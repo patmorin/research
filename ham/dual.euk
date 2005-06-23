@@ -1,0 +1,90 @@
+frame(-15,-1,11,11)
+
+p00 = point(0,0)
+p10 = point(10,0)
+p01 = point(0,10)
+p11 = point(10,10)
+draw(p00,p01,p11,p10)
+
+x0 = point(-14,10)
+x1 = point(-14,0)
+
+y0 = point(-3,0)
+y1 = point(-3,10)
+
+r1 = point(-9,6)
+r2 = point(-8,3)
+
+draw("0",x0,0.6,90:);
+draw("1",x1,0.6,270:);
+draw("0",y0,0.6,270:);
+draw("1",y1,0.6,90:);
+
+draw("r1",r1,0.6,90:)
+draw("r2",r2,0.6,-90:)
+
+draw(segment(x0,x1))
+draw(segment(x1,r2))
+draw(segment(r2,y0))
+draw(segment(y0,y1))
+draw(segment(y1,r1))
+draw(segment(r1,x0))
+color(green)
+draw(segment(x0,y0),dashed)
+draw(segment(x1,y1),dashed)
+color(black)
+
+y1r1X = intersection(line(y1,r1),line(x0,x1))
+y0r2X = intersection(line(y0,r2),line(x0,x1))
+x0r1Y = intersection(line(x0,r1),line(y0,y1))
+x1r2Y = intersection(line(x1,r2),line(y0,y1))
+
+draw(segment(r1,y1r1X),dotted)
+draw(segment(r1,x0r1Y),dotted)
+draw(segment(r2,y0r2X),dotted)
+draw(segment(r2,x1r2Y),dotted)
+
+Tr1 = segment(point(10-ordinate(y1r1X),10),point(0,ordinate(x0r1Y)))
+draw(Tr1,dashed)
+Tr2 = segment(point(10-ordinate(y0r2X),0),point(10,ordinate(x1r2Y)))
+draw(Tr2,dashed)
+
+color(red)
+Ax interactive(-12,.1,"A",right)
+Ay interactive(7,.1,"A",up)
+A = point(Ax,Ay)
+draw(A)
+draw("A",A,0:)
+AX = 10-ordinate(intersection(line(y1,A),line(x0,x1)))
+TA = line(point(10-Ay,Ay),point(AX,10))
+draw(segment(intersection(TA,line(p00,p10)),intersection(TA,line(Tr1))))
+As = segment(intersection(TA,line(Tr1)),point(abscissa(intersection(TA,line(Tr1))),10))
+draw(As)
+draw("A",midpoint(As),180:)
+
+color(blue)
+Bx interactive(-12,.1,"B",right)
+By interactive(4.5,.1,"B",up)
+B = point(Bx,By)
+draw(B)
+draw("B",B,0:)
+BX = 10-ordinate(intersection(line(y1,B),line(x0,x1)))
+TB = line(point(10-By,By),point(BX,10))
+draw(segment(intersection(TB,line(Tr2)),point(abscissa(intersection(TB,line(Tr2))),0)))
+Bs = segment(intersection(TB,line(Tr2)),intersection(TB,line(Tr1)))
+draw(Bs)
+draw("B",midpoint(Bs),180:)
+draw(segment(intersection(TB,line(Tr1)),point(abscissa(intersection(TB,line(Tr1))),10)))
+
+color(magenta)
+Cx interactive(-5.6,.1,"C",right)
+Cy interactive(3.8,.1,"C",up)
+C = point(Cx,Cy)
+draw(C)
+draw("C",C,0:)
+CX = 10-ordinate(intersection(line(y1,C),line(x0,x1)))
+TC = line(point(10-Cy,Cy),point(CX,10))
+draw(segment(intersection(TC,line(Tr2)),point(10,ordinate(intersection(TC,line(Tr2))))))
+draw(segment(intersection(TC,line(Tr2)),intersection(TC,line(Tr1))))
+draw(segment(intersection(TC,line(Tr1)),point(0,ordinate(intersection(TC,line(Tr1))))))
+draw("C",intersection(TC,line(Tr2)),1.1,181:)

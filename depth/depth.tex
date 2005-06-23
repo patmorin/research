@@ -1,0 +1,263 @@
+\documentclass[lotsofwhite,charterfonts]{patmorin}
+\usepackage{amsfonts}
+
+\input{pat}
+\title{\MakeUppercase{Data Depth and Computational Geometry}}
+\author{Stefan Langerman \and Pat Morin}
+\date{}
+
+
+
+\newcommand{\DLO}{D_\mathrm{L1}}
+\newcommand{\DZ}{D_\mathrm{Z}}
+\newcommand{\DO}{D_\mathrm{O}}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Computational aspects of statistic data depth are surveyed.  In
+particular, links between computational geometry and definitions of
+data depth are explored.
+\end{abstract}
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\section{Introduction}
+
+Let $S=\{s_1,\ldots,s_n\}$ be a set of points in $\mathbb{R}^d$.  A
+\emph{depth function} assigns, to each point $p\in \mathbb{R}^d$, a
+\emph{depth value} $D(S,p)$ as a function of $p$ and $S$.  A point of
+maximal depth is called a \emph{median}.  The set of points with depth
+at least $\delta$ is called the $\delta$-level.  In order to be useful
+as a statistical tool, there are several properties that are desirable
+in a depth function.  Some of these properties include \cite{zs00a}
+
+\begin{description}
+
+\item[Affine invariance.]  We should have that
+$D(S,p)=D(\sigma(S),\sigma(p))$ where $\sigma$ is any affine
+transformation.
+
+\item[Generalization of the median.]  In $\mathbb{R}^1$, the
+definition of the depth function should make the median equivalent to
+the standard univariate median.
+
+\item[Monotone along rays.]  $D(S,p)$ should be (weakly) monotonically
+decreasing as $p$ moves along any ray whose origin is at a median.
+
+\item[Convexity.]  For any value $\delta$, the $\delta$-level should
+be convex.  This is stronger than the previous property, which implies
+only that the $\delta$-levels are star-shaped.
+
+\item[Vanishing at infinity.] $D(S,p)$ should approach 0 as $p$ goes to
+infinity.
+
+\item[Robustness.]  Moving a small number of points of $S$ should not
+cause the median to move by an arbitrary amount.  \end{description}
+
+Since the pioneering work of Tukey \cite{t75}, many different
+definitions of data depth have been proposed.  Many of these
+definitions involve basic geometric constructs (halfspaces, simplices,
+arrangements, etc.) like those studied in the field of computational
+geometry.  This means that the problems involved in finding efficient
+algorithms for computing data depth, medians, etc fall squarely within
+the realm of computational geometry.  Thus, the field of computational
+geometry is in a unique position to help advance the study of data
+depth by providing efficient algorithms for problems arising in data
+depth.  Typical problems include:
+
+\begin{description}
+\item[Depth computation.] Compute the depth $D(S,p)$ of $p$.
+
+\item[Countour finding.] Find the set of all points whose depth is at least
+$\delta$.
+
+\item[Depth mapping.] Construct a representation of the function
+$D(S,\cdot)$.
+
+\item[Median finding.] Find a point $p^*\in \mathbb{R}^d$ of maximum depth.
+
+\item[Center finding.] Find the point $p'\in S$ of maximum depth.
+
+\item[Deep Point finding.] Find a point whose depth is at least $\delta$ for
+some fixed constant $\delta$.
+\end{description}
+
+The purpose of the current paper is to provide a survey of these
+definitions and, when necessary, restate them in a form that is
+accessible to computational geometers.  At the same time we describe,
+or provide references to, efficient geometric algorithms that can
+solve problems related to data depth and/or point out open problems
+where efficient algorithms are lacking.  Besides presenting solutions
+to several open problems in this area, it is our hope that this paper
+will be useful to computational geometers, since it provides a list of
+open problems as well as to statisticians working in data depth, since
+it provides or gives references to efficient algorithms for solving
+data depth problems. 
+
+Note that we are concerned here with problems of depth with respect to
+a \emph{data set} $S$ (i.e., a finite point set), rather than the
+depth with respect to a distribution.  While most definitions of depth
+generalize to probability distributions, computing the depth of points
+within a probability distribution is not a subject that we consider in
+this paper.
+
+The remainder of the paper is organized as follows:
+
+\section{Geometric Preliminaries}
+
+Duality, $k$-set, $k$-levels, other stuff as needed.
+
+\section{Data Depth Definitions}
+
+In this section we survey many of the various notions of data depth
+and algorithms for solving data depth problems.   Note that throughout
+this section we assume that the dimension $d$ is a constant.
+Therefore, in the running times of algorithms, we omit constants that
+depend only on $d$.
+
+\subsection{L1 Depth}
+
+The L1 or ``sum of distances'' depth is defined as
+\begin{equation}
+   \DLO(S,p) = 1/\sum_{s\in S} \|ps\|  \eqlabel{l1}
+\end{equation}
+where $\|xy\|$ denotes the Euclidean distance between the points $x$
+and $y$.  The L1-median, the point that maximizes \eqref{l1}, was
+proposed by Weber in 1909 as a solution to a transportation cost
+minimization problem \cite{web1909}.
+
+If we assume a model of computation in which square roots can be
+implemented in constant time then computing $\DLO(S,p)$ for an input
+point $p$ is trivial, since the formula \eqref{l1} can easily be
+evaluated in linear time.
+
+Observe that $\DLO(S,p)$ is the sum of convex functions (in this case
+(d+1)-dimensional cones with apexes at the points of $S$) and is
+therefore convex itself.  Based on this, many iterative methods that
+converge to the L1-median have been proposed \cite{X,X,X,X}.  However,
+there is evidence that it is not possible to compute the L1-median
+exactly, for point sets with $n\ge 5$ points.  In particular, Bajaj
+\cite{bXX} has shown that there exists a set of 5 points for which it
+is not possible to construct the L1-median using a compass and ruler.
+Bose \etal\ \cite{bmm01,bdm02} describe data structures for
+preprocessing $S$ so that an approximation to $\DLO(S,p)$ can be
+computed very quickly for any query point $p$.  Using this data
+structure, they give $O(n)$ time algorithms for computing an
+$\epsilon$-approximation\footnote{The algorithm finds a point
+$p\in\mathbb{R}^d$ such that $\DLO(S,p)\ge (1-\epsilon)\DLO(S,p^*)$.} to
+the L1-median.
+
+Indyk \cite{X} gives a randomized $O(n)$ time algorithm that
+$(\epsilon,\delta)$-approximates\footnote{The algorithm finds a point
+$p\in S$ such that $\DLO(S,p)\ge (1-\epsilon)D(S,p')$ with probability
+at least $1-\delta$.} the L1-center.  In fact, Indyk's algorithm
+applies even when replacing Euclidean distance in \eqref{l1} with any
+arbitrary metric.
+
+\subsection{Mahalanobis Depth}
+
+$O(n)$ from the definition.
+
+\subsection{Oja Depth} 
+
+The \emph{Oja depth} of a point $p$ with respect to a set $S$ of
+points is given by 
+\[
+      \DO(S,p) = \sum_{\{p_1,\ldots, p_{d}\}\subseteq S}
+	\mathrm{volume}\{p,p_1,\ldots,p_d\} \enspace ,
+\]
+where $\mathrm{volume}(X)$ denotes the volume of the convex hull of
+the set $X$.  Therefore, the Oja depth of a point $p$ can be computed
+in a straightforward manner in $O(n^d)$ time.
+
+Note that the Oja depth is the sum piecewise linear functions and is
+therefore piecewise linear itself.  To see this, observe that the
+contribution of $\{p_1,\ldots,p_d\}\subseteq S$ to the Oja depth of
+$p$ is proportional to the distance of $p$ from the hyperplane
+containing $p_1,\ldots,p_d$ --- a piecewise linear function with 2
+pieces. It follows then that an Oja-median occurs at a place where $d$
+of these hyperplanes intersect.  Since there are $O(n^{d^2})$ such
+points and the Oja depth at each point can be computed in $O(n^d)$
+time, so this gives a straightforward $O(n^{d(d+1)})$ time algorithm
+for computing the Oja-median. 
+
+
+
+$O(n\log^3 n)$ Aloupis et al.
+
+\subsection{Simplicial Depth}
+$O(n^4)$ Aloupis et al.  Can this be improved by
+formulating an LP with violations?   Certainly, it can be formulated as a
+convex program with $n^3$ constraints.  However, all these constraints are generated by $n\choose 2$ lines.
+
+\subsection{Halfplane Depth}
+$O(n\log n)$ Langerman and Steiger
+
+\subsection{Tukey Depth}
+
+
+
+Long history
+$O(n\log n)$ Chan and Langerman
+
+\subsection{Zonoid Depth}
+
+The \emph{$k$-zonoid} for a set $S=\{p_1,\ldots,p_n\}$ of $n$ points
+is defined as 
+
+\[
+  Z_k(S) = \left\{\sum_{i=1}^n 0\le \lambda_ip_i : \sum_{i=1}^n\lambda_i
+=1 \mbox{ and } \lambda_i\le 1/k\right\} \enspace .
+\]
+Note that, for $k=1$, the $k$-zonoid corresponds to the convex hull of
+$S$.  For $k\ge 1$, we obtain all convex combinations of points in $S$
+such that no coefficient exceeds $1/k$.  In particular, for $k=n$ we
+obtain the center of gravity, or average, of $S$.  The \emph{zonoid
+depth} of a point $p\in \mathbb{R}^d$ with respect to a point set $S$
+is defined as
+\[
+  \DZ(S,p) = \sup\{k : p\in Z_k\} \enspace .
+\]
+
+
+
+\subsection{Projection Depth}
+
+\[ O_1(x,X) = \frac{|x-\mu(X)|}{\sigma(X)} \]
+\[ O_d(x,X) = \sup_{\|u\|=1} O_1(u'x,u'X) \]
+
+See Stahel (1981), Donoho (1982), and Rousseeuw (1993) for approximation
+algorithms.  First exact algorithm is presented at this conference.  Seems to
+run in $O(n^2)$ time.  Stefan says $O(n^{4/3}\log n)$ by tracing three levels
+in the dual arrangement.
+
+\subsection{Stahel-Donoho (1982)}
+
+See Donoho (1982), Tyler (1994), Gather and
+Hiker (1997), Zuo (2000).  See Zuo (2003) for a 3-dimensional estimator with
+breakdown $n/2$.
+
+\subsection{Median Distance Depth}
+
+The depth of point $p$ is the median of the distances from points in
+$S$ to $p$.  Can be optimized in $O(n\log n)$ time.
+
+\subsection{Spherical Depth} 
+The spherical depth of a point can be computed in
+time $O(n^2)$ in any fixed dimension.  Is there a faster algorithm for small
+dimensions.  What is the complexity of a level?  How quickly can we find a
+point of maximum depth?  Is there a Helly-type theorem?
+
+\section{Conclusions}
+
+\bibliographystyle{plain}
+\bibliography{depth}
+
+\end{document}
+
+

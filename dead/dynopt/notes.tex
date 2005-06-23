@@ -1,0 +1,117 @@
+\documentclass[charterfonts,lotsofwhite]{patmorin}
+\input{pat.tex}
+
+\title{\MakeUppercase{On the Splay Tree Dynamic Optimality Conjecture}}
+\author{Pat Morin}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This document contains some ideas about how to develop data structures
+that achieve Wilbur's lower bound for accessing a sequence.
+\end{abstract}
+
+
+\section{Wilbur's Lower Bound}
+
+Let $T$ be a binary search tree containing the elements $1,\ldots,n$.
+Let $A=a_1,\ldots,a_m$ be a sequence consisting of elements in
+$\{1,\ldots,n\}$.  Let $T_i$ denote the binary search tree obtained by
+inserting $a_i,a_{i-1},\ldots,a_1$.  Let $C_i(x)$ be cost of searching
+for $x$ in $T_i$ and let $W_i(x)$ denote the number of alternations in
+the search path for $x$ in $T_i$.
+
+\begin{thm}[Wilbur's Lower Bound]
+The cost of accessing the sequence $A$ using a binary search tree is
+$\Omega(\sum_{i=1}^{m} W_{i-1}(a_i))$ independent of the update
+algorihtm used on the search tree.
+\end{thm}
+
+\section{Decomposing Splay Trees}
+
+
+\begin{lem}[Sequential Access Lemma]\lemlabel{sequential}
+The cost of accessing the sequence $0,\ldots,n-1$ on a splay tree is $O(n)$.
+\end{lem}
+
+We will show how the Sequential Access Lemma can be used to show that
+splay trees access the "shuffle sequence" sequence $a_1,\ldots,a_n$
+where $a_i=\floor{i/n}+\sqrt{n}(i\bmod \sqrt{n})$ in $O(n)$ time.
+Consider the following two-level data structure.  Our level-1 data
+structure is a splay tree of size $\sqrt{n}$.  This splay tree
+contains $\sqrt{n}$ level-2 splay trees each of which contains a
+consecutive group of $\sqrt{n}$ elements.
+
+Observe that the shuffle sequence iterates $\sqrt{n}$ time accessing each group
+in order in order.  Therefore, by \lemref{sequential}, the cost of accessing
+the groups in the level-1 splay tree is $\sqrt{n}\times O(\sqrt{n})=O(n)$.
+Furthermore, within each group the elements are accessed in order so the cost
+of accesses within each level-2 splay tree is $O(\sqrt{n})$ for a total cost of
+$O(n)$ since there are $O(\sqrt{n})$ groups.
+
+Now, if we delve more deeply into the internals of this two-level data
+structure, we see that we can slightly reorder the splay tree operations
+without affecting their running times.
+
+\begin{enumerate}
+\item Search for the requested group in the level-1 data structure.
+\item Search for the requested element in the level-2 data structure for that group.
+\item Splay in the level-2 data structure.
+\item Splay in the level-1 data structure.
+\end{enumerate}
+
+Now, observe that the splay in Step~3 brings the requested element to the root
+of its level-2 data structure and the splay in Step~4 brings the requested
+group to the root of the level-1 data structure.  However, the concatenation of
+Steps~3 and 4 is simply a splay of the requested element in the entire data
+structure.  In other words, this two level data structure is simply a splay
+tree!
+
+\section{Using Treaps to Match Wilbur's Lower Bound}
+
+To match Wilbur's lower bound we can try using treaps to maintain the
+trees $T_1,\ldots,T_m$.  Suppose we have the tree $T_{i-1}$ and we
+want to access $a_i$.  We can certainly do this using $C_{i-1}(a_i)$
+comparisons since we have the tree $T_{i-1}$ available to us (can we
+do this faster).  Now, we want to update $T_{i-1}$ to get the tree
+$T_i$.  Normally, we would do this by doing rotations about node $a_i$
+until it becomes the root, and this would cost $O(C_{i-1}(a_i))$.
+However, we can actually do all these rotations by performing only
+$O(W_{i-1}(a_i))$ pointer updates.  To see this, observe that rotating
+a node up a string of right (or left children) only affects the
+pointers at the ends of the string:
+
+\begin{center}
+\begin{minipage}{2.5in}
+\begin{verbatim}
+                      x
+   /                 / \
+  a                 a   Y
+ / \               / \
+A   b             A   b
+   / \               / \
+  B   c      =>     B   c
+     / \               / \
+    C   d             C   d
+       / \               / \
+      D   x             D   X
+         / \
+        X   Y
+\end{verbatim}
+\end{minipage}
+\end{center}
+
+This seems to imply that, with the necessary data structures, this
+updating could be done in $O(W_{i-1}(a_i)\log\log n)$ time, or maybe
+faster.  Thus, all that would be needed is a faster way to search in
+$T_{i-1}$ to get a data structure comes close to Wilbur's lower bound.
+
+\section{Using a Potential Function that Compares the Wilbur Tree
+$\bf T_i$ and the Splay Tree}
+
+
+
+\end{document}
+

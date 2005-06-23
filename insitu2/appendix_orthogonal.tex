@@ -1,0 +1,318 @@
+%% -*- LaTeX -*- This is LaTeX2e code
+
+
+\newcommand{\LU}{\ensuremath{<_{y.\mathrm{upper}}}}
+\newcommand{\LY}{\ensuremath{<_{y}}}
+
+\section{Orthogonal Line-Segment Intersection}\label{sec:olsi}
+
+In this appendix, we describe an algorithm that solves the
+orthogonal line segment intersection problem in
+\Oh{n \log n +k} time using \Oh{1} extra space, where $n$
+is the total number of line segments and $k$ is the total number
+of intersections. We assume that the input is given in the form
+of two arrays ${H}[0\ldots n_h-1]$ and
+${V}[0\ldots n_v-1]$ of horizontal and vertical line
+segments, respectively, where $n = n_h + n_v$.
+
+We will describe the algorithm as a recursive algorithm. Since it
+follows the general framework of Section~\ref{sec:tools}, however, we
+can make it space-efficient so that it uses only \Oh{1} extra space.
+
+Consider a subarray ${V}[0\ldots e_v-1]$, and let
+$m:=2^{\lfloor \log_2 ((e_v)/2) \rfloor}$. Let $i$ be the index
+such that the $X$-coordinate of $V[i]$ is the $m$-th smallest among
+all $X$-coordinates of the line segments in this subarray.
+Our algorithm will use $V[i]$ to first partition the subarray into a
+subarray of length $m$ (we call this ``partitioning the left'') and then
+into a subarray of length $e_v-m$ (we call this ``partitioning
+the right''). These partitioning algorithms are given as
+Algorithms~\ref{algPreVP} and~\ref{algMidVP}. Both of them can be 
+undone, see Algorithms~\ref{algUndoPreVP} and~\ref{algUndoMidVP}. 
+
+\begin{algorithm}
+
+  \caption{\textsc{PreVerticalPartition}(${V}$,$e_v$) Partition
+  the vertical segments before the first recursive call (Partitioning
+  the left)}
+  
+  \label{algPreVP}
+  \begin{algorithmic}[1]
+    \REQUIRE ${V}[0\ldots e_v-1]$ is sorted according to
+    \LU, i.e., $Y$-coordinates of the upper endpoints. 
+    \ENSURE That $e_v:=m$ and the resulting array 
+    ${V}[0\ldots e_v-1]$ contains all vertical segments not to the 
+    right of the $X$-median, and is sorted according to \LU. 
+    \STATE $m \leftarrow 2^{\lfloor \log_2 ((e_v)/2) \rfloor}$
+    %% \COMMENT{$m=e_v/2 \iff e_v\neq |V|$}
+    \STATE $i \leftarrow 
+           \textsc{RestoringSelect}({V},0,e_v,m,\textsc{Select})$. 
+    \STATE Using \textsc{SortedSubsetSelection}, move all elements
+    less than or equal to ${V}[i]$ to ${V}[0\ldots m-1]$.
+    \STATE $\textsc{Push}(S,\textsc{Left})$.
+    \STATE $e_v \leftarrow m$
+    \STATE Return $e_v$
+ \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+
+  \caption{\textsc{UndoPreVerticalPartition}(${V}$,$e_v$)
+  Undo the pre-partitioning of the vertical segments after returning
+  from the first recursive call.}
+  \label{algUndoPreVP}
+  \begin{algorithmic}[1]
+    \REQUIRE The first recursion has ended, and we are given an array 
+    ${V}[0\ldots e_v-1]$ that is sorted according to \LU.
+    \ENSURE  The variable $e_v$ has been reset to its original value and 
+    the resulting array ${V}[0\ldots e_v-1]$ is sorted 
+    according to \LU.
+    \STATE $\textsc{Pop}(S)$.
+    \IF{$2e_v \leq |V|$}
+      \STATE $e_v^{orig} \leftarrow 2e_v$.
+    \ELSE
+      \STATE $e_v^{orig} \leftarrow |V|$.
+    \ENDIF
+    \STATE $\textsc{UndoSubsetSelection}({V},0,e_v^{orig},e_v)$
+    \STATE $e_v \leftarrow e_v^{orig}$
+    \STATE Return $e_v$
+ \end{algorithmic}
+\end{algorithm}
+
+\newcounter{RestoreRight}
+
+\begin{algorithm}
+  \caption{\textsc{MidVerticalPartition}(${V}$,$e_v$) Partition
+  the vertical segments before the second recursive call.} 
+  \label{algMidVP}
+  \begin{algorithmic}[1]
+    \REQUIRE ${V}[0\ldots e_v-1]$ is sorted according to \LU.
+    \ENSURE That $e_v := e_v - m$ and that the resulting array 
+    ${V}[0\ldots e_v]$ contains all vertical segments to the right of 
+    the $X$-median and is sorted according to \LU.
+    \STATE $m \leftarrow 2^{\lfloor \log_2 (e_v/2) \rfloor}$
+    %% \COMMENT{$m=e_v/2 \iff e_v\neq |V|$}
+    \STATE $i \leftarrow 
+         \textsc{RestoringSelect}({V},0,e_v,m,\textsc{Select})$. 
+    \STATE Using \textsc{SortedSubsetSelection}, move all elements
+    larger than ${V}[i]$ to ${V}[0\ldots e_v - m-1 ]$.
+    \STATE $\textsc{Push}(S,\textsc{Right})$.
+    \STATE $e_v \leftarrow e_v-m$
+    \STATE Return $e_v$
+ \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+
+  \caption{\textsc{UndoMidVerticalPartition}(${V}$,$e_v$)
+  Undo the partitioning of the vertical segments after returning from
+  the second recursive call}
+  \label{algUndoMidVP}
+   
+  \begin{algorithmic}[1]
+    \REQUIRE The last recursive call has ended, and we are
+    given an array ${V}[0\ldots e_v]$ that is
+    sorted  according to \LU.
+    \ENSURE The variable $e_v$ has been reset to its original value and 
+    the resulting array ${V}[0\ldots e_v-1]$ is sorted 
+    according to \LU.  
+    \STATE $\textsc{Pop}(S)$.
+    \STATE Let $d$ be the number of elements on the stack $S$.
+    \STATE $e_v^{orig} \leftarrow 2^{\lceil\log_2 |V|\rceil - (d+1)} +
+    e_v$. \setcounter{RestoreRight}{\value{ALC@line}} 
+    \STATE $\textsc{UndoSubsetSelection}({V},0,e_v^{orig},e_v)$
+    \STATE $e_v \leftarrow e_v^{orig}$
+    \STATE Return $e_v$
+ \end{algorithmic}
+\end{algorithm}
+
+The observation that shows the correctness of the formula for
+restoring the value of $e_v$ (Line~\theRestoreRight\ in 
+Algorithm~\ref{algUndoMidVP}) is that the left
+subtree of the current node is a complete binary tree. The height of
+the tree is the height of the recursion tree (which is $\lceil\log_2
+|V|\rceil$) minus the depth of the current node.
+%% , that is minus the depth of the ``recursion'' at present. 
+The number of leaves in the
+left subtree, and hence the number of elements on which the first 
+recursive call took place, is then $2^{\lceil\log_2 |V|\rceil -
+  (d+1)}$, which is also the index of the split point.
+
+\newcounter{StopElement}
+\begin{algorithm}
+  \caption{\textsc{PreHorizontalPartition}(${H}$,$e_h$)
+  Partition the horizontal segments before the first recursive call.} 
+   \label{algPreHP}
+  \begin{algorithmic}[1]
+    \REQUIRE ${H}[0\ldots e_h-1]$ is sorted according to
+    \LY. The current slab boundaries as well as the median for
+    splitting the slab are known.
+    \ENSURE That $e_h := m$ and the resulting array 
+    ${H}[0\ldots e_h-1]$ contains all horizontal segments to be 
+    passed to the first recursion sorted according to \LY.
+    \STATE Let $m$ be the number of elements in ${H}[0\ldots
+    e_h-1]$ that intersect the left sub-slab and do not cross the
+    current slab.
+    \IF{$m < e_h$}
+      \STATE $\textsc{Push}(T,1)$. \COMMENT{At least one segment will not
+        move.}
+      \STATE Synchronously go back in stack $T$ and stack $S$ and find
+      the most recent recursion (except for the current) where at
+      least one segment was not moved. Let $R$ be the type of this
+      recursion. 
+      \IF{$R=\textsc{Right}$}
+        \STATE Let $h$ be the segment of those crossing the current
+        slab with the leftmost left endpoint. 
+      \ELSE
+        \STATE Let $h$ be the segment of those crossing the current
+        slab with the rightmost right endpoint. 
+      \ENDIF
+      \IF{$h$ is undefined}
+        \STATE Let $h$ be ${H}[m]$. \COMMENT{Don't do anything.}
+      \ENDIF
+      \STATE Move $h$ to ${H}[m]$. \setcounter{StopElement}{\value{ALC@line}}
+      \STATE Using \textsc{SortedSubsetSelection}, move all elements
+      except for those that (a) avoid the left sub-slab or (b)
+      cross the current slab to ${H}[0\ldots m-1]$. 
+    \ELSE
+      \STATE $\textsc{Push}(T,0)$.
+    \ENDIF
+    \STATE $e_h \leftarrow m$
+    \STATE Return $e_h$
+ \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+
+  \caption{\textsc{UndoPreHorizontalPartition}(${H}$,$e_h$)
+  Undo the partitioning of the horizontal segments after returning from
+  the first recursive call.} 
+    \label{algUndoPHP}
+    
+  \begin{algorithmic}[1]
+    \REQUIRE The first recursive call has ended, and we are
+    given an array ${H}[0\ldots e_h-1]$ that is
+    sorted  according to \LY. The current slab boundaries as well as
+    the median for splitting the slab is known.
+    \ENSURE The variable $e_h$ have been reset to its original value and
+    the resulting array ${H}[0\ldots e_h-1]$ is sorted 
+    according to \LY. 
+    \STATE $i \leftarrow \textsc{Pop}(T)$.
+    \IF{$i=0$}
+      \STATE \COMMENT{No partitioning needs to be reverted.}
+    \ELSE
+      \STATE $h \leftarrow {H}[e_h]$.
+      \IF{$h$ crosses the current slab}
+        \STATE Synchronously go back in stack $T$ and stack $S$ and find
+        the most recent recursion (except for the current) where at
+        least one segment was not moved. Let $R$ be the type of this
+        recursion. 
+        \IF{$R=\textsc{Right}$}
+          \STATE Starting at ${H}[e_h+1]$, scan to find the first
+          element that either is right of the current slab or which
+          crosses the current slab and whose left endpoint is left of
+          $h$'s left endpoint.  
+        \ELSE
+          \STATE Starting at ${H}[e_h+1]$, scan to find the first
+          element that either is right of the current slab or which
+          crosses the current slab and whose right endpoint is right of
+          $h$'s right endpoint. 
+        \ENDIF
+      \ELSE
+        \STATE Starting at ${H}[e_h+1]$, scan to find the
+        first element whose right endpoint is right of the right slab
+        boundary or the first element which crosses the current slab.
+      \ENDIF
+      \STATE Let $e_h^{orig}$ be the index of the element just found.
+      \STATE $\textsc{UndoSubsetSelection}({H},0,e_h^{orig},e_h)$
+      \STATE Move $h$ to its proper position.
+      \STATE $e_h \leftarrow e_h^{orig}$
+      \STATE Return $e_h$
+    \ENDIF
+ \end{algorithmic}
+\end{algorithm}
+
+After a subarray ${V}[0\ldots e_v-1]$ has been ``partitioned
+to the left'', the vertical slab spanned by
+${V}[0\ldots e_v-1]$ (this is the \emph{current slab})
+has been partitioned into a \emph{left sub-slab} and a
+\emph{right sub-slab}. At this moment, we use these sub-slabs to
+partition the corresponding subarray ${H}[0\ldots e_h-1]$
+of horizontal line segments. To be more precise, in ``partitioning the 
+left'' (see Algorithm~\ref{algPreHP}), the initial part 
+of the subarray of ${H}$ contains all $m$ horizontal line segments
+in the subarray that intersect the left sub-slab and do not cross the
+current slab. A problem arises when we want to undo this partitioning
+(in Algorithm~\ref{algUndoPHP}): At that moment, we do not know the 
+original value of $e_h$. The solution is to store a ``special'' horizontal 
+segment (\emph{viz}.\ the segment $h$ in Line~\theStopElement\ 
+of Algorithm~\ref{algPreHP}) in ${H}[m]$.
+
+This segment is used to distinguish horizontal segments crossing the
+left sub-slab from horizontal segments crossing a slab corresponding
+to a recursive call higher up in the recursion tree. These segments
+may be stored in cells ${H}[m]$ and higher and may make it
+impossible to re-obtain the original index $e_h$ that is needed in the
+restoration process. If there is no segment crossing the current
+slab, but at least one segment did not move, we can easily re-obtain
+the original index $e_h$ by searching for the first segment that is either
+to the right of the current slab or completely crosses the current
+slab.
+
+Because of the special role of the horizontal line segment $h$,
+we use a variant of \textsc{SortedSubsetSelection} in
+Algorithm~\ref{algPreHP} and a variant of \textsc{UndoSubsetSelection}
+in Algorithm~\ref{algUndoPHP}. These variants skip over the line 
+segment $h$. 
+%entry
+%${H}[e_h]$.
+
+We have only described how to partition the subarray
+${H}[0\ldots e_h-1]$ ``to the left''.
+In a completely symmetric way, this subarray can be partitioned
+``to the right''.
+
+Having these subroutines at hand, the algorithm solving the orthogonal 
+line segment intersection problem is given as Algorithm~\ref{algIOLSI}.
+
+\begin{algorithm}
+
+  \caption{\textsc{ImprovedOLSI}(${V}$,$e_v$,${H}$,$e_h$)
+  Solving the Orthogonal Line Segment Intersection Problem.} 
+   \label{algIOLSI}
+  
+  \begin{algorithmic}[1]
+    \STATE Scan ${V}[0\ldots e_v-1]$ to compute the
+    boundaries of the current slab (min/max values of
+    $X$-coordinates). 
+    \STATE Using \textsc{SortedSubsetSelection}, move all horizontal 
+    segments spanning the current slab to ${H}[0\ldots \ell -1]$. 
+    \STATE Perform a top-down sweep over ${H}[0\ldots \ell -1]$
+    and ${V}[0\ldots e_v-1]$ to find all intersections.
+    \STATE \textsc{UndoSubsetSelection} on
+    ${H}[0\ldots e_h-1]$.
+    \STATE $e_v \leftarrow$ \textsc{PreVerticalPartition}(${V}$,$e_v$)
+    \STATE $e_h \leftarrow$ \textsc{PreHorizontalPartition}(${H}$,$e_h$)
+    \STATE \textsc{ImprovedOLSI}(${V}$,$e_v$,${H}$,$e_h$)
+    \STATE $e_v \leftarrow$ \textsc{UndoPreVerticalPartition}(${V}$,$e_v$)
+    \STATE \textsc{UndoPreHorizontalPartition}(${H}$,$e_h$,$m_h$)
+    \STATE $e_v \leftarrow$ \textsc{MidVerticalPartition}(${V}$,$e_v$)
+    \STATE $e_h \leftarrow$ \textsc{MidHorizontalPartition}(${H}$,$e_h$)
+    \STATE
+    \textsc{ImprovedOLSI}(${V}$,$e_v$,${H}$,$e_h$)
+    \STATE $e_v \leftarrow$ \textsc{UndoMidVerticalPartition}(${V}$,$e_v$)
+    \STATE $e_h \leftarrow$ \textsc{UndoMidHorizontalPartition}(${H}$,$e_h$)
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{theorem}
+Given a set of $n$ horizontal and vertical line segments, all $k$ 
+intersections among them can be reported in \Oh{n\log n + k} time 
+using \Oh{1} extra space. 
+\end{theorem}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "paper"
+%%% End:

@@ -1,0 +1,492 @@
+\documentclass[lotsofwhite]{patmorin}
+
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{algorithmic}
+\input{pat}
+
+\newcommand{\rank}{\mathrm{rank}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\N}{\mathbb{N}}
+%\newcommand{\defeq}{\stackrel{\mathrm{def}}{=}}
+\newcommand{\defeq}{=}
+
+\title{\MakeUppercase{Realizing Partitions Respecting Full
+and Partial Order Information}}
+\author{
+	Justin Colannino \and
+	Erik Demaine \and
+	Vida Dujmovi\'c \and
+	Jeff Erickson \and
+	John Iacono \and
+	Danny Krizan\'c \and
+	Stefan Langerman \and
+	Erin McLeish \and
+	Henk Meijer \and
+	Pat Morin \and
+	Mark Overmars \and
+	David Rappaport \and
+	Diane Souvaine \and
+	Ileana Streinu \and
+	Perouz Taslakian \and
+	Remco Veltcamp \and
+	Sue Whitesides
+}
+\date{}
+
+%\DeclareMathOperator{\op}{op}
+\newcommand{\op}{\diamond}
+\newcommand{\opij}{\op_{ij}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We consider the problem of partitioning the interval $[0,n]$ into $k$
+subintervals of positive integer lengths $\ell_1,\ldots,\ell_k$ such that
+the lengths satisfy a set of simple constraints of the form $\ell_i
+\opij \ell_j$ where $\opij$ is one of $<$, $>$, or $=$.  In the
+\emph{full information} case, $\opij$ is given for all $1\le i,j\le
+k$.  In the \emph{sequential information} information case, $\opij$ is
+given for all $1\le i\le k$ and $j=i\pm 1$.  That is, only the
+relations between the lengths of consecutive intervals are specified.
+We show that both versions of the problem can be solved
+in time polynomial in $k$ and $\log n$.
+\end{abstract}
+
+\section{Introduction}
+
+We consider problems of realizing a sequence having restrictions on
+its sum and the relative sizes of its terms.  In particular, we
+consider the problem of partitioning the interval $[0,n]$ into $k$
+subintervals of positive integer lengths $\ell_1,\ldots,\ell_k$ such
+that the lengths satisfy a set of simple constraints of the form
+$\ell_i \opij \ell_j$ where $\opij$ is one of $<$, $>$, or $=$.  In
+the \emph{full information} case, $\opij$ is given for all $1\le
+i,j\le k$.  In the \emph{sequential information} information case,
+$\opij$ is given for all $1\le i\le k$ and $j=i\pm 1$. 
+
+\comment{
+The motivation for studying these types of problems comes from the
+study of the perception of musical melody and rhythm.  Experimental
+evidence shows that humans can recognize tunes given only the
+melodic-contour, i.e., the sequence that specifies whether one note is
+at a higher, lower, or the same pitch as the previous note.  It then
+becomes a natural question to ask whether a given melodic contour can
+be realized 
+
+These types of reconstruction problems arise in the analysis of
+musical rhythm\ldots
+}
+
+
+Both versions of this problem reduce to special cases of
+$\textsc{Subset-Sum}$ with multiplicity, where there are special
+constraints on the allowable multiplicities.  The efficiency and
+correctness of our algorithms for solving these problems rely
+primarily on properties of modular arithmetic. Throughout this paper,
+we use some standard number-theoretical notations: $\Z_k\defeq
+\{0,\ldots,k-1\}$, $\N_k\defeq\Z_k\setminus\{0\}$, $\Z\defeq\Z_\infty$,
+$\N\defeq\N_\infty$, and $\Z_k^+$ is the group whose elements are
+$\Z_k$ and whose operator is addition modulo $k$.
+
+The remainder of the paper is organized as follows.  In
+\secref{full-information} we given an algorithm for the full
+information case.  In \secref{partial-information} we given an
+algorithm for the sequential information case.  \Secref{conclusions}
+summarizes our results and concludes with directions for future
+research.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Full Information}\seclabel{full-information}
+
+In this section we consider the full information case, in which for
+each $1\le i,j \le k$ we are told either that $\ell_i< \ell_j$,
+$\ell_i > \ell_j$ or $\ell_i = \ell_j$.  We assume that this
+information is given (implicitly or explicitly) in the form of a
+comparison matrix $\op$ so that we can determine in constant time
+which of the three cases applies to $\ell_i$ and $\ell_j$.  The
+algorithm we describe will either find a sequence
+$\ell_1,\ldots\ell_k\in\N$ such that $\sum_{i=1}^k\ell_i = n$ and
+$\ell_i\opij\ell_j$ for all $1\le i,j\le n$ or the algorithm will
+conclude that no such partition exists.
+
+We first observe that, because we are given the entire comparison
+matrix $\op$, we can run any reasonable sorting algorithm to partition
+$1,\ldots,k$ into  $m\le k$ equivalence classes $C_1,\ldots,C_{m}$
+where (1)~$\ell_i = \ell_j$ if $i$ and $j$ belong to the same class and
+(2)~$\ell_i < \ell_j$ if $i\in C_{i'}$, $j\in C_{j'}$ and $i'< j'$.
+
+Refer to \figref{graphical}.  Now our problem is to find
+$v_1,\ldots,v_{m}\in\N$ such that $v_i < v_{i+1}$, for all $1\le i <
+m$ and $\sum_{i=1}^m{v_i|C_i|} = n$.  Then by assigning $l_i=v_{i'}$
+for all $i\in C_{i'}$ we obtain a solution to the original problem.
+The restriction $v_i < v_{i+1}$ is slightly inconvenient and we
+can remove it with a rewording of the problem.  Let $t_1 = k$,
+ and let $t_i=t_{i-1}-|C_{i-1}|$ for $i>1$.  Then
+it suffices to find $w_1,\ldots,w_m\in\N$ such that
+\begin{equation}
+       \sum_{i=1}^m w_it_i = n \enspace . \eqlabel{wis}
+\end{equation}
+From $w_1,\ldots, w_m$ we can compute the value of $v_i$ as 
+$v_i=\sum_{j=1}^i w_j$.  That is, each value $w_i$
+represents the increase from $v_{i-1}$ to $v_i$.
+
+\begin{figure}
+\begin{center}\includegraphics{graphical}\end{center}
+\caption{The relationship between $v_1,\ldots,v_k$ and
+$w_1,\ldots,w_k$. The area under the
+curve is $n$.} \figlabel{graphical}
+\end{figure}
+
+At this point it is tempting to immediately apply dynamic programming
+to solve \eqref{wis} directly.  However, this would lead to an
+algorithm with running time $O(k^a n^b)$, for some constants $a$ and
+$b$.  In general, this is superpolynomial in the input size since the
+input is a $k\times k$ comparison matrix and an integer $n$, all of
+which can be encoded in $O(k^2 + \log n)$ bits.  In the following, we
+describe a representation that allows us to eliminate the dependence
+on $n$.
+
+Let 
+\[ S_i = \left\{\sum_{j=1}^i w_jt_j : 
+        w_1,\ldots,w_i\in \mathbb{N} \right\} 
+\enspace .
+\]
+Our algorithm uses dynamic programming to compute $S_i$ for
+$i=1,\ldots,m$.  However, since the set $S_i$ has infinite size, we
+require a compact representation for it.  To obtain a nice
+representation, we observe that, because $t_1=k$, if $S_i$ contains
+$x$ then $S_i$ also contains $x+k$, $x+2k$, $x+3k$, and so on.  Thus,
+we can represent $S_i$ by storing, for each $y\in \Z_k$,
+the value 
+\[
+   D_{i}(y) = \min \{x :\mbox{$x\in S_i$ and $x\equiv y\pmod k$}\}. 
+\]
+\begin{lem}\lemlabel{firstalg}
+Given $D_{i-1}$, $D_i$ can be computed in $O(k)$ time.
+\end{lem}
+
+\begin{proof}
+We show that a careful reordering of the elements of $\Z_k$ allows us
+to compute $D_i$ by a sequence of $k/r$ lower envelope computations
+each taking time $O(r)$.  Here, $r=k/\gcd(k,\ell_i)$ is the length of
+the \emph{orbit} of $\ell_i$ in the group $\mathbb{Z}_k^+$.  An
+example of the lower envelope we use is illustrated in
+\figref{envelope}.
+
+\begin{figure}
+\begin{center}
+\includegraphics{envelope}
+\end{center}
+\caption{A possible lower envelope used for the set $q_{0}$, with $k=20$
+and $\ell_i=6$.   The empty circles show values in $D_{i-1}$ and
+the filled disks show values in $D_i$.}\figlabel{envelope}
+\end{figure}
+
+Define $q_{c,j} = (c + jt_i)\bmod k$.  We will show how to compute
+$D_{i}(y)$ for all $y$ in 
+\[ 
+    q_{0}=\{q_{0,1}, q_{0,2},q_{0,3},\ldots,q_{0,r}\}
+\]
+in $O(r)$ time.  The same algorithm can be used for the sets $q_{1},
+q_{2}, \ldots, q_{k/r}$ to give a total running time of
+$O(r)\times k/r= O(k)$.
+The main observation we use is that
+\begin{equation}
+    f(j) \defeq D_{i}(q_{0,j}) = \min\{D_{i-1}(q_{0,(j-x)\bmod k}+x\ell_i) :
+x\in \N_k\} \enspace .
+\end{equation}
+
+That is, the univariate function $f(j)$ is the lower
+envelope of $k$ half-lines, where the $x$th half-line is given by the
+equation $y=(D_{i-1}(q_{0,x}) + (j-x)\ell_i)\bmod k$, $j\ge 1$.  Since
+the slope, $\ell_i$, of all $k$ half-lines is identical and positive and
+their left endpoints are sorted (by $j$) the lower envelope can easily
+be computed in $O(r)$ time by scanning from left to right and keeping
+track of the current minimum line.  This completes the proof.
+\end{proof}
+
+Note that the algorithm implied by \lemref{firstalg} is actually very
+simple, and is given by the following pseudocode
+
+\begin{algorithmic}[1]
+\STATE{$r\gets\gcd(k,\ell_i)$}
+\FOR{$c = 0,\ldots,k/r-1$}
+  \STATE{$m \gets \infty$}
+  \FOR{$j = 1,\ldots,r$}
+    \STATE{$m \gets \min\{m, D_{i-1}((c-j\ell_i)\bmod k)+j\ell_i\}$}
+  \ENDFOR
+  \FOR{$j = 0,\ldots, r-1$}
+    \STATE{$D_i((c+j\ell_i)\bmod k)\gets m$}
+    \STATE{$m \gets\min\{m, D_{i-1}((c+j\ell_i)\bmod k) \} + \ell_i$}
+  \ENDFOR
+\ENDFOR
+\end{algorithmic}
+
+
+Once we have computed $D_{m}$, we can test if $n$ is in the set $S_m$ by
+checking if $D_m(n\bmod k) \le n$.  This completes the proof of our
+first result:
+
+\begin{thm}
+The realization problem with full information can be solved in
+$O(k^2)$ time.
+\end{thm}
+
+
+\comment{
+\begin{lem}
+Let $t_1,\ldots,t_m$ be natural numbers not exceeding $k$ and suppose
+there exists integers $w_1,\ldots,w_m$ such that $\sum_{i=1}^m
+w_it_i\equiv x \pmod{k}$.  Then, there exists non-negative integers
+$w_1',\ldots,w_m'$ such that $\sum_{i=1}^m
+w_i't_i\equiv x \pmod{k}$ and $\sum_{i=1}^m
+w_i' \le k/\gcd(k,t_1,\ldots,t_m)$. 
+\end{lem}
+
+\begin{proof}
+See my notes.
+\end{proof}
+
+Unfortunately, this beautiful lemma is useless to us,  because the
+$w_i$ might be zero, which is not valid for us.
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Sequential Information}\seclabel{partial-information}
+
+Next we consider the realization problem given only sequential
+information.  That is, for each $i\in\{1,\ldots,k-1\}$ we are told
+only that $\ell_i > \ell_{i+1}$, $\ell_i < \ell_{i+1}$ or
+$\ell_i=\ell_{i+1}$.  Our approach is similar to that of the full
+information case.  By scanning for $\op_{i,i+1}$ for $i=1,\ldots,k-1$
+we determine a set of $m\le k$ equivalences classes $C_1,\ldots,C_m$
+over $1,\ldots,k$ such that (1)~$l_i=l_j$ if $i$ and $j$ belong to the
+same class and (2)~if $i\in C_{i'}$ and $j\in C_{i'+1}$ then either
+$l_i<l_j$ or $l_i > l_j$, as indicated by $\op$. 
+
+Let $t_1=k$, and let $t_i = t_{i-1}-|C_{i-1}|$ for $i>1$.  Let
+$s_1=+1$ and, for $i>1$, let $s_i=+1$ if the elements in $C_{i}$
+should be greater than the elements in $C_{i-1}$ and let $s_{i}=-1$ if
+the elements in $C_{i}$ should be less than the elements in $C_{i-1}$.
+Then, our problem is to find $w_1,\ldots,w_m\in\N$ such
+that
+\begin{equation}
+\sum_{j=1}^m w_js_jt_j = n \eqlabel{sum-n}
+\end{equation}
+and
+\begin{equation}
+\sum_{j=1}^i w_js_j \ge 1 \mbox{ for all $i\in\{1,\ldots,m\}$.}
+\eqlabel{admissible}
+\end{equation}
+We say that $w_1,\ldots,w_m$ are \emph{admissible} if they satisfy
+\eqref{admissible}.
+
+Given $w_1,\ldots,w_m$ satisfying \eqref{sum-n} and
+\eqref{admissible}, we can compute the value of $l_i\in C_{i'}$ as 
+$l_i =\sum_{j=1}^{i'} w_js_j$.  That is, the value $w_j$ represents the
+difference in the values in $C_{j-1}$ and $C_j$, this difference being
+an increase if $s_j=+1$ and a decrease if $s_j=-1$.
+
+As before, because $t_1=k$ and $s_1=+1$, we can implicitly represent
+the set 
+\[
+   S_i = \left\{\sum_{j=1}^i w_js_jt_j : 
+	\mbox{$w_1,\ldots,w_i\in\mathbb{N}$ and  
+		$w_1,\ldots,w_i$ are admissible} \right\}
+\]
+by maintaining, for each $y\in \Z_k$ the value 
+\[
+   D_i(y) = \min\left\{x : \mbox{$x\in S_i$ and $x\equiv y\pmod{k}$} \right\}
+    \enspace .
+\]
+However, unlike the case for full information, the function $D_{i-1}$
+is not sufficient for computing the function $D_{i}$.  In particular,
+which values of $w_i$ are admissible depends on
+$\sum_{j=1}^{i-1}w_js_j$, which can be different for each value of $y$.
+Instead, we maintain a two-dimensional table
+\[
+   D_i(y,h) = \min\left\{
+    \begin{array}{ll}
+          & \mbox{there exists admissible $w_1,\ldots,w_i$ such that
+                                      $\sum_{j=1}^i w_js_jt_j = x$ and} \\
+        x :  & \mbox{$\sum_{j=1}^i w_js_j = h$ and} \\
+          & \mbox{$x\equiv y\pmod{k}$} 
+    \end{array}
+    \right\}
+    \enspace .
+\]
+
+Next we consider exactly how much information must be stored in order
+to maintain the table $D_i$. Since $y\in \mathbb{Z}_k$ we know that
+the first dimension ($y$) of the table is of size $k$. The following
+lemma shows that the second dimension ($h$) is also not too big.
+
+\begin{lem}\lemlabel{lowheight}
+Let $H=k^2+1$.  If $h\ge H$ then $D_i(y,h) - kt_i \ge D_i(y,h-k)$.
+\end{lem}
+
+\begin{proof}
+Let $w_1,\ldots,w_i$ be any admissible sequence that defines
+$D_i(y,h)$.  That is,  $\sum_{j=1}^iw_js_j = h$ and $\sum_{j=1}^i w_js_jt_j
+= D_i(y,h)$.  Let $i'\le i$ be the largest index such that
+$w_{i'}\ge k+1$ and $s_{i'}=+1$.  The existence of $i'$ is guaranteed
+by the pigeonhole principle and the
+assumption that $h>H$.  Consider the sequence $w_1',\ldots,w_i'$ where
+\[
+     w_j' = \left\{ \begin{array}{ll}
+            w_j-k & \mbox{if $j=i'$} \\
+            w_j & \mbox{otherwise}  \end{array} \right.
+\]
+Then
+\[
+  \sum_{j=1}^i w_j's_j = \sum_{j=1}^i w_js_j - k = h-k
+\]
+and
+\[
+   \sum_{j=1}^i w_j's_jt_j = \sum_{j=1}^i w_js_jt_j - kt_{i'} 
+    \le \sum_{j=1}^i w_js_jt_j - kt_{i} \enspace . 
+\]
+Thus, $D_i(y,h-k) < D_i(y,h) - kt_i$ provided that $w_1',\ldots,w_i'$
+is admissible.  To see that $w_1',\ldots,w_i'$ is admissible we
+observe that, if this were not the case, then there must exist some
+index $r>i'$ such that $\sum_{j=1}^r w_js_j \le k$.  But then, by the
+pigeonhole principle there
+must exist some index $i''>r>i'$ such that $w_{i''}>k$ and
+$s_{i''}=+1$.  But this is not possible since $i'$ was chosen to be
+the largest index with this property.
+\end{proof}
+
+\lemref{lowheight} shows that in computing $D_m$ we need only consider
+values of $h\le H$.  This is because for any value $x$ that appears as
+$x=D_m(y,h)$ for $h>H$, there is a value $z< x$ that appears as
+$z=D_m(y,h')$ with $h'\le H$.  Since $D_m(y,h')$ implicitly represents the
+set $\{z, z+k, z+2k,\ldots\}$, the value $x$ is represented by
+$D_m(y,h')$.
+
+Thus, to obtain our final answer, we need only compute a
+table $D_m$ containing $Hk$ entries.  However, a small technicality
+occurs because computing $D_m$ from $D_{m-1}$ requires (as we shall
+see) looking up table entries of the form $D_{m-1}(y,h)$ where
+$H<h<H+k$.  The easiest way to deal with this is to use a table of
+size $(H+k)k$ to store $D_{m-1}$.  But then to compute $D_{m-1}$ from
+$D_{m-2}$ we require table entries of the form $D_{m-2}(y,h)$ where
+$H<h<H+2k$, and so on.  In general, the table $D_i$ will have
+$(H+k(m-i))k$ entries so that we can lookup any value $D_i(y,h)$ with
+$y\in Z_k$ and $1\le h\le H+(m-i)k$.  Note that this only increases
+the sizes of the tables by a constant factor, and the following lemma
+shows that we can compute these tables in time proportional to their
+size.
+
+\begin{lem}
+Given $D_{i-1}$, $D_i$ can be constructed in $O(Hk)$ time.
+\end{lem}
+
+\begin{proof}
+We first describe the algorithm for the case $s_i=+1$. The algorithm
+for the case $s_i=-1$ is similar except for a small modification
+described at the end of the proof.
+
+As in the proof of \lemref{firstalg} we reduce the problem to a 
+sequence of lower-envelope
+computations.   As before, we begin by
+splitting the elements of $\Z_k$ into the sets
+$q_{0},\ldots,q_{k/r}$ where $r=\gcd(k,t_i)$ and
+$q_{c,j}=(c+jt_i)\bmod k$.
+Using exactly the same scanning algorithm used in \lemref{firstalg} we
+can compute $D_i(q_{0,j},j)$ for all $1\le j\le H+(m-i)k$ in $O(H)$ time.
+Again, this is because the univariate function
+\[ f(j) = D_i(q_{0,j},j) = \min\{ D_{i-1}(q_{0,j-x}+xt_i,j-x) : 1\le
+x\le j\} 
+\]
+is the lower envelope of $H+(m-i)k$ parallel half-lines.
+By repeated applications of the above procedure we can compute
+$D_i(q_{0,j},j+c)$ for all $1\le j\le H$ and all
+$0\le c< r$ in $O(Hr)$ time.  Finally, by repeating that
+procedure $k/r$ times we compute entire table $D_i(y,h)$, for all
+$y\in Z_k$ and all $1\le h\le H$ in $O(Hk)$ time, as required. 
+
+The case $s_{i}=-1$ is handled in a symmetric manner except that now
+the function $f$ is defined as
+\[
+  f(j) = D_{i}(q_{0,j},j) = \min\{D_{i-1}(q_{0,j+x},j+x) - xt_i :
+1\le x\le \infty\} \enspace .
+\]
+The difficulty with this formulation is that $f(j)$ is the lower
+envelope of an infinite number of lines.  However, it follows immediately from \lemref{lowheight} that 
+\[
+  f(j) = D_{i}(q_{0,j},j) = \min\{D_{i-1}(q_{0,j+x},j+x) - xt_i :
+1\le x\le H-j+(m-i+1)k\} \enspace .
+\]
+Thus, we can compute $D_i$ by taking the lower envelope of
+$H+(m-i+1)k$ parallel half-lines.  This completes the proof.
+\end{proof}
+
+We have just shown that we can incrementally construct the sets
+$S_1,\ldots,S_m$ in $O(Hk)=O(k^3)$ time per set.  This yields our
+second theorem:
+
+\begin{thm}
+The realization problem with sequential information can be solved in
+$O(k^4)$ time.
+\end{thm}
+
+ 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusions}\seclabel{conclusions}
+
+We have considered the problem of partitioning the interval $[0,n]$
+into $k$ positive integer length subintervals satisfying some simple
+order requirements.  The types of requirements we have considered
+include full information, in which the relative length of each pair of
+subintervals is given and sequential information, in which only the
+relative lengths of consecutive subintervals is given.  Our algorithms
+run in $O(k^2)$ and $O(k^4)$ time, respectively.
+
+The first problem we study considers the case when the total order of
+$l_1,\ldots,l_k$ is given.  An obvious generalization of this problem
+is the following: Given any partial order over $1,\ldots,k$, find a
+sequence $l_1,\ldots,l_k\in\N$ that respects this partial order and
+whose sum is $n$. This remains an open problem.
+
+Another open problem, that would be useful in performing perceptual
+tests on rhythms, is that of selecting uniformly at random from all
+partitions of $1,\ldots,n$ that satisfy sequential or total
+information.  Such an algorithm would be useful for testing hypotheses
+of the form:  ``All rhythms of length $n$ and having $k$ onsets that
+satisfying some total information matrix sound alike.''
+
+The second problem we study is motivated by the 3-level ($+-0$)
+contour representation studied by Dowling \cite{d78}.  This
+representation has been generalized to multi-level contours
+\cite{l96,kcgv00} where we are given, for each $l_i$, a range
+relative to $l_{i-1}$.  For example, we may be told that $l_{i}\in
+[l_{i-1} + 50, l_{i-1}+100]$.  The problem is then to find
+$l_1,\ldots,l_k$ that satisfy all these constraints and whose sum is
+$n$.
+
+\section*{Acknowledgements}
+
+This work was initiated at the Bellairs Winter Workshop on
+Computational Geometry for Music Information Retrieval, January 28 to
+February 4th, 2005.  The authors are grateful to Godfried Toussaint
+for organizing the workshop and presenting the open problems which
+lead to the current paper.  The authors are also grateful to the other
+workshop participants, namely 
+Greg Aloupis,
+David Bremner,
+Mirela Damian, 
+Francisco Gomez,
+Ferran Hurtado, 
+Suneeta Ramaswami,
+and David Wood,
+for providing a
+stimulating work environment.
+
+\bibliographystyle{plain}
+\bibliography{realizing}
+
+\end{document}
+

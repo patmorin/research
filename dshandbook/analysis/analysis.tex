@@ -1,0 +1,1940 @@
+\chapter{
+Analysis of Algorithms}\index{analysis of algorithms|(}\index{algorithms!analysis|(}
+
+\begin{chapterauthors}
+\chapterauthor{
+Sartaj Sahni}
+{University of Florida}
+\end{chapterauthors}
+
+
+\section{Introduction}\label{sec:intro}
+The topic ``Analysis of Algorithms'' is concerned primarily with determining
+the memory (space) and time requirements (complexity)
+of an algorithm. Since the techniques
+used to determine memory requirements are a subset of those used to
+determine time requirements, in this chapter, we focus
+on the methods used to determine the time complexity of an algorithm.
+
+The time complexity\index{complexity!time} (or simply, complexity)
+of an algorithm
+is measured
+as a function of the problem size. Some examples
+are given below.
+\begin{enumerate}
+\item
+The complexity of an
+algorithm to sort $n$ elements may be given as a function of $n$.
+\item
+The complexity of an
+algorithm to multiply an $m \times n$ matrix and an $n \times p$ matrix
+may be given as a function of $m$, $n$, and $p$.
+\item
+The complexity of an
+algorithm to determine whether $x$ is a prime number may be given as a
+function of the number, $n$, of bits
+in $x$.
+Note that
+$n = \lceil \log_2 (x + 1)\rceil$.
+\end{enumerate}
+
+We partition our discussion of algorithm analysis into the following sections.
+\begin{enumerate}
+\item
+Operation counts.
+\item
+Step counts.
+\item
+Counting cache misses.
+\item
+Asymptotic complexity.
+\item
+Recurrence equations.
+\item
+Amortized complexity.
+\item
+Practical complexities.
+\end{enumerate}
+
+See \cite{cormen,horo,rawl,sahni}
+for additional material on algorithm analysis. 
+
+\section{Operation Counts}
+One\index{complexity!operation count|(}\index{operation count|(} way
+to estimate the time complexity of a program or method is to
+select one or more operations, such as add, multiply, and compare, and
+to determine
+how many of each is done.
+The success of this method depends on our ability to identify
+the operations that contribute most to the time complexity.
+
+ 
+\begin{example}
+\label{E2:max}
+\ecaption{Max Element}
+Figure~\ref{prog1:max}\index{max element} gives an algorithm
+that returns the position of the largest
+element
+in the array {\tt a[0:n-1]}.  When {\tt n} $> 0$,
+the time complexity of this algorithm can be estimated
+by determining the number of comparisons
+made between elements of the array {\tt a}.
+When {\tt n} $\leq 1$, the {\tt for} loop is not entered.
+So no comparisons between elements of {\tt a} are made.
+When {\tt n} $> 1$,
+each iteration of the {\tt for} loop makes one comparison between
+two elements of {\tt a},
+and the total number of element comparisons is {\tt n-1}.
+Therefore, the number of element comparisons is
+max\{{\tt n-1}, 0\}.
+The method {\tt max}
+performs other comparisons (for example, each iteration of the {\tt for}
+loop is preceded by a comparison between {\tt i} and {\tt n}) that
+are not included
+in the estimate.  Other operations such as
+initializing {\tt positionOfCurrentMax} and incrementing
+the {\tt for} loop index {\tt i} are also not included in the estimate.
+\end{example}
+
+\begin{figure}
+\begin{verbatim}
+int max(int [] a, int n)
+{
+   if (n < 1) return -1; // no max
+   int positionOfCurrentMax = 0;
+   for (int i = 1; i < n; i++)
+      if (a[positionOfCurrentMax] < a[i]) positionOfCurrentMax = i;
+   return positionOfCurrentMax;
+}
+\end{verbatim}
+\caption{Finding the position of the largest element in {\tt a[0:n-1]}
+\label {prog1:max}}
+\end{figure}
+ 
+The algorithm of Figure~\ref{prog1:max} has the nice property that the operation
+count is precisely determined by the problem size. For many other problems,
+however, this is not so.
+Figure~\ref{prog2:bubble} gives an algorithm that performs
+one pass of a bubble sort\index{sort!bubble}\index{bubble sort}. In this pass,
+the largest element in {\tt a[0:n-1]} relocates to position {\tt a[n-1]}.
+The number of swaps
+performed by this algorithm
+depends not only on the problem
+size $n$ but also on
+the particular values of the elements in the array
+{\tt a}.  The number of swaps varies from a low of
+$0$ to a high of $n  -  1$.
+
+
+\begin{figure}
+\begin{verbatim}
+void bubble(int [] a, int n)
+{
+   for (int i = 0; i < n - 1; i++)
+      if (a[i] > a[i+1]) swap(a[i], a[i+1]);
+}
+\end{verbatim}
+\caption{A bubbling pass
+\label{prog2:bubble}}
+\end{figure}
+
+Since the operation count isn't always
+uniquely determined by the problem size,
+we ask for the best\index{operation count!best}, worst\index{operation count!worst}, and average counts\index{operation count!average}.
+ 
+\begin{example}
+\label{E2:seqsearch}
+\index{search!sequential}
+\ecaption{Sequential Search}
+Figure~\ref{prog2:SeqSearch} gives an algorithm that searches
+{\tt a[0:n-1]} for the first occurrence of {\tt x}.
+The number of comparisons between {\tt x} and the elements of {\tt a}
+isn't uniquely determined by the problem size $n$.
+For example, if $n$ = 100
+and {\tt x} = {\tt a[0]}, then only 1 comparison is made.  However, if {\tt x}
+isn't equal to any of the {\tt a[i]}s, then 100 comparisons are made.
+ 
+A search is {\bf successful}\index{search!successful}
+when {\tt x} is one of the {\tt a[i]}s.  All other
+searches are {\bf unsuccessful}.\index{search!unsuccessful}
+Whenever we have an unsuccessful search, the number of comparisons is $n$.
+For successful searches the best comparison count is 1, and the worst is
+$n$.  For the average count assume that all array elements are distinct
+and that each is searched for with equal frequency.  The average count
+for a successful search is
+
+$$\frac{1}{n} \sum_{i=1}^n i = (n+1)/2$$
+\end{example}
+ 
+\begin{figure}
+\begin{verbatim}
+int sequentialSearch(int [] a, int n, int x)
+{
+   // search a[0:n-1] for x
+   int i;
+   for (i = 0; i < n && x != a[i]; i++);
+   if (i == n) return -1;   // not found
+   else return i;
+}
+\end{verbatim}
+\caption{Sequential search
+\label{prog2:SeqSearch}}
+\end{figure}
+
+\begin{example}
+\label{E2:insert} 
+\ecaption{Insertion into a Sorted Array}
+Figure~\ref{prog2:insert} gives an algorithm to
+insert an element {\tt x} into a sorted array
+{\tt a[0:n-1]}.
+
+\begin{figure}
+\begin{verbatim}
+void insert(int [] a, int n, int x)
+{
+   // find proper place for x
+   int i;
+   for (i = n - 1; i >= 0 && x < a[i]; i--)
+      a[i+1] = a[i];
+
+   a[i+1] = x;  // insert x
+}
+\end{verbatim}
+\caption{Inserting into a sorted array
+\label{prog2:insert}}
+\end{figure}
+
+ 
+We wish to determine the number of comparisons made between {\tt x} and the
+elements of {\tt a}.  For the problem size, we use the number
+{\tt n} of elements initially in {\tt a}.
+Assume that $n \geq 1$.
+The best or minimum number of comparisons is 1, which happens
+when the new element {\tt x} is to be inserted at the right end.
+The maximum number of comparisons is {\tt n}, which happens
+when {\tt x} is to be inserted at the left end.
+For the average assume that {\tt x} has an equal
+chance of being inserted into any of the possible {\tt n+1} positions.
+If {\tt x} is eventually inserted into position {\tt i+1} of {\tt a},
+{\tt i} $\geq$ 0, then the
+number of comparisons is {\tt n-i}.
+If {\tt x} is inserted into {\tt a[0]}, the
+number of comparisons is {\tt n}.  So the average count is
+%
+%\begin{eqnarray*}
+%\frac{1}{n+1} ( \sum_{i = 0}^{n - 1} (n - i) + n ) &=&
+%\frac{1}{n+1} ( \sum_{j = 1}^n j  + n )\\
+% &=& \frac{1}{n+1} (\frac{n(n+1)}{2} + n)\\
+% &=& \frac{n}{2} + \frac{n}{n+1}
+%\end{eqnarray*}
+
+
+$$\frac{1}{n+1} ( \sum_{i = 0}^{n - 1} (n - i) + n ) =
+\frac{1}{n+1} ( \sum_{j = 1}^n j  + n )
+ = \frac{1}{n+1} (\frac{n(n+1)}{2} + n)
+ = \frac{n}{2} + \frac{n}{n+1}$$
+
+This average count is almost $1$ more than half the worst-case count.
+\end{example}
+
+
+\section
+{Step Counts}
+The\index{complexity!step counts|(}\index{step count|(} operation-count method
+of estimating time complexity omits accounting for the time spent on all
+but the chosen operations.  In the {\bf step-count} method, we attempt to
+account for the time spent in all parts of the algorithm.
+As was the case for operation counts,
+the step count
+is a function of the
+problem size.
+ 
+A {\bf step}\index{step}\index{step count!step} is any
+computation unit that is independent of
+the problem size.  Thus 10 additions
+can be one step; 100 multiplications can
+also be one step; but $n$ additions, where $n$ is the problem
+size, cannot be one step.
+The amount of computing represented by one step may be
+different from that represented by another.
+For example, the entire statement
+
+\begin{verbatim}
+return a+b+b*c+(a+b-c)/(a+b)+4;
+\end{verbatim}
+can be regarded as a single step if its execution time is
+independent of the problem size.
+We may also count a statement
+such as
+
+\begin{verbatim}
+x = y;
+\end{verbatim}
+as a single step.
+ 
+To determine the step count of an algorithm, we first determine
+the number of steps per
+execution (s/e)\index{step count!steps per execution} of each statement
+and the total number
+of times (i.e., frequency) each statement is executed.
+Combining these two quantities gives us the total contribution of
+each statement to the total step count.  We then add the contributions
+of all statements to obtain the step count for the entire algorithm.
+ 
+ 
+\begin{example}
+\label{E2:sSearch}
+\ecaption{Sequential Search}
+Tables~\ref{fig2:SeqTable1}\index{search!sequential} and \ref{fig2:SeqTable}
+show
+the best- and worst-case step-count analyses for
+{\tt sequentialSearch} 
+(Figure~\ref{prog2:SeqSearch}).
+
+\begin{table}
+\begin{tabular}{|l|lll|}
+Statement & s/e & Frequency & Total steps\\ \hline
+\verb?int sequentialSearch?($\cdots$) & 0 &0 & 0 \\
+\verb?{? & 0 &0 & 0 \\
+\verb?   int i;? & 1 &1 & 1 \\
+\verb?   for (i = 0; i < n && x != a[i]; i++);? & 1 &1 & 1 \\
+\verb?   if (i == n) return -1;? & 1 &1 & 1 \\
+\verb?   else return i;? & 1 &1 & 1 \\
+\verb?}? & 0 &0 & 0 \\ \hline
+Total &  &  & 4\\
+\end{tabular}
+\caption{\label{fig2:SeqTable1}Best-case step count for Figure~\ref{prog2:SeqSearch}}
+\end{table}
+
+\begin{table}
+\begin{tabular}{|l|lll|}
+Statement & s/e & Frequency & Total steps\\ \hline
+\verb?int sequentialSearch?($\cdots$) & 0 &0 & 0 \\
+\verb?{? & 0 &0 & 0 \\
+\verb?   int i;? & 1 &1 & 1 \\
+\verb?   for (i = 0; i < n && x != a[i]; i++);? & 1 &$n+1$ & $n+1$ \\
+\verb?   if (i == n) return -1;? & 1 &1 & 1 \\
+\verb?   else return i;? & 1 &0 & 0 \\
+\verb?}? & 0 &0 & 0 \\ \hline
+Total &  &  & $  n+3$\\
+\end{tabular}
+\caption{\label{fig2:SeqTable}Worst-case step count for Figure~\ref{prog2:SeqSearch}}
+\end{table}
+
+ 
+For the average step-count analysis for a successful search,
+we assume that the $n$
+values in {\tt a} are distinct and that
+in a successful search, {\tt x} has an equal probability
+of being any one of these values.
+Under these assumptions the average step count for a successful search
+is the
+sum of the step counts for the $n$
+possible successful searches divided by $n$.
+To obtain this average, we first obtain the step count for the case
+{\tt x} = {\tt a[j]} where {\tt j} is in the range [0, $n-1$]
+(see Table~\ref{fig2:SeqTab2}).
+
+\begin{table}
+\begin{tabular}{|l|lll|}
+Statement & s/e & Frequency & Total steps\\ \hline
+\verb?int sequentialSearch?($\cdots$) & 0 &0 & 0 \\
+\verb?{? & 0 &0 & 0 \\
+\verb?   int i;? & 1 &1 & 1 \\
+\verb?   for (i = 0; i < n && x != a[i]; i++);? & 1 &$j+1$ & $j+1$ \\
+\verb?   if (i == n) return -1;? & 1 &1 & 1 \\
+\verb?   else return i;? & 1 &1 & 1 \\
+\verb?}? & 0 &0 & 0 \\ \hline
+Total &  &  & $  j + 4$\\
+\end{tabular}
+\caption{\label{fig2:SeqTab2}Step count for Figure~\ref{prog2:SeqSearch} when {\tt x} = {\tt a[j]}}
+\end{table}
+
+ 
+Now we obtain the average step count for a successful search:
+
+\[ \frac{1}{ n}  \sum_{j = 0}^{n - 1} (j + 4) = (n + 7) / 2\]
+This value is a little more than half the step count for an unsuccessful search.
+ 
+Now suppose that successful searches occur only 80 percent of the time and that
+each {\tt a[i]} still has the same probability of being searched for.
+The average step count for {\tt sequentialSearch} is
+
+\noindent
+.8 $*$ (average count for successful searches) + .2 $*$ (count for an unsuccessful search)\\
+\noindent
+= $.8(n+7) / 2 + .2(n+3)$\\
+\noindent
+= $.6n + 3.4$
+\end{example}
+ 
+
+\section{Counting Cache Misses}
+\subsection{A Simple Computer Model}
+Traditionally,
+the focus of algorithm analysis has been on
+counting operations and steps.
+Such a focus was justified when computers
+took more time to perform an operation than they took to fetch the
+data needed for that operation.  Today, however, the cost of performing
+an operation is significantly lower than the cost of fetching data from memory.
+Consequently, the run time of many algorithms is dominated by
+the number of memory references (equivalently, number of cache misses) rather
+than by the number of operations. Hence, algorithm designers focus on reducing
+not only the number of operations but also the number of memory accesses.
+Algorithm designers focus also on designing algorithms that hide memory
+latency.
+
+Consider\index{cache|(} a simple computer model in which
+the computer's memory consists of
+an L1 (level 1) cache\index{cache!L1}, an L2 cache\index{cache!L2}, and main memory.
+Arithmetic and logical operations are performed by
+the arithmetic and logic unit (ALU) on data resident in
+registers (R). Figure~\ref{fig2:cache} gives a block diagram for our
+simple computer model.
+
+
+\begin{figure}
+\centerline{\protect\psfig {file = analysis/cache.eps}}
+\caption{A simple computer model
+\label{fig2:cache}}
+\end{figure}
+
+Typically, the size of main memory is tens or hundreds of megabytes;
+L2 cache sizes are typically a fraction of a megabyte; L1 cache is usually
+in the tens of kilobytes; and the number of registers is between
+8 and 32. When you start your program, all your data are in main memory.
+
+
+To perform an arithmetic operation such as an add, in our computer model,
+the data to be
+added are first loaded from memory into registers, the data in the
+registers are added, and the result is written to memory.
+
+Let one cycle be the length of time it takes to add data that
+are already in registers. The time needed to load data
+from L1 cache to a register is two cycles in our model.
+If the required data are not in L1 cache but are in L2 cache, we get
+an L1 cache miss and the required data are copied from L2 cache to
+L1 cache and the register in 10 cycles. When the required data
+are not in L2 cache either, we have an L2 cache miss and the required
+data are copied from main memory into L2 cache, L1 cache, and the
+register in 100 cycles.
+The write operation is counted as one cycle even when the data
+are written to main memory because we do not wait for the write to
+complete before proceeding to the next operation.
+For more details on cache organization, see \cite{henn}.
+
+\subsection{Effect of Cache Misses on Run Time}\label{sec2:miss}
+For our simple model, the statement {\tt a = b + c}
+is compiled into the computer instructions
+
+\begin{verbatim}
+load a; load b; add; store c;
+\end{verbatim}
+where the {\tt load} operations load data into registers and the
+{\tt store} operation writes the result of the {\tt add} to memory.
+The {\tt add} and the {\tt store} together take two cycles.
+The two {\tt load}s may take anywhere from 4 cycles to 200 cycles
+depending on whether we get no cache miss, L1 misses, or L2 misses.
+So the total time for the statement {\tt a = b + c} varies
+from 6 cycles to 202 cycles. In practice, the variation in time is not
+as extreme because we can overlap the time spent on successive
+cache misses.
+
+Suppose that we have two algorithms that perform
+the same task. The first algorithm does 2000 {\tt add}s
+that require 4000 {\tt load},
+2000 {\tt add}, and 2000 {\tt store} operations and the second
+algorithm does 1000 {\tt add}s.  The data access pattern for the
+first
+algorithm is such that 25 percent of the {\tt load}s result in an
+L1 miss and another 25 percent result in an L2 miss. For our simplistic
+computer model, the time required by the first algorithm is
+$2000 * 2$ (for the 50 percent {\tt load}s that cause no cache miss)
++ $1000 * 10$ (for the 25 percent {\tt load}s that cause an L1 miss)
++ $1000 * 100$ (for the 25 percent {\tt load}s that cause an L2 miss)
++ $2000 * 1$ (for the {\tt add}s) + $2000 * 1$ (for the {\tt store}s)
+= 118,000 cycles. 
+If the second algorithm has 100 percent L2 misses, it will take
+$2000 * 100$ (L2 misses) + $1000 * 1$ ({\tt add}s) + $1000 * 1$
+({\tt store}s) = 202,000 cycles. So the second algorithm, which
+does half the work done by the first, actually takes 76 percent
+more time than is taken by the first algorithm.
+
+Computers use a number of strategies (such as preloading
+data that will be needed in the near future into cache,
+and when a cache miss occurs, the needed data as well as data in
+some number of adjacent bytes are loaded into cache) to reduce
+the number of cache misses and hence reduce the run time of a program.
+These strategies are most effective when successive computer
+operations use
+adjacent bytes of main memory.
+
+Although our discussion has focussed on how cache is used for data,
+computers also use cache to reduce the time needed to access instructions.
+
+\subsection{Matrix Multiplication}
+
+The algorithm of Figure~\ref{prog2:mult}
+multiplies\index{matrix!multiply|(} two
+square matrices that are represented as two-dimensional arrays.
+It performs the following computation:
+
+
+\begin{equation}\label{Eqn2:multiply}
+\mathtt{c[i][j]} = \sum_{k=1}^n \mathtt{a[i][k]} * \mathtt{b[k][j]},\  1 \leq \mathtt{i} \leq \mathtt{n},\ 1 \leq \mathtt{j} \leq \mathtt{n} 
+\end{equation}
+ 
+\begin{figure}
+\begin{verbatim}
+void squareMultiply(int [][] a, int [][] b, int [][] c, int n)
+{
+   for (int i = 0; i < n; i++)
+      for (int j = 0; j < n; j++)
+      {
+         int sum = 0;
+         for (int k = 0; k < n; k++)
+            sum += a[i][k] * b[k][j];
+         c[i][j] = sum;
+      }
+}
+\end{verbatim}
+\caption{Multiply two {\tt n} $\times$ {\tt n} matrices
+\label{prog2:mult}}
+\end{figure}
+
+Figure~\ref{prog2:sqmult2} is an alternative algorithm that
+produces the same two-dimensional array {\tt c} as is produced by
+Figure~\ref{prog2:mult}. We observe that Figure~\ref{prog2:sqmult2}
+has two nested {\tt for} loops
+that are not present in Figure~\ref{prog2:mult} and
+does more work than is done by Figure~\ref{prog2:mult} with repect to indexing
+into the array {\tt c}.
+The remainder of the work is the same.
+
+\begin{figure}
+\begin{verbatim}
+void fastSquareMultiply(int [][] a, int [][] b, int [][] c, int n)
+{
+   for (int i = 0; i < n; i++)
+      for (int j = 0; j < n; j++)
+         c[i][j] = 0;
+
+   for (int i = 0; i < n; i++)
+      for (int j = 0; j < n; j++)
+         for (int k = 0; k < n; k++)
+            c[i][j] += a[i][k] * b[k][j];
+}
+\end{verbatim}
+\caption{Alternative algorithm to multiply square matrices
+\label{prog2:sqmult2}}
+\end{figure}
+
+You will notice that if you permute the order of the three nested
+{\tt for} loops in Figure~\ref{prog2:sqmult2}, you do not
+affect the result array {\tt c}. We refer to the loop
+order in Figure~\ref{prog2:sqmult2} as {\tt ijk} order.
+When we swap the second and third {\tt for} loops,
+we get {\tt ikj} order.
+In all, there are 3! = 6 ways in which we can order the three nested
+{\tt for} loops. All six orderings result in methods that perform
+exactly the same number of operations of each type.
+So you might think all six take the same time. Not so.
+By changing the order of the loops, we change the data access
+pattern and so change the number of cache misses. This in
+turn affects the run time.
+
+In {\tt ijk} order, we access the elements of {\tt a} and {\tt c} by rows;
+the elements of {\tt b} are accessed by column. Since elements in the
+same row are in adjacent memory and elements in the same column are
+far apart in memory, the accesses of {\tt b} are likely to result in many
+L2 cache misses when the matrix size is too large for the three
+arrays to fit into L2 cache.
+In {\tt ikj} order, the elements of {\tt a}, {\tt b}, and {\tt c} are accessed
+by rows. Therefore, {\tt ikj} order is likely to result in fewer L2 cache misses
+and so has the potential to take much less time than taken by {\tt ijk} order.
+
+For a crude analysis of the number of cache misses, assume we are interested
+only in L2 misses; that an L2 cache-line can hold $w$ matrix elements;
+when an L2 cache-miss occurs, a block of $w$ matrix elements is brought
+into an L2 cache line; and that L2 cache is small compared to the
+size of a matrix. Under these assumptions, the accesses to the elements
+of {\tt a}, {\tt b} and {\tt c} in {\tt ijk} order, respectively, result in
+$n^3/w$, $n^3$, and $n^2/w$ L2 misses.
+Therefore, the total number of L2 misses in {\tt ijk}
+order is $n^3(1+w+1/n)/w$. In {\tt ikj} order, the number of L2 misses
+for our three matrices is $n^2/w$, $n^3/w$, and $n^3/w$, respectively.
+So, in {\tt ikj} order, the total number of L2 misses is
+$n^3(2+1/n)/w$. When $n$ is large, the ration of {\tt ijk} misses to
+{\tt ikj} misses is approximately $(1+w)/2$, which is 2.5 when
+$w = 4$ (for example when we have a 32-byte cache line and the data is
+double precision) and 4.5 when $w = 8$ (for example when we have a 64-byte
+cache line and double-precision data). For a 64-byte cache line and
+single-precision (i.e., 4 byte) data, $w = 16$ and the ratio is
+approximately 8.5.
+
+Figure~\ref{fig2:matrixbar} shows the normalized run times of a Java version
+of our matrix multiplication algorithms. In this
+figure, $mult$ refers to the multiplication algorithm of
+Figure~\ref{prog2:mult}.
+The normalized run time of a method
+is the time taken by the method divided by the
+time taken by {\tt ikj} order.
+
+
+\begin{figure}
+\centerline{\protect\psfig {file = analysis/mtime.eps,height=2in}}
+\caption{Normalized run times for matrix multiplication
+\label{fig2:matrixbar}}
+\end{figure}
+
+Matrix multiplication using
+{\tt ikj} order takes 10 percent less time than does {\tt ijk} order
+when the matrix size is {\tt n} = 500 and 16 percent less time when
+the matrix size is 2000. Equally surprising is that {\tt ikj} order
+runs faster than the algorithm of
+Figure~\ref{prog2:mult} (by about 5 percent when $n$ = 2000).
+This despite the fact that {\tt ikj} order does more work than is done
+by the algorithm of Figure~\ref{prog2:mult}.
+
+\section{Asymptotic Complexity}
+\subsection{Big Oh Notation ($\bigoh$)}
+Let\index{asymptotic notation!big oh|(}\index{big oh notation|(} $p(n)$ and $q(n)$ be two nonnegative functions.
+$p(n)$ is {\bf asymptotically bigger} ($p(n)$ asymptotically dominates $q(n)$)
+than the function $q(n)$ iff
+
+
+\begin{equation}\label{Eqn2:bigger}
+\lim_{n\rightarrow\infty} \frac{q(n)}{p(n)} = 0 
+\end{equation}
+
+
+$q(n)$ is {\bf asymptotically smaller} than $p(n)$ iff $p(n)$
+is asymptotically
+bigger than $q(n)$. $p(n)$ and $q(n)$ are {\bf asymptotically equal}
+iff neither is asymptotically bigger than the other.
+
+\begin{example}\label{E2:bigger}
+Since
+\[
+\lim_{n\rightarrow\infty} \frac{10n+7}{3n^2+2n+6}
+= \frac{10/n + 7/n^2}{3+2/n+6/n^2} = 0/3 = 0 \]
+$3n^2+2n+6$ is asymptotically bigger than $10n+7$ and $10n+7$ is
+asymptotically smaller than
+$3n^2+2n+6$.
+A similar derivation shows that $8n^4 + 9n^2$ is
+asymptotically bigger than
+$100n^3 - 3$, and that $2n^2 + 3n$ is asymptotically bigger
+than $83n$.
+$12n+6$ is asymptotically equal to $6n+2$.
+\end{example}
+
+In the following discussion the function $f(n)$ denotes
+the time or space complexity of an algorithm as a function
+of the problem size $n$.
+Since the time or space requirements of a program are nonnegative quantities,
+we assume that the function $f$ has a nonnegative value for all values of $n$.
+Further, since $n$ denotes an instance characteristic,
+we assume that $n \geq 0$.
+The function $f(n)$ will, in general, be a sum of terms.
+For example, the terms of $f(n) = 9n^2 + 3n +12$ are
+$9n^2$, $3n$, and 12. We may compare pairs of terms
+to determine which is bigger.
+The biggest term in the example $f(n)$ is $9n^2$.
+
+Figure~\ref{fig2:functions} gives the terms that occur
+frequently in a step-count analysis.
+Although all the terms in Figure~\ref{fig2:functions} have a coefficient of 1,
+in an actual analysis, the coefficients of these terms may have a different value.
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{| l | l |}
+Term  &  Name\\ \hline
+$1$  &  constant\\
+$\log n$  &  logarithmic\\
+$n$  &  linear\\
+$n \log n$  &  $n \log n$\\
+$n^2$  &  quadratic\\
+$n^3$  &  cubic\\
+$2^n$  &  exponential\\
+$n !$  &  factorial\\
+\end{tabular}
+\end{center}
+\caption{Commonly occurring terms
+\label{fig2:functions}}
+\end{figure}
+
+We do not associate a logarithmic
+base with the functions in Figure~\ref{fig2:functions}
+that include $\log n$
+because for any constants $a$ and $b$ greater than $1$,
+$\log_a n$ = $\log_b n /  \log_b a$.
+So $\log_a n$ and $\log_b n$
+are asymptotically equal.
+
+The definition of aymptotically smaller implies
+the following ordering for
+the terms of Figure~\ref{fig2:functions} ($<$ is to be read as
+``is asymptotically smaller than''):
+\[
+1 < \log n < n < n \log n < n^2 < n^3 < 2^n < n!
+\]
+
+{\bf Asymptotic notation}
+describes the behavior of the time or space complexity for large
+instance characteristics.
+Although we will develop asymptotic notation
+with reference to step counts alone, our
+development also applies to space complexity and operation
+counts.
+
+The notation $f(n) = \bigoh (g(n))$ (read as ``$f(n)$ is big oh of $g(n)$'')
+means that $f(n)$ is asymptotically smaller than or equal to $g(n)$.
+Therefore, in an asymptotic sense $g(n)$ is an upper bound
+for $f(n)$.
+
+\begin{example}\label{E2:work}
+From Example~\ref{E2:bigger},
+it follows that
+$10n+7 =
+\bigoh (3n^2+2n+6);
+100n^3 - 3 =
+\bigoh (8n^4 + 9n^2)$. We see also that
+$12n + 6 = \bigoh (6n+2)$;
+$3n^2+2n+6 \neq
+\bigoh (10n+7)$;
+and
+$8n^4 + 9n^2 \neq
+\bigoh (100n^3 - 3)$.  
+\end{example}
+
+Although Example~\ref{E2:work} uses the big oh notation in a correct
+way, it is customary to use $g(n)$ functions that are {\bf unit terms} (i.e.,
+$g(n)$ is a single term whose coefficient is 1) except when $f(n) = 0$.
+In addition, it is customary to use, for $g(n)$, the smallest unit term
+for which the statement $f(n) = \bigoh (g(n))$ is true.
+When $f(n) = 0$, it is customary to use $g(n) = 0$.
+
+\begin{example}
+The customary way to describe the asymptotic behavior of the functions
+used in Example~\ref{E2:work} is
+$10n+7 = \bigoh (n)$; $100n^3 - 3 = \bigoh (n^3)$; $12n + 6 = \bigoh (n)$;
+$3n^2+2n+6 \neq \bigoh (n)$; and $8n^4 + 9n^2 \neq \bigoh (n^3)$.
+\end{example}
+
+In asymptotic complexity analysis, we determine the biggest term
+in the complexity; the coefficient of this biggest term is set to 1.
+The unit terms of a step-count function are step-count terms with their
+coefficients changed to 1.
+For example, the unit terms of $3n^2 + 6n \log n +7n +5$
+are $n^2$, $n \log n$, $n$, and 1; the biggest unit term is $n^2$.
+So when the step count of a program is
+$3n^2 + 6n \log n +7n +5$, we say that its asymptotic complexity
+is $\bigoh (n^2)$.
+
+Notice that $f(n)$ = $\bigoh$($g(n)$)
+is not the same as $\bigoh$($g(n)$) = $f(n)$.  In fact,
+saying that $\bigoh$($g(n)$) = $f(n)$ is meaningless.
+The use of the symbol = is unfortunate,
+as this symbol commonly denotes the equals relation.
+We can avoid some of the confusion that results
+from the use of this symbol (which is standard terminology)
+by reading the symbol = as ``is'' and not
+as ``equals.''
+
+\subsection{Omega ($\Omega$) and Theta ($\Theta$) Notations}
+Although\index{asymptotic notation!omega|(}\index{omega notation|(}\index{asymptotic notation!theta|(}\index{theta notation|(}
+the big oh notation is the most frequently used asymptotic notation,
+the omega and theta notations are sometimes used to describe the
+asymptotic complexity of a program.
+
+The notation $f(n) = \Omega (g(n))$ (read as ``$f(n)$ is omega of $g(n)$'')
+means that $f(n)$ is asymptotically bigger than or equal to $g(n)$.
+Therefore, in an asymptotic sense, $g(n)$ is a lower bound
+for $f(n)$.
+The notation $f(n) = \Theta (g(n))$ (read as ``$f(n)$ is theta of $g(n)$'')
+means that $f(n)$ is asymptotically equal to $g(n)$.
+
+
+\begin{example}
+$10n+7 = \Omega (n)$ because $10n+7$ is asymptotically equal to
+$n$; $100n^3 - 3 = \Omega (n^3)$; $12n + 6 = \Omega (n)$;
+$3n^3+2n+6 = \Omega (n)$; $8n^4 + 9n^2 = \Omega (n^3)$;
+$3n^3+2n+6 \neq \Omega (n^5)$; and $8n^4 + 9n^2 \neq \Omega (n^5)$.
+
+$10n+7 = \Theta (n)$ because $10n+7$ is asymptotically equal to
+$n$; $100n^3 - 3 = \Theta (n^3)$; $12n + 6 = \Theta (n)$;
+$3n^3+2n+6 \neq \Theta (n)$; $8n^4 + 9n^2 \neq \Theta (n^3)$;
+$3n^3+2n+6 \neq \Theta (n^5)$; and $8n^4 + 9n^2 \neq \Theta (n^5)$.
+
+The best-case step count for {\tt sequentialSearch}
+(Figure~\ref{prog2:SeqSearch}) is 4 (Table~\ref{fig2:SeqTable1}),
+the worst-case step count is $n + 3$,
+and the average step count is $0.6n + 3.4$.
+So the best-case asymptotic complexity of {\tt sequentialSearch} is
+$\Theta(1)$, and the worst-case and average complexities are
+$\Theta(n)$. It is also correct to say that the complexity of
+{\tt sequentialSearch} is $\Omega (1)$ and $\bigoh (n)$
+because 1 is a lower bound (in an asymptotic sense) and
+$n$ is an upper bound (in an asymptotic sense) on the step count.
+
+\end{example}
+ 
+When using the $\Omega$ notation,
+it is customary to use, for $g(n)$, the largest unit term
+for which the statement $f(n) = \Omega (g(n))$ is true.
+
+At times it is useful to interpret $\bigoh$($g(n)$), $\Omega ( g(n)$),
+and $\Theta ( g(n)$) as being the following sets:
+
+$\bigoh ( g(n) ) = \{ f(n) | f(n)  =  \bigoh ( g(n) )\}$\\
+
+$\Omega ( g(n) ) = \{ f(n)  |  f(n)  =  \Omega ( g(n) )\}$\\
+
+$\Theta ( g(n) ) = \{ f(n)  |  f(n)  =  \Theta ( g(n) )\}$
+ 
+Under this interpretation,
+statements such as $\bigoh$($g_1 (n)$) = $\bigoh$($g_2 (n)$) and
+$\Theta ( g_1 (n)$) = $\Theta ( g_2 (n)$) are meaningful.
+When using this interpretation, it is also
+convenient to read $f(n)$ = $\bigoh$($g(n)$) as ``{\it f} of $n$ is
+in (or is a member of) big oh of $g$ of $n$'' and so on.
+
+\subsection{%
+Little Oh Notation ($\littleoh$)
+}
+The\index{asymptotic notation!little oh|(}\index{little oh notation|(} little oh notation describes a strict upper bound on the
+asymptotic growth rate of the function $f$.
+$f(n)$ is little oh of $g(n)$ iff $f(n)$ is asymptotically
+smaller than $g(n)$.
+Equivalently, $f(n)$ = $\littleoh$($g(n)$) (read as ``$f$ of $n$ is
+little oh of $g$ of $n$'') iff 
+$f(n)$ = $\bigoh$($g(n))$ and $f(n)$ $\neq$ $\Omega ( g(n))$.
+ 
+\begin{example}
+\label{E2:ex.small}
+\ecaption{Little oh}
+$3n + 2$ = $\littleoh$($n^2$) as $3n + 2$ = $\bigoh$($n^2$)
+and $3n + 2$ $\neq$ $\Omega ( n^2$).  However, $3n + 2$ $\neq$ $\littleoh$($n)$.
+Similarly, $10n^2$ + $4n$ + 2
+= $\littleoh$($n^3$), but is not $\littleoh$($n^2$).
+\end{example}
+
+ 
+The little oh notation is often used
+in step-count analyses.  A step count of $3n$ + $\littleoh$($n$) would mean that
+the step count is $3n$ plus terms that are asymptotically smaller than $n$.
+When performing such an analysis, one can ignore portions of the
+program that are known to contribute less than $\Theta ( n$) steps.\index{asymptotic notation!little oh|)}\index{little oh notation|)}
+ 
+
+\section{Recurrence Equations}
+Recurrence equations arise frequently in the analysis of algorithms, particulary
+in the analysis of recursive as well as divide-and-conquer algorithms.
+\begin{example}
+\ecaption{Binary Search}
+Consider
+\index{search!binary}
+a binary search of the sorted array $a[l:r]$, where
+$n = r - l + 1 \geq 0$,
+for the
+element $x$. When $n = 0$, the search is unsuccesful and when
+$n = 1$, we compare $x$ and $a[l]$.
+When $n > 1$, we compare $x$ with the element
+$a[m]$ ($m = \lfloor (l+r)/2\rfloor$)
+in the middle of the
+array. If the compared elements are equal, the search terminates; if $x
+< a[m]$, we search $a[l:m-1]$; otherwise, we search
+$a[m+1:r]$.
+Let $t(n)$ be the worst-case complexity of binary search. Assuming that
+$t(0) = t(1)$,
+we obtain the
+following recurrence.
+
+\begin{equation}\label{eqn:bin1}
+t(n) =  \left \{
+         \begin{array}{ll}
+            t(1) & n \leq 1\\
+    t(\lfloor n / 2\rfloor)+c &  n > 1
+          \end{array}
+         \right.
+\end{equation}
+where $c$ is a constant.
+\end{example}
+
+\begin{example}
+\ecaption{Merge Sort}
+In
+\index{sort!merge}\index{merge sort}
+a merge sort of $a[0:n-1]$, $n \geq 1$, we consider two cases.
+When $n = 1$, no work is to be done as a one-element array is always in
+sorted order. When $n > 1$, we divide
+$a$ into two parts of roughly the same size,
+sort these two parts using the merge sort
+method recursively, then finally merge the sorted parts to obtain the desired
+sorted array.
+Since the time to do the final merge is $\Theta (n)$ and the dividing
+into two roughly equal parts takes $O(1)$ time, the complexity, $t(n)$,
+of merge sort is given by the recurrence:
+\begin{equation}\label{eqn:merge1}
+t(n) =  \left \{
+         \begin{array}{ll}
+            t(1) & n = 1\\
+    t(\lfloor n / 2\rfloor)+t(\lceil n/2\rceil)+cn &  n > 1
+          \end{array}
+         \right.
+\end{equation}
+where $c$ is a constant.
+\end{example}
+
+Solving recurrence equations such as Equations~\ref{eqn:bin1} and \ref{eqn:merge1}
+for $t(n)$ is complicated by the presence of the floor and ceiling functions.
+By making an appropriate assumption on the permissible values of $n$, these
+functions may be eliminated to obtain a simplified recurrence. In the
+case of Equations~\ref{eqn:bin1} and \ref{eqn:merge1} an assumption such
+as $n$ is a power of 2 results in the simplified recurrences:
+\begin{equation}\label{eqn:bin2}
+t(n) =  \left \{
+         \begin{array}{ll}
+            t(1) & n \leq 1\\
+    t(n / 2)+c &  n > 1
+          \end{array}
+         \right.
+\end{equation}
+and
+\begin{equation}\label{eqn:merge2}
+t(n) =  \left \{
+         \begin{array}{ll}
+            t(1) & n = 1\\
+    2t( n / 2)+cn &  n > 1
+          \end{array}
+         \right.
+\end{equation}
+
+Several\index{recurrence equation} techniques---substitution\index{substitution method}\index{recurrence equation!substitution method},
+table lookup\index{table lookup}\index{recurrence equation!table lookup},
+induction\index{induction}\index{recurrence equation!induction},
+characteristic roots\index{characteristic roots}\index{recurrence equation!characteristic roots}, and generating functions\index{generating functions}\index{recurrence equation!generating functions}---are
+available to solve recurrence equations.
+We describe only the substitution and table lookup
+methods.
+
+\subsection{Substitution Method}\index{substitution method}
+In the substitution method, recurrences such as Equations~\ref{eqn:bin2} and
+\ref{eqn:merge2} are solved by repeatedly substituting right-side
+occurrences (occurences to the right of $=$)
+of $t(x)$, $x > 1$, with expressions involving $t(y)$, $y < x$.
+The substitution process terminates when the only occurrences of $t(x)$ that
+remain on the right side  have $x = 1$.
+
+Consider the binary search recurrence of Equation~\ref{eqn:bin2}.
+Repeatedly substituting for $t()$ on the right side, we get
+\begin{eqnarray*}
+t(n)  &=&  t(n/2) + c\\
+ &=&  (t(n /4) + c) + c \\
+ &=&  t(n /4) +  2c \\
+ &=&  t(n /8) +  3c \\
+ &\vdots\\
+ &=&   t(1) + c\log_2n  \\
+ &=&  \Theta(\log n)
+\end{eqnarray*}
+
+For the merge sort recurrence of Equation~\ref{eqn:merge2}, we get
+\begin{eqnarray*}
+t(n) &=& 2t(n/2) + cn\\
+&=& 2(2t(n/4) + cn/2) + cn\\
+&=& 4t(n/4) + 2cn\\
+&=& 4(2t(n/8) + cn/4) + 2cn\\
+&=& 8t(n/8) + 3cn\\
+&\vdots&\\
+&=& nt(1) + cn\log_2 n\\
+&=& \Theta(n \log n)
+\end{eqnarray*}
+\subsection{Table-Lookup Method}
+The complexity of many divide-and-conquer algorithms is given by
+a recurrence of the form
+
+\begin{equation}\label{Eqn14:11}
+t(n)  =  \left \{
+            \begin{array}{ll}
+         t(1) & n = 1\\
+          a * t(n / b)+g(n) & n > 1
+            \end{array}
+         \right.
+\end{equation}
+where $a$ and $b$ are known constants.  The merge sort recurrence,
+Equation~\ref{eqn:merge2}, is in this form. Although the recurrence for binary search,
+Equation~\ref{eqn:bin2}, isn't exactly in this form, the $n \leq 1$ may be
+changed to $n = 1$ by eliminating the case $n = 0$. 
+To solve Equation~\ref{Eqn14:11}, we assume that $t(1)$ is known and
+that $n$ is a power of $b$ (i.e., $n$ =
+$b^k$).  
+Using the substitution method, we can show that
+
+\begin{equation}\label{Eqn14:13}
+t(n) = n^{\log_b a} [t(1)+f(n)] 
+\end{equation}
+where $f(n)$ = $\sum_{j=1}^k h(b^j )$ and $h(n)$ =
+$g(n) /  n^{\log_b a}$.
+ 
+Table~\ref{fig14:14.8}
+tabulates the asymptotic value of $f(n)$ for various values of
+$h(n)$.  This table allows us to easily obtain
+the asymptotic value of $t(n)$ for many of the
+recurrences we encounter when analyzing divide-and-conquer algorithms.  
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|l|}
+\multicolumn{1}{|c|}{$h(n)$} & \multicolumn{1}{|c|}{$f(n)$}\\ \hline
+ &  \\
+ $O ( n^r$), $r < 0$ &  $O$(1)\\ 
+ & \\
+ $\Theta ( ( \log n)^i$), $i \geq 0$ &  $\Theta (( ( \log n)^{i+1} ) / (i+1))$\\
+ & \\
+ $\Omega ( n^r$), $r > 0$ &  $\Theta ( h(n))$\\
+ & \\
+\end{tabular}
+\end{center}
+\caption{$f(n)$ values for various $h(n)$ values
+\label{fig14:14.8}}
+\end{table}
+
+ 
+Let us solve the binary search and merge sort recurrences using this table.
+Comparing Equation~\ref{eqn:bin2} with $n \leq 1$ replaced by $n = 1$
+with Equation~\ref{Eqn14:11}, we see that
+$a$ = 1, $b$ = 2, and $g(n)$ = $c$.  Therefore,
+$\log_b (a)$ = 0, and $h(n)$ = $g(n) / 
+n^{\log_b a}$ = $c$ = $c ( \log n)^0$ =
+$\Theta ( ( \log n)^0$).  From Table~\ref{fig14:14.8}, we obtain
+$f(n)$ = $\Theta$($\log n$). 
+Therefore,
+$t(n)$ = $n^{\log_b a} (c+ \Theta ( \log n))$ =
+$\Theta$($\log n$).
+ 
+For the merge sort recurrence, Equation~\ref{eqn:merge2},
+we obtain $a$ = 2, $b$ = 2, and $g(n)$ = $cn$.
+So $\log_b a  =  1$ and $h(n) =  g(n) / n$ = $c$ = $\Theta$($( \log n)^0$).
+Hence $f(n)$ = $\Theta ( \log n$) and $t(n)$ = $n(t(1) +  \Theta ( \log n))$ =
+$\Theta ( n \log n$).
+ 
+
+\section{Amortized Complexity}
+\index{amortized complexity |(}\index{complexity!amortized|(}
+\subsection{What is Amortized Complexity?}
+
+The complexity of an algorithm or of an operation such
+as an insert, search, or delete, as defined in
+Section~\ref{sec:intro}, is the {\em  actual complexity}\index{complexity!actual} of the
+algorithm or operation. The actual complexity of an operation
+is determined by the step count
+for that operation, and the actual complexity of a sequence of operations
+is determined by the step count for that sequence. The actual
+complexity of a sequence of operations may be determined
+by adding together the step counts for the individual
+operations in the sequence.
+Typically, determining the step count for each operation in the sequence is
+quite difficult, and instead, we obtain an upper bound on
+the step count for the sequence
+by adding together the worst-case step count for each operation.
+
+
+When determining the complexity of a sequence of operations, we can, at times,
+obtain tighter bounds using {\em amortized complexity}
+rather than worst-case complexity.
+Unlike the actual and worst-case complexities of an operation
+which are closely related to the step count for that operation, the
+amortized complexity of an operation is an accounting artifact that often
+bears no direct relationship to the actual complexity of that operation.
+The amortized complexity of an operation could be anything. {\em The
+only requirement
+is that the sum of the amortized complexities of all operations in the sequence
+be greater than or equal to the sum of the actual complexities.} That is
+
+\begin{equation}\label{eqn:amort1}
+\sum_{1 \leq i \leq n}amortized(i) \geq
+\sum_{1 \leq i \leq  n}actual(i)   
+\end{equation}
+
+\noindent
+where $amortized(i)$ and $actual(i)$,
+respectively, denote the amortized and actual complexities of the
+$i$th operation in a sequence of $n$
+operations.
+Because of this requirement on the sum of the amortized complexities of the
+operations in any sequence of operations, we may use the sum of the amortized
+complexities as an upper bound on the complexity of any sequence of operations.
+
+You may view the amortized cost of an operation as being the amount you charge
+the operation rather than the amount the operation costs. You can charge an
+operation any amount you wish so long as the amount charged to all operations
+in the sequence is at least equal to the actual cost of the operation sequence.
+
+Relative to the actual and amortized costs of each operation in a sequence
+of $n$ operations, we define a {\em potential
+function}\index{potential function} $P(i)$ as below
+
+\begin{equation}\label{eqn:pot}
+P(i) = amortized(i) - actual(i) + P(i-1)
+\end{equation}
+
+That is, the $i$th operation causes
+the potential function to change by the difference between the amortized
+and actual costs of that operation.
+If we sum Equation~\ref{eqn:pot} for $1 \leq  i \leq n$, we get
+$$\sum_{1 \leq i \leq n} P(i) = \sum_{1 \leq i \leq n} (amortized(i) - actual(i) + P(i-1))$$
+
+or
+
+$$\sum_{1 \leq i \leq n} (P(i) - P(i-1)) = \sum_{1 \leq i \leq n} (amortized(i) - actual(i))$$
+
+or
+
+$$P(n) - P(0) = \sum_{1 \leq i \leq n} (amortized(i) - actual(i))$$
+
+From Equation~\ref{eqn:amort1}, it follows that
+\begin{equation}\label{eqn:pot2}
+P(n) - P(0) \geq 0
+\end{equation}
+
+When $P(0) = 0$, the potential
+$P(i)$ is the amount by which the first
+$i$ operations have been overcharged (i.e., they have
+been charged more than their actual cost).
+
+Generally, when we analyze the complexity of a sequence of $n$ operations, $n$
+can be any nonnegative integer.
+Therefore, Equation~\ref{eqn:pot2} must hold for all nonegative integers.
+
+The preceding discussion leads us to the following three methods to arrive at
+amortized costs for operations:
+
+\begin{enumerate}
+\item
+{\bf Aggregate Method}\index{aggregate method}\index{amortized complexity!aggregate method}\\
+In the aggregate method, we determine an upper bound
+for the sum
+of the actual costs of the
+$n$ operations.
+The amortized cost of each operation is set equal to
+this upper bound divided by $n$.
+You may verify that this assignment of amortized costs
+satisfies Equation~\ref{eqn:amort1} and is, therefore, valid.
+\item
+{\bf Accounting Method}\index{accounting method}\index{amortized complexity!accounting method}\\
+In this method, we assign amortized costs to the operations
+(probably by guessing what assignment will work), compute
+the $P(i)$s using Equation~\ref{eqn:pot}, and show
+that $P(n)-P(0) \geq 0$.
+\item
+{\bf Potential Method}\index{potential method}\index{amortized complexity!potential method}\\
+Here, we start with a potential
+function (probably obtained using good guess work)
+that satisfies Equation~\ref{eqn:pot2}
+and compute the amortized complexities
+using Equation~\ref{eqn:pot}.
+\end{enumerate}
+
+\subsection{Maintenance Contract}
+\subsubsection*{Problem Definition}
+In January,
+you buy a new car
+from a dealer who offers you the following maintenance
+contract: \$50 each month other than March, June,
+September and
+December (this covers an oil change and general inspection),
+\$100 every March, June, and September
+(this covers an oil change, a
+minor tune-up, and a general inspection), and
+\$200 every
+December (this covers an oil change, a
+major tune-up, and a general inspection).
+We are to obtain an upper bound on the cost of this maintenance
+contract as a function of the number of months.
+
+\subsubsection*{Worst-Case Method}
+We can bound the contract cost
+for the first $n$ months by taking the product
+of $n$ and the maximum cost incurred in any month
+(i.e., \$200). This would be analagous to
+the traditional way
+to estimate the complexity--take the product of the number of operations and the
+worst-case complexity of an operation.
+Using this approach, we get \$200n as an upper
+bound on the
+contract cost. The upper bound is correct because the actual cost
+for $n$ months does not exceed \$200$n$.
+
+\subsubsection*{Aggregate Method}
+\index{aggregate method|(}\index{amortized complexity!aggregate method|(}
+To use the aggregate method for amortized complexity, we first
+determine an upper bound on the sum of the costs for the first
+$n$ months. As tight a bound as is possible is desired.
+The sum of the actual monthly costs of the contract for
+the first $n$ months is
+
+\begin{eqnarray*}
+200*\lfloor n/12\rfloor &+& 100*(\lfloor n/3\rfloor - \lfloor n/12\rfloor) + 50*(n - \lfloor n/3\rfloor)\\
+&=& 100*\lfloor n/12\rfloor + 50*\lfloor n/3\rfloor + 50*n\\
+&\leq& 100*n/12 + 50*n/3 + 50*n\\
+&=& 50n(1/6 + 1/3 + 1)\\
+&=& 50n(3/2)\\
+&=& 75n
+\end{eqnarray*}
+
+The amortized cost for each month is set to \$75.
+Table~\ref{table:contract} shows the actual costs, the amortized costs,
+and the potential function value (assuming $P(0) = 0$)
+for the first 16 months of the contract.
+
+\begin{table}
+\begin{tabular}{|l | r r r r r r r r r r r r r r r r|}
+month&1&2&3&4&5&6&7&8&9&10&11&12&13&14&15&16\\
+actual cost&50&50&100&50&50&100&50&50&100&50&50&200&50&50&100&50\\
+amortized cost&75&75&75&75&75&75&75&75&75&75&75&75&75&75&75&75\\
+P()&25&50&25&50&75&50&75&100&75&100&125&0&25&50&25&50\\
+\end{tabular}
+\caption{Maintenance contract\label{table:contract}}
+\end{table}
+
+Notice that some months are charged more than their actual costs and others are
+charged less than their actual cost. The cumulative difference between what
+the operations are charged and their actual costs is given by the
+potential function. The potential function satisfies Equation~\ref{eqn:pot2}
+for all
+values of $n$.
+When we use the amortized cost of \$75 per month,
+we get $\$75n$ as an upper bound on the
+contract cost for $n$ months. This bound
+is tighter than the bound of
+$\$200n$ obtained using the worst-case monthly cost.
+\index{aggregate method|)}\index{amortized complexity!aggregate method|)}
+
+\subsubsection*{Accounting Method}
+\index{accounting method|(}\index{amortized complexity!accounting method|(}
+When we use the accounting method, we must first assign an amortized cost
+for each month and then show that this assignment satisifes Equation~\ref{eqn:pot2}.
+We have the option to assign a different amortized cost to each month.
+In our maintenance contract example, we know the actual cost by month and could use this
+actual cost as the amortized cost.  It is, however, easier to work with
+an equal cost assignment for each month. Later, we shall see examples
+of operation sequences that consist of two or more types of operations
+(for example, when dealing with lists of elements, the operation sequence
+may be made up of search, insert, and remove operations). When dealing
+with such sequences we often assign a different amortized cost to operations
+of different types (however,
+operations of the same type have the same amortized cost).
+
+To get the best upper bound on the sum of the
+actual costs, we must set the amortized monthly cost to be the smallest number
+for which Equation~\ref{eqn:pot2} is satisifed for all $n$.
+From the above table, we see that using any cost less than
+$\$75$ will result in $P(n) - P(0) < 0$
+for some values of $n$. Therefore, the smallest
+assignable amortized cost consistent with Equation~\ref{eqn:pot2} is
+\$75.
+
+Generally, when the accounting method is used, we have not computed the
+aggregate cost. Therefore, we would not know that \$75
+is the least assignable amortized cost.
+So we start by assigning an amortized cost (obtained by making
+an educated guess) to each of the
+different operation types and then proceed to show that this assignment of
+amortized costs satisfies Equation~\ref{eqn:pot2}.
+Once we have shown this, we can
+obtain an upper bound on the cost of any operation sequence by computing
+
+$$\sum_{1 \leq i \leq k} f(i) * amortized(i)$$
+where $k$ is the number of different operation types
+and $f(i)$ is the frequency of operation type
+$i$ (i.e., the number of times operations of this type
+occur in the operation sequence).
+
+For our maintenance contract example, we might try an amortized
+cost of \$70. When we use
+this amortized cost, we discover that Equation~\ref{eqn:pot2} is not satisifed
+for $n = 12$ (for example) and so
+\$70 is an invalid
+amortized cost assignment.  We might next try \$80.
+By constructing a table such as the one above, we will observe that
+Equation~\ref{eqn:pot2} is satisfied for all months in the first 12
+month cycle, and then conclude that the equation is satisifed for all
+$n$. Now, we can use $\$80n$
+as an upper bound on the contract cost for
+$n$ months.
+\index{accounting method|)}\index{amortized complexity!accounting method|)}
+
+\subsubsection*{Potential Method}
+\index{potential method|(}\index{amortized complexity!potential method|(}
+We first define a potential function for the analysis.
+The only guideline you have in defining this function is that the
+potential function
+represents the cumulative difference between the amortized and actual costs.
+So, if you have an amortized cost in mind, you may be able to use this
+knowledge to develop a potential function that satsifies Equation~\ref{eqn:pot2},
+and then use the potential function and the actual operation costs (or
+an upper bound on these actual costs) to verify the amortized costs.
+
+If we are extremely experienced, we might start with the potential
+function
+
+\begin{eqnarray*}
+t(n)  =  \left \{
+            \begin{array}{ll}
+         0 & n \mbox{ mod } 12 = 0 \\
+         25 & n \mbox{ mod } 12 = 1 \mbox{ or } 3 \\
+         50 & n \mbox{ mod } 12 = 2, \ 4, \mbox{ or } 6 \\
+         75 & n \mbox{ mod } 12 = 5, \ 7, \mbox{ or } 9 \\
+         100 & n \mbox{ mod } 12 = 8 \mbox{ or } 10 \\
+         125 & n \mbox{ mod } 12 = 11  
+            \end{array}
+         \right.
+\end{eqnarray*}
+
+Without the aid of the table (Table~\ref{table:contract})
+constructed for the aggregate method, it
+would take quite some ingenuity to come up with this potential function.
+Having formulated a potential function and verified that this
+potential function satisfies Equation~\ref{eqn:pot2} for all $n$,
+we proceed to use Equation~\ref{eqn:pot} to determine the amortized costs.
+
+From Equation~\ref{eqn:pot}, we obtain
+$amortized(i) = actual(i) + P(i) - P(i-1)$.
+Therefore,
+\begin{eqnarray*}
+amortized(1) &=& actual(1) + P(1) - P(0) = 50 + 25 - 0 = 75\\
+amortized(2) &=& actual(2) + P(2) - P(1) = 50 + 50 - 25 = 75\\
+amortized(3) &=& actual(3) + P(3) - P(2) = 100 + 25 - 50 = 75\\
+\end{eqnarray*}
+and so on. Therefore, the amortized cost for each month is
+\$75. So, the actual cost for
+$n$ months is at most
+$\$75n$.
+\index{potential method|)}\index{amortized complexity!potential method|)}
+
+\subsection{The McWidget Company}
+\subsubsection*{Problem Definition}
+The famous McWidget company manufactures widgets. At its headquarters, the
+company has a large display that shows how many widgets have been manufactured
+so far. Each time a widget is manufactured, a maintenance person updates
+this display. The cost for this update is $\$c + dm$,
+where $c$ is a fixed trip charge,
+$d$ is a charge per display digit that is to be
+changed, and $m$ is the number of digits that are
+to be changed.  For example, when the display is changed from
+1399 to
+1400, the cost to the company is
+$\$c + 3d$ because
+3 digits must be changed.
+The McWidget company wishes to amortize the cost of maintaining the display
+over the widgets that are manufactured, charging the same amount to each widget.
+More precisely, we are looking for an amount
+$\$e = amortized(i)$ that should leavied against
+each widget so that the sum of these charges equals or exceeds the
+actual cost of maintaining/updating the display
+($\$e*n \geq$ actual total cost incurred for first $n$ widgets
+for all $n \geq 1$).
+To keep the overall selling price of a widget low, we wish to find as small
+an $e$ as possible.
+Clearly,
+$e > c + d$ because each time a widget is made, at least
+one digit (the least significant one) has to be changed.
+
+\subsubsection*{Worst-Case Method}
+This method does not work well in this application
+because there is no finite worst-case cost
+for a single display update.  As more and more widgets are manufactured,
+the number of digits that need to be changed increases.
+For example, when the 1000th widget is made,
+4 digits are to be changed incurring a cost
+of $c + 4d$, and when the
+1,000,000th widget is made,
+7 digits are to be changed incurring a cost
+of $c + 7d$.
+If we use the worst-case method, the amortized cost to each widget
+becomes infinity.
+
+\subsubsection*{Aggregate Method}
+\index{aggregate method|(}\index{amortized complexity!aggregate method|(}
+Let $n$ be the number of widgets made so far.
+As noted earlier, the least significant digit of the display has
+been changed $n$ times.
+The digit in the tens place changes once for every ten widgets
+made, that in the hundreds place changes once for evey hundred widgets made,
+that in the thousands place changes once for evey thousand widgets made,
+and so on.
+Thefore, the aggregate number of digits that have changed is
+bounded by
+$$n(1 + 1/10 + 1/100 + 1/1000 + ...) = (1.11111...)n$$
+So, the amortized cost of updating the display is
+$\$c + d(1.11111...)n/n < c + 1.12d$.
+If the McWidget company adds $\$c + 1.12d$
+to the selling price of each widget, it will collect enough money to
+pay for the cost of maintaining the display.
+Each widget is charged the cost of changing 1.12 digits
+regardless of the number of digits that are actually changed.
+Table~\ref{table:widget} shows the actual cost,
+as measured by the number of digits that
+change, of maintaining the display, the amortized cost
+(i.e., 1.12 digits per widget), and the potential
+function. The potential
+function gives the difference between the sum of the amortized costs and
+the sum of the actual costs. Notice how the potential function builds up so that
+when it comes time to pay for changing two digits, the previous
+potential function value
+plus the current amortized cost exceeds 2. From
+our derivation of the amortized cost, it follows that the potential function
+is always nonnegative.
+
+\begin{table}
+\begin{tabular}{|l| r r r r r r r r r r r r r r|}\\
+widget&1&2&3&4&5&6&7&8&9&10&11&12&13&14\\
+actual cost&1&1&1&1&1&1&1&1&1&2&1&1&1&1\\
+amortized cost|&1.12&1.12&1.12&1.12&1.12&1.12&1.12&1.12&1.12&1.12&1.12&1.12&1.12&1.12\\
+P()&0.12&0.24&0.36&0.48&0.60&0.72&0.84&0.96&1.08&0.20&0.32&0.44&0.56&0.68\\\hline\hline\\
+widget&15&16&17&18&19&20&21&22&23&24&25&26&27&28\\
+actual cost&1&1&1&1&1&2&1&1&1&1&1&1&1&1\\
+amortized cost|&1.12&1.12&1.12&1.12&1.12&1.12&1.12&1.12&1.12&1.12&1.12&1.12&1.12&1.12\\
+P()&0.80&0.92&1.04&1.16&1.28&0.40&0.52&0.64&0.76&0.88&1.00&1.12&1.24&1.36\\
+\end{tabular}
+\caption{Data for widgets\label{table:widget}}
+\end{table}
+\index{aggregate method|)}\index{amortized complexity!aggregate method|)}
+
+
+\subsubsection*{Accounting Method}
+\index{accounting method|(}\index{amortized complexity!accounting method|(}
+We begin by assigning an amortized cost to the individual operations,
+and then we show that these assigned costs satsify Equation~\ref{eqn:pot2}.
+Having already done an amortized analysis using the aggregate method, we
+see that Equation~\ref{eqn:pot2} is satisfied when we assign an amortized cost of
+$\$c + 1.12d$ to each display change.
+Typically, however, the use of the accounting method is not preceded
+by an application of the aggregate method and we start by guessing
+an amortized cost and then showing that this guess satisfies
+Equation~\ref{eqn:pot2}.
+
+Suppose we assign a guessed amortized cost of 
+$\$c + 2d$ for each display change.
+
+\begin{eqnarray*}
+P(n) - P(0) &=& \sum_{1 \leq  i \leq  n} (amortized(i) - actual(i))\\
+&=& (c + 2d)n - \sum_{1 \leq i \leq n}actual(i)\\
+&=& (c + 2d)n - (c + (1 + 1/10 + 1/100 + ...)d)n\\
+&\geq& (c + 2d)n - (c + 1.12d)n\\
+&\geq& 0
+\end{eqnarray*}
+
+This analysis also shows us that we can reduce the amortized cost of a widget
+to
+$\$c + 1.12d$.
+
+An alternative proof method that is useful in some analyses involves
+distributing the excess charge
+$P(i) - P(0)$ over various accounting entities,
+and using these stored excess charges (called {\em credits})
+to establish
+$P(i+1) - P(0) \geq 0$.
+For our McWidget example, we use the display digits as the accounting entities.
+Initially, each digit is 0 and each digit has
+a credit of 0 dollars.
+Suppose we have guessed an amortized cost of
+$\$c + (1.111...)d$.
+When the first widget is manufactured,
+$\$c + d$ of the amortized cost is used to pay
+for the update of the display and the remaining
+$\$(0.111...)d$ of
+the amortized cost is retained as a credit
+by the least significant digit of the display.
+Similarly, when the second through ninth widgets are manufactured,
+$\$c + d$ of the amortized cost is used to pay
+for the update of the display and the remaining
+$\$(0.111...)d$ of the
+amortized cost is retained as a credit
+by the least significant digit of the display.
+Following the manufacture of the ninth widget, the least
+significant digit of the display has a credit of
+$\$(0.999...)d$ and the remaining digits have no credit.
+When the tenth widget is manufactured,
+$\$c + d$ of the amortized cost are used to pay
+for the trip charge and the cost of changing the least significant digit.
+The least significant digit now has a credit of
+$\$(1.111...)d$.  Of this credit,
+$\$d$ are used to pay for the change of
+the next least significant digit (i.e., the digit in the tens place),
+and the remaining
+$\$(0.111...)d$ are transferred to the ten's digit
+as a credit.
+Continuing in this way, we see that when the display shows
+99, the credit on the ten's digit is
+$\$(0.999...)d$ and that on the one's digit
+(i.e., the least significant digit) is also
+$\$(0.999...)d$. When the 100th
+widget is manufactured, 
+$\$c + d$ of the amortized cost are used to pay
+for the trip charge and the cost of changing the least significant digit,
+and the credit on the least significant digit becomes
+$\$(1.111...)d$.  Of this credit,
+$\$d$ are used to pay for the change of
+the tens digit from 9 to 0,
+the remaining
+$\$(0.111...)d$ credit on the one's digit is transferred
+to the ten's digit. The credit on the ten's digit now becomes
+$\$(1.111...)d$.  Of this credit,
+$\$d$ are used to pay for the change of
+the hundred's digit from 0 to 1,
+the remaining
+$\$(0.111...)d$ credit on the ten's digit is transferred
+to the hundred's digit.
+
+The above accounting scheme ensures that the credit on each digit of the display
+always equals
+$\$(0.111...)dv$, 
+where
+$v$ is the value of the digit (e.g., when the display is
+206 the credit on the one's digit is
+$\$(0.666...)d$, 
+the credit on the tens digit is
+$\$0$, and that on the hundred's digit is
+$\$(0.222...)d$. 
+
+From the preceding
+discussion, it follows that
+$P(n) - P(0)$
+equals the sum of the digit credits and
+this sum is always nonnegative.
+Therefore, Equation~\ref{eqn:pot2} holds for all $n$.
+\index{accounting method|)}\index{amortized complexity!accounting method|)}
+
+
+\subsubsection*{Potential Method}
+\index{potential method|(}\index{amortized complexity!potential method|(}
+We first postulate a potential function that satisfies Equation~\ref{eqn:pot2},
+and then use this function to
+obtain the amortized costs.
+From the alternative proof used above for the accounting method,
+we can see that we should use the potential function
+$P(n) = (0.111...)d \sum_i v_i$,
+where $v_i$ is the value of
+the $i$th digit of the display.
+For example, when the display shows 206
+(at this time $n$ = 206), the
+potential function value is $(0.888...)d$.
+This potential function satisifies Equation~\ref{eqn:pot2}.
+
+Let $q$ be the number of 9s
+at the right end of $j$ (i.e., when $j$
+= 12903999, $q$ = 3). When the display changes from
+$j$ to $j+1$, the potential change
+is $(0.111...)d(1-9q)$ and the actual cost of
+updating the display is $\$c + (q+1)d$.
+From Equation~\ref{eqn:pot}, it follows that the amortized cost for the display change
+is
+%\begin{eqnarray*}
+%\mbox{actual cost} &=& \mbox{potential change}\\
+%&=& c + (q+1)d + (0.111...)d(1-9q)\\
+%&=& c + (1.111...)d\\
+%\end{eqnarray*}
+
+$$\mbox{actual cost} + \mbox{potential change}
+= c + (q+1)d + (0.111...)d(1-9q)
+= c + (1.111...)d$$
+\index{potential method|)}\index{amortized complexity!potential method|)}
+
+
+\subsection{Subset Generation}
+\index{subset generation|(}
+\subsubsection*{Problem Definition}
+The subsets of a set of $n$ elements are defined
+by the $2^n$ vectors
+$x[1:n]$, where each
+$x[i]$ is either 0 or
+1.
+$x[i] = 1$ iff the
+$i$th element of the set is a member of the
+subset.  The subsets of a set of three elements are given by the
+eight vectors 000, 001, 010, 011, 100, 101, 110, and 111,
+for example.
+Starting with an array $x[1:n]$ has been initialized to zeroes (this
+represents the empty subset), each invocation of
+algorithm {\tt nextSubset} (Figure~\ref{fig:enum})
+returns the next subset. When all subsets have been generated, this
+algorithm
+returns {\tt null}.
+
+\begin{figure}
+\begin{verbatim}
+public int [] nextSubset()
+{// return next subset; return null if no next subset
+   // generate next subset by adding 1 to the binary number x[1:n]
+   int i = n;
+   while (i > 0 && x[i] == 1)
+      {x[i] = 0; i--;}
+
+   if (i == 0) return null;
+   else {x[i] = 1; return x;}
+}
+\end{verbatim}
+\caption{Subset enumerator\label{fig:enum}}
+\end{figure}
+
+We wish to determine how much time it takes to generate the first
+$m$, $1 \leq  m \leq 2^n$ subsets. This is the time for the first $m$
+invocations of {\tt nextSubset}.
+
+\subsubsection*{Worst-Case Method}
+The complexity of {\tt nextSubset} is
+$\Theta(c)$, where $c$
+is the number of $x[i]$s that change.
+Since all $n$ of the $x[i]$s
+could change in a single invocation of {\tt nextSubset},
+the worst-case complexity of {\tt nextSubset} is
+$\Theta(n)$. Using the worst-case method, the
+time required to generate the first m subsets
+is $O(mn)$.
+
+\subsubsection*{Aggregate Method}
+\index{aggregate method|(}\index{amortized complexity!aggregate method|(}
+The complexity of {\tt nextSubset} equals the number of
+$x[i]$s that change.
+When {\tt nextSubset} is invoked
+$m$ times,
+$x[n]$ changes $m$ times;
+$x[n - 1]$ changes $\lfloor m/2\rfloor$
+times;
+$x[n - 2]$ changes $\lfloor m/4\rfloor$ times;
+$x[n - 3]$ changes $\lfloor m/8\rfloor$ times;
+and so on. Therefore, the sum of the actual costs of the first
+$m$ invocations is
+$\sum_{0 \leq i \leq \lfloor \log_2 m \rfloor} (m/2^i)
+< 2m$.
+So, the complexity of generating the first m
+subsets is actually $O(m)$, a tighter bound than
+obtained using the worst-case method.
+
+The amortized complexity of {\tt nextSubset}
+is $\mbox{(sum of actual costs)}/m < 2m/m = O(1)$.
+\index{aggregate method|)}\index{amortized complexity!aggregate method|)}
+
+\subsubsection*{Accounting Method}
+\index{accounting method|(}\index{amortized complexity!accounting method|(}
+We first guess the amortized complexity of {\tt nextSubset},
+and then show that this amortized complexity satisfies Equation~\ref{eqn:pot2}.
+Suppose we guess that the amortized complexity is 2.
+To verify this guess, we must show that
+$P(m) - P(0) \geq 0$
+for all $m$.
+
+We shall use the alternative proof method used in the McWidget example.
+In this method, we
+distribute the excess charge
+$P(i) - P(0)$ over various accounting entities,
+and use these stored excess charges
+to establish
+$P(i+1) - P(0) \geq 0$.
+We use the $x[j]$s as the accounting entities.
+Initially, each $x[j]$ is 0 and
+has
+a credit of 0.
+When the first subset is generated,
+1 unit of the amortized cost is used to pay
+for the single $x[j]$ that changes and the remaining
+1 unit of
+the amortized cost is retained as a credit
+by $x[n]$, which is the $x[j]$
+that has changed to 1.
+When the second subset is generated, the credit on
+$x[n]$ is used to pay for changing
+$x[n]$ to 0 in the
+while loop,
+1 unit of the amortized cost is used to pay
+for changing $x[n-1]$ to
+1, and the remaining
+1 unit of
+the amortized cost is retained as a credit
+by $x[n-1]$, which is the $x[j]$
+that has changed to 1.
+When the third subset is generated,
+1 unit of the amortized cost is used to pay
+for changing $x[n]$ to
+1, and the remaining
+1 unit of
+the amortized cost is retained as a credit
+by $x[n]$, which is the $x[j]$
+that has changed to 1.
+When the fourth subset is generated,
+the credit on
+$x[n]$ is used to pay for changing
+$x[n]$ to 0 in the
+while loop,
+the credit on
+$x[n-1]$ is used to pay for changing
+$x[n-1]$ to 0 in the
+while loop,
+1 unit of the amortized cost is used to pay
+for changing $x[n-2]$ to
+1, and the remaining
+1 unit of
+the amortized cost is retained as a credit
+by $x[n-2]$, which is the $x[j]$
+that has changed to 1.
+Continuing in this way, we see that each
+$x[j]$ that is 1 has a credit
+of 1 unit on it. This credit is used to pay
+the actual cost of changing this $x[j]$
+from 1 to
+0 in the while
+loop. One unit of the amortized cost of {\tt nextSubset}
+is used to pay for the actual cost of changing an
+$x[j]$ to 1 in the
+else clause, and the remaining
+one unit of the amortized cost is retained as a credit by this
+$x[j]$.
+
+The above accounting scheme ensures that the credit on each
+$x[j]$ that is 
+1 is exactly
+1, and the credit on each
+$x[j]$
+that is
+0 is
+0. 
+
+From the preceding
+discussion, it follows that
+$P(m) - P(0)$
+equals the number of
+$x[j]$s that are
+1. Since this number
+is always nonnegative,
+Equation~\ref{eqn:pot2} holds for all $m$.
+
+Having established that the amortized complexity of {\tt nextSubset}
+is $2 = O(1)$, we conclude that the complexity
+of generating the first $m$ subsets
+equals $m * \mbox{ amortized complexity } = O(m)$.
+\index{accounting method|)}\index{amortized complexity!accounting method|)}
+
+\subsubsection*{Potential Method}
+\index{potential method|(}\index{amortized complexity!potential method|(}
+We first postulate a potential function that satisfies Equation~\ref{eqn:pot2},
+and then use this function to
+obtain the amortized costs. Let $P(j)$
+be the potential just after the $j$th
+subset is generated.
+From the proof used above for the accounting method,
+we can see that we should define
+$P(j)$ to be equal to the number of $x[i]$s
+in the $j$th subset that are equal to
+1.
+
+By definition, the
+0th subset has all $x[i]$
+equal to 0. Since $P(0) = 0$ and
+$P(j) \geq 0$ for all $j$,
+this potential function $P$ satisfies Equation~\ref{eqn:pot2}.
+Consider any subset $x[1:n]$.
+Let $q$ be the number of 1s
+at the right end of $x[]$ (i.e., $x[n]$,
+$x[n-1]$, $\cdots$, $x[n-q+1]$, are all 1s).
+Assume that there is a next subset.
+When the next subset is generated,
+the potential change
+is $1-q$ because $q$ 1s are
+replaced by 0 in the while
+loop and a 0 is replaced by a 1
+in the else clause.
+The actual cost of generating the next subset is $q+1$.
+From Equation~\ref{eqn:pot}, it follows that, when there is a next subset,
+the amortized cost for {\tt nextSubset}
+is
+$$\mbox{actual cost } + \mbox{ potential change}
+= q + 1 + 1 - q
+= 2$$
+
+When there is no next subset,
+the potential change
+is $-q$
+and the actual cost of {\tt nextSubset} is $q$.
+From Equation~\ref{eqn:pot}, it follows that, when there is no next subset,
+the amortized cost for {\tt nextSubset}
+is
+$$\mbox{actual cost } + \mbox{ potential change}
+= q - q
+= 0$$
+Therefore, we can use 2 as the amortized complexity
+of {\tt nextSubset}. Consequently, the actual cost of
+generating the first $m$ subsets is
+$O(m)$.
+\index{potential method|)}\index{amortized complexity!potential method|)}
+\index{subset generation|)}
+\index{amortized complexity |)}\index{complexity!amortized|)}
+
+\section{Practical Complexities}
+We\index{complexity!practical|(} have seen that the time complexity of a program
+is generally some function of the problem
+size.  This function is very useful in
+determining how the time requirements vary as the
+problem size changes.  For example, the run time of an algorithm
+whose complexity is $\Theta(n^2)$ is expected to increase by a factor of 4
+when the problem size doubles and by a factor of 9 when the problem
+size triples.
+
+The complexity
+function also may be used to compare two algorithms $P$ and $Q$ that perform
+the same task.  Assume that algorithm $P$ has complexity
+$\Theta (n)$ and that algorithm $Q$ has complexity
+$\Theta ( n^2$).  We can assert that 
+algorithm $P$ is faster than algorithm $Q$
+for ``sufficiently large'' $n$.  To see the validity of this assertion,
+observe that the actual computing time of $P$ is bounded from above
+by $cn$ for some constant $c$ and for all $n$, $n$ $\geq$ $n_1$, while that of
+$Q$ is bounded from below by $dn^2$ for some constant $d$ and all $n$, $n$ $\geq$ $n_2$.
+Since $cn$ $\leq$ $dn^2$ for $n$ $\geq$ $c / d$, algorithm $P$ is faster
+than algorithm $Q$ whenever $n \geq \max\{
+n_1 ,  n_2 ,  c / d$\}.
+ 
+One should always be cautiously aware of the presence of the
+phrase {\it sufficiently large} in the assertion of the preceding
+discussion.  When
+deciding which of the two algorithms to use, we must know whether
+the $n$ we are dealing with is, in fact, sufficiently large.  If
+algorithm $P$ actually runs in $10^6 n$ milliseconds while algorithm $Q$
+runs in $n^ 2$ milliseconds
+and if we always have $n$ $\leq$ $10^6$,
+then algorithm $Q$ is the one to use.
+ 
+To get a feel for how the various functions grow with $n$,
+you should study Figures~\ref{fig2:10.16} and
+\ref{fig2:10.3} very closely.  These figures show that
+$2^n$ grows very rapidly with $n$.  In fact, if a algorithm needs
+$2^n$ steps for execution, then when $n$ = 40,
+the number of steps needed is approximately
+$1.1 * 10^{12}$.  On a computer performing 1,000,000,000 steps per second,
+this algorithm would require about 18.3 minutes.  If $n$ = 50, the same algorithm
+would run for about 13 days on this computer.  When
+$n$ = 60, about 310.56 years
+will be required to execute the algorithm, and when $n$ = 100, about $4 * 10^{13}$
+years will be needed.  We can conclude that the utility
+of algorithms with exponential complexity is limited to small $n$
+(typically $n$ $\leq$ 40).
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{|r ||r|| r r r r|}
+$\log n$ & $n$ & $n \log n$ & $n^2$ & $n^3$ & $2^n$\\ \hline
+0 & 1 & 0 & 1 & 1 & 2\\
+1 & 2 & 2 & 4 & 8 & 4\\
+2 & 4 & 8 & 16 & 64 & 16\\
+3 & 8 & 24 & 64 & 512 & 256\\
+4 & 16 & 64 & 256 & 4096 & 65,536\\
+5 & 32 & 160 & 1024 & 32,768 & 4,294,967,296\\ 
+\end{tabular}
+\end{center}
+\caption{Value of various functions
+\label{fig2:10.16}}
+\end{figure}
+
+\begin{figure}
+\centerline{\protect\psfig {file = analysis/f1.eps, height = 2.5in}}
+\caption{Plot of various functions
+\label{fig2:10.3}}
+\end{figure}
+
+ 
+Algorithms that have a complexity that is a high-degree polynomial
+are also of limited utility.  For example, if an algorithm needs
+$n^{10}$ steps, then our 1,000,000,000 steps
+per second computer needs 10 seconds when $n$ = 10; 3171 years
+when $n$ = 100; and $3.17 * 10^{13}$ years
+when $n$ = 1000.  If the algorithm's complexity had been
+$n^3$ steps instead, then the computer would need $1$ second
+when $n$ = 1000, 110.67 minutes when $n$ = 10,000,
+and 11.57 days when $n$ = 100,000.
+
+ 
+Figure~\ref{fig2:10.17} gives the time that a 1,000,000,000 instructions per second
+computer needs to execute an
+algorithm of complexity $f(n)$ instructions.  One
+should note that currently only the fastest computers can execute about
+1,000,000,000
+instructions per second.
+From a practical standpoint, it is evident that for reasonably large
+$n$ (say $n > 100$) only algorithms of small complexity (such as $n$, $n \log n$,
+$n^2$, and $n^3$) are feasible.  Further, this
+is the case even if we could build a computer capable of executing
+$10^{12}$ instructions per second.
+In this case the computing times of Figure~\ref{fig2:10.17} would decrease
+by a factor of 1000.  Now when $n$ = 100, it would take 3.17 years
+to execute $n^{10}$
+instructions and $4 * 10^{10}$ years to execute $2^n$ instructions.\index{complexity!practical|)}
+
+
+\begin{figure}
+\begin{center}
+\begin{tabular} {|r || r | r| r| r| r| r| r|}
+  & \multicolumn{7}{c|}{$f(n)$}\\ \hline
+$n$ & $n$ & $n \log_2 n$ & $n^2$ & $n^3$ & $n^4$ & $n^{10}$ & $2^n$ \\ \hline
+10 & .01 $\mu$s & .03 $\mu$s & .1 $\mu$s & 1 $\mu$s & 10 $\mu$s & 10 s & 1 $\mu$s \\
+20 & .02 $\mu$s & .09 $\mu$s & .4 $\mu$s & 8 $\mu$s & 160 $\mu$s & 2.84 h & 1 ms \\
+30 & .03 $\mu$s & .15 $\mu$s & .9 $\mu$s & 27 $\mu$s & 810 $\mu$s & 6.83 d & 1 s \\
+40 & .04 $\mu$s & .21 $\mu$s & 1.6 $\mu$s & 64 $\mu$s & 2.56 ms & 121 d & 18 m \\
+50 & .05 $\mu$s & .28 $\mu$s & 2.5 $\mu$s & 125 $\mu$s & 6.25 ms & 3.1 y & 13 d \\
+100 & .10 $\mu$s & .66 $\mu$s & 10 $\mu$s & 1 ms & 100 ms & 3171 y & $4 * 10^{13}$ y \\
+$10^3$ & 1 $\mu$s & 9.96 $\mu$s & 1 ms & 1 s & 16.67 m & $3.17 * 10^{13}$ y & $32 * 10^{283}$ y \\
+$10^4$ & 10 $\mu$s & 130 $\mu$s & 100 ms & 16.67 m & 115.7 d & $3.17 * 10^{23}$ y &     \\
+$10^5$ & 100 $\mu$s & 1.66 ms & 10 s & 11.57 d & 3171 y & $3.17 * 10^{33}$ y &     \\
+$10^6$ & 1 ms & 19.92 ms & 16.67 m & 31.71 y & $3.17 * 10^7$ y & $3.17 * 10^{43}$ y &     \\ 
+\end{tabular}
+\end{center}
+\centerline{
+$\mu$s = microsecond = $10^{-6}$ seconds; ms = milliseconds = $10^{-3}$ seconds
+}
+\centerline{
+s = seconds; m = minutes; h = hours; d = days; y = years
+}
+\caption{Run times on a 1,000,000,000 instructions per second computer
+\label{fig2:10.17}}
+\end{figure}
+
+
+\section*{Acknowledgement}
+This work was supported,
+in part, by the National Science Foundation under
+grant CCR-9912395.
+
+\begin{thebibliography}{99}
+\bibitem{cormen}
+T. Cormen, C. Leiserson,
+and R. Rivest,
+{\it Introduction to Algorithms},
+McGraw-Hill, New York, NY, 1992.
+
+\bibitem{henn}
+J. Hennessey
+and D. Patterson,
+{\it Computer  Organization and Design},
+Second Edition,
+Morgan Kaufmann Publishers, Inc., San Francisco, CA, 1998, Chapter 7.
+
+\bibitem{horo}
+E. Horowitz,
+S. Sahni, and S. Rajasekaran,
+{\it Fundamentals of Computer Algorithms},
+W. H. Freeman and Co., New York, NY, l998.
+
+\bibitem{rawl}
+G. Rawlins,
+{\it Compared to What: An Introduction to the Analysis of Algorithms},
+W. H. Freeman and Co., New York, NY, 1992.
+
+\bibitem{sahni}
+S. Sahni,
+{\it Data Structures, Algorithms, and Applications in Java},
+McGraw Hill, NY, 2000.
+\index{analysis of algorithms|)}\index{algorithms!analysis|)}
+
+\end{thebibliography}

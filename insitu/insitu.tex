@@ -1,0 +1,1251 @@
+\documentclass{elsart}
+%\usepackage[sort&compress,numbers]{natbib}
+%\usepackage{psfig}
+\usepackage{amsfonts}
+\usepackage[noend]{algorithmic}
+\usepackage{url}
+\usepackage{graphicx}
+%\usepackage{ipe}
+%\usepackage[colorlinks=true, pdfstartview=FitV, linkcolor=blue,
+%            citecolor=blue, urlcolor=blue]{hyperref}
+
+\newcommand{\email}[1]{\texttt{#1}}
+\input{pat.tex}
+
+\newcommand{\insitu}{\emph{in situ}}
+\newcommand{\inplace}{in-place}
+\newcommand{\Inplace}{In-place}
+\newcommand{\InPlace}{In-Place}
+\newcommand{\InSitu}{In-Situ}
+
+\newcommand{\rt}{\mathrm{right\_turn}}
+
+\comment{
+\title{\MakeUppercase{Space-Efficient Planar Convex Hull Algorithms}% 
+	\thanks{This research was partly funded by the National
+	Science Foundation, the Natural Sciences and Engineering
+	Research Council of Canada and the Danish Natural Science
+	Research Council under contract 9801749 (project Performance
+	Engineering).}}
+
+\author{Herv\'e Br\"onnimann%
+      \thanks{CIS, Polytechnic University, Six Metrotech, Brooklyn,
+      New York, 11201. \texttt{\{hbr,jiacono\}@poly.edu}} \and
+      John Iacono\footnotemark[2] \and
+      Jyrki Katajainen%
+      \thanks{Department of Computing, University of Copenhagen,
+      \email{jyrki@diku.dk}} \and
+      Pat Morin%
+      \thanks{School of Computer Science, Carleton University, 
+      1125 Colonel By Dr., Ottawa, Ontario, CANADA, K1S~5B6.
+      \email{\{morin,morrison\}@cs.carleton.ca}} \and
+      Jason Morrison\footnotemark[4] \and
+      Godfried Toussaint%
+      \thanks{School of Computer Science, McGill University,
+      \email{godfried@cgm.cs.mcgill.ca}}}
+}
+
+\date{}
+
+%\sloppy
+\begin{document}
+\begin{frontmatter}
+\title{Space-Efficient Planar Convex Hull Algorithms\thanksref{funding}} 
+\author{Herv\'e Br\"onnimann},
+\author{John Iacono},
+\address{CIS, Polytechnic University}
+\author{Jyrki Katajainen},
+\address{Department of Computing, University of Copenhagen}
+\author{Pat Morin\corauthref{pat}},
+\corauth[pat]{Corresponding author. Address: School of Computer
+Science, Carleton University, 1125 Colonel By Drive, Ottawa, Ontario,
+Canada, K1S~5B6}
+\ead{morin@cs.carleton.ca}
+\author{Jason Morrison},
+\address{School of Computer Science, Carleton University}
+\author{Godfried Toussaint}
+\address{School of Computer Science, McGill University}
+\thanks[funding]{This research was partly funded by the National
+	Science Foundation, the Natural Sciences and Engineering
+	Research Council of Canada and the Danish Natural Science
+	Research Council under contract 9801749 (project Performance
+	Engineering).}
+
+\begin{abstract}
+A space-efficient algorithm is one in which the output is given in the
+same location as the input and only a small amount of additional
+memory is used by the algorithm.  We describe four space-efficient
+algorithms for computing the convex hull of a planar point set.
+\comment{All three algorithms are optimal, some more so than
+others\ldots}
+\end{abstract}
+
+\begin{keyword}
+Computational geometry \sep convex hulls \sep \inplace \sep \insitu
+\end{keyword}
+
+\end{frontmatter}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+Let $S=\{S[0],\ldots,S[n-1]\}$ be a set of $n$ distinct points in the
+Euclidean plane.  The \emph{convex hull} of $S$ is the minimal convex
+region that contains every point of $S$.  From this definition, it
+follows that the convex hull of $S$ is a convex polygon whose vertices
+are points of $S$.  For convenience, we say that a point $p\in S$ is
+``on the convex hull of $S$'' if $p$ is a vertex of the convex hull of
+$S$.  The \emph{convex hull problem} is the problem of computing the
+convex hull of $S$ and reporting the points on the convex hull in the
+order in which they appear on the hull.
+
+As early as 1972, Graham \cite{g72} gave a convex hull algorithm with
+$O(n\log n)$ worst-case running time in which all branching is done
+based on the results of comparisons between quadratic polynomials.
+Shamos \cite{s78} later showed that, in any model of computation where
+sorting has an $\Omega(n\log n)$ lower bound, every convex hull
+algorithm must require $\Omega(n\log n)$ time for some inputs.
+Despite these matching upper and lower bounds, and probably because of
+the many applications of convex hulls, a number of other planar convex
+hull algorithms have been published since Graham's algorithm.  For a
+sample, see References
+\cite{a79,bs97,csy97,cs88,e77,j73,p79,ph77,ks86,w97}.
+
+Of particular note is the ``Ultimate(?)'' algorithm of
+\mbox{Kirkpatrick} and \mbox{Seidel} \cite{ks86} that computes the
+convex hull of a set of $n$ points in the plane in $O(n\log h)$ time,
+where $h$ is the number of vertices of the convex hull. (Later, the
+same result was obtained by Chan using a much simpler algorithm
+\cite{c96}.) The same authors show that, on algebraic decision trees
+of any fixed order, $\Omega(n\log h)$ is a lower bound for computing
+convex hulls of sets of $n$ points having convex hulls with $h$
+vertices.
+
+Because of the importance of planar convex hulls, it is natural to try
+and improve the running time and storage requirements of planar convex
+hull algorithms.  In this paper, we focus on reducing the intermediate
+storage used in the computation of planar convex hulls.  In
+particular, we describe \emph{\inplace}\ and \insitu\ algorithms for
+computing convex hulls.  These algorithms take the input points as an
+array and output the vertices of the convex hull in clockwise order,
+in the same array. During the execution of the algorithm, additional
+working storage is kept to a minimum. In the case of \inplace\
+algorithms, the extra storage is kept in $O(1)$ while \insitu\
+algorithms allow an extra memory of size $O(\log n)$.  After execution
+of the algorithm, the array contains exactly the same points, but in a
+different order.  For convenience, we use the general term
+\emph{space-efficient} to mean \inplace\ or \insitu.
+
+Space-efficient algorithms have several practical advantages over
+traditional algorithms.  Primarily, space-efficient algorithms allow
+for the processing of larger data sets.  Any algorithm that uses
+separate input and output arrays will, by necessity, require enough
+memory to store $2n$ points.  In contrast, a space-efficient algorithm
+needs only enough memory to store $n$ points plus $O(\log n)$ or
+$O(1)$ working space.  Related to this is the fact that
+space-efficient algorithms usually exhibit greater locality of
+reference, which makes them very practical for implementation on
+modern computer architectures with memory hierarchies.  A final
+advantage of space-efficient algorithms, especially in mission
+critical applications, is that they are less prone to failure since
+they do not require the allocation of large amounts of memory that may
+not be available at run time.
+
+We describe four space-efficient planar convex hull algorithms.  The
+first is \inplace, uses Graham's Scan in combination with an \inplace\
+sorting algorithm, and runs in $O(n\log n)$ time.  The second and
+third algorithms run in $O(n\log h)$ time, are \insitu\ and are based
+on algorithms of Chan \etal\ \cite{csy97} and Kirkpatrick and Seidel
+\cite{ks86}, respectively.  The fourth (``More Ultimate?'')  algorithm
+is based on an algorithm of Chan \cite{c96}, runs in $O(n\log h)$ time
+and is \inplace.  The first two algorithms are simple, implementable,
+and efficient in practice.  To justify this claim, we have implemented
+both algorithms and made the source code freely available \cite{m01}.
+
+To the best of our knowledge, this paper is the first to study the
+problem of computing convex hulls using space-efficient algorithms.
+This seems surprising, given the close relation between planar convex
+hulls and sorting, and the large body of literature on space-efficient
+sorting and merging algorithms
+\cite{d82,dg82,d87,dd88,f64,hl88,hl92,kp92,%
+kp99,kpt96,mu84,mrs90,ss87,sw84,s95,w64}.  The main reason for this is
+probably that the scan portion of Graham's original algorithm
+\cite{g72} is inherently in-place, so in-place sorting algorithms
+already provide an $O(n\log n)$ time in-place convex hull algorithm.
+\comment{Furthermore, even though our first algorithm is a fairly
+obvious modification of Graham's Scan, a survey of publicly available
+planar convex hull software shows that our implementations are the
+first \inplace\ and \insitu\ implementations of planar convex hull
+algorithms.\footnote{O'Rourke's implementation of Graham's Scan
+\cite{o93} uses the same array for input and output, but overwrites
+some of the elements in the array so that the array no longer contains
+all of the original input elements.}}
+
+The remainder of the paper is organized as follows: In
+Sections~\ref{sec:graham}, \ref{sec:chan-1} and \ref{sec:chan-2} the
+four algorithms are described, and in \secref{conclusions} the results
+are summarized and some open problems are presented.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{An $O(n\log n)$ Time Algorithm}\seclabel{graham}
+
+In this section, we present a simple \inplace\ implementation of
+Graham's convex hull algorithm \cite{g72} or, more precisely, Andrew's
+modification of Graham's algorithm \cite{a79}.  The algorithm requires
+the use of an \inplace\ sorting algorithm.  This can be any efficient
+\inplace\ sorting algorithm (see, e.g., \cite{kpt96,w64}), so we refer
+to this algorithm simply as \textsc{InPlace-Sort}.
+
+Because this is probably the most practically relevant algorithm given
+in this paper, we begin by describing the most conceptually simple
+version of the algorithm, and then describe a slightly more involved
+version that improves the constants in the running time.
+
+%=======================================================================
+\subsection{The Basic Algorithm}
+
+Let $S$ be a set of $n>1$ points and Let $l$ be the line through the
+bottommost-leftmost point of $S$ and the topmost-rightmost point of
+$S$.  The \emph{upper convex hull} of $S$ is the convex hull of all
+points in $S$ that are above, or on, $l$ and the lower convex hull of
+$S$ is the convex hull of all points of $S$ that are below, or on,
+$l$.  It is well-known that the convex hull of a point set is the
+union of its upper and lower convex hulls (cf. \cite{ps85}).
+
+Graham's Scan computes the upper (or lower) convex hull of an
+$x$-monotone chain incrementally, storing the partially computed hull
+on a stack.  The addition of each new point involves removing zero or
+more points from the top of the stack and then pushing the new point
+onto the top of the stack.
+
+The following pseudo-code uses the \textsc{InPlace-Sort} algorithm and
+Graham's Scan to compute the upper or lower hull of the point set $S$.
+The parameter $d$ is used to determine whether the upper or lower hull
+is being computed.  If $d=1$, then \textsc{InPlace-Sort} sorts the points
+by increasing order of lexicographic $(x,y)$-values and the upper hull
+is computed.  If $d=-1$, then \textsc{InPlace-Sort} sorts the points by
+decreasing order and the lower hull is computed.  The value of $h$
+corresponds to the number of elements on the stack.
+
+In the following, and in all remaining pseudo-code,
+$S=S[0],\ldots,S[n-1]$ is an array containing the input points.
+
+\vspace{1ex}
+\noindent\begin{minipage}{\textwidth}
+\textsc{Graham-InPlace-Scan}$(S, n, d)$
+\begin{algorithmic}[1]
+\STATE{\textsc{InPlace-Sort}$(S, n, d)$}
+\STATE{$h\gets 1$}
+\FOR{$i\gets 1\ldots n-1$}
+  \WHILE{$h\ge 2$ \textbf{and} \textbf{not} $\rt(S[h-2], S[h-1], S[i])$}
+     \STATE{$h\gets h-1$ \COMMENT{ pop top element from the stack }}
+  \ENDWHILE
+  \STATE{\textbf{swap} $S[i]\leftrightarrow S[h]$}
+  \STATE{$h\gets h+1$}
+\ENDFOR
+\STATE{\textbf{return} $h$}
+\end{algorithmic}
+\end{minipage}
+\vspace{1ex}
+
+It is not hard to verify that when the algorithm returns in Line~8,
+the elements of $S$ that appear on the upper (or lower) convex hull
+are stored in $S[0],\ldots,S[h-1]$.  In the case of an upper hull
+computation ($d=1$), the hull vertices are sorted left-to-right
+(clockwise), while in the case of a lower hull computation ($d=-1$),
+the hull vertices are sorted right-to-left (also clockwise).
+
+To compute the convex hull of the point set $S$, we proceed as follows
+(refer to \figref{graham}): First we make a call to
+\textsc{Graham-InPlace-Scan} to compute the vertices of the upper hull
+of $S$ and store them in clockwise order at positions
+$S[0],\ldots,S[h-1]$.  It follows that $S[0]$ is the
+bottommost-leftmost point of $S$ and that $S[h-1]$ is the
+topmost-rightmost point of $S$.  We then use $h-1$ swaps to bring
+$S[0]$ to position $S[h-1]$ while keeping the relative ordering of
+$S[1],\ldots S[h-1]$ unchanged.  Finally, we make a call to
+\textsc{Graham-InPlace-Scan} to compute the lower convex hull of
+$S[h-2],\ldots,S[n-1]$ (which is also the lower convex hull of $S$).
+This stores the vertices of the lower convex hull in
+$S[h-2],\ldots,S[h+h'-2]$ in clockwise order.  The end result is that
+the convex hull of $S$ is stored in $S[0],\ldots,S[h+h'-2]$ in
+clockwise order.
+
+\newcommand{\fillit}{\raisebox{-.1cm}{\rule{0mm}{.45cm}}}
+
+\begin{figure}
+\begin{center}
+$\begin{array}{c}
+   \underbrace{\framebox[4in]{\fillit $A$}} \\
+   \mbox{compute upper hull}
+\end{array}$
+
+\vspace{2ex}
+
+\comment{
+$\begin{array}{c@{}c}
+   \underbrace{\framebox[2in]{\fillit $S[0],\ldots,S[n_u-1]$}}
+	& {\framebox[2in]{\fillit $S[n_u],\ldots,S[n-1]$}} \\
+   \mbox{compute upper hull} & 
+\end{array}$
+
+\vspace{2ex}
+}
+
+$\begin{array}{c@{}c@{}c@{}c@{}c}
+   \underbrace{\framebox[.15in]{\fillit $a$}
+	\framebox[1.2in]{\fillit $S[1],\ldots,S[h-2]$}
+	\framebox[.15in]{\fillit $b$}}
+	& {\framebox[2.5in]{\fillit $S[h],\ldots,S[n-1]$}} \\
+   \mbox{move $a$} & 
+\end{array}$
+
+\vspace{2ex}
+
+$\begin{array}{c@{}c@{}c@{}c}
+   \framebox[1.2in]{\fillit} 
+      & \underbrace{\framebox[.15in]{\fillit $b$}
+      \framebox[.15in]{\fillit $a$}
+	\framebox[2.5in]{\fillit $S[h],\ldots,S[n-1]$}} \\
+   	& \mbox{compute lower hull} \\
+\end{array}$
+
+\vspace{2ex}
+
+$\begin{array}{c@{}c@{}c@{}c}
+   \underbrace{\framebox[2.5in]{\fillit $S[0],\ldots,S[h+h'-2]$}} 
+	& \framebox[1.5in]{\fillit} \\
+	\mbox{output hull}
+\end{array}$
+
+\end{center}
+\caption{The execution of the \textsc{Graham-InPlace-Hull} algorithm.}
+\figlabel{graham}
+\end{figure}
+
+The following pseudo-code gives a more precise description of the
+algorithm.  We use the C pointer notation $S+i$ to denote (the
+starting position of) the of array $S[i],\ldots,S[n-1]$.
+
+\vspace{1ex}
+\noindent\begin{minipage}{\textwidth}
+\textsc{Graham-InPlace-Hull}$(S, n)$
+\begin{algorithmic}[1]
+\STATE{$h\gets\textsc{Graham-InPlace-Scan}(S,n,1)$}
+\FOR{$i\gets 0\ldots h-2$}
+  \STATE{\textbf{swap} $S[i]\leftrightarrow S[i+1]$}
+\ENDFOR
+\STATE{$h'\gets\textsc{Graham-InPlace-Scan}(S+h-2,n-h+2, -1)$}
+\STATE{\textbf{return} $h+h'-2$}
+\end{algorithmic}
+\end{minipage}
+\vspace{1ex}
+
+Each call to \textsc{Graham-InPlace-Scan} executes in $O(n\log n)$
+time, and the loop in lines~2--3 takes $O(h)$ time.  Therefore, the
+total running time of the algorithm is $O(n\log n)$.  The amount of
+extra storage used by \textsc{InPlace-Sort} is $O(1)$, as is the storage
+used by both our procedures.
+
+\begin{thm}
+Algorithm \textsc{Graham-InPlace-Hull} computes the convex hull of a
+set of $n$ points in $O(n\log n)$ time using $O(1)$ additional memory.
+\end{thm}
+
+The algorithm of \secref{chan-2} makes use of
+\textsc{Graham-InPlace-Scan}. However, the algorithm requires that the
+resulting convex hull be stored in clockwise order beginning with the
+leftmost vertex.  We note that this output format can easily be
+achieved in an $O(n)$ time postprocessing step.
+
+
+%=======================================================================
+\subsection{The Optimized Algorithm}
+
+The constants in the running time of \textsc{Graham-InPlace-Hull} can
+be improved by first finding the extreme points $a$ and $b$ and using
+these points to partition the array into two parts, one that contains
+vertices that can only appear on the upper hull and one that contains
+vertices that can only appear on the lower hull.  \figref{graham-2}
+gives a graphical description of this.  In this way, each point
+(except $a$ and $b$) takes part in only one call to
+\textsc{Graham-InPlace-Scan}.
+
+To further reduce the constants in the algorithm, one can implement
+\textsc{InPlace-Sort} with the \inplace\ merge-sort algorithm of
+Katajainen \etal\ \cite{kpt96}.  This algorithm requires only $n\log_2
+n+O(n)$ comparisons and $\frac{3}{2}n\log_2 n+O(n)$ swaps to sort $n$
+elements.  Since Graham's Scan performs only $2n-h$ right-turn tests
+when computing the upper hull of $n$ points having $h$ points on the
+upper hull, the resulting algorithm performs at most $3n-h$ right-turn
+tests (the extra $n$ comes from the initial partitioning step).  We
+call this algorithm \textsc{Opt-Graham-InPlace-Hull}.
+
+\begin{figure}
+\begin{center}
+$\begin{array}{c}
+   \underbrace{\framebox[4in]{\fillit $A$}} \\
+   \mbox{partition}
+\end{array}$
+
+\vspace{2ex}
+
+$\begin{array}{c@{}c}
+   \underbrace{\framebox[2in]{\fillit upper hull candidates}} &
+      \framebox[2in]{\fillit lower hull candidates} \\
+   \mbox{compute upper hull}
+\end{array}$
+
+\vspace{2ex}
+
+$\begin{array}{c@{}c}
+   \underbrace{\framebox[.15in]{\fillit $a$}
+	\framebox[1.2in]{\fillit upper hull}\framebox[.15in]{\fillit $b$}} &
+      \underbrace{\framebox[.5in]{\fillit}
+	\framebox[2in]{\fillit lower hull candidates}} \\
+   \mbox{move $a$} & \mbox{shift}
+\end{array}$
+
+\vspace{2ex}
+
+$\begin{array}{c@{}c@{}c}
+	\framebox[1.2in]{\fillit upper hull}
+	& \underbrace{\framebox[.15in]{\fillit $b$}
+	  \framebox[.15in]{\fillit $a$}
+      \framebox[2in]{\fillit lower hull candidates}} & 
+	\framebox[.5in]{\fillit} \\
+         & \mbox{compute lower hull} 
+\end{array}$
+
+\vspace{2ex}
+
+$\begin{array}{c@{}c@{}c}
+	\underbrace{\framebox[2.5in]{\fillit convex hull}}
+	& \framebox[1.5in]{\fillit } \\
+	\mbox{output hull}
+
+\end{array}$
+
+\end{center}
+\caption{A faster implementation of \textsc{Graham-InPlace-Hull}.}
+\figlabel{graham-2}
+\end{figure}
+
+\begin{thm}
+\textsc{Opt-Graham-InPlace-Hull} computes the convex hull of $n$
+points in $O(n\log n)$ time using at most $3n-h$ right turn tests,
+$\frac{3}{2}n\log_2 n+O(n)$ swaps, $n\log_2 n+O(n)$ lexicographic
+comparisons and $O(1)$ additional memory, where $h$ is the number of
+vertices of the convex hull.
+\end{thm}
+
+Finally, we note that if the array $A$ is already sorted in
+lexicographic order then no lexicographic comparisons are necessary.
+One can use an \inplace\ stable partitioning algorithm to partition
+$A$ into the set of upper hull candidates and the set of lower hull
+candidates while preserving the sorted order within each set.  There
+exists such a stable partitioning algorithm that runs in $O(n)$ time
+and performs $O(n)$ comparisons \cite{kp92}.  (In this context, each
+comparison is actually a right turn test.) Since the algorithm is
+stable, the original sorted order of the input is preserved and no
+additional sorting step is necessary.  We call the resulting algorithm
+\textsc{Sorted-Graham-InPlace-Hull}.
+
+\begin{thm}
+\textsc{Sorted-Graham-InPlace-Hull} computes the convex hull of $n$
+points given in lexicographic order in $O(n)$ time using $O(n)$ right
+turn tests, $O(n)$ swaps, no lexicographic comparisons and $O(1)$
+additional memory.
+\end{thm}
+
+A final option for an in-place implementation of Graham's Scan is to
+sort the points in $S$ radially about some point $p$ in the interior
+of the convex hull.  Once this is done, one call to
+\textsc{Graham-InPlace-Scan} will compute the entire convex hull.
+Unfortunately, this method uses $O(n\log n)$ right turn tests during
+the sorting step, so it will likely be slower than methods that use
+only $O(n)$ right turn tests.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Two $O(n\log h)$ Time \InSitu\ Algorithms}\seclabel{chan-1}
+
+In this section, we show how to compute the upper (and symmetrically,
+lower) hull of $S$ in $O(n\log h)$ time \insitu, where $h$ is the
+number of points of $S$ that are on the upper (respectively, lower)
+hull of $S$. We discuss two algorithms, due to Kirkpatrick and
+Seidel~\cite{ks86}, and Chan, Snoeyink and Yap~\cite{csy97}. Both
+algorithms are recursive and partition the problem into two roughly
+equal-sized subproblems. They use different strategies for this
+purpose, however.
+
+%=====================================================================
+\subsection{Chan, Snoeyink and Yap's Algorithm}\seclabel{csy}
+
+We first show how to transform the $O(n\log h)$ time algorithm of Chan
+\etal~\cite{csy97} into an \insitu\ algorithm.  The algorithm begins
+by arbitrarily grouping the elements of $S$ into $\lfloor n/2\rfloor$
+pairs.  From these pairs, the pair with median slope $s$ is found
+using a linear-time median-finding algorithm.\footnote{Bhattacharya
+and Sen \cite{bs97} and Wenger \cite{w97} have both noted that
+median-finding can be replaced by choosing a random pair of elements.
+The expected running time of the resulting algorithm is $O(n\log h)$.}
+We then find a point $p\in S$ such that the line through $p$ with
+slope $s$ has all points of $S$ below it.  Naturally, $p$ is a vertex
+of the convex hull of $S$.
+
+Let $q.x$ denote the $x$ coordinate of the point $q$ and let $\pi(i)$
+denote the index of the element that is paired with $S[i]$.  We use
+the notation $(a,b)$ to denote the line segment with endpoints $a$ and
+$b$.  We now
+use $p$, and our grouping to partition the elements of $S$ into three
+groups $S^0$, $S^1$, and $S^2$ as follows (see \figref{chan}):
+\[
+S[i] \in \left\{ \begin{array}{ll}
+   S^0 & \mbox{if $S[i].x \le p.x$ and $(S[\pi(i)], p)$ is not above $S[i]$,} \\
+   S^1 & \mbox{if $S[i].x > p.x$ and $(S[\pi(i)], p)$ is not above $S[i]$, and} \\
+   S^2 & \mbox{otherwise.} \end{array}\right.
+\]
+The algorithm then recursively computes the upper hull of
+$S^0\cup\{p\}$ and $S^1\cup\{p\}$ and outputs the concatenation of the
+two.  For a discussion of correctness and a proof that this algorithm
+runs in $O(n\log h)$ time, see the original paper \cite{csy97}.
+
+\begin{figure}
+\begin{center}\begin{tabular}{c@{\hspace{2cm}}c}
+\includegraphics{chan-d} & \includegraphics{chan-c} \\
+$S[i]\in S^0$ & $S[i]\in S^1$ \\[1cm]
+\includegraphics{chan-a} & \includegraphics{chan-b} \\
+$S[i]\in S^2$ & $S[i]\in S^2$
+\end{tabular}\end{center}
+\caption{Partitioning $S$ into $S^0$, $S^1$ and $S^2$.}
+\figlabel{chan}
+\end{figure}
+
+Now we turn to the problem of making this an \insitu\ algorithm.  The
+choice of median slope $s$ ensures that $S^0\le 3n/4$ and $S^1\le
+3n/4$, so the algorithm uses only $O(\log n)$ levels of recursion.
+Our strategy is to implement each level using $O(1)$ local variables.
+
+For simplicity, assume $n$ is odd. The case when $n$ is even is easily
+handled by processing an extra unpaired element after all the paired
+elements have been processed.  To pair off elements, we pair
+consecutive elements of $S$, so that $\pi(i)=i+1$ if $i$ is even or
+$\pi(i)=i-1$ if $i$ is odd.  Several \insitu\ (even \inplace) linear
+time median-finding algorithms exist (see, e.g., \mbox{Horowitz}
+\etal\ \cite[Section~3.6]{hsr97} or Lai and Wood \cite{lw88}) that can
+be used to find the pair $(S[i],S[i+1])$ with median slope.
+
+The tricky part of the implementation is the partitioning of $S$ into
+sets $S^0$, $S^1$ and $S^2$.\footnote{This is a slight variant of
+Feijen's \emph{Dutch National Flag} problem (see Dijkstra \cite{d76})
+in which the input array consists of red, white and blue points and
+the goal is to rearrange the input so that all the red points appear
+first, followed by all white points, followed by all blue points.}
+The difficulty lies in the fact that the elements are grouped into
+pairs, but the two elements of the same pair may belong to different
+sets $S^i$ and $S^j$.  To do this partitioning, we process the pairs
+from left-to-right and maintain the sets $S^0$, $S^1$ and $S^2$ in the
+leftmost part of the array (see \figref{left-pack}).  More precisely,
+we maintain three indices $i_0$, $i_1$ and $i_2$, where $i_j-1$ is the
+index of the last element in $S^j$.  In this way, $i_2$ is the index
+of the first element in the next unprocessed pair.  At each step, we
+examine the next unprocessed pair, classify each of the two points as
+belonging to $S^0$, $S^1$ or $S^2$ and add them to the appropriate
+sets.  While adding the points to these sets, we may have to shift
+each of the $S_i$ by up to two locations.  However, we are not
+required to preserve the order within each set $S^i$, so this shifting
+is easily done in $O(1)$ time by moving at most two of the leftmost
+elements in each set.
+
+\begin{figure}
+\begin{center}
+\vspace{2ex}
+$\begin{array}{c@{}c@{}c@{}c}
+      \framebox[.5in]{\fillit $S^0$} &
+      \framebox[.5in]{\fillit $S^1$} &
+      \framebox[.5in]{\fillit $S^2$} &
+      \framebox[2.5in]{\fillit unprocessed pairs} \\
+      &\multicolumn{1}{l}{i_0} & \multicolumn{1}{l}{i_1} & 
+      \multicolumn{1}{l}{i_2} 
+\end{array}$
+\end{center}
+\caption{Paritioning into sets $S^0$, $S^1$ and $S^2$.}
+\figlabel{left-pack}
+\end{figure}
+
+\comment{
+\newcommand{\floor}[1]{\lfloor #1 \rfloor}
+\newcommand{\eof}{\phi}
+
+First note that we can compute the sizes $n_0$, $n_1$ and $n_2$ of
+these sets in linear time without difficulty by scanning $S$.
+Conceptually, we partition $S$ into three \emph{files}, $f_0$, $f_1$
+and $f_2$ that contain pairs of points in $S$.  The file $f_0$
+contains the elements $S[0],\ldots,S[2\floor{n_0/2}-1]$.  The file
+$f_1$ contains the elements
+$S[2\floor{n_0/2}],\ldots,S[2\floor{(n_0+n_1)/2}-1]$.  The file $f_2$
+contains the elements $S[2\floor{(n_0+n_1)/2}],\ldots,S[n]$.
+
+It is important to note that these files are only abstractions.  Each
+file $f_i$ is implemented using two integer values $r_i$ and $\eof_i$.
+The value of $r_i$ is initialized to the index of the first record in
+the file.  The value of $\eof_i$ is initialized to $r_i+k_i$ where
+$k_i$ is the number of elements in $f_i$.  A \textsc{Read} operation
+on $f_i$ returns the pair $(S[r_i],S[r_{i+1}])$ and increases the
+value of $r_i$ by 2.  We say that $f_i$ is \emph{empty} if
+$r_i\ge\eof_i$.
+
+These files are used in conjunction with a stack $A$ that stores pairs
+of points.  The stack and files serve two purposes: (1)~when there is
+no data on the stack we read a pair from one of the files and store it
+on the stack, and (2)~when we are about to overwrite an element from a
+pair that has not yet been placed on the stack, we read the pair from
+the file and save it on the stack.  In this way no element is ever
+overwritten without first being saved on the stack, and the initial
+pairing of elements is preserved.
+
+These ideas are made more concrete by the following pseudo-code, which
+places the elements of $S^0$ into array locations
+$S[0],\ldots,S[n_0-1]$, the elements of $S^1$ into array locations
+$S[n_0],\ldots,S[n_0+n_1-1]$, and the elements of $S^2$ into array
+locations $S[n_0+n_1],\ldots,S[n-1]$.  The algorithm repeatedly
+processes pairs $(a,b)$ of elements by determining which of the three
+sets $a$ and $b$ belong to and then placing $a$ and $b$ in their
+correct locations.
+
+\vspace{1ex}\noindent
+\begin{minipage}{\textwidth}
+\textsc{CSY-Partition}$(S,n,n_0,n_1)$
+\begin{algorithmic}[1]
+\STATE{$i_0\gets 0$}
+\STATE{$i_1\gets n_0$}
+\STATE{$i_2\gets n_0+n_1$}
+\STATE{$m\gets 0$}
+\WHILE{$m> 0$ \textbf{or} one of $f_0$, $f_1$, $f_2$ is not empty}
+  \IF{$m = 0$}
+    \STATE{$A[m]\gets\textsc{ReadFromFile}()$}
+    \STATE{$m\gets m+1$}
+  \ENDIF
+  \STATE{$m\gets m-1$}
+  \STATE{$P\gets A[m]$ \COMMENT{ process this pair }}
+  \FOR{both $q\in P$}
+    \STATE{$S^j\gets \textsc{Group}(q,P)$}
+    \STATE{$\textsc{Place}(q, i_j)$}
+    \STATE{$i_j\gets i_j+1$}
+  \ENDFOR
+\ENDWHILE 
+\end{algorithmic}
+\end{minipage}
+\vspace{1ex}
+
+The \textsc{ReadFromFile} function simply reads a pair from one of the
+non-empty files and returns it.  The $\textsc{Group}(q,P)$ returns (a
+pointer to) the group of point $q$ in the pair $P$.  The
+$\textsc{Place}(q,k)$ function places the point $q$ at index $k$ in
+$S$, after ensuring that the overwritten element has been read and
+placed on the stack.
+
+\vspace{1ex}\noindent
+\begin{minipage}{\textwidth}
+$\textsc{Place}(q, k)$
+\begin{algorithmic}[1]
+\FOR{$i\gets 0,1,2$}
+  \IF{$k\ge r_i$ \textbf{and} $k < \eof_i$}
+     \STATE{\COMMENT{ $S[k]$ belongs to $f_i$ and has not yet been read }}
+     \STATE{$\textsc{Read}(a,b)$ from $f_i$}
+     \STATE{$A[m]\gets (a,b)$}
+     \STATE{$m\gets m+1$}
+  \ENDIF
+\ENDFOR
+\STATE{$S[k]\gets q$}
+\end{algorithmic}
+\end{minipage}
+\vspace{1ex}
+
+To show that this partitioning step is correct, we make two
+observations.  (1)~Exactly $n/2$ pairs of elements are read and
+processed since the file abstraction ensures that no pair is read
+more than once and the algorithm does not terminate until all files
+are empty.  (2)~The code in \textsc{Place} ensures that any pair is
+read and placed on the stack $A$ before an element of the pair is
+overwritten.  Therefore, all of the original $n/2$ pairs of elements
+are processed and each element is placed into one of $S^0$, $S^1$ or
+$S^2$.
+
+Since the algorithm uses a stack $A$ that may grow without bound, it
+is not obvious that the partitioning algorithm's additional memory is
+of a constant size.  To prove that $A$ does not grow without bound
+note that overwriting $k_i$ elements of $f_i$ causes at most $\lceil
+k_i/2\rceil$ read operations.  Each iteration of the outer loop places
+one pair of elements, and each read operation reads one pair of
+elements.  Therefore, the total number of read operations performed
+after $k$ iterations is at most $k+3$.  However, each iteration
+removes 1 pair of elements from the stack $A$, so the total number of
+pairs on the stack after $k$ iterations is not more than 3.  Since
+this holds for any value of $k$, the stack $A$ never holds more than 3
+pairs of elements.
+}
+
+\figref{chan-1} recaps the algorithm for computing the upper hull of
+$S$.  First the algorithm partitions $S$ into the sets $S^0$, $S^1$
+and $S^2$.  It then recurses on the set $S^0$.  After the recursive
+call, the convex hull of $S^0$ is stored at the beginning of the array
+$S$, and the last element of this hull is the point $p$ that was used
+for partitioning.  The algorithm then shifts $S^1$ leftward so that it
+is adjacent to $p$ and recurses on $S^1\cup\{p\}$.  The end result is
+the upper hull of $S$ being stored consecutively and in clockwise
+order at the beginning of the array $S$.  Using the technique from
+\secref{graham} (Figures~\ref{fig:graham} and \ref{fig:graham-2}),
+this upper hull algorithm can be made into a convex hull algorithm
+with the same running time and memory requirements.
+
+\begin{figure}
+\begin{center}
+$\begin{array}{c}
+   \underbrace{\framebox[4in]{\fillit $A$}} \\
+   \mbox{partition}
+\end{array}$
+
+\vspace{2ex}
+
+$\begin{array}{c@{}c@{}c}
+   \underbrace{\framebox[1.5in]{\fillit $S^0$}} & 
+   \framebox[1.5in]{\fillit $S^1$} 
+   \framebox[1in]{\fillit $S^2$} \\
+   \mbox{recurse}
+\end{array}$
+
+\vspace{2ex}
+
+$\begin{array}{c@{}c@{}c}
+   \framebox[1in]{\fillit $\mathrm{UH}(S^0)$} &
+   \underbrace{\framebox[.5in]{\fillit}
+   \framebox[1.5in]{\fillit $S^1$}} & 
+   \framebox[1in]{\fillit $S^2$} \\
+   & \mbox{compact}
+\end{array}$
+
+\vspace{2ex}
+
+$\begin{array}{c@{}c@{}c}
+   \framebox[.85in]{\fillit} &
+   \underbrace{\framebox[.15in]{\fillit $p$}
+   \framebox[1.5in]{\fillit $S^1$}} & 
+   \framebox[.5in]{\fillit}
+   \framebox[1in]{\fillit $S^2$} \\
+   & \mbox{recurse}
+\end{array}$
+
+\vspace{2ex}
+
+$\begin{array}{c@{}c@{}c}
+   \underbrace{\framebox[2.2in]{\fillit $\mathrm{UH}(S)$}} &
+   \framebox[1.8in]{\fillit} \\ 
+   \mbox{output hull}
+\end{array}$
+\end{center}
+\caption{Overview of the \textsc{CSY-InSitu-Hull} algorithm.}
+\figlabel{chan-1}
+\end{figure}
+
+
+\begin{thm}
+Algorithm \textsc{CSY-InSitu-Hull} computes the convex hull of $n$
+points in $O(n\log h)$ time using $O(\log n)$ additional storage,
+where $h$ is the number of vertices of the convex hull.
+\end{thm}
+
+
+%======================================================================
+\subsection{Kirkpatrick and Seidel's Algorithm}
+
+The previous algorithm solves the partitioning problem by finding a
+point $p$ on the convex hull that leaves roughly the same number of
+vertices on each side.  Kirkpatrick and Seidel's original solution to
+the partitioning problem is to first find an \emph{edge} of the upper
+hull (the \emph{upper bridge}) that leaves approximately the same
+number of points on each side.
+
+Suppose that we can find such an edge $pq$ with $p.x < q.x$, such that
+$S^0$ consists of the points left of $p$, $S^1$ the points right of
+$q$, and $S^2$ the points below $pq$, and furthermore such that
+$|S^0|\leq n/2$ and $|S^1|\leq n/2$.  The algorithm recursively
+computes the upper hulls of $S^0\cup\{p\}$ and $S^1\cup\{q\}$, and
+outputs the concatenation of the two, in $O(n\log h)$ total
+time. Clearly, if $pq$ is an edge of the convex hull, the result is
+the upper hull of $S$. For a proof of the running time, see the
+original paper~\cite{ks86}.
+
+Unlike the previous algorithm, partitioning $S$ \inplace\ into $S^0$,
+$S^1$ and $S^2$ once $p$ and $q$ are known is trivial, since it is not
+necessary to maintain a pairing of the edges.  Furthermore, since
+$|S^0|\leq n/2$ and $|S^1|\leq n/2$, there are $O(\log n)$ levels of
+recursion.  Therefore, if we can find the upper bridge in linear time
+\inplace, the algorithm will thus be performed \insitu.
+
+The \textbf{upper bridge} problem asks: \emph{Given two sets $S^0$ and
+$S^1$ of points separated by a vertical line $y=x_0$, which are the
+two endpoints $p\in S^0$ and $q\in S^1$ such that the edge $pq$ is on
+the upper hull of $S^0\cup S^1$?} This problem is dual to the
+\textbf{separated 2D linear programming} problem which can be phrased
+as: \emph{Given two sets $L^0$ and $L^1$ of lines with positive and
+negative slopes respectively, compute the point with smallest
+$y$-coordinate that is above all the lines.}  This linear program is
+always feasible and the solution is always the intersection of a pair
+of lines, one with positive slope and one with negative slope.
+
+\newcommand{\dual}{\varphi}
+
+Denoting the point of coordinates $x$ and $y$ by $[x,y]$, and the line
+of equation $ax+by+c=0$ by $[a,b,c]$, the duality given by
+$\dual([x,y])=[x_0-x,-1,y-x_0(x_0-x)]$ and
+$\dual([a,b,c])=(x_0+\frac{a}{b},-\frac{c+ax_0}{b})$ has the property
+that if $p$ is below $l$, then $\dual(l)$ is above $\dual(p)$.
+Moreover, $p$ is to the left (resp.\ right) of $y=x_0$ if and only if
+$\dual(p)$ has positive (resp.\ negative) slope.  In turn, this
+implies that the solution to the separated 2D linear programming
+problem given by $L=\dual(S)$ is dual to the solution of the upper
+bridge problem. This is the intuition behind the original
+algorithm~\cite{ks86}.
+
+Note that the duality does not really have to be computed: the 2D
+linear programming problem can be solved directly with the points of
+$S$, only the geometric predicates involving the points are
+transformed into predicates on lines via the transformation $\dual$.
+Thus if we can solve 2D linear programming \inplace, we can also
+answer the upper bridge problem in-place.
+
+As in the original algorithm, we first compute the median abscissa
+$x_0$ of $S$ \inplace\ and partition $S$ into two roughly equal-sized
+subsets around $x_0$.  This enforces that $|S^0|\leq n/2$ and
+$|S^1|\leq n/2$.
+
+There is an algorithm due to Seidel~\cite{s91} which solves the 2D
+linear programming problem in expected linear time and is very
+simple. It assumes that the order of the lines is random (we could
+always enforce this by shuffling the set $S$ randomly in linear time
+prior to each linear programming query). Upon close examination, the
+algorithm does not need to reorder the input and in fact works
+\inplace, maintaining only two indices to scan both sets of lines, and
+two indices to remember the two lines making up the current optimal
+solution.
+
+Megiddo~\cite{m84} gave a worst-case linear-time algorithm. We adapt
+this algorithm to run \inplace, and explain it for lines in the dual
+setting.  Megiddo's algorithm assumes that there are at least 8 lines,
+otherwise a brute force method can be used. The lines in $L$ are
+paired up and ordered by slope within each pair: in the in-place
+implementation, $L[i]$ is paired with $L[\pi(i)]$.  Using an \inplace\
+median-finding algorithm \cite{lw88}, the pair whose point of
+intersection has median abscissa $x_0$ can be found in linear time
+(and those pairs intersecting to the left of $x_0$ are placed in the
+first half, while the pairs intersecting to the right of $x_0$ in the
+second half).  We only have to take care that when exchanging two
+pairs, each line in the first pair is exchanged with the corresponding
+line in the second pair.  Next, the line $l\in L$ that intersects the
+vertical line $x=x_0$ at the highest ordinate is found.  Recall that
+the solution to the linear programming problem is the lowest point
+which is above all lines.  Therefore, if the slope of $l$ is negative,
+then the solution to the linear programming problem is to the right of
+$x_0$, otherwise the solution is to the left of $x_0$.
+
+In the first case, we scan the pairs in the first half: the line of
+smallest slope in each pair of the first half can be discarded since
+to the right of $x_0$ it is always below its paired line and hence
+cannot define the solution. In the second case, the line of largest
+slope in each pair of the second half can be discarded.  Discarded
+lines can be put at the end of the array by swapping with the last as
+yet undiscarded line. This works in the second case as well if the
+pairs in the second half are examined in the \emph{reverse order}
+(beginning at the end and moving towards the middle of the array)
+since the discarded zone grows twice as slowly as the lines in the
+examined pairs.
+
+The choice of medians ensure that $n/4$ lines have been discarded in
+any case.  At the end of this process, we are left with a set $L'$ of
+at most $\lceil 3n/4 \rceil$ lines, such that the solution to the
+original problem is defined by two of these lines.  Care must be taken
+to include the last line in the $3n/4$ if the original number of lines
+was odd.  Hence, the solution of the linear programming problem on
+$L'$ is the same as that of $L$. The algorithm is run again on $L'$
+instead of $L$, until the size of $L'$ falls below 8 at which point a
+brute-force method is used.  (In practice, Seidel's algorithm can be
+used under a certain fixed size determined during the fine-tuning.)
+
+\begin{thm}
+The above algorithm, \textsc{Megiddo-Inplace-LP-2D}, solves a
+separated 2D linear programming problem \inplace\ in linear time.
+\end{thm}
+
+\Figref{ks} recaps the algorithm for computing the upper hull of $S$.
+First the algorithm computes the median abscissa $x_0$ of $S$, and the
+upper bridge $pq$ by using the dual of the algorithm
+\textsc{Megiddo-InPlace-LP-2D}. The bridge is used to partition $S$
+into the sets $S^0$, $S^1$ and $S^2$.  The algorithm then recurses on
+the set $S^0$.  After the recursive call, the convex hull of $S^0$ is
+stored at the beginning of the array $S$, and the last element of this
+hull is the first endpoint $p$ of the upper bridge.  The algorithm
+then shifts $S^1$ leftward so that it is adjacent to $pq$ and recurses
+on $S^1\cup\{q\}$.  The end result is the upper hull of $S$ being
+stored consecutively and in clockwise order at the beginning of the
+array $S$.
+
+\begin{figure}
+\begin{center}
+$\begin{array}{c}
+   \underbrace{\framebox[4in]{\fillit $A$}} \\
+   \mbox{partition}
+\end{array}$
+
+\vspace{2ex}
+
+$\begin{array}{c@{}c@{}c}
+   \underbrace{\framebox[1.5in]{\fillit $S^0$}} & 
+   \framebox[1.5in]{\fillit $S^1$} 
+   \framebox[1in]{\fillit $S^2$} \\
+   \mbox{recurse}
+\end{array}$
+
+\vspace{2ex}
+
+$\begin{array}{c@{}c@{}c}
+   \framebox[1in]{\fillit $\mathrm{UH}(S^0)$} &
+   \underbrace{\framebox[.5in]{\fillit}
+   \framebox[1.5in]{\fillit $S^1$}} & 
+   \framebox[1in]{\fillit $S^2$} \\
+   & \mbox{compact}
+\end{array}$
+
+\vspace{2ex}
+
+$\begin{array}{c@{}c@{}c}
+   \framebox[.85in]{\fillit} &
+   \framebox[.15in]{\fillit $p$}
+   \underbrace{\framebox[.15in]{\fillit $q$}
+   \framebox[1.35in]{\fillit $S^1$}} & 
+   \framebox[.5in]{\fillit}
+   \framebox[1in]{\fillit $S^2$} \\
+   & \mbox{recurse}
+\end{array}$
+
+\vspace{2ex}
+
+$\begin{array}{c@{}c@{}c}
+   \underbrace{\framebox[2.5in]{\fillit $\mathrm{UH}(S)$}} &
+   \framebox[1.5in]{\fillit} \\ 
+   \mbox{output hull}
+\end{array}$
+\end{center}
+\caption{Overview of the \textsc{KS-InSitu-Hull} algorithm.}
+\figlabel{ks}
+\end{figure}
+
+\begin{thm}
+The above algorithm, \textsc{KS-InSitu-Hull}, computes the convex hull
+of $S$ in $O(n\log h)$ time using $O(\log n)$ additional storage,
+where $h$ is the number of vertices of the convex hull.
+\end{thm}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{An $O(n\log h)$ Time \InPlace\ Algorithm}\seclabel{chan-2}
+
+Next, we give an $O(n\log h)$ time \inplace\ planar convex hull
+algorithm.  Our algorithm is a modification of Chan's $O(n\log h)$
+time algorithm, which is essentially a speedup of Jarvis' March
+\cite{j73}.  We begin with a review of Chan's algorithm, and
+thereafter we describe the modifications needed for making it
+\inplace.
+
+Chan's algorithm runs in rounds.  During the $i^\mathrm{th}$ round the
+algorithm finds the first $g_i=2^{2^i}$ points on the convex hull.
+Once $g_i\ge h$ the rounds end as the algorithm detects that it has
+found all points on the convex hull.  During round $i$, the algorithm
+partitions the input points into $n/g_i$ groups of size $g_i$ and
+computes the convex hull of each group.  The vertices on the convex
+hull are output in clockwise order beginning with the leftmost vertex.
+Each successive vertex is obtained by finding tangents from the
+previous vertex to each of the $n/g_i$ convex hulls.  The next vertex
+is determined, as in Jarvis' March, by choosing the vertex having
+largest polar angle with respect to the previously found vertex as
+origin.  In the case where the largest polar angle is not unique, ties
+are broken by taking the farthest vertex from the previously found
+vertex.
+
+Finding a tangent to an individual convex hull can be done in $O(\log
+g_i)$ time if the vertices of the convex hull are stored in an array
+in clockwise order \cite{cd87,ps85,ov81}.  There are $n/g_i$ tangent
+finding operations per iteration and $g_i$ iterations in round $i$.
+Therefore, round $i$ takes $O(n\log g_i)=O(n2^i)$ time.  Since there
+are at most $\lceil \log\log h \rceil$ rounds, the total cost of
+Chan's algorithm is $\sum_{i=1}^{\lceil \log\log h \rceil} O(n2^i) =
+O(n\log h)$.
+
+\comment{
+For a convex polygon $P$ and a point $p$, the \emph{counterclockwise
+tangent (cc-tangent)} of $p$ and $P$ is obtained as follows: Take a
+ray originating from $p$ that intersects $P$ and rotate it
+counterclockwise about $p$ until it is tangent to $P$. The last point
+on the ray that intersects $P$ is called the \emph{support point} of
+the tangent.  Given a convex polygon $P$ with $n$ vertices stored in
+an array, there exist algorithms based on binary or Fibonacci search
+that find the cc-tangent of $p$ and $P$ in $O(\log n)$ time, for any
+point $p$ \cite{cd87,ov81,p79}.
+
+Chan's algorithm uses a grouping trick.  During round $i$, the
+algorithm partitions the input points into $n/g_i$ groups of size
+$g_i=2^{2^i}$ and computes the convex hull of each group. The
+algorithm then finds an edge $(p,q)$ of the convex hull of $S$, where
+$p$ appears just before $q$ as the hull is traversed in clockwise
+order.  Using the tangent-finding procedure mentioned above, the
+algorithm then finds the cc-tangent of $q$ with every group and takes
+the cc-tangent that maximizes the angle $\angle pqr$, where $r$ is the
+support point of the tangent and the angle is measured in the
+counterclockwise direction.  The edge $(q,r)$ is guaranteed to be on
+the boundary of the convex hull.
+
+The algorithm then repeats this process beginning with the edge
+$(q,r)$.  A round terminates when the cc-tangent found is $p$ or when
+the number of steps exceeds $g_i$, whichever comes first.  In the
+former case, the entire algorithm terminates, while in the latter case
+the value of $i$ is incremented and another round is started.  Since
+each step of round $i$ costs $n/g_i\log g_i=2^in/g_i$ and there are at
+most $g_i$ steps, the total cost of round $i$ is $2^in$.  The
+algorithm terminates at the first round $i$ where $g_i\ge h$.
+Therefore, the total cost of the algorithm is
+$\sum_{i=1}^{\lceil\log\log h\rceil} c2^in = O(n\log h)$.
+}
+
+Next we show how to implement each round using only $O(1)$ additional
+storage.  Assume for the sake of simplicity that $n$ is a multiple of
+$g_i$.  For the grouping step, we build $n/g_i$ groups of size $g_i$
+by taking groups of consecutive elements in $S$ and computing their
+convex hulls using $\textsc{Graham-InPlace-Hull}$.  Two questions now
+arise: (1)~Once we start the tangent-finding steps, where do we put
+the convex hull vertices as we find them? (2)~In order to find a
+tangent from a point to a group in $O(\log g_i)$ time we need to know
+the size of the convex hull of the group. How can we keep track of all
+these sizes using only $O(1)$ extra memory?
+
+To answer the first question, we store convex hull vertices at the
+beginning of the array $S$ in the order that we find them.  That is,
+when we find the $k^\mathrm{th}$ vertex on the convex hull, we swap it
+with $S[k-1]$.  At this point, the convex hull of the first group and
+the group containing the newly found convex hull vertex have changed.
+Therefore, we recompute both of these convex hulls at a cost of
+$O(g_i\log g_i)$.
+
+\comment{We say that a group $G$ is \emph{dirty} if one of its
+members has been found to be on the convex hull of $S$.  A group that
+is not dirty is \emph{clean}.  If a group $G$ is clean, then we can
+use binary search to find a tangent to $G$ in $O(\log g_i)$ time,
+otherwise we have to use linear search which takes $O(g_i)$ time.
+Since after $k$ iterations, the algorithm stores the first $k$ hull
+vertices in locations $S[0],\ldots S[k-1]$, the first group consists
+of elements $S[k],\ldots,S[g_i-1]$ and is always considered dirty.
+
+To keep track of which other groups are dirty, we mark them by
+reordering the first two points of the group.  In a clean group, the
+points are stored in lexicographic order.  In a dirty group, we store
+them in reverse lexicographic order.  This allows us to test in
+constant time whether a group is clean or dirty.
+}
+
+To keep track of the size of the convex hull of each group without
+storing the size explicity we use a reordering trick.  Let
+$G[0],\ldots,G[g_i-1]$ denote the elements of a group $G$ and let $<$
+denote lexicographic comparison of $(x,y)$ values.  We say that the
+\emph{sign} of $G[j]$ is $+$ if $G[j]<G[j+1]$, and $-$ otherwise. If
+the convex hull of $G$ contains $h$ vertices, then it follows that the
+first elements $G[0],\ldots,G[h-2]$ have signs that form a sequence of
+1 or more $+$'s followed by 0 or more $-$'s.  Furthermore, the
+elements $G[h],\ldots,G[g_i-1]$ can be reordered so that the remainder
+of the signs form an alternating sequence.  
+
+To test if a point $G[i]$ is on the convex hull of $G$ for $i=0,1,2$
+we simply observe that all three such vertices must be on the convex
+hull of $G$ unless they are collinear, in which case only $G[0]$ and
+$G[1]$ are on the convex hull of $G$.
+
+To test if a point $G[i]$, $i\ge 3$ is on the convex hull of $G$, we
+examine the sequence of signs formed by $G[i]$, $G[i-1]$, $G[i-2]$,
+and $G[i-3]$.  If this sequence does not contain two consecutive $+$'s
+or two consecutive $-$'s then a simple case analysis will convince the
+reader that $G[i]$ is not on the convex hull of $G$.  Otherwise, at
+least one of $G[i]$, $G[i-1]$, $G[i-2]$, or $G[i-3]$ is on the convex
+hull of $G$. To determine which of these vertices is the last such
+vertex, we perform tests of the form $\rt(G[j],G[j+1],G[0])$, for
+$j=i-3,\ldots, i-1$ (see \figref{find-last}).  The first value for
+which this test returns false is the index $j$ of the final element of
+the convex hull of $G$.  If no such test returns false then $i$ is on
+the convex hull of $G$.
+
+\begin{figure}
+\begin{center}\includegraphics{find-last}\end{center}
+\caption{The first vertex to fail the right\_turn test is the last
+vertex on the convex hull of $G$.}
+\figlabel{find-last}
+\end{figure}
+
+
+\comment{When we do this, a group
+element $G[j]$, $0<j<g_i-1$, $j\neq h-1$ is on the convex hull of $G$
+if and only if $G[j-1]$, $G[j]$, $G[j+1]$ do not have signs that
+alternate.
+
+The three special cases that remain are $G[0]$, $G[g_1-1]$ and
+$G[h-1]$.  The point $G[0]$, it is always on the convex hull of $G$ so
+in this case the test is trivial. The point $G[g_i-1]$ is if and only
+if $G[g_i-2]$ is on the convex hull of $G$ and the triangle
+$G[g_i-2],G[g_i-1],G[0]$ is oriented clockwise.
+
+To summarize, to test if $G[i]$ is on the convex hull of $G$ we proceed as
+follows:
+
+\noindent{$\textsc{Test-Hull}(i)$}
+\begin{algorithmic}
+\IF{$i=0$} 
+  \STATE{\textbf{return} true}
+\ELSIF{$i=g_i-1$}
+  \STATE{\textbf{return} $\textsc{Test-Hull(i-1)}$ \textbf and
+	$\rt(G[i-1],G[i],G[i+1])$}
+\ELSIF{$G[i-1]$, $G[i]$, $G[i+1]$ do not have signs that alternate}
+  \STATE{\textbf{return} false}
+\ELSE
+  \STATE{\textbf{return} false}
+\ENDIF
+\end{algorithmic}
+
+As for $G[0]$, $G[g_i-1]$ and $G[h-1]$ we know that $G[0]$ is always
+on the convex hull of $G$. The point $G[g_i-1]$ is on the convex hull
+of $G$ if and only if $G[g_i-2]$ is on the convex hull of $G$ and the
+triangle $G[g_i-2],G[g_i-1],G[0]$ is oriented clockwise.\footnote{We
+use the convention that three collinear points are \emph{not} oriented
+clockwise.}  The point $G[h-1]$ is on the convex hull of $G$ if and
+only if $G[h-2]$ is on the convex hull of $G$ and the triangle
+$G[h-2],G[h-1],G[0]$ is oriented clockwise.  Therefore, for any index
+$0\le j< g_i$, we can test if $G[j]$ is on the convex hull of $G$ in
+constant time.  Using this in conjunction with binary search, we can
+compute the number of vertices on the convex hull of $G$ in $O(\log
+g_i)$ time.  Thus, we can compute the size of the convex hull of $G$
+and find a tangent in $O(\log g_i)$ time, as required.
+}
+
+We have now provided all the tools for an \inplace\ implementation of
+Chan's algorithm.  Except for the cost of recomputing convex hulls of
+groups after modifying them, the running time of this implementation
+is asymptotically the same as that of the original algorithm.
+Therefore, we need only bound this extra cost.  During one step of
+round $i$, we find one convex hull vertex and recompute the convex
+hull of two groups.  The cost of recomputing these convex hulls is
+$O(g_i\log g_i)$ and there are at most $g_i$ steps in round $i$.
+Therefore, the total cost of recomputing convex hull vertices in round
+$i$ is $O(g_i{}^2\log g_i)\subseteq O(n)$ for all $g_i\le (n/\log
+n)^{1/2}$.  Hence, the total cost of round $i$ is $O(g_i^2\log
+g_i+n\log g_i)\subseteq O(n\log g_i)$ for any $g_i<(n/\log n)^{1/2}$.
+Since we can abort the algorithm when $g_i\ge (n/\log n)^{1/2}$ and
+use \textsc{Graham-InPlace-Hull}, the overall running time of the
+algorithm is again $O(n\log h)$.
+
+\begin{thm}
+The above algorithm, \textsc{Chan-InPlace-Hull}, computes the convex
+hull of $n$ points in $O(n\log h)$ time using $O(1)$ additional
+storage, where $h$ is the number of vertices of the convex hull.
+\end{thm}
+
+The constants in \textsc{Chan-InPlace-Hull} can be improved using the
+following trick that is mentioned by Chan \cite{c96}. When round $i$
+terminates without finding the entire convex hull, the $g_i$ convex
+hull points that were computed should not be discarded.  Instead, the
+grouping in round $i+1$ is done on the remaining $n-g_i$ points, thus
+eliminating the need to recompute the first $g_i$ convex hull
+vertices.  This optimization works perfectly when applied to
+\textsc{Chan-InPlace-Hull} since the first $g_i$ convex hull points
+are already stored at locations $S[0],\ldots,S[g_i-1]$.
+
+
+\comment{Another possible optimization is as follows: During round
+$i$, rather than mark groups as being dirty, simply recompute their
+convex hull in $O(g_i\log g_i)$ time.  During the entire round, this
+contributes an extra overhead of $O(g_i^2\log g_i)$ as compared with
+the $O(g_i^3)$ that is required to perform searches on dirty groups.}
+
+\comment{Another optimization pointed out by Welzl is that the convex
+hulls of the groups in round $i$ can be obtained by merging convex
+hulls of groups from round $i-1$ in a balanced fashion.  This
+optimization can also be implemented \inplace\ by using a fairly
+straightforward modification of \textsc{Sorted-Graham-InPlace-Hull} to
+perform the merging.}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusions}\seclabel{conclusions} 
+
+We have given four space-efficient algorithms for computing the convex
+hull of a planar point set.  The first algorithm is \inplace\ and runs
+in $O(n\log n)$ time.  The second and third algorithms are \insitu\
+and run in $O(n\log h)$ time.  The fourth algorithm is \inplace\ and
+and runs in $O(n\log h)$ time.  The first two algorithms are
+reasonably simple and implementable, and their running times compare
+favourably with those of convex hull algorithms that use additional
+storage.  \comment{Experimentally, the running time difference of
+in-place versions of various algorithms varies depending on the
+complexity of the algorithm, on the distribution of the input and on
+the size of the output. For Graham's Scan, we typically find a speedup
+of roughly 15\% compared to a version that uses a separate array to
+store the convex hull.}  In order to facilitate comparisons with other
+convex hull implementations, our source code is available for download
+\cite{m01}.  \comment{and our timing results are posted on the
+Internet \cite{b01}.}
+
+Although we have assumed throughout the paper that all of the input
+points are distinct, the algorithms in this paper can be modified to
+handle the case in which the input is a multiset.  These modifications
+are technical, but relatively straightforward.  In particular, care
+must be taken with respect to ``side of line'' tests and the size
+encoding scheme used in \secref{chan-2} needs to make use of a third
+symbol, 0, used for consecutive identical elements.
+
+The ideas presented in this paper also apply to other problems.  The
+\emph{maximal elements} problem is that of determining all elements
+$S[i]$ such that $S[j].x \le S[i].x$ or $S[j].y \le S[i].y$ for all
+$0\le j < n$.  An algorithm almost identical to Graham's Scan can be
+used to solve the maximal elements problems in $O(n\log n)$ time, and
+this can easily be implemented \inplace.  Furthermore, an \inplace\
+algorithm almost identical to that in \secref{chan-2} can be used to
+solve the maximal elements problem in $O(n\log h)$ time, where $h$ is
+the number of maximal elements.
+
+The question of \insitu\ and \inplace\ algorithms for convex hulls in
+dimensions $d\ge 3$ is still open.  In order for this question to make
+sense, we ask only that the algorithm identify which input points are
+on the convex hull (extreme points).  An algorithm independently
+discovered by Chan \cite{c96b}, Clarkson \cite{c94} and Ottman \etal\
+\cite{oss95} identifies convex hull points by solving $n$ linear
+programs each of size $h$ and $h$ linear programs each of size $n$ and
+is already \inplace.  Combining this with Seidel's linear programming
+algorithm gives an $O(d!nh)$ time \insitu\ algorithm for computing the
+extreme points of an $n$ point set in $d$ dimensions.  Is there an
+\inplace\ or \insitu\ algorithm with a reduced dependence on $h$?
+This is still open even for the case $d=3$.
+
+More generally, one might ask what other computational geometry
+problems admit space-efficient algorithms.  Some problems that
+immediately come to mind are those of computing $k$-piercings of sets,
+finding maximum cliques in intersection graphs, computing largest
+empty disks inside polygons, and finding ham-sandwich cuts.
+
+\section*{Acknowledgements}
+
+The authors are grateful to two anonymous referees for making an
+observation about the algorithm in \secref{csy} that allowed us to
+greatly simplify the partitioning step of the algorithm.
+
+\bibliography{insitu}
+\bibliographystyle{elsart-num}
+
+\end{document}

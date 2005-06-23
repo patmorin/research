@@ -1,0 +1,87 @@
+\documentclass[lotsofwhite]{patmorin}
+
+
+\title{IOUs in BitTorrent}
+\author{Pat Morin}
+
+\newcommand{\field}[1]{\texttt{#1}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We present a proposal for adding IOUs to the BitTorrent protocol.
+\end{abstract}
+
+
+\section{The Protocol Extensions}
+
+The peer-to-peer part of the BitTorrent protocol should be extended
+with two new kinds of messages
+
+\subsection{The IOU Message}
+
+The IOU message contains two parts, a \field{bytes} field indicating
+how many bytes the client is offering to owe and a \field{checksum}
+field that the receiver must store and resend in order to redeem the
+IOU.  The form of the \field{checksum} field is left up to the
+implementation. It is expected that the receiver of an IOU will store
+these values on some persistent media along with the \field{peer\_id}
+of the sender.
+
+\noindent\textbf{Remark:}  The documentation of the BitTorrent
+protocol says that \field{peer\_id} is a string of length 20 that is
+generated at random at the start of a new download.   The proposed
+change would require that this \field{peer\_id} be created at the time
+of installation (or first use) of BitTorrent and continue to be used
+for all BitTorrent connections.  This does not seem to cause any
+problems.
+
+\subsection{The UOME Message}
+
+The UOME message contains two parts, a \field{peer\_id} and a
+\field{checksum}.  The \field{checksum} field is copied from a
+previous IOU message received from a peer that identified itself with
+\field{peer\_id}.
+
+\section{Semantics}
+
+The intended meaning of an IOU message is:  ``I owe you \field{bytes}
+bytes of data and I will do my best to repay these to you when I
+receive a UOME message containing \field{checksum}.''  Similarly, the
+meaning of a UOME message is:  ``You owe me some data and to prove it
+here is the \field{checksum}.''
+
+It is intended that a BitTorrent client should keep track of all IOUs
+that it sends but for which it has not yet received a UOME message.
+When a client receives a UOME message it should remove the
+corresponding entry from its list of outstanding IOUs and adjust its
+internal structures to treat the sender of the UOME message with the
+appropriate priority.
+
+Similarly, when a client receives an IOU message, it should store this
+IOU along with the \field{peer\_id} of the sender so that it may
+redeem this IOU in the future.  At the same time, it should adjust its
+internal structures to treat the sender of the IOU message with the
+appropriate priority.
+
+\section{Implementation Issues}
+
+One item that has been left out so far is how much the client should
+increase the priority of an outgoing connection in response to an IOU
+or a UOME message.  This is a delicate question because there is a
+possibility of writing bad IOUs.  A misbehaved client could, in an
+attempt to increase its download speed, happily write IOUs but never
+change its behaviour upon receipt of a UOME.  Or, a client could
+change its \field{peer\_id} at each session so that other clients
+would never recognize it as the sender of a previous IOU.
+
+To avoid these types of abuse, the value of IOUs must be carefully
+tempered.  In particular, a client should not react the same way to a
+peer
+
+
+
+
+
+\end{document} 

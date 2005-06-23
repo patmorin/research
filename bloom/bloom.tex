@@ -1,0 +1,390 @@
+\documentclass[lotsofwhite]{patmorin}
+\usepackage{amsmath}
+\usepackage{url}
+
+\title{\MakeUppercase{On the False-Positive Rate of Bloom Filters}}
+
+\author{Prosenjit Bose 
+	\and Hua Guo 
+	\and Evangelos Kranakis 
+	\and Anil Maheshwari 
+	\and Pat Morin
+	\and Jason Morrison
+	\and Michiel Smid 
+	\and Yihui Tang}
+\date{}
+
+\input{pat}
+
+\newcommand{\stirling}[2]{\genfrac{\{}{\}}{0pt}{}{#1}{#2}}
+\newcommand{\blah}{\frac{k}{p}\sqrt{\frac{\ln m-2k\ln p}{m}}}
+
+\begin{document}
+\maketitle
+\vspace{-1.3cm}
+\begin{center}
+School of Computer Science \\
+Carleton University \\
+\{jit,hguo2,kranakis,maheshwa,morin,morrison,michiel,y\_tang\}@scs.carleton.ca
+\end{center}
+
+\begin{abstract}
+Bloom filters are a randomized data structure for membership queries
+dating back to 1970.  Bloom filters sometimes give erroneous answers
+to queries, called \emph{false positives}.  Bloom analyzed the probability of
+such erroneous answers, called the \emph{false-positive rate}, and
+Bloom's analysis has appeared in many publications throughout the
+years.  We show that Bloom's analysis is incorrect and give a correct
+analysis.
+\end{abstract}
+
+\paragraph{Keywords:} Data structures, analysis of algorithms
+
+\section{Introduction}
+
+A Bloom filter \cite{b70} is an extremely simple randomized data
+structure for testing membership in a set and has found applications
+in many areas including (sequential, distributed and parallel)
+databases \cite{g82,m83,r82}, computer networks \cite{bm02}, social
+networks \cite{loaf}, and cryptography \cite{bc04,g03}. A Bloom filter
+represents an $n$ element set $S$ using a bit-vector
+$B=B_1,\ldots,B_{m}$ of length $m$.  Initially all the bits of $B$
+are set to 0.  It is assumed that each element $x$ to be stored or
+searched for comes with a sequence of $k$ random\footnote{Here, as
+usual, the term ``random'' means chosen uniformly at random and
+independently of any other ``random'' choices.} hash values
+$x_1,\ldots,x_k\in \{1,\ldots,m\}$.  To store the element $x$ one
+simply sets the bits $B_{x_1}=B_{x_2}=\cdots=B_{x_k}=1$.  To query a
+Bloom filter for an element $y$ one simply checks if
+$B_{y_1},\ldots,B_{y_k}$ are all set to 1.  If so, the filter outputs
+``yes'' otherwise it outputs ``no.''
+
+If $y$ is stored in the filter then, by definition,
+$B_{y_1},\ldots,B_{y_k}$ are all set to 1, so the query algorithm
+correctly outputs yes.  However, the converse is not true.  It is
+possible that $y$ is not stored in the filter but (by coincidence)
+$B_{y_1},\ldots,B_{y_k}$ are all set to 1.  This situation is called a
+\emph{false positive} and the probability that this occurs is called
+the \emph{false-positive rate}.  Bloom derives the false-positive rate
+in the following way: The probability that any particular bit $B_i$ is
+equal to 0 is $(1-1/m)^{kn}$, since the value $i$ must be avoided by
+all $kn$ hash values.   Therefore, the probability that a particular
+bit is set to 1 is 
+\[
+	p\stackrel{\mathrm{def}}{=}\Pr\{B_i=1\}=1-(1-1/m)^{kn} \enspace .
+\]
+Now, in order for $y$ to result in a false positive, each of the $k$
+hash values $y_1,\ldots,y_k$ must be the index of a bit that is set to
+1.  The probability that this happens is 
+\[
+	p_{k,n,m} \stackrel{\mathrm{def}}{=} 
+	\Pr\{\mbox{$B_{y_1}=1$ and $B_{y_2}=1$ and \ldots and $B_{y_k}=1$}\}
+\]
+which is claimed to be
+\begin{equation}         
+	p^k = (1-(1-1/m)^{kn})^k \enspace .  \eqlabel{mistake}
+\end{equation}
+This proof, which has appeared in many papers
+throughout the years, is incorrect.  The error occurs in deriving
+\eqref{eq:mistake}, where there is an implicit assumption that the
+event ``$B_{y_i}=1$'' and the event ``$B_{y_1}=B_{y_2}=\cdots
+=B_{y_{i-1}}=1$'' are independent.  At first glance, this seems to be
+true, since $y_1,\ldots,y_i$ are independent.  However, a simple
+counterexample to this proof can be obtained by considering the case
+$n=1$, $k=2$, $m=2$.  In this case, by simply enumerating the 16
+possible situations\footnote{There are two elements involved, the
+element $x$ stored in the table and some element $y$ not stored in the
+table.  Whether or not $y$ is a false positive depends only on $x_1$,
+$x_2$, $y_1$ and $y_2$.} one finds that the false-positive rate is
+$5/8$, whereas $p^k$ evaluates to $9/16=4.5/8$.  Thus,
+Bloom's bound underestimates the false-positive rate in this case.
+
+In this paper, we perform a detailed analysis of the false-positive
+rate of Bloom filters.  Our discoveries suggest that the analysis of
+the false-positive rate is not nearly as straightforward as one would
+hope. The contributions of this paper are as follows:
+\begin{enumerate}
+
+\item We give an exact formula for the false-positive rate of Bloom filters.
+Unfortunately, this formula is not anywhere near closed form, but
+could be useful for small values of $k$, $n$ and $m$.
+
+\item We give an upper bound on the false-positive rate that converges to
+ $p^k$ for most common choices of the parameters $k$ and $m$.
+
+\item We show that, rather than being an upper-bound,
+$p^k$ is actually a strict lower bound on the
+false-positive rate for any $k\ge 2$.  That is, for any choice of $k$,
+$m$, and $n$ with $k\ge 2$, the false-positive rate of the resulting
+Bloom filter is greater than $p^k$
+\end{enumerate}
+
+To the best of our knowledge, this is the first paper to point out
+this error in the analysis of Bloom filters and give a corrected
+analysis.  The only similar result we know of is a paper
+by Carter \etal\ \cite{cfgmw78} in which they define a data structure
+(Approximate Membership Tester 1) that, under their assumptions, is
+equivalent to a Bloom filter.  They show that the expected number of
+bits set to 1 in the filter is $mp$ so the probability of
+a false positive ``is at most about'' $p^k$.  Their use
+of the qualifier ``about'' indicates that they realize this is not the
+exact probability, but they do not elaborate any further.
+
+The remainder of this paper is organized as follows:  In
+\secref{exact} we derive an exact formula for the false-positive rate.  In
+\secref{asymptotic} we give tight upper and lower bounds on the
+false-positive rate.  In \secref{conclusions} we summarize and
+conclude.
+
+\section{An Exact Formula}\seclabel{exact}
+
+We model the problem of determining the false-positive rate as a
+problem on balls and urns.  We are given $m$ urns. We throw $kn$
+white balls at random into these urns.  We call an urn \emph{white}
+if it contains at least one white ball.  Next we throw $k$ black balls
+in the urns.  Let $A$ be the event that each black ball is in a white
+urn.  We want to evaluate $\Pr\{A\}$.  To see that this correctly
+models Bloom filters, treat the urns as the bits $B_1,\ldots,B_m$ and
+use the convention that $B_i=1$ if and only if urn $i$ is white.
+Thus, the event $A$ corresponds to a false positive ($k$ randomly
+chosen bits are all set to 1).  Thus, the false-positive rate
+$p_{k,n,m}$ is equal to $\Pr\{A\}$.
+
+Observe that the set of white urns can be represented as a subset of
+$\{ 1,\ldots,m \}$.  For any $I \subseteq \{ 1,\ldots,m \}$, let
+$E_I$ be the event that $I$ is the set of white urns. Observe that $1
+\leq |I| \leq m$. Using conditional probabilities, we get 
+\[ \Pr\{A\} = \sum_{I \subseteq \{ 1,\ldots,m \}} 
+            \Pr\{ A \mid E_I \} \cdot \Pr\{ E_I \}. 
+\] 
+If $I$ is fixed then 
+\[ \Pr\{ A \mid E_I \} = \left(\frac{|I|}{m}\right)^k ,
+\] 
+whereas $\Pr\{ E_I \}$ is the quotient of 
+\begin{itemize} 
+\item the number of surjections from a set of size $kn$ onto a set of
+size $i$, and
+\item the number of functions from a set of size $kn$ to a set of size
+$m$.
+\end{itemize} 
+
+
+The number of surjections from a set of size $kn$ onto a set of size
+$i$ is given by $i!\stirling{kn}{i}$ where 
+\[ 
+ \stirling{kn}{i} = 
+     \frac{1}{i!}\sum_{j=0}^i (-1)^j \binom{i}{j} j^{kn} 
+\] is called a
+\emph{Stirling number of the second kind} \cite[Section~6.1]{gkp94}.
+ 
+The number of functions from a set of size $kn$ to a set of size $m$
+is equal to $m^{kn}$. 
+
+Putting everything together, we obtain 
+\begin{eqnarray*} 
+ \Pr\{ A \} & = & \sum_{I \subseteq \{ 1,\ldots,m \}}
+              \left(\frac{|I|}{m}\right)^k \times
+              \frac{|I|!\stirling{kn}{|I|}}{m^{kn}} \\
+  & = & \frac{1}{m^{k(n+1)}}\sum_{i=1}^{m} 
+           i^ki!\binom{m}{i}
+          \stirling{kn}{i} \enspace .
+\end{eqnarray*} 
+
+\begin{thm}\thmlabel{exact}
+Let $p_{k,n,m}$ be the false-positive rate for a Bloom filter that stores $n$
+elements in a bit-vector of size $m$ using $k$ hash functions.  Then,
+\[
+  p_{k,n,m} = \frac{1}{m^{k(n+1)}}\sum_{i=1}^{m} 
+           i^ki!\binom{m}{i}
+          \stirling{kn}{i} \enspace .
+\]
+\end{thm}
+
+
+
+\section{Asymptotic Bounds}\seclabel{asymptotic}
+
+Unfortunately, the formula for $p_{k,n,m}$ given by \thmref{exact} is
+not very enlightening.  In particular, it is not easy to compare it
+directly with $p^k$, the value derived by Bloom.  In this section, we
+use probability theory to study the asymptotics of $p_{k,n,m}$, and
+give closed-form upper and lower bounds.  We make use of the following
+result on balls and urns due to Kamath \etal\ \cite{kmps94} (see also
+Motwani and Raghavan~\cite[Theorem~4.18]{mr95}):
+
+\begin{thm}[Kamath, Motwani, Palem, Spirakis 1994]\thmlabel{ballsurns}
+Let $W$ denote the number of white urns after throwing $kn$ white balls into
+$m$ urns. Then
+\[
+    E[W] = m\left(1-\left(1-\frac{1}{m}\right)^{kn}\right)
+\]
+and for $\lambda > 0$
+\[
+    \Pr\{|W - E[W]| \ge \lambda\} \le 2\exp\left(
+        -\frac{\lambda^2(m-1/2)}{m^2-E[W]^2}\right) \le
+2\exp(-\lambda^2/(2m)) \enspace .
+\]
+\end{thm}
+
+Again, let $A$ be the event ``every black ball is contained in a white
+urn.'' We want to compute upper and lower bounds on $\Pr\{A\}$.  
+
+\subsection{The Upper Bound}
+
+In this section we give an upper-bound on $p_{k,n,m}$. However, it is
+awkward (and not very useful) to give an upper bound that holds for
+all possible choices of $k$, $n$ and $m$.  Our upper bound requires
+the condition that
+\begin{equation}
+	\blah \le c  \eqlabel{blah}
+\end{equation}
+for some constant $c < 1$.  The reasons for this will become apparent
+in the analysis.  To see that this assumption is justified, note that,
+in nearly all applications of Bloom filters, the parameter $k$ is
+chosen (as a function of $m$ and $n$) so that $p=1-(1-1/m)^{kn}$ is a
+constant, usually close to $1/2$. Under these conditions, $k = \Theta(m/n)$
+and \eqref{eq:blah} becomes
+\[
+        \blah = O\left(\frac{m}{n}\sqrt{\frac{m/n+\ln m}{m}}\right) < c
+\enspace .
+\]
+For sufficiently large values of $m$, this is satisfied as long as $m
+= o(n^{3/2})$.  Again, this is true in all applications of Bloom
+filters since, if we are willing to use $m=\Theta(n\log n)$ bits of
+storage, hash tables are a better alternative since they offer
+constant time searches with no false positives.
+
+
+We obtain the upper bound by conditioning on the value of $W$ which,
+according to \thmref{ballsurns} is strongly concentrated around its
+expected value.  Recall the definition $p=1-(1-1/m)^{kn}$ and let
+$j=E[W]+ \sqrt{m(\ln m-2k\ln p)}$. Then
+\begin{eqnarray}
+\Pr\{A\} & = & 
+ \Pr\{W \le j\}\times\Pr\{A\mid W\le j\} +
+	\Pr\{W >j\} \times \Pr\{A\mid W > j\} \\
+  &\le&  1\times\Pr\{A\mid W= j\} +
+	\Pr\{W >j\} \times 1 \\
+  &\le& \left(\frac{E[W]+\sqrt{m(\ln m-2k\ln p)}}{m}\right)^k + 
+       2\exp\left(-\frac{m(\ln m-2k\ln p)}{2m}\right) \\
+   &=& \left(p + \sqrt{\frac{\ln m-2k\ln p}{m}}\right)^k+ 
+       2p^k/\sqrt{m}  \\  \eqlabel{leap-one}
+   &\le& 
+	\sum_{i=0}^kp^{k-i}\left(k\sqrt{\frac{\ln m-2k\ln p}{m}}\right)^i 
+		+ 2p^k/\sqrt{m} \\
+   &\le& p^k\times\left( 
+	\sum_{i=0}^k\left(\blah\right)^i 
+		+ 2/\sqrt{m}\right) \\
+   &=& p^k \times \left(
+	\frac{1-\left(\blah\right)^{k+1}}
+		{1-\blah}
+	+ 2/\sqrt{m} \right) \\
+   &\le& p^k \times \left(
+	\frac{1}{1-\blah}
+	+ 2/\sqrt{m} \right) \\
+   &=& p^k \times \left(1+
+	\frac{\blah}{1-\blah}
+	+ 2/\sqrt{m} \right) \\
+   &=& p^k \times \left(1+ O\left(\frac{k}{p}\sqrt{\frac{\ln m-k\ln
+p}{m}}\right)\right)
+\end{eqnarray}
+where \eqref{eq:leap-one} uses the inequality (easily verified by induction
+on $k$) which states that
+\[
+   (a+b)^k \le a^k + kb(a+b)^{k-1}\enspace\mbox{, valid for $a,b \ge 0$} 
+\eqlabel{binomial}
+\]
+and that, when iterated $k+1$ times gives
+\[
+(a+b)^k \le \sum_{i=0}^k a^{k-i}b^ik!/(k-i)! \le \sum_{i=0}^k a^{k-i}(bk)^i
+ \enspace\mbox{, valid for $a,b \ge 0$.}
+\]
+
+\subsection{The Lower Bound}
+For the lower bound, we use a very different argument.  Let
+$b_1,\ldots,b_k$ be the urns in which the $k$ black balls are thrown.
+We will show that, for $2\le i\le k$,
+\begin{equation}
+	\Pr\{\mbox{$b_i$ is white} \mid \mbox{$b_1,\ldots,b_{i-1}$ are white}\}
+           > \Pr\{\mbox{$b_i$ is white}\} = p \enspace .
+	\eqlabel{conditional}
+\end{equation}
+Therefore,
+\[
+	\Pr\{A\}=\prod_{i=1}^k \Pr\{\mbox{$b_i$ is white} \mid
+	\mbox{$b_1,\ldots,b_{i-1}$ are white}\} > p^k \enspace .
+\]
+
+Note that this lower-bound is strict, so the actual false-positive
+rate of a Bloom filter is strictly greater than $p^k$
+whenever $k\ge 2$. To finish the proof,
+all that remains is to justify \eqref{eq:conditional}.  Recall that
+$b_1,\ldots,b_{i-1}$ are just randomly chosen urns.  For any
+$j\ge 2$, the following is obvious
+\begin{equation}
+	\Pr\{\mbox{$b_1,\ldots,b_{i-1}$ are white} \mid W\ge j \}
+		> \Pr\{\mbox{$b_1,\ldots,b_{i-1}$ are white}\} \enspace .
+	\eqlabel{conditionb}
+\end{equation}
+We say that this is obvious because, for example, the case in which
+all white balls land in one urn is excluded.  From
+the definition of conditional probability, \eqref{eq:conditionb} is
+equivalent to
+\[
+	\Pr\{W\ge j \mid \mbox{$b_1,\ldots,b_{i-1}$ are white}\}
+	> \Pr\{W \ge j \} \enspace .
+\]
+The above statement says that the random variable $W$ conditioned on
+``$b_1,\ldots,b_{i-1}$ are white'' \emph{stochastically dominates} the
+random variable $W$ (conditioned on nothing).  Note that, if a random
+variable $X$ stochastically dominates a random variable $Y$ then
+$E[X]> E[Y]$.  Therefore,
+\[
+	E[W\mid \mbox{$b_1,\ldots,b_{i-1}$ are white}] > E[W] \enspace .
+\]
+Consider the random variable $W/m$ and observe that
+$E[W/m]=\Pr\{\mbox{$b_i$ is white}\}$.  Therefore, we have
+\begin{eqnarray*}
+   \Pr\{\mbox{$b_i$ is white} \mid \mbox{$b_1,\ldots,b_{i-1}$ are
+	white}\}
+   &=& E[W/m\mid \mbox{$b_1,\ldots,b_{i-1}$ are white}] \\
+   &>& E[W/m] \\
+   &=&\Pr\{\mbox{$b_i$ is white}\}
+\end{eqnarray*}
+as required for \eqref{eq:conditional}.
+
+This completes the proof of
+\begin{thm}
+Let $p_{k,n,m}$ be the false-positive rate for a Bloom filter that
+stores $n$ elements in a bit-vector of size $m$ using $k$ hash
+functions, where $k\ge 2$ and  $k$, $n$ and $m$ satisfy
+\eqref{eq:blah}. Let $p=1-(1-1/m)^{kn}$.  Then,
+\[
+    p^k < p_{k,n,m} \le 
+	p^k \times \left(1+ O\left(\frac{k}{p}
+	\sqrt{\frac{\ln m-k\ln p}{m}}\right)\right)
+\]
+\end{thm}
+
+\section{Conclusions} \seclabel{conclusions}
+
+We have shown that the analysis of Bloom filters originally given by
+Bloom, and repeated in many subsequent papers, is incorrect.  The
+actual false-positive rate is strictly larger than
+$p^k=(1-(1-1/m)^{kn})^k$.  We have also given bounds on how much
+larger the false-positive rate can be.  Our upper bounds show that,
+for large enough values of $m$ with small values of $k$, the
+difference between $p^k$ and the actual false-positive rate is
+negligible.
+
+Mullin \cite{m83} and Gremillion \cite{g82} both observe that the
+false-positive rate of Bloom filters in their database applications
+are slightly higher than $p^k$.  However, they attribute this to poor
+quality pseudorandom numbers.  Our results offer another possible
+explanation: the actual  false-positive rate is higher than $p^k$,
+even if perfect random numbers are available.
+
+\bibliographystyle{plain}
+\bibliography{bloom}
+
+\end{document}

@@ -1,0 +1,185 @@
+
+\comment{
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Testing Cylinders}\seclabel{cylinders}
+
+Before we can describe a quality testing procedure for cylinders, we
+must generalize the notion of quality to cylinders.  In this work, we
+are concerned with the roundess of cylinders, and not their height, or
+the flatness of their ends.  For these reasons, we will assume that
+our manufactured cylinders have length $l$, and that their ends are
+perfectly flat.  The object, $J$, that we are interested in testing is
+a compact simply connected subset of the space $(x,y,[0,l])$.
+
+We assume that $J$ is resting on the $(x,y)$ plane and that we know
+the orientation of the cylinder.  Define $J_h$ to be the set of all
+points $(x,y)$ such that $(x,y,h)\in J$. Note that $J_h$ is a planar
+object.  We define the {\em outer boundary} of $J$ as
+\begin{equation} 
+\jout = \bigcup_{0\le h\le_l}J_h \enspace , 
+\end{equation}
+and we define the {\em inner boundary} of $J$ as 
+\begin{equation} 
+\jin = \bigcap_{0\le h\le_l}J_h \enspace . 
+\end{equation}
+
+For a point $p$ on the plane, we use $R(p,J)$ and $r(p,J)$ to denote
+the maximal and minimal distance, respectively, from $p$ to a point in
+$\bd(\jout)$ and $\bd(\jin)$, respectively.  For a point $p$, let
+\begin{eqnarray}
+\qual(p,J) &=& \min\{r(p,J)-(1-\epsilon), (1+\epsilon)-R(p,J)\} \\  
+\qual(J) \ &=& \max\{\qual(p, J) : p\in\mathbb{R}^3\} \enspace . 
+\end{eqnarray}
+We call any point $c_J$ with $\qual(c_J, J)=\qual(J)$ a {\em center}
+of $J$.  Note that according to these definitions $J$ is an good
+object if there exists an annulus of inner radius $1-\epsilon$ and
+outer radius $1+\epsilon$ which covers both $\bd(\jin)$ and
+$\bd(\jout)$. Intuitively, $J$ is good if the projection of all
+points on the surface of $J$ onto the $(x,y)$ plane can be covered by
+an annulus of inner radius $1-\epsilon$ and outer radius $1+\epsilon$.
+
+As part of our minimum quality assumptions for cylinders we have the
+following generalizations of Assumptions~\ref{ass:mq} and
+\ref{ass:ss}.
+
+\begin{ass}\asslabel{mq-cylinder}
+$R(c_J,J)\le 1+\delta$ and $r(c_J,J)\ge 1-\delta$, for some constant
+$0<\delta<1/21$, i.e., $\jout\setminus\jin$ is contained
+in an annulus of inner radius $1-\delta$ and outer radius $1+\delta$.
+\end{ass}
+
+\begin{ass}\asslabel{ss-cylinder}
+For all $0\le h\le l$, $J_h$ is a star-shaped object, and its kernel
+contains all points $p$ such that $\dist(c_J,p)\le\alpha$, for some
+constant $1-\delta>\alpha>2\delta$.
+\end{ass}
+
+Note that these assumptions are not sufficient.  In fact, with only
+these assumptions, any probing strategy which uses a finite number of
+probes can be fooled into accepting an bad object.  This is because it
+only takes one infinitely thin ``bad'' cross section to make an bad
+object.  Thus, we need another assumption.
+
+\begin{ass}\asslabel{weird-cylinder}
+Let $J$ be an object with center $c_J$, and let $J[h-\alpha,h+\alpha]$
+be the subset of points in $J$ with $z$ coordinate in
+$[h-\alpha,h+\alpha]$.  Let $K$ be the intersection of the infinite
+length cylinder of radius $\alpha$, which is perpendicular to the
+$(x,y)$ plane and is centered at $O$ with $J[h-\alpha,h+\alpha]$.
+Then $J[h-\alpha,h+\alpha]$ is a star shaped object with kernel $K$.
+\end{ass}
+
+Note that Assumptions~\ref{ass:mq-cylinder} and \ref{ass:ss-cylinder}
+allow us to find a near-center $c_0$ of $J$ in constant time.  Our
+procedure for testing cylinders is exactly the same as the procedure
+for testing disks described in \secref{full-disk}, except that during
+each iteration, we perform $ln/2\pi$ sets of probes along the planes
+$z=0, z=2\pi/n, z=4\pi/n,\ldots,z=l$, where each set contains $n$
+probes directed at $c_0$. Note that the number of probes performed is
+$O(ln^2)$. After collecting these sample points, they are projected
+onto the $(x,y)$-plane, and the algorithm of \cite{bbbrw97} or
+\cite{dgr97}, determine whether there exists an annulus of inner
+radius $r$ and outer radius $R$ which contains them.
+
+Like the procedure for disks, the testing algorithm relies on a
+lemma regarding the maximum distance of any point on $\bd(J)$ to the
+nearest sample point.  Before stating the lemma, we define the
+function}
+\begin{equation} 
+f''(n) = \fppn \enspace . 
+\end{equation}
+
+\begin{lem}\lemlabel{closeness3}
+Let $J$ be an object of length $l$ with center $c_J$, and satisfying
+Assumptions~\ref{ass:mq-cylinder}, \ref{ass:ss-cylinder}, and
+\ref{ass:weird-cylinder}.  Let $c_0$ be any point such that
+$\dist(c_I,c_0)\le 2\delta$, and let $S$ be a set of $ln/2\pi$, $n\ge
+n'_0$, probes directed at $c_0$ as described above.  Then for any
+point $p\in\bd(J)$ there exists a point $p'\in S$ such that $\dist(p,
+p')\le f''(n)$.
+\end{lem}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Begin version
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{proof}[Sketch]
+Note that $S$ contains a ring of probes $S'$ such that for all $p'\in
+S$, $|z(p')-z(p)|\le \pi/n$.  With reference to \figref{cylinder}, one
+can prove that $\dist(p,p'')\le f'(n)$ using the same arguments used
+in the proof of \lemref{closeness2}.  Using \assref{weird-cylinder},
+once can also prove that $\dist(p'',p')\le \frac{1}{n}\left(
+((1+3\delta)\pi/\alpha)^2 + \pi^2 \right)^\frac{1}{2}$.  The stated
+bound then follows from the triangle inequality. 
+\end{proof}
+
+\begin{figure}
+\centeripe{cylinder}
+\caption{The proof of \lemref{closeness3}.}
+\figlabel{cylinder}
+\end{figure}
+
+
+}{
+\begin{proof}
+Note that $S$ contains a ring of probes $S'$ such that for all $p'\in
+S$,
+\begin{equation}
+|z(p')-z(p)|\le \pi/n \enspace . \eqlabel{cyl-z}
+\end{equation}
+In this ring, there is a point $p'$ such that
+\[ \angle(\x(p'),\y(p'))c_0(\x(p),\y(p))\le\pi/n \enspace . \]
+
+Let $L$ be the half-line contained in the plane $z=z(p)$ with endpoint
+$c_0$ and passing through $p$.  Consider the intersection of $L$ with
+$\bd(J)$.  By \assref{ss-cylinder}, this intersection is a point.
+Call this point $p''$ (see \figref{cylinder}).
+Assumptions~\ref{ass:mq-cylinder} and \ref{ass:ss-cylinder} and the
+same argument used in the proof of \lemref{closeness2} can be used
+to prove that
+\begin{equation}
+\dist(p,p'')\le f'(n) \enspace . \eqlabel{p-p''}
+\end{equation}
+
+\begin{figure}
+\centeripe{cylinder}
+\caption{The proof of \lemref{closeness3}.}
+\figlabel{cylinder}
+\end{figure}
+
+Next, assume wlog that $c_0=O$, $\x(p'')=0$, and $\z(p'')=0$.  Note
+that under these assumptions $\x(p)=0$ and therefore
+\begin{equation}
+|\x(p)-\x(p'')| = 0 \enspace . \eqlabel{cyl-x}
+\end{equation}
+
+Let $L_{pp''}$ be the line passing through $p$ and $p''$.  By
+\assref{weird-cylinder}, the equation of $L_{pp''}$ is of the form
+$y=m|\z(p')-\z(p'')|$, where
+\begin{eqnarray}
+m & \in & [-\y(p'')/\alpha,\y(p'')/\alpha] \\
+  & \subseteq & [(1+3\delta)/\alpha,(1+3\delta)/\alpha] \enspace .
+\end{eqnarray}
+Therefore, 
+\begin{eqnarray}
+|\y(p'')-\y(p')| & \le & (1+3\delta)|\z(p')-\z(p'')|/\alpha \\
+   & \le & (1+3\delta)\pi/n\alpha \eqlabel{cyl-y} \enspace .
+\end{eqnarray}
+Using \eqref{cyl-z}, \eqref{cyl-x}, and \eqref{cyl-y} we obtain 
+\begin{equation}
+\dist(p'',p')
+   \le  \frac{1}{n}\left( ((1+3\delta)\pi/\alpha)^2 + \pi^2 
+                \right)^\frac{1}{2} \enspace . \eqlabel{p'-p''}
+\end{equation}
+
+Using \eqref{p-p''} and \eqref{p'-p''} along with the triangle
+inquality yields the required result. 
+\end{proof}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% End version
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+With this result, and following the arguments of
+\secref{full-disk}, it is not difficult to prove the correctness
+and running time of the testing procedure for cylinders.
+}

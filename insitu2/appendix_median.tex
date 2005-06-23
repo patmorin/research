@@ -1,0 +1,298 @@
+%% -*- LaTeX -*- This is LaTeX2e code
+
+\newcommand{\LA}{\ensuremath{<_{y}}}
+\newcommand{\LB}{\ensuremath{<_{x}}}
+
+\section{Selecting the $k$-th smallest element} \label{sec:detkmed}
+
+In this appendix, we describe a space-efficient variant of the
+well-known median-find algorithm by Blum \etal~\cite{blum:selection}.
+Our algorithm assumes that the input is given in the form of an array
+${A}[0\ldots n-1]$ which is sorted according to some total
+order \LA. The goal of the algorithm is, given an integer $k\in
+[0\ldots n-1]$, to select the $k$-th smallest element in {A}
+\emph{according to some other total order} \LB. This algorithm will
+run in linear time and will require only \Oh{1} extra space. 
+Additionally, the algorithm returns the array ${A}[0\ldots n-1]$ 
+in the same order as it was presented, namely sorted according to \LA.
+
+The correctness of the algorithm described below will follow from the
+following invariant:
+
+\begin{description}
+\item[Invariant:] Assume the algorithm is called to select the $k$-th
+  smallest element from a \LA-sorted (sub-)array
+  ${A}[b\ldots e-1]$, where $b,e$, and $k$, are three global
+  variables. Then, upon returning from this call, $b,e$, and $k$ 
+  have been restored to the values they had when the algorithm was 
+  called. Additionally, ${A}[b\ldots e-1]$ is sorted according 
+  to \LA. 
+\end{description}
+
+
+\newcounter{ALGBREAK}
+\newcounter{SelectA}
+\newcounter{SelectB}
+\newcounter{SelectC}
+\newcounter{StackA}
+\newcounter{StackB}
+
+\begin{algorithm}
+  \caption{The algorithm
+    $\textsc{RestoringSelect}({A},b,e,k,\text{mode})$ for
+    selecting the $k$-th smallest element in ${A}[b\ldots
+    e-1]$ (if $\text{mode}=\textsc{Select}$) or the median element (if
+    $\text{mode}=\textsc{Median}$).}
+  \begin{algorithmic}[1]
+    \REQUIRE ${A}[b\ldots e-1]$ is sorted according to
+    \LA. 
+    \ENSURE ${A}[b\ldots e-1]$ is sorted according to
+    \LA. The variables $b,e$, and $k$ are reset to their
+    original values. 
+    \STATE Subdivide ${A}[b\ldots e-1]$ into $\lfloor(e-b)/5
+    \rfloor$ groups of $5$ elements and (possibly) one group of size 
+    $\leq 4$.  
+    \STATE Move the medians of the first $\lfloor(e-b)/5 \rfloor$ 
+    groups to ${A}[b\ldots b+\lfloor(e-b)/5\rfloor-1]$ using 
+    algorithm \textsc{SortedSubsetSelection}.  
+    \STATE $i \leftarrow (e-b) - \lfloor(e-b)/5\rfloor\cdot 5$
+    \STATE $\textsc{Push}(S,i)$ \setcounter{StackA}{\value{ALC@line}}
+    \STATE
+    $i_{\mathrm{med}} \leftarrow 
+       \textsc{RestoringSelect}({A},b,b+\lfloor(e-b)/5\rfloor,k,\textsc{Median})$
+    \setcounter{SelectA}{\value{ALC@line}}
+    \STATE
+    $\textsc{UndoSubsetSelection}({A},b,b+\lfloor(e-b)/5\rfloor\cdot 5, \lfloor(e-b)/5\rfloor)$
+    \STATE $i \leftarrow \textsc{Pop}(S)$ \setcounter{StackB}{\value{ALC@line}}
+    \STATE $e \leftarrow b + \lfloor(e-b)/5\rfloor \cdot 5 + i$
+    \IF{$\text{mode} = \textsc{Median}$}
+      \STATE $l \leftarrow \lfloor (e-b)/2 \rfloor$
+    \ELSE
+      \STATE $l \leftarrow k$
+    \ENDIF
+    \STATE $x \leftarrow {A}[i_{\mathrm{med}}]$
+    \STATE 
+     $k_< \leftarrow |\left\{a\in{A}[b\ldots e-1] \mid a<x\right\}|$
+    \STATE 
+     $k_= \leftarrow |\left\{a\in{A}[b\ldots e-1] \mid a=x\right\}|$ 
+    \STATE 
+     $k_> \leftarrow |\left\{a\in{A}[b\ldots e-1] \mid a>x\right\}|$
+    \IF{$l\notin [k_< + 1, k_< + k_=]$}
+      \IF{$l \leq k_<$}
+        \IF{$l = k_<$}
+          \STATE Set $i_{\mathrm{med}}$ to point to the largest element
+          in ${A}[b\ldots e-1]$ less than $x$ (according to \LB).
+        \ELSE
+          \STATE Move $x$ to ${A}[b]$.
+          \STATE Using \textsc{SortedSubsetSelection}, move all elements in
+          ${A}[b+1\ldots e-1]$ less than $x$ to
+          ${A}[b+1\ldots b+k_<]$.
+          \STATE Move the largest element less than $x$ (according to
+          \LB) to ${A}[e-1]$ .
+          \STATE
+          $i_{\mathrm{med}} \leftarrow 
+            \textsc{RestoringSelect}({A},b+1,b+k_<,k,\textsc{Select})$
+          \setcounter{SelectB}{\value{ALC@line}}
+          \STATE Starting at ${A}[b+k_<]$, scan ${A}$ to find
+          $e-1$ (the index of the first element $y$ for which 
+          $y\LB x:=A[b]$). 
+          \STATE Move ${A}[e-1]$ to its proper position in
+          ${A}[b+1\ldots b+k_<]$.
+          \STATE $\textsc{UndoSubsetSelection}({A},b+1,e,b+k_<+1)$.
+          \STATE Reinsert (according to \LA) $x:={A}[b]$ into
+          ${A}[b\ldots e-1]$ maintaining $i_{\mathrm{med}}$.
+        \ENDIF
+          \setcounter{ALGBREAK}{\value{ALC@line}}
+       \ELSE
+         \STATE (\ldots) \\[2ex]
+         \setcounter{ALC@line}{44}
+       \ENDIF
+     \ENDIF
+     \STATE Return $i_{\mathrm{med}}$.
+ \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+  \addtocounter{algorithm}{-1}
+  \caption{Algorithm
+    $\textsc{RestoringSelect}({A},b,e,k,\text{mode})$ (contd.)}
+  \begin{algorithmic}[1]
+    \setcounter{ALC@line}{17}
+    \IF{$l\notin [k_< + 1, k_< + k_=]$}
+      \IF{$l \leq k_<$}
+        \STATE (\ldots)\\[2ex]
+        \setcounter{ALC@line}{\value{ALGBREAK}}
+      \ELSE
+        \IF{$l = b-e$}
+          \STATE Set $i_{\mathrm{med}}$ to point to the largest element
+          in ${A}[b\ldots e-1]$ larger than $x$ (according to \LB).
+        \ELSE
+          \STATE Using \textsc{SortedSubsetSelection}, move all elements in
+          ${A}[b+1\ldots e-1]$ larger than $x$ to
+          ${A}[b+1\ldots b+k_>]$.
+          \STATE Move the smallest element larger than $x$ (according to
+          \LB) to ${A}[e-1]$.
+          \STATE
+          $i_{\mathrm{med}} \leftarrow 
+           \textsc{RestoringSelect}({A},b+1,b+k_>,k-(k_<+k_=),\textsc{Select})$.
+          \setcounter{SelectC}{\value{ALC@line}}
+          \STATE Starting at ${A}[b+k_>]$, scan ${A}$ to find
+          $e-1$ (the index of the first element $y$ for which 
+          ${A}[b] =: x <_{x} y$). 
+          \STATE Move ${A}[e-1]$ to its proper position in
+          ${A}[b+1\ldots b+k_>]$.
+          \STATE $\textsc{UndoSubsetSelection}({A},b+1,e,b+k_>+1)$.
+          \STATE Reinsert (according to \LA) $x:=A[b]$ into
+          ${A}[b\ldots e-1]$ maintaining $i_{\mathrm{med}}$.
+          \STATE Recompute $k_<$ and $k_=$ (as above) and set 
+            $k \leftarrow (k-(k_<+k_=))+k_<+k_=$. 
+        \ENDIF
+       \ENDIF
+    \ENDIF
+    \STATE Return $i_{\mathrm{med}}$.
+  \end{algorithmic}
+\end{algorithm}
+
+The invariant is to enforce trivially for any constant-sized input. 
+Algorithm~13 is described in a recursive way to facilitate the 
+analysis and the proof of correctness. We can convert this algorithm 
+into a non-recursive variant by simply maintaining a stack of 
+two-bit entries that indicate whether the current ``invocation'' took 
+place from line \theSelectA, \theSelectB, or \theSelectC. This stack 
+has a worst-case depth of \Oh{\log n} and thus will (in an asymptotic 
+sense) not increase the extra space required by this algorithm. 
+Also, the stack $S$ used in lines \theStackA\ and \theStackB\ 
+contains only integers in the range $[0\ldots 4]$, so its overall 
+size is bounded by \Oh{\log n} bits,
+too. 
+
+Assuming that the above invariant is fulfilled for any constant-size
+input, we can inductively assume that the invariant holds after the
+``recursive'' call in line~\theSelectA. This implies that for the
+successive call to \textsc{UndoSubsetSelection} the parameters $b$,
+$\lfloor(e-b)/5\rfloor$, and hence also $e_1:=b+\lfloor(e-b)/5\rfloor$
+and $e_2:=b+\lfloor(e-b)/5\rfloor\cdot 5$ are known. The situation
+prior to the call to \textsc{UndoSubsetSelection} is depicted in
+Figure~\ref{fig:undomedian}: The array ${A}[b\ldots e_1-1]$
+contains the medians in sorted \LA-order that had been
+selected from ${A}[b\ldots e_2-1]$, and the remaining $i$
+elements are still untouched, hence also sorted according to
+\LA. 
+
+\begin{figure}[ht]
+  \renewcommand{\arraystretch}{1.75}
+  \begin{center}
+  \begin{tabular}{cccrrcrl}
+    \hline
+    \ldots & 
+    \multicolumn{2}{|c|}{medians \LA-sorted} &
+    \multicolumn{2}{c|}{unsorted} &
+    \multicolumn{2}{c|}{rest \LA-sorted} & 
+    \ldots \\
+    \hline 
+    &
+    {\small $b$} &
+    &
+    {\small $e_1$} & 
+    &
+    {\small $e_2$} & 
+    &
+    {\small $e_2+i$} 
+  \end{tabular}
+  \end{center}
+  \caption{Restoring the \LA-order after having computed
+    the median of the $\lfloor(b-e)/5\rfloor$ medians. 
+    Here $e_1:= b + \lfloor(b-e)/5\rfloor$ and  
+    $e_2:= b + \lfloor(b-e)/5\rfloor \cdot 5$.}
+  \label{fig:undomedian}
+\end{figure}
+
+As a consequence, we can first undo the effects of
+\textsc{SortedSubsetSelection} on ${A}[b\ldots e_2 -1]$, hence
+restoring it to sorted \LA-order and finally adjust $e$
+to point to $e_2 + i$. This implies that $b$ and $e$ are known and
+${A}[b\ldots e-1]$ is sorted according to \LA. As the original
+value of $k$ had been passed to the ``recursive'' call to
+\textsc{RestoringSelection}, by the invariant, we still know its value.
+
+For the second and third situtation in which a ``recursive'' call to
+\textsc{RestoringSelection} may happen (lines \theSelectB\ and
+\theSelectC), we do not know how many elements are passed to
+the ``recursive'' call. In order to recover the original value of
+$e$ after the call, we move the median-of-medians $x$ to the front of
+the array and use a distinguished element $y$ to denote the \emph{end}
+of the subarray that is not passed to the recursive call. Let us 
+consider the situation where the $k$-th element to be selected is 
+larger (according to \LB) than the median-of-medians $x$ (the other 
+situation is handled analogously). Prior to the ``recursive'' call 
+in line \theSelectC\ we have moved all elements larger than $x$ to 
+the front of the array, more specifically to the subarray 
+${A}[b+1\ldots b+k_>]$. Then we find the largest element 
+larger than $x$ (using a single scan) and move it to the end of the 
+current array ${A}[b\ldots e-1]$. This element, being larger 
+than $x$, is also larger than any element not passed to the 
+``recursive'' call and will be the first element larger than $x$ 
+encountered when scanning the array ${A}$ starting from 
+${A}[b+k_>]$ (Figure~\ref{fig:undoselect}).
+
+\begin{figure}[ht]
+  \renewcommand{\arraystretch}{1.75}
+  \begin{center}
+  \begin{tabular}{ccccrrcl}
+    \hline
+    \ldots & 
+    \multicolumn{1}{|c}{$x$} &
+    \multicolumn{2}{|c|}{``$x$ \LB'' \LA-sorted} &
+    \multicolumn{2}{c|}{``$x \not<_{x}$'' unsorted} &
+    \multicolumn{1}{c|}{$y$} & 
+    \ldots \\
+    \hline 
+    &
+    {\small $b$} &
+    {\small $b+1$} &
+    &
+    {\small $b+k_>$} & 
+    & {\small ?}
+    & {\small $e$}
+  \end{tabular}
+  \end{center}
+  \caption{Restoring the \LA-order after having selected the
+    $k-(k_<+k_=)$-th element from ${A}[b+1\ldots b+k_>-1]$.
+    Here $y$ is the largest element in ${A}[b\ldots e-1]$ for
+    which $x\LB y$.}
+  \label{fig:undoselect}
+\end{figure}
+
+By the invariant, we know that after the ``recursive call'' to
+\textsc{RestoringSubsetSelection}$({A},b+1,b+k_>,k-(k_<+k_=)$,
+the subarray ${A}[b+1\ldots b+k_>-1]$ will be sorted according
+to \LA, and we will know the values of $b+1$, $b+k_>$, and
+$k-(k_<+k_=)$. This enables us to retrieve the median-of-medians $x$
+from ${A}[b]$ and (starting from ${A}[b+k_>]$) to scan
+for the first element larger than $x$. After we have found this
+element at position $e-1$, we have restored to original value of $e$,
+and a single scan over ${A}[b\ldots e-1]$ allows us to
+compute the values $k_<$ and $k_=$, which are needed to restore $k$ to
+its original value. 
+
+Inductively, we see that the invariant holds for the initial call to
+the algorithm, and this implies that the algorithm selects the $k$-th
+smallest element according to \LB\ while maintaining the \LA-order in
+which the elements had been given. The space requirement of this
+algorithm is \Oh{\log n} bits, because besides a constant number of
+indices, only two stacks of size \Oh{\log n} bits are needed. Using
+the analysis of the original algorithm by Blum 
+\etal~\cite{blum:selection}, the running time can be shown to be
+\Oh{n}, and we conclude with the following theorem:
+
+\begin{theorem}\label{lem:select}
+ The $k$-th smallest element in an array of $n$ element can be 
+ selected in linear time using \Oh{1} extra space. Furthermore, if 
+ the set is given sorted according to some total order, this order 
+ can be restored in the same time and space complexity.
+\end{theorem}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "paper"
+%%% End:

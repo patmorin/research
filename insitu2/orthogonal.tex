@@ -1,0 +1,140 @@
+%% -*- LaTeX -*- This is LaTeX2e code
+
+\section{Orthogonal line segment intersection}\label{sec:orth}
+
+In this section, we present a space-efficient algorithm for the
+orthogonal line segment intersection problem.  Since this problem has
+a variable output size $k \in \Oh{n^2}$ we consider the output memory
+model to be a write-only space usable only for output and not for
+temporary space.  This model has been used by Chen and
+Chan~\cite{chen:space-efficient} for variable size output,
+space-efficient algorithms and accurately models algorithms that have
+output streams with write-only buffer space.
+
+The input to our algorithm is an array $V[0,n-1]$ of $n$ vertical
+segments and an array $H[0,m-1]$ of $m$ horizontal segments. The
+goal is to output all of the intersections between horizontal and
+vertical segments.  Our solution is an algorithm in standard recursive
+form. Therefore, we use \Oh{\log n} extra memory and our computation
+time is \Oh{n \log n + k} where $k$ is the number of intersections.
+This is an improvement over the algorithm by Chen and
+Chan\cite{chen:space-efficient}, however they solve the more general
+problem of enumerating all intersections among a general set of
+line segments.  It is unclear how to convert our solution to
+space-efficient recursive form because it is difficult to pre-compute
+all of the base instances.  Once we have described the algorithm,
+the reason for this difficulty will become clear.
+
+
+
+\begin{algorithm}
+  \caption{OLSI($V[a,b],H[c,d]$): Report all intersections between vertical line segments in $V[a,b]$ and horizontal line segments $H[c,d]$.} \label{alg:orth}
+  \begin{algorithmic}[1]
+    \REQUIRE segments in $V$ are sorted by $Y$-coordinate of the top vertices of the segments and segments in $H$ are sorted by $Y$-coordinate.
+    \ENSURE all intersections between a segment in $H$ and a segment in $V$ are reported.
+    \IF{$b-a$ is 1} 
+       \STATE \COMMENT{There are 2 vertical segments in $V[a,b]$.}
+       \STATE Let $X_{min}$ be the minimum $X$-coordinate of the segments in $V[a,b]$.
+       \STATE Let $X_{max}$ be the maximum $X$-coordinate of all segments in $V[a,b]$.
+       \STATE Use \textsc{SortedSubsetSelection}, to select all horizontal segments that completely span the slab $[X_{min},X_{max}]$.
+              The segments are placed in $H[c,m_2]$.
+       \STATE Scan $V[a,b]$ and $H[c,m_2]$ to report all intersections.
+       \STATE UNDO Selection of horizontal segments spanning the slab. We recover $H[c,d]$ from $H[c,m_2]$.
+    \ELSE
+       \STATE Let $X_{min}$ be the minimum $X$-coordinate of all segments in $V[a,b]$.
+       \STATE Let $X_{med}$ be the median $X$-coordinate of all segments in $V[a,b]$.
+       \STATE Let $X_{max}$ be the maximum $X$-coordinate of all segments in $V[a,b]$.
+       \STATE \COMMENT{$X_{min}$ and $X_{max}$ represent the boundaries of the current vertical slab being processed}.
+       \STATE Use \textsc{SortedSubsetSelection}, to select all horizontal segments that completely span the slab $[X_{min},X_{max}]$.
+              The segments are placed in $H[c,m_2]$.
+              \COMMENT{These are the horizontal segments that are completely spanning the current slab: $[X_{min},X_{max}]$}.
+       \STATE Scan $V[a,b]$ and $H[c,m_2]$ to report all intersections.
+       \STATE UNDO Selection of horizontal segments spanning the slab. We recover $H[c,d]$ from $H[c,m_2]$.
+       \STATE Use \textsc{SortedSubsetSelection} to select all vertical segments in the slab $[X_{min},X_{med}]$.
+              The segments are placed in $V[a,m_1]$.
+       \STATE Use \textsc{SortedSubsetSelection}, to select all horizontal segments that are in the slab $[X_{min},X_{med}]$ or span the slab $[X_{min},X_{med}]$ but
+              DO NOT span the slab $[X_{min},X_{max}]$.
+              The segments are placed in $H[c,m_2]$.
+       \STATE OLSI($V[a,m_1],H[c,m_2]$).
+       \STATE UNDO Selection of horizontal segments to recover $H[c,d]$ from $H[c,m_2]$.
+       \STATE UNDO Selection of vertical segments to recover $V[a,b]$ from $V[a,m_1]$.
+       \STATE Use \textsc{SortedSubsetSelection} to select all vertical segments in the slab $[X_{med},X_{max}]$.
+              The segments are placed in $V[a,m_1]$.
+       \STATE Use \textsc{SortedSubsetSelection}, to select all horizontal segments that are in the slab $[X_{med},X_{max}]$ or span the slab $[X_{med},X_{max}]$ but
+              DO NOT span the slab $[X_{min},X_{max}]$.
+              The segments are placed in $H[c,m_2]$.
+       \STATE OLSI($V[a,m_1],H[c,m_2]$).
+   \ENDIF
+  \end{algorithmic}
+\end{algorithm}
+
+The above algorithm is in standard recursive form. Since the recursion tree is balanced, the running time is \Oh{n \log n} 
+and the amount of extra memory
+required is \Oh{\log n} for the recursion stack. Prior to invoking the recursive algorithm, the segments in $H$ and $V$ are sorted 
+in \Oh{n \log n} time. The key point is that an intersection between a horizontal and vertical segment is
+reported only when the vertical segment is contained in the current slab and the horizontal segment completely spans the vertical slab.
+All of the selection steps and their undo counter-parts are performed using SortedSubsetSelection in linear time with
+constant extra memory. Selecting the
+segments with maximum and minimum $X$-coordinate in $V[a,b]$ is trivial. Selecting the median can be done in linear expected time with \Oh{1}
+extra memory using the algorithm described in Section \ref{sec:sel} or deterministically in linear time and \Oh{1} extra memory using
+the algorithm described in Appendix \ref{sec:detkmed}.
+The only steps of the algorithm still requiring explanation are Steps 6 and 14: how to report all of the intersections between vertical
+segments within a slab and horizontal segments spanning a slab.
+
+Prior to the scan, the vertical segments in $V[a,b]$ are sorted
+by $Y$-coordinate of the upper vertices of the segments and the
+horizontal segments in $H[c,m_2]$ are sorted by $Y$-coordinate. For
+each vertical segment with endpoints $p,q$, we locate the index $i$
+in $H$ of the horizontal segment with largest $Y$-coordinate whose
+value is at most the $Y$-coordinate of $p$.  Starting at $i$, we
+sequentially scan $H$ until we find the index $j$ of the first
+horizontal segment whose $Y$-coordinate is more than the $Y$-coordinate
+of $q$. Now, all of the segments in $H[i,j-1]$ intersect segment
+$pq$. Given $i$, the number of segments of $H$ that are verified
+is one more than the number of intersections. A simple scan, similar to the
+merging of two sorted lists, shows that all of the $i$'s can be found in linear time.
+Since a vertical segment only occurs in \Oh{\log n} slabs, the total amount of time
+spent in this step is \Oh{n \log n + k} where $k$ is the number of intersections reports.
+We outline the scan below.
+
+\begin{algorithm}
+  \caption{Scan($V[a,b],H[c,d]$): Report all intersections between vertical line segments in $V[a,b]$ and horizontal line
+           segments in $H[c,d]$.} \label{alg:scan}
+  \begin{algorithmic}[1]
+    \REQUIRE All vertical segments are within a vertical slab and all the horizontal segments span the slab. All segments in
+             $V$ are sorted by $Y$-coordinate of the upper vertex and all segments in $H$ are sorted by $Y$-coordinate.
+    \ENSURE all intersections between a segment in $H$ and a segment in $V$ are reported. The order of the segments in $V$ and $H$
+            remains unchanged.
+
+\STATE C := a \COMMENT{C represents the index of the current vertical segment}.
+\STATE T := index of first $Y$-coordinate in $H[c,d]$ that is smaller than $Y$ coordinate of $V[C]$.
+\STATE R := T.
+\WHILE{$C \leq b$}
+      \WHILE{$Y$-coordinate of $H[R] > Y$-coordinate of $V[C]$}
+            \STATE Report intersection and increment R by 1.
+      \ENDWHILE
+      \STATE increment C by 1.
+      \STATE update T and set $R: = T$. 
+\ENDWHILE
+
+  \end{algorithmic}
+\end{algorithm}
+
+
+%% state theorem
+\begin{theorem}
+Given a set of $n$ vertical line segments in an array $V$ and a set of $m$ horizontal line segments in an array $H$, all
+intersections between horizontal and vertical segments can be reported in \Oh{(n + m)\log n + k} time using \Oh{\log n} extra space where $k$ is
+the number of intersections reported.
+\end{theorem}
+
+The main difficutly in transforming this algorithm into space-efficient recursive form stems from the difficulty of pre-computing
+all of the base instances. Since a horizontal line segment can span a logarithmic number of slabs, we are unable
+to precompute the base instances in a simple way.
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "paper"
+%%% End:
+

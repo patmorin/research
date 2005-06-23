@@ -1,0 +1,82 @@
+
+%% -*- LaTeX -*- This is LaTeX2e code
+
+
+
+\section{Introduction}
+
+Researchers have studied space-efficient algorithms since the early
+70's. Examples include merging, (multiset) sorting, and partitioning
+problems;
+see~\cite{geffert:merging,katajainen:multisets,katajainen:partitioning}.
+Br\"onnimann \etal~\cite{bronnimann:convex} were the first to consider
+space-efficient geometric algorithms and showed how to compute the
+convex hull of a planar set of $n$ points in \Oh{n \log h} time using
+\Oh{1} extra space, where $h$ denotes the size of the output.
+Recently, Chen and Chan~\cite{chen:space-efficient} addressed the
+problem of computing the intersections among $n$ line segments, giving
+an algorithm that runs in \Oh{(n+k)\log^2 n} time using \Oh{\log^2n}
+extra space where $k$ is the number of intersections and an algorithm
+that runs in \Oh{(n+k)\log n} time using \Oh{1} extra space but the
+initial input is destroyed.  Br\"onnimann, Chan and
+Chen~\cite{bronnimann:inplace} developed some space efficient data
+structures and used them to solve a number of geometric problems such
+as convex hull, Delaunay triangulation and nearest neighbor queries.
+In this paper, we develop a number of space-efficient tools outlined
+in Section \ref{sec:tools} that are of interest in their own right. We
+then apply these tools to several geometric problems that have
+solutions using some form of divide-and-conquer. Specifically, we
+address the problems of closest pairs, bichromatic closest pair 
+and orthogonal line segment intersection.
+
+\ournote{Jit:  Can you please add a sentence for Br\"onnimann \etal~\cite{bronnimann:inplace}? I forgot my proceedings at home.}
+
+\subsection{The Model}
+
+The goal is to design algorithms that use very little extra space over
+and above the space used for the input to the algorithm. The input is
+assumed to be stored in an array of size $n$, thereby allowing random
+access.  The specifics of the input are outlined with each problem
+addressed.  We assume that a constant size memory can hold a constant
+number of words. Each word can hold one pointer, or an \Oh{\log n} bit
+integer, and a constant number of words can hold one element of the
+input array. The extra memory used by an algorithm is measured in
+terms of the number of extra words. In certain cases, the output may
+be much larger than the size of the input. For example, given a set of
+$n$ line segments, if the goal is to output all the intersections,
+there may be as many as \Wm{n^2}. In such cases, we consider the
+output memory to be write-only space usable for output but cannot be
+used as extra storage space by the algorithm.  This model has been
+used by Chen and Chan~\cite{chen:space-efficient} for variable size
+output, space-efficient algorithms and accurately models algorithms
+that have output streams with write-only buffer space.
+
+The remainder of the paper is organized as follows. In Section
+\ref{sec:tools}, we outline the space-efficient tools that will be
+useful in the solution of the geometric problems addressed. In Section
+\ref{sec:nn}, we present an \Oh{n \log n} time algorithm to solve the
+closest pair problem using only \Oh{1} extra memory. In the following
+subsection, we solve the bichromatic closest pair problem in \Oh{n
+\log n} time using only \Oh{1} extra memory. The solution is
+randomized but the extra memory used is still \Oh{1} in the worst
+case.  Section \ref{sec:orth} presents a solution to the orthogonal
+line segment intersection problem in \Oh{n\log n + k} time using
+\Oh{\log n} extra space where $n$ is the number of line segments, and
+$k$ is the number of intersections.  Finally, conclusions and open
+problems are in Section \ref{sec:conc}.
+
+
+%\begin{definition}
+%  An algorithm that needs \Oh{1} extra working space is called
+%  \emph{in-place}, and an algorithm that needs \Oh{\log_2 n} extra
+%  space is called \emph{in situ}.
+%\end{definition}
+%
+%Recently, Raman~\etal~\cite{raman:dynamic,raman:indexable} considered 
+%\emph{succinct} representations of ordered sets that allowed for
+%various dictionary operations.
+%
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "paper"
+%%% End:

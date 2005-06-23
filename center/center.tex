@@ -1,0 +1,324 @@
+\documentclass{ws-ijcga}
+%\usepackage{charter}
+%\usepackage[numbers,sort&compress]{natbib}
+\usepackage{graphicx}
+%\usepackage{fullpage}
+%\usepackage{amsfonts}
+%\usepackage{algorithmic}
+
+\input{pat.tex}
+
+%\setlength{\parskip}{.3cm}
+%\setlength{\parindent}{1cm}
+\newcommand{\area}{\mathrm{area}}
+
+\begin{document}
+
+\markboth{P. Bra\ss, L. Heinrich-Litan and P. Morin}
+{Computing the Center of Area of Convex Polygon}
+
+\catchline
+
+\title{\MakeUppercase{Computing the Center of Area of a Convex Polygon}%
+  \thanks{This research was partly funded by Deutsche 
+    Forschungsgemeinschaft (DFG), grant BR 1465/5-2, and by
+    the IST Programme of the EU as a Shared-cost RTD (FET Open) 
+    Project under Contract Number IST-2000-26473 (ECG - Effective 
+    Computational Geometry for Curves and Surfaces).}}
+
+\author{Peter Bra\ss}
+\address{Department of Computer Science R8/206, City College CUNY,
+    138th Street at Convent Ave. \\
+    New York NY 10031, USA \\
+    peter@cs.ccny.cuny.edu} 
+
+\author{Laura Heinrich-Litan}
+\address{Institut f\"ur Informatik, Freie Universit\"at Berlin \\
+    D-14195 Berlin, Germany \\ 
+    litan@inf.fu-berlin.de}
+
+\author{Pat Morin}
+\address{School of Computer Science, Carleton University,
+    1125 Colonel By Drive \\ 
+    Ottawa, Ontario, K1S~5B6, Canada \\
+    morin@cs.carleton.ca}
+
+\maketitle
+
+\pub{Received September 18, 2002}{Revised July 25, 2003}{Communicated by
+Pankaj K. Agarwal}
+
+\begin{abstract}
+The center of area of a convex planar set $X$ is the point $p$ for
+which the minimum area of $X$ intersected by any halfplane containing
+$p$ is maximized.  We describe a simple randomized linear-time
+algorithm for computing the center of area of a convex $n$-gon.
+\end{abstract}
+
+\keywords{Geometric optimization; center of area, Tukey center}
+
+\section{Introduction}
+Let $X$ be a convex planar set with unit area.  The \emph{center of
+area} of $X$ is a point $p^*$ that maximizes the \emph{cut off area
+function}
+\[
+f(p) = \min\{\area(h\cap X) \mid \mbox{$h$ is a halfplane that contains $p$} \}
+	\enspace ,
+\]
+and the value $\delta^*=f(p^*)$ is known as \emph{Winternitz's measure of
+symmetry}.\cite{g63} The $\delta$-level $\Gamma_\delta$ of $X$ is
+defined as
+\[
+\Gamma_\delta = \{p \mid f(p)=\delta  \} \enspace .
+\]
+It is known that $\Gamma_\delta$ is a closed convex curve and
+that $\Gamma_{\delta_1}$ is strictly contained in $\Gamma_{\delta_2}$
+if $\delta_1>\delta_2$.  From this it follows that $p^*$ is unique.
+
+There is a long history of work on the center of area of convex sets.
+A classical result of Winternitz,\cite[pp.~54--55]{b23} which has
+been rediscovered many times,\cite{e55b,ll35,n45,n58,yb51} is
+that $f(g)\ge 4/9$ where $g$ is the centroid of $X$, with equality if
+and only if $X$ is a triangle. (In $d$ dimensions, Ehrhart\cite{e55a} showed
+that $f(g)\ge d^d/(d+1)^d$ with equality if and only if $X$ is a
+pyramid on any (d-1)-dimensional convex base.)  For centrally
+symmetric sets, $f(g)=1/2$, since any line through the point of
+symmetry cuts $X$ into two pieces of equal area.  Thus, $4/9\le
+f(g)\le 1/2$ with $f(g)=4/9$ for triangles and $f(g)$ close to $1/2$
+for highly symmetric sets.
+
+Although much is known about the center of area, it is quite
+nontrivial to determine the center of area for a given convex set.  In
+a series of papers, D\'{\i}az and O'Rourke\cite{do89,do91,do94} develop
+an $O(n^6\log^2 n)$ time algorithm for finding the center of area of a
+convex $n$-gon.  The same authors give an approximation algorithm that
+runs in $O(GK(n+K))$ time, where $G$ is the bit-precision of the input
+polygon $P$ and $K$ is the output bit-precision of the point $p^*$.
+Bra\ss\ and Heinrich-Litan\cite{bh02} describe an $O(n^2\log^3
+n\alpha(n))$ time algorithm for computing the center of area of a
+convex $n$-gon.  As an application of tools for searching in
+arrangments of lines, Langerman and Steiger\cite{ls02} present an
+$O(n\log^3 n)$ time algorithm for finding the center of area of a
+convex $n$-gon.  All of these algorithms are deterministic.
+
+In this paper we give a simple randomized linear-time algorithm for
+finding the center of area of a convex $n$-gon $P$, which also
+computes Winternitz's measure of symmetry for $P$.  We proceed by first
+giving a linear-time algorithm for the decision problem: Does there
+exist a point $p$ such that $f(p)>\delta$?  We then apply a randomized
+technique due to Chan\cite{c99} to turn this decision algorithm into a
+linear-time optimization algorithm.  For convenience, our model of
+computation is the real RAM,\cite{ps85} though we do not use any functions that
+are specific to this model.  We require only that it is possible to
+to compute the exact area of a convex polygon.
+
+The remainder of the paper is organized as follows.  \secref{decision}
+describes our algorithm for the decision problem and
+\secref{optimization} shows how to convert this decision algorithm
+into an optimization algorithm.  \secref{conclusions} summarizes and
+concludes with directions for future research.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The Decision Algorithm}\seclabel{decision}
+
+In this section, we give an $O(n)$ time algorithm for the following
+decision problem: Is there a point $p$ such that $f(p)\ge \delta$?  An
+alternative statement of this problem is: is $\Gamma_\delta$
+non-empty?  In what follows, we show that $\Gamma_\delta$ can be
+computed in $O(n)$ time.
+
+A $\delta$-cut of $P$ is a directed line segment $uv$ with endpoints
+$u$ and $v$ on the boundary of $P$ such that the area of $P$ to the
+right of $uv$ is at most $\delta$.  Note that, for any $\delta$-cut
+$uv$, the point $p$ cannot be to the right of $uv$. On the other
+hand, if there is no $\delta$-cut $uv$ with $p$ on its right, then
+$f(p)\ge\delta$.  Therefore, each $\delta$-cut defines a linear
+constraint on the location of $p$, which we call a
+$\delta$-constraint.  The answer to the decision problem is
+affirmative if and only if there is a point $p$ that simultaneously
+satisfies all $\delta$-constraints.  If such a point $p$ exists, we
+call the constraints feasible, otherwise we call them infeasible.
+
+Unfortunately, every polygon has an infinite number of $\delta$-cuts
+and hence an infinite number of $\delta$-constraints.  However, we
+will show that all constraints imposed by these $\delta$-cuts can be
+represented succinctly as $O(n)$ non-linear (but convex) constraints
+that can be computed in $O(n)$ time.
+
+To generate a representation of all $\delta$-constraints, we begin by
+choosing a point $u$ on the boundary of $P$ and finding the unique
+point $v$ so that $uv$ is a $\delta$-cut.  Next, we sweep the points
+$u$ and $v$ counterclockwise along the boundary of $P$ maintaining the
+invariant that $uv$ has an area of exactly $\delta$ to its right.  We
+continue this process until we return to the original points $u$ and
+$v$.
+
+Observe that, as long as $u$ and $v$ do not cross a vertex of $P$, the
+intersection of all $\delta$-constraints belonging to an edge pair is
+a convex region whose boundary consists of at most 2 linear pieces and
+1 non-linear piece.  (See \figref{delta-cut}.) In fact, this
+non-linear piece is a hyperbolic arc.  This is due to the well known
+fact that a line tangent to a hyperbola forms a triangle of constant
+area with the asymptotes of the hyperbola.  Furthermore, the
+description complexity of these pieces is constant, since they are
+defined by a four-tuple of vertices of $P$.  Thus, the intersection of
+all these $\delta$-constraints can be computed explicitly in constant
+time.  Since $u$ and $v$ sweep over each vertex exactly once, we
+obtain $2n$ such convex constraints whose intersection is equal to the
+intersection of all $\delta$-constraints.
+
+\begin{figure}[b]
+\begin{center}\includegraphics{delta-cut}\end{center}
+\caption{The intersection of all $\delta$-constraints defined by a
+pair of edges makes a convex region whose boundary consists of at
+most 3 pieces.}\figlabel{delta-cut}
+\end{figure}
+
+Therefore, the decision problem reduces to determining if the
+intersection of $2n$ convex regions is empty.  We can compute an
+explicit representation of this intersection in $O(n)$ time, as
+follows: Separately compute the intersection of all
+$\delta$-constraints that contain the point $(0,+\infty)$ and all
+$\delta$-constraints that contain the point $(0,-\infty)$ and then
+compute the intersection of the two resulting convex regions.  Since
+the $\delta$-constraints are generated sorted by slope, the first step
+is easily done in $O(n)$ time using an algorithm similar to Graham's
+Scan.\cite{a79,g72}  Since the two boundaries of the two resulting
+regions are $x$-monotone and upwards, respectively downwards, convex,
+their intersection (step two) can be computed in $O(n)$ time using a
+left-to-right plane sweep.\cite{bo79}
+
+We have just proven:
+
+\begin{theorem}
+Let $P$ be a convex $n$-gon and $\delta>0$ a real parameter.  Then
+there exists an $O(n)$ time algorithm for the decision problem: Does
+there exist a point $p$ such that $f(p)\ge\delta$?
+\end{theorem}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The Optimization Algorithm}\seclabel{optimization}
+
+In this section, we show how to use the decision algorithm of the
+previous section along with a technique of Chan\cite{c99} to solve the
+optimization problem: What is the largest value of $\delta$ such that
+$\Gamma_\delta$ is non-empty?  Chan's technique requires only that we
+be able to (1)~solve the decision problem in $D(n)=\Omega(n^\epsilon)$
+time, $\epsilon>0$ and (2)~generate a set of $r>1$ subproblems each of
+size $\alpha n$, $\alpha <1$, such that the solution to the original
+problem is the minimum (or maximum) of the solutions to the
+subproblems.  Under these conditions, the optimization problem can be
+solved by a randomized algorithm in $O(D(n))$ expected time.
+
+To apply Chan's technique, we need a suitable definition of
+subproblem.  Let $S$ be a subset of edges of $P$.  The $S$-induced
+$\delta$-constraints are the set of all $\delta$-constraints $uv$,
+where $u$ and $v$ are both on edges of $S$.  The type of subproblems
+we consider are those of determining for a given set $S$ and a value
+$\delta$ whether or not the $S$-induced $\delta$-constraints feasible.
+To obtain a linear-time algorithm, we must be able to solve such
+subproblems in $O(|S|)$ time.
+
+For a given set $S$, computing a representation of the $S$-induced
+$\delta$-constraints, can be done using a modification of the sweep
+algorithm from the previous section so that it only considers
+$\delta$-cuts $uv$ where $u$ and $v$ are on elements of $S$.  The only
+technical tool required for this modification is a data structure
+that, given two points $u$ and $v$ on elements of $S$ (the boundary of
+$P$) tells us the area of $P$ to the right of $uv$ in constant time.
+This data structure is provided by Czyzowicz \etal\cite{ccu98} who
+show that any convex $n$-gon can be preprocessed in $O(n)$ time so
+that the area of the polygon to the right of any chord $uv$ can be
+computed in $O(1)$ time.  Using this data structure, it is
+straightforward to generate a representation of $S$-induced
+$\delta$-constraints in $O(|S|)$ time.  Once we have computed these
+constraints, we can test if they are feasible in $O(|S|)$ time.  Thus,
+Condition~1 required to use Chan's technique is satisfied with
+$D(n)=\Theta(n)$.
+
+Next, we observe that Helly's theorem in the plane (c.f.,
+Eckhoff\cite{e93}) implies that for any $\delta>\delta^*$ there exists
+a set of three $\delta$-constraints whose intersection is empty.  In
+our context, this means that $P$ contains 6 edges such that, for any
+$\delta>\delta^*$, the $\delta$-constraints induced by those edges are
+infeasible.  Therefore, if a set $S$ contains those 6 edges, then the
+$S$-induced $\delta$-constraints are feasible if and only if
+$\delta\le\delta^*$.
+
+Therefore, we can solve our maximization problem as follows: Partition
+the edges of $P$ in $7$ groups, $E_1,\ldots,E_7$, each of size
+approximately $n/7$.  Next, generate subsets $S_1,\ldots,S_7$, by
+taking all $7$ 6-tuples of $E_1,\ldots,E_7$.  Note that, for each
+$S_i$, the $S_i$-induced $\delta$-constraints are satisfiable if
+$\delta\le\delta^*$, since they are just a subset of the original
+constraints.  On the other hand, for the set $S_j$ that contains the 6
+edges guaranteed by Helly's theorem, the $S_j$-induced
+$\delta$-constraints are not satisfiable for any $\delta>\delta^*$.
+Therefore,
+\[
+\delta^* = \min\left\{\max\left\{\delta \mid 
+	\mbox{$S_i$-induced $\delta$-constraints are satisfiable} 
+	\right\} \mid 1\le i\le 7\right\} \enspace .
+\]
+Finally, observe that each $S_i$ is of size at most $\alpha n$, for
+$\alpha=6/7$.  Therefore, we have satisfied the second condition
+required to apply Chan's optimization technique.  This completes the
+proof of:
+
+\begin{theorem}
+There exists a randomized $O(n)$ expected time algorithm for the
+optimization problem: What is the largest value $\delta^*$ for which
+$\Gamma_{\delta^*}$ is non-empty?
+\end{theorem}
+
+Of course, once $\delta^*$ is known, an explicit representation of
+$\Gamma_{\delta^*}$ can be computed in $O(n)$ time.  Alternatively,
+Chan's technique can also be made to output a point
+$p^*\in\Gamma_{\delta^*}$.\cite{c99}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusions}\seclabel{conclusions}
+
+We have given a randomized linear-time algorithm for determining the
+center of area of a convex $n$-gon.  This algorithm is simple,
+implementable, and is asymptotically faster than any previously known
+algorithm.
+
+Although our algorithm is simple and easy to implement, the constants
+hidden in the $O$-notation are enormous.  A close examination of
+Chan's technique reveals that the number of subproblems generated in
+our application is actually $r\ge {k\choose 6}$, where $k$ is an
+integer that satisfies $\ln {k\choose 6}+1 < k/6$. The smallest such
+value of $k$ is $146$, which leads to $r={146\choose 6}=12\, 122\,
+560\, 164$ subproblems.  Reducing this constant while maintaining the
+$O(n)$ asymptotic running time remains an open problem.  One possible
+approach is to treat the problem as an LP-type problem and try to use
+the Matou\v sek-Sharir-Welzl algorithm.\cite{msw92}  The difficulty with
+this approach is that the underlying LP-type problems consists of
+as many as $n\choose 2$ constraints (though only $O(n)$ apply to any given value of
+$\delta$).  A linear-time deterministic algorithm is also an open
+problem. The current fastest deterministic algorithm runs in
+$O(n\log^3 n)$ time.\cite{ls02}
+
+Finally, we have not considered the problem of computing the center of
+area of a non-convex polygon.  There are two different versions of
+this problem, depending on whether a cut is defined as a chord of $P$,
+which partitions $P$ into two polygons, or a line which may partition
+$P$ into many polygons.  Approximation algorithms for the second case
+are considered by D\'{\i}az and O'Rourke.\cite{do89}  To the best of
+our knowledge, there are no exact algorithms for either version.
+
+
+\section*{Acknowledgements}
+
+The authors would like to thank Stefan~Langerman for helpful
+discussions and for bringing his paper\cite{ls02} to our attention.
+
+\bibliography{center}
+\bibliographystyle{plain}
+
+
+
+
+\end{document}

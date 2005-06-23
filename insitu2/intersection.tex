@@ -1,0 +1,98 @@
+%% -*- LaTeX -*- This is LaTeX2e code
+
+\subsubsection{Orthogonal Line Segment Intersection}
+
+
+In this section, we present a space-efficient algorithm for the
+Orthogonal Line Segment Intersection problem. Our algorithm can be
+seen a variant of the (external-memory) \emph{distribution sweeping}
+approach taken by Goodrich \etal~\cite{goodrich:external}.
+
+The (internal memory) version of this algorithm is a top-down
+divide-and-conquer algorithm, that is, the (algorithmic) work is done
+prior to recursion. As a precondition, assume that all vertical
+segments are sorted according to the $y$-coordinate of their lower
+endpoint and that all horizontal segments are sorted according to
+theit $y$-coordinate. In each step of the recursion, the set of
+vertical segments is split according to the median $x$-coordinate.
+These sets define two \emph{slabs} that are swept top-down. All
+horizontal segments that completely span a slab are pushed onto a
+stack corresponding to their stack. Whenever (the lower endpoint of) a
+vertical segment is encountered, the stack corresponding to the slab
+containing the segment is scanned and all intersecting segments are
+reported. After this sweep all horizontal segments (or fragments
+thereof) not completely spanning a slab are distributed to the
+corresponding slab which in turn is processed recursively.
+
+The first observation that helps making this algorithm \emph{in-place}
+is that the ``stack'' used in the top-down sweep is never accessed
+using \emph{push}-operations. Instead, all horizontal segments are
+pushed onto this stack in sorted order. This means that any sorted
+(part of an) array in connection with a single pointer indicating the
+current ``top'' of the ``stack'' can be used to implement this part of
+the algorithm.
+
+A much more challenging problem is that the recursion tree
+corresponding to the algorithm is traversed in an \emph{inorder}
+fashion, i.e., the general framework of Section~\ref{sec:dandc}
+cannot be used. Our approach\ldots
+
+\begin{itemize}
+\item  Do ``revertable'' median-split according to $x$.
+\item  ``Left'' segments are sorted in the opposite direction as 
+  ``right'' segments. Alternate reversal on each level of the
+  recursion, i.e., always revert the ``left'' segments w.r.t. to the
+  last order encountered.
+\item Claim: Can always reconstruct left, right, and median
+  $x$-coordinate. 
+\end{itemize}
+
+\begin{itemize}
+\item  Unless it is clear, how to report intersections
+  space-efficently, just do counting\ldots
+\item  This algorithm uses median-finding which can be done
+  \emph{in-place} using the algorithm of Carlsson and 
+  Sundstr\"om~\cite{carlsson:linear}. 
+\item  Divide and conquer without cutting vertical segments that cross
+  the ``divide'' line. Instead, move each such segment down one
+  level when starting recursion and bring it back up when returning
+  from recursion. Consequence: each segment is stored exactly once.
+\item Breakdown of the algorithm:
+  \begin{itemize}
+  \item Sort all horizontal segments by their $y$-coordinate. These
+    horizontal segments are stored in an array $h[1\ldots H]$.
+  \item  Sort all vertical segments by their lower endpoint. These
+    vertical segments are stored in an array $v[1\ldots V]$.
+  \item  Maintain four index pointers: $h_b,h_e$ to indicate the
+    subarray of array $h$ currently under inspection, and $v_b,v_e$ to
+    indicate the subarray of array $v$ currently under inspection.
+    Initially: $h_b = v_b = 1$, $h_e = H$, and $v_e=V$.
+  \item repeat:
+    \begin{itemize}
+    \item  Use median-find to find the median $m$ of the $x$ coordinates
+      of the vertical segments stored in $v[v_b,v_e]$.
+    \item In-place partition the vertical segments such as to respect
+      the median while maintaining their
+      $y$-order~\cite{katajainen:partitioning} (\Oh{1} extra space).
+      
+    \item The array $a[1\ldots n/2]$ in each slab is subdivided into
+      three parts using two indices $1\leq c\leq d \leq n/2+1$ such that
+      the elements $a[c\ldots d-1]$ are on the stack, the elements
+      $a[d\ldots n/2]$ have not been swept yet. Initially, $c=d=1$.
+    \item \ldots
+    \item Scan the array $a[c\ldots d-1]$ with index $i$: if $a[i]$ is
+      not crossed by the segment, set $c=i+1$, else report the
+      intersection. Correctness: At each point in time, the segments in
+      the array are ordered by their lower endpoint.
+    \item  
+    \end{itemize}
+    until $v_b=1$ and $v_e = V$ (i.e. until the recursion tree has
+    been traversed completely.
+  \end{itemize}
+\end{itemize}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "paper"
+%%% End:
+

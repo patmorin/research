@@ -1,0 +1,613 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[charterfonts,lotsofwhite]{patmorin}
+
+\newcommand{\E}{\mathbf{E}\,}
+\newcommand{\frequent}{\textsc{Frequent}}
+\newcommand{\FREQUENT}{\textsc{FREQUENT}}
+
+\newcommand{\centeripe}[1]{\begin{center}\Ipe{#1}\end{center}}
+\newcommand{\comment}[1]{}
+
+\newcommand{\centerpsfig}[1]{\centerline{\psfig{#1}}}
+
+\newcommand{\seclabel}[1]{\label{sec:#1}}
+\newcommand{\Secref}[1]{Section~\ref{sec:#1}}
+\newcommand{\secref}[1]{\mbox{Section~\ref{sec:#1}}}
+
+\newcommand{\alglabel}[1]{\label{alg:#1}}
+\newcommand{\Algref}[1]{Algorithm~\ref{alg:#1}}
+\newcommand{\algref}[1]{\mbox{Algorithm~\ref{alg:#1}}}
+
+\newcommand{\applabel}[1]{\label{app:#1}}
+\newcommand{\Appref}[1]{Appendix~\ref{app:#1}}
+\newcommand{\appref}[1]{\mbox{Appendix~\ref{app:#1}}}
+
+\newcommand{\tablabel}[1]{\label{tab:#1}}
+\newcommand{\Tabref}[1]{Table~\ref{tab:#1}}
+\newcommand{\tabref}[1]{Table~\ref{tab:#1}}
+
+\newcommand{\figlabel}[1]{\label{fig:#1}}
+\newcommand{\Figref}[1]{Figure~\ref{fig:#1}}
+\newcommand{\figref}[1]{\mbox{Figure~\ref{fig:#1}}}
+
+\newtheorem{thm}{Theorem}{\bfseries}{\itshape}
+\newcommand{\thmlabel}[1]{\label{thm:#1}}
+\newcommand{\thmref}[1]{Theorem~\ref{thm:#1}}
+
+\newtheorem{lem}{Lemma}{\bfseries}{\itshape}
+\newcommand{\lemlabel}[1]{\label{lem:#1}}
+\newcommand{\lemref}[1]{Lemma~\ref{lem:#1}}
+
+\newtheorem{cor}{Corollary}{\bfseries}{\itshape}
+\newcommand{\corlabel}[1]{\label{cor:#1}}
+\newcommand{\corref}[1]{Corollary~\ref{cor:#1}}
+
+\newtheorem{assumption}{Assumption}{\bfseries}{\rm}
+\newenvironment{ass}{\begin{assumption}\rm}{\end{assumption}}
+\newcommand{\asslabel}[1]{\label{ass:#1}}
+\newcommand{\assref}[1]{Assumption~\ref{ass:#1}}
+
+\newcommand{\proclabel}[1]{\label{alg:#1}}
+\newcommand{\procref}[1]{Procedure~\ref{alg:#1}}
+
+\newtheorem{rem}{Remark}
+\newtheorem{op}{Open Problem}
+
+\newcommand{\etal}{\emph{et al.}}
+
+\newcommand{\dlom}{\textsc{dl-om}}
+\newcommand{\DLOM}{DL-OM}
+
+\title{\MakeUppercase{Bounds for Frequency Estimation of Packet
+Streams}\thanks{This work was partly funded by NSERC (Natural Sciences
+and Engineering Research Council of Canada) and MITACS (Mathematics of
+Information Technology and Complex Systems) grants.}}
+
+\author{Prosenjit Bose \and
+	Evangelos Kranakis \and
+	Pat Morin \and
+	Yihui Tang}
+\date{}
+
+\begin{document}
+\maketitle
+\vspace{-1.25cm}
+\begin{center}
+School of Computer Science, Carleton University \\
+\texttt{\{jit,kranakis,morin,y\_tang\}@scs.carleton.ca}
+\end{center}
+
+\begin{abstract}
+We consider the problem of approximating the frequency of frequently
+occurring elements in a stream of length $n$ using only a memory of
+size $m\ll n$. This models the process of gathering statistics on Internet 
+packet streaming using a memory that is small relative to the number of
+classes ({\it e.g.} IP addresses) of packets. We show that when some 
+data item $a$ occurs $\alpha n$ times in a stream 
+of length $n$, the \frequent\ algorithm of Demaine \etal\ \cite{dlom02}, 
+can approximate $a$'s frequency with an error of no more than 
+$(1-\alpha)n/m$. We also give a lower-bound of $(1-\alpha)n/(m+1)$ on 
+the accuracy of any deterministic packet counting algorithm, which implies 
+the  \frequent\ algorithm is nearly optimal. Finally, we show that randomized 
+algorithms can not be significantly more accurate since there is a lower 
+bound of $(1-\alpha)\Omega(n/m)$ on the expected accuracy of any randomized 
+packet counting algorithm. 
+\end{abstract}
+
+%\keywords{Frequency Statistics, Frequency Estimation, Packet Stream,
+%Data Stream, Fixed-sized Memory, Counting}
+
+
+
+\section{Introduction}
+
+We consider the problem of processing a data stream $x_1,\ldots,x_n$
+of \emph{packet classes} in one pass.  This models the process of
+gathering statistics on Internet packet streams using a memory that is
+small relative to the number of classes or categories of packets.
+
+More formally, we consider \emph{packet counting algorithms} that
+process the stream $x_1,\ldots,x_n$ one item at a time.  A packet
+counting algorithm has a memory of fixed-size and has access to $m$
+integer counters, each of which can be labelled with a packet class.
+If a counter is labelled with some packet class $a$ then we say that
+counter is \emph{monitoring} $a$.  While processing an item, the
+algorithm may modify its memory, perform equality tests on packet
+classes, increment or decrement counters and change the labels of
+counters.  However, other than comparing packet classes and storing
+them as counter labels, the algorithm may not do any other
+computations on storage of packet classes.  After the algorithm
+completes, the \emph{counter value} for a packet class $a$ is the
+value of the counter monitoring $a$. If no counter is monitoring $a$
+then the counter value for $a$ is defined to be zero.
+
+The problem of accurately maintaining frequency statistics in a data
+stream has applications in Internet routers and gateways, which must
+handle continuous streams of data that are much too large to store and
+postprocess later.  As an example, to implement fairness policies one
+might like to ensure that no user (IP address) of a router or gateway
+uses more than 1\% of the total available bandwidth.  Keeping track of
+the individual usage statistics would require (at least) one counter
+per user and there may be tens of thousands of users.  However, the
+results in this paper imply that, using only 99 counters, we can
+identify a set of users, all of whom are using more than 1\% of the
+available bandwidth and which contains every user using more than 2\%
+of the bandwidth.  If more accuracy is required, we could use 990
+counters, and the threshold values become 1\% and 1.1\%, respectively.
+\comment{The accuracy of counters, and the ability to prove that they
+are correct may be extremely useful, e.g., in proving that contractual
+obligations have been met.}
+
+
+\subsection{Related Work}
+Motivated mainly by applications like the one described above, there
+is a growing body of literature on algorithms for processing data
+streams \cite{ams96,ccf02,dgim02,ev01,fsgm98,gm99,hnss95,i00,igms02,mm02}.
+An early work, particularly relevant to the current paper, is the work
+of Fischer and Salzberg \cite{fs82} who showed that, using one counter
+and making one pass through a data stream, it is possible to determine
+a class $a$ such that, if any class occurs more than $n/2$ times,
+then it is $a$. 
+
+Demaine \etal\ \cite{dlom02} showed that Fischer and
+Salzberg's algorithm generalizes to an algorithm which they call
+\frequent. The same algorithm was also independently 
+discovered by Karp \etal\ \cite{kps03}. The \frequent\ algorithm 
+uses $m$ counters and determines a set of $m$ candidates that contain 
+all elements that occur more than $n/(m+1)$ times. The output of \frequent\
+is therefore a list of elements including all of these heavy users and 
+possibly some light users ({\it false positives}). To determine all heavy
+users, Karp \etal\ \cite{kps03} point out that we cannot do better than 
+keeping a counter for each user, which results in  $\Omega(c)$ memory, 
+where $c$ is the number of different users. In the case of Internet 
+packet streams, the number of users (IP addresses) is substantially larger 
+than $m$. Hence, the algorithm needs much more space than the size of 
+the output. The difficulty of determining all heavy users is that at any 
+point of time, many users may have nearly equal number of occurrences, 
+and therefore equal chances to be a heavy user, the algorithm must 
+remember the exact count of each user. 
+
+In applications like network traffic measurement and accounting, it is
+important to not only identify all large flows but also to estimate the 
+frequencies of these large flows. Manku \etal\ \cite{mm02} proposed two 
+algorithms for 
+computing frequencies of all large flows above a user-specified threshold. 
+The {\it Sticky Sampling} algorithm is probabilistic and with 
+probability $1-\delta$, the algorithm identifies all items whose true 
+frequency exceeds a user specified threshold $s \in (0,1) $ using at most 
+$\frac{2}{\epsilon} \log(s^{-1} \delta ^ {-1})$ expected number 
+of counters, where $\epsilon \in (0,s)$ is the maximum error in the output. 
+The other algorithm called {\it Lossy Counting} is deterministic in the 
+sense that it outputs all flows above the threshold. Regardless of the 
+threshold $s$, it achieves the same accuracy $\epsilon $ using at most 
+$\frac{1}{\epsilon} \log (\epsilon n)$ counters.
+
+
+
+Other work on the particular problem of estimating frequencies in
+packet streams includes the work of Fang \etal\ \cite{fsgm98} who
+propose heuristics to compute all values above a certain threshold.
+Charikar \etal\ \cite{ccf02} give algorithms for computing the top $k$
+candidates under the Zipf distribution.  Estan and Varghese
+\cite{ev01} attempt to identify a set of packet classes that are
+likely to contain the most frequently occurring packet classes, and
+give probabilistic estimates of the expected count value in terms of a
+user selected threshold.
+
+\subsection{Results of the Paper}
+
+
+In this paper we are concerned with the accuracy of packet counting
+algorithms.  We say that a packet counting algorithm is
+\emph{$k$-accurate} if, for any class $a$ that appears $n_a$ times,
+the algorithm terminates with a counter value $c_a$ for $a$ that
+satisfies
+\begin{equation}
+c_a\le n_a\le c_a+k \enspace . \label{accuracy}
+\end{equation}  
+
+Therefore, both the Sticky Sampling and Lossy Counting algorithms are
+$\epsilon n$-accurate. We show that the \frequent\ algorithm is 
+$n/(m+1)$-accurate. In general, with $m$ counters, no algorithm is 
+better than $n/(m+1)$ accurate since, if $m+1$ classes each occurs 
+$n/(m+1)$ times then one of those classes will have a counter value 
+of $0$ when the algorithm terminates.
+
+However, this argument breaks down when we consider the case when some
+particular packet class $a$ occurs $n_a\ge\alpha n$ times, for some
+$\alpha > 1/(m+1)$. In this case, it may be possible for the algorithm
+to report the number of occurrences of $a$ (and other elements) more
+accurately.  We explore this relationship between accuracy and
+$\alpha$.  Our results are outlined in the next paragraph.
+
+In \secref{dlom} we show that the \frequent\ algorithm of Demaine
+\etal\ is $(1-\alpha)n/m$-accurate, where $\alpha n$ is the number of
+times the most frequently occurring packet class appears in the stream.
+In \secref{lower-bounds} we give a lower-bound of $(1-\alpha)n/(m+1)$
+on the accuracy of any deterministic packet counting algorithm and a
+lower bound of $(1-\alpha)\Omega(n/m)$ on the accuracy of any
+randomized packet counting algorithm.  This latter result solves an
+open problem posed by Demain \etal\ \cite{dlom02} about whether
+randomized packet counting algorithms can be more accurate than
+deterministic ones.  In \secref{conclusions} we summarize and conclude
+with open problems.
+
+\section{The \FREQUENT\ Algorithm}\seclabel{dlom}
+
+The \frequent\ algorithm of Demaine \etal\ \cite{dlom02} uses $m$
+counters. When processing stream item $x_i$, the following rules are
+applied in order:
+
+\begin{enumerate}
+\item If there is a counter monitoring class $x_i$ then increment
+ 	that counter, otherwise
+\item if some counter is equal to 0 then set that counter to 1 and
+	have it monitor class $x_i$, otherwise
+\item decrement all counters by 1.
+\end{enumerate}
+
+A nice way to visualize this algorithm is to imagine a set of $m$
+buckets that hold colored balls. When a new ball arrives we either
+place it in the bucket that contains balls of the same color (Case~1),
+place it in an empty bucket (Case~2) or discard one ball from every
+bucket as well as the new ball (Case~3).
+
+To analyze the accuracy of this algorithm, we first provide a rough
+upper-bound on the accuracy and then use this upper-bound to bootstrap
+a better analysis.  Let $d$ be the total number of times Case~3 of the
+algorithm occurs.  No counter is ever less than 0, and each of Case~1
+and Case~2 increments exactly one counter.  Therefore, if $C$ is the
+total sum of all counters when the algorithm terminates, then
+\[
+      C = n - (m+1)d \ge 0 \enspace ,
+\]
+so that 
+\[
+ d\le \frac{n}{m+1} \enspace .
+\]
+It follows immediately that for any class $a$ that occurs $n_a$ times, the counter monitoring $a$ has a value of
+at least
+\[
+     c_a \ge n_a - d \ge n_a - \frac{n}{m+1} \enspace .
+\]
+
+Suppose that $n_a=\alpha n$ for some $\alpha\ge 1/(m+1)$.  Now we can
+repeat the above argument, since we have just shown that
+\[
+C = n - (m+1)d \ge \alpha n- \frac{n}{m+1} \enspace ,
+\]
+so that
+\[
+     d \le \frac{(1-\alpha) n}{m+1} + \frac{n}{(m+1)^2} \enspace . 
+\]
+and the value of $c_a$ satisfies
+\[
+   c_a \ge \alpha n - d \ge \alpha n - \left(\frac{(1-\alpha) n}{m+1} + \frac{n}{(m+1)^2}\right) \enspace . 
+\]
+
+In general, we can repeat the above argument $k$ times to show that
+\[
+  c_a \ge \alpha n - \sum_{i=1}^k \frac{(1-\alpha)n}{(m+1)^i} 
+  - \frac{n}{(m+1)^{k+1}} \enspace .
+\]
+In particular, as $k\rightarrow\infty$, we obtain $c_a \ge \alpha
+n-(1-\alpha)n/m$.  Now, since $c_a$ is clearly never greater than
+$n_a$, we have
+\[
+    c_a \le n_a \le c_a + \frac{(1-\alpha)n}{m} \enspace ,
+\]
+so the output $c_a$ is $(1-\alpha)n/m$-accurate.
+
+Finally, we observe that the above analysis gives an upper-bound on
+$d$, and this gives an upper bound on the accuracy of the counter
+value for $a$.  However, the upper bound on $d$ also gives an upper
+bound on the accuracy of \emph{any} counter, not just the counter for
+$a$.  This implies our first result.
+
+\begin{thm}
+For any stream in which some element occurs at least $\alpha n$ times,
+the \frequent\ algorithm is $(1-\alpha)n/m$-accurate.
+\end{thm}
+
+\section{Lower-Bounds on Accuracy}\seclabel{lower-bounds}
+
+In this section we give lower bounds on the accuracy of deterministic
+and randomized packet counting algorithms. 
+
+\subsection{A Deterministic Lower-Bound}
+
+Here we give a lower bound for deterministic packet counting
+algorithms by using an adversary argument.  Our adversary builds two
+distinct streams that the algorithm cannot distinguish between.
+
+Our adversary uses $m+2$ packet classes and builds its streams in two
+parts (see \figref{stream}).  The first part of both streams is of
+length $(1-\alpha)n$ and consists of the first $m+1$ packet classes
+each occurring the same number of times, so that each class occurs
+$(1-\alpha)n/(m+1)$ times.  At this point the two streams diverge.  In
+the first stream, the adversary adds $\alpha n$ occurrences of the
+unique packet class $a$ of the $m+1$ first classes that is not being
+monitored by the algorithm after processing the first part of the
+stream. In the second stream, the adversary adds $\alpha n$ occurrences
+of the unique packet class $z$ that does not appear in the first part
+of the stream.
+
+\begin{figure}
+\begin{minipage}{\textwidth}
+\[
+  \begin{array}{c@{}ccc@{}c@{}c}
+    abcd\cdots y & abcd\cdots y & \cdots & abcd\cdots y & aaaaaa\cdots a \\[1ex]
+    \underbrace{abcd\cdots y} & 
+    \underbrace{abcd\cdots y} & \cdots & \underbrace{abcd\cdots y} & 
+    \underbrace{zzzzzz\cdots z} \\
+  m+1 & m+1 && m+1 & \alpha n 
+  \end{array}
+\]
+\end{minipage}
+\caption{The adversary's two streams.}\figlabel{stream}
+\end{figure}
+
+Observe that, since neither $a$ nor $z$ is stored in any of the
+algorithm's counters after processing the first part of the stream,
+the only information the algorithm obtains by reading the last element
+of the stream is that it is not being monitored.  Therefore, since the
+algorithm is deterministic, its counter value $c_a$ for $a$ on the
+first stream will be equal to its counter value $c_z$ for $z$ on the
+second stream.  However, in the first stream $a$ occurs
+$n_a=(1-\alpha)n/(m+1)+\alpha n$ times and in the second stream, $z$
+occurs $n_z=\alpha n$ times.  In order to be accurate at all (refer to
+(\ref{accuracy})) the algorithm must terminate with a counter value
+$c_a=c_z\le n_z$.  But in this case, the algorithm is not better than
+$(1-\alpha)n/(m+1)$-accurate for the first stream.
+
+\begin{thm}
+For any deterministic algorithm, there exists a stream in which some
+symbol $a$ occurs $n_a\ge\alpha n$ times, but the algorithm reports a
+value $c_a$ such that $c_a>n_a$ or $c_a \le n_a-(1-\alpha)n/(m+1)$.
+\end{thm}
+
+\subsection{A Randomized Lower-Bound}
+
+Next we give a lower bound for randomized algorithms.  We do this by
+providing a probability distribution on input streams such that the
+expected accuracy of \emph{any} deterministic algorithm on this
+distribution is at least $(1-\alpha)cn/m$.  Since any randomized
+algorithm is just a probability distribution on deterministic
+algorithms, the lower-bound therefore holds for randomized algorithms
+as well.\footnote{Technically, this is an application of \emph{Yao's
+Principle} \cite{y77}.}  The distribution we use is a probabilistic
+version of our deterministic construction.
+
+Our distribution uses two constants $1<c_1<c_2$ that will be specified
+later.  Each stream of our distribution is a two part data stream made
+up of $c_2m$ packet classes.  The first part of all streams is
+identical.  As before, it is of length $(1-\alpha)n$, and it consists
+of the first $c_1m$ packet classes each occurring an equal number of
+times, so that each class occurs $(1-\alpha)n/c_1m$ times.  For the
+second part of the sequence, we select a packet class uniformly at
+random from all $c_2m$ classes and make that class occur $\alpha n$
+times.
+
+Let $a$ be the packet class chosen to make up the second part of the
+sequence.  Immediately after the first part of the sequence has been
+processed by the algorithm, there are three cases to consider:
+
+\begin{enumerate}
+\item The algorithm has a counter that is monitoring $a$.  Since the
+algorithm has only $m$ counters, this happens with probability at most
+\[
+   p_1 \le \frac{m}{c_2m} = \frac{1}{c_2} \enspace ,
+\]
+and the number of occurrences of $a$ is $n_1=(1-\alpha)n/c_1m + \alpha n$.
+
+\item The algorithm does not have a counter monitoring $a$ and $a$ comes
+from the first $c_1m$ packet classes.  This happens with probability at
+least 
+\[
+    p_2 \ge \frac{(c_1-1)m}{c_2m} = \frac{c_1-1}{c_2} \enspace ,
+\]
+and the number of occurrences of $a$ is also $n_2=(1-\alpha)n/c_1m + \alpha n$.
+
+\item The class $a$ does not come from the first $c_1m$ packet classes 
+(so the algorithm is not monitoring $a$). This happens with probability
+\[
+    p_3 = 1-\frac{c_1}{c_2} \enspace ,
+\]
+and the number of occurrences of $a$ is $n_3=\alpha n$.
+
+\end{enumerate}
+
+Let $c_a$ be the value output by the algorithm for class $a$.  Since
+we are proving a lower-bound, we can assume that in Case~1, the
+algorithm answers with perfect accuracy, i.e.,
+$c_a=(1-\alpha)n/c_1m+\alpha n$.  However, if the algorithm is not
+monitoring class $a$ (Cases~2 and 3) then it cannot distinguish
+between Cases~2 and 3.  Since the algorithm is deterministic, it must
+output the same counter value $c_a$ in both cases.  Therefore, the
+expected error made by the algorithm is at least
+\begin{eqnarray*}
+    \E[|c_a-n_a|] & \ge &
+	p_1\times 0 + p_2\times|c_a-n_2| + p_3\times |c_a-n_3| \\
+ 	& \ge &	p_2\times\left|c_a
+	-\left(\frac{(1-\alpha)n}{c_1m}+\alpha n\right) \right|
+		+ p_3\times\left|c_a-\alpha n\right| \\
+	& = & p_2\times\left|x_a
+	- \left(\frac{(1-\alpha)n}{c_1m}\right) \right|
+		+ p_3\times\left|x_a\right| \\
+	& \ge & \frac{c_1-1}{c_2}\times\left|x_a
+	- \left(\frac{(1-\alpha)n}{c_1m}\right) \right|
+		+ \left(1-\frac{c_1}{c_2}\right)\times\left|x_a\right| \enspace , \\
+\end{eqnarray*}
+where $x_a=c_a-\alpha n$.  Setting $c_1=1+\sqrt{2}/2$,
+$c_2=1+\sqrt{2}$, and simplifying we obtain
+\begin{eqnarray*}
+   \E[|c_a-n_a|] & \ge & \frac{\sqrt{2}}{2(1+\sqrt{2})}\times
+	\left(\left|x_a-\left(\frac{(1-\alpha)n}{(1+\sqrt{2}/2)m}\right)\right|
+	+ |x_a|\right) \\
+	& \ge & \frac{\sqrt{2}}{2(1+\sqrt{2})}\times
+		\left(\frac{(1-\alpha)n}{(1+\sqrt{2}/2)m}\right) \\
+	& \ge & 0.17157(1-\alpha)n/m
+\end{eqnarray*}
+
+\begin{thm}\thmlabel{randomized}
+For any randomized algorithm, there exists a stream in which some
+symbol $a$ occurs $n_a\ge \alpha n$ times, but the algorithm has a
+counter value $c_a$ such that $\E|n_a-c_a|\ge 0.17157(1-\alpha)n/m$.
+\end{thm}
+
+We observe that the proof of \thmref{randomized} extends to a slightly
+more powerful model in which the packet counting algorithm is allowed
+to periodically output class/value pairs of the form $(a,c_a)$ whose
+meaning is ``$a$ has occurred $c_a$ times'' and the counter value for
+$a$ is considered to be the last such value output.  A similar model
+is used by Demaine \etal\ \cite{dlom02} to study probabilistic packet
+streams.  To see that the lower-bound carries over, observe that the
+last such pair $(a,c_a)$ is either output before the second part of
+the stream begins, or after.  In the latter case, the argument above
+shows that $\E[n_a-c_a]=\Omega((1-\alpha)n/m)$.  In the former case,
+the algorithm outputs the value $c_a$ without having seen the final
+$\alpha n$ occurrences of $a$.  An argument similar to the one above
+shows that, in this case, there is a packet class $a$ such that
+$\E[n_a-c_a]=\Omega(\alpha n)$.
+
+\section{Conclusions}\seclabel{conclusions}
+
+We have studied the problem of approximating the frequency of items in
+a data stream using a fixed number, $m$, of counters.  We have shown
+that when some data item $a$ occurs $\alpha n$ times in a stream of
+length $n$, then the \frequent\ algorithm of Demaine \etal\
+\cite{dlom02} is $(1-\alpha)n/m$-accurate.  This is nearly optimal
+for a deterministic algorithm since we have shown that no
+deterministic algorithm is better than $(1-\alpha)n/(m+1)$-accurate.
+Finally, we have shown that randomized algorithms can not be
+significantly more accurate since any randomized algorithm has an
+expected accuracy of at least $(1-\alpha)\Omega(n/m)$.
+
+The main open problem left by our research is that of determining if
+the constant factor in the accuracy of the \frequent\ algorithm can
+be improved by somehow introducing randomization.  It may well be the
+case that running \frequent\ on a random sample of the original input
+stream is enough to foil an adversary and improve its accuracy.
+
+\bibliographystyle{plain}
+\bibliography{streaming.bib}
+\end{document}
+
+\begin{thebibliography}{10}
+
+\bibitem{ams96}
+N.~Alon, Y.~Matias, and M.~Szegedy.
+\newblock The space complexity of approximating the frequency moments.
+\newblock In {\em Proceedings of the 28th ACM Symposium on the Theory of
+  Computing (STOCS'96)}, pages 20--29, 1996.
+
+\bibitem{ccf02}
+M.~Charikar, K.~Chen, and M.~Farach-Colton.
+\newblock Finding frequent items in data streams.
+\newblock In {\em Proceedings of the 19th International Colloquium on Automata,
+  Languages and Programming}, pages 693--703, 2002.
+
+\bibitem{dgim02}
+M.~Datar, A.~Gionis, P.~Indyk, and R.~Motwani.
+\newblock Maintaining stream statistics over sliding windows.
+\newblock In {\em Proceedings of the 13th Annual ACM-SIAM Symposium on Discrete
+  Algorithms (SODA~2002)}, pages 635--644, 2002.
+
+\bibitem{dlom02}
+E.~D. Demaine, A.~L\'opez-Ortiz, and J.~I. Munro.
+\newblock Frequency estimation of internet packet streams with limited space.
+\newblock In {\em Proceedings of the 10th Annual European Symposium on
+  Algorithms (ESA~2002)}, pages 348--360, 2002.
+
+\bibitem{ev01}
+C.~Estan and G.~Varghese.
+\newblock New directions in traffic measurement and accounting.
+\newblock In {\em Proceedings of the ACM SIGCOMM Internet Measurement
+  Workshop}, 2001.
+
+\bibitem{fsgm98}
+M.~Fang, S.~Shivakumar, H.~Garcia-Molina, R.~Motwani, and J.~Ullman.
+\newblock Computing iceberg queries efficiently.
+\newblock In {\em Proceedings of the 24th International Conference on Very
+  Large Databases}, pages 299--310, 1998.
+
+\bibitem{fs82}
+M.~J. Fischer and S.~L. Salzberg.
+\newblock Finding a majority among {$n$} votes: Solution to problem 81-5
+  ({J}ournal of {A}lgorithms, june 1981).
+\newblock {\em Journal of Algorithms}, 3(4):362--380, 1982.
+
+\bibitem{gm99}
+P.~Gupta and N.~McKeown.
+\newblock Packet classification on multiple fields.
+\newblock In {\em Proceedings of ACM SIGCOMM}, pages 147--160, 1999.
+
+\bibitem{hnss95}
+P.~J. Haas, J.~F. Naughton, S.~Sehadri, and L.~Stokes.
+\newblock Samples-based estimation of the number of distinct values of an
+  attribute.
+\newblock In {\em Proceedings of the 21st International Conference on Very
+  Large Databases (VLDB'95)}, pages 311--322, 1995.
+
+\bibitem{i00}
+P.~Indyk.
+\newblock Stable distributions, pseudorandom generators, embeddings, and data
+  stream computations.
+\newblock In {\em Proceedings of the 41st Annual IEEE Symposium on Foundations
+  of Computer Science (FOCS~2000)}, pages 189--197, 2000.
+
+\bibitem{igms02}
+P.~Indyk, S.~Guha, M.~Muthukrishnan, and M.~Strauss.
+\newblock Histogramming data streams with fast per-item processing.
+\newblock In {\em Proceedings of the 19th International Colloquium on Automata,
+  Languages and Programming}, pages 681--692, 2002.
+
+\bibitem{kps02}
+R.~Karp, C.~H. Papadimitriou, and S.~Shenker.
+\newblock A simple algorithm for finding frequent elements in streams and bags.
+\newblock Unpublished manuscript.
+
+\bibitem{mm02}
+G.~Manku and R.~Motwani.
+\newblock Approximate frequency counts over data streams.
+\newblock In {\em Proceedings of the 28th International Conference on Very
+  Large Data Bases}, 2002.
+
+\bibitem{y77}
+A.~C. Yao.
+\newblock Probabilistic computations: Towards a unified measure of complexity.
+\newblock In {\em Proceedings of the 18th Annual Symposium on Foundations of
+  Computer Science (FOCS'77)}, pages 222--227, 1977.
+
+\end{thebibliography}
+
+
+
+% Please include detailed author-related affiliations and
+% addresses here.
+% Note that the author's name is the only argument to the
+% biog environment:
+
+\begin{biog}{Prosenjit Bose}is with the School of Computing
+Science, Carleton University, Ottawa, ON, Canada K1S 5B6.
+E-mail: jit@scs.carleton.ca
+\end{biog}
+
+\begin{biog}{Evangelos Kranakis}is with the School of Computing
+Science, Carleton University, Ottawa, ON, Canada K1S 5B6.
+E-mail: kranakis@scs.carleton.ca
+\end{biog}
+
+\begin{biog}{Pat Morin}is with the School of Computing
+Science, Carleton University, Ottawa, ON, Canada K1S 5B6.
+E-mail: morin@scs.carleton.ca
+\end{biog}
+
+\begin{biog}{Yihui Tang}is with the School of Computing
+Science, Carleton University, Ottawa, ON, Canada K1S 5B6.
+E-mail: y\_tang@scs.carleton.ca
+\end{biog}
+
+\end{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

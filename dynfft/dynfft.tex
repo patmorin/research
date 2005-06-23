@@ -1,0 +1,77 @@
+\documentclass[lotsofwhite]{patmorin}
+
+
+
+\begin{document}
+We want a data structure that supports the following operations:
+
+\begin{enumerate}
+\item $\textsc{Build}(x_1,\ldots,x_m)$.  Build a data structure that
+can manipulate a polynomial and quickly evaluate it at any $x_i$,
+$1\le i\le m$.
+
+\item $\textsc{Add}(c)$.  If the data structure currently represents
+the polynomial $c_nx^n+\cdots+c_1x+c_0$ then modify it so that it
+represents $c_nx^n+\cdots+c_1x+(c_0+c)$.
+
+\item $\textsc{Multiply}$.  If the data structure currently represents
+$c_nx^n+\cdots+c_1x+c_0$ then modify it so that it represents
+$c_nx^{n+1}+\cdots+c_1x^2+c_0x$.
+
+\item $\textsc{Evaluate}(i)$.  If the data structure currently
+represents $c_nx^n+\cdots+c_1x+c_0$ then output $c_nx_i^n+\cdots
++c_1x_i+c_0$.
+\end{enumerate}
+
+In order to do this we use a grouping scheme with $O(\log n)$ groups.
+The group $G_i$ is responsible for the subpolynomial:
+\[
+    P_i(x) =c_kx^k + c_{k-1}x^{k-1} + \cdots + c_{k-l}x^{k-l}  \enspace .
+\]
+where we maintain the invariant that $k$ is in the range
+$[2^{i-1},2^{i}]$ and $l$ is in the range $[2^{i-2},2^{i-1}]$.
+Obviously this can be done in such a way that the subpolynomial
+assigned to $G_i$ only has to change after every $\Theta(2^{i})$
+\textsc{Multiply} operations.
+
+Each group $G_i$ will maintain a subset of indices
+$j\in\{1,\ldots,m\}$ for which it has precomputed the value of
+$P_i(x_j)$.  To execute the command $\textsc{Evaluate}(j)$ some groups
+$G_i$ will have $P_i(x_j)$ precomputed and some groups won't.  For
+those that do, we will use the precomputed value.  For those that
+don't, we will compute $P_i$ at $2^i$ different values in
+$x_1,\ldots,x_m$ that we haven't already precomputed, including the
+value $x_j$.  This takes $\Theta(2^i\log 2^i)$ time using the FFT
+convolution technique for evaluating a degree $2^i$ polynomial at
+$2^i$ different locations.
+
+To analyze the this data structure we let $K$ denote the total number
+of pairs $(i,j)$ such that the value $P_i(x_j)$ has not yet been
+precomputed.  Note that $0\le K\le m\log n$.   Let $\phi(D)$ denote
+the usual potential function used for showing that logarithmic
+hierarchies have $O(\log n)$ amortized insertion time.\footnote{For
+insertion only hierarchies, this is usually $\phi(G_0,\ldots,G_{\log
+n})= \sum_{i=0}^{\log n}
+|G_i|(\log n - i)$.} Then we use
+the potential function
+\[
+ \phi'(D) = c_1\phi(D)\log n + c_2K\log n  \enspace .
+\]
+Note that, with this potential function, the amortized cost of an
+\textsc{Evaluate} operation is $O(\log n)$ since the expensive
+precomputation steps are accompanied by a drop in the value of $K$. All that remains to show is that the amortized cost of
+\textsc{Multiply} is not too high.  But this is trivial, since
+rebuilding a group $G_i$ increases $K$ by at most $|G_i|$ so this
+increase in potential gets killed off by the $\phi(D)$ term.  This
+gives an amortized insertion time of $O(\log^2 n)$ and an amortized
+query time of $O(\log n)$.
+
+Again, we can also easily augment this data structure to support the operation
+\begin{enumerate}
+\item \textsc{Divide}.  If the data structure currently represents
+$c_nx^n+\cdots+c_1x + c_0$ then modify it so that it represents
+$c_nx^{n-1}+\cdots+c_2x + c_1$.
+\end{enumerate}
+
+
+\end{document}

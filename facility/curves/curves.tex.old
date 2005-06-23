@@ -1,0 +1,967 @@
+\documentclass[lotsofwhite]{patmorin}
+%\usepackage{fullpage}
+\usepackage{charter}
+\usepackage{url}
+\usepackage[noend]{algorithmic}
+%\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{ipe}
+%\usepackage[colorlinks=true, pdfstartview=FitV, linkcolor=blue,
+%            citecolor=blue, urlcolor=blue]{hyperref}
+
+\input{pat}
+
+\newtheorem{nts}{Note to Self}
+\newtheorem{rem}{Remark}
+
+\newcommand{\rO}{\hat{O}}
+\newcommand{\tO}{\tilde{O}}
+\newcommand{\E}{\mathbf{E}}
+\newcommand{\area}{\mathrm{A}}
+\newcommand{\patch}{\mathrm{P}}
+
+
+%\setlength{\parskip}{1ex}
+
+\title{\MakeUppercase{Minimalist Approximations for Convex Functions}%
+  \thanks{This research was partly supported by the Natural Sciences and
+  Engineering Research Council of Canada.}
+}
+\author{Prosenjit Bose%
+  \thanks{School of Computer Science, Carleton University, 1125 Colonel By Dr., Ottawa, Ontario, CANADA, K1S 5B6, \texttt{jit@scs.carleton.ca} .}
+  \and Luc Devroye%
+  \thanks{School of Computer Science, McGill University, 3480
+    University Street, McConnell Engineering Building., Room 318,
+    Montreal, Quebec, CANADA, H3A 2A7, \texttt{\{luc@,morin@cgm.\}cs.mcgill.ca} .}
+  \and Pat Morin$^\ddagger$
+}
+\date{}
+
+\begin{document}
+\begin{titlepage}
+\maketitle
+
+\begin{abstract}
+  We describe a data structure that $(1-\epsilon)$-approximates any
+  convex function $f(x)$ whose slopes are in the range $[-n,n]$ at all
+  points except possibly where the slope of $f(x)$ is small.  The data
+  structure uses $O(\log_E n)$ storage and has $O(\log\log_E n)$ query
+  time where $E=1/(1-\epsilon)$.  A dynamic version of the data
+  structure allows modification in $O(\log\log_E n)$ time, where a
+  modification involves changing increasing or decreasing the slope of
+  $f(x)$ by 1 for all $x$ in a half-infinite interval.
+
+  We also show how this data structure can be used to obtain fast new
+  approximation algorithms for computing sums of distances, clustering
+  problems, and the Fermat-Weber problem.  The dynamic version of the
+  data structure can be used to approximate sums of distances under
+  insertions and deletions of points.
+\end{abstract}
+\end{titlepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+Convex functions are important \cite{hl93,rv73,r70,sw70}.  In this
+paper we study the problem of approximating convex functions with
+piecewise linear functions using a small number of linear pieces.
+
+Let $f:\mathbb{R}\rightarrow\mathbb{R}$ be a function that is
+non-negative everywhere.  We say that a function $g(x)$ is a
+\emph{$(1-\epsilon)$-approximation} for $f(x)$ if
+\[
+(1-\epsilon)f(x) \le g(x) \le f(x)
+\]
+for all $x\in\mathbb{R}$.
+
+In \secref{approx} we show that for any convex function $f(x)$ whose
+slopes take on values in the range $[-n,n]$, there exists a piecewise
+linear function $g(x)$ having $O(\log_E n)$ pieces such that that
+$g(x)$ is a $(1-\epsilon)$-approximation to $f(x)$ over all
+$x\in\mathbb{R}$ except where the slope of $f(x)$ is close to 0.
+Here, and throughout the remainder of the paper, $E=1/(1-\epsilon)$.
+
+In \secref{applications} we give applications of this technique to
+$(1-\epsilon)$-approximating the objective function $f(x)$ that occurs
+in the \emph{Fermat-Weber} problem.  In this problem, we are given a
+set $S=\{p_1,\ldots,p_n\}$ of points in $\mathbb{R}^d$ and asked to
+find the point $x$ that minimizes $f(x)=\sum_{i=1}^n d(x,p_i)$, where
+$d(p,q)$ denotes the distance between $p$ and $q$.  We begin by
+describing a data structure for $\mathbb{R}^1$ that has size $O(\log_E
+n)$, can be constructed in $O(n/\epsilon)$ time and that answers
+queries in $O(\log\log_E n)$ time.
+
+We then study the same objective function in $d$-dimensions under both
+the $L_1$ and $L_2$ metrics.  Under the $L_1$ metric our data
+structure can be constructed in $O(dn/\epsilon)$ time and answers
+queries in $O(d\log\log_E n)$ time.  Under the $L_2$ metric we give a
+randomized data structure that answers correctly with constant
+probability and has the same resource requirements.  We also give a
+deterministic data structure that can be constructed in
+$O(d^{d/2}n/\epsilon^{d-1})$ time, and answers queries in
+$O(\frac{d^{d/2}}{\epsilon^{d-1}}\log\log_E n)$ time.  We conclude
+\secref{applications} with applications of these data structures to
+problems that occur in facility location and clustering.
+
+In \secref{lower-bounds}, we give an $\Omega(\log n\log_E n)$ lower
+bound on the number of bits of storage required by any data structure
+that stores a $(1-\epsilon)$-approximation to any piecewise linear
+convex function whose slopes are integers in the range $[-n,n]$.  This
+shows that the storage used by our data structure is optimal.
+
+In \secref{conclusions} we summarize and conclude with open problems.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Approximating Convex Functions of 1 Variable}\seclabel{approx}
+
+Refer to \figref{trivial} for what follows.  Consider the function
+$f(x)=|nx|$.  It is clear that the function $g(x)=(1-\epsilon)|nx|$ is
+a $(1-\epsilon)$-approximation for $f(x)$.  Furthermore, $g(x)$ is
+also a $(1-\epsilon)$-approximation for any function $f^{*}$
+satisfying $g(x)\le f^{*}(x)\le f(x)$.  While the preceding statements
+are trivial, they nevertheless allow us to derive a very efficient
+data structure for approximating convex functions with bounded slopes.
+
+\begin{figure}
+\centeripe{trivial}
+\caption{The function $g(x)$ is a $(1-\epsilon)$-approximation for
+$f(x)$ and $f^*(x)$.}
+\figlabel{trivial}
+\end{figure}
+
+Suppose now that $f(x)$ is an arbitary convex function whose whose
+slope at $x$ is given by $f'(x)$.  Assume furthermore that for all
+$x$, $|f'(x)|\le n$. To approximate $f(x)$ we construct a piecewise
+linear function $g(x)$ as follows.  We find the two values
+$x_{l_1}=\sup\{x:f'(x)\le-(1-\epsilon)n\}$ and
+$x_{r_1}=\inf\{x:f'(x)\ge(1-\epsilon)n\}$.\footnote{We use the convention
+  that $\sup\emptyset=-\infty$ and $\inf\emptyset=\infty$.} We then
+set $g(x)$ to be
+\[
+g(x) = \left\{\begin{array}{ll}
+  -(1-\epsilon)n(x-x_{l_1}) + f(x_{l_1}) &\mbox{if $x\le x_{l_1}$} \\
+  (1-\epsilon)n(x-x_{r_1}) + f(x_{r_1})  &\mbox{if $x\ge x_{r_1}$} \\
+  \mbox{to be determined}                   &\mbox{otherwise .}
+  \end{array}\right.
+\]
+From the preceding discussion, it follows that $g(x)$ is a
+$(1-\epsilon)$-approximation to $f(x)$ for all $x$ such that $x\le
+x_l$ or $x\ge x_r$.  Thus, all that remains is to define $g(x)$ for
+the range $x_l< x < x_r$.  Note that, in this range $f(x)$ is a convex
+function whose slope varies between $-(1-\epsilon)n$ and
+$(1-\epsilon)n$.  We can therefore recursively apply our algorithm on
+this subfunction.  Our recursion completes when the subfunction has
+been reduced to the point where its slopes are in the range $[-c,c]$
+for some positive constant $c$.
+
+A piecewise linear function output by this recursive algorithm is
+illustrated in \figref{alg}.  The following pseudocode shows precisely
+how an approximate representation is computed.  
+\comment{It computes set of
+points $\{x_{l_0},\ldots,x_{l_{\lceil\log_E
+    n\rceil}}\,x_{l_{\lceil\log_E n\rceil}},\ldots,x_{r_0}\}$ such
+that $g(x)$ is linear in the intervals $(x_{l_{i}},x_{l_{i+1}}]$
+and $[x_{r_{i+1}},x_{r_{i}})$, for all $1\le i\le\log_E n$.
+breakpoints of the piecewise linear function $g(x)$.
+}
+The notation $g(x)\gets ax+b$,
+$x\in I$ denotes that $g(x)$ is defined by the equation $ax+b$ for all
+values of $x$ in the interval $I$.
+
+\begin{figure}
+\IpeScale{90}\centeripe{alg}
+\caption{The algorithm approximates the (dashed) function 
+  $f(x)$ with the (solid) piecewise linear function $g(x)$.}
+\figlabel{alg}
+\end{figure}
+
+\vspace{1ex}
+\noindent\begin{minipage}{\textwidth}
+$\textsc{Approx-Curve}(f,f')$
+\begin{algorithmic}[1]
+\STATE{$x_{l_0}\gets -\infty$, $x_{r_0}\gets \infty$}
+\FOR{$i=1,\ldots, \lceil \log_{E} n\rceil$}
+  \STATE{$x_{l_i}\gets\sup\{x:f'(x)\le -(1-\epsilon)^in\}$}
+  \STATE{$g(x)\gets -(1-\epsilon)^in(x - x_{l_i}) +
+    f(x_{l_i})$,\quad $x\in(x_{l_i-1},x_{l_i}]$}
+  \STATE{$x_{r_i}\gets\inf\{x:f'(x)\ge(1-\epsilon)^in\}$}
+  \STATE{$g(x)\gets (1-\epsilon)^in(x - x_{r_i}) +
+    f(x_{r_i})$,\quad $x\in[x_{r_i},x_{r_{i-1}})$}
+\ENDFOR
+\comment{ \STATE{$g(x)\gets f((x_{l_i}+x_{r_i})/2)$,\quad $x\in(x_{l_i},x_{r_i})$} }
+\end{algorithmic}
+\end{minipage}
+\vspace{1ex}
+
+\begin{thm}\thmlabel{approx}
+  The function $g(x)$ produced by the preceding algorithm is a
+  $(1-\epsilon)$-approximation to $f(x)$ for all $x$ except possibly
+  in the interval $[x_{l_{\lceil\log n\rceil}},x_{r_{\lceil\log
+      n\rceil}}]$.  Furthermore, there is a representation of $g(x)$
+  as an array of $O(\log_{E} n)$ line segments that allows us to
+  evaluate $g(x)$ in $O(\log\log_{E} n)$ time for any query value $x$.
+\end{thm}
+
+\begin{proof}
+  We start with the first sentence of the theorem.  By the above
+  discussion, $g(x)$ is a $(1-\epsilon)$-approximation to $f(x)$ at
+  any $x$ for which $g(x)$ is defined in lines~5 or 7 of the
+  algorithm.  The only values of $x$ for which $g(x)$ is not defined
+  in lines~5 or 7 are those in the range $[x_{l_{\lceil\log
+      n\rceil}},x_{r_{\lceil\log n\rceil}}]$ and these are explicitly
+  excluded from the statement of the theorem.
+  
+  The second sentence of the theorem follows by storing each of the
+  $O(\log_E n)$ segments that define $g(x)$ in an array sorted by
+  $x$-coordinate and using binary search to perform queries.
+\end{proof}
+
+\paragraph{Remark.}
+
+Depending on the form of $f(x)$, it is sometimes
+possible to find a piecewise linear function $g(x)$ with the minimum
+number of linear pieces that is a $(1-\epsilon)$-approximation to
+$f(x)$.  This is done by computing the \emph{corridor} $C=\{(x,y) :
+(1-\epsilon)f(x)\le y \le f(x) \}$ and then computing the
+\emph{minimum link path} \cite{msd00} in $C$ from the point
+$(-\infty,f(-\infty))$ to the point $(\infty,f(\infty))$.  In such
+cases, which include the applications described in the following
+sections, \thmref{approx} shows that the resulting function will have
+$O(\log_E n)$ pieces.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Applications}\seclabel{applications}
+
+The previous section shows that a convex function $f(x)$ can be
+approximated well except in the regions where its slope less than 1
+and provided that we can efficiently evaluate expressions of the form
+$\inf\{x:f'(x)\ge (1-\epsilon)^in\}$ and
+$\sup\{x:f'(x)\le-(1-\epsilon)^in\}$.  With these restrictions, it
+is not immediately clear that this is a very useful result.  In this
+section we show that the result has (at least) important applications
+in facility location.
+
+%=======================================================================
+\subsection{Sums of Distances in One Dimension}
+
+Let $S=\{x_1,\ldots,x_n\}$ be a set of points on the real line with
+$x_i<x_{i+1}$ for all $1\le i< n$.  For convenience, define
+$x_0=-\infty$ and $x_{n+1}=\infty$.  Consider the function
+\[
+   f(x)=\sum_{i=1}^n |x-x_i| \enspace .
+\]
+It follows from this definition that $f(x)$ is piecewise linear, with
+at most $n+1$ pieces, and that its slope is always in the range
+$[-n,n]$.  Furthermore, the slope of $f(x)$ is given by $f'(x)=-n +
+2i$ for $x\in (x_i,x_{i+1})$.
+
+Therefore $f(x)$ satisfies the conditions of \thmref{approx} and
+taking supremums and infimums of $f'(x)$ can be replaced by finding
+the element of a given rank.  This leads to the following algorithm
+for computing the function $g(x)$.  In lines~4 and 6 of the algorithm
+the assignment is performed by storing the endpoints of the interval
+and the equation in an array.
+
+\vspace{1ex}
+\noindent\begin{minipage}{\textwidth}
+$\textsc{Approx-SumOfDistances}(x_1,\ldots,x_n)$
+\begin{algorithmic}[1]
+\STATE{$x_{l_0}\gets -\infty$}
+\STATE{$x_{r_0}\gets \infty$}
+\FOR{$i=1,\ldots, \lceil\log_E (n/2)\rceil$}
+  \STATE{$l_i\leftarrow \lceil(1-\epsilon)^i n/2\rceil$}
+  \STATE{$g(x)\gets 
+    -(n+2l_i)(x-x_{l_i}) + f(x_{l_i})$,\quad $x\in[x_{l_{i-1}},x_{l_i}]$}
+  \STATE{$r_i\leftarrow n-l_i$}
+  \STATE{$g(x)\gets 
+    (n+2r_i)(x-x_{r_i}) + f(x_{r_i})$,\quad $x\in[x_{r_{i}},x_{r_{i-1}}]$}
+\ENDFOR
+\STATE{$g(x)\gets 
+  f(x)$,\quad $x\in(x_{l_i},x_{r_i})$}
+\end{algorithmic}
+\end{minipage}
+\vspace{1ex}
+
+\begin{thm}
+  The above algorithm runs in time $O(n/\epsilon)$ and produces a
+  representation of a function $g(x)$ with at most $2\lceil\log_E
+  n\rceil+2$ linear pieces and such that $g(x)$ is a
+  $(1-\epsilon)$-approximation to $f(x)$.
+\end{thm}
+
+\begin{proof}
+  First, the running time.  By construction, the algorithm runs for
+  $O(\log_E n)$ rounds.  We claim that round $i$ can be implemented to
+  run in $O((1-\epsilon)^i n)$, even if the input $S$ is not given in
+  sorted order.  Therefore, the overall running time is proportional
+  to $\sum_{i=1}^n (1-\epsilon)^in = O(n/\epsilon)$.
+
+  Suppose that before the $(i+1)$st round we have computed the following
+  pieces of information:
+  \begin{eqnarray*}
+    S_i & = & \{x_{l_{i-1}},\ldots,x_{r_{i-1}}\} \enspace ,  \\
+    a_i & = & \sum_{j=1}^{l_i} |x_{l_{i-1}}-x_j| \enspace , \\
+    b_i & = & \sum_{j=r_i}^n |x_{r_{i-1}}-x_j| \enspace .
+  \end{eqnarray*}
+  
+  Note that $S_i$ contains only $O((1-\epsilon)^i n)$ elements.
+  Therefore, locating elements $x_{l_i}$ and $x_{r_i}$ can be
+  implemented by running a linear time selection algorithm on $S_i$,
+  at a cost of $O((1-\epsilon)^in)$.  At the same time, the set
+  $S_{i+1}$ used in the next round can be generated at no extra cost.
+  Finally, the values
+  \begin{eqnarray*}
+    f(x) & = & a_i + b_i + l_i(x-x_{l_i})  + (n-r_i)(x_{r_i}-x)  + 
+    \sum_{j=l_i}^{r_i} |x-x_j| \enspace , \\
+    a_{i+1} & = & a_i + l_i(x_{l_{i+1}}-x_{l_i}) + 
+    \sum_{j=l_i}^{l_{i+1}} |x-x_j| \enspace ,  \\
+    b_{i+1} & = & b_i + (n-r_i)(x_{r_{i}}-x_{r_{i+1}}) + 
+    \sum_{j=r_{i+1}}^{r_{i}} |x-x_j|
+  \end{eqnarray*}
+  can easily be computed in $O((1-\epsilon)^in)$ time since the
+  summations only involve elements of $S_i$.  Therefore, we can
+  evaluate $f(x_{l_i})$ and $f(x_{r_i})$ and compute the inputs
+  $S_{i+1}$, $a_{i+1}$ and $b_{i+1}$ for the next round in the desired
+  time. This completes the analysis of the running time.
+  
+  The bound on the number of pieces comes from the fact that each of
+  the $\lceil\log_E n\rceil$ rounds generates two pieces, and line~8
+  generates at most 2 pieces.
+  
+  The upper and lower bounds on the value of $g(x)$ come from the fact
+  that the above algorithm is simply a specialization of the algorithm
+  given in the previous section.  Therefore, all the parts of $g(x)$
+  defined in lines 3--6 satisfy the $(1-\epsilon)$-approximation
+  property.  The only other parts of $g(x)$ defined are in line 8, and
+  there $g(x)$ is defined to be the same as $f(x)$.
+\end{proof}
+
+%=======================================================================
+\subsection{Sums of Distances in the $L_1$ Metric}
+
+Let $S=\{x_1,\ldots,x_n\}$ be $n$ points in $\mathbb{R}^d$.  For a
+point $p\in \mathbb{R}^d$, let $p[i]$ denote the $i$th coordinate of
+$p$.  Under the $L_1$ metric, the distance between two points $p$ and
+$q$ is
+\[
+d_1(p,q) = \sum_{j=1}^d |p[j]-q[j]|
+\]
+Therefore, under the $L_1$ metric the objective function $f(x)$ used
+in the Fermat-Weber problem becomes
+\[
+f_1(x) = \sum_{j=1}^d \sum_{i=1}^n |x[j]-x_i[j]| \enspace .
+\]
+Thus, evaluating $f(x)$ simply involves evaluating $d$ instances of
+the 1-dimensional function studied in the previous section.  The
+existence of a data structure that uses $O(dn/\epsilon)$ preprocessing
+time $O(d\log_E n)$ storage and has $O(d\log\log_E n)$ query time
+follows immediately.
+
+\begin{thm}
+  There exists a data structure using $O(d\log_En)$ storage, that can
+  be built in $O(dn/\epsilon)$ time and that, for any query point $x$,
+  can return a value $g(x)$ such that $(1-\epsilon)f_1(x)\le g(x)\le
+  f_1(x)$ in $O(d\log\log_E n)$ time.
+\end{thm}
+
+%=======================================================================
+\subsection{Sums of Distances in the $L_2$ Metric: The 2-$d$ Case}
+
+Under the $L_2$ metric, the distance between two points $p,q\in\mathbb{R}^d$
+is
+\[
+d_2(p,q) = \left(\sum_{j=1}^d (p[j]-q[j])^2\right)^\frac{1}{2} \enspace .
+\]
+
+\newcommand{\rot}{\mathrm{r}}
+
+Let $p$ and $q$ be two points in $\mathbb{R}^2$, and let
+$\rot(p,\theta)$ denote the point $p$ rotated by an angle of $\theta$
+about the origin.  Notice that, as we rotate $p$ and $q$ about the
+origin, $d_1(p,q)$ fluctuates between $d_2(p,q)$ and $\sqrt{2}\cdot
+d_2(p,q)$.  Therefore, we might expect that if we took the sum of
+$d_1(p,q)$ under many different angles of rotation and averaged that
+we could get a good approximation to $d_2(p,q)$.  This intuition is
+correct.  Define
+\[ d_k(p,q) = \frac{1}{k} \sum_{i=0}^{k-1} d_1(\rot(p,i\pi/2k),\rot(q,i\pi/2k))
+  \enspace .
+\]
+and let
+$c_k=\frac{1}{k}\sum_{i=0}^{k-1}\left(\sin(i\pi/2k)+\cos(i\pi/2k)\right)$.
+Note that $1\le c_k\le\sqrt{2}$.
+
+\begin{lem}
+$c_k\cdot d_2(p,q) \le d_k(p,q)
+\le (c_k+\pi/4k) \cdot d_2(p,q)$.
+\end{lem}
+
+\begin{proof}
+  Let
+  $c(\Delta)=\frac{1}{k}\sum_{i=0}^{k-1}\left(\sin(i\pi/2k+\Delta)+\cos(i\pi/2k+\Delta)\right)$.
+  Then $d_k(p,q)=c(\Delta)\cdot d_2(p,q)$ for some value of $0\le \Delta<\pi/2k$.
+  The value of $c(\Delta)$ is minimized when $\Delta=0$, yielding
+  \[ d_k(p,q) \ge c(0)\cdot d_2(p,q) = c_k\cdot d_2(p,q)  \] 
+  and is maximized when $\Delta=\pi/4k$ yielding
+  \begin{eqnarray*}
+    d_k(p,q) & \le & c(\pi/4k)\cdot d_2(p,q) \\
+             & = & \frac{1}{k}\sum_{i=0}^{k-1}\left(\sin(i\pi/2k+\pi/4k)+\cos(i\pi/2k+\pi/4k)\right) \cdot d_2(p,q) \\
+             & \le & \frac{1}{k}\sum_{i=0}^{k-1}\left(\sin(i\pi/2k)+\cos(i\pi/2k)+\pi/4k\right) \cdot d_2(p,q) \\
+             & = & (c_k+\pi/4k)\cdot d_2(p,q)
+  \end{eqnarray*}
+\end{proof}
+
+The utility of all this is that the function
+\[
+f_k(x) = \frac{1}{c_k+\pi/4k}\cdot \sum_{i=1}^n d_k(x,x_i)
+\]
+satisfies the inequalities
+\[
+\left(1-\frac{\pi}{4k}\right)\cdot f_2(x)
+  \le \left(1-\frac{\pi}{4kc_k}\right)\cdot f_2(x) 
+  \le \left(\frac{c_k}{c_k+\pi/4k}\right)\cdot f_2(x)\le f_k(x) \le f_2(x) \enspace .
+\]
+This implies that $f_k(x)$ is a $(1-\epsilon)$-approximation to
+$f_2(x)$ when $k\ge\pi/4\epsilon$.
+
+To build a data structure for $f_k(x)$ we simply build $k$ data
+structures for $f_1(x)$, on the $k$ different rotations of our point
+set.  To answer a query on $f_k(x)$ using these data structures we
+simply add up the return values from the queries on each of the $k$
+data structures and divide by $c_k$.  If we set
+$k=\lceil\pi/4\epsilon\rceil$ and build $k$ data structures for
+computing a $(1-\epsilon)$-approximation to $f_1(x)$ then we obtain a
+data structure that can evaluate a $(1-\epsilon)^2$-approximation to
+$f_2(x)$.  The performance of this data structure is given by the
+following theorem.
+
+\begin{thm}
+  There exists a data structure for points in $\mathbb{R}^2$ using
+  $O(\frac{1}{\epsilon}\log_En)$ storage, that can be built in
+  $O(n/\epsilon^2)$ time and that, for any query point $x$, can
+  return a value $g(x)$ such that $(1-\epsilon)^2f_2(x)\le g(x)\le
+  f_2(x)$ in $O(\frac{1}{\epsilon}\log\log_E n)$
+  time.
+\end{thm}
+
+
+\comment{
+%=======================================================================
+\subsection{Sums of Distances in the $L_2$ Metric: 
+  The $d$-Dimensional Case, Deterministic Version}
+
+In $d$-Dimensions, the problem becomes significantly more complicated.
+The difficulty arises because, except for a few values of $k$, there
+is no way to place $k$ points ``uniformly'' on the surface of the unit
+ball in $\mathbb{R}^d$.  Nevertheless, in \appref{approx-spreading},
+we show how to place $O(d^{d/2}/\epsilon^{d-1})$ points
+$p_1,\ldots,p_m$, each corresponding to a rotation of the coordinate
+system so that the sum of distances under the corresponding $L_1$
+metrics is a $(1-\epsilon)$-approximation to the Euclidean distance.
+
+\begin{thm}
+  There exists a data structure for points in $\mathbb{R}^d$ using
+  $O(\frac{d^{d/2}}{\epsilon^{d-1}}\log_En)$ storage, that can be built in
+  $O(d^{d/2}n/\epsilon^{d-1})$ time and that, for any query point $x$, can
+  return a value $g(x)$ such that $(1-\epsilon)^2f_2(x)\le g(x)\le
+  f_2(x)$ in $O(\frac{d^{d/2}}{\epsilon^{d-1}}\log\log_E n)$ time.
+\end{thm}
+}
+
+
+%=======================================================================
+\subsection{Sums of Distances in the $L_2$ Metric: 
+  The $d$-Dimensional Case}
+
+It is possible to extend our construction for the 2-dimensional case
+to the $d$-dimensional case by choosing an appropriate set of
+rotations for the coordinate system.  However, such a construction
+will have factors in the preprocessing time and storage requirements
+that are exponential in $d$.  In this section we show that, if we are
+willing to accept randomization, we can achieve a
+$(1-\epsilon)$-approxiation with arbitarily high probability
+$1-\delta$ using a number of rotations $k=O(\log (1/\delta))$ that is
+independent of the dimension $d$.
+
+Consider two points $p,q\in\mathbb{R}^d$ and take a random rotation of
+space about the origin to obtain two new points $p'$ and $q'$,
+respectively.  Then $d_1(p',q')$ is a random variable that can take on
+all values in the range $[d_2(p,q),\sqrt{d}\cdot d_2(p,q)]$.  The
+random variable $d_1(p',q')$ has some expected value $c_d\cdot
+d_2(p',q')$ where $c_d$ depends only on $d$.  Tight bounds on the
+value of $c_d$ are derived in \appref{cd}, but for our purposes the
+most important property of $c_d$ is that $c_d=\Theta(\sqrt{d})$.  Let
+$f_1^1(x)$ denote the function $f_1(x)$ after a random rotation of the
+set $S$.  Then, by linearity of expectation $E[f_1^1(x)]=c_d\cdot
+f_2(x)$ for any point $x\in\mathbb{R}^d$.  This suggests that
+$f_1^1(x)/c_d$ can already be used as a reasonable approximation for
+$f_2(x)$.
+
+More specifically, let $f_1^1(x),\ldots,f_1^k(x)$ denote the $k$
+functions obtained by taking $k$ independent random rotations of the
+set $S$.  Then, for any query point $x$, each $f_1^i(x)$ is a random
+variable in the range $[f_2(x),\sqrt d\cdot f_2(x)]$ and these random
+variables are independent and identically distributed.  Now we would
+like to know information about the distribution of the random variable
+\[
+f_1^*(x) = \frac{1}{kc_d}\cdot\sum_{i=1}^k f_1^i(x)
+\]
+
+\begin{lem}
+$\Pr\{|f_1^*(x) - f_2(x)| > \epsilon f_2(x)\} \le O(e^{-\Omega(\epsilon^2k)})$.
+\end{lem}
+
+\begin{proof}
+  Note that $\{f_1^1(x),\ldots,f_1^k(x)\}$ are independent identically
+  distributed random variables that all fall within the range
+  $[f_2(x),\sqrt{d}\cdot f_2(x)]$ and whose expected value is
+  $c_df_2(x)$.  Therefore, by Hoeffding's inequality \cite{h63},
+  \[
+  \Pr\left\{\left|\sum_{i=1}^k f_1^i(x) - kc_df_2(x)\right| > \epsilon kc_d f_2(x)\right\} 
+  \le 2e^{-2(\epsilon kc_d f_2(x))^2 / kd(f_2(x))^2}
+  \comment{ = 2e^{-2\epsilon^2 k (c_d)^2 /d} }
+  = 2e^{-\Omega(\epsilon^2k)}
+  \]
+\end{proof}
+
+As before, a data structure for evaluating $f_1^*(x)$ can be
+constructed by building $k$ data structures for evaluating $f_1(x)$.
+The following theorem is obtained by setting $k=\lceil 1/\delta\rceil$.
+
+\begin{thm}
+  There exists a randomized data structure using
+  $O(\frac{d}{\delta}\log_En)$ storage, that can be built in
+  $O(dn/\epsilon\delta)$ time and that, for any query point $x$, can
+  return a value $g(x)$ such that, with probability
+  $1-e^{-\Omega(\epsilon^2/\delta)}$, $(1-\epsilon)^2f_2(x)\le
+  g(x)\le f_2(x)$.  This query operates in
+  $O(\frac{d}{\delta}\log\log_E n)$ time.
+\end{thm}
+
+
+%=======================================================================
+\subsection{Facility-Location and Clustering Problems}
+
+Bose \etal\ \cite{bmm02} describe data structures for approximating
+sums of distances.  They show how to build a data structure in
+$O(n\log n)$ time that can $(1-\epsilon)$-approximate function in
+$f_2(x)$ for any query point $x$ in $O(\log n)$ time.
+
+The authors also give applications of this data structure to a number
+of facility-location and clustering problems, including evaluation of
+the Medoid and AverageDistance clustering measures, the Fermat-Weber
+problem, the constrained Fermat-Weber problem, and the constrained
+obnoxious facility-location problem.  All of these applications also
+work with our data structure, except that the running time is reduced
+by a factor of $\log n$, since our data structure can be constructed
+in $O(n)$ time.
+
+\comment{
+Next we describe applications of our data structures to problems from
+facility location and clustering.
+
+%-----------------------------------------------------------------------
+\paragraph{Clustering Functions.}
+
+Clustering involves grouping points of $\mathbb{R}^d$ into ``similar''
+groups.  Two commonly used measures of dissimilarity are the functions
+\begin{equation}
+    \mathrm{Medoid}(S) = \frac{1}{n}\min\{f_2(p_i) : 1\le i \le n\} \eqlabel{cluster-one}
+\end{equation}
+and
+\begin{equation}
+    \mathrm{AvgDist}(S) = \frac{1}{n}\sum_{i=1}^n f_2(p_i)  \eqlabel{cluster-two}
+\end{equation}
+used in \emph{$k$-means} \cite{kr90,nh94} and \emph{WCDG} \cite{eh00}
+clustering, respectively.  
+
+Currently, no subquadratic time algorithm is known for evaluating
+either of these functions exactly, though Indyk \cite{i99} has given a
+linear time algorithm that delivers a $(1-\epsilon)$-approximation
+with constant probability.  Indyk's result implies a $O(n\log n)$ time
+algorithm that delivers a $(1-\epsilon)$-approximation with high
+probability, i.e, with probability $(1-n^{-c})$.
+
+We note simply that preprocessing the point set $S$ using our data
+structures then using these data structures to evaluate
+\eqref{cluster-one} and \eqref{cluster-two} yields a
+$(1-\epsilon)$-approximation for both functions in
+$O(\frac{d^{d/2}}{{\epsilon^{d-1}}}n\log\log_E n)$ time.
+
+%-----------------------------------------------------------------------
+\paragraph{The Fermat-Weber Problem.}
+
+The \emph{Fermat-Weber} problem asks us to find the point $p$ that
+minimizes $f_2(p)$. Currently, no exact solution to this problem is
+known.  Indeed, Bajaj \cite{b88} has shown that exact solutions to
+this problem can not be represented exactly, even using radicals.  In
+particular, it is impossible to construct an optimal solution by means
+of a ruler and compass.
+
+Bose \etal\ \cite{bmm01} give a $(1-\epsilon)$-approximation algorithm
+for the Fermat-Weber problem that has running time $O(P(n)+Q(n)\log
+n)$ for any fixed dimension $d$ and constant $\epsilon$.  Here $P(n)$
+and $Q(n)$ are the preprocessing and query times, respectively, of a
+$(1-\epsilon)$-approximation data structure for evaluating $f_2(x)$.
+When using the data structures presented in the current work, the
+running time of their algorithm becomes $O(n)$.
+
+%-----------------------------------------------------------------------
+\paragraph{The Constrained Fermat-Weber Problem.}
+
+The method of Bose \etal\ \cite{bmm01} applies also to the case where
+the point $p$ is constrained to lie in the common intersection of $n$
+halfspaces, known as the \emph{constrained Fermat-Weber problem}.
+When used in conjunction with our data structure, the running time of
+their algorithm becomes $O(n)$ for any fixed $d$ and $\epsilon$.
+
+%-----------------------------------------------------------------------
+\paragraph{Constrained Obnoxious Facility Location.}
+
+The constrained obnoxious facility location problem takes as input a
+set of points $S$ and a constraining polyhedron $P$ having $n$
+vertices.  The output of the problem is a point $p\in P$ that
+maximizes $f_2(p)$.  It follows from convexity that the point $p$ lies
+at a vertex of $P$.  Therefore, using our data structures, a
+$(1-\epsilon)$-approximation can be obtained in
+$O(\frac{d^{d/2}}{\epsilon^{d-1}}n\log\log_E n)$ time.
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{A Lower Bound on Storage}\seclabel{lower-bounds}
+
+In this section we prove an $\Omega(\log n\log_E n)$ lower bound on
+the number of bits required by any data structure that provides a
+$(1-\epsilon)$-approximation for convex curves that arise as sums of
+distances.
+
+The idea behind our proof is to make $m=\Theta(\log_E n)$ choices from a
+set of $n$ elements.  We then encode these choices in the form of a
+convex curve $f(x)$ whose slopes are in $[0,n]$.  We then
+show that given a function $g(x)$ that is a
+$(1-\epsilon)$-approximation to $f(x)$ we can recover the
+$\Theta(\log_E n)$ choices.  Therefore, any data structure that can
+produce $(1-\epsilon)$-approximation to convex curves whose slopes lie
+in $[0,n]$ must be able to encode $n\choose m$ different
+possibilities and must therefore store $\Omega(\log n \log_E n)$ bits
+in the worst case.
+
+Let $p_1,\ldots,p_m$ be any increasing sequence of $m=\lfloor\log_E
+n\rfloor$ integers in the range $[1,n]$.  We construct the function
+$f(x)$ as follows:
+\begin{enumerate}
+\item For $x\in [-\infty,0)$, $f(x)=0$.
+\item For $x\in (2^{p_i},2^{p_{i+1}})$, $f(x)$ has slope $(2E)^i$.
+\item For $x\in (2^{p_m},\infty]$, $f(x)$ has slope $n$.
+\end{enumerate}
+
+
+The following lemma, illustrated in \figref{encoding} allows us to
+decode the values of $p_1,\ldots,p_m$ given a
+$(1-\epsilon)$-approximation to $f(x)$.
+
+\begin{figure}
+\centeripe{encoding}
+\caption{An illustration of \lemref{encoding}.}\figlabel{encoding}
+\end{figure}
+
+\begin{lem}\lemlabel{encoding}
+  For the function $f(x)$ defined above and for all $1\le i< m$,
+  $(1-\epsilon)f(2^{p_i+1}) > f(2^{p_i}) +
+  (2E)^{i-1}(2^{p_i+1}-2^{p_i})$.
+\end{lem}
+
+\begin{proof}
+  From \figref{encoding} (or some algebra) one can see that it is sufficient
+  to show that
+  \[
+  \epsilon f(2^{p_i}) < ((1-\epsilon)(2E)^i-(2E)^{i-1})(2^{p_i+1}-2^{p_i})
+  \enspace .
+  \]
+  Using the fact that $f(2^{p_i})\le(2E)^{i-1}2^{p_i}$, 
+  \begin{eqnarray*}
+    \epsilon f(2^{p_i}) & < & f(2^{p_i}) \\
+    & \le & (2E)^{i-1}2^{p_i} \\
+    & =   & \left(\frac{2^{i-1}}{(1-\epsilon)^{i-1}}\right)2^{p_i} \\
+    & =   & \left(\frac{2^{i}}{(1-\epsilon)^{i-1}}
+      -\frac{2^{i-1}}{(1-\epsilon)^{i-1}}\right)2^{p_i} \\
+    & =   & \left((1-\epsilon)\left(\frac{2^{i}}{(1-\epsilon)^{i}}\right)
+      -\frac{2^{i-1}}{(1-\epsilon)^{i-1}}\right)2^{p_i} \\
+    & =   & ((1-\epsilon)(2E)^i-(2E)^{i-1})(2^{p_i+1}-2^{p_i}) \enspace ,
+  \end{eqnarray*}
+  as required. 
+\end{proof}
+
+Suppose that $g(x)$ is a $(1-\epsilon)$-approximation to $f(x)$, i.e.,
+for all $x\in\mathbb{R}$, $g(x)$ satisfies $(1-\epsilon)f(x)\le
+g(x)\le f(x)$.  Then \lemref{encoding} can be used to recover the
+values of $p_1,\ldots,p_m$ from $g(x)$.  Suppose, that we have already
+recovered $p_1,\ldots,p_{i-1}$ and that we now wish to recover $p_i$.
+Note that, since we have recovered $p_1,\ldots,p_{i-1}$ we can compute
+the exact value of $f(2^{p_{i-1}})$.  We then evaluate $g(x)$ at
+$2^{p_{i-1}+2}$, $2^{p_{i-1}+3}$,\ldots until encountering a value $j$
+such that $g(2^{p_{i-1}+j})> f(2^{p_{i-1}}) +
+(2E)^{i-1}(2^{p_{i-1}+j}-2^{p_{i-1}})$.  \lemref{encoding} then
+guarantees that $p_i=p_{i-1}+j-1$.  In this way, we can reconstruct
+the entire function $f(x)$ and recover the values of $p_1,\ldots,p_m$.
+
+Although in the above discussion the slopes used in the construction
+of $f(x)$ are not always integral it is clear that carefully rounding
+values appropriately would yield the same results using only integer
+valued slopes.  Since we can encode $n\choose m$ different choices of
+$p_1,\ldots,p_m$ in this manner and $\log {{n}\choose{m}} =\Omega(\log
+n\log_E n)$, we conclude the following.
+
+\begin{thm}
+  Any data structure that can represent a $(1-\epsilon)$-approximation
+  to any convex function whose slopes are integers in the range
+  $[0,n]$ must use $\Omega(\log n\log_E n)$ bits of storage in the
+  worst case.
+\end{thm}
+
+\begin{rem}
+  Some readers may complain that the function used in our lower bound
+  construction uses linear pieces whose lengths are exponential in
+  $n$.  However, one should take into account that the endpoints of
+  these pieces have $x$-coordinates that are integral powers of 2 and
+  they can therefore be encoded in $O(\log n)$ bits each using, e.g.,
+  a floating point representation.
+\end{rem}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusions}\seclabel{conclusions}
+
+We have studied the problem of approximating a convex curve with a
+piecewise linear function.  Applications of this work include
+approximate data structures for evaluating sums of distances as they
+occur in the Fermat-Weber problem, under both the $L_1$ and $L_2$
+metrics and a series of related problems.
+
+\tabref{data-structure} summarizes the results we have obtained for
+evaluating sums of distances in $1$ dimension and in $d$-dimensions
+under both the $L_1$ and $L_2$ metrics.  \tabref{applications} shows
+applications of this work to other problems from clustering and
+facility location.
+
+\begin{table}
+\begin{center}\begin{tabular}{c|lccccc}
+Space & Operation     & Exact cost & Previous result  & New result \\ \hline
+$d=1$ & Preprocessing & $O(n\log n)$ & $O(n\log n)$  
+             & $O(n)$ \\
+       & Query         & $O(\log n)$  & $O(\log n)$   & $O(\log\log n)$\\\hline
+$d>1$, $L_1$   & Preprocessing & $O(n\log n)$ & $O(n\log n)$ & $O(n)$ \\
+           & Query     & $O(\log n)$  & $O(\log n)$  & $O(\log\log n)$\\\hline
+$d>1$, $L_2$   & Preprocessing & --       & $O(n\log n)$ & $O(n)$ \\
+           & Query         & $O(n)$   & $O(\log n)$  & $O(\log\log n)$ \\
+\end{tabular}\end{center}
+\caption{Results on evaluating sums of distances in $1$ dimension 
+  and in $d$ dimensions under the $L_1$ and
+  $L_2$ metrics when $d$ and $\epsilon$ are fixed. (Previous results are either trivial or from Bose \etal\ 
+  \cite{bmm01}.)}\tablabel{data-structure}
+\end{table}
+
+\newcounter{ro}
+\newcounter{to}
+
+\begin{table}
+\begin{minipage}{\textwidth}
+\begin{center}\begin{tabular}{l|cccc}
+Problem      & Exact solution & Previous best & Ref. & New result \\ \hline
+Average distance  & $O(n^2)$ & $O(n)^a$ $O(n\log n)$ & 
+    \cite{i99,bmm01} & $O(n\log\log n)$ \\
+Medoid (1-Median) & $O(n^2)$ & $O(n)^a$ $O(n\log n)$ & 
+    \cite{i99,bmm01} & $O(n\log\log n)$ \\
+Discrete Fermat-Weber & $O(n^2)$ & $O(n)^a$ $O(n\log n)$ & 
+    \cite{i99,bmm01} & $O(n\log\log n)$ \\
+Fermat-Weber & -- & $O(n)^b$ $O(n\log n)$ & 
+    \cite{i99,bmm01} & $O(n)$ \\
+Constrained Fermat-Weber & $O(n^2)$ & $O(n)^b$ $O(n\log n)$ & 
+    \cite{i99,bmm01} & $O(n)$ \\
+Constrained OFL & $O(n^2)$ & $O(n)^a$ $O(n\log n)$ & 
+    \cite{i99,k97,bmm01} & $O(n\log\log n)$ 
+\end{tabular}\end{center}
+\footnotetext[1]{Refers to a randomized algorithm that
+  outputs a  $(1-\epsilon)$-approximation with constant probability.}
+\footnotetext[2]{Refers to a randomized algorithm that outputs a
+  $(1-\epsilon)$-approximation with high probability, i.e., with probability
+  $1-n^{-c}$, for some $c>0$.}
+\end{minipage}
+\caption{Applications of the data structure for the $L_2$ metric when
+  $d$ and $\epsilon$ are fixed.}
+\tablabel{applications}
+\end{table}
+
+
+Although we have shown that $\Omega(\log n \log_E n)$ is a lower bound
+on the size (in bits) of a data structure for approximately evaluating
+convex functions, we are unable to show that $\Omega(\log\log_E n)$ is
+a lower bound on the query time for such a data structure.  This
+remains an open problem.
+
+\bibliographystyle{plain} \bibliography{curves}
+
+\appendix
+
+\comment{
+\section{Approximately Uniform Rotations in $d$-Dimensions}
+\applabel{approx-spreading}
+
+In this appendix we describe a scheme for choosing a set of
+$O(\epsilon^{-d})$ rotations of the coordinate system so that the sum
+of $L_1$ distances in each of the coordinate systems is a good
+approximation to the Euclidean distance.
+
+
+\noindent LUC NEEDS TO PROVE THIS.  I CAN'T.
+
+\comment{
+Let $s_d$ denote the unit hypersphere in
+$\mathrm{R}^d$.  Note that a rotation can be specified as a point on
+$s_d$.
+
+We partition $s_d$ into \emph{patches}, most of which have equal area.
+A patch is a range of $d-1$ dimensional polar coordinates that defines
+a connected subset of $s_d$.  We construct our patches recursively.
+For the case $d=2$, we partition the circle into $2\pi/\epsilon$ arcs,
+where the $i$th arc has polar angle in the interval
+$[i\epsilon,(i+1)\epsilon)$.  In general, if we have a partition of
+$s_{d-1}$ we can extend it to a partition of $s_d$ in the following
+way.  We extend each patch $P$ of the partition to $d$-space by
+setting the interval of its $(d-1)$th polar coordinate to $[0,2\pi]$.
+We then subdivide each piece $P$ into a maximal number of subpatches,
+all but one of which has area $\epsilon^{d-1}$ by subdividing
+$P$ along its $(d-1)$th polar coordinate.
+
+Note that for any two points $x,y$ in some patch $P$,
+$d_1(x,y)\le\epsilon d$.  Let $S_d$ denote the set of points obtained
+by taking the center of each patch in the partition of $s_d$.  For a
+point $p\in S_d$ let $\patch(p)$ denote the patch that defines $p$.
+For a surface $P$ (patch of sphere) we denote the area of $P$ by
+$A(P)$.
+
+Since each patch has area at most $\epsilon^d$, and these patches
+partition the surface of $s_d$, we have
+\[
+|S_d| \ge \frac{2\pi^{d/2}}{\Gamma(d/2)\epsilon^{d-1}} \enspace .
+\]
+Call a patch \emph{bad} if it does not have area $\epsilon^d$ and call
+it \emph{good} otherwise.  Note that each patch in the partition
+of $s_{d-1}$ generates at most one bad patch in the partition of $s_d$.
+Therefore,
+\[
+|S_d| \le \frac{2\pi^{d/2}}{\Gamma(d/2)\epsilon^{d-1}} + |S_{d-1}|\enspace ,
+\]
+and $B$, the number of bad patches is at most
+\[
+B\le |S_{d-1}| = O(\epsilon|S_d|) \enspace .
+\]
+
+Let $d_1(p)$ denote the $L_1$ distance from the origin to the point
+$p$ and define $f(X)=\sum_{p\in X}d_1(p)/|S|$.  To prove bounds on the
+discrepancy between Euclidean distance and the distance defined by the
+points of $S_d$, it suffices to prove bounds on $|f(S_1)-f(S_2)|$,
+where $S_1$ and $S_2$ are any two rotations of $S_d$.  By the triangle
+inequality
+\[
+|f(S_1)-f(S_2)| \le 2 \E |f(S^*) - f(S^\mathrm{r})|
+\]
+where $S^\mathrm{r}$ is a random rotation of $S_d$ and $S^*$ is a
+rotation of $S$ chosen to maximize the above expectation.  Now we
+have
+\begin{eqnarray*}
+  2 \E |f(S^*)-f(S^\mathrm{r})|
+  & = & 2\left|\frac{1}{|S_d|} \sum_{p\in S^*} d_1(p) - \frac{1}{\area(s_d)} \int_{s_d} d_1(p)\, dp \right| \\
+  & = &  2\left|\frac{1}{|S_d|} \sum_{p\in S^*} d_1(p) - 
+    \sum_{p\in S}
+      \left(\frac{1}{\area(s_d)}\int_{\patch(p)} d_1(q)\,dq\right) \right| \\
+  &\le& 2\sum_{p\in S^*} \left|\frac{d_1(p)}{|S_d|} - 
+      \left(\frac{1}{\area(s_d)}\int_{\patch(p)} d_1(q)\,dq\right) \right| \\
+  &\le& 2\left(\frac{(|S_d|-B)\epsilon d}{|S_d|} + \frac{B\sqrt{d}}{|S_d|}\right) \\
+  &\le& O(\epsilon d) \enspace .
+\end{eqnarray*}
+
+In summary, if we define $d_1^p(x,y)$ as the $L_1$ distance between
+$x$ and $y$ after rotation according to the point $p\in s_d$, then we
+can define 
+\[
+f_1^S(x)=\frac{\sum_{p\in S_d} \sum_{i=1}^n d_1^p p_i}{\sum_{p\in S_d}d_1(p)}
+\]
+which obeys the inequalities
+\[
+|f_1^S(x)-f_2(x)| \le O(\epsilon\sqrt{d}) f_2(x) \enspace .
+\]
+}
+}
+
+\section{The Value of $\mathbf{c_d}$}\applabel{cd}
+
+The value of $c_d$ is given by
+\[
+  c_d = \E \left[\sum_{i=1}^d|X_i| \right] \enspace ,
+\]
+where $(X_1,\ldots,X_d)$ is a point taken from the uniform
+distribution on the surface of the unit ball in $\mathbb{R}^d$.
+We observe that $(X_1^2,\ldots,X_d^2)$ is distributed as 
+\[
+\left(\frac{N_1^2}{N^2},\ldots,\frac{N_d^2}{N^2}\right) \enspace ,
+\]
+where $N^2=\sum_{i=1}^d N_i^2$ and $(N_1,\ldots,N_d)$ are i.i.d.\
+$\mathrm{normal}(0,1)$.  Clearly,
+\[
+\frac{N_1^2}{N^2} = \frac{N_1^2}{N_1^2+\sum_{i=2}^dN_i^2}
+  \stackrel{\mathcal{L}}{=} \frac{G(\frac{1}{2})}{G(\frac{1}{2})+G(\frac{d-1}{2})}
+\]
+where $G(\frac{1}{2})$, and $G(\frac{d-1}{2})$ are independent
+$\mathrm{gamma}(\frac{1}{2})$ and $\mathrm{gamma}(\frac{d-1}{2})$
+random variables, respectively.  Thus, $N_1^2/N$ is distributed as a
+$\mathrm{beta}(\frac{1}{2},\frac{d-1}{2})$ random variable,
+$\beta(\frac{1}{2},\frac{d-1}{2})$.  We have:
+\begin{eqnarray*}
+\E\left[\sum_{i=1}^d |X_i|\right]
+ & = & d\,\E\left[\sqrt{\beta\left(\frac{1}{2},\frac{d-1}{2}\right)}\right] \\
+ & = & d\int_0^1\frac{x^{\frac{1}{2}-1}(1-x)^{\frac{d-1}{2}-1}}
+                    {B(\frac{1}{2},\frac{d-1}{2})}\cdot\sqrt{x} \quad dx\\
+ & = & d\cdot\frac{B(1,\frac{d-1}{2})}{B(\frac{1}{2},\frac{d-1}{2})}\\
+\comment{ & = & d\cdot 
+       \frac{\Gamma(\frac{d-1}{2})}
+            {\Gamma(\frac{d+1}{2})} \cdot
+       \frac{\Gamma(\frac{d}{2})}
+            {\Gamma(\frac{1}{2})\cdot\Gamma(\frac{d-1}{2})} \\
+ & = & \frac{d\Gamma(\frac{d}{2})}
+            {\Gamma(\frac{1}{2})\cdot\Gamma(\frac{d+1}{2})} \\ 
+ & = & \frac{2\Gamma(\frac{d}{2}+1)}
+            {\Gamma(\frac{1}{2})\cdot\Gamma(\frac{d+1}{2})} \\
+}
+ & = & \frac{2}{B(\frac{1}{2},\frac{d+1}{2})} \enspace , 
+\end{eqnarray*}
+where $B(a,b)$ is the beta function.
+
+From Mitrinovic \cite{m70}[p.~286], we note:
+\begin{eqnarray}
+\frac{2}{B(\frac{1}{2},\frac{d+1}{2})} & \ge &
+  \sqrt{\frac{d}{2}+\frac{1}{4}+\frac{1}{16d+32}}\cdot 
+     \frac{1}{\Gamma(\frac{1}{2})} \\
+ & = & 2\sqrt{\frac{d}{2}+\frac{1}{4}+\frac{1}{16d+32}}\cdot
+      \frac{1}{\sqrt{\pi}} \\
+ & \ge & \sqrt{\frac{2d+1}{\pi}} \enspace .
+\end{eqnarray}
+
+Furthermore,
+\begin{eqnarray*}
+\E\left[\sum_{i=1}^d|X_i|\right] & = & d\,\E[|X_1|] \\
+  & \le & \frac{d+1}{\sqrt{\pi}\cdot\sqrt{\frac{d}{2}+
+                       \frac{3}{4}+\frac{1}{16d+48}}} \\
+  & \le & \frac{2(d+1)}{\sqrt{\pi}\cdot\sqrt{2d+3}} \\ 
+  & \le & \sqrt\frac{2(d+1)}{\pi} \enspace . 
+\end{eqnarray*}
+
+In summary,
+\[
+\sqrt\frac{2d+1}{\pi} \le c_d = \frac{2\Gamma(\frac{d}{2}+1)}
+                            {\sqrt{\pi}\cdot\Gamma(\frac{d+1}{2})}
+ \le \sqrt{\frac{2(d+1)}{\pi}} \enspace .
+\]
+
+
+\end{document}

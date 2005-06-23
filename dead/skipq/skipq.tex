@@ -1,0 +1,84 @@
+\documentclass{article}
+
+\input{pat.tex}
+
+
+\newcommand{\y}{\mathrm{y}}
+
+\title{Skiplists as Priority Queues%
+	\thanks{This research was partially funded NSERC.}}
+\author{Pat Morin \\ 
+	School of Computer Science \\ 
+	Carleton University \\ 
+	\texttt{morin@cs.carleton.ca}}
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+We study the use of skiplists as priority queues.  Using skiplists we
+obtain easy-to-implement priority queues that have the working set
+property \cite{st85} or the queueish property \cite{il02}.  Previously
+implementations of priority queues with the working set or queueish
+property only satisfied these properties in an amortized sense.
+Priority queues based on skiplists can satisfy these properties with
+high probability.
+\end{abstract}
+
+\section{Introduction}\seclabel{introduction}
+
+Consider the a priority queue $Q$ containing a set of $S$ of $n$
+elements.  For an element $x$ contained in $Q$, let $\y_x$ denote the
+set of elements currently in $Q$ that were inserted into $Q$ after the
+insertion of $x$.  (These elements are \emph{younger} than $x$.)  We
+say that $Q$ has the \emph{working set} property if the deletion of
+$x$ can be performed in $O(\log \y_x)$ time.  We say that $Q$ has the
+\emph{queueish} property if the deletion of $x$ can be done in $O(\log
+(n-\y_x))$ time.
+
+The working set and queueish properties are complementary.
+Intuitively, if $Q$ is used as a stack then the working set property
+implies that deletions are a constant time operation.  On the other
+hand, if $Q$ is used as a queue then the queueish property implies
+that deletion are a constant time operation.
+
+There are several examples in which these properties are useful.  For
+the working set property, examples include\ldots For the queueish
+property, examples include sorting inputs that have few inversions and
+running Dijkstra's algorithm on graphs with almost-uniform edge
+weights.
+
+Priority queue implementations with the working set and queueish
+properties do exist.  In particular, pairing heaps \cite{fsst86} achieve
+the working set property and queaps \cite{il02} achieve the queueish
+property.  However, both these data structures achieve these
+properties only in an amortized sense, and the cost of an individual
+deletion operation can be $\Omega(n)$.
+
+In this paper, we study the use of skiplists \cite{p90} in the
+implementation of priority queues.  We show that, using skiplists, it
+is possible to implement priority queues that have the working set or
+queueish properties with high probability.  For the working set
+property, this means that the probability that deleting $x$ takes more
+than $c\log \y_x$ time is at most $\y_x{}^{-c}$.  Of course, this
+implies that these data structures also have these properties in an
+expected sense, so that the expected cost of deleting $x$ is $O(\log
+\y_x)$ for the working set data structure.
+
+The remainder of this paper is organized as follows. In
+\secref{working-set} we describe a priority queue implementation with
+the working set property.  In \secref{queueish} we give an
+implementation with the queuish property.  In \secref{conclusion} we
+summarize and make some closing remarks.
+
+\section{A Working Set Priority Queue}\seclabel{working-set}
+
+\section{A Queueish Priority Queue}\seclabel{queueish}
+
+\section{Conclusion}\seclabel{conclusion}
+
+
+\bibliography{skipq}
+\bibliographystyle{plain}
+
+\end{document}

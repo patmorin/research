@@ -1,0 +1,69 @@
+%% -*- LaTeX -*- This is LaTeX2e code
+
+\section{Other Space-Efficient Geometric Algorithms}
+
+In this section, we present some simple observations about well-known
+algorithms for geometric problems and show how to space-efficiently
+encode the results.
+
+\subsection{Convex Hull of a Simple Polygon}
+
+Using an space-efficient stack, e.g., along the lines of Br\"onnimann
+\etal\'{}s~\cite{bronnimann:convex} description of Graham\'{}s
+Scan~\cite{graham:efficient}, we can implement an optimal
+space-efficient algorithm for computing the convex hull of a simple
+polygon. To do so, we only need to observe that the only operations
+performed in the algorithm described by Preparata and
+Shamos~\cite[Chap. 4.1.4]{preparata:computational} are push and pop
+operations.
+
+\begin{lemma}
+  The convex hull of a simple polygon with $n$ vertices can
+  be computed \emph{in place} in \Oh{n} time.
+\end{lemma}
+
+\subsection{Diameter of a Point Set}
+
+Using the space-efficient algorithm of Br\"onnimann
+\etal~\cite{bronnimann:convex}, we immediately obtain an optimal
+space-efficient algorithm for computing the diameter of a point set.
+This is due to the fact that the algorithm for enumerating antipodal
+pairs as described by Preparata and Shamos~\cite[Chap.
+4.2.3]{preparata:computational} already is an \emph{in-place}
+traversal of the boundary of the convex hull. To encode the output
+without any extra space, we simply swap an antipodal pair determining
+the diameter to the start of the array containing the points.
+
+\begin{lemma}
+  The diameter of a set of $n$ points in the plane can be computed
+  \emph{in-place} in \Oh{n \log_2 n} time. The encoding of the result
+  does not need any extra space.
+\end{lemma}
+
+\subsection{Minimum Enclosing Circle}
+
+A close look at Welzl\'{}s incremental
+algorithm~\cite{welzl:smallest} shows that this algorithm already
+works \emph{in-place}. We can modify the output of this algorithm such
+that the array containing the points is reorganized in the following
+way: Either the first three points determine the minimum enclosing
+circle or the first two points determine the diameter of the circle.
+Which of these cases applies, can be checked by first assuming that
+the first two points determine the diameter and then checking whether
+the third point is contained within this circle. As we can always
+arrange the three points that determine the minimum enclosing circle
+in such a way that the circle given by first two points does not
+contain the third point (take the endpoints of the shortest edge in
+the triangle formed by these points), this shows that the result
+can be encoded without any extra space.
+
+\begin{lemma}
+  The Minimum Enclosing Circle of a set of $n$ points in the plane can
+  be computed \emph{in-place} in \Oh{n} expected time. The encoding of
+  the result does not need any extra space.
+\end{lemma}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "paper"
+%%% End:

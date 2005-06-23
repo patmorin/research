@@ -1,0 +1,735 @@
+\documentclass[lotsofwhite]{patmorin}
+\usepackage{charter}
+\usepackage{graphicx,ipe}
+\usepackage[noend]{algorithmic}
+
+\newcommand{\email}[1]{\texttt{#1}}
+\newcommand{\dfst}{\textsc{DFS-Traversal}}
+\newcommand{\bfst}{\textsc{BFS-Traversal}}
+\newcommand{\layer}{d}
+\newcommand{\fakefigure}{\begin{center}\rule{2in}{2in}\end{center}}
+\input{pat.tex}
+
+\title{\MakeUppercase{Recognizing Depth-First-Search and
+	Breadth-First-Search Trees}}
+
+\author{Jurek Czyzowicz\thanks{%
+		Universit\'e du Qu\'ebec en Outaouais,
+		\email{jurek@uqo.ca}} \and
+	Wojciech Fraczak\thanks{%
+		IDT Canada,
+		\email{wojtek.fraczak@idt.com}} \and
+	Pat Morin\thanks{%
+		Carleton University,
+		\email{morin@cs.carleton.ca}} \and
+	Andrzej Pelc\thanks{%
+		Universit\'e du Qu\'ebec en Outaouais,
+		\email{pelc@uqo.ca}}}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract} 
+Given a graph $G$ and a spanning tree $T$ of $G$, is $G$ a
+depth-first-search or breadth-first-search tree of $G$?  We show that
+this question can be answered in linear time.
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+Two of the most important paradigms in the design of efficient graph
+algorithms are \emph{depth-first-search} (DFS) and
+\emph{breadth-first-search} (BFS).  Both of these graph traversal
+algorithms have been in use for nearly thirty years and have many
+applications including planarity testing \cite{X}, graph drawing
+\cite{X}, separator finding (divide-and-conquer) \cite{X}, VLSI layout
+\cite{X}, \ldots Both techniques have been studied extensively and
+their complexity has been considered in sequential \cite{X}, parallel
+\cite{X}, distributed \cite{X}, and external-memory \cite{X} computing
+environments.
+
+Let $G$ be a (directed or undirected) graph and denote by $V(G)$ the
+vertex set of $G$ and by $E(G)$ the edge set of $G$.  We say that a
+node $v$ is the \emph{neighbour} of a node $u$ if $E(G)$ contains the
+edge $(u,v)$ (for directed graphs) or the edge $\{u,v\}$ (for
+undirected graphs).  The DFS algorithm uses a stack and a mark bit at
+each node of $G$ to keep track of which vertices have already been
+visited.  The following algorithm, when called on input $r\in V(G)$
+with all nodes of $G$ unmarked will build a \emph{DFS tree} $T$ of $G$
+rooted at $r$:
+
+\noindent
+\begin{minipage}{\textwidth}
+$\dfst(v)$
+\begin{algorithmic}[1]
+\STATE{mark $r$ and push it onto the stack}
+\WHILE{the stack is not empty}
+  \IF{vertex $u$ on the top of the stack has an unmarked neighbour $v$}
+    \STATE{add edge $(u,v)$ to $T$}
+    \STATE{mark $v$ and and push it onto the stack}
+  \ELSE
+    \STATE{pop $u$ from the stack}
+  \ENDIF
+\ENDWHILE
+\end{algorithmic}
+\end{minipage}
+
+The BFS algorithm uses a queue and mark bits on the vertices of $G$ to
+traverse $G$.  The following algorithm, when called on input $r$ with
+all nodes of $G$ unmarked will build a \emph{BFS tree} $T$ of $G$
+rooted at $r$:
+
+\noindent
+\begin{minipage}{\textwidth}
+$\bfst(v)$
+\begin{algorithmic}[1]
+\STATE{mark $r$ and enqueue it}
+\WHILE{the queue is not empty}
+  \STATE{dequeue the next vertex $u$}
+  \WHILE{$u$ has an unmarked neighbour $v$}
+     \STATE{add edge $(u,v)$ to $T$}
+     \STATE{mark $v$ and enqueue it}
+  \ENDWHILE
+\ENDWHILE
+\end{algorithmic}
+\end{minipage}
+
+Note that both these algorithms are non-deterministic in the sense
+that the tree $T$ depends on the order in which the neighbours of $u$
+are processed in lines 3 and 4, respectively.  Thus, $G$ may have many
+different DFS or BFS trees rooted at $r$.  A question that therefore
+occurs naturally is: Given a graph $G$ and a tree $T$, is $T$ is a DFS
+(respectively BFS) tree of $G$ rooted at $r$?  For an undirected tree
+$T$, we may also ask: What is the set of vertices $r\in V(G)$ such
+that $T$ is a DFS (respectively BFS) tree of $G$ rooted at $r$?
+
+Although there are many algorithms for recognizing specific types of
+graphs (e.g., chordal graphs \cite{X}, bounded tree-width or
+path-width graphs \cite{X}, interval graphs \cite{X}).  There are also
+several algorithms for finding specific subgraphs \cite{X} or minors
+\cite{X} withing a graph.  However, we are unaware of any result on
+the problem of testing whether a spanning tree $T$ of a graph $G$ is a
+DFS or BFS tree of $G$.  The most similar such result is on testing
+whether a spanning tree of $G$ is a minimum spanning tree of $G$
+\cite{X}.
+
+In this paper, we show that all these questions can be answered in
+optimal $O(|V(G)|+|E(G)|)$ time.  The remainder of this paper is
+organized as follows: In \secref{dfs} we desribe algorithms for
+recognizing DFS trees.  In \secref{bfs} we present algorithms for
+recognizing BFS trees.  In \secref{conclusions} we summarize and
+conclude with open problems.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Recognizing DFS Trees}\seclabel{dfs}
+
+In this section, we present algorithms for recognizing DFS trees.  Our
+exposition proceeds is as follows: First we give an algorithm that,
+given an undirected graph $G$, a spanning tree $T$ of $G$ and a vertex
+$r\in V(G)$ determines whether $T$ is a DFS tree of $G$ rooted at $r$.
+Next we show how to extend this algorithm to the case where $G$ is
+directed.  Finally, we describe an algorithm that, given an undirected
+graph $G$ and a spanning tree $T$ of $G$ determines all vertices $r\in
+V(G)$ such that $T$ is a DFS tree of $G$ rooted at $r$.
+
+%======================================================================
+\subsection{DFS: Rooted Spanning Trees of Undirected Graphs}
+
+In this section, $G$ is a connected undirected graph, $T$ is a
+spanning tree of $G$ and some distinguished node $r\in V(G)$ is called
+the \emph{root} of $T$.  We denote this rooted tree by $T_r$.  We say
+that an edge that is in $G$ but not in $T$ is a \emph{non-tree} edge
+of $G$.  We say that a node $u$ is an \emph{ancestor} of a node $v$ in
+$T_r$ if $u$ is on the path from $r$ to $v$ in $T$.  In this case we
+also say that $v$ is a \emph{descendant} of $u$ in $T_r$. We begin
+with the following easy lemma about the \dfst\ algorithm:
+
+\begin{lem}\lemlabel{ancestor}
+During a run of the \dfst\ algorithm that produces the tree $T$, $u$
+is an ancestor of $v$ in $T_r$ if and only if $v$ is marked while $u$
+is on the stack.
+\end{lem}
+
+\begin{proof}
+The stack lists the vertices on the path from $r$ to the node
+currently on the top of the stack.  Therefore, $u$ is an ancestor of
+$v$ in $T_r$ if and only if $u$ is on the stack when $v$ is marked and
+pushed onto the stack.
+\end{proof}
+
+The following characterization of DFS trees in undirected graphs forms
+the basis of our algorithm.
+
+\begin{lem}\lemlabel{back-edges}
+Let $G$ be a connected undirected graph and let $T$ be a spanning tree
+of $G$.  Then $T$ is a DFS tree of $G$ rooted at $r$ if and only if,
+for each non-tree edge $\{u,v\}$, either $u$ is an ancestor or a
+descendant of $v$ in $T_r$.
+\end{lem}
+
+
+\begin{proof} 
+
+Suppose $T$ is a DFS tree of $G$ rooted at $r$.  Consider any non-tree
+edge $\{u,v\}\in E(G)$ and note that in any execution of the \dfst\
+algorithm, one of $u$ or $v$ must be pushed on the stack first and
+this node does not leave the stack until all of its neighbours are
+marked.  But then, by \lemref{ancestor}, this (first) node is an
+ancestor of the other (second) node.
+
+Suppose $T$ is such that, for every non-tree edge $\{u,v\}$ in $G$,
+$u$ is an ancestor or descendant of $v$.  Imagine running the \dfst\
+algorithm on the input graph $T$.  In this case, the algorithm will
+certainly produce the DFS tree $T$.  Note that, while running the
+algorithm on $T$, a node $u$ is not popped until all its ancestors and
+descendants in $T$ have been marked.  Therefore, if the only non-tree
+edges of $u$ in $G$ are all ancestors or descendants of $u$ in $T$,
+then all of $u$'s neighbours in $G$ have also been marked so this
+execution of the \dfst\ algorithm is also a valid execution of the
+\dfst\ algorithm on $G$ that generates the tree $T$.  Therefore, $T$
+is a DFS tree of $G$.
+\end{proof}
+
+Given a tree $T$, to test if it satisfies the conditions of the lemma,
+we simply run the \dfst\ algorithm on $T$ and check that, whenever a
+node $u$ is popped from the stack, all of $u$'s neighbours in $G$ are
+already marked.  This algorithm is easily implemented to run in
+$O(|V(G)|+|E(G)|)$ time and its correctness follows from the proof of
+\lemref{back-edges}.
+
+\begin{thm} 
+Let $G$ be an undirected graph, $T$ be a spanning tree of $G$ and $r$
+be vertex in $V(G)$.  There exists an $O(|V(G)|+|E(G)|)$ time
+algorithm to test if $T$ is a DFS tree of $G$ rooted at $r$.
+\end{thm}
+
+%======================================================================
+\subsection{DFS: Rooted Spanning Trees of Directed Graphs}
+
+Next we consider the case in which $G$ is a directed graph. In this
+section, we will talk about $T$ as if it is undirected so that, for
+any two vertices $u,v\in V(G)$, there is a unique path in $T$ that joins
+them, although in actuality, the tree $T$ is a directed tree with all
+edges directed away from the root $r$.  The directed case is
+considerably more complicated than the undirected case, since now
+non-tree edges need not lead to ancestors or descendants.  The
+following lemma captures exactly what types of non-tree edges are
+allowed.
+
+\begin{lem}\lemlabel{ancestor2} 
+Let $G$ be a directed graph, let $T$ be a DFS tree of $G$ rooted
+at $r$, and let $(u,v)$ be a non-tree edge of $G$.  Then, in any run
+of the \dfst\ algorithm on $G$ that produces the DFS tree $T$, the
+node $v$ is marked before $u$ is popped from the stack.  
+\end{lem}
+
+\begin{proof}
+By definition of the \dfst\ algorithm, $u$ is not popped from the
+stack until all its neighbours are marked.  Since $v$ is a neighbour
+of $u$, $v$ must be marked before $u$ is popped from the stack.
+\end{proof}
+
+\begin{lem}\lemlabel{back-edges2}
+The tree $T$ is a DFS tree of $G$ if and only if there is an execution
+of the \dfst\ algorithm on $T$ such that the condition of
+\lemref{ancestor2} holds for every non-tree edge $(u,v)\in E(G)$.  
+\end{lem}
+
+\begin{proof}
+The proof is similar to the proof of \lemref{back-edges}.
+\end{proof}
+
+For two vertices $u,v\in V(G)$, the \emph{lowest common ancestor
+(LCA)} of $u$ and $v$ in $T_r$ is the vertex on the path from $u$ to
+$v$ in $T$ that is closest to $r$ in $T$ (see \figref{lca}).  Note
+that if neither $u$ nor $v$ is a descendant of the other, then
+$a\notin\{u,v\}$.  In this case, let $u'$ (respectively, $v'$) denote
+the node that immediately precedes $a$ (respectively, follows $a$) on
+the path from $u$ to $v$ in $T$.  Bender and Farach-Colton \cite{X}
+give an algorithm for preprocessing a rooted tree $T_r$ in linear time
+so that, for any pair of vertices $u$ and $v$, one can determine the
+LCA $a$ of $u$ and $v$ in $T_r$ in constant time.  Furthermore, in the
+case where $a\notin\{u,v\}$ their algorithm can also report the
+vertices $u'$ and $v'$ in constant time.
+
+\begin{figure}
+\centeripe{lca}
+\caption{The lowest common ancestor $a$ of $u$ and $v$ in
+  $T_r$.}\figlabel{lca}
+\end{figure}
+
+Note that when $u$ is an ancestor of $v$ (or vice versa) then the
+condition of \lemref{ancestor2} is met by any depth first traversal of
+$T$ since $u$ is not popped from the stack until all its ancestor and
+descendants have been marked.  However, when neither $u$ nor $v$ is an
+ancestor of the other, the edge $(u,v)$ implies a constraint on the
+order in which the \dfst\ algorithm can visit the descendants of $a$.
+In particular, the traversal meets the conditions of
+\lemref{ancestor2} if and only if it pushes $v'$ onto the stack before
+pushing $u'$ (otherwise, $u$ will be popped before $v$ is marked).
+Therefore, by \lemref{back-edges2}, $T$ is a DFS tree of $G$ rooted at
+$r$ if and only if the \dfst\ algorithm can meet all such constraints.
+
+By using the LCA data structure to the compute the LCA of $u$ and $v$
+for each non-tree edge $(u,v)$ we can compute, for each vertex $a\in
+V(G)$, the constraints on the order in which the \dfst\ algorithm must
+push the children of $a$.  This gives us a directed graph on the
+children of $a$, and all the constraints can be satisfied if and only
+if this graph is acyclic (i.e., the constraints form a partial order).
+Computing all of these directed graphs is easily done in $O(|E(G)|+|V(G)|)$
+time and testing whether they are acyclic can be done in the same
+time-bound using topological sort (see, e.g., \cite{X}).
+
+
+\begin{thm} 
+Let $G$ be a directed graph, $T$ be a spanning tree of $G$
+and $r$ be vertex in $V(G)$.  There exists an $O(|V(G)|+|E(G)|)$ time algorithm
+to test if $T$ is a DFS tree of $G$ rooted at $r$.
+\end{thm}
+
+%======================================================================
+\subsection{DFS: Unrooted Spanning Trees of Undirected
+Graphs}\seclabel{edge-marker}
+
+Next we consider the case where we are given only an undirected graph
+$G$ and a spanning tree $T$ of $G$ and our goal is to determine all
+vertices $r$ such that $T$ is a spanning tree of $G$ rooted at $r$.
+Note that, by \lemref{back-edges}, this is the problem of finding all
+vertices $r$ such that all non-tree edges of $G$ are between descendants
+and their ancestors in $T_r$.
+
+Refer to \figref{dfs-locations}.  Consider a particular non-tree edge
+$\{u,v\}$.  Let $e_u$ (respectively, $e_v$) denote the first
+(respectively, last) edge on the path from $u$ to $v$ in $T$.  If we
+remove the edges $e_u$ and $e_v$ from $T$ then the resulting forest
+has 3 connected components, one that contains $u$, one that contains
+$v$ and one that contains neither $u$ nor $v$.  Observe that $v$ is a
+descendant of $u$ in $T_r$ if and only if $r$ is in the first of these
+three components and that $u$ is a descendant of $v$ in $T_r$ if and
+only if $r$ is in the second of these components.  Therefore, by
+\lemref{back-edges} if $T$ is a DFS tree of $G$ rooted at $r$, then
+the root $r$ must be in the first two of these components.  In this
+way, every non-tree edge $\{u,v\}$ of $G$ generates a constraint on
+the location of $r$.  If we can find a vertex $r$ that satisfies all
+such constraints simultaneously then $T$ is a DFS tree of $G$ rooted
+at $r$.
+
+\begin{figure}
+\centeripe{dfs-locations}
+\caption{The root of $T$ must be in a component of
+$T\setminus\{e_u,e_v\}$ that contains $u$ or
+$v$.}\figlabel{dfs-locations}
+\end{figure}
+
+Note that we can represent the constraint induced by edge $\{u,v\}$ by
+placing symbolic ``markers'' on the edges $e_u$ and $e_v$ indicating
+on which side of these edges the root $r$ should be placed in order to
+satisfy the constraint.  We can compute all these markers using a
+depth first traversal of $T$ starting arbitrary vertex $r'$.  In this
+traversal, the stack is represented as an array of length $n$ and when
+we push a vertex $v$ onto the stack, we keep track of the index $i_v$
+of $v$ in the stack as well as a pointer to the edge of $G$ that
+brought us to $v$.  When the traversal is about to pop a vertex $v$
+from the stack, we examine the neighbours of $v$ in $G$ (see
+\figref{edge-mark}).
+
+\begin{figure}
+\begin{center}\begin{tabular}{c@{\hspace{2cm}}c}
+\Ipe{edge-mark-a} & \Ipe{edge-mark-b} \\
+(1) & (2) 
+\end{tabular}\end{center}
+\caption{Using DFS to mark place markers on the edges of $T$. Bold
+edges indicate the path currently on the DFS stack.}
+\figlabel{edge-mark}
+\end{figure}
+
+\begin{enumerate} 
+
+\item If $u$ is a neighbour of $v$ and $u$ is currently on the stack
+then the stack contains the path from $u$ to $v$ and we can find the
+edges $e_u$ and $e_v$ by looking at the entries for $i_u+1$ and $i_v$
+on the stack.  In this case we place markers on the edges $e_u$ and
+$e_v$ and mark the edge $\{u,v\}$ as already having been processed.
+
+\item If $u$ is a neighbour of $v$, $u$ is not currently on the stack,
+and the edge $\{u,v\}$ has not already been processed then the edge
+$e_v$ is given by $i_v$.  In this case we place a marker on $e_v$ but
+do not mark the edge $\{u,v\}$ as already having been processed (since
+we might still need to place a marker on the edge $e_u$).  
+
+\end{enumerate}
+
+Correctness of the above algorithm follows from the fact that, for
+each edge $\{u,v\}$, the markers on $e_u$ and $e_v$ are correctly
+computed by either Rule~1 (if one of $u$ and $v$ is a descendant of
+the other in $T_{r'}$) or by Rule~2 (otherwise).  Using the indices
+into the stack and the pointers to edges the algorithm is easily
+implemented to run in $O(|V(G)|+|E(G)|)$ time.
+
+To determine which vertices satisfy all constraints simultaneously, we
+again pick an arbitrary vertex $r'$ and walk around $T$ to count how
+many constraints are satisfied by $r'$.  We then do a DFS traversal of
+$T$ starting at $r'$. When the traversal moves from vertex $u$ to
+vertex $v$, we examine the markers on edge $\{u,v\}$ to update the
+number of satisfied constraints. In this way we can compute the number
+of constraints satisfied by each vertex in $V(G)$ using one DFS search
+and examining each edge marker only twice. Since the number of
+constraints (non-tree edges) is exactly $|E(G)|-|V(G)|+1$, this tells
+us exactly which vertices of $G$ satisfy all constraints
+simultaneously.  This algorithm is easily implemented to run in
+$O(|E(G)|+|V(G)|)$ time so we have just proven:
+
+\begin{thm} 
+Let $G$ be an undirected graph $G$ and let $T$ be a spanning
+tree of $G$.  There exists an $O(|V(G)|+|E(G)|)$ time algorithm to find the
+set of all vertices $r\in V(G)$ such that $T$ is a DFS tree of $G$
+rooted at $r$.  
+\end{thm}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Recognizing BFS Trees}\seclabel{bfs}
+
+Next we consider the problem of recognizing BFS trees of graphs.  The
+order of exposition is slightly different than what was used for DFS
+trees.  In particular, we do not consider the special case of rooted
+trees in undirected graphs since the algorithm for this case does not
+seem to be much simpler than the algorithm for the (more general) case
+of rooted trees in directed graphs.
+
+%======================================================================
+\subsection{BFS: Rooted Spanning Trees of Directed Graphs}
+
+First we consider the problem of testing, given a directed graph $G$
+and a rooted spanning tree $T_r$ of $G$, whether $T$ is a BFS tree of
+$G$ rooted at $r$.  In studying problems on BFS trees, we naturally
+think of the vertices of $T_r$ as being partitioned into \emph{layers}
+where the vertices of one layer all have the same distance to the root
+$r$.  Let $\layer_r(v)$ denote the distance from $v$ to $r$ in $T$.  We
+begin with the following easy lemma.
+
+\begin{lem}\lemlabel{layer} 
+If $T$ is a BFS tree of $G$ rooted at $r$ then, for each non-tree edge
+$(u,v)$ in $G$, $\layer_r(v)\le\layer_r(u)+1$.
+\end{lem}
+
+\begin{proof} 
+This follows immediately from the well-known fact (easily proven by
+induction) that when a node at layer $i$ is dequeued, the only marked
+nodes are those at layers $0,\ldots,i+1$.
+\end{proof}
+
+Since testing the condition of \lemref{layer} is easily done in
+$O(V(G)+E(G))$ time, we assume from this point onwards that this
+condition has been checked and is true. However, this condition is not
+sufficient. The following lemma shows that edges $(u,v)$ for which
+$\layer_r(v)=\layer_r(u)+1$ impose additional constraints on the way
+the \bfst\ algorithm must traverse $T$ (see \figref{forward}).
+
+\begin{figure}
+\centeripe{forward}
+\caption{Illustration of \lemref{forward}.}\figlabel{forward}
+\end{figure}
+
+
+\begin{lem}\lemlabel{forward}
+Let $G$ be a directed graph, let $T$ be a BFS tree of $G$ rooted at
+$r$, let $(u,v)$ be a non-tree edge such that
+$\layer_r(v)=\layer_r(u)+1$, and let $a$ be the LCA of $u$ and $v$ in
+$T_r$.  Let $u'$ be the second node on the path in $T$ from $a$ to $u$
+and let $v'$ be the second node on the path in $T$ from $a$ to $v$.
+Then, in any run of the \bfst\ algorithm on $G$ that produces $T$, the
+node $v'$ is enqueued before the node $u'$.
+\end{lem}
+
+\begin{proof}
+Suppose that this were not the case and that $u'$ was enqueued before
+$v'$.  Then $u$ would be dequeued before the parent of $v$ in $T$, so
+when processing $u$, $v$ would be unmarked and would become a child of
+$u$.  But this contradicts the assumption that $(u,v)$ is a non-tree
+edge.
+\end{proof}
+
+
+\begin{lem}\lemlabel{bfs-condition}
+The tree $T$ is a BFS tree of $G$ if and only if there is an execution
+of the \bfst\ algorithm on $T$ such that the condition of
+\lemref{forward} holds for every non-tree edge $(u,v)\in E(G)$.  
+\end{lem}
+
+\begin{proof}
+Similar to the proof of \lemref{back-edges}.
+\end{proof}
+
+
+\lemref{bfs-condition} leads to an algorithm that is very similar to
+the algorithm for testing if $T$ is a DFS tree of $G$.  For each
+non-tree edge $(u,v)$ such that $\layer_r(v)=\layer_r(u)+1$ we find
+the LCA of $u$ and $v$ as well as the first vertices $u'$ and $v'$ on
+the paths in $T$ from $a$ to $u$ and $v$, respectively.  This edge
+establishes the constraint that, when visiting $a$, the vertex $v'$
+must be enqueued before the vertex $u'$.  As before, we use
+topological sorting to determine if all these constraints can be
+satisfied simultaneously.
+
+\begin{thm}
+Let $G$ be a directed graph, $T$ be a spanning tree of $G$, and $r$ be
+some vertex in $V(G)$. There is an $O(|V(G)|+|E(G)|)$ to test if $T$
+is a BFS tree of $G$ rooted at $r$.
+\end{thm}
+
+
+%======================================================================
+\subsection{BFS: Unrooted Spanning Trees of Undirected Graphs}
+
+In this section we consider the case where $G$ is an undirected graph,
+$T$ is a spanning tree of $G$ and we want to compute the set of all
+$r\in V(G)$ such that $T$ is a BFS tree of $G$ rooted at $r$.  We
+proceed by first finding a subtree $T'$ of $T$ that contains all
+possible locations of the root $r$.  We then do a test on $T'$ that
+tells us if all or none of these locations are valid roots for a BFS
+tree.
+
+There are two structural properties of BFS trees that produce
+constraints on the possible locations of $r$.  The first property that
+we require for $T$ to be a BFS tree rooted at $r$ comes from
+\lemref{layer}.  In the language of undirected graphs, \lemref{layer}
+says that, for every non-tree every edge $\{u,v\}$, we must choose a
+root $r$ such that
+\begin{equation}
+	\left|\layer_r(u)-\layer_r(v)\right|\le 1 \enspace . \eqlabel{layers}
+\end{equation}
+
+We classify each non-tree edge $\{u,v\}$ of $G$ as being \emph{even}
+or \emph{odd} depending on whether the length of the path from $u$ to
+$v$ in $T$ is even or odd, respectively.  See \figref{even-odd} for
+what follows.  If $\{u,v\}$ is an even edge, then in order to satisfy
+\eqref{layers} we must choose a root $r$ so that the LCA of $u$ and
+$v$ in $T_r$ is the median vertex on the path from $u$ to $v$ in $T$.
+Similarly, if $\{u,v\}$ is an odd edge then we must choose a root $r$
+so that the LCA of $u$ and $v$ in $T_r$ is one of the two median
+vertices on the path from $u$ to $v$ in $T$.  Note that in both cases,
+the set of possible locations for $r$ induces a connected subtree of
+$T$.  It follows that if we take the intersection of all such sets
+then they also induce a connected subtree $T'$ of $T$.
+
+\begin{figure}
+\begin{center}\begin{tabular}{c@{\hspace{2cm}}c}
+\Ipe{median-even} & \Ipe{median-odd} \\
+(a) & (b)
+\end{tabular}\end{center}
+\caption{The set of possible locations for the root $r$ when
+considering the edge $\{u,v\}$ (a)~when $\{u,v\}$ is even and (b)~when
+$\{u,v\}$ is odd.}\figlabel{even-odd}
+
+\end{figure}
+
+To compute the tree $T'$ we first need to find, for each non-tree edge
+$\{u,v\}$ the median vertex or vertices on the path from $u$ to $v$ in
+$T$.  To find these median vertices, we fix an arbitrary root $r$ of
+$T$ and compute, for each edge $\{u,v\}$ the lowest common ancestor of
+$u$ and $v$ in $T_r$. At the same time we also compute $\layer(v)$ for
+every vertex $v$.  Next we do a DFS traversal of $T$ beginning at $r$.
+Just before the traversal pops an element $u$ off the stack, we check
+the non-tree edges of $G$ incident to $u$.  When examining an edge
+$\{u,v\}$ such that the LCA of $u$ and $v$ in $T_r$ is $a$ we do the
+following (see \figref{median-find}):
+
+\begin{figure}
+\begin{center}\begin{tabular}{c@{\hspace{2cm}}c@{\hspace{2cm}}c}
+\Ipe{median-find-a} & \Ipe{median-find-b} & \Ipe{median-find-c} \\
+(1) & (2) & (3)
+\end{tabular}\end{center}
+\caption{Finding the median element on the path from $u$ to $v$ in
+$T$. Bold edges indicate the path of vertices currently on the DFS
+stack. The box indicates the position of the median vertex or
+vertices.}
+\figlabel{median-find}
+\end{figure}
+
+\begin{enumerate}
+\item If $\layer_r(u)=\layer_r(v)$ then the median vertex is $a$.
+
+\item If $\layer_r(u)>\layer_r(v)$ then the median vertex or vertices
+are stored on the stack and their location can be computed by
+examining $\layer_r(u)$, $\layer_r(v)$ and $\layer_r(a)$.
+
+\item Otherwise, the median vertex or vertices will be computed when
+$v$ is popped from the stack.
+\end{enumerate}
+
+Once these median vertices are known for each edge we can apply a
+simple variation on the algorithm of \secref{edge-marker} that uses
+edge markers to compute the intersection of all these subtrees in
+$O(|V(G)|+|E(G)|)$ time.  We leave the details to interested reader.
+
+Next we consider the second step of our algorithm, which is testing to
+see if the vertices of $T'$ are indeed valid roots of $T$.  Let
+$\{x,y\}$ be an edge of $T'$.  We say that $\{x,y\}$ \emph{supports} a
+non-tree edge $\{u,v\}$ if the path in $T$ from $u$ to $v$ uses the
+edge $\{x,y\}$.  If $\{x,y\}$ supports $\{u,v\}$ then it follows that
+$\{u,v\}$ is an odd edge and that $x$ and $y$ are on the path from $u$
+to $v$ in $T$.  Note that, for different vertices $r\in V(T')$ the LCA
+of $u$ and $v$ in $T_r$ may be either $x$ or $y$, and this is the
+primary obstacle in findin an efficient algorithm.  The following
+surprising result says that after computing the tree $T'$, we can
+forget about the edge $\{u,v\}$.
+
+\begin{lem}\lemlabel{shifty}
+Let $r$ be a vertex in $T'$.  Then $T$ is a BFS tree of $G$ rooted at
+$r$ if and only if $T$ is a BFS tree of $G'$ rooted at $r$, where
+$V(G')=V$ and $E(G')=E(G)\setminus E'$ and $E'$ is the set of non-tree
+edges of $G$ supported by edges in $T'$.
+\end{lem}
+
+\begin{proof}
+If $T$ is a BFS tree of $G$ rooted at $r$ then $T$ is certainly a BFS
+tree of $G'$ since the non-tree edges of $G'$ are a subset of the
+non-tree edges of $G$.
+
+Suppose then that $T$ is not a BFS tree of $G$ rooted at $r$.  Since
+$r$ is in $T'$, all non-tree edges $\{u,v\}$ in $G$ satisfy
+$|\layer_r(u)-\layer_r(v)|\le 1$.  Therefore, by
+\lemref{bfs-condition} there is some vertex $a\in V(G)$ such that the
+constraints imposed on the children of $a$ by \lemref{forward} can not
+be satisfied.  The children of $a$ in $T_r$ can be partitioned (see
+\figref{constrain-a}) into the set $S_1$ of children that are in $T'$
+and the remaining children $S_2$ (that are in $T$ but not $T'$).
+There are four types of constraints on the children of $a$ (see
+\figref{no-support}):
+
+\begin{figure}
+\centeripe{constrain-a}
+\caption{Partitioning the children of $a$ into the sets $S_1$ and
+$S_2$.}\figlabel{constrain-a}
+\end{figure}
+
+\begin{figure}
+\begin{center}\begin{tabular}{cc}
+\Ipe{no-support-a} &
+\Ipe{no-support-b} \\
+(1) & (2) \\[1cm]
+\Ipe{no-support-c} &
+\Ipe{no-support-d} \\
+(3) & (4)
+\end{tabular}\end{center}
+\caption{Four different types of constraints on the children of $a$.
+Bold edges represent edges of $T'$.}
+\figlabel{no-support}
+\end{figure}
+
+\begin{enumerate}
+\item Constraints that force a node of $S_2$ to be enqueued before
+another node of $S_2$,
+
+\item constraints that force a node of $S_1$ to be enqueued before a
+node of $S_2$,
+
+\item constraints that force a node of $S_1$ to be enqueued before
+another node of $S_1$, and
+
+\item Constraints that force a node of $S_2$ to be enqueued before a
+node of $S_1$.
+\end{enumerate}
+
+Since these constraints are not satisfiable they must form a cycle.
+Notice that constraints of type 2, 3 and 4 are caused by non-tree
+edges that are supported by an edge of $T'$ and constraints of type~1
+are caused by non-tree edges that are not supported by an edge of
+$T'$. 
+
+We will show that constraints of types~3 and 4 do not exist.  It then
+follows that the elements of $S_1$ can not take part in a cycle of
+constraints.  Since constraints of type 2 always involve elements of
+$S_1$, it follows that these constraints are not involved in a cycle
+of constraints.  Therefore, removing these constraints (by removing
+the non-tree edges that generated them) does not remove the cycle of
+constraints in the children of $a$, so $T$ is also not a BFS tree of
+$G'$ rooted at $r$, as required.
+
+To see that there are no constraints of type~3, consider an edge
+$\{u,v\}$ that would generate such a constraint.  Then, $T'$ contains
+two edges $\{u',a\}$ and $\{a,v'\}$ on the path from $u$ to $v$ in
+$T$.  But this can't happen since, by construction, at most one edge
+on the path from $u$ to $v$ in $T$ can be in $T'$.
+
+To see that there are no constraints of type~4, we again consider an
+edge $\{u,v\}$ that would generate such a constraint.  Without loss of
+generality, suppose $u'\in S_1$ is the second node on the path from
+$a$ to $u$ in $T$.  Then $T'$ contains an edge $\{u',a\}$ on the path
+from $u$ to $v$ in $T$.  But then this must be the median edge on the
+path from $u$ to $v$ in $T$, in which case $\layer(u)=\layer(v)+1$ so
+the constraint generated by such an edge is of type~2, not type~4.
+\end{proof}
+
+\lemref{shifty} is quite powerful.  For example, it has the following
+all-or-nothing consequence.
+
+\begin{lem}
+If $T$ is a BFS tree of $G$ rooted at some vertex $r\in T'$ then $T$
+is a BFS tree of $G$ rooted at \emph{any} vertex $r\in T'$.
+\end{lem}
+
+\begin{proof} 
+By \lemref{bfs-condition}, whether or not $T$ is a BFS tree rooted at
+$r\in T'$ depends only the following information about each non-tree
+edge $\{u,v\}$: (1)~$\layer_r(u)$, (2)~$\layer_r(v)$ and (3)~LCA of
+$u$ and $v$ in $T_r$.  Now observe that, unless $\{u,v\}$ is supported
+by an edge of $T'$, all of this information is the same for any $r\in
+T'$.  But, by \lemref{shifty}, the non-tree edges supported by edges
+of $T'$ have no effect on whether $T$ is a BFS tree of $G$ rooted at $r$.
+\end{proof}
+
+Therefore, to find all vertices $r$ such that $T$ is a BFS tree rooted
+at $r$, we first compute $T'$ and, if $T'$ is not empty choose a
+representative $r\in T'$ and use the algorithm of the previous section
+to test if $T$ is a BFS tree of $G$ rooted at $r$. If so, then $T$ is
+a BFS tree of $G$ for every vertex $r\in V(T')$.  If not, then $T$ is
+no a BFS tree of $G$ for any root $r\in V(G)$.  Since each of these
+steps can be accomplished in $O(V(G)+E(G))$ time, we obtain the
+following result:
+
+\begin{thm}
+Let $G$ be an undirected graph $G$ and let $T$ be a spanning
+tree of $G$.  There exists an $O(|V(G)|+|E(G)|)$ time algorithm to find the
+set of all vertices $r\in V(G)$ such that $T$ is a BFS tree of $G$
+rooted at $r$.  
+\end{thm}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusions}\seclabel{conclusions}
+
+We have considered algorithms that take as input a graph $G$ and a
+spanning tree $T$ of $G$ and decide if $T$ is a BFS or DFS tree of
+$G$.  These algorithms all run in optimal $O(|V(G)|+|E(G)|)$ time.  In
+deriving these algorithms, we found some simple but non-obvious
+properties properties of DFS and BFS trees.  For example, it follows
+from the algorithm of \secref{edge-marker} that if $T$ is a DFS tree of an
+undirected graph $G$ then it is always possible to find a root of $T$
+that is a leaf.  Another example of such a property is that the set of
+possible roots for a BFS tree form a connected subtree.
+
+One case we have not considered is when $G$ is a directed graph, $T$
+is an undirected tree and the goal is to find all vertices $r\in V(G)$
+such that the directed tree $T_r$ is a BFS or DFS tree rooted at $r$.
+As is the case with rooted DFS trees, it seems that directed edges
+complicate matters considerably.
+
+The two graph traversal algorithms we have considered lie at opposite
+extremes of the spectrum in the sense that DFS attempts to fully
+examine a subtree before moving onto another subtree while BFS
+examines only the next level in a subtree before switching to a
+different subtree.  There are, of course, other graph traversal
+algorithms that lie somewhere between these two extremes.  Given any
+graph traversal algorithm $\mathcal{X}$ that generates a spanning
+tree, we can always ask the question: Is $T$ a spanning tree that could have
+been generated by $\mathcal{X}$?
+
+\bibliographystyle{plain}
+\bibliography{bfsdfs}
+
+\end{document}

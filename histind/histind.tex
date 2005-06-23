@@ -1,0 +1,137 @@
+\documentclass[lotsofwhite,charterfonts]{patmorin}
+
+\input{pat.tex}
+
+\newcommand{\E}{\mathrm{E}}
+
+\title{\MakeUppercase{$B$-Treaps}}
+\author{Stefan Langerman \and Pat Morin}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We describe a randomized version of B-trees called B-treaps and show
+that they execute update and search operations in $O(\log_B n)$ time
+for all operations.
+\end{abstract}
+
+\section{Introduction}
+
+\section{Randomized $B$-Trees}
+
+A $B$-tree is a search tree in which each node contains at most $B-1$
+elements and has at most $B$ children.   A node is \emph{full} if
+contains exactly $B-1$ elements.  To insert the element $x$ into a
+$B$-tree we follow the search path for $x$ until we reach a non-full
+node and then add $x$ to that node.  Note this implies, that after any
+sequence of insertions, the only non-full nodes are leaves.  
+
+We consider the random process of inserting a random permutation of
+$\{1,\ldots,n\}$ into an initially empty $B$-tree.  We call the
+resulting tree a \emph{random $B$-tree}.  Let $T_B$ denote the
+resulting tree and, for a node $u$ in $T_B$, let $S_B(u)$ denote the
+set of elements stored in node $u$.  For $B=2$, the resulting tree
+$T_2$ is a random binary search tree and this process is fairly well
+understood.  In particular, it is known that the expected depth of any
+particular node in $T_2$ is at most $2\ln n$ and at least $\ln n$
+\cite{X} and the expected height (depth of the deepest node) of $T_2$
+is at most $c\ln n$, where $c=4.31107\ldots$ \cite{X}.  
+
+We first observe that the two trees $T_2$ and $T_B$, $B>2$ are closely
+related (see \figref{bin-to-b}).  For any node $u$ in $T_B$, $S_B(u)$
+induces a connected subtree of $T_2$.  Note, furthermore, that for
+every permutation that produces the tree $T_B$, the elements of
+$S_B(u)$ can permuted arbitrarily and the same tree $T_B$ results.
+This implies that the subtree of $T_2$ induced by $S_B(u)$ is a random
+binary search tree and has the properties described above.  In
+particular, the shape of the subtree is independent of the tree $T_B$.
+
+Let $u_1,\ldots,u_k$ be the sequence of nodes visited while searching
+for some element $x$ in $T_B$ and observe that $u_1,\ldots,u_{k-1}$
+are full.  Consider one such node $u_i$, $1<i<k$ and let $V(u_i)$
+denote the number of elements in $u$ that are also visited by the
+search path for $x$ in $T_2$.  From the above remarks, it follows that
+\[ 
+     \ln B \le \E[V(u_i)] \le 2\ln B \enspace ,  
+\] 
+since $V(u)$ is the number of nodes visited during a search of a
+random binary search tree of size $B$.  Furthermore, all the $V(u_i)$
+are independent and they are independent of $k$.  Therefore, by Wald's
+Equation
+\begin{eqnarray*}
+    \E\left[k-1\right]\times \E\left[V(u_i)\right] 
+	&  =  & \E\left[\sum_{i=1}^{k-1} V(u_i)\right] \\
+        & \le & \E\left[\sum_{i=1}^{k} V(u_i)\right] \\
+        & \le & 2\ln n 
+	\enspace . 
+\end{eqnarray*}
+Stated another way,
+\begin{equation}
+	\E[k] \le 2\ln n/\E[|V(u_i)|]+1 \le  2\log_B n + 1  \enspace .
+	\eqlabel{search-time}
+\end{equation}
+Thus, the search time in a random $B$-tree is within a constant factor
+of the optimal search time.
+
+\begin{rem}
+The constant 2 in \eqref{search-time} is probably not tight. To
+improve this constant, we need a lower bound on $E[V(u)]$.  The bound
+$\ln i+\ln (B-i)$ for searching the element of rank $i$ might be more
+useful, but it is difficult to get a handle on the values $i$.
+\end{rem}
+
+\section{$B$-Treaps}
+
+Here I want to dynamize random $B$-trees using priorities.  However,
+this is trickier than with treaps because a single rotation in $T_2$
+causes a whole cascade of changes in $T_B$.  The solution will be to
+follow the search paths for the inserted value until we find a node
+whose minimum priority is less than the priority of the element we are
+inserting then rebuild (at most) 4 subtrees rooted at that node.  The
+following lemma shows that there's not very much to rebuild.
+
+\begin{lem}
+Let $s(i)$ denote the size of the subtree rooted at $i$ in a random
+binary search tree.  Then  $E[s(i)] = O(\log n)$.
+\end{lem}
+
+\begin{proof}
+We first show that the expected number of elements in the right
+subtree of $i$ is $O(\log (n-i))$.  By a symmetric argument, the
+number of elements in the left subree is $O(\log i)$, which is
+sufficient to prove the lemma.
+
+The elements in the right subtree of $i$ are all greater than $i$, so
+consider only the permutation of the $n-i+1$ elements greater than or
+equal to $i$.  In this permutation, there is some minimum value $j$
+that appears before $i$ (if $i$ is the first element, then we use the
+convention that $j=n+1$).  The elements in the right subtree of $i$
+are precisely those elements that appear after $i$ in the permutation
+and are less than $j$.  Therefore, what we are really studying is the
+expected value of $j-i$.  Of course, this is highly dependent on the
+position of $i$ in the permutation: \begin{eqnarray*} E[j-i] & = &
+\sum_{k=1}^{n-i+1} \Pr\{\mbox{$i$ is at location $k$}\} \times
+E[j-i\mid\mbox{$i$ is at location $k$}] \\ & = &
+\frac{1}{n-i+1}\sum_{k=1}^{n-i+1} E[j-i\mid\mbox{$i$ is at location
+$k$}] \end{eqnarray*} Now note that $E[j-i\mid\mbox{$i$ is at location
+$k$}]$ is the minimum of $k-1$ numbers chosen at random without
+replacement from the set $\{0,\ldots,n-i\}$.  An easy computation
+shows that this is $O((n-i)/k)$ (What is the exact value?), which
+allows us to complete the preceding computation: \begin{eqnarray*}
+E[j-i] & = & \frac{1}{n-i+1}\sum_{k=1}^{n-i+1} O(n-i/k) \\ & = &
+O(H_{n-i}) \\ & = & O(\log (n-i)) \enspace , \end{eqnarray*} and this
+completes the proof.  \end{proof}
+
+
+Since the four subtrees that we rebuild in $T_B$ contain only elements
+that are descendents of the newly inserted node in $T_2$, the above
+lemma says that there are not very many nodes involved in the
+rebuilding.  What we need now is a lemma that says that a random
+$B$-tree on $m$ values has $O(m/B)$ nodes.  I currently have no idea
+how to prove this.
+
+
+
+\end{document}

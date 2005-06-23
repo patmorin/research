@@ -1,0 +1,535 @@
+% Style file for the journal of discrete algorithms
+
+% Fonts for the journal title
+%\font\jlctitleA=cmss10 at 33pt\font\jlctitleB=cmss17 at 42pt
+
+\renewcommand{\sfdefault}{phv}
+\renewcommand{\rmdefault}{ptm}
+\renewcommand{\ttdefault}{pcr}
+
+
+% Standard parameters
+\evensidemargin=\oddsidemargin
+\textwidth 120mm
+\textheight 190mm 
+\headsep 10pt
+\setcounter{tocdepth}{0}
+%\def\sectionmark#1{}
+\parindent=1em
+\parskip=0pt
+
+\renewcommand{\floatpagefraction}{0.8}
+\renewcommand{\topfraction}{1}
+\renewcommand{\textfraction}{0.1}
+\setcounter{topnumber}{3}
+\setcounter{totalnumber}{3}
+
+
+\def\ps@firstpagepaper{\let\@mkboth\@gobbletwo
+     \def\@oddhead{\Rule}\def\@oddfoot{
+     { %\begin{picture}(0,0)
+%      {\put(0,0){\parbox{\textwidth}{\hfil\pageref{firstpage\thechapter}\hfil}}}
+%      \end{picture}
+     \footnotesize{\em J. of Discrete Algorithms}, Vol.~\thisvolume~No.~\thisnumber,
+     pp.~\pageref{firstpage\thechapter}--\pageref{lastpage\thechapter},
+     \thisyear\hfill$\copyright$ Hermes Science Publications}}
+     \let\@evenhead\@oddhead\let\@evenfoot\@oddfoot}
+
+
+% page style for first page of each `non-paper'. A non-paper is an
+% editorial section of the journal; eg, the Editorial, Books Received,
+% Book Review sections.
+\def\ps@firstpagenonpaper{\let\@mkboth\@gobbletwo
+     \def\@oddhead{\Rule}\def\@oddfoot{%
+     \parbox{\textwidth}{\hfil\thepage\hfil}}
+     \let\@evenhead\@oddhead\let\@evenfoot\@oddfoot}
+
+% page style for most pages
+\def\ps@jlc{\let\@mkboth\markboth
+     \def\@oddfoot{}\def\@evenfoot{}
+     \def\@evenhead{\rm \thepage\ \ \ \ \ {\it J. of Discrete Algorithms}, Vol.~\thisvolume~No.~\thisnumber, \thisyear\hfil\mbox{}}
+     %\def\@oddhead{\hbox{}\sl \rightmark \hfil \rm\thepage}
+     \def\@oddhead{\mbox{}\hfil{\it\rightmark}\ \ \ \ \ \normalsize\rm\thepage}
+     }
+
+% change to cleardoublepage in order to supress running head on the
+% resulting blank left hand page
+\def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
+    \hbox{}\thispagestyle{empty}\newpage\if@twocolumn\hbox{}\newpage\fi\fi\fi}
+
+\pagestyle{jlc}
+
+% we use report.sty's `chapter' counter for papers
+\setcounter{chapter}{0}
+
+\@addtoreset{equation}{section}% rjq 26.10.92 equation counter by section
+\def\theequation{\thesection.\arabic{equation}}
+
+% a conditional which is true while the `papers' part of the journal
+% is being processed
+\newif\ifprocessingpapers\processingpapersfalse
+
+% a conditional which is true if the Proof Reader's version is being
+% produced. Set in the preamble.
+\newif\ifProofReader \ProofReaderfalse
+
+% commands for setting up constant values, and their defaults
+\newcommand{\journalvolume}[1]{\def\thisvolume{#1}}
+\newcommand{\journalnumber}[1]{\def\thisnumber{#1}}
+\newcommand{\journalmonth}[1]{\def\thismonth{#1}}
+\newcommand{\journalyear}[1]{\def\thisyear{#1}}
+\def\thisvolume{0}
+\def\thisnumber{0}
+\def\thismonth{\ \ \ \ }
+\def\thisyear{0000}
+
+% the command \myparagraph is used in the Book Reviews and Forthcoming
+% papers sections
+\def\myparagraph{\@startsection
+        {subparagraph}{4}{\z@}{-3.25ex plus 1ex minus 
+        .2ex}{1em}{\normalsize\raggedright}}
+
+% the command \supressindent is a hack for supressing indents when all
+% else seems to fail. It exploits the mechanism used by sectioning commands
+\def\suppressindent{
+        \@startsection{subparagraph}{4}{\z@}{-.1pt}{.1pt}{}*{}}
+
+
+% this command produces the first page of the whole issue
+\newcommand{\Firstpage}{
+        \noindent
+        % squeeze tightly the letters of the title
+        \def\sqz{\hskip0pt minus1cm}
+        {\jlctitleA Journal of Discrete Algorithms \\[9pt]}
+        \noindent{\Huge\sf Volume \thisvolume, Number \thisnumber, \thismonth\ \thisyear\par}  %rjq
+        \par\noindent\Rule\par
+        \noindent{\Huge\bf Contents\par}\vspace{10pt}
+        {\large\parindent=0pt\@starttoc{toc}} % make the tableofcontents
+        \thispagestyle{empty}\par
+        }
+
+
+\newcommand{\journalcontents}[4]{
+        \noindent
+        % squeeze tightly the letters of the title
+        \def\sqz{\hskip0pt minus1cm}
+        {\jlctitleA Journal of Discrete Algorithms\\[9pt]}
+        \noindent{\Huge\sf Volume #1, Number #2, #3\ #4\par}  %rjq
+        \par\noindent\Rule\par
+        \noindent{\Huge\bf Contents\par}\vspace{10pt}
+        \thispagestyle{empty}\par 
+        }
+
+
+\newcommand{\Firstpagecontents}[2]{\cleardoublepage  %rjq
+        \noindent  %rjq
+        % squeeze tightly the letters of the title  %rjq
+        \def\sqz{\hskip0pt minus1cm}  %rjq
+        {\jlctitleA Journal \\[.5cm]  %rjq
+         \jlctitleB \\[18pt]}  %rjq
+        \noindent{\Huge\sf Volume #1, #2\par}\vspace{10cm}  %rjq
+%        \noindent{\Huge\sf OXFORD\\[3pt] %rjq
+%        UNIVERSITY\\[3pt] %rjq
+%        PRESS} %rjq
+        \thispagestyle{empty}\par  %rjq
+        \addtocounter{page}{-2}\par  %rjq
+        }  %rjq
+
+% input the standard subscription information
+\newcommand{\Subsinfo}{\input{../general/Subsinfo}}
+
+% Some editorial sections of the journal; see the users documentation
+% for examples of how they are used
+\newenvironment{editorial}{\Nonpaper{Editorial}}{}
+\newenvironment{reviews}[1]{\cleardoublepage\Nonpaper{Reviews}
+         \myparagraph*{#1}\vspace{2mm}}{}
+\newcommand{\anotherreview}[1]{\par\vspace{2mm}\noindent\Rule\vspace{-3mm}\par
+         \myparagraph*{#1}\vspace{2mm}}
+\newenvironment{booksreceived}{\Nonpaper{Books Received}}{}
+\newenvironment{conferences}{\Nonpaper{Conferences}}{}
+\newenvironment{forthcomingpapers}{\Nonpaper{Forthcoming Papers}}{}
+\newenvironment{announcements}{\Nonpaper{Announcements}}{}
+\newenvironment{subscription}{\Nonpaper{Subscription}}{}
+\newenvironment{acknowledgements}{\Nonpaper{Acknowledgements}}{}%rjq
+\newenvironment{authorindex}{\Nonpaper{Author Index}}{}%rjq
+\newenvironment{contentsvolume}[1]{\cleardoublepage\Nonpaper{Contents for Volume #1}%rjq
+         \section*{Issue No. 1}\vspace{2mm}
+        {\parindent=0pt
+        \input issue1.toc }
+         \section*{Issue No. 2}\vspace{2mm}
+        {\parindent=0pt
+        \input issue2.toc }\newpage
+         \section*{Issue No. 3}\vspace{2mm}
+        {\parindent=0pt
+        \input issue3.toc }
+         \section*{Issue No. 4}\vspace{2mm}
+        {\parindent=0pt
+        \input issue4.toc }\newpage
+         \section*{Issue No. 5}\vspace{2mm}
+        {\parindent=0pt
+        \input issue5.toc }
+        \section*{Issue No. 6}\vspace{2mm}
+        {\parindent=0pt
+        \input issue6.toc }
+         }{}%rjq
+
+\newcommand{\afp}[2]{\myparagraph*{\large#1\\\bf#2}\vspace{-1mm}\small}
+\newcommand{\acf}[3]{\paragraph*{{\bf #1}\\{\em #2}\\{\em #3}}}
+
+\newcommand{\signature}[2]{\vspace{3ex}\par
+        {\raggedleft{\sc #1}\\\raggedleft{\em #2}\par}}
+
+
+% Here we vary some parameters from the standard table of contents
+% %% denotes present in l@chapter but seems redundant
+% % denotes present in l@chapter but changed by mdr
+\def\@pnumwidth{4em}% {1.55em}
+\def\l@paper#1#2{%
+        %\addpenalty{-\@highpenalty}%
+        \vskip 0.5em plus 1pt
+        \@tempdima 0em % why?
+        \begingroup%
+        \parindent \z@
+        \rightskip \@pnumwidth % bring in right margin by this amount
+        %% \advance\leftskip\@tempdima
+        %% \hskip -\leftskip
+        % #1\nobreak\hfil
+        % \nobreak\hbox to\@pnumwidth{\hss #2}
+        %
+        % This is the way I will do it
+        \rm\leavevmode%
+        \makebox[0pt][l]{\hskip\textwidth \hskip-\@pnumwidth%
+            \hbox to \@pnumwidth{\hss #2}}%
+        \hyphenpenalty10000 
+        \sloppy\rightskip\@pnumwidth plus 1fil
+        #1 \par \penalty\@highpenalty\endgroup}
+
+% this environment encapsulates a paper. It assumes the title and
+% author details have been specified by the commands \Title,
+% \LongAuthor and \ShortAuthor. It sets up the appropriate toc entry
+% and prints the title information in the standard style.
+\newenvironment{paper}{
+        % reset section numbering from appndix
+        \def\thesection{\arabic{section}}
+        \ifprocessingpapers\else
+ %      \addtocontents{toc}{\protect\contentsline
+ %              {paper}{{\em Original Articles:\/}}{}}
+        \global\processingpaperstrue\fi
+        \cleardoublepage\Section{\shorttitle}{\longtitle}
+        \refstepcounter{chapter}\label{firstpage\thechapter}
+        \thispagestyle{firstpagepaper}
+ %      \addcontentsline{toc}{paper}{%
+ %         {\protect\rm\longtitle}\protect\\{\protect\bf\shortauthor}}
+        {\parindent 0pt\large\raggedright\longauthor\par}
+        \vspace{-1pt} % space after the address
+        \suppressindent
+        }{
+        \nopagebreak[4]\vspace{10pt}\nopagebreak[4]%
+        \normalsize\noindent\receiveddate
+        \label{lastpage\thechapter}
+        }
+
+% Similarly for non-papers...
+\newcommand{\Nonpaper}[1]{\clearpage
+        \Section{#1}{#1}
+        \thispagestyle{firstpagenonpaper}
+        \addcontentsline{toc}{paper}{{\protect\em#1}}
+        }
+
+% and this is the code papers and non-papers (i.e. journal Sections)
+% have in common
+\newcommand{\Section}[2]{%
+          {\parindent 0pt\raggedright\Huge%
+            \rule{0pt}{17pt}% hack for getting the space between the
+                            % rule and the title correct
+            \bf#2\par
+            \nobreak\vskip 6pt} 
+          \@afterheading
+          \suppressindent
+        \markboth{#1}{#1}
+        }
+
+% the 2pt rule at the head of journal Sections
+\newcommand{\Rule}{\rule{\textwidth}{0.25pt}}
+
+% this appears to be redundant (I will delete it if it proves so)
+%\newcommand{\mystack}[2]{\begin{tabular}[t]{@{}l}#1\\#2\end{tabular}}
+
+% commands for specifying title, etc
+\def\Title{\@ifnextchar[{\xTitle}{\yTitle}}
+\def\xTitle[#1]#2{\def\shorttitle{#1}\def\longtitle{#2}}
+\def\yTitle#1{\def\shorttitle{#1}\def\longtitle{#1}}
+\def\author#1{#1,}
+\def\address#1{{\em#1}\\[2ex]}
+\def\LongAuthor#1{\def\longauthor{#1}}
+\def\ShortAuthor#1{\def\shortauthor{#1}}
+\def\Address#1{\def\authoraddress{#1}}
+\def\and{\\[1ex]}
+\def\Received#1{\def\receiveddate{Received #1}}
+\def\receiveddate{}
+
+% abstract in JLC style
+\renewenvironment{abstract}{\Rule{\small \it ABSTRACT:\/}\ixpt\it}
+{\par\vspace{-2pt}}
+\newcommand{\Keywords}[1]{\par\vskip11pt\noindent
+        {\small{\em Keywords\/}: #1}}
+
+% THEOREM ENVIRONMENTS
+
+% Prevent users from defining new numbering schemes for theorems by
+% mapping 
+%
+%  \newtheorem{1}[2]{3}  to  \newtheorem{1}[thmcount]{3}
+%  \newtheorem{1}{2}     to  \newtheorem{1}[thmcount]{3}
+%  \newtheorem{1}{2}[3]  to  \newtheorem{1}[thmcount]{3}
+%
+
+\@definecounter{thmcount}\@addtoreset{thmcount}{section}
+\def\thethmcount{\thesection .\arabic{thmcount}}
+
+\let\@@othm\@othm
+\def\@othm#1[#2]#3{%
+   % if #1 is already defined, do nothing (but print a warning)
+   \@ifundefined{#1}{%
+      % if #1 is undefined, do \@othm but force counter to thmcount
+      \@@othm{#1}[thmcount]{#3}
+   }{\@warning{othm: `#1' already defined; skipping this definition}}}
+
+\def\@xnthm#1#2[#3]{%
+   % if already defined, just print a warning
+   \@ifundefined{#1}{%
+      % if #1 is undefined, do \@othm but force counter to thmcount
+      \@@othm{#1}[thmcount]{#2}
+   }{\@warning{xnthm: `#1' already defined; skipping this definition}}}
+
+\def\@ynthm#1#2{%
+   \@ifundefined{#1}{%
+      % if #1 is undefined, do \@othm but force counter to thmcount
+      \@@othm{#1}[thmcount]{#2}
+   }{\@warning{ynthm: `#1' already defined; skipping this definition}}}
+
+
+% avoid italics theorems, and make small caps
+% theorem headings should stand on line of their own
+\newcommand{\hyperanchor}[2]{#2}
+
+\renewcommand{\@begintheorem}[2]{%
+  \trivlist\item[%
+  \rlap{\vbox{\hbox{\hskip\labelsep{\hyperanchor{\@currenthyper}{\sc #1\ #2}}}
+              \hbox{\strut}}}]}
+
+\renewcommand{\@opargbegintheorem}[3]{%
+  \trivlist\item[%
+  \rlap{\vbox{\hbox{\hskip\labelsep\parbox{\textwidth}{\hyperanchor{\@currenthyper}{\sc #1\ #2}\ {\rm (#3)}}}
+              \hbox{\strut}}}]}
+ 
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+\newtheorem{algorithm}{Algorithm}
+\newtheorem{application}{Application}
+\newtheorem{theorem}{Theorem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{lemma}{Lemma}
+\newtheorem{sublemma}{Sublemma}
+\newtheorem{notation}{Notation}
+\newtheorem{observation}{Observation}
+\newtheorem{comment}{Comment}
+\newtheorem{consequence}{Consequence}
+\newtheorem{illustration}{Illustration}
+\newtheorem{problem}{Problem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{proposal}{Proposal}
+\newtheorem{property}{Property}
+\newtheorem{remark}{Remark}
+\newtheorem{hint}{Hint}
+\newtheorem{result}{Result}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{claim}{Claim}
+\newtheorem{note}{Note}
+\newtheorem{question}{Question}
+\newtheorem{fact}{Fact}
+\newtheorem{assumption}{Assumption}
+\newtheorem{corollary}{Corollary}
+\newtheorem{principle}{Principle}
+
+
+
+% PROOF ENVIRONMENT (from PT)
+% it puts a black box (or whatever \markendofproof) at the end of each
+% proof, unless the author has already done so with the command \qed.
+ 
+% the ``proof'' environment itself
+\def\proof{\followon{Proof}}
+\def\endproof{\ifSuppressEndOfProof\global\SuppressEndOfProoffalse
+   \else\xqed\fi\endfollowon}
+\def\followon#1{\trivlist\item[\hskip\labelsep{\sc#1.}]}
+\def\endfollowon{\endtrivlist}
+
+% command to push black box to right of page
+\def\pushright#1{{\parfillskip=0pt\widowpenalty=10000
+\displaywidowpenalty=10000\finalhyphendemerits=0\leavevmode\unskip
+\nobreak\hfil\penalty50\hskip.2em\null\hfill{#1}\par}}
+
+% command to force early end of proof marker. This is used if the end
+% of proof marker would otherwise come out in the wrong place.
+\def\qed{\xqed\global\SuppressEndOfProoftrue}
+\newif\ifSuppressEndOfProof\SuppressEndOfProoffalse
+\def\xqed{\pushright\markendofproof}
+\def\markendofproof{\rule{1.3217ex}{2ex}}
+%
+%
+% REFERENCES (scrunched up. see article.sty)
+
+\def\thebibliography#1{\section*{References}
+  \ifProofReader\typeout{Processing proof readers version}
+     \def\baselinestretch{1.5}\fi
+  \small\list
+  {[\arabic{enumi}]}{\settowidth\labelwidth{[99]}\leftmargin\labelwidth
+    \advance\leftmargin\labelsep \itemsep 0pt
+    \usecounter{enumi}}
+  \def\newblock{\hskip .11em plus .33em minus .07em}
+  \sloppy\clubpenalty4000\widowpenalty4000
+  \sfcode`\.=1000\relax}
+\let\endthebibliography=\endlist
+
+% Since all bib items are to be numbered, we redefine
+% \bibitem[Abr91]{abram} to \bibitem{abram}
+%\def\@lbibitem[#1]#2{\bibitem{#2}}
+
+
+
+
+% appendix
+
+\def\appendix{\par\small
+ \setcounter{section}{0}
+ \setcounter{subsection}{0}
+ \def\thesection{\Alph{section}}}
+
+%===========================
+
+% SECTION HEADINGS
+
+% chapter heading
+\def\Huge{\@setsize\Huge{26pt}\xxpt\@xxpt}
+
+% sections
+\def\section{%
+  \@startsection {section}{1}{\z@}{-18pt}{6pt}{\large\bf\raggedright}}
+\def\subsection{%
+  \@startsection{subsection}{2}{\z@}{-18pt}{6pt}{\large\it\raggedright}}
+\def\subsubsection{%
+  \@startsection{subsubsection}{3}{\z@}{-18pt}{3pt}{\large\raggedright}}
+\def\subsubsubsection{%
+  \@startsection{subsubsubsection}{4}{\z@}{6pt}{-1em}{\it\raggedright}}
+\setcounter{secnumdepth}{4}
+\let\paragraph\subsubsubsection
+
+% other sizes -- these are variations on the standard style files
+
+\def\small{\@setsize\small{10pt}\viiipt\@viiipt % I changed this and \@listi
+\abovedisplayskip 8.5pt plus 3pt minus 4pt\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip \z@ plus2pt\belowdisplayshortskip 4pt plus2pt minus 2pt
+\def\@listi{\leftmargin 1.0em \topsep\z@ \parsep 1pt plus 1pt minus 1pt
+      \itemsep \parsep}}
+
+\def\abssize{\@setsize\small{10pt}\ixpt\@ixpt % I changed this and \@listi
+\abovedisplayskip 8.5pt plus 3pt minus 4pt\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip \z@ plus2pt\belowdisplayshortskip 4pt plus2pt minus 2pt
+\def\@listi{\leftmargin 1.0em \topsep\z@ \parsep 1pt plus 1pt minus 1pt
+      \itemsep \parsep}}
+
+\def\footnotesize{\@setsize\footnotesize{8pt}\vipt\@vipt % this & \@listi
+\abovedisplayskip 6pt plus 2pt minus 4pt\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip \z@ plus 1pt\belowdisplayshortskip 3pt plus 1pt
+minus 2pt
+\def\@listi{\leftmargin 1.0em \topsep\z@ \parsep 1pt plus 1pt minus 1pt
+      \itemsep \parsep}}
+
+% In the following variation on the standard definition from the style
+% files, the \hskip in line 2 below varies the distance
+% between the section number and name (originally 1em)
+
+%\def\@sect#1#2#3#4#5#6[#7]#8{\ifnum #2>\c@secnumdepth \let\@svsec\@empty\else
+%\refstepcounter{#1}\edef\@svsec{\csname the#1\endcsname\hskip 0.9em}\fi
+%\@tempskipa #5\relax \ifdim \@tempskipa>\z@ \begingroup #6\relax
+%\@hangfrom{\hskip #3\relax\@svsec}{\interlinepenalty \@M #8\par}\endgroup
+%\csname #1mark\endcsname{#7}\addcontentsline{toc}{#1}{%
+%\ifnum #2>\c@secnumdepth \else \protect\numberline{\csname the#1\endcsname}\fi
+%#7}\else \def\@svsechd{#6\hskip #3\relax \@svsec #8\csname #1mark\endcsname
+%{#7}\addcontentsline{toc}{#1}{\ifnum #2>\c@secnumdepth \else
+%\protect\numberline{\csname the#1\endcsname}\fi #7}}\fi \@xsect{#5}}
+
+
+% LIST ENVIRONMENTS
+
+\leftmargin\z@
+\labelsep 0.3em
+
+\def\@listI{%
+   \leftmargin 1.5em
+   \labelsep 0.3em
+   \labelwidth\leftmargin\advance\labelwidth-\labelsep
+  \topsep 8pt plus 2pt minus 4pt
+   \partopsep=\parskip
+   \parsep=1pt plus1pt minus0pt
+   \itemsep=1pt plus1pt minus0pt
+  }
+\let\@listi\@listI
+\@listi 
+\def\@listii{%
+   \leftmargin 0.9em
+   \labelwidth\leftmargin\advance\labelwidth-\labelsep
+   \partopsep=\z@
+   \topsep=\z@ 
+   \parsep=-1pt plus1pt minus0pt
+   \itemsep=1pt plus1pt minus0pt
+  }
+\def\@listiii{%
+   \leftmargin 0.8em
+   \labelwidth\leftmargin\advance\labelwidth-\labelsep
+   \partopsep=\z@
+   \topsep=\z@ %1pt plus 1pt minus0pt
+   \parsep-1pt plus1pt minus0pt
+   \itemsep=1pt plus1pt minus0pt
+}
+
+\def\@listiv{%
+   \leftmargin 0.8em
+   \labelwidth\leftmargin\advance\labelwidth-\labelsep}
+\def\@listv{%
+   \leftmargin 0.8em
+   \labelwidth\leftmargin\advance\labelwidth-\labelsep}
+\def\@listvi{%
+   \leftmargin 0.8em
+   \labelwidth\leftmargin\advance\labelwidth-\labelsep}
+
+
+% make the footnoterule stretch across the page instead of the
+% standard LaTeX 2 inches
+
+\def\footnoterule{\kern-3\p@
+  \hrule \kern 2.6\p@} % the \hrule is .4pt high
+
+% Provide a simple macro for using Paul Taylor's prooftrees
+% This is not really the right place for this...
+
+%\newcommand{\prt}[3]{\prooftree#1\justifies#2\using#3\endprooftree}
+\newcommand{\prh}[2]{\prooftree#1\proofdotnumber=0\leadsto#2\endprooftree}
+
+% Style for figure and table captions -- they vary from the standard one
+
+\def\thefigure{\@arabic\c@figure}
+\def\fnum@figure{{\sc Fig.\ }\thefigure}
+\def\thetable{\@arabic\c@table}
+\def\fnum@table{{\sc Table} \thetable}
+
+\long\def\@makecaption#1#2{
+ \vskip 10pt 
+ \setbox\@tempboxa\hbox{#1. #2}
+ \ifdim \wd\@tempboxa >\hsize #1: #2\par \else \hbox
+to\hsize{\hfil\box\@tempboxa\hfil} 
+ \fi}
+
+\renewenvironment{abstract}{\Rule\par\noindent{\small \it ABSTRACT:\ }\abssize}
+{\par\noindent\Rule\par \vspace{-2pt}}

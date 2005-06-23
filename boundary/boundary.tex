@@ -1,0 +1,622 @@
+\documentclass[lotsofwhite,charterfonts]{patmorin}
+\usepackage{graphicx}
+\usepackage{charter}
+\usepackage{url}
+\usepackage{amsfonts,amsthm}
+
+\input{pat.tex}
+
+\newcommand{\voronoi}{Vorono\u\i}
+\newcommand{\ceil}[1]{\lceil #1 \rceil}
+\newcommand{\adt}{\mathrm{ADT}}
+
+
+\newcommand{\email}[1]{\texttt{#1}}
+
+\title{\MakeUppercase{Output-Sensitive Algorithms for Computing 
+	Nearest-Neighbour Decision Boundaries}\thanks{%
+	This research was partly funded by the Alexander von Humboldt
+	Foundation and The Natural Sciences and Engineering Research
+	Council of Canada.}}
+
+\author{David~Bremner\thanks{Faculty of Computer Science,
+	University of New Brunswick,
+	%Box 4400 Fredericton New Brunswick E3B 5A3 Canada
+	\email{bremner@unb.ca}} \and
+	Erik~Demaine\thanks{MIT Laboratory for Computer Science,
+       	%200 Technology Square, Cambridge, MA 02139, USA,
+       	\email{edemaine@mit.edu}}  \and
+	Jeff~Erickson\thanks{Computer Science Department, University of Illinois,
+	\email{jeffe@cs.uiuc.edu}} \and
+	John~Iacono\thanks{Polytechnic University, 
+	%5 MetroTech Center, Brooklyn, New York, USA, 11530. 
+	\email{jiacono@poly.edu}} \and
+	Stefan~Langerman\thanks{Charg\'e de recherches du FNRS, Universit\'e Libre de
+	Bruxelles, 
+	%CP212, boulevard du Triomphe, 1050 Bruxelles.
+	\email{stefan.langerman@ulb.ac.be}} \and
+	Pat~Morin\thanks{School of Computer Science, Carleton University,
+	%1125 Colonel By Drive, Ottawa, K1S~5B6, CANADA,
+	\email{morin@cs.carleton.ca}} \and
+	Godfried~Toussaint\thanks{School of Computer Science, McGill University,
+	%3480 University St., Montreal, Quebec, CANADA, H3A~2A7.
+	\email{godfried@cs.mcgill.ca}}
+} 
+	
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract} 
+Given a set $R$ of red points and a set $B$ of blue points, the
+\emph{nearest-neighbour decision rule} classifies a new point $q$ as
+red (respectively, blue) if the closest point to $q$ in $R\cup B$
+comes from $R$ (respectively, $B$).  This rule implicitly partitions
+space into a red set and a blue set that are separated by a red-blue
+\emph{decision boundary}.  In this paper we develop output-sensitive
+algorithms for computing this decision boundary for point sets on the
+line and in $\mathbb{R}^2$.  Both algorithms run in time $O(n\log k)$,
+where $k$ is the number of points that contribute to the  decision
+boundary.  This running time is the best possible when parameterizing
+with respect to $n$ and $k$.  
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+Let $S$ be a set of $n$ points in the plane that is partitioned into a
+set of \emph{red points} denoted by $R$ and a set of \emph{blue
+points} denoted by $B$.  The \emph{nearest-neighbour decision rule}
+classifies a new point $q$ as the colour of the closest point to $q$ in
+$S$.  The nearest-neighbour decision rule is popular in pattern
+recognition as a means of learning by example.  For this reason, the
+set $S$ is often referred to as a \emph{training set}. 
+
+Several properties make the nearest-neighbour decision rule quite
+attractive, including its intuitive simplicity and the theorem that
+the asymptotic error rate of the nearest-neighbour rule is bounded
+from above by twice the Bayes error rate \cite{ch67,d81,s77}.  (See
+\cite{t03} for an extensive survey of the nearest-neighbour decision
+rule and its relatives.) Furthermore, for point sets in small
+dimensions, there are efficient and practical algorithms for
+preprocessing a set $S$ so that the nearest neighbour of a query point
+$q$ can be found quickly.
+
+The nearest-neighbour decision rule implicitly partitions the plane
+into a red set and a blue set that meet at a red-blue \emph{decision
+boundary}.  One attractive aspect of the nearest-neighbour decision
+rule is that it is often possible to reduce the size of the training
+set $S$ without changing the decision boundary.  To see this, consider
+the \emph{\voronoi\ diagram} of $S$, which partitions the plane into
+convex (possibly unbounded) polygonal \emph{\voronoi\ cells}, where
+the \voronoi\ cell of point $p\in S$ is the set of all points that are
+closer to $p$ than to any other point in $S$ (see \figref{voronoi}.a).
+If the \voronoi\ cell of a red point $r$ is completely surrounded by
+the \voronoi\ cells of other red points then the point $r$ can be
+removed from $S$ and this will not change the classification of any
+point in the plane (see \figref{voronoi}.b).   We say that these
+points \emph{do not contribute} to the decision boundary, and the
+remaining points \emph{contribute} to the decision boundary.
+
+
+\begin{figure}
+\begin{center}\begin{tabular}{cc}
+%\includegraphicsFit{2.2in}\includegraphics{voronoi-bw} & \includegraphicsFit{2.2in}\includegraphics{voronoi-condense-bw} \\
+\includegraphics{boundary-a} & \includegraphics{boundary-b} \\
+(a) & (b)
+\end{tabular}\end{center}
+\caption{The \voronoi\ diagram (a)~before \voronoi\ condensing
+and (b)~after \voronoi\ condensing.  Note that the decision boundary
+(in bold) is unaffected by \voronoi\ condensing. Note: In this
+figure, and all other figures, red points are denoted by white circles 
+and blue points are denoted by black disks.}
+\figlabel{voronoi}
+\end{figure}
+
+The preceding discussion suggests that one approach to reducing the
+size of the training set $S$ is to simply compute the \voronoi\
+diagram of $S$ and remove any points of $S$ whose \voronoi\ cells are
+surrounded by \voronoi\ cells of the same colour.  Indeed, this method
+is referred to as \emph{\voronoi\ condensing} \cite{tbp84}.  There are
+several $O(n\log n)$ time algorithms for computing the \voronoi\
+diagram a set of points in the plane, so \voronoi\ condensing can be
+implemented to run in $O(n\log n)$ time.\footnote{Historically, the
+first efficient algorithm for specifically computing the
+nearest-neighbour decision boundary is due to Dasarathy and White
+\cite{dw78} and runs in $O(n^4)$ time.  The first $O(n\log n)$ time
+algorithm for computing the \voronoi\ diagram of a set of $n$ points
+in the plane is due to Shamos \cite{s75}.}  However, in this paper we
+show that we can do significantly better when the number of points
+that contribute to the decision boundary is small.  Indeed, we show
+how to do \voronoi\ condensing in $O(n\log k)$ time, where $k$ is the
+number of points that contribute to the decision boundary (i.e., the
+number of points of $S$ that remain after \voronoi\ condensing).  We
+also show that the same result holds even if there are $c>2$ colour
+classes.
+Algorithms, like these, in which the size of the input and
+the size of the output play a role in the running time are referred to
+as \emph{output-sensitive} algorithms. 
+
+Readers familiar with the literature on output-sensitive convex hull
+algorithms may recognize the expression $O(n\log k)$ as the running
+time of optimal algorithms for computing convex hulls of $n$ point
+sets with $k$ extreme points, in 2 or 3 dimensions
+\cite{bs97,c96,csy97,ks86,w97}. This is no coincidence.  Given a set
+of $n$ points in $\mathbb{R}^2$, we can colour them all red and add
+three blue points at infinity (see \figref{convexhull}).  In this set,
+the only points that contribute to the nearest-neighbour decision
+boundary are the three blue points and the red points on the convex
+hull of the original set.  Thus, identifying the points that
+contribute to the nearest-neighbour decision boundary is at least as
+difficult as computing the extreme points of a set.
+
+\begin{figure}
+\centerline{\includegraphics{convexhull-bwx}}
+\caption{The relationship between convex hulls and decision
+boundaries. Each vertex of the convex hull of $R$ contributes 
+to the decision boundary.}
+\figlabel{convexhull}
+\end{figure}
+
+Observe that, once the size of the training set has been reduced by
+\voronoi\ condensing, the condensed set can be preprocessed in $O(k\log
+k)$ time to answer nearest neighbour queries in $O(\log k)$ time per
+query.  This makes it possible to do nearest-neighbour classifications
+in $O(\log k)$ time.  Alternatively, the algorithm we describe for
+computing the nearest neighbour decision boundary actually produces
+the \voronoi\ diagram of the condensed set (which has size $O(k)$)
+that can be preprocessed in $O(k)$ time by Kirkpatrick's
+point-location algorithm \cite{k83} to allow nearest neighbour
+classification in $O(\log k)$ time.
+
+The remainder of this paper is organized as follows: In \secref{one-d}
+we describe an algorithm for computing the nearest-neighbour decision
+boundary of points on a line that runs in $O(n\log k)$ time.  In
+\secref{two-d} we present an algorithm for points in the plane that
+also runs in $O(n\log k)$ time.  Finally, in \secref{conclusions} we
+summarize and conclude with open problems.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{A 1-Dimensional Algorithm}\seclabel{one-d}
+
+In the 1-dimensional version of the nearest-neighbour decision
+boundary problem, the input set $S$ consists of $n$ real numbers.
+Imagine sorting $S$, so that $S=\{s_1,\ldots,s_n\}$ where
+$s_i<s_{i+1}$ for all $1\le i< n$.  The decision boundary consists of
+all pairs $(s_i,s_{i+1})$ where $s_i$ is red and $s_{i+1}$ is blue, or
+\emph{vice-versa}.  Thus, this problem is solvable in linear-time if
+the points of $S$ are sorted.  Since sorting the elements of $S$ can
+be done using any number of $O(n\log n)$ time sorting algorithms, this
+immediately implies an $O(n\log n)$ time algorithm.  Next, we give an
+algorithm that runs in $O(n\log k)$ time and is similar in spirit to
+Hoare's quicksort \cite{h61}.
+
+To find the decision boundary in $O(n\log k)$ time, we begin by
+computing the median element $m=s_{\ceil{n/2}}$ in $O(n)$ time using
+any one of the existing linear-time median finding algorithms (see
+\cite{bfprt73}).  Using an additional $O(n)$ time, we split $S$ into
+the sets $S_1=\{s_1,\ldots,s_{\ceil{n/2}-1}\}$ and
+$S_2=\{s_{\ceil{n/2}+1},\ldots,s_n\}$ by comparing each element of $S$
+to the median element $m$.  At the same time we also find
+$s_{\ceil{n/2}-1}$ and $s_{\ceil{n/2}+1}$ by finding the maximum and
+minimum elements of $S_1$ and $S_2$, respectively.  We then check if
+$(s_{\ceil{n/2}-1},m)$ and/or $(m,s_{\ceil{n/2}+1})$ are part of the
+decision boundary and report them if necessary.  
+
+At this point, a standard divide-and-conquer algorithm would recurse
+on both $S_1$ and $S_2$ to give an $O(n\log n)$ time algorithm.
+However, we can improve on this by observing that it is not necessary
+to recurse on a subproblem if it contains only elements of one colour,
+since it will not contribute a pair to the decision boundary.
+Therefore, we recurse on each of $S_1$ and $S_2$ only if they contain
+at least one red element and one blue element.
+
+The correctness of the above algorithm is clear.  To analyze its
+running time we observe that the running time is bounded by the
+recurrence
+\[
+   T(n,k) \le O(n) + T\left(n/2,l\right) 
+   	+ T\left(n/2,k-l\right) \enspace
+  , 
+\]
+where $l$ is the number of points that contribute to the decision
+boundary in  $S_1$ and where $T(1,k)=O(1)$ and $T(n,0)=O(n)$.  An
+easy inductive argument that uses the concavity of the logarithm shows
+that this recurrence is maximized when $l=k/2$, in which case the
+recurrence solves to $O(n\log k)$ \cite{csy97}.
+
+\begin{thm}
+The nearest-neighbour decision boundary of a set of $n$ red and blue
+real numbers can be computed in $O(n\log k)$ time, where $k$ is the
+number of elements that contribute to the decision boundary.
+\end{thm}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{A 2-Dimensional Algorithm}\seclabel{two-d}
+
+In the 2-dimensional nearest-neighbour decision boundary problem the
+\voronoi\ cells of $S$ are (possibly unbounded) convex polygons and
+the goal is to find all \voronoi\ edges that bound two cells whose
+defining points have different colours.  Throughout this section we
+will assume that the points of $S$ are in \emph{general position} so
+that no four points of $S$ lie on a common circle.  This assumption is
+not very restrictive, since general position can be simulated using
+infinitesmal perturbations of the input points.
+
+It will be more convenient to present our algorithm using the
+terminology of Delaunay triangulations.  A \emph{Delaunay triangle} in
+$S$ is a triangle whose vertices $(v_1,v_2,v_3)$ are in $S$ and such
+that the circle with $v_1$, $v_2$ and $v_3$ on its boundary does not
+contain any point of $S$ in its interior.  A \emph{Delaunay
+triangulation} of $S$ is a partitioning of the convex hull of $S$ into
+Delaunay triangles.  Alternatively, a \emph{Delaunay edge} is a line
+segment whose vertices $(v_1,v_2)$ are in $S$ and such that there
+exists a circle with $v_1$ and $v_2$ on its boundary that does not
+contain any point of $S$ in its interior.  When $S$ is in general
+position, the Delaunay triangulation of $S$ is unique and contains all
+triangles whose edges are Delaunay edges (see \cite{ps85}).  It is
+well known that the Delaunay triangulation and the \voronoi\ diagram are
+dual in the sense that two points of $S$ are joined by an edge in the
+Delaunay triangulation if and only if their \voronoi\ cells share an
+edge.  
+
+We call a Delaunay triangle or Delaunay edge \emph{bichromatic} if its
+set of defining vertices contains at least one red and at least one
+blue point of $S$. Thus, the problem of computing the
+nearest-neighbour decision boundary is equivalent to the problem of
+finding all bichromatic Delaunay edges. 
+
+%=======================================================================
+\subsection{The High Level Algorithm}\seclabel{outline}
+
+In the next few sections, we will describe an algorithm that, given a
+value $\kappa\ge k$, finds the set of all bichromatic Delaunay
+triangles in $S$ in $O((\kappa^2 + n)\log \kappa)$ time, which
+for $\kappa\le\sqrt{n}$ simplifies to $O(n\log\kappa)$.  To obtain an
+algorithm that runs in $O(n\log k)$ time, we repeatedly guess the
+value of $\kappa$, run the algorithm until we find the entire decision
+boundary or until it determines that $\kappa< k$ and, in the latter
+case, restart the algorithm with a larger value of $\kappa$.  If we
+ever reach a point where the value of $\kappa$ exceeds $\sqrt{n}$ then
+we stop the entire algorithm and run an $O(n\log n)$ time algorithm to
+compute the entire Delaunay triangulation of $S$.
+
+The values of $\kappa$ that we use are $\kappa=2^{2^i}$ for
+$i=0,1,2,\ldots,\ceil{\log\log n}$.  Since the algorithm will
+terminate once $\kappa\ge k$ or $\kappa\ge\sqrt{n}$, the total cost of
+all runs of the algorithm is therefore \[ T(n,k) =
+\sum_{i=0}^{\ceil{\log\log k}} O(n\log 2^{2^i}) =
+\sum_{i=0}^{\ceil{\log\log k}} O(n{2^i}) = O(n\log k) \enspace , \] as
+required.
+
+
+%=======================================================================
+\subsection{Pivots}
+
+A key subroutine in our algorithm is the \emph{pivot}\footnote{The
+term pivot comes from linear programming.  The relationship between a
+(polar dual) linear programming pivot and the circular pivot described
+here is evident when we consider the parabolic lifting that transforms
+the problem of computing a 2-dimensional Delaunay triangulation to
+that of computing a 3-dimensional convex hull of a set of points on
+the paraboloid $z=x^2+y^2$.  In this case, the circle is the
+projection of the intersection of a plane with the paraboloid.}
+operation illustrated in \figref{pivot}. A pivot in the set of points
+$S$ takes as input a ray and reports the largest circle whose center
+is on the ray, has the origin of the ray on its boundary and has no
+point of $S$ in its interior.  We will make use of the following data
+structuring result, due to Chan \cite{c96}.  For completeness, we also
+include a proof.
+
+\begin{figure}
+\begin{center}\begin{tabular}{c@{\hspace{1.5cm}}c}
+\includegraphics{pivot-a-bw}
+\end{tabular}\end{center}
+\caption{A pivot operation.}
+\figlabel{pivot}
+\end{figure}
+
+
+\begin{lem}[Chan 1996]\lemlabel{chan} Let $S$ be a set of $n$ points
+in $\mathbb{R}^2$.  Then, for any integer $1\le m\le n$, there exists a
+data structure of size $O(n)$ that can be constructed in $O(n\log m)$
+time, and that can perform pivots in $S$ in $O(\frac{n}{m}\log m)$
+time per pivot.  \end{lem}
+
+\begin{proof} 
+Dobkin and Kirkpatrick \cite{dk83,dk85} show how to preprocess a set
+$S$ of $n$ points in $O(n\log n)$ time to answer pivot queries in
+$O(\log n)$ time per query.  Chan's data structure simply partitions
+$S$ into $n/m$ groups each of size $m$ and then uses the
+Dobkin-Kirkpatrick data structure on each group.  The time to build
+all $n/m$ data structures is $\frac{n}{m}\times O(m\log m)=O(n\log
+m)$.  To perform a query, we simply query each of the $n/m$ data
+structures in $O(\log m)$ time per data structure and report the
+smallest circle found, for a query time of $\frac{n}{m}\times O(\log
+m)=O(\frac{n}{m}\log m)$.  
+\end{proof}
+
+
+In the following, we will be using \lemref{chan} with a value of
+$m=\kappa^2$, so that the time to construct the data structure is
+$O(n\log\kappa)$ and the query time is
+$O(\frac{n}{\kappa^2}\log\kappa)$.  We will use two such data
+structures, one for performing pivots in the set $R$ of red points
+and one for performing pivots in the set $B$ of blue points.
+
+%=======================================================================
+\subsection{Finding the First Edge}
+
+The first step in our algorithm is to find a single bichromatic edge
+of the Delaunay triangulation.  Refer to \figref{first}.  To do this,
+we begin by choosing any red point $r$ and any blue point $b$.  We
+then perform a pivot in the set $B$ along the ray with origin $r$ that
+contains $b$.  This gives us a circle $C$ that has no blue points in
+its interior and has $r$ as well as some blue point $b'$ (possibly
+$b=b'$) on its boundary.  Next, we perform a pivot in the set $R$
+along the ray originating at $b'$ and passing through the center of
+$C$.  This gives us a circle $C_1$ that has no point of $S$ in its
+interior and has $b'$ and some red point $r'$ (possibly $r=r'$) on its
+boundary.  Therefore, $(r',b')$ is a bichromatic edge in the Delaunay
+triangulation of $S$.
+
+\begin{figure}
+\begin{center}\begin{tabular}{c@{\hspace{1.5cm}}c}
+\includegraphics{first-a-bw} & \includegraphics{first-b-bw} \\
+(a) & (b)
+\end{tabular}\end{center}
+\caption{The (a)~first and (b)~second pivot used to find a
+bichromatic edge $(r',b')$.}
+\figlabel{first}
+\end{figure}
+
+The above argument shows how to find  a bichromatic Delaunay edge
+using only 2 pivots, one in $R$ and one in $B$.  The second part of
+the argument also implies the following useful lemma.
+
+\begin{lem}\lemlabel{finding} 
+If there is a circle with a red point $r$ and a blue point $b$ on
+its boundary, and no red (respectively, blue) points in its interior,
+then $r$ (respectively, $b$) contributes to the decision boundary.  
+\end{lem}
+
+%=======================================================================
+\subsection{Finding More Points}
+
+Let $Q$ be the set of points that contribute to the decision
+boundary, i.e., the set of points that are the vertices of bichromatic
+triangles in the Delaunay triangulation of $S$.  Suppose that we have
+already found a set $P\subseteq Q$ and we wish to either (1)~find a
+new point $p\in Q\setminus P$ or (2)~verify that $P=Q$.  
+
+To do this, we will make use of the \emph{augmented Delaunay
+triangulation} of $P$ (see \figref{augmented}).  This is the
+Delaunay triangulation of $P\cup \{v_1,v_2,v_3\}$, where $v_1$,
+$v_2$, and $v_3$ are three \emph{black} points ``at infinity'' (see
+\figref{augmented}). For any triangle $t$, we use the notation $C(t)$
+to denote the circle whose boundary contains the three vertices of $t$
+(note that if $t$ contains a black point then $C(t)$ is a halfplane).
+The following lemma allows us to tell when we have found the entire
+set of points $Q$ that contribute to the decision boundary.
+
+\begin{figure}
+\centerline{\includegraphics{augmented-bw}}
+\caption{The augmented Delaunay triangulation of
+$S$.}\figlabel{augmented}
+\end{figure}
+
+
+\begin{lem}\lemlabel{stopping} 
+Let $\emptyset\neq P\subseteq Q$.  The following statements are equivalent:
+\begin{enumerate}
+
+\item For every triangle $t$ in the augmented Delaunay triangulation
+of $P$, if $t$ has a blue (respectively, red) vertex then $C(t)$
+does not have a red (respectively, blue) point of $S$ in its
+interior.  
+
+\item $P=Q$.
+\end{enumerate}
+\end{lem}
+
+\begin{proof} 
+First we show that if Statement~1 of the lemma is not true, then
+Statement~2 is also not true, i.e., $P\neq Q$.  Suppose there is some
+triangle $t$ in the augmented Delaunay triangulation of $P$ such that
+$t$ has a blue vertex $b$ and $C(t)$ contains a red point of $S$ in
+its interior.  Pivot in $R$ along the ray originating at $b$ and
+passing through the center of $C(t)$ (see \figref{witness}).  This
+will give a circle $C$ with $b$ and some red point $r\notin P$ on its
+boundary and with no red points in its interior.  Therefore, by
+\lemref{finding}, $r$ contributes to the decision boundary and is
+therefore in $Q$, so $P\neq Q$.  A symmetric argument applies when $t$
+has a red vertex $r$ and $C(t)$ contains a blue vertex in its
+interior.
+
+\begin{figure}
+\centerline{\includegraphics{monochrome-bw}}
+\caption{If Statement~1 of \lemref{stopping} is not true then
+$P\neq Q$.}
+\figlabel{witness}
+\end{figure}
+
+Next we show that if Statement~2 of the lemma is not true then
+Statement~1 is not true.  Suppose that $P\neq Q$.  Let $r$ be a point
+in $Q\setminus P$ and, without loss of generality, assume $r$ is a red
+point.  Since $r\in Q$, there is a circle $C$ with $r$ and some
+other blue point $b$ on its boundary and with no points of $S$ in its
+interior.  We will use $r$ and $b$ to show that the augmented Delaunay
+triangulation of $P$ contains a triangle $t$ such that either (1)~$b$
+is a vertex of $t$ and $C(t)$ contains $r$ in its interior, or
+(2)~$C(t)$ contains both $r$ and $b$ in its interior.  In either case,
+Statement~1 of the lemma is not true because of triangle $t$.
+
+Refer to \figref{stopping} for what follows.  Consider the largest
+circle $C_1$ that is concentric with $C$ and that contains no point of
+$P$ in its interior (this circle is at least as large as $C$).  The
+circle $C_1$ will have at least one point $p_1$ of $P$ on its boundary
+(it could be that $p_1=b$, if $b\in P$).  Next, perform a pivot in $P$
+along the ray originating at $p_1$ and containing the center of $C_1$.
+This will give a circle $C_2$ that contains $C_1$ and with two points
+$p_1$ and $p_2$ of $P\cup\{v_1,v_2,v_3\}$ on its boundary and with no
+points of $P\cup\{v_1,v_2,v_3\}$ in its interior.  Therefore,
+$(p_1,p_2)$ is an edge in the augmented Delaunay triangulation of $P$. 
+
+\begin{figure}
+\begin{center}\begin{tabular}{cc}
+\includegraphics{stopping-11a-bw} & \includegraphics{stopping-21a-bw} \\[2ex] 
+\includegraphics{stopping-11b-bw} & \includegraphics{stopping-21b-bw} \\[2ex]
+\includegraphics{stopping-11c-bw} & \includegraphics{stopping-21c-bw} \\[1ex]
+(1) & (2)
+\end{tabular}\end{center}
+\caption{If $P\neq Q$ then Statement~1 of \lemref{stopping} is not
+true. 
+The left column (1) corresponds to the case where $b\not\in
+P$ and the right column (2) corresponds to the case where $b\in
+P$.}
+\figlabel{stopping}
+\end{figure}
+
+The edge $(p_1,p_2)$ partitions the interior of $C_2$ into two pieces,
+one that contains $r$ and one that does not.  It is possible to move
+the center of $C_2$ along the perpendicular bisector of $(p_1,p_2)$
+maintaining $p_1$ and $p_2$ on the boundary of $C_2$.  There are two
+directions in which the center of $C_2$ can be moved to accomplish
+this.  In one direction, say $\overrightarrow{d}$, the part of the
+interior that contains $r$ only increases, so move the center in this
+direction until a third point $p_3\in P\cup\{v_1,v_2,v_3\}$ is on the
+boundary of $C_2$.  The resulting circle has the points $p_1$, $p_2$,
+and $p_3$ on its boundary and no points of $P$ in its interior, so
+$p_1$, $p_2$ and $p_3$ are the vertices of a triangle $t$ in the
+augmented Delaunay triangulation of $P$.  The circumcircle $C(t)$
+contains $r$ in its interior and contains $b$ either in its interior
+or on its boundary.  In either case, $t$ contradicts Statement~1, as
+promised.  
+\end{proof}
+
+Note that the first paragraph in the proof of \lemref{stopping} gives
+a method of testing whether $P=Q$, and when this is not the case, of
+finding a point in $Q\setminus P$.  For each triangle $t$ in the
+Delaunay triangulation of $P$, if $t$ contains a blue vertex $b$ then
+perform a pivot in $R$ along the ray originating at $b$ and passing
+through $C(t)$.  If the result of this pivot is $C(t)$, then do
+nothing.  Otherwise, the pivot finds a circle $C$ with no red points
+in its interior and that has one blue point $b$ and one red point
+$r\notin P$ on its boundary.  By \lemref{finding}, the point $r$ must
+be in $Q$.  If $t$ contains a red vertex, repeat the above procedure
+swapping the roles of red and blue.  If both pivots (from the red
+point and the blue point) find the circle $C(t)$, then we have
+verified Statement~1 of \lemref{stopping} for the triangle $t$.
+
+The above procedure performs at most two pivots for each triangle $t$
+in the augmented Delaunay triangulation of $P$.  Therefore, this
+procedure performs $O(|P|)=O(\kappa)$ pivots.  Since we repeat this
+procedure at most $\kappa$ times before deciding that $\kappa<k$, we
+perform $O(\kappa^2)$ pivots, at a total cost of
+$O(\kappa^2\times\frac{n}{\kappa^2}\log\kappa)=O(n\log\kappa)$.  The
+only other work done by the algorithm is that of recomputing the
+augmented Delaunay triangulation of $P$ each time we add a new vertex
+to $P$.  Since each such computation takes $O(|P|\log|P|)$ time and
+$|P|\le\kappa$, the total amount of work done in computing all these
+triangulations is $O(\kappa^2\log\kappa)$.
+
+In summary, we have an algorithm that given $S$ and $\kappa$ decides
+whether the condensed set $Q$ of points in $S$ that contribute to the
+decision boundary has size at most $\kappa$, and if so, computes $Q$.
+This algorithm runs in $O((\kappa^2 + n)\log\kappa)$ time.  By trying
+increasingly large values of $\kappa$ as described in \secref{outline}
+we obtain our main theorem.
+
+\begin{thm}\thmlabel{main}
+The nearest-neighbour decision boundary of a set of $n$ red and blue
+points in $\mathbb{R}^2$ can be computed in $O(n\log k)$ time, where
+$k$ is the number of points that contribute to the decision boundary.
+\end{thm}
+
+
+\noindent\textbf{Remark:} In the pattern-recognition community pattern
+classification rules are often implemented as neural networks.  In the
+terminology of neural networks, \thmref{main} states that it is
+possible, in $O(n\log k)$ time, to design a simple one-layer neural
+network that implements the nearest-neighbour decision rule and uses
+only $k$ McCulloch-Pitts neurons (threshold logic units).
+
+\subsection{More than 2 Color Classes}
+
+\thmref{main} extends easily to the case where there are $c>2$ colour
+classes and our goal is to find all \voronoi\ edges bounding two
+\voronoi\ cells of different colour.  In this case we build a pivot
+data structure for each of the $c$ colour classes.  When performing
+pivots from a point in some colour class $R$, we perform queries in
+all the data structures except the one for colour class $R$.  (This is
+equivalent to a pivot in the set $S\setminus R$.)  This increases the
+cost of pivot operations to $O(\frac{cn}{m}\log m)$.
+
+The only other modifications to the algorithm are the tuning of a few
+parameters. Note that $c$ is a lower bound on $k$ because each colour
+class contributes at least 1 point to the decision boundary.
+Therefore, we may assume that $c\le \kappa\le n^{1/3}$ since we can
+always start our algorithm with $\kappa=2^{2^{\ceil{\log\log c}}}$ and
+we can use an $O(n\log n)$ time algorithm when $\kappa>n^{1/3}$.  In
+the previous section, we chose $m=\kappa^2$, but could just as easily
+have chosen $m=\kappa^3$ without affecting the analysis of the running
+time (this is where the assumption that $\kappa\le n^{1/3}$ is used).
+With this choice of $m$, the time to perform a pivot becomes \[
+O\left(\frac{cn}{m}\log m\right) = O\left(\frac{n}{\kappa^2}\log
+m\right) \enspace .  \] Each round of the algorithm performs
+$O(\kappa^2)$ queries. Therefore, each round can be implemented in
+$O((\kappa^3+n)\log m)=O(n\log\kappa)$ time.  The rest of the analysis
+remains unaffected and the entire algorithm runs in $O(n\log k)$ time.
+
+\begin{thm}\thmlabel{multicolour}
+The nearest-neighbour decision boundary of a set of $n$ points from
+$c$ different colour classes in $\mathbb{R}^2$ can be computed in
+$O(n\log k)$ time, where $k$ is the number of points that contribute
+to the decision boundary.
+\end{thm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusions}\seclabel{conclusions}
+
+We have given $O(n\log k)$ time algorithms for computing
+nearest-neighbour decisions boundaries of bichromatic point sets in 1
+and 2 dimensions, where $k$ is the number of points that contribute to
+the decision boundary.  A standard application of Ben-Or's lower-bound
+technique \cite{bo83} shows that even the 1-dimensional algorithm is
+optimal in the algebraic decision tree model of computation. Simple
+variants of these algorithms give solutions for computing the
+nearest-neighbour decision boundary of points sets with $c>2$ colours
+that run in the same time bounds.
+
+We have not studied algorithms for dimensions $d\ge 3$. In this case,
+it is not even clear what the term ``output-sensitive'' means.  Should
+$k$ be the number of points that contribute to the decision boundary,
+or should $k$ be the complexity of the decision boundary?  In the
+first case, $k\le n$ for any dimension $d$, while in the second case,
+$k$ could be as large as $\Omega(n^{\lceil d/2\rceil})$.  To the best
+of our knowledge, both are open problems.
+
+\section*{Acknowledgements}
+
+This research wash initiated at the McGill Worshop on Instance-Based
+Learning at Bellairs Marine Biology Institute, Jan.~21--Feb.~6, 2003.
+The authors would like to thank the other workshop participants,
+namely, Greg~Aloupis, Jit~Bose, Vida~Dujmovi\'c, Ferran~Hurtado,
+Danny~Krizanc, Henk~Meijer, Mark~Overmars, Tom~Shermer,
+Sue~Whitesides, and David~Wood for helpful discussions and for
+providing a stimulating working environment.  The authors are also
+grateful to an anonymous referee for showing us how to remove a $\log
+c$ factor from the running time in \thmref{multicolour}.
+
+
+
+\bibliographystyle{plain}
+\bibliography{boundary}
+
+\end{document}
+

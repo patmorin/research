@@ -1,0 +1,89 @@
+\documentclass[ccfonts,lotsofwhite]{patmorin}
+
+\input{pat.tex}
+
+\title{\MakeUppercase{New Data Structures for Mass Finding}}
+\author{Pat Morin \\
+	\emph{School of Computer Science, Carleton University} \\
+	\texttt{morin@cs.carleton.ca}}
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+Given a sequence $W=w_1,\ldots,w_n$ of positive real numbers, we show
+how to preprocess $W$ so that, given a query value $M$ we can
+determine if there exists indices $i$ and $j$, $1\le i\le j\le n$ such
+that $M=\sum_{k=i}^j w_k$.  We describe a simple data structure that
+uses $O(n^{1.465})$ space and answers queries in $O(\log n)$ time.  We
+show that this generalizes to a data structure that uses
+$O(n^{1+\epsilon})$ space and $O(\log n)$ query time, for any constant
+$\epsilon > 0$.  
+\end{abstract}
+
+\section{Introduction}
+
+We consider the following problem, which seems to have been introduced
+by Cieliebak \etal\ \cite{cels02,cels01b} in the context of
+computational biology.  Given a sequence $W=w_1,\ldots,w_n$ of
+positive real numbers, preprocess $S$ so that, given a query value $M$
+one can quickly determine if there exists indices $i$ and $j$, $1\le
+i\le j\le n$ such that $M=\sum_{k=i}^j w_k$.
+
+The quality of a solution to this problem is measured by three
+quantities: The \emph{storage requirement} $S(n)$ measures the amount
+of memory required by the preprocessing and query algorithms and the
+\emph{query time} $Q(n)$ measures how long it takes to answer a query.
+
+Cieliebak \etal\ point out two trivial solutions to this problem.  The
+first has $S(n)=O(n)$ and $Q(n)=O(n)$. That is, the algorithm simply
+tries to find a subsequence $w_i,\ldots,w_j$ whose sum is $M$ using a
+linear time algorithm.  The second trivial solution is simply to
+compute all the $n\choose 2$ possible sums obtained from contiguous
+subseqences of $S$ and store these in dictionary.  In this way, we
+obtain $S(n)=O(n^2)$ and $Q(n)=O(\log n)$.  The challenge, therefore,
+is to find algorithms in which $S(n)=o(n^2)$ and $Q(n)=o(n)$.
+
+In the context of computational biology, the Cieliebak argue that the
+number of distinct values $m$ appearing in $W$ is $O(1)$.  This is
+because these values represent the weights of amino acids, of which
+only 20 or so are known to exist.  Under this assumption, the authors
+give a solution with $S(n)=O(n)$ and $Q(n)=O(n/\log n)$.  For the
+special case of binary alphabets, i.e., when the number of distinct
+values in $W$ is $2$, the same authors give a solution with
+$S(n)=O(n)$ and $Q(n)=O(\log n)$.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|l|l|l|l|}\hline
+$S(n)$ & $Q(n)$ & Restriction on $m$ & Reference \\ \hline\hline
+$O(n)$ & $O(n)$ & none & \cite{cels02b} \\
+$O(n^2)$ & $O(\log n)$ & none & \cite{cels02b} \\
+$O(n)$ & $O(n/\log n)$ & $m=O(1)$ & \cite{cels02b} \\
+$O(n)$ & $O(\log n)$ & $m=2$ & \cite{cels02b} \\
+$O(n^{1.465})$ & $O(\log n)$ & none & here \\ \hline
+\end{tabular}
+\end{center}
+\tablabel{results}
+\caption{Summary of old and new results.}
+\end{table}
+
+\tabref{results} summarizes the results of Cieliebak \etal\
+\cite{cels02b,cels01b} as well as the new result obtained here.  Here
+we give a solution with $S(n)=O(n^{\log_3 5})=o(n^{1.465})$ and
+$Q(n)=O(\log n)$.  Thus, we show that logarithmic query time is
+possible using subquadratic space, even when the number is distinct
+weights is unbounded.  Furthermore, the algorithm is quite simple and
+the big-Oh notation doesn't hide large constant factors.
+
+
+
+\section{A Data Structure for Mass Finding}
+
+\section{Conclusions}
+
+\bibliography{mass}
+\bibliographystyle{plain}
+
+
+\end{document}

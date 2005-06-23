@@ -1,0 +1,55 @@
+\documentclass{article}
+\usepackage{fullpage}
+\usepackage{amsfonts}
+
+\newcommand{\area}{\mathrm{area}}
+\setlength{\parskip}{.3cm}
+\setlength{\parindent}{1cm}
+
+\title{Comments on ``Computing the Center of Area of a Convex Polygon'' by
+Bra\ss\ and Heinrich-Litan}
+\date{}
+\author{}
+
+\begin{document}
+\maketitle
+
+The paper gives an algorithm for computing the ``center of area''
+(i.e., Tukey center) of a convex polygon.  The algorithm runs in
+$O(n^2\log^c n)$ time, improving on the previous algorithm of Diaz and
+O'Rourke, which ran in $O(n^6\log^c n)$ time.  The paper is reasonably
+well-written and the algorithm appears to be correct.  The main source
+of the speed up is an application of prune-and-search.
+
+However, I believe that there is a linear time algorithm based on
+Chan's randomized optimization technique \cite{cXX}.  Chan's technique
+requires two ingredients: (1)~it must be possible to partition the
+problem into $r$ subproblems, each of size at most $\alpha n$,
+$\alpha< 1$ such that the optimal solution is the maximum of the
+solutions to these subproblems and (2)~it must be possible to solve
+the decision problem ``is $f(p^*)>\delta$?'' in $f(n)$ time. Here, $r$
+and $\alpha$ are constants independent of $n$.  If both these
+conditions are satisfied, then the question ``what is the value of
+$f(p^*)$?''  (and where is $p^*$?) can be solved in $O(f(n))$ time.
+
+Consider the following generalization of the problem: Let $P$ be a
+convex polygon whose edges are assigned non-negative weights.  Assume
+that the area of $P$ plus the sum of the weights is 1.  For a
+halfspace $h$, define $\area(h\cap P)$ as the area of of $h\cap P$
+plus the weights of all edges contained in $h$.  In the generalized
+version of this problem we want to maximize (over all
+$p\in\mathbb{R}^2)$ the cut-off weighted area function
+\[
+	f(p)=\min\{\area(h\cap P)\mid \mbox{$h$ is admissible for $p$}\}
+\]
+where $h$ is admissible for $p$ if it is bounded by a line through $p$
+and this line does not intersect any edge with strictly positive weight.
+
+Observe that this is equivalent to the original center of area problem
+if all edges of $P$ have weight 0.
+
+Suppose we are given an instance of the above problem.  In order to apply
+Chan's technique, we need to partition the problem into $r$ subproblems
+each of size at most $\alpha n$.
+
+\end{document}

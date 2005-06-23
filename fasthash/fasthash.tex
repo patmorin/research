@@ -1,0 +1,199 @@
+\documentclass[lotsofwhite,charterfonts]{patmorin}
+\usepackage{amsthm}
+
+\title{\MakeUppercase{Efficient Universal Hashing}}
+\author{Prosenjit Bose \and Pat Morin}
+\date{}
+
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\xor}{\oplus}
+\newcommand{\rev}[1]{\overleftarrow{#1}}
+\input{pat}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+We introduce a new family of hash functions that maps $b$-bit
+non-negative integers onto $r$-bit non-negative integers ($r\le b$).
+This family is defined as the set
+\[
+ \mathcal{F}_\mathrm{BM} = \left\{ h_{k,l}(x)=((x\times k) \xor (\rev{x}\times
+l))\bmod 2^r :
+k,l\in\{0,\ldots,2^b-1\} \right\} 
+\]
+where $\rev{x}$ denotes the integer obtained by reversing the bits in
+the binary representation of $x$ and $\xor$ denotes the bitwise
+exclusive-or operation.  We show that, besides being very fast to
+implement on a binary computer, this family of hash functions has a
+very strong \emph{avalanche} property.  Namely, for any distinct
+$x,y\in\{0,\ldots,2^b\}$, if we choose $k$ and $l$ randomly then
+$h_{k,l}(x)\xor h_{k,l}(y)$ is a random bit-string of length $r$.  We
+show that this family of hash functions has applications in data
+structures and cryptography.  
+\end{abstract}
+
+
+\section{Introduction}
+
+A family $\mathcal{H}$ of functions from $U=\{0,\ldots,u-1\}$ onto
+$M=\{0,\ldots,m-1\}$ is said to be a \emph{universal} family of hash
+functions if, for every distinct $x,y\in U$ choosing a random element
+$h\in \mathcal{H}$ gives
+\[
+    \Pr\{h(x)=h(y)\} \le 1/m \enspace .
+\]
+As a data structuring tool, universal families of hash functions are
+extremely useful since, given a set $S\subseteq U$ of size $O(m)$ a
+randomly chosen member of $\mathcal{H}$ can be used to map the
+elements of $S$ into a table of size $m$ such that the expected number
+of elements mapped into any particular table position is $O(1)$.  This
+gives a data structure for querying membership in $S$ that takes
+$O(1)$ expected time per query.  With slightly more work, families of
+universal hash functions can be used to build a table of size $O(m)$
+in which no element is mapped to more than one table entry
+\cite{fksXX,clrsXX}.  Families of universal hash functions also have
+applications to message authentication in the field of cryptography
+\cite{cXX,cXX,cXX}.
+
+Universal families of hash functions were introduced by Carter and
+Wegman \cite{cwXX} who suggested the family
+\[
+\mathcal{F}^{(u,m)} = \{f_{k,l}(x)=(kx+l)\bmod u\bmod m  :
+k\in\{1,\ldots,m-1\}, l\in\{0,\ldots,m-1\} \}
+\]
+and showed that if $u$ is a prime then this family of hash functions
+is universal.  Unfortunately, the requirement that $u$ is a prime
+makes this function awkward to use in implementations.  For example,
+if we wish to build a hash table to store 32 bit integers then the
+smallest prime value not less than $2^{32}$ is $u=2^{32}+15$.
+Therefore, to implement this hash function, the multiplication
+$k\times x$ requires the use of 64-bit arithmetic as does the modular
+arithmetic operation that computes the result modulo u.  The 64-bit
+arithmetic is costly, but even more costly is the reduction modulo u.
+On current architectures the $\bmod$ operation typically takes an order of
+magnitude longer to execute than an integer multiplication or addition
+operation. 
+
+Being aware of this problem, Halevi and Krawczyk \cite{X} showed how
+the reduction modulo $u=2^{32}+15$ can be implemented without division
+using a constant number of multiplication, addition, subtraction,
+negation, shifting, and branching instructions, all done using 64-bit
+arithmetic.
+
+Black \etal\ \cite{X} introduce a new class of hash functions for use
+in message authentication that operates on $b$-bit binary numbers,
+where $b=2w$.  This family is defined as
+\[
+	\mathcal{G}^{(2^b,2^b)} = \{ g_{k,l}(x) = ((k+x_\mathrm{hi})\bmod
+2^w)(l+x_\mathrm{lo})\bmod 2^w) : k,l\in\{0,\ldots,2^w-1\} \}	\enspace ,
+\]
+where $x_\mathrm{hi}$ and $x_\mathrm{lo}$ denote the high order and
+low order $w$ bits of $x$, respectively.  This family of hash
+functions is extremely well-suited to implementation on modern
+computers since the modular reductions are done using only powers of 2 and can
+therefore be implemented as a bitwise binary AND operation.
+Furthermore, all arithmetic takes place using $b$-bit arithmetic.
+That is, if the input $x$ is a 32-bit number then all arithmetic
+operations can be implemented using 32-bit arithmetic.  Unfortunately,
+the family $\mathcal{F}_\mathrm{B+}$ is not universal.  In fact the
+strongest statement one can make is that, for distinct $x,y\in
+\{0,\ldots2^{2w}-w\}$ and randomly chosen $k,l\in\{0,\ldots,2^{w}-1\}$,
+\[ 
+    \Pr\{h_{k,l}(x)=h_{k,l}(y)\} \le 1/2^w \enspace .  
+\] 
+Compared with universal families of hash functions, this is quite weak
+since the total number of possible hash values is $m=2^b=2^{2w}$, but
+two keys have the same hash value with probability $1/2^w=1/\sqrt{m}$.
+Other families of hash functions, designed with the goal of optimizing
+software implementations have been proposed \cite{X,X,X,X,X} but none
+of these is universal. (Though some give better guarantees on the
+collision probability.)
+
+In this paper we propose a new family of hash functions that maps $b$ bit
+integers onto $r$ bit integers.  This family is defined as
+\[
+	\mathcal{H}^{(2^b,2^r)} = 
+	\{
+	  (kx\oplus l\rev{x}) \bmod 2^r : k,l\in \Z_{2^b}\}
+	\} \enspace 	
+\]
+where $\rev{x}$ denotes the integer obtained by reversing the bits of
+$x$ and $\xor$ denotes the bitwise exclusive-or operation.
+This family of hash functions is well-suited for implementation on
+modern computers because its main ingredients are multiplication and
+modular reduction over a power of 2 and bitwise exclusive-or.  The
+only troublesome operation is the $\rev{x}$ operation which is not
+implemented as a primitive in most programming languages.  However,
+we show that it can be implemented efficiently using lookup tables.
+Furthermore, unlike modular reduction, there is no fundamental
+difficulty involved in implementing the $\rev{x}$ operation in
+hardware.  Indeed, it can be implemented by a circuit that requires 0
+gates.
+
+On the theoretical side, we show that this family has a very strong
+\emph{avalanche} property:\footnote{We call this an avalanche property
+because a small (1 bit) change in the input results in a large
+($b/2$-bit) expected change in the output \cite{X}.}
+\begin{thm}\thmlabel{random}
+Consider two distinct values  $x,y\in \{0,\ldots,2^b-1\}$ and select a
+random member $h\in \mathcal{H}^{(2^b,2^b)}$.  Then
+$X = h(x)\xor h(y)$ is a random binary string
+of length $b$.  That is, each bit of $X$ is set to 0 or 1 with
+probability $1/2$ independently of all other bits of $X$.
+\end{thm}
+
+Since $h(x)=h(y)$ if and only if $h(x)\xor h(y)= 0$, \thmref{random} leads
+immediately to the following corollary, which makes this family of
+hash functions excellent for use in the implementation of hash tables.
+\begin{cor}
+The family $H^{(2^b,2^r)}$ is universal for all $1\le r\le b$.
+\end{cor}
+
+\thmref{random} also leads immediately to the following corrolary
+which makes this family of hash functions useful for message
+authentication applications:
+
+\begin{cor}
+Let $k_i$ and $l_i$, $1\le i\le p$ be random $b$-bit strings and let
+$x_i$ and $y_i$, $1\le i\le p$ be such that there exists at least one
+$i$ in which $x_i\neq y_i$.  Then
+\[
+   \Pr\left\{\bigoplus_{i=1}^p h^{(b,b)}_{k_i,l_i}(x_i) = 
+	\bigoplus_{i=1}^p h^{(b,b)}_{k_i,l_i}(y_i) \right\} \le 1/2^b
+\enspace .
+\]
+\end{cor}
+
+The remainder of this paper is organized as follows.   In
+\secref{proof} we prove \thmref{random}.  In \secref{implementation}
+we describe an implementation of this algorithm and some experimental
+results comparing it to other algorithms.  In \secref{conclusions} we
+summarize and conclude with open problems.
+
+\section{Proof of \thmref{random}}\seclabel{proof}
+
+\begin{proof}[Proof (of \thmref{random})]
+
+Let $x_i$ denote the $i$th bit of $x$.  Since $x\neq y$, there exists
+some $i$ such that $x_i$ and $y_i$ differ.  Consider the bit $X_j$.
+There are two cases to consider:
+
+\noindent\textbf{Case 1:} $j \ge i$.  In this case, the value of $X_j$
+can be expressed as an exclusive or of many bits, one of which is
+$x_i\and k_{j-i}$ and another of which is $y_j\and k_{j-i}$. 
+
+ that includes
+\begin{enumerate}
+\item
+
+\end{enumerate}
+
+
+\end{proof}
+
+\section{Implementation and Experiments}
+
+\section{Conclusions}
+
+\end{document}

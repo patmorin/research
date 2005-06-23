@@ -1,0 +1,927 @@
+\documentclass[ccfonts,lotsofwhite]{patmorin}
+%\usepackage{bbold}
+\usepackage{algorithmic}
+
+\input{pat.tex}
+
+%\setlength{\oddsidemargin}{1in}
+%\setlength{\evensidemargin}{\oddsidemargin}
+%\setlength{\textwidth}{6.25in}
+
+\newtheorem{defn}{Definition}
+
+\newcommand{\enets}[1]{}
+\newcommand{\notenets}[1]{#1}
+
+\newcommand{\hppc}{\textsc{Hyperplane-Cover}}
+\newcommand{\cover}{\mathrm{cover}}
+\newcommand{\set}{\mathrm{set}}
+\newcommand{\setcover}{\textsc{Dim-Set-Cover}}
+\newcommand{\rsetcover}{\textsc{Restricted-Set-Cover}}
+%\newcommand{\exponent}{(d+1)^2/4}
+
+\newcommand{\inetsize}{k^{d-i}\log k}
+\newcommand{\inettime}{nO(i)^{3i}k^{2i}\log^{i}(ik)}
+\newcommand{\exponent}{\lceil(d+1)/2\rceil\lfloor(d+1)/2\rfloor}
+\newcommand{\runtime}{k^{d(k+1)}+c2^dk^{\exponent}n\log n}
+
+
+\newcommand{\DF}{DF}
+\newenvironment{example}{%
+	\addtolength{\textwidth}{-1cm}
+	\begin{center}\begin{tabular}{|p{\textwidth}|}}
+	{\end{tabular}\end{center}}
+
+\title{\MakeUppercase{Covering Things with Things}\thanks{This
+research took place while both author were visitors at the School of
+Computer Science of McGill University and  was partly funded by NSERC,
+MITACS, FCAR and CRM.}}
+
+\author{Stefan Langerman\thanks{Charg\'e de recherches du FNRS} \\
+	Universit\'e Libre de Bruxelles \\ 
+	D\'epartement d'informatique. \\
+	\texttt{stefan.langerman@ulb.ac.be}
+\and Pat Morin \\
+	School of Computer Science \\
+	Carleton University \\
+	\texttt{morin@cs.carleton.ca}}
+\date{}
+
+\sloppy
+\begin{document}
+\begin{titlepage}
+\maketitle
+
+\begin{abstract}
+An abstract NP-hard covering problem is presented and fixed-parameter
+tractable algorithms for this problem are described.  The running
+times of the algorithms are expressed in terms of three parameters:
+$n$, the number of elements to be covered, $k$, the number of sets
+allowed in the covering, and $d$, the combinatorial dimension of the
+problem.  The first algorithm is deterministic and has running time
+$O'(k^{dk}n)$.  The second algorithm is also deterministic and has
+running time $O'(k^{d(k+1)}+n^{d+1})$.  The third is a Monte-Carlo
+algorithm that runs in time $O'(\runtime)$ time and is correct with
+probability $1-n^{-c}$.  Here, the $O'$ notation hides factors that
+are polynomial in $d$.  These algorithms lead to fixed-parameter
+tractable algorithms for many geometric and non-geometric covering
+problems.
+\end{abstract}
+\thispagestyle{empty}
+\end{titlepage}
+
+
+\section{Introduction}
+
+This paper pertains to the parametrized complexity of some geometric
+covering problems, many of which are NP-hard. A prototype for these
+problems is the following \hppc\ problem: Given a set $S$ of $n$
+points in $\mathbb{R}^d$, does there exist a set of $k$ hyperplanes
+such that each point of $S$ is contained in at least one of the
+hyperplanes?  It it known that \hppc\ is NP-hard, even in
+$\mathbb{R}^2$ (i.e., covering points with lines) \cite{mt82}.
+
+Parametrized complexity \cite{df99} is one of the recent approaches
+for finding exact solutions to NP-hard problems.  In a typical
+application of this approach, one tries to identify one or more
+natural (usually numerical) parameters of the problem which, if small,
+make the problem tractable.
+
+With many problems, such as deciding if a graph with $n$ vertices
+contains a clique of size $k$, it is easy to devise algorithms with
+running time of the form $O(n^k)$, so the problem is polynomial for
+any constant $k$.  While this is somewhat helpful, it is not
+completely satisfying since the degree of the polynomial grows quickly
+as $k$ grows.  Fixed-parameter tractable algorithms have more strict
+requirements.  Namely, the running time must be of the form
+$O(f(k)n^c)$, where $f$ is an arbitrarily fast growing function of
+$k$, and $c$ is a constant not depending on $k$ or $n$.
+
+A typical example is the \textsc{Vertex-Cover} problem: Given a graph
+$G=(V,E)$ with $n$ vertices, does $G$ have a subset $V'\subseteq V$ of
+$k$ vertices such that every edge is incident to at least one vertex
+of $V'$?  After much work on this problem, its running time has been
+reduced to $O(1.2852^k + kn)$ which, with current computing technology
+allows for the efficient solution of problem with values of $k$ as
+large as 200 and arbitrarily large $n$ \cite{ckj01}.
+
+\comment{The best known algorithm for this problem has running time
+$??????$.  On the other hand, SET-COVER, a generalization of
+VERTEX-COVER for arbitrary hypergraphs, is not known and not believed
+to be fixed parameter tractable. Many techniques have been created to
+develop FTP algorithms. For a survey, see \cite{df99}.}
+
+The current article is an attempt to apply the general techniques of
+parametrized complexity to geometric NP-hard problems. Indeed many
+geometric problems have natural parameters that can be used to limit
+their complexity.  The most common of such a parameter is the
+geometric dimension of the problem.
+
+This has been observed, for example, in the study of linear
+programming in $R^d$ where the parameter is the dimension $d$.  For
+this problem, there exists an algorithm with running time (e.g.)
+$O(d^2n + e^{O(\sqrt{d}\ln d)})$ \cite{msw96}, so the problem is
+fixed-parameter tractable.  Another remarkable example of this
+phenomenon is \emph{$k$-piercing of rectangles}: Given a set of $n$
+rectangles in the plane, is there a set of $k$ points such that each
+rectangle contains at least one of the points? This problem has
+$O(n\log n)$ time algorithms for $k=1,\ldots,5$
+\cite{mt97,n97,s99,sw96}, which makes it believable that it could
+admit an algorithm with running time of the form $O(f(k)n\log n)$ for
+arbitrary values of $k$.  For now, no such result is known, and the
+best known algorithm has running time $n^{\Omega(k)}$.
+
+
+\comment{
+$O(n\log{n})$ algorithm for $d=2$ (by computing the convex hull as
+observed by Shamos \cite{s-cg-78}), and $d=3$ \cite{mp-fitcp-78},
+which then was improved to $O(n)$ algorithms for $d=2,3$
+\cite{d-ltatt-84}\cite{m-ltalp-83}, and then for any constant $d$ with
+running time $O(2^{2^{d}}n)$ \cite{m-lpltw-84}.  Many other problems
+are likely to be candidates for FPT algorithms, which already have
+fast algorithms for some particular values of a parameter. The most
+remarquable example is probably \emph{$k$-piercing of rectangles}:
+given a set of $n$ rectangles in the plane, it is asked to find $k$
+points such that each rectangle contains at least one point. This
+problem has $O(n\log{n})$ algorithms for $k=1,\ldots,5$
+\cite{n97,sw96}. Recently, work has also been done to apply FPT
+techniques to geometric problems, and more particularly in graph
+drawing [xxxvida].
+}
+
+In this paper we define an abstract set covering problem called
+\setcover\ that includes \hppc\ and many similar problems.  As part of
+this definition, we introduce a new notion of geometric set system
+hierarchy, in many points similar to the range spaces of Vapnik and
+Chervonenkis \cite{vc71}, along with a concept of dimension for each
+set system, which is always at least as large as its VC-dimension. We
+then give \emph{fixed-parameter tractable} algorithms for \setcover.
+These are algorithms that have running times of the form
+$O(f(k,d)n^c)$ where $c$ is a constant, $d$ is the combinatorial
+dimension of the problem and $f(k,d)$ is an arbitrarily fast growing
+function of $k$ and $d$.
+
+We give three algorithms for \setcover.  The first is deterministic
+and runs in $O'(k^{dk} n)$ time.  The second is deterministic and runs
+in $O'(k^{d(k+1)}+n^{d+1})$ time.  The third is a Monte-Carlo algorithm
+that runs in $O'(\runtime)$ time and returns a correct answer with
+probability at least $1-n^{-c}$.  Here and throughout, the $O'$
+notation is identical to the standard $O$ notation except that it
+hides factors that are polynomial in $d$.
+
+The remainder of the paper is organized as follows.  In
+\secref{abstract} we introduce the \setcover\ problem.  In
+\secref{deterministic} we give a deterministic algorithm for
+\setcover.  In \secref{randomized} we present two more algorithms for
+\setcover.  In \secref{applications} we describe several covering
+problems that can be expressed in terms of \setcover.  Finally, in
+\secref{conclusions} we summarize and conclude with open problems.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Abstract Covering Problems}\seclabel{abstract}
+
+In this section we present the abstract covering problem \setcover\
+that models many geometric and non-geometric covering problems.
+Throughout this section we illustrate all concepts using the \hppc\
+example.  Since these illustrations are deviations from the main text,
+we denote them with vertical bars.
+
+Let $U$ be a (possiblity infinite) universe and let $S\subseteq U$ be
+a \emph{ground set} of size $n<\infty$.  The universe $U$ is covered
+by a set $R$ of subsets of $U$.  The goal of any covering problem is,
+given $S$, $R$ and an integer $k$, to find $r_1,\ldots,r_k\in R$ such
+that $S\subseteq \bigcup_{i=1}^k r_i$ or report that no such
+$r_1,\ldots,r_k$ exist.  In our (geometric) setting, $R$ is
+partitioned into $d$ sets $R_0,\ldots,R_{d-1}$ with the property
+defined below. For convenience, we also define $R_{-1}=\emptyset$ and
+$R_{d}=\{ U\}$.
+
+\begin{example}
+In our \hppc\ example, $U$ is $\mathbb{R}^d$ and $S$ is a set of $n$
+points in $\mathbb{R}^d$.  We say that an \emph{$i$-flat} is the
+affine hull of $i+1$ affinely independent points \cite{ps85}.  The set
+$R_i$, $0\le i\le d$, is the set of all $i$-flats in $\mathbb{R}^d$. 
+\end{example}
+
+
+Given a set $A\subseteq U$ we define the \emph{dimension} of $A$ as
+\[
+\dim(A) = \min\{i:\exists r\in R_i\mbox{ such that } A\subseteq r\}
+\]
+and we define the \emph{cover} of $A$ as 
+\[
+\cover(A) = \{r\in R_{\dim(A)}\mbox{ such that } A\subseteq r\} \enspace .
+\]
+Since $R_{d}=\{U\}$, it is clear that $\dim(A)$ and $\cover(A)$ are
+well defined and $\cover(A)$ is non-empty for any $A\subseteq U$.  We
+require that the sets $R_0,\ldots,R_{d-1}$ also satisfy the following
+property.
+
+\begin{prop}[Intersection Reduces Dimension]\proplabel{intersection}
+For any $r_1\in R_i$ and $r_2\in R_j$, $0\le i,j\le d$, such that
+$r_1\not\subseteq r_2$ and $r_2\not\subseteq r_1$, $\dim(r_1\cap r_2)<
+\min\{i,j\}$.
+\end{prop}
+
+\begin{example}
+In our \hppc\ example, the dimension $\dim(A)$ of a set $A$ is the
+dimension of the affine hull of $A$.  The set $\cover(A)$ is a
+singleton containing the unique $\dim(A)$-flat that contains $A$.
+\propref{intersection} says that the intersection of an $i$-flat and a
+$j$-flat, neither of which contains the other, is an $l$-flat for some
+$l<\min\{i,j\}$. (We consider the empty set to be a $(-1)$-flat.)
+\end{example}
+
+A \emph{$k$-cover} of $S$ is a set $\{r_1,\ldots,r_k\}\subseteq R$
+such that $S\subseteq \bigcup_{i=1}^k r_i$.  
+
+\begin{defn}[\setcover]
+Given $S$, $R$ and $R_0,\ldots,R_d$ having \propref{intersection}, 
+the \setcover\ problem is that of
+determining whether $S$ has a $k$-cover.  
+\end{defn}
+
+\propref{intersection} has some important implications.  The following
+lemma says that $\cover(A)$ really only contains one interesting set.
+
+\begin{lem}\lemlabel{set-a}
+For any $A\subset U$ and any finite $S\subseteq U$ there is a
+$\set(A)\in\cover(A)$ such that $r\cap S\subseteq \set(A)\cap S$ for
+all $r\in\cover(A)$.
+\end{lem}
+
+\begin{proof}
+Suppose, by way of contradiction, that there is no such set in
+$\cover(A)$.  Then, there must exist two sets $r_1,r_2\in\cover(A)$
+such that $r_1\cap S\not\subseteq r_2\cap S$ and $r_2\cap
+S\not\subseteq r_1\cap S$.  Then, it must be that $r_1\not\subseteq
+r_2$ and $r_2\not\subseteq r_1$ so, by \propref{intersection},
+$\dim(r_1 \cap r_2) < \dim(A)$.  But this is a contradiction since
+$A\subseteq r_1\cap r_2$.
+\end{proof}
+
+\begin{example}
+In our \hppc\ example, we could also have defined $R_i$ as the set of
+all point sets in $\mathbb{R}^d$ whose affine hull has dimension $i$.
+Then \lemref{set-a} says that for any $A\subseteq\mathbb{R}^d$ whose
+affine hull has dimension $i$, there exists one $i$-flat $F$
+containing every point set whose affine hull has dimension $i$ and
+that contains $A$.
+\end{example}
+
+The following lemma says that we can increase the dimension of $A$ by
+adding a single element to $A$.
+
+\begin{lem}\lemlabel{increase-dimension}
+For any $A\subseteq U$ and $p\in U\setminus\set(A)$,
+$\dim(A\cup\{p\}) > \dim(A)$.
+\end{lem}
+
+\begin{proof}
+By definition, $\dim(A\cup\{p\})\ge\dim(A)$.  Suppose therefore, by
+way of contradiction, that $\dim(A\cup\{p\})=\dim(A)$.  Then there is
+a set $r'\in R_{\dim(A)}$ that contains $A\cup\{p\}$.  But then
+$r'\in\cover(A)$ and by \lemref{set-a}, $r'\subseteq\set(A)$,
+contradicting $p\in U\setminus\set(A)$.
+\end{proof}
+
+\begin{example}
+In our \hppc\ example, \lemref{increase-dimension} implies that if we
+have a set $A$ whose affine hull is an $i$-flat and take a point $p$
+not contained in the affine hull of $A$ then $A\cup\{p\}$ is not
+contained in any $i$-flat, i.e. the dimension of $A\cup\{p\}$ is
+greater than the dimension of $A$.
+\end{example}
+
+The next lemma says that for any $A\subseteq S$, $\set(A)$ has a
+\emph{basis} consisting of at most $\dim(A)+1$ elements.
+
+\begin{lem}\lemlabel{basis}
+For any $r\in R$ such that $r=\set(A)$ for some $A\subseteq U$, there
+exists a \emph{basis} $A'\subseteq A$ such that $r=\set(A')$ and
+$|A'|\le\dim(A)+1$.
+\end{lem}
+
+\begin{proof}
+Any such set $r$ can be generated as follows: Initially, set
+$A'\gets\emptyset$, so that $\dim(A')=-1$.  While,
+$\set(A')\neq\set(A)$, repeatedly add an element of
+$A\setminus\set(A')$ to $A'$.  By \lemref{increase-dimension}, each
+such addition increases the dimension of $A'$ by at least 1, up to a
+maximum of $\dim(A)$.  Therefore, $A'$ contains at most $\dim(A)+1$
+elements and $\set(A')=r$, as required.
+\end{proof}
+
+\begin{example}
+In our \hppc\ example, \lemref{basis} is equivalent to saying that any
+$i$-flat is the affine hull of some set of $i+1$ points.
+\end{example}
+
+Throughout this paper we assume, usually implicitly, that $2\le k< n$,
+otherwise the problem is not very interesting.
+
+The sets $U$, $R$, and $R_0,\ldots,R_{d-1}$ may be infinite, so they
+are usually represented implicitly.  We assume that any algorithm for
+\setcover\ accesses these sets using two operations.  (1)~Given a set
+$r\in R_i$ and an element $p\in S$, the algorithm can query if $p$ is
+contained in $r$.  Such a query takes $O'(1)$ time.  (2)~Given a set
+$A\subseteq U$, the algorithm can determine $\set(A)$ and $\dim(A)$ in
+$O'(|A|)$ time.  It follows that the only sets accessible to an
+algorithm are those sets $r\in R$ such that $r=\set(S')$ for some
+$S'\subseteq S$.  We call such sets \emph{accessible sets}.
+Throughout the remainder of this paper we consider only $k$-covers
+that consist of accessible sets.
+
+\begin{example}
+In our \hppc\ example, we can determine in $O(d)=O'(1)$ time if a point is
+contained in an $i$-flat.  Given $A\subseteq\mathbb{R}^d$, we can
+compute the affine hull of $A$ in $O'(|A|)$ time by reducing a
+$|A|\times d$ matrix to row-echelon form.
+\end{example}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{A Deterministic Algorithm}\seclabel{deterministic}
+
+Next we give a deterministic fixed-parameter tractable algorithm for
+\setcover.  The algorithm is based on the \emph{bounded search tree}
+method \cite{df99}.  The algorithm works by trying to partition $S$
+into sets $S_1,\ldots,S_k$ such that $\dim(S_i)<d$ for all $1\le i\le
+k$.
+
+Initially, the algorithm sets $S'\gets S$ and $S_1\gets
+S_2\gets\cdots\gets S_k\gets\emptyset$.  The algorithm always
+maintains the invariants that (1)~$S',S_1,\ldots,S_k$ form a partition
+of $S$ and (2)~$\dim(S_i)<d$ for all $1\le i\le k$.  At the beginning
+of every recursive invocation the algorithm checks if $S'$ is empty
+and, if so, outputs \emph{yes}, since $\set(S_1),\ldots,\set(S_k)$ is
+a $k$-cover of $S$.  Otherwise, the algorithm chooses an element $p\in
+S'$. For each $1\le i\le k$, if $\dim(S_i\cup\{p\})<d$ the algorithm
+calls itself recursively on $S'\setminus\set(S_i\cup\{p\})$, and
+$S_1,\ldots,S\cap\set(S_i\cup\{p\}),\ldots,S_k$.  If none of the
+recursive calls gives a positive result the algorithm returns
+\emph{no}.  This is described by the following pseudocode.
+
+\noindent
+\begin{minipage}{\textwidth}
+$\textsc{BST-\setcover}(S',S_1,\ldots,S_k)$
+\begin{algorithmic}[1]
+\IF{$S'=\emptyset$}
+  \STATE{\textbf{output} \emph{yes} and quit}
+\ELSE
+  \STATE{choose $p\in S$}
+  \FOR{$i=1,\ldots k$}
+    \IF{$\dim(S_i\cup \{p\}) < d$}
+      \STATE{$\textsc{BST-\setcover}(S'\setminus\set(S_i\cup \{p\}),S_1,\ldots,S\cap\set(S_i\cup\{p\}),\ldots,S_k)$}
+    \ENDIF
+  \ENDFOR
+\ENDIF
+\STATE{\textbf{output} \emph{no}}
+\end{algorithmic}
+\end{minipage}
+
+\begin{thm}
+Algorithm \textsc{BST-\setcover} correctly solves the \setcover\
+problem in $O'(k^{dk}n)$ time.
+\end{thm}
+
+\begin{proof}
+We begin by proving the correctness of the algorithm.  To do this we
+consider a \emph{restriction} of the problem.  A \rsetcover\ instance
+is a $(k+1)$-tuple $(S,S_1,\ldots,S_k)$ where $S_i\subseteq S$ and
+$\dim(S_i)<d$ for each $1\le i\le k$.  A solution to the instance
+consists of a $k$-cover $\{r_1,\ldots,r_k\}$ of $S$ such that
+$S_i\subseteq r_i$ for all $1\le i\le k$.  The \emph{degree of
+freedom}, of a \rsetcover\ instance is defined as
+$\DF(S_1,\ldots,S_k)=(d-1)k-\sum_{i=1}^k\dim(S_i)$.  Note that
+\rsetcover\ is equivalent to \setcover\ when
+$S_1=\cdots=S_k=\emptyset$, in which case $\DF(S_1,\ldots,S_k)=dk$.
+
+We claim that a call to $\textsc{BST-\setcover}(S,S_1,\ldots,S_k)$
+correctly solves the \rsetcover\ instance $(S,S_1,\ldots,S_k)$.  To
+prove this, we use induction on $\DF(S_1,\ldots,S_k)$.  If
+$\DF(S_1,\ldots,S_k)=0$ then $\dim(S_i)=d-1$ for all $1\le i\le n$,
+and, by \lemref{increase-dimension} the \rsetcover\ instance has a
+solution if and only if $S'$ is empty.  Since line~1 of the algorithm
+checks this condition, the algorithm is correct in this case.
+
+Next suppose that $\DF(S_1,\ldots,S_k)=m>0$.  If $S'$ is empty then
+$S_1,\ldots,S_k$ form a partition of $S$ and line~1 ensures that the
+algorithm correctly answers \emph{yes}.  Otherwise, by construction,
+any $p\in S'$ is not contained in any $\set(S_i)$.  If the answer to
+the \rsetcover\ instance is yes then, in a restricted $k$-cover
+$\{r_1,\ldots,r_k\}$, $p$ is contained in some set $r_i$.  Therefore, the
+\rsetcover\ instance
+$(S,S_1,\ldots,S_i\cup\{p\},\ldots,S_k)$ also has a solution.  On the
+other hand, if the correct answer is no, then none of the restrictions
+$(S,S_1,\ldots,S_i\cup\{p\},\ldots,S_k)$ for any $1\le i\le k$ have a
+solution.  By \lemref{increase-dimension},
+$\DF(S_1,\ldots,S_i\cup\{p\},\ldots,S_k)<m$ for all $1\le i\le k$ so,
+by induction, a call to
+\textsc{BST-\setcover}$(S_1,\ldots,S_i\cup\{p\},\ldots,S_k)$ correctly
+solves the \rsetcover\ instance
+$(S_1,\ldots,S_i\cup\{p\},\ldots,S_k)$.  Since the algorithm checks
+all these $k$ \rsetcover\ instances, it must answer correctly.
+
+Finally, we prove the running time of the algorithm. Each invocation
+of the procedure results in at most $k$ recursive invocations and, by
+\lemref{increase-dimension}, each recursive call decreases the degree
+of freedom by at least one.  Therefore, the recursion tree has at most
+$k^{dk}$ leaves and $\sum_{i=0}^{dk-1}k^i=O(k^{dk-1})$ internal nodes.
+The work done at each leaf is $O'(k)$ and the work done at each
+internal node is $O'(kn)$.  Therefore the overall running time is
+$O'(k^{dk}n)$, as required.
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Kernelization}\seclabel{randomized}
+
+In this section we give two more algorithms for \setcover\ that have a
+reduced dependence on $k$.  The first algorithm is deterministic and
+runs in $O'(k^{d(k+1)}+n^{d+1})$ time.  The second is a Monte-Carlo
+algorithm that runs in $O'(\runtime)$ time and outputs a correct
+answer with high probability.  Both algorithms work by reducing the
+given \setcover\ instance to an equivalent \emph{kernel} instance that
+has size $O(k^d)$ and then solving the new instance using the
+\textsc{BST-\setcover} algorithm. We begin with a structural lemma.
+
+\begin{lem}\lemlabel{highly-covered}
+Suppose $|r\cap S|\le m$ for all $r\in \bigcup_{j=0}^{i-1} R_j$ and
+there exists an accessible set $r'\in R_i$ such that $|r'\cap S|>km$.
+Then any $k$-cover of $S$ contains a set $r''$ such that $r'\subseteq
+r''$.\footnote{The reader is reminded that we are only considering
+$k$-covers consisting of accessible sets.}
+\end{lem}
+
+\begin{proof}
+By \propref{intersection}, any \emph{accessible} set $r\in R$ that
+does not contain $r'$ has $\dim(r\cap r') < i$ and therefore $|(r\cap
+r')\cap S|\le m$, i.e., $r$ contains at most $m$ elements of $r'\cap
+S$.  Therefore, $k$ such sets contain at most $km<|r'\cap S|$ elements
+of $r'\cap S$.  However, in a $k$-cover, all elements of $r'\cap S$
+must be covered.  We conclude that any $k$-cover must contain a set
+$r''$ such that $r'\subseteq r''$.
+\end{proof}
+
+\lemref{highly-covered} is the basis of our \emph{kernelization}
+procedure.  The procedure works by finding sets in $R$ that contain
+many elements of $S$ and grouping those elements of $S$ together.
+Given a subset $S'\subseteq S$, a grouping of the \setcover\ instance
+$S$ by $S'$ creates a new \setcover\ instance as follows: (1)~The
+elements of $S'$ are removed from $S$ and a new element $s'$ is added
+to $S$.  (2)~For every set $r\in R$ such that $S'\subseteq r$, the
+element $s'$ is added to $r$.  
+
+It is clear that $\dim(A)$ for any $A\subseteq S$ and
+\propref{intersection} are preserved under the grouping operation, so
+that \propref{intersection} holds for the new \setcover\ instance.
+Furthermore, \lemref{basis} implies that the new element $s'$ can be
+represented as a list of at most $d$ elements of $S$.  Thus,
+operations on grouped instances of \setcover\ can be done with a
+runtime that is within a factor of $d$ of non-grouped instances, i.e.,
+the overhead of working with grouped instances is $O'(1)$.
+
+The following lemma shows that, if the group is chosen carefully, the
+new instance is equivalent to the old one.
+
+\begin{lem}\lemlabel{grouping}
+Suppose $|r\cap S|\le m$ for all $r\in \bigcup_{j=0}^{i-1} R_j$ and
+there exists an accessible set $r'\in R_i$ with size $|r'\cap S|> km$.
+Then the grouping of $S$ by $S'=r'\cap S$ has a $k$-cover if and only
+if $S$ has a $k$-cover.
+\end{lem}
+
+\begin{proof} 
+If $S$ has a $k$-cover $\{r_1,\ldots,r_k\}$ then, by
+\lemref{highly-covered}, there exists an $r_j$ such that $r'\subseteq
+r_j$.  Consider the sets $r_1',\ldots,r_k'$ in the grouped instance
+that correspond to the sets $r_1,\ldots,r_k$, respectively.  For each
+$1\le i\le k$, $r_i\subseteq r_i'$. Therefore, $S\setminus S'\subseteq
+S\subseteq \bigcup_{i=1}^kr_i'$.  Furthermore, $r_j'$ contains $s'$.
+Therefore $\{r_1',\ldots,r_k'\}$ is a $k$-cover for the grouped instance.
+
+On the other hand, if the grouping of $S$ by $S'$ has a $k$-cover
+$\{r_1',\ldots,r_k'\}$, then the corresponding sets $r_1,\ldots,r_k$
+in the original instance also form a $k$-cover for $S$.  This is due
+to the facts that, for each $1\le i\le k$, $r_i=r_i'\setminus\{s'\}$,
+$s'\notin S$ and $s'\in r_i'$ implies $S'\subseteq r_i$.  \end{proof}
+
+The following procedure is used to reduce an instance of \setcover\
+involving a set $S$ of size $n$ into a new instance with size at most
+$k^{d}$.
+
+\noindent
+\begin{minipage}{\textwidth}
+\textsc{Kernelize}$(S)$
+\begin{algorithmic}[1]
+\FOR{$i=0,\ldots,d-1$}
+  \WHILE{$R_i$ contains an accessible set $r$ such that $|r\cap S|>k^i$}
+    \STATE{group $S$ by $r\cap S$}
+  \ENDWHILE
+\ENDFOR
+\end{algorithmic}
+\end{minipage}
+
+\begin{lem}
+A call to \textsc{Kernelize}$(S)$ produces a new instance of
+\setcover\ that has a $k$-cover if and only if the original instance
+has a $k$-cover.
+\end{lem}
+
+\begin{proof}
+By the time the procedure considers set $R_i$ in lines~2--4, every $r$
+in $\bigcup_{j=0}^{i-1} R_j$ has size $|r\cap S|\le k^{i-1}$.  Therefore, by
+\lemref{grouping}, any grouping operation performed in line~3 results
+in a \setcover\ instance that has a $k$-cover if and only if the
+original \setcover\ instance has a $k$-cover.
+\end{proof}
+
+After a call to \textsc{Kernelize}$(S)$ we get a new instance of
+\setcover\ for which $|r\cap S|\le k^{d-1}$ for all $r\in R$.  One
+consequence of this is that, if the new instance has more than $k^d$
+elements that need to be covered, then we can be immediately certain
+that it does not have a $k$-cover.  Therefore, the instance that we
+have left to solve has size $n'\le k^d$ and can be solved in time
+$O'(k^{d(k+1)})$ using the \textsc{BST-\setcover} algorithm.
+
+\begin{lem}
+The \setcover\ problem can solved in $O'(k^{d(k+1)}+K(n,k,d))$ time
+where $K(n,k,d)$ is the running time of the \textsc{Kernelize}
+procedure.
+\end{lem}
+
+All that remains is to find an efficient implementation of the
+\textsc{Kernelize} procedure.  \lemref{basis} implies that any
+accessible set in $R_i$ can be generated as $\set(S')$ where
+$S'\subseteq S$ has size at most $i+1$.  It follows that all the
+accessible sets in $R_i$ can be generated in $O(n^{i+1})$ time, and
+each one can be checked in $O(n)$ time.  This gives us the following
+brute force result.
+
+\begin{thm}\thmlabel{brute-force}
+The \setcover\ problem can be solved in $O'(k^{d(k+1)}+n^{d+1})$ time by
+a deterministic algorithm.
+\end{thm}
+
+Although \thmref{brute-force} implies a faster algorithm for some
+values of $k$, $d$ and $n$, it is not entirely satisfactory.  In fact,
+if we parameterize by $k$ adn $d$ then it does not even satisfy the
+definition of fixed-parameter tractability since $d$ appears in the
+exponent of $n$.  To obtain a faster algorithm we make use of
+randomization.
+
+Define a \emph{heavy covering set} as an accessible set $r\in R_i$
+such that $|r\cap S|> n/2k^{d-i}$.  Consider the following alternative
+implementation of \textsc{Kernelize}.
+
+\noindent
+\begin{minipage}{\textwidth}
+\textsc{Halving-Kernelize}$(S)$
+\begin{algorithmic}[1]
+\WHILE{$|S|>2k^d$}
+  \STATE{$n\gets |S|$}
+  \FOR{$i=0,\ldots,d-1$}
+    \WHILE{$R_i$ contains a heavy covering set $r$}
+      \STATE{group $S$ by $r\cap S$}
+    \ENDWHILE
+  \ENDFOR
+  \IF{$|S|>n/2$}
+    \STATE{\textbf{output} \emph{no}} 
+  \ENDIF
+\ENDWHILE
+\end{algorithmic}
+\end{minipage}
+
+It is easy to verify, using \lemref{grouping}, that each grouping
+operation results in an instance of \setcover\ that has a $k$-cover if
+and only if the original instance has a $k$-cover.  Now, after each
+iteration of the outer while loop, $|r\cap S|\le n/2k$ for all $r\in
+S$.  Therefore, if $|S|$ is greater than $n/2$ we can be sure that $S$
+has no $k$-cover, so the algorithm only outputs \emph{no} in line~9
+when $S$ has no $k$-cover.  If this is not the case, then $|S|$
+decreases by a factor of at least 2 during each iteration.
+
+It seems that \textsc{Halving-Kernelize} is no easier to implement
+than the original \textsc{Kernelize} procedure.  However, the
+difference between the two is that \textsc{Halving-Kernelize} attempts
+to find heavy covering sets, which contain relatively large fractions
+of $S$.  
+\enets{To find these heavy covering sets, we make use of
+$\epsilon$-nets.
+
+Given a ground set $S$ of size $n$ and a family $R$ of ranges, an
+$\epsilon$-net for $(S,R)$ is a subset $N\subset S$ such that $|r\cap
+S|\ge\epsilon n$ implies $|r\cap N|>0$, for every $r\in R$.  The study
+of $\epsilon$-nets has a long history, and efficient algorithms for
+the construction of small $\epsilon$-nets exist provided that the
+VC-dimension (defined next) of $(S,R)$ is small.
+
+Define the \emph{restriction of $R$ to $A$}, denoted by $R|_A$ as
+$R|_A=\{r\cap A:r\in R\}$.  We say that the set $A\subseteq S$ is
+\emph{shattered} by $R$ if $R|_A=2^A$, i.e., $R|_A$ contains every
+subset of $A$.  The \emph{VC-dimension} of $(S,R)$ is the size of the
+largest subset of $A\subseteq S$ such that $A$ is shattered by $R$.
+
+\begin{lem}
+The VC-dimension of $(S,\{set(r): r\in \bigcup_{j=0}^i R_j\})$ is at
+most $i+1$.
+\end{lem}
+
+\begin{proof}
+Suppose $A$ is shattered by $\{set(r): r\in \bigcup_{j=0}^i R_j\}$.
+We claim that $|A\cap r|\le j+1$ for all $r\in \{\set(r):r\in R_j\}$,
+and $0\le j\le i$.
+\end{proof}
+
+If we choose $\epsilon=1/2k^{d-i}$, then an $\epsilon$-net for $(S,R)$
+is guaranteed to contain at least one element from every heavy
+covering set in $r\in R_i$.  Unfortunately, this is not quite enough
+for our purposes.  Rather, we require that the net contain a basis for
+$r$.  An $\epsilon$-basis-net $N$ for $(S,R)$ is a subset $N\subseteq
+S$ such that $|r\cap S|\ge\epsilon n$ implies that $N$ contains a
+basis for $r$.  That is, there is an $A\subseteq N$ such that
+$\set(A)=r$.
+
+\begin{lem}
+If $k>d$ and $|S\cap r|\le n/2k^{d-j}$ for all $r\in R_j$ and $0\le
+j\le i-1$ then there exists an $1/2k^{d-i+1}$-basis-net $N$ for
+$(S,\{\set(r):r\in \bigcup_{j=0}^{i-1}R_j\})$ that has size
+\[ |N| = O'(\inetsize) \]
+and that can be found in time 
+\[
+   T(n,i) = O'(\inettime) \enspace .
+\]
+\end{lem}
+
+\begin{proof}
+The algorithm is as follows.  Initially, we set $S_0\gets S$.  We
+repeat the following procedure for $1\le\ell\le i$: Set $S_\ell\gets
+S_{\ell-1}$ and compute a $1/4k^{d-i+1}$-net $N_\ell$ for
+$(S_{\ell},\{\set(r):r\in \bigcup_{j=0}^{i-1}R_j\})$ using the
+algorithm of \mbox{Chazelle} and \mbox{Matousek} \cite{cmXX}. For each
+$j$-tuple $A\subseteq N$ we compute $\set(A)\cap S$ and set
+$S_\ell\gets S_\ell\setminus\set(A)$, i.e., we remove from $S_\ell$
+the elements covered by $\set(A)$.
+
+We claim that $N=\bigcup_{\ell=1}^i N_\ell$ is a
+$1/2k^{d-i+1}$-basis-net for $(S,\{\set(r):r\in
+\bigcup_{j=0}^{i-1}R_j\})$.  By the conditions of the lemma, $|r\cap
+S|< n/2k^{d-i+1}$ for all $r\in R_j$ and $0\le j<i-1$, so we need only
+verify the $\epsilon$-basis-net condition for sets $r\in R_{i-1}$.  In
+this setup, we are claiming that $N$ contains a basis for every heavy
+covering set $r\in R_{i-1}$.  
+
+Let $A\subseteq N$ consist of $i$ elements drawn from each of the
+$N_1,\ldots,N_i$.  Then, by \lemref{increase-dimension},
+$\dim(A)=i-1$, i.e., $A$ is a basis for some $r\in R_{i-1}$.  We claim
+that if $N^{(j)}=\bigcup_{\ell=1}^{j-1} N_j$ does not contain a basis
+for $r$ then $N_j$ contains an element of $r\cap S$.  Therefore,
+either some $N^{(j)}$, for $j<i$ contains a basis for $r$ or $N$
+contains a basis for $r$ (by taking one element of $r\cap S$ from each
+of $N_1,\ldots,N_i$).
+
+\newcommand{\sbarr}{S_{\overline{r}}}
+
+To prove our claim we show that, if $N^{(j)}$ does not contain a basis
+for $r$, then $r\cap S_{j-1}$ contains at least
+$n/2k^{d-i+1}-n/2k^{d-i+2}>n/4k^{d-i+1}$ and $N_j$ contains an
+element of $r\cap S$ (since $N_j$ is a $1/4k^{d-i+1}$-net).  To see
+this, consider the set $\sbarr=r\cap (S\setminus S_{j-1})$, i.e., the
+elements of $r$ that have been removed from $S$.  If
+$|\sbarr|>n/2k^{d-i+1}$ then, by the conditions of the lemma,
+$\dim(\sbarr)\ge i$.  But then, 
+
+\end{proof}
+}
+\notenets{
+This helps, because if we choose $i+1$ elements of $S$ at
+random, there is a good chance that they will all belong a heavy
+covering set in $R_i$, if a heavy covering set exists.
+
+Suppose that $|r\cap S|\le n/(2k^{d-j})$ for all $r\in R_j$, $j<i$.
+Let $r\in R_i$ be a heavy covering set and consider the following
+experiment.  Initially we set our \emph{sample} $S'$ equal to the
+empty set.  We then repeatedly choose an element $p$ from $S$ at
+random and add it to our sample $S'$.  If $p$ is contained in $(r\cap
+S)\setminus \set(S')$ we are successful and we continue, otherwise we
+are unsuccessful and we stop.  The experiment ends when we are either
+unsuccessful or $\set(S')=r$.  In the former case, we call the
+experiment a \emph{failure}.  In the latter case we call it a
+\emph{success}.
+
+If $\dim(S')=-1$, i.e., $S'=\emptyset$, then the probability that we
+are successful is at least
+\[
+\frac{|r\cap S|}{n} \ge \frac{1}{2k^{d-i}}
+\]
+Otherwise, if $0\le \dim(S')=j<i$, then the probability that we are
+successful is at least
+\[
+\frac{|r\cap S|-|\set(S')\cap S|}{n} \ge \frac{1}{2k^{d-i}}-\frac{1}{2k^{d-j}}
+	= \frac{k^{i}-k^{j}}{2k^d}\enspace ,
+\]
+and each successful step increases $\dim(S')$ by at least 1.
+Therefore, the probability that the entire experiment is a success is
+at least
+\begin{eqnarray}
+  p_i & \ge & \frac{1}{2k^{d-i}}\times\prod_{j=0}^{i-1}\left(\frac{k^{i}-k^{j}}{2k^{d}}\right) \\
+	& = & \frac{1}{2^{i+1}k^{d+di-i}}\times\prod_{j=0}^{i-1}\left(k^{i}-k^{j}\right) \\
+	& = & \frac{k^{i^2}}{2^{i+1}k^{d+di-i}}\times\prod_{j=0}^{i-1}\left(1-k^{j-i}\right) \\
+	& = & \frac{1}{2^{i+1}k^{d+di-i-i^2}}\times\prod_{j=1}^{i}\left(1-k^{-j}\right) \\
+	& \ge & \frac{1}{2^{i+1}k^{d+di-i-i^2}}\times\prod_{j=1}^{\infty}\left(1-k^{-j}\right) \\
+	& \ge & \frac{1}{2^{i+3}k^{d+di-i-i^2}} \eqlabel{euler} \\
+	& \ge & \frac{1}{2^{d+2}k^{\exponent}}
+		\enspace .
+\end{eqnarray}
+Inequality \eqref{euler} follows from Euler's pentagonal number
+theorem \cite[Chapter~16]{e48} (c.f., Andrews \cite{a76}).  If we
+repeat the above experiment $x$ times, then the probability that all
+of the experiments are failures is at most
+\[
+   (1-p_i)^x
+\]
+Setting $x=2^{d+2}k^{\exponent}$, this probability is less
+than $1/2$.  If we repeat this procedure $cx\log n$ times, the
+probability that all experiments are failures is no more than
+$n^{-c}$.  Thus, we have an algorithm that runs in $O'(cxn\log n)$
+time and finds $r$ with probability at least $1-n^{-c}$.
+
+\lemref{basis} implies that the total number of accessible sets in
+$R_i$, and hence the total number of heavy covering sets in $R_i$ is
+at most ${n\choose i+1}\le n^{i+1}$.  Thus, if we choose $c={i+1+c'}$
+then the probability that there exists a heavy covering set in $R_i$
+that is not found by repeating the above sampling experiment $cx\log
+n$ times is at most $n^{-c'}$.  Therefore, one execution of line~4--6
+of the \textsc{Halving-Kernelize} algorithm can be implemented to run
+in $O'(c'x|S|\log n)$ time and fails with probability at most
+$n^{-c'}$.  Since $|S|$ is halved during each iteration of the outer
+loop, the entire algorithm runs in time $O'(c'xn\log n)$ and the
+algorithm is correct with probability at least $1-n^{-c'}d\log n$.
+Choosing $c'$ large enough yields our main result on randomized
+algorithms.
+
+\begin{thm}
+There exists a Monte-Carlo algorithm for the \setcover\ problem that
+runs in $O'(\runtime)$ time and answers
+correctly with probability at least $1-n^{-c}$.
+\end{thm}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Applications}\seclabel{applications}
+
+In this section we present a number of covering problems, both
+geometric and non-geometric, that can be modeled as instances of
+\setcover\ and hence solved by the algorithms of the previous two
+sections.  For the geometric applications, the value of $d$ is closely
+related to the dimension of the geometric space.
+
+\subsection{Covering points with hyperplanes and vice-versa.}
+
+Given a set $S$ of $n$ points in $\mathbb{R}^d$, does there exist a
+set of $k$ hyperplanes such that each point of $S$ is contained in at
+least one hyperplane?
+
+This problem has received considerable attention in the literature and
+appears to be quite difficult.  It is known to be NP-hard even when
+$d=2$ \cite{mt82}.  The optimization problem of finding the smallest
+value of $k$ for which the answer is yes has recently been shown to be
+APX-hard \cite{bhn01,kar00}, so unless $\mathrm{P}=\mathrm{NP}$
+there does not exist a $(1+\epsilon)$-approximation algorithm.
+Algorithms for restricted versions and variants of this problem have
+been considered by \mbox{Agarwal} and \mbox{Procopiuc} \cite{ap98} and
+\mbox{Hassin} and \mbox{Megiddo} \cite{hm91}.
+
+We have seen, in our running example, that this problem can be
+modelled as follows: $U=\mathbb{R}^d$ and, for each $0\le i\le d-1$,
+$R_i$ is the set of $i$-flats embedded in $\mathbb{R}^d$.  To see that
+this fits into our model, observe that the intersection of an $i$-flat
+and a $j$-flat, neither of which contains the other is an $l$-flat,
+for some $l<\min\{i,j\}$ so this system satisfies
+\propref{intersection}.  Thus, this is a \setcover\ instance in which
+the parameter $d$ is equal to the dimension of the underlying
+Euclidean space.
+
+In a dual setting, we are given a set $S$ of $n$ hyperplanes in
+$\mathbb{R}^d$ and asked if there exists a set of $k$ points such that
+each hyperplane in $S$ contains at least one of the points.  By a
+standard point-hyperplane duality, this problem is equivalent to the
+previous problem and can be solved as efficiently.
+
+At this point we remark that in the plane, i.e., covering points with
+lines, it is possible to achieve a deterministic algorithm that
+performs slightly better than our randomized algorithm.\footnote{This
+result can be generalized to $\mathbb{R}^d$ when the point set $S$ is
+\emph{restricted}, i.e., no $i+1$ elements of $S$ lie on a common
+$i$-flat, for any $0\le i<d-1$.  However, since any input that has a
+$k$-cover necessarily has many points on a common $(d-1)$-flat, this
+does not seem like a reasonable assumption.}  This is achieved by
+replacing our randomized procedure for finding heavy covering sets
+with an algorithm of Guibas \etal\ \cite{gor96} that can find all
+lines containing at least $m$ points of $S$ in time $O((n^2/m)\log
+(n/m))$.  Using this yields a deterministic algorithm with running time
+$O(k^{2k+2}+kn)$.
+
+\subsection{Covering points with spheres.}
+
+Given a set $S$ of $n$ points in $\mathbb{R}^d$, does there exist a
+set of $k$ hyperspheres such that each point in $S$ is on the surface
+of at least one of the hyperspheres? 
+
+For this problem we take $R_{d+1}=U=\mathbb{R}^d$.  The set $R_i$,
+$0\le i\le d$ consists of all $i$-spheres, so that $R_0$ consists of
+points, $R_1$ consists of pairs of points, $R_2$ consists of circles,
+and so on.  Again, the intersection of an $i$-sphere and a $j$-sphere,
+neither of which contains the other, is an $l$ sphere for some
+$l<\min\{i, j\}$, so this system satisfies \propref{intersection}.
+This yields an instance of \setcover\ whose dimension is 1 greater
+than that of the underlying Euclidean space.
+
+\subsection{Covering points with polynomials.}
+
+Given a set $S=\{(x_1,y_1),\ldots,(x_n,y_n)\}$ of $n$ points in
+$\mathbb{R}^2$ does there exist a set of $k$ polynomial functions
+$f_1,\ldots,f_k$, each with maximum degree $d$, such that for each
+$1\le i\le n$, $y_i=f_j(x_i)$ for some $1\le j\le k$?  In other words,
+is every point in $S$ contained in the graph of at least one of the
+functions?
+
+This problem is a generalization of the problem of covering points
+with lines.  As such, it is NP-hard and APX-hard, even when $d=1$.
+
+We say that two points in $\mathbb{R}^2$ are $x$-distinct if they have
+distinct $x$-coordinates.  For this problem, $R_0$ is the set of all
+points, $R_1$ is the set of all $x$-distinct pairs of points, $R_2$ is
+the set of all $x$-distinct triples of points, and so on, until
+$R_{d+1}$ which is the set of all degree $d$ polynomials.  Since there
+exists a degree $d$ polynomial that contains any set of $d+1$ or fewer
+$x$-distinct points, each set in $R$ corresponds to points that can be
+covered by a degree $d$ polynomial (possibly with some coefficients
+set to 0).
+
+The intersection of a finite set of $i$ points and a (possibly
+infinite) set of $j\ge i$ points, neither of which contains the other
+results in a set of $l<\min\{i,j\}$ points.  The intersection of two
+non-identical degree $d$ polynomials is a set of at most $d$ points.
+Therefore, the above system of sets satsifies \propref{intersection}
+and can be solved with our algorithms.
+
+\subsection{Covering by sets with intersection at most $d$.}
+
+Given a set $S$ of size $n$ and a set $C$ containing subsets of $S$
+such that no two elements of $C$ have more than $d$ elements in
+common, is there a set of $k$ elements in $C$ whose union contains all
+the elements of $S$?
+
+This problem is a special case of the classic \textsc{Set-Cover}
+problem, which was one of the first problems shown to be NP-hard
+\cite{k72}.  The version when $d=1$ is a generalization of covering
+points by lines and is therefore APX-hard.  In fact, finding an
+$o(\log n)$ approximation for the corresponding optimization problem
+is not possible unless
+$\mathrm{NP}\subseteq\mathrm{ZTIME}(n^{O(\log\log n)})$ \cite{kar00}.
+On the other hand, Johnson \cite{j74} shows that, even with no
+restrictions on $d$, an $O(\log n)$-approximation can be achieved with
+a simple greedy algorithm.
+
+To model this problem as a \setcover\ instance, we let $R_i$, $0\le i<
+d$ be all subsets of $S$ of size $i+1$ that are contained in 1 element
+of $C$ and we let $R_{d}=C$.  It is easy to verify that these sets
+satisfy \propref{intersection} and hence we have an instance of
+\setcover\ that can be solved with our algorithms.  If the sets are
+given explicitly, the Kernelize procedure runs in $O(n')$ time where
+$n'=\sum_{r\in C}|r|$ is the input size.  Thus, for this case we
+obtain an algorithm that runs in time $O(n'+k^{d(k+1)})$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusions}\seclabel{conclusions}
+
+We have presented an abstract covering problem on sets that includes
+many NP-hard geometric and non-geometric covering problems.  We have
+obtained fixed-parameter tractable algorithms for this problem that
+yield fixed-parameter tractable algorithms for the concrete problems.
+
+Our third algorithm is a Monte-Carlo algorithm that relies on
+randomization to find heavy covering sets.  It seems feasible that the
+algorithm could be derandomized with the use of $\epsilon$-nets
+\cite{cm96,hw87,m95}.  Indeed, setting $\epsilon=1/2k^{d-i}$
+guarantees that an $\epsilon$-net contains at least one element from
+each heavy covering set in $R_i$.  However, we require a net that
+contains a basis for every heavy covering set in $R_i$.  Perhaps such
+a net could be obtained by repeated applications of $\epsilon$-nets.
+
+One type of problem that can not be modelled by our abstraction is the
+class of \emph{$k$-piercing} problems, where we are given a set of
+objects, say rectangles in the plane, and asked to find a set of $k$
+points such that each rectangle contains at least one point.  The main
+difficulty here seems to be that the intersection of two rectangles is
+another rectangle, so the resulting system does not satisfy
+\propref{intersection}.  Nevertheless, $O(n\log n)$ time algorithms
+exist for $k=1,\ldots,5$ \cite{mt97,n97,s99,sw96}, so it is plausible that
+fixed-parameter tractable algorithms for piercing problems exist.
+
+
+
+\bibliography{covering}
+\bibliographystyle{plain}
+
+\end{document}

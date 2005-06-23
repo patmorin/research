@@ -1,0 +1,692 @@
+\documentclass[lotsofwhite]{patmorin}
+\usepackage{charter}
+%\documentclass[lotsofwhite,ccfonts]{patmorin}
+\usepackage{bbold}
+\usepackage{graphicx}
+\usepackage{ipe}
+%\usepackage[colorlinks=true, pdfstartview=FitV, linkcolor=black,
+%            citecoloa=black, urlcolor=black]{hyperref}
+\usepackage{amsthm}
+
+\newcommand{\email}[1]{\texttt{#1}}
+\input{pat.tex}
+
+\title{\MakeUppercase{Computing the Maximum Detour and Spanning 
+	Ratio of 2 and 3-Dimensional Paths, Trees and Cycles}%
+	\thanks{This research was partly funded by CRM, FCAR, MITACS, 
+		and NSERC.}}
+
+\author{Pankaj K. Agarwal \\ \textit{Duke University} \and
+	Rolf Klein \\ \textit{FernUniversit\"at Hagen} \and
+	Christian Knauer \\ \textit{FernUniversit\"at Hagen} \and
+	Stefan Langerman \\ \textit{McGill University} \and
+	Pat Morin \\ \textit{Carleton University} \and
+	Micha Sharir \\ \textit{Tel Aviv University} \and
+	Michael Soss \\ \textit{Chemical Computing Group}}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The maximum detour and spanning ratio of an embedded graph $G$ are
+values that measure how well $G$ approximates Euclidean space and the
+complete Euclidean graph, respectively.  In this paper we describe
+$O(n\log n)$ time algorithms for computing the maximum detour and
+spanning ratio of a planar polygonal path.  These algorithms solve
+open problems posed in at least two previous works \cite{ekll01,ns01}.
+We also generalize these algorithms to find a $O(n\log^2 n)$ time
+algorithms for computing the maximum detour or spanning ratio of
+planar trees and cycles.  For cycles, paths and trees embedded in 3
+dimensions, we give subquadratic time algorithms for computing the
+maximum detour and spanning ratio.
+\end{abstract}
+
+\section{Introduction}
+
+Let $G=(V,E)$ be an embedded connected graph with $n$ vertices and $m$
+edges.  Specifically, the vertex set $V$ consists of points in
+$\mathbb{R}^d$, and $E$ consists of closed line segments whose
+endpoints are in $V$. Let $s$ and $t$ be two points in $\cup
+E$.\footnote{Here and thoughout, $\cup S$ is shorthand for
+$\bigcup_{x\in S} x$.}  We denote by $\|st\|$ the Euclidean distance
+between $s$ and $t$ and by $\|st\|_G$ the length of the shortest path
+from $s$ to $t$ in $G$.  The detour between two points $s,t\in\cup E$
+is defined as
+\[
+	D(G,s,t) = \frac{\|st\|_G}{\|st\|} \enspace .
+\]
+The \emph{maximum detour} $D(G)$ of $G$ is the maximum detour
+over all pairs of points in $G$, i.e.,
+\[
+       D(G) = \max\{ D(G,s,t): {s,t\in\cup E, 
+	s\neq t} \} \enspace .
+\]
+The \emph{spanning ratio} or \emph{stretch factor} $S(G)$ of $G$ is
+the maximum detour over all pairs of vertices of $G$, i.e.,
+\[
+  	S(G) = \max\{ D(G,s,t) : {s,t\in V,\, s\neq t}\} \enspace .
+\]
+
+The maximum detour and spanning ratio play important roles in the
+analysis of online routing algorithms \cite{bm01,ik95} and the
+construction of spanners \cite{e99}.  In the former case, the goal is
+to find paths that minimize maximum detour.  In the latter, the goal
+is to construct graphs with few edges that minimize the spanning
+ratio.
+
+\subsection{Related Work}
+
+Recently, researchers have become interested in computing the maximum
+detour and spanning ratio of embedded graphs.  In any dimension $d$,
+the spanning ratio can be computed by computing the shortest paths in
+$G$ between all pairs of vertices and using this to compute the detour
+between each pair of vertices.  Similarly, the maximum detour can be
+computed by computing the detour between each pair of edges.  The
+approaches require at least $\Omega(n^2)$, respectively $\Omega(m^2)$
+computation time.  Surprisingly, these are the best known results for
+computing the exact maximum detour or spanning ratio.  Even if the
+input graph $G$ is a path in $\mathbb{R}^2$, no subquadratic time
+algorithms are known.
+
+Narasimhan and Smid \cite{ns01} study the problem of approximating the
+spanning ratio in a graph and give $O(n\log n)$ time algorithms that
+can $(1-\epsilon)$-approximate the spanning ratio when $G$ is a path,
+a cycle or a tree.  More generally, they show that, after $O(n\log n)$
+preprocessing, the problem of approximating the spanning ratio can be
+reduced to $O(n)$ approximate shortest path queries on $G$.  Their
+results hold even for graphs embedded in $\mathbb{R}^d$.  The authors
+also show that approximating the spanning ratio requires $\Omega(n\log
+n)$ time in the algebraic decision tree model of computation.
+
+Ebbers-Baumann \etal\ \cite{ekll01} study the problem of approximating
+the maximum detour of a polygonal path and give an
+$O(\frac{n}{\epsilon}\log n)$ time algorithm that finds a
+$(1-\epsilon)$-approximation to the maximum detour.  Their algorithm
+also generalizes to planar cycles, with the same running time.
+
+\subsection{New Results}
+
+In this paper we give randomized algorithms with $O(n\log n)$ expected
+running time that compute the exact spanning ratio or maximum detour
+of a polygonal path with $n$ vertices.  These are the first
+subquadratic time algorithms for finding the exact spanning ratio or
+maximum detour, and they solve open problems posed in at least two
+papers \cite{ekll01,ns01}.  We show that these algorithms can be
+extended to give $O(n\log^2 n)$ time algorithms for computing the
+maximum detour and spanning ratio of planar cycles and trees.
+
+We solve these problems by reducing the associated decision problem to
+computing the upper envelope of a set of identical cones in
+$\mathbb{R}^3$.  In the case of spanning ratio, the set of cones is
+finite, and the upper envelope that we compute is actually an
+additively-weighted Voronoi diagram of points in the plane.  In the
+case of maximum detour, the set of cones is infinite, and corresponds
+to computing the additively-weighted Voronoi diagram of line segments
+in the plane, a diagram that seems not to have been considered
+previously.  We then apply a general optimization technique of Chan
+\cite{c99} to convert the decision algorithms into optimization
+algorithms.
+
+We also consider the problem of computing the maximum detour and
+spanning ratio of 3-dimensional chains and show that this problem can
+be solved in subquadratic time.  Using the same extensions as in the
+planar case, this leads to subquadratic time algorithms for
+3-dimensional trees and cycles.  We also show that it is unlikely that
+an $O(n\log^c n)$ time algorithm exists for computing the maximum
+detour of 3-dimensional chains, since this problem is at least as hard
+as Hopcroft's problem.
+
+Some of these results, namely those on planar paths, trees and cycles
+have appeared in a preliminary form in a conference proceedings
+\cite{lms02}.
+
+The remainder of the paper is organized as follows: In \secref{cones}
+we show how to reduce the decision problems to an upper envelope
+computation.  In \secref{bats} we give an algorithm for computing the
+upper envelope of a set of objects called bats that is required for
+solving the maximum detour decision problem.  In \secref{finishing} we
+describe how to use these decision algorithms to obtain optimization
+algorithms.  In \secref{trees-cycles} we extend these algorithms to
+trees and cycles.  Finally, in \secref{conclusions} we
+summarize and conclude with open problems.
+
+
+\section{A Problem on Cones}\seclabel{cones}
+
+For a point $p\in\mathbb{R}^3$, denote by $p_z$ the $z$-coordinate of
+$p$ and by $p_{xy}$, the projection of $p$ onto the $x,y$-plane.
+Given a polygonal path $P$ in $\mathbb{R}^2$ whose vertices are
+$v_1,\ldots,v_n$ we lift it to a polygonal path $P'$ in $\mathbb{R}^3$
+by assigning to each point $p$ in $P$ a $z$-coordinate equal to its
+distance along the path from $v_1$, i.e., for each point $p\in P$,
+$P'$ has a point $p'$ such that $p_{xy}'=p$ and $p'_z=\|v_1p\|_P$.
+
+In this way, we obtain a $z$-monotone polygonal path $P'$ with
+vertices $u_1,\ldots,u_n$ such that for any two points $p',q'\in P'$,
+the unique path between the corresponding points $p,q\in P$ has length
+$\|pq\|_P=\|p'_z-q'_z\|$.
+
+Consider the following construction.  At each vertex $u_i$ of $P'$ we
+place the apex of a cone $c_i$ that points downwards with its axis of
+rotation parallel to the $z$-axis and that spans an angle of
+$2\arctan(1/d)$.  We call such a cone the $d$-cone of $u_i$.  Now, if
+some cone $c_i$ contains some vertex $u_j$ then $D(P,v_i,v_j)\ge d$
+(see \figref{cones}).  Conversely, if there exists a pair of vertices
+$v_i$, $v_j$ such that $D(P,v_i,v_j)\ge d$, then either $c_i$ contains
+$u_j$ or $c_j$ contains $u_{i}$.  Thus, the problem of determining
+whether the spanning ratio of $P$ is greater than or equal to $d$ is
+reducible to the problem of determining whether any cone $c_i$
+contains any vertex $u_j$.
+
+\begin{figure}
+\centeripe{cone}
+\caption{If $c_i$ contains $u_j$ then $D(P,v_i,v_j)\ge d$.}
+\figlabel{cones}
+\end{figure}
+
+The \emph{upper envelope} of the cones $c_1,\ldots,c_n$ is the
+bivariate function $f(x,y)=\max\{z:(x,y,z)\in c_i,\mbox{ for some
+$i$}\}$.  From this definition it follows that $u_i$ is contained in
+some cone if and only if $u_i$ does not appear on the upper envelope,
+i.e., $f(u_i)\neq u_{i,z}$.  The upper envelope of identical and
+identically oriented cones has been given at least two other names:
+additively-weighted Voronoi diagram \cite{f87} and Johnson-Mehl
+crystal growth diagram \cite{jm39}.  It is known that $f$ consists of
+$O(n)$ pieces and can be computed in $O(n\log n)$ time using a sweep
+line algorithm \cite{f87}.  Thus, the decision problem of determining
+whether the spanning ratio of $P$ is at least $d$ can be solved in
+$O(n\log n)$ time.
+
+Next we turn to the problem of determining whether the maximum detour
+of $G$ is at least $d$.  For this problem we use the same construction
+except that we place a cone with its apex on \emph{every} point of
+$P'$, not just the vertices.  The decision problem then reduces to the
+question: Does every point on $P'$ appear on the upper envelope of
+these (infinitely many) cones.  Of course, computationally, we do not
+compute the upper envelope of infinitely many cones.  Instead, we
+compute the upper envelope of $n$ \emph{bats}, where a \emph{bat} is
+the convex hull of two cones with apexes on the endpoints of an edge
+of $P$.  We call the edge that defines a bat the \emph{core} of the
+bat.
+
+Thus, for both maximum detour and spanning ratio, the associated
+decision problem can be solved by computing the upper envelope of a
+suitably chosen set of objects, either cones or bats. To the best of
+our knowledge, no algorithm exists for computing the upper envelope of
+a set of bats.  In the following section, we show that we can
+nevertheless solve the decision problem.
+
+\section{The Upper Envelope of a Set of Bats}\seclabel{bats}
+
+We say that a point $p$ in the core of some bat is \emph{redundant} if
+$p$ is contained in some other bat.  We say that the input is
+\emph{redundant} if some bat contains a redundant point and the input
+is \emph{non-redundant} otherwise.  It is clear that solving the
+decision problem associated with detour is equivalent to determining
+whether the input is redundant or non-redundant.  In the preliminary
+version of this paper, we sketched a plane sweep algorithm for
+answering this question \cite{lms02}.  Here, we present an alternative
+solution.  We begin with a structural lemma due to Ebbers-Baumann
+\etal\ \cite{ekll01}.
+
+\begin{lem}[Ebbers-Baumann \etal]\lemlabel{vertex-edge}
+For a planar polygonal chain $P$, the maximum detour is attained by a
+vertex and some other point on $P$, i.e., $D(P)=D(P,v_i,q)$ where
+$v_i$ is a vertex of $P$ and $q$ is some other point of $P$.
+Furthermore, the segment $v_iq$ intersects $P$ only at its endpoints.
+\end{lem}
+
+The consequence of \lemref{vertex-edge} is that it allows us to use
+the additively weighted Voronoi diagram of points rather than line
+segments.  Suppose that $v_i$ appears after $q$ on $P$.  Then, for any
+value of $d$ less than $D(P)$, the $d$-cone of $v'_i$ contains $q'$.
+If $v_i$ appears before $q$ on $P$ then we can reverse the direction
+of $P$ to obtain a path $\overleftarrow{P}$ and the same statement is
+true in $\overleftarrow{P}$.  Therefore, we can solve our decision
+problem by computing the upper-envelope of the $d$-cones defined by
+the vertices of of $P$ (respectively, $\overleftarrow{P}$) and
+checking whether $P'$ (respectively, $\overleftarrow{P}'$) is
+completely above the upper envelope of the $d$-cones.  If both paths
+are above their respective upper envelopes then the answer to the
+decision problem is no, otherwise it is yes.
+
+Computing the upper envelope of $n$ $d$-cones (i.e., the additively
+weighted Voronoi diagram of a set of a $n$ points) can be done in
+$O(n\log n)$ time using Fortune's algorithm \cite{f87}, but testing
+whether $P'$ lies above this diagram is slightly more complicated.
+The straightforward way to solve this problem would be to compute, for
+each Voronoi cell, the portion of $P$ contained in that cell, and then
+test if each of these segments intersects the $d$-cone that defines
+the cell. Unfortunately, the number of intersections between $P$ and
+the Voronoi cells may be $\Omega(n^2)$, so this approach leads to a
+quadratic-time algorithm.
+
+A more efficient algorithm is obtained by using the second part of
+\lemref{vertex-edge}.  For each vertex $v_i$ of $P$, we only require
+the portion of $P$ that intersects the Voronoi cell of $v_i$ and is
+visible from $v_i$, call this $P_i$.  The
+Combination~Lemma~\cite{gss89,sa95} says that in total, all $P_i$
+consist of only $O(n)$ segments and can be computed in $O(n\log n)$
+time using the red-blue merging technique \cite{sa95}.  Once the sets
+$P_i$ are computed we need only test for each segment in $P_i$,
+whether it intersects the $d$-cone of $v_i$. Since each of these steps
+can be done in $O(n\log n)$ time, we obtain the following result.
+
+
+\comment{ In this section we show how to compute the upper envelope of
+a set of bats using a sweep line algorithm.  This algorithm is
+essentially a modification of Fortune's algorithm for computing
+additively-weighted Voronoi diagrams and Voronoi diagrams of line
+segments \cite{f87}.
+
+This is fortunate, since the upper envelope of $n$
+bats can have $\Omega(n^2)$ complexity (see \figref{quadratic}), so any
+approach that requires computing the upper envelope is doomed to have
+quadratic running time in the worst case.
+
+\begin{figure}
+\centeripe{quad}
+\caption{The upper envelope of $n$ bats can have $\Omega(n^2)$ complexity.}
+\figlabel{quadratic}
+\end{figure}
+
+We describe an algorithm that takes as input a set of $n$ bats which
+are the union of cones that span angles of $2\alpha\le\pi/2$ and
+either reports that the input is redundant or correctly computes the
+upper envelope of the input.  The algorithm sweeps a plane $P$ through
+space and maintains, at all times, the intersection of $P$ with the
+upper envelope $E$.  The plane $P$ is parallel to the $x$-axis and
+forms an angle of $\pi-\alpha$ with the $x,y$-plane (see
+\figref{sweep-plane}).  The reason we sweep with such a plane is that
+no bat $b$ can contribute to $P\cap E$ until $P$ has swept over some
+point in the core of $b$.
+
+\begin{figure}
+\centeripe{plane}
+\caption{The sweep plane makes an angle of $\pi-\alpha$ with the $x,y$-plane.}
+\figlabel{sweep-plane}
+\end{figure}
+
+To understand the structure of $P\cap E$, it is helpful to note that
+the boundary of a bat consists of four pieces (see \figref{bat}): two
+conic pieces and two planar pieces.  It is easy to verify that the
+intersection $P\cap E$ is a weakly $x$-monotone curve consisting of
+pieces of parabolas and lines.  Therefore, its pieces can be stored in
+a balanced binary tree sorted by $x$-coordinate.  The intersection
+$P\cap E$ consists of parabolic arcs (where $P$ intersects conic
+pieces) and straight line segments (where $P$ intersects linear
+pieces).
+
+\begin{figure}
+\IpeFit{1.5in}\centeripe{bat}
+\caption{The boundary of a bat consists of two conic pieces and
+	two planar pieces.}
+\figlabel{bat}
+\end{figure}
+
+As $P$ sweeps through space, $P\cap E$ changes continuously.
+Therefore, we store $P\cap E$ symbolically so that each arc and
+segment is represented by its equation as a function of the position
+of the plane $P$.  The progress of the sweep plane is controlled by a
+priority queue $Q$.  Initially, $Q$ contains $2n$ events corresponding
+to the times at which the sweep plane passes over each endpoint of the
+core of a bat.
+
+During the sweep, some arcs or segments of $P\cap E$ may disappear as
+they become obscured by neighbouring arcs.  Since each arc and segment
+is parameterized by the position of the plane $P$, it is a constant
+time operation to determine the time (if any) that an arc will be
+obscured by its neighbours. In the following discussion, when we
+insert and delete arcs and segments from $P\cap E$, it is implicit
+that we recompute the times at which arcs in the neighbourhood of the
+inserted/deleted arc are obscured and insert these times into $Q$. For
+further details refer to Fortune's original paper \cite{f87}.
+
+During the sweep, we process three types of events:
+
+\begin{enumerate}
+\item \emph{$P$ sweeps over a point $p$ that is the first endpoint of
+the core of some bat $b$.}  Refer to \figref{events}.a.  In this case,
+we first check if $p$ is below $P\cap E$.  If so, then $p$ is
+contained in the bat that intersects $P$ directly above $p$, so we
+quit and report that the input is redundant.  Otherwise, we add four
+objects to $P\cap E$.  These objects are two line segments
+representing the intersection of $P$ with the two planar pieces of $b$
+and two parabolic arcs representing the intersection of $P$ with the
+cone whose apex is at $p$.
+
+\begin{figure}
+\begin{center}\begin{tabular}{cc}
+\IpeFit{2.1in}\Ipe{event-2} & \IpeFit{1.9in}\Ipe{event-1} \\
+(a) & (b) 
+\end{tabular}\end{center}
+\caption{Handling type~1 and type~2 events.}
+\figlabel{events}
+\end{figure}
+
+\item \emph{$P$ sweeps over a point $p$ that is the last endpoint of
+the core of some bat $b$.}  Refer to \figref{events}.b.  In this case,
+we add two parabolic arcs to $P\cap E$ that correspond to the
+intersection of $P$ with the cone whose apex is at $p$.
+
+\item \emph{An arc or segment disappears from $P\cap E$.}  In this
+case, we remove from $Q$ any events associated with the arc or
+segment.  In the case of a segment, we also check if one endpoint of
+the segment corresponds to a point in the core of a bat.  If so, then
+that point is not part of $E$ so we can quit and report that the input
+is redundant.
+\end{enumerate}
+
+To see that the above algorithm runs in $O(n\log n)$ time, we observe
+that there are only $O(n)$ type~1 and 2 events.  Each of these can be
+easily implemented in $O(\log n)$ time, and each such event adds
+$O(1)$ arcs or segments to $P\cap E$.  Each type~3 event can also be
+implemented in $O(\log n)$ time, and deletes one element from $P\cap
+E$.  Therefore, there are only $O(n)$ type~3 events and the entire
+algorithm runs in $O(n\log n)$ time.
+
+To see that the algorithms is correct for non-redundant inputs we can
+use arguments which are standard by now \cite{f87}.  In particular, we
+can show that there is a direct correspondence between the events
+processed by the algorithm and changes to the combinatorial structure
+of $P\cap E$.  Suppose therefore that the input is redundant and let
+$p$ be the first redundant point swept over by $P$.  Either $p$ is an
+endpoint of a core or it is in the interior of a core.  In the former
+case, it will be handled as a type~1 event while in the latter case it
+will be handled as a type~3 event.
+
+In either case, all input previously swept over by $P$ is
+non-redundant, so the intersection $P\cap E$ has been correctly
+computed.  If $p$ is an endpoint of a core it will then be processed
+as a type~1 event and the algorithm will correctly detect that $p$ is
+below $P\cap E$ and is therefore redundant.  If $p$ is in the interior
+of a core it will be processed as a type~3 event and the algorithm
+will correctly detect that the input is redundant.  Therefore, either
+the algorithm correctly computes the upper envelope (if the input is
+non-redundant) or correctly reports that the input is redundant.
+}
+
+
+\begin{lem}
+There exists an algorithm requiring $O(n\log n)$ time and $O(n)$ space
+that tests whether a set of $n$ bats is redundant or non-redundant.
+\end{lem}
+
+\section{Optimization}\seclabel{finishing}
+
+So far we have given all the tools required for solving the decision
+problems associated with finding the maximum detour and spanning ratio
+of a path.  More specifically, we have solved the problem: Given a set
+of segments (possibly points) in 3 space, does there exist a cone $c$
+with angular radius $2\arctan(1/d)$, center of rotation parallel to
+the $z$-axis and apex on one of the segments such that $c$ intersects
+or contains another segment.  The optimization problem is that of
+finding the largest value of $d$ for which such a cone exists.
+
+To solve the optimization problem we apply the randomized reduction of
+Chan \cite{c99}, which requires only that we (1)~be able to solve the
+decision problem in $f(n)=\Omega(n^\epsilon)$ time, for some constant
+$\epsilon>0$, and (2)~partition the problem into $r$ subproblems, each
+of size at most $\alpha n$, $\alpha < 1$ such that the optimal
+solution is the maximum of the solutions to the $r$ subproblems.  The
+reduction works by considering the subproblems in random order and
+recursively solving a subproblem only if its solution is larger than
+the current maximum (which can be tested by the decision algorithm).
+The resulting optimization algorithm has running time $O(f(n))$.
+
+We have already shown how to do (1) in $f(n) = O(n\log n)$ time.  To
+do (2), we simply note that we can partition our set of segments into
+three sets $A$, $B$, and $C$, each of size rougly $n/3$.  The optimal
+solution is then the maximum of the solutions to $A\cup B$, $B\cup C$
+and $A\cup C$.  Since there are only $r=3$ subproblems and each has
+size $\alpha n=\frac{2}{3}n$ we have satisfied the conditions required
+to use Chan's optimization technique.
+
+\begin{thm}
+The maximum detour and spanning ratio of a planar path with $n$
+vertices can be computed in $O(n\log n)$ expected time.
+\end{thm}
+
+\noindent\textbf{Remark:} Using the parametric search technique
+\cite{m83}, it is possible to devise $O(n\log^c n)$ time deterministic
+algorithms for computing the maximum detour or spanning ratio of a
+planar path, for constant $c$.  However, it seems difficult to apply
+parametric search to obtain an $O(n\log n)$ time algorithm.
+
+\section{Planar Trees and Cycles}\seclabel{trees-cycles}
+
+In this section we show how the tools developed for planar paths can
+be used for solving problems on more complicated types of objects.  In
+our discussions, we consider only the problem of computing the maximum
+detour, although it is clear that the algorithms also apply to the
+problem of computing the spanning ratio.
+
+\subsection{Planar Trees}
+
+Let $T$ be a tree embedded in the plane and assume $T$ is rooted at a
+vertex $v$ such that $T\setminus\{v\}$ has no component with more than
+$n/2$ vertices.  Such a vertex is easily found in linear time. Refer
+to \figref{ab}.  We partition the children of $v$ into two sets $A$
+and $B$.  Let $T_A$, respectively $T_B$, denote the tree induced by
+$v$ and all vertices having ancestors in $A$, respectively $B$.  The
+partition $A$, $B$ is chosen so that
+$\frac{1}{4}n\le\|T_A\|,\|T_B\|\le\frac{3}{4}n$.  Since no descendent of
+$v$ is the root of a subtree with size more than $\frac{n}{2}$, such a
+partition can be found with a greedy algorithm.
+
+\begin{figure}
+\centeripe{ab}
+\caption{Partitioning into subtrees $T_A$ and $T_B$.}
+\figlabel{ab}
+\end{figure}
+
+We lift $T$ into a 3-dimensional tree $T'$ in the following way.  Each
+point $p\in T_A$ is assigned a $z$-coordinate equal to $\|vp\|_T$.  Each
+point $p\in T_B$ is assigned a $z$-coordinate equal to $-\|vp\|_T$.
+This gives us a 3-dimensional tree $T'$ consisting of points $T_A'$
+above the $x,y$ plane and points $T_B'$ below the $x,y$ plane.
+
+This lifting has the property that for any point $p'\in T_A'$ and any
+point $q'\in T_B'$ the distance between the corresponding points $p$
+and $q$ in $T$ is equal to the difference in $z$-coordinates of $p'$
+and $q'$, i.e., $\|pq\|_T=\|p_z'-q_z'\|$.  Furthermore, for two points
+$p,q$ both in $T_A$ or both in $T_B$, $\|pq\|_T\ge\|p_z'-q_z'\|$.  It
+follows that if we run the maximum detour algorithm of the previous
+section on the tree $T'$, the algorithm will respond with the correct
+answer $D(T)$ if there is a pair of points $p\in T_A$ and $q\in T_B$
+such that $D(T)=D(T,p,q)$.  If this is not the case, then the
+algorithm may report a value less than $D(T)$, but will never report a
+larger value.
+
+Therefore, we can compute $D(T)$ using a recursive algorithm.  We run
+the maximum detour algorithm on the tree $T'$, make two recursive
+calls on $T_A$ and $T_B$ and output the maximum of the three values
+obtained.  To see that this algorithm correctly computes $D(T)$,
+consider the pair $p,q\in T$ that maximizes $D(T,p,q)$.  If $p\in A$
+and $q\in B$ (or vice versa), the correct value of $D(T,p,q)$ is found
+when we run the maximum detour algorithm on $T'$.  Otherwise, $p,q\in
+T_A$ or $p,q\in T_B$ and is correctly reported by one of the recursive
+calls.
+
+The running time of the above algorithm is given by the recurrence
+\[ 
+   T(n)=T(n-k+1)+T(k)+O(n\log n) \enspace , 
+\]
+with $n/4\le k\le 3n/4$, which solves to $O(n\log^2
+n)$.
+
+\begin{thm}
+The maximum detour or spanning ratio of a planar tree with $n$
+vertices can be computed in $O(n\log^2 n)$ expected time.
+\end{thm}
+
+\subsection{Planar Cycles}
+
+To compute the maximum detour of a planar cycle, we use a similar
+divide and conquer strategy.  However, before beginning, we must
+take care of one small technicality.
+
+\begin{lem}
+Let $C$ be a planar cycle of length 1.  Then the maximum detour in $C$
+is obtained by two points $p$ and $q$ such that
+(a)~$\|pq\|_C = 1/2$ or (b)~$p$ is a vertex of $C$.
+\end{lem}
+
+The maximum detour over all pairs of points $p$ and $q$ such that
+$\|pq\|_C=1/2$ can be computed in linear time by scanning two points
+around $C$ while maintaining the invariant that their distance along
+$C$ is always equal to $1/2$.  Therefore, we can concentrate on
+computing the maximum detour over all points $p,q\in C$ where $p$ is
+vertex of $C$.
+
+We do this by solving a more general problem. Let $C$ be a planar
+cycle of length 1 and let $s$, $t$, $u$ and $v$ be four points on $C$
+that appear in counterclockwise order and such that $\|su\|_C =
+\|tv\|_C = 1/2$. (See \figref{cycle}.) Let $C_{ab}$ denote the
+polygonal chain obtained by traversing $C$ counterclockwise beginning
+at $a$ and ending at $b$.
+
+\begin{figure}
+\centeripe{cycle}
+\caption{Finding the maximum detour over all $p,q\in C_{st}\cup C_{uv}$.}
+\figlabel{cycle}
+\end{figure}
+
+Suppose that we wish to compute the maximum detour between all points
+$p$ and $q$ where $p,q\in C_{st}\cup C_{uv}$ and define $m$ as the
+number of edges in $C_{st}\cup C_{uv}$.  We will show how to solve
+this problem in $O(m\log^2 m)$ time.  To solve the original problem of
+computing the maximum detour of $C$, we simply set $v=s$ so that
+$t=u$.
+
+Let $w$ be any point in $C_{st}$.  Then there is a unique point $x\in
+C_{uv}$ such that $\|wx\|_C=1/2$.  There are four possible locations
+for the points $p$ and $q$ that maximize the detour. These are
+(1)~$p,q\in C_{wt}\cup C_{ux}$, (2)~$p,q\in C_{xv}\cup C_{sw}$,
+(3)~$p,q\in C_{wt}\cup C_{xv}$, or (4)~$p,q\in C_{sw}\cup C_{ux}$.
+
+Observe that in Case~1, we only consider a subchain of $C$ that has
+length $1/2$, so that any shortest path in $C$ between two points of
+$C_{wt}\cup C_{ux}$ remains in $C_{wx}$.  Therefore, we can resolve
+Case~1 by lifting $C_{wt}$ and $C_{ux}$ into three space where the $z$
+coordinate of any point in the lifting is it's distance, along $C$
+from $t$.  Applying the algorithm for chains to this lifting
+determines the maximum detour between any two points $p,q\in
+C_{wt}\cup C_{ux}$ in $O(m\log m)$ time.  The same is true for case~2,
+so it can also be resolved in $O(m\log m)$ time.
+
+In Cases~3 and 4, we are left with problems of the same form as the
+original problem, so we can recursively solve these.  Since we can
+always find a point $w$ such that $C_{wt}\cup C_{xv}$ and $C_{sw}\cup
+C_{ux}$ each contain at least $m/4$ vertices, the running time of the
+resulting algorithm is given by
+\[
+ T(m) = T(m-k) + T(k) + O(m\log m) \enspace ,
+\] 
+with $m/4\le k\le 3m/4$, which solves to $O(m\log^2 m)$.
+
+\begin{thm}\thmlabel{three}
+The maximum detour or spanning ratio of a planar cycle with $n$
+vertices can be computed in $O(n\log^2 n)$ time.
+\end{thm}
+
+\section{Three Dimensional Objects}
+
+\ldots
+
+Finally, we show that computing the maximum detour of a 3-d path is as
+hard as Hopcroft's problem: Given $n$ lines $l_1,\ldots,l_n$ and $n$
+points $p_1,\ldots,p_n$ in the the plane, determine if any line
+contains any point. There is an abundance of evidence that suggests
+that Hopcroft's problem has an $\Omega(n^{4/3})$ lower bound
+\cite{e95}.  The best known upper bound in any reasonable model of
+computation is $O(n^{4/3}2^{O(\log^* n)})$ \cite{m93}.
+
+Refer to \figref{hopcroft} for what follows.  To reduce an instance of
+Hopcroft's problem to that of computing the maximum detour of a 3-d
+path, we will build a 3-d path that is self-intersecting, i.e., has
+infinite maximum detour, if and only if the answer to Hopcroft's
+problem is yes.  We begin by computing a bounding rectangle $R$ that
+contains all input points and contains all points at which two input
+lines intersect.  This can easily be done in $O(n\log n)$ time.
+
+Next, we take the intersection of each $l_i$ with $R$ and lift it
+orthogonally so that it lies in the plane $z=i$ to obtain a line
+segment $l'_i$.  Then we transform each input point $p_i$ to a line
+segment $p'_i$ that is parallel to the $z$-axis, has one endpoint on
+the plane $z=0$, the other endpoint on the plane $z=n+1$ and whose
+projection onto the $x,y$ plane is $p_i$.
+
+\begin{figure}
+\centeripe{hopcroft}
+\caption{Hopcrofts's problem can be solved by computing the maximum
+detour of a 3-d path. Red points and lines show the input to
+Hopcroft's problem, the blue part of the chain corresponds to input
+lines and the purple part of the chain corresponds to input
+points.}\figlabel{hopcroft}
+\end{figure}
+
+This gives us a set of line segments such that the answer to
+Hopcroft's problem is yes if and only if two of the line segments
+intersect.  All that remains is to make a path that contains all these
+segments without introducting any additional crossings.  To do this,
+we connect each $l'_i$ to $l'_{i+1}$ using a path whose projection onto
+the $x,y$ plane is contained in $R$ and that stays between the planes
+$z=i$ and $z=i+1$.  It is clear that each such connection can be done
+using $O(1)$ edges and that no two such connections intersect, nor do
+they intersect any other line segments.
+
+Next we sort $p'_1,\ldots,p'_n$ lexicographically by $x,y$ and make
+these into a polygonal chain where $p'_i$ is connected to $p'_{i+1}$
+with a line segment in the plane $z=0$ if $i$ is even and a line
+segment in the plane $z=n+1$ if $i$ is odd.  This chain is clearly not
+self-intersecting, since it's projection onto the $x,y$ plane is
+monotone.
+
+Finally, we connect the unconnected endpoint of $l'_n$ to the
+unconnected endpoint of $p'_1$ with a path that stays between the
+planes $z=n$ and $z=n+1$ and whose projection onto the $x,y$ plane is
+contained in the boundary of $R$, except for one vertical segment that
+joins the bottom edge of $R$ to $p_1$.  Again, this path uses $O(1)$
+edges and does not introduce any additional crossings.  Therefore, the
+resulting chain if self-intersecting, i.e., has infinite maximum
+detour, if and only if the answer to Hopcroft's problem is yes.
+
+\begin{thm}
+An algorithm with running time $f(n)$ for computing the maximum detour
+of 3-dimensional polygonal chain with $n$ vertices implies an $O(n\log
+n+ f(n))$ time algorithm for Hopcroft's problem.
+\end{thm}
+
+\section{Conclusions}\seclabel{conclusions}
+
+We have given $O(n\log n)$ time algorithms for computing the maximum
+detour and spanning ratio of planar paths.  These algorithms lead to
+an $O(n\log^2 n)$ time algorithms for computing the maximum detour and
+spanning ratio of a planar trees and cycles.  In three dimensions, we
+have given subquadratic algorithms for computing the maximum detour of
+paths, trees and cycles.  Previously, no subquadratic time algorithms
+were known for any of these problems.
+
+The main idea in this paper is that of reducing maximum detour and
+spanning ratio problems to problems on sets of cones and bats,
+respectively.  The upper envelope of bats, i.e., the
+additively-weighted Voronoi diagram of line segments, may have other
+applications.  It would be interesting to find an output sensitive
+algorithm for the case in which the input is redundant.  This seems
+difficult to do with plane sweep, since it requires a 4th type of
+event that occurs when a core reappears on the upper envelope.
+Maintaining these events can take quadratic time even when the
+complexity of the upper envelope is linear.
+
+There are many open problems in this new area.  The most obvious is:
+Which other classes of graphs admit subquadratic time algorithms for
+computing the maximum detour or spanning ratio?
+
+
+\bibliography{detour}
+\bibliographystyle{plain}
+
+
+\end{document}

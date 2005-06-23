@@ -1,0 +1,1314 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  Contributory Book %%%%%%%%
+%
+%  written by Sean Davey
+%  Modified by ITC
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{enghb2e}[1998/02/03 1.0 CRC Engineering Handbook Document Style]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newif\if@FontsAvailable
+\@FontsAvailablefalse    % set to false to use Computer Modern
+\newif\if@ChapterResetsPage
+\@ChapterResetsPagetrue  % set to true to reset the page number at each chapter
+\newif\if@UnnumberedReferences
+\@UnnumberedReferencesfalse   % set to true to have references be unnumbered
+\newif\if@pdf
+\DeclareOption{pdf}{\@pdftrue}
+% New Index Option created on 27th Feb Shibu so that the index entries are
+% followed by lightface chapter no.-page no. as requested by Sartaj Sahani
+% So the Book has to be compiled with \usepackege[index]{enghb2e} option
+% so that .idx file will be produced without bold chapter no. in the index entry. Then turn the
+% index option off using \usepackage[enghb2e] only.
+% and compile for final output where the page nos. in the pages and TOCs are bold
+% chapter no. followed by a hyphen and then the page no.
+% A new page style  \indexplain is defined in the macroforindex.tex file which will 
+% produce a page with folio not preceded by the chapter no.
+% The TOC entry for the index has been also taken care 
+% More works need to be done for the exact page entry in the toc for index.
+\newif\ifindex
+\DeclareOption{index}{\indextrue}
+\global\indexfalse
+%
+\DeclareOption{UnnumRef}{\@UnnumberedReferencestrue}  %% This Option added by shibu
+\ProcessOptions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\hoffset3pc
+\textwidth33pc
+\textheight50pc
+\topmargin\z@
+\headheight12pt
+\headsep12pt
+\topskip12pt
+\oddsidemargin0pt
+\evensidemargin\oddsidemargin
+\columnsep21pt
+\parindent10pt
+
+\def\cleardoublepage{%
+  \clearpage
+  \if@twoside\ifodd\c@page\else
+    \thispagestyle{empty}\clearpage
+    \if@twocolumn\thispagestyle{empty}\clearpage\fi\fi\fi}
+\def\@nextevenpage{%
+  \clearpage
+  \if@twoside\ifodd\c@page
+    \thispagestyle{empty}\clearpage
+    \if@twocolumn\thispagestyle{empty}\clearpage\fi\fi\fi}
+\newcount\chap@page
+\chap@page\z@
+\newcount\temp@page
+\def\@Chapter#1{{\FolioBoldFont\thechapter}-\@arabic\c@page}
+\def\@Part#1{{\FolioBoldFont\thepart}-\@arabic\c@page}
+\def\@title{}
+\def\markrightshort#1{}
+
+\if@pdf
+  \def\@cip{{\tiny\copyright}\footnotesize 1999 by CRC Press, LLC}
+\else
+  \newsavebox\@cipboxa
+  \newsavebox\@cipboxb
+  \newdimen\@ciprulewidth
+  \def\@cip#1#2{\sbox\@cipboxa{\CIPFont #1}\sbox\@cipboxb{\CIPFont #2}\@ciprulewidth\wd\@cipboxa\ifnum\@ciprulewidth<\wd\@cipboxb\@ciprulewidth\wd\@cipboxb\fi}\fi
+\newsavebox\ul@box
+\newsavebox\ur@box
+\newsavebox\ll@box
+\newsavebox\lr@box
+\def\top@cornermarks{%
+  \ifodd\c@page\hskip-5pc\else\hskip-4.25pc\fi
+  \vbox to 0\p@{\vskip-6.1pc\llap{\copy\ul@box}\vss}%
+  \vbox to 0\p@{\vskip-6.1pc\rlap{\hskip7in\copy\ur@box}\vss}%
+  \vbox to 0\p@{\vskip9.25in\llap{\copy\ll@box}\vss}%
+  \vbox to 0\p@{\vskip9.25in\rlap{\hskip7in\copy\lr@box}\vss}%
+  \ifodd\c@page\hskip5pc\else\hskip4.25pc\fi}
+\def\ps@empty{%
+  \let\@mkboth\@gobbletwo
+  \if@pdf
+    \let\@evenhead\@empty
+    \let\@oddhead\@empty
+    \def\@oddfoot{\@cip\hfil}%
+    \def\@evenfoot{\@cip\hfil}%
+  \else
+    \let\@evenhead\top@cornermarks
+    \let\@oddhead\top@cornermarks
+    \let\@oddfoot\@empty
+    \let\@evenfoot\@empty\fi}
+\newif\if@cip
+\@ciptrue
+\def\ps@folio{%
+  \let\@mkboth\@gobbletwo
+  \if@pdf
+    \let\@evenhead\@empty
+    \let\@oddhead\@empty
+    \def\@oddfoot{\@cip\hfil}%
+    \def\@evenfoot{\@cip\hfil}%
+  \else
+    \let\@oddhead\top@cornermarks
+    \def\@oddfoot{
+      \hbox{}%
+      \hbox{%
+        \vbox to 10pt{%%%shibu
+          \parindent\z@\baselineskip9pt
+          \if@cip\noindent\rule{\@ciprulewidth}{.25pt}\par\fi
+          \hbox to \textwidth{\if@cip\vbox{\copy\@cipboxa\par\copy\@cipboxb}\else\rule{\z@}{18\p@}\global\@ciptrue\fi\hfill\FolioFont\thepage}}}}%
+    \let\@evenhead\@empty
+    \let\@evenfoot\@empty\fi}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% partheadings created for proper page no. style in part title page %% shibu
+\def\ps@partheadings{%
+   \pagenumbering{Part}
+    \let\@evenhead\@empty
+    \let\@oddhead\@empty
+    \def\@oddfoot{\hfill\thepage}%
+    \def\@evenfoot{\hfill\thepage}%
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% shibu
+\def\ps@headings{%
+  \let\@mkboth\markboth
+\if@pdf
+    \let\@evenhead\@empty
+    \let\@oddhead\@empty
+    \def\@oddfoot{\@cip\hfil}%
+    \def\@evenfoot{\@cip\hfil}%
+\else
+    \def\@oddfoot{}%
+    \def\@evenfoot{}%
+    \def\@evenhead{\top@cornermarks\rm \thepage\hfil \sl \leftmark}%
+    \def\@oddhead{\top@cornermarks{\sl \rightmark}\hfil \rm\thepage}%
+\def\chaptermark##1{\markboth {\@title}{##1}}%%%%%%%%%%%%%%%%%%%% Setting the Running Head
+%%    \def\chaptermark##1{\markboth {\uppercase{\ifnum \c@secnumdepth >\m@ne
+%%      \@chapapp\ \thechapter. \ \fi ##1}}{}}%
+%    \def\sectionmark##1{\markright {\uppercase{\ifnum \c@secnumdepth >\z@
+%      \thesection. \ \fi ##1}}}
+\def\sectionmark##1{}
+\fi}
+%
+\def\ps@myheadings{%
+  \let\@mkboth\@gobbletwo
+  \if@pdf
+    \let\@evenhead\@empty
+    \let\@oddhead\@empty
+    \def\@oddfoot{\@cip\hfil}%
+    \def\@evenfoot{\@cip\hfil}%
+  \else
+    \def\@oddhead{\top@cornermarks{\sl\rightmark}\hfil \rm\thepage}%
+    \def\@oddfoot{}\def\@evenhead{\rm \thepage\hfil\sl\leftmark}%
+    \def\@evenfoot{}\def\chaptermark##1{}\def\sectionmark##1{}%
+    \def\subsectionmark##1{}\fi}
+\long\def\@makefntext#1{
+  \leftskip1pc
+  $\m@th^{\@thefnmark}$#1}
+\def\addcontentsline#1#2#3{%
+  \if@filesw
+    \begingroup
+    \let\label\@gobble\let\index\@gobble\let\glossary\@gobble
+    \def\break{\string\break\ }%
+    \def\protect##1{\string ##1 }%
+     \@temptokena{\thepage}%1
+    \edef\@tempa{\write \@auxout{\string\@writefile{#1}{\protect\contentsline{#2}{#3}{\the\@temptokena}}}}\@tempa%1
+    \if@nobreak\ifvmode\nobreak\fi\fi
+    \endgroup
+  \fi}
+\def\myaddcontentsline#1#2#3{%
+  \if@filesw
+    \begingroup
+    \let\label\@gobble\let\index\@gobble\let\glossary\@gobble
+    \def\break{\ }%
+    \def\protect##1{\string ##1 }%
+      \@temptokena{\thepage}%2
+        \edef\@tempa{\write#1{\string\chapcontentsline{#2}{\string\raggedright\space #3}{\the\@temptokena}}}\@tempa%3
+    \if@nobreak\ifvmode\nobreak\fi\fi
+    \endgroup
+  \fi}
+\def\my@addcontentsline#1#2#3{%
+  \if@filesw
+    \begingroup
+      \let\label\@gobble\let\index\@gobble\let\glossary\@gobble
+      \def\break{\ }%
+      \def\protect##1{\ }%
+       \@temptokena{\thepage}%4
+      \edef\@tempa{\write#1{\string\contentsline{#2}{\string\raggedright\space #3}{\the\@temptokena}}}\@tempa%5
+      \if@nobreak\ifvmode\nobreak\fi\fi\endgroup\fi}
+\def\secnumwidth{21pt}
+\def\chapcontentsline#1{\csname l@#1\endcsname}
+\def\@dottedtocline#1#2#3#4#5{%%%%%%%%%%%%%%%%%%% Commented so that the subsection entries are prevented from appearing in the maintoc %% shibu
+%  \ifnum #1>\c@tocdepth
+% \else
+%    \vskip \z@ \@plus.2\p@
+%    {\leftskip #2\relax\rightskip\@tocrmarg\parfillskip -\rightskip
+%      \parindent #2\relax\@afterindenttrue
+%      \interlinepenalty\@M
+%      \leavevmode
+%      \@tempdima #3\relax
+%      \advance\leftskip\@tempdima\null\hskip -\leftskip
+%      {#4}\nobreak
+%   \if@pdf
+%      \else
+%        \leaders\hbox{$\m@th\mkern\@dotsep mu\hbox{.}\mkern\@dotsep mu$}\hfill
+%        \nobreak
+%        \hb@xt@\@pnumwidth{\hfil\normalfont\normalcolor #5}
+%    \fi
+%         \par}\fi
+}
+\def\@mydottedtocline#1#2#3#4#5{
+  \ifnum #1>\c@tocdepth
+  \else
+    \vskip 2pt plus.2\p@
+    {\interlinepenalty\@M
+      \leavevmode
+      \def\@dotsep{1.2}%
+      \@tempdima #3\relax
+      \rightskip\z@
+      \advance\hsize-\secnumwidth
+      \vbox{\hskip-\secnumwidth\CCOneFont #4\nobreak
+        \if@pdf
+        \else
+          \leaders\hbox{$\m@th\mkern\@dotsep mu.\mkern\@dotsep mu$}\hfill\nobreak
+          \hbox to24\p@{\CCOneFont\hfil #5}\fi}
+      \par}\fi}
+\def\maketitle{
+  \sbox\ul@box{\rule{18\p@}{.25\p@}\hskip8\p@\hbox to.25\p@{\vbox to26\p@{\noindent\rule{.25\p@}{18\p@}}}}%
+  \sbox\ur@box{\hbox to.25\p@{\vbox to26\p@{\noindent\rule{.25\p@}{18\p@}}}\hskip8\p@\rule{18\p@}{.25\p@}}%
+  \sbox\ll@box{\rule{18\p@}{.25\p@}\hskip8\p@\lower34\p@\hbox to.25\p@{\vbox to26\p@{\noindent\rule{.25\p@}{18\p@}}}}%
+  \sbox\lr@box{\lower34\p@\hbox to.25\p@{\vbox to26\p@{\noindent\rule{.25\p@}{18\p@}}}\hskip8\p@\rule{18\p@}{.25\p@}}%
+%  \pagestyle{empty}
+  \cleardoublepage
+  \thispagestyle{empty}
+  \global\@topnum\z@
+  \@afterindentfalse
+  {\parindent\z@\raggedright\baselineskip\z@\lineskip\z@\parskip\z@
+    \vbox{
+    \vskip -7pt
+    \leavevmode\hfil\baselineskip 30pt\TitlePageTitleFont\raggedleft\@title\medskip\hrule\par}
+    \vskip 60pt
+    {\baselineskip 10pt\lineskip 10pt\FMEDFont by\par\vskip20pt\uppercase{\@author}\par}  %% by added author moved below book title by shibu
+%%%    \leavevmode\hfil\baselineskip 104pt\TitlePageTitleFont\@title\par}}}%%% for book title commnted by shibu
+}}%%% for book title
+%\setcounter{tocdepth}{0}
+\def\tableofcontents{%
+  \@restonecolfalse
+  \if@twocolumn\@restonecoltrue\onecolumn\fi
+%  \@cipfalse
+  \chapter*{\contentsname}
+  \pagestyle{empty}
+%  \thispagestyle{empty}
+  {\raggedright
+  \@mkboth{\contentsname}{\contentsname}
+  {\let\break\space
+    \let\author\toc@author
+    \reset@authors
+    \let\toc@draw\relax
+    \@starttoc{toc}
+    \toc@draw}}
+  \if@restonecol\twocolumn\fi}%% end of tableofcontents
+\def\@tocindent{20pt}
+\def\@pnumwidth{24\p@}
+\newif\if@firstchap
+\newif\if@break
+\def\breakand{\@breaktrue}%
+\newcounter{numauthors}
+\def\toc@author#1{%
+  \if@firstauthor
+    \@firstauthorfalse
+  \else
+    \ifx\@authors\@empty
+      \xdef\@authors{\last@author}%
+    \else
+      \@cons{\@authors}{, \last@author}\fi\fi
+  \stepcounter{numauthors}\gdef\last@author{#1}}
+\def\draw@authors{%
+  \let\@t\authors
+  \ifx\@t\@empty
+    \let\@t\last@author\fi
+  \ifx\@t\@empty\else
+    \unskip\unskip\hskip12\p@
+    \@authors
+    \ifx\@authors\@empty
+    \else
+      \ifnum\c@numauthors>2,\fi
+      \if@break\break\fi
+      \ and \fi
+    \last@author\fi}
+\def\reset@authors{%
+  \gdef\@authors{}%
+  \gdef\last@author{}%
+  \@firstauthortrue
+  \@breakfalse
+  \setcounter{numauthors}{0}}
+\def\l@part#1#2{%
+  \toc@draw
+  \reset@authors
+  \gdef\toc@draw{\draw@part{#1}{#2}}}
+\def\draw@part#1#2{%
+  \ifhmode\par\fi
+  \addpenalty{-\@highpenalty}%
+  \addvspace{12\p@}%
+  \begingroup
+  \@tempdima\@tocindent
+    \parindent \z@ \rightskip \@pnumwidth
+    \parfillskip -\@pnumwidth
+    {\FMCCZeroFont
+      \leavevmode
+      #1\hfil\hbox{}}\vskip12\p@% \hbox to\@pnumwidth{\hss #2}\vskip12\p@
+      \nobreak
+      \global\@nobreaktrue
+      \everypar{\global\@nobreakfalse\everypar{}}\endgroup}
+%%%%% chapter heading into main toc %% shibu
+\def\chap@numline#1{\hbox to\@tempdima{\FMCCThreeNumFont #1\hfil}}
+\def\l@chapter#1#2{%
+  \toc@draw
+  \reset@authors
+  \gdef\toc@draw{\draw@chapter{#1}{#2}}}
+\def\draw@chapter#1#2{%
+  \ifhmode
+    \par
+  \else
+%    \addpenalty{-\@highpenalty}%
+%    \addvspace{12pt}
+  \fi
+  \@tempdima\@tocindent
+  {\def\FolioBoldFont{}%
+    \parindent\z@\rightskip\@pnumwidth
+    \parfillskip -\@pnumwidth
+    \FMCCThreeFont
+    \leavevmode
+    \advance\leftskip\@tempdima
+    \hskip -\leftskip
+    \let\numberline\chap@numline
+    #1{\FMCCThreeAFont\draw@authors}
+\leaders\hbox{$\m@th\mkern\@dotsep mu.\mkern\@dotsep mu$}\hfill\nobreak
+          \hbox to24\p@{\CCOneFont\hfil #2}\par}}
+%%%%          \leaders\hbox{$\m@th\mkern\@dotsep mu.\mkern\@dotsep mu$}\hfill\nobreak
+%    \nobreak\leaders\hbox{$\m@th \mkern \@dotsep mu.\mkern \@dotsep mu$} %%% *********************
+%    \hfill\nobreak\hbox to\@pnumwidth{\hss\FMCCFourFont #2}\par
+%    \break
+%    \penalty\@highpenalty}}
+\def\l@section#1#2{%
+  \toc@draw
+  \reset@authors
+  \gdef\toc@draw{\draw@section{#1}{#2}}}
+\def\draw@section#1#2{%
+  %% commented as per EEH style so that the sections are not entered into the main toc. %%% shibu
+  %% \@dottedtocline{1}{\@tocindent}{2.3em}{{\FMCCFourFont #1\FMCCFourAFont\draw@authors}}{{\def\FolioBoldFont{}#2}}
+}
+%
+\def\@FMHead#1#2{
+  \vskip-10pt
+  \def\@t{#1}
+  \ifx\@t\@empty\else
+    \sbox\@cnbox{\ChapNumFont #1}
+    \hfill\rlap{\hskip-\wd\@cnbox\hskip\numadjust\box\@cnbox}
+    \vskip18pt\fi
+  {\raggedleft\baselineskip28pt\ChapTitleFont #2\par}
+  \vskip1pt
+  \hfill\rule{24pc}{1pt}
+  \vskip24pt plus 6pt}
+\def\contributors{\thispagestyle{empty}\@FMHead{}{Contributors}}%\thispagestyle{empty} added to prevent page no. from appearing in this page
+\def\endcontributors{\thispagestyle{empty}}
+\def\threecontributors#1#2#3#4#5#6{{%
+  \parindent0pt
+  \parbox[t]{10pc}{\raggedright\FMCFont #1\par\FMCAFont #2\par}%
+  \hskip18pt
+  \parbox[t]{10pc}{\raggedright\FMCFont #3\par\FMCAFont #4\par}%
+  \hskip18pt
+  \parbox[t]{10pc}{\raggedright\FMCFont #5\par\FMCAFont #6\par}%
+  \vskip8pt}}
+\def\advisors{\@FMHead{}{Advisory Board}}
+\def\endadvisors{\thispagestyle{empty}}
+\def\twoadvisors#1#2#3#4{{%
+  \parindent0pt
+  \parbox[t]{15pc}{\raggedright\FMCFont #1\par\FMCAFont #2\par}%
+  \hskip36pt
+  \parbox[t]{15pc}{\raggedright\FMCFont #3\par\FMCAFont #4\par}%
+  \vskip8pt}}
+%%
+\def\partauthor#1#2{%
+  \ifx\author@one\@empty
+    \def\author@one{#1}\def\affiliation@one{#2}
+  \else\ifx\author@two\@empty
+    \def\author@two{#1}\def\affiliation@two{#2}
+  \else
+    \def\author@three{#1}\def\affiliation@three{#2}\fi\fi}
+\def\author@one{}
+\def\affiliation@one{}
+\def\author@two{}
+\def\affiliation@two{}
+\def\author@three{}
+\def\affiliation@three{}
+\newwrite\@parttoc
+\def\thepart{\Roman{part}}
+\def\part{
+  \sbox\ul@box{\rule{18\p@}{.25\p@}\hskip8\p@\hbox to.25\p@{\vbox to26\p@{\noindent\rule{.25\p@}{18\p@}}}}%
+  \sbox\ur@box{\hbox to.25\p@{\vbox to26\p@{\noindent\rule{.25\p@}{18\p@}}}\hskip8\p@\rule{18\p@}{.25\p@}}%
+  \sbox\ll@box{\rule{18\p@}{.25\p@}\hskip8\p@\lower34\p@\hbox to.25\p@{\vbox to26\p@{\noindent\rule{.25\p@}{18\p@}}}}%
+  \sbox\lr@box{\lower34\p@\hbox to.25\p@{\vbox to26\p@{\noindent\rule{.25\p@}{18\p@}}}\hskip8\p@\rule{18\p@}{.25\p@}}%
+  \if@filesw\immediate\closeout\@parttoc\fi
+  \cleardoublepage
+  \def\theequation{\thepart.\@arabic\c@equation}%
+  \def\thefigure{\thepart.\@arabic\c@figure}%
+  \def\thetable{\thepart.\@arabic\c@table}%
+  \setcounter{equation}{0}%
+  \setcounter{figure}{0}%
+  \setcounter{table}{0}%
+%%  \pagestyle{headings} %% commented by shibu
+  \@cipfalse
+%%  \thispagestyle{folio}% %% commented by shibu and modified to part headings below
+  \thispagestyle{partheadings}% shibu
+%%  \pagenumbering{Part}% commented by shibu to give the correct page no. format. (chapter no in bold-pageno.)
+  \if@twocolumn
+     \onecolumn
+     \@tempswatrue
+  \else
+    \@tempswafalse\fi
+  \hbox{}
+  \secdef\@@part\@@spart}
+\def\@@spart#1{
+  {\PartTitleFont
+    \setbox\@tempboxa\vbox{\hbox{#1}}
+   \@tempdima\wd\@tempboxa
+    \box\@tempboxa
+    \noindent\vrule width\@tempdima height1pt\par
+}
+  \@endpart}
+%%%%%%%%%%%%%%%%%% No hyphenation in part title
+\newcommand{\nohyphens}{\hyphenpenalty=10000\exhyphenpenalty=10000\relax}
+%%%%%%%%%%%%%%%%%%
+\def\@@part[#1]#2{\@ifnextchar[{\@xpart{#1}{#2}}{\@xpart{#1}{#2}[]}}
+\def\@xpart#1#2[#3]{\@ifnextchar[{\@ypart{#1}{#2}{#3}}{\@ypart{#1}{#2}{#3}[]}}
+\def\@ypart#1#2#3[#4]{
+  \ifnum \c@secnumdepth >-2
+    \relax
+    \refstepcounter{part}%
+    \addcontentsline{toc}{part}{Part \thepart:\hspace{1em}#1\hfill\medskip\hrule}%% PART made Part, : and rule added as per EEH style %% shibu
+  \else
+    \addcontentsline{toc}{part}{#1}\fi
+%  \def\@title{#1}% Commented by shibu to make book title the left hand running head
+  \markboth{#1}{#1}%
+  {\ifnum \c@secnumdepth >-2
+      \relax
+      \hfill\PartNumFont\thepart\par
+      \vskip 20\p@\fi
+    \parindent\z@
+    {\PartTitleFont
+      \baselineskip40\p@
+      \def\@secondline{#3}%
+      \def\@thirdline{#4}%
+%      \setbox\@tempboxa\vbox{\hbox{#2} % commented 27th Feb 2003 by shibu to fit part title within the textwidth and modfied given below
+      \setbox\@tempboxa\vbox{\nohyphens{#2}%5th march for no hyphenation in part title shibu
+        \ifx\@secondline\@empty
+        \else
+          \par\hbox{#3}
+          \ifx\@thirdline\@empty
+          \else
+            \par\hbox{#4}\fi\fi}
+    \@tempdima\wd\@tempboxa
+    \box\@tempboxa
+    \if@pdf\@writetorep{#1}{part.\theHpart}{-1}\fi
+    \par
+    \vrule width\@tempdima height1pt}%
+    \vskip6pt
+    \ifx\author@one\@empty\else{\SEFont\baselineskip16pt\author@one\par}\fi
+    \ifx\affiliation@one\@empty\else{\SEAFont\baselineskip15pt\affiliation@one\par}\fi
+    \ifx\author@two\@empty\else{\SEFont\baselineskip16pt\author@two\par}\fi
+    \ifx\affiliation@two\@empty\else{\SEAFont\baselineskip15pt\affiliation@two\par}\fi
+    \ifx\author@three\@empty\else{\SEFont\baselineskip16pt\author@three\par}\fi
+    \ifx\affiliation@three\@empty\else{\SEAFont\baselineskip15pt\affiliation@three\par}\fi
+    \def\author@one{}%
+    \def\affiliation@one{}%
+    \def\author@two{}%
+    \def\affiliation@two{}%
+    \def\author@three{}%
+    \def\affiliation@three{}%
+    \let\author\toc@author
+    \reset@authors
+    \def\@sections{}%
+    \def\section##1{\ifx\@sections\@empty\def\@sections{##1}\else\@cons{\@sections}{ $\bullet$\ ##1}\fi}%
+    \let\boldmath\@empty
+    \let\contentsline\part@contentsline
+    \vskip40\p@
+    \leftskip60\p@
+    \hsize358\p@
+    \@firstchaptrue
+    \CCTwoFont\sloppy\makeatletter\@input{part\arabic{part}.toc}\makeatother
+    \l@partchapter{}{}}%
+  \def\@fname{part\arabic{part}.toc}
+  \if@filesw\immediate\openout\@parttoc\@fname\fi
+  \vskip24\p@\@afterindentfalse\@afterheading}
+\let\part@contentsline\contentsline
+\def\l@partchapter#1#2{%
+  \if@firstchap
+    \@firstchapfalse
+  \else
+    {\let\@b\bullet
+      \def\bullet{\raisebox{2pt}{$\scriptscriptstyle\@b$}}%
+      \@mydottedtocline{1}{\z@}{6\p@}{\PCOneFont\@chaptitle\hspace{10pt}\CCOneIFont\draw@authors}{{\def\FolioBoldFont{}\@chappage}}\par
+      {\hsize370\p@\footnotesize\@sections\par}}
+    \reset@authors
+    \def\@sections{}\fi   
+  \def\@chaptitle{#1}
+  \def\@chappage{#2}}
+\def\introauthor#1#2{\ifhmode\par\fi\noindent{\SEIFont #1}\par\noindent{\SEIAFont #2}\par\@afterindentfalse\@afterheading}
+\@addtoreset{equation}{part}
+\def\dropcap#1{%
+  \leavevmode
+  {\DropCapFont\global
+    \setbox\@tempboxa\hbox{\uppercase{#1}\hspace{4\p@}}}%
+  \hangindent\wd\@tempboxa\hangafter-3\llap{\vbox to 6.5\p@{\box\@tempboxa}}}
+\newwrite\@chaptoc
+\newwrite\@tempfile
+\newif\if@firstauthor
+\def\chapter{
+  \sbox\ul@box{\rule{18\p@}{.25\p@}\hskip8\p@\hbox to.25\p@{\vbox to26\p@{\noindent\rule{.25\p@}{18\p@}}}}%
+  \sbox\ur@box{\hbox to.25\p@{\vbox to26\p@{\noindent\rule{.25\p@}{18\p@}}}\hskip8\p@\rule{18\p@}{.25\p@}}%
+  \sbox\ll@box{\rule{18\p@}{.25\p@}\hskip8\p@\lower34\p@\hbox to.25\p@{\vbox to26\p@{\noindent\rule{.25\p@}{18\p@}}}}%
+  \sbox\lr@box{\lower34\p@\hbox to.25\p@{\vbox to26\p@{\noindent\rule{.25\p@}{18\p@}}}\hskip8\p@\rule{18\p@}{.25\p@}}%
+  \cleardoublepage
+  \if@filesw\immediate\closeout\@chaptoc\fi
+  \initlists
+  \def\theequation{\thechapter.\@arabic\c@equation}%
+  \def\thefigure{\thechapter.\@arabic\c@figure}%
+  \def\thetable{\thechapter.\@arabic\c@table}%
+    \pagenumbering{Chapter}  %%%      added by shibu   to get the correct page no. format in Chapters
+ \pagestyle{headings}%       
+  \@ciptrue
+  \thispagestyle{folio}%
+  \if@ChapterResetsPage\global\c@page\@ne\fi
+  \global\@topnum\z@
+  \gdef\chapterauthor{\@ca}
+  \gdef\endchapterauthors{\end@cas}
+  \@afterindentfalse
+  \secdef\@chapter\@schapter}
+\def\@chapter[#1]#2{
+  \ifnum \c@secnumdepth >\m@ne
+    \refstepcounter{chapter}%
+    \typeout{\@chapapp\space\thechapter.}%
+    \addcontentsline{toc}{chapter}{\protect\numberline{\thechapter}#1}
+    \my@addcontentsline{\@parttoc}{partchapter}{\string\makebox[21pt]{\thechapter}#1}%    
+    \markboth{}{#1}
+  \else
+    \addcontentsline{toc}{chapter}{#1}\fi
+  \chaptermark{#1}%
+  \addtocontents{lof}{\protect\addvspace{10\p@}}% Adds between-chapter space to
+  \addtocontents{lot}{\protect\addvspace{10\p@}}%lists of figs & tables.
+  \if@twocolumn
+    \@topnewpage[\@makechapterhead{#2}]%
+  \else
+    \@makechapterhead{#2}%
+    \@afterheading\fi
+  \if@filesw\immediate\openout\@chaptoc\thechapter.toc\fi}
+\newsavebox\@cnbox
+\newdimen\numadjust
+\newcount\@chapdigit
+\let\chaptocbreak\space
+\def\@makechapterhead#1{%
+  \@chapdigit=\thechapter \@whilenum\@chapdigit>9\do{\advance\@chapdigit-10}
+  \ifcase\@chapdigit\numadjust2pt\or\numadjust8pt\or\numadjust2pt\or\numadjust5pt\or\numadjust2pt
+    \or\numadjust5pt\or\numadjust2pt\or\numadjust2pt\or\numadjust3pt\or\numadjust3pt\fi%
+  \@FMHead{\thechapter}{#1}%
+  {\parindent\z@
+    \def\author##1##2{\immediate\write\@tempfile{\string\author{##1}{##2}}}%
+    \def\FolioBoldFont{}%
+    \def\'{\noexpand\'}%
+    \def\`{\noexpand\`}%
+    \def\"{\noexpand\"}%
+    \let\@b\bullet
+    \def\bullet{\raisebox{2pt}{$\scriptscriptstyle\@b$}}%
+    \let\SubsectionItalicFont\it
+    \immediate\openout\@tempfile temp
+    {\let\newline\par
+      \let\chaptocbreak\par
+      \def\hyperlink##1##2{##2}%
+      \def\break{\string\break\ }%
+      \global\setbox\@tempboxa\vbox{{%
+        \hsize21pc\sloppy\baselineskip10pt\rightskip24pt plus 1fill\footnotesize%%%%% plus 1 fill added by shibu making CCTwo raggedright.
+        \leftskip\secnumwidth\CCTwoFont
+        \makeatletter\@input{\thechapter.toc}\makeatother\par}}}%
+    \immediate\closeout\@tempfile
+    %\let\bullet\@b
+    \@firstauthortrue
+    \def\author##1##2{\if@firstauthor\@firstauthorfalse\else\vskip10pt\fi\CAFont ##1\def\@t{##2}\ifx\@t\@empty\else\par\CAAFont ##2\fi}%
+    \parbox[b]{12pc}{\raggedright\baselineskip10pt\@input{temp}\ }\box\@tempboxa}%
+  \vskip36pt plus6pt}
+%
+\def\@makesindexhead{%
+ \thispagestyle{empty}%       
+ %% \@FMHead{}{#1}%
+    \my@addcontentsline{toc}{chapter}{Index}}
+%
+\def\@makeschapterhead#1{%
+\thispagestyle{empty}%       added by shibu to prevent page no. from ppearing in this page
+  \@FMHead{}{#1}%
+    \my@addcontentsline{\@parttoc}{partchapter}{#1}}
+\def\chapterauthors{%
+  \def\break{\string\break\ }%
+  \def\protect##1{\string ##1 }}
+\def\end@cas{}
+\def\end@casplusone{\vskip4pt\@doendpe}
+\def\@ca#1#2{%
+  \if@filesw
+    \edef\@tempa{\write\@chaptoc{\string\author{#1}{#2}}}\@tempa
+    {\let\break\space
+      \def\protect##1{\ }%
+      \edef\@tempa{\write\@parttoc{\string\author{#1}}}%
+      \@tempa}%
+    \write\@auxout{\string\@writefile{toc}{\string\author{#1}}}%
+  \fi}
+\def\@caplusone{\@ifstar{\@scaplusone}{\@ifnextchar[{\@xcaplusone}{\@xcaplusone[]}}}
+\def\@xcaplusone[#1]#2#3{\def\@@empty{#1}\ifx\@empty\@@empty\@ca{#2}{#3}\else\@ca{#2}{#1}\fi\@scaplusone{#2}{#3}}
+\def\@scaplusone#1#2{\ifhmode\vskip-12pt\fi\noindent\hskip3pc{\CAPlusOneFont\baselineskip14pt #1\def\@t{#2}\ifx\@t\@empty\else,\fi}\hskip6pt{\CAAPlusOneFont #2}\par}
+\def\chapterauthoronly#1#2{\@ca{#1}{}\@scaplusone{#1}{#2}}
+
+\newif\if@firstsub
+\newif\if@writesubs
+\@writesubstrue
+\newdimen\@abovesub
+
+\def\section{%
+  \gdef\chapterauthor{\@caplusone}%
+  \gdef\endchapterauthors{\end@casplusone}%
+  \@firstsubtrue
+  \@ifstar{\@ssection}{\@dblarg{\@section}}}
+\def\@ssection#1{%
+  \@startsection{section}{1}{\z@}{-15pt}{3pt}{\SectionHeadFont\baselineskip15pt}*{#1}%
+  \if@pdf
+    \refstepcounter{section}%
+    \addcontentsline{toc}{section}{\protect\numberline{}{#1}}\fi
+  %\myaddcontentsline{\@chaptoc}{chapsection}{#1}%%%%% change by itc
+  \@aftersection}
+\def\@section[#1]#2{%
+  {\def\break{\ }%
+    \def\protect##1{\string ##1 }%
+    \edef\@tempa{\write\@parttoc{\string\section{#1}}}\@tempa}%
+  \@startsection{section}{1}{\z@}{-15pt}{3pt}{\SectionHeadFont\baselineskip15pt}[#1]{#2}%
+  \myaddcontentsline{\@chaptoc}{chapsection}{\string\makebox[\secnumwidth][l]{\thesection}#1}%
+  \@aftersection}
+\def\@aftersection{%
+  \nobreak\addvspace{-10pt}%
+  \nobreak\rule{\columnwidth}{.25pt}%
+  \nobreak\vskip-8pt
+  \nobreak\hbox{}%
+  \let\reserved@d\subsection
+  \def\reserved@a{\vskip-6pt\@abovesub-1pt\ignorespaces}%
+  \def\reserved@b{\@abovesub-18pt\@xsect{3pt}}
+  \futurelet\@let@token\@ifnch}
+\def\l@chapsection{\@mydottedtocline{1}{\z@}{6pt}}
+\def\subsection{\@ifstar{\@ssubsection}{\@dblarg{\@subsection}}}
+\def\@ssubsection#1{%
+  \@startsection{subsection}{2}{\z@}{\@abovesub}{6pt}{\SubsectionHeadFont}*{#1}%
+%%%%  \if@writesubs\myaddcontentsline{\@chaptoc}{chapsection}{#1}\fi   %%%%% change by itc
+%%%%  \@firstsubtrue %%%% %%%%% change by itc
+  \@abovesub-18pt}
+\def\@subsection[#1]#2{%
+  \@startsection{subsection}{2}{\z@}{\@abovesub}{6pt}{\SubsectionHeadFont}[#1]{#2}%
+  \@abovesub-18pt
+  \if@writesubs\if@filesw
+    {\def\protect##1{\string ##1 }%
+      \if@firstsub
+        \edef\@tempa{\write\@chaptoc{#1}}\@tempa
+      \else
+        \edef\@tempa{\write\@chaptoc{$\bullet$\ #1}}\@tempa\fi}\fi\fi
+  \@firstsubfalse}
+\def\TOCSubsOn{\@writesubstrue}
+\def\TOCSubsOff{\@writesubsfalse}
+\def\subsubsection{\@ifstar{\@ssubsubsection}{\@dblarg{\@subsubsection}}}
+\def\@ssubsubsection#1{%
+  \@startsection{subsubsection}{3}{2pc}{12pt}{3pt}{\SubsubsectionHeadFont}*{#1}%
+  \everypar{%
+    \if@nobreak%
+      \global\@nobreakfalse\clubpenalty\@M%
+      \hskip2pc\hskip-\parindent%
+    \else%
+      \clubpenalty\@clubpenalty\everypar{}%
+    \fi}}
+\def\@subsubsection[#1]#2{%%% shibu
+%  \@startsection{subsubsection}{3}{2pc}{12pt}{3pt}{\raggedright\SubsubsectionHeadFont}[#1]{#2}%
+  \@startsection{subsubsection}{3}{0pc}{12pt}{6pt}{\raggedright\SubsubsectionHeadFont}[#1]{#2}%
+  \everypar{%
+    \if@nobreak%
+      \global\@nobreakfalse\clubpenalty\@M%
+%      \hskip2pc
+\hskip-\parindent%
+    \else%
+      \clubpenalty\@clubpenalty\everypar{}%
+    \fi}}
+%\def\paragraph{\@startsection{paragraph}{4}{3pc}{1pt}{-10pt}{\ParagraphHeadFont}}
+\def\paragraph{\@startsection{paragraph}{4}{0pc}{12pt}{.5pt}{\ParagraphHeadFont}}%
+%\def\subparagraph{\@startsection{paragraph}{4}{3pc}{1pt}{-10pt}{\SubParagraphHeadFont}}
+\def\subparagraph{\@startsection{paragraph}{4}{0pc}{1pt}{-10pt}{\SubParagraphHeadFont}}
+\def\@xsect#1{%
+  \@tempskipa #1\relax
+  \ifdim \@tempskipa>\z@
+    \nobreak \par \nobreak
+    \vskip \@tempskipa \nobreak
+    \@afterheading
+  \else
+    \global\@nobreakfalse \global\@noskipsectrue
+    \everypar{%
+      \if@noskipsec
+        \global\@noskipsecfalse
+        \clubpenalty\@M \hskip -\parindent
+        \begingroup \@svsechd \endgroup
+        \unskip
+%%        \@tempskipa #1\relax
+        \@tempskipa #1.\relax
+        \hskip -\@tempskipa
+      \else
+        \clubpenalty \@clubpenalty
+        \everypar{}%
+      \fi}%
+  \fi
+  \ignorespaces}
+
+\newcounter{proposition}[chapter]
+\newcounter{lemma}[chapter]
+\newcounter{corollary}[chapter]
+\newcounter{proof}[chapter]
+\newcounter{definition}[chapter]
+\newcounter{remark}[chapter]
+\newcounter{properties}[chapter]
+\newcounter{theorem}[chapter]
+\newcounter{example}[chapter]
+\newcounter{solution}[chapter]%%%%%%%%%%%%%%%%%%%%% new solution counter added/created
+\newcounter{fact}[chapter]
+\def\theproposition{\arabic{chapter}.\arabic{proposition}}
+\def\thelemma{\arabic{chapter}.\arabic{lemma}}
+\def\thecorollary{\arabic{chapter}.\arabic{corollary}}
+\def\theproof{\arabic{chapter}.\arabic{proof}}
+\def\thedefinition{\arabic{chapter}.\arabic{definition}}
+\def\theremark{\arabic{chapter}.\arabic{remark}}
+\def\theproperties{\arabic{chapter}.\arabic{properties}}
+\def\thetheorem{\arabic{chapter}.\arabic{theorem}}
+\def\theexample{\arabic{chapter}.\arabic{example}}
+\def\thesolution{\arabic{chapter}.\arabic{solution}}%%%% counter for solution
+\def\thefact{\arabic{chapter}.\arabic{fact}}
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Proof changed on Nov. 12th--2002
+\newif\ifproof
+\global\prooffalse
+%
+%\newenvironment{PLCPDRP}[1]{
+%  \refstepcounter{#1}
+%  \ifhmode\par\fi
+%  \addvspace{18pt}%
+%  \noindent%
+%  {\PLCPDRPHeadFont \uppercase{#1}\ \csname the#1\endcsname}%
+%  \hskip 10pt%
+%  \bgroup
+%}{\egroup\ifhmode\par\fi\addvspace{12pt}}
+\newenvironment{PLCPDRP}[1]{
+  \refstepcounter{#1}
+  \ifhmode\par\fi
+  \addvspace{18pt}%
+  \noindent%
+  \ifproof
+     {\PLCPDRPHeadFont {Proof}}%
+  \else
+     {\PLCPDRPHeadFont \uppercase{#1}\ \csname the#1\endcsname}%
+  \fi
+  \hskip 10pt%
+  \bgroup
+}{\egroup\ifhmode\par\fi\addvspace{12pt}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newenvironment{proposition}{\PLCPDRP{proposition}}{\endPLCPDRP}
+\newenvironment{lemma}{\PLCPDRP{lemma}}{\endPLCPDRP}
+\newenvironment{corollary}{\PLCPDRP{corollary}}{\endPLCPDRP}
+\newenvironment{proof}{\prooftrue\PLCPDRP{proof}}{\endPLCPDRP\prooffalse}
+\newenvironment{definition}{\PLCPDRP{definition}}{\endPLCPDRP}
+\newenvironment{remark}{\PLCPDRP{remark}}{\endPLCPDRP}
+\newenvironment{properties}{\PLCPDRP{properties}}{\endPLCPDRP}
+\newenvironment{theorem}{
+  \refstepcounter{theorem}
+  \ifhmode\par\fi
+  \addvspace{18pt}%
+  \noindent%
+  {\TheoremHeadFont THEOREM \thetheorem}%
+  \hskip 10pt%
+  \bgroup\it
+}{\egroup\ifhmode\par\fi\addvspace{12pt}}
+%\def\example#1{
+%  \refstepcounter{example}%
+%  \ifhmode\par\fi%
+%  \addvspace{24pt}%
+%  \begingroup
+%  \settowidth\leftskip{\hskip10pt\ExampleHeadFont EXAMPLE \theexample:\quad}\rightskip10pt
+%  \noindent\hskip-\leftskip{\hskip10pt\ExampleHeadFont EXAMPLE \theexample:\quad}#1
+%  \vskip6pt
+%  \endgroup}
+\newenvironment{example}{
+  \refstepcounter{example}
+  \ifhmode\par\fi%
+  \addvspace{12pt}%
+  \noindent\ignorespaces%
+  {\ExampleHeadFont Example~\theexample\par}\vskip6pt%
+  \noindent\ignorespaces%
+  \bgroup%
+  \noindent\ignorespaces%
+}{\egroup\ifhmode\par\fi\addvspace{12pt}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% New Solution Env created %% shibu
+\newenvironment{solution}{
+  \refstepcounter{solution}
+  \ifhmode\par\fi%
+  \addvspace{12pt}%
+  \noindent\ignorespaces%
+  {\SolutionHeadFont Solution~\thesolution\par}\vskip6pt%
+  \noindent\ignorespaces%
+  \bgroup%
+  \noindent\ignorespaces%
+}{\egroup\ifhmode\par\fi\addvspace{12pt}\noindent\ignorespaces}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  New glossary Env. Created %% shibu
+\newenvironment{gloss}
+               {\list{}{\labelwidth\z@ \itemindent-\leftmargin
+                        \let\makelabel\glosslabel}}
+               {\endlist}
+\newcommand\glosslabel[1]{\hspace\labelsep
+                                \normalfont\bfseries #1}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newenvironment{fact}{
+  \refstepcounter{fact}
+  \ifhmode\par\fi
+  \addvspace{18pt}%
+  \noindent%
+  {\TheoremHeadFont FACT \thefact}%
+  \hskip 10pt%
+  \bgroup\it
+}{\egroup\ifhmode\par\fi\addvspace{12pt}}
+\newenvironment{extract}{\ifhmode\par\fi\leftskip3pc\rightskip10pt\vskip6pt}{\vskip6pt}
+\def\unnumlist{\list{}{\@listunnum}} 
+\let\endunnumlist\endlist
+%%
+\def\thebibliography#1{
+% \samepage
+%%%%%%%%%%%%%%%%%%%%%% Added Reference Head
+\addvspace{1pc}\noindent {\SectionHeadFont References}
+  \BiblioFont
+  \list{\@biblabel{\arabic{enumiv}}
+}{\settowidth\labelwidth{\@biblabel{#1}}%
+    \leftmargin\labelwidth
+    \advance\leftmargin\labelsep
+    \if@UnnumberedReferences\itemindent-\leftmargin\fi
+    \itemsep0pt
+    \parsep0pt
+    \usecounter{enumiv}%
+    \let\p@enumiv\@empty
+    \def\labelenumiv{\theenumiv.}%
+    \def\theenumiv{\arabic{enumiv}}}%
+  \def\makelabel##1{\hss\llap{##1}}%
+  \def\newblock{\hskip .11em plus.33em minus.07em}%
+  \sloppy\clubpenalty4000\widowpenalty4000
+  \sfcode`\.=\@m
+  \let\reserved@d\bibliopar
+  \def\reserved@a{\vskip-31pt\vbox{}\item[]\hskip\itemindent}%
+  \def\reserved@b{}%
+  \futurelet\@let@token\@ifnch}
+%\def\thebibliography#1{
+%% \samepage
+%  \BiblioFont
+%  \list{\@biblabel{\arabic{enumiv}}}{\settowidth\labelwidth{\@biblabel{#1}}%
+%    \leftmargin30pt  %% as per EEH style %% shibu
+%%    \leftmargin\labelwidth  %% commented shibu
+%    \advance\leftmargin\labelsep
+%%%    \if@UnnumberedReferences\itemindent-\leftmargin\fi   %% commented shibu
+%\if@UnnumberedReferences
+%\itemindent-35pt %% shibu as per EEH
+%\else
+%\itemindent-22pt %% shibu as per EEH
+%\fi
+%    \itemsep0pt
+%    \parsep0pt
+%    \usecounter{enumiv}%
+%    \let\p@enumiv\@empty
+%    \def\labelenumiv{\theenumiv.}%
+%    \def\theenumiv{\arabic{enumiv}}}%
+%  \def\makelabel##1{\hss\llap{##1}}%
+%  \def\newblock{\hskip .11em plus.33em minus.07em}%
+%  \sloppy\clubpenalty4000\widowpenalty4000
+%  \sfcode`\.=\@m
+%  \let\reserved@d\bibliopar
+%  \def\reserved@a{\vskip-31pt\vbox{}\item[]\hskip\itemindent}%
+%  \def\reserved@b{}%
+%  \futurelet\@let@token\@ifnch}
+\def\bibliopar#1{
+  \ifhmode\par\fi
+  \addvspace{6pt}
+  \noindent
+  {\parindent\z@
+  \leftskip-\leftmargin
+  #1
+  \ifhmode\par\fi}
+  \addvspace{6pt}}
+\if@UnnumberedReferences
+   \def\@biblabel#1{}
+   \def\@biblabel#1{\def\@t{#1}\ifx\@t\@empty\else\fi}
+\else
+%   \def\@biblabel#1{\stepcounter{enumiv}\@arabic\c@enumiv.}
+        \def\@biblabel#1{\def\@t{#1}\ifx\@t\@empty\else[#1]\fi}
+\fi
+%%  \def\@biblabel#1{\def\@t{#1}\ifx\@t\@empty\else[#1]\fi}\fi %% commented by shibu and modified below:
+%% \def\@biblabel#1{\def\@t{#1}\ifx\@t\@empty\else\fi}
+%
+%
+\newcounter{subequation}[equation]
+\def\eqnarray{\stepcounter{equation}\let\@currentlabel\theequation\@eqnarray}
+\def\@eqnarray{
+\global\@eqnswtrue\m@th
+\global\@eqcnt\z@\tabskip\@centering\let\\\@eqncr
+$$\halign to\displaywidth\bgroup\@eqnsel\hskip\@centering
+  $\displaystyle\tabskip\z@{##}$&\global\@eqcnt\@ne
+  \hskip 2\arraycolsep \hfil${##}$\hfil
+  &\global\@eqcnt\tw@ \hskip 2\arraycolsep $\displaystyle\tabskip\z@{##}$\hfil
+   \tabskip\@centering&\llap{##}\tabskip\z@\cr} 
+\def\endeqnarray{\end@eqnarray\global\advance\c@equation\m@ne}
+\def\end@eqnarray{\@@eqncr\egroup$$\global\@ignoretrue}
+\@namedef{eqnarray*}{\def\@eqncr{\nonumber\@seqncr}\@eqnarray}
+\@namedef{endeqnarray*}{\nonumber\end@eqnarray}
+\def\@eqnnum{{\EqNumFont (\theequation)}}
+\def\@eqnnumlet{{\EqNumFont (\thesubequation)}}
+\def\eqnletarray{\ifhmode\vskip-\parskip\fi
+\ifnum\c@subequation=0\stepcounter{equation}\c@subequation1\fi
+  \let\@currentlabel\thesubequation
+  \global\@eqnswtrue
+  \m@th
+  \global\@eqcnt\z@
+  \tabskip\@centering
+  \let\\\@eqnletcr
+  \noindent\hskip-\@totalleftmargin\hbox to\textwidth\bgroup\vbox\bgroup$$
+  \halign to\displaywidth\bgroup\@eqnsel\hskip\@centering
+  $\displaystyle\tabskip\z@{##}$&\global\@eqcnt\@ne
+  \hskip 2\arraycolsep \hfil${##}$\hfil
+  &\global\@eqcnt\tw@ \hskip 2\arraycolsep $\displaystyle\tabskip\z@{##}$\hfil
+   \tabskip\@centering&\llap{##}\tabskip\z@\cr}
+\def\endeqnletarray{%
+  \@@eqnletcr
+  \egroup$$\egroup\egroup\vskip\jot\noindent\global\@ignoretrue}
+\if@pdf
+  \def\H@eqnarraystar{\def\@eqncr{\nonumber\@seqncr}\@eqnarray}%
+  \def\H@endeqnarraystar{\nonumber\end@eqnarray}%
+  \AtBeginDocument{%
+    \@namedef{eqnarray*}{\H@eqnarraystar}%
+    \@namedef{endeqnarray*}{\H@endeqnarraystar}}%
+  \let\H@eqnletarray\eqnletarray
+  \let\H@endeqnletarray\endeqnletarray
+  \def\eqnletarray{%
+    \let\reserved@a\relax
+    \H@eqnletarray
+    \make@stripped@name{\thesubequation}%
+    \let\theHsubequation\newname
+    \hyper@makecurrent{subequation}%
+    \hyper@anchorstart{\@currentHref}}
+  \def\endeqnletarray{%
+    \hyper@anchorend
+    \H@endeqnletarray}\fi
+\def\@eqnletcr{%
+  {\ifnum0=`}\fi
+  \@ifstar{%
+    \global\@eqpen\@M\@yeqnletcr
+  }{%
+    \global\@eqpen\interdisplaylinepenalty \@yeqnletcr}}
+\def\@yeqnletcr{\@ifnextchar[{\@xeqnletcr}{\@xeqnletcr[\z@]}}
+\def\@xeqnletcr[#1]{%
+  \ifnum0=`{\fi}%
+  \@@eqnletcr
+  \noalign{\penalty\@eqpen\vskip\jot\vskip #1\relax}} 
+\def\@@eqnletcr{\let\@tempa\relax
+    \ifcase\@eqcnt \def\@tempa{& & &}\or \def\@tempa{& &}%
+      \else \def\@tempa{&}\fi
+     \@tempa \if@eqnsw\@eqnnumlet\stepcounter{subequation}\fi
+     \global\@eqnswtrue\global\@eqcnt\z@\cr}
+\def\thesubequation{\theequation\alph{subequation}}
+\def\reseteqnletter{\setcounter{subequation}{0}}
+\setlength{\floatsep}{20pt plus 2pt minus 2pt}%%%% added by shibu for vertical space between figures %%%
+\newdimen\artmargin \artmargin\z@
+\newif\if@dblfloat \@dblfloatfalse
+\newif\if@centercaption \@centercaptionfalse
+
+\def\@dblfloat{%
+  \if@twocolumn\let\@tempa\@dbflt\@dblfloattrue\else\let\@tempa\@float\fi
+  \@tempa}
+\let\@end@dblfloat\end@dblfloat
+\def\end@dblfloat{\@dblfloatfalse\@end@dblfloat}
+%\newcounter{subfigure}[figure]
+\def\figurenumber{%
+  \refstepcounter{figure}%
+%%  \noindent{\FigureNumFont\thefigure}}
+\noindent{\FigureNumFont FIGURE \thefigure}} %% FIGURE added by shibu
+\def\figurenumberlet{%
+  \refstepcounter{subfigure}%
+  \noindent{\FigureNumFont Figure \thesubfigure}}
+%\def\caption{\@ifnextchar[{\@caption}{\@caption[\textwidth]}}
+%\def\@caption[#1]#2{%
+%  {\baselineskip 11pt \lineskip 11pt
+%  \vskip 3pt plus 9pt
+%  \noindent\parbox{#1}%
+%    {\if@centercaption\hfil\fi\hskip\artmargin\figurenumber\quad\def\it{\CaptionItFont}\CaptionFont #2\hfil}%
+%    \vskip-10pt}%
+%  {\let\ref\@gobble
+%    \addcontentsline{\ext@figure}{figure}{\protect\numberline{\thefigure}{#2}}}}
+\def\captionlet#1{%
+  {\baselineskip 11pt \lineskip 11pt
+  \vskip 3pt plus 9pt
+  \noindent\parbox{\if@dblfloat\textwidth\else\columnwidth\fi}%
+    {\if@centercaption\hfil\fi\hskip\artmargin\figurenumberlet\quad\def\it{\CaptionItFont}\CaptionFont #1\hfil}
+  \vskip-10pt}
+  {\let\ref\@gobble
+  \addcontentsline{\ext@figure}{figure}{\protect\numberline{\thesubfigure}{#1}}}}
+\def\figurename{FIGURE}
+\def\thesubfigure{\thechapter.\@arabic\c@figure\alph{subfigure}}
+\def\resetfigureletter{\setcounter{subfigure}{0}}
+\def\artdirectory{}         % change to get art from different directory
+\intextsep24pt
+
+\newif\if@tablerules \@tablerulestrue
+\newif\if@thinline \@thinlinefalse
+\newif\if@centertable
+\newif\if@centertabletitle
+\newbox\@tablebox
+\newbox\@tabletitlebox
+\newdimen\@tablewidth
+\newdimen\@tabletitlewidth
+%\newcounter{subtable}[table]
+\def\noautomaticrules{\@tablerulesfalse}
+\def\nocentertable{\@centertablefalse}
+\def\toprule{\\[-6pt] \hline \\[-6pt]}%%%%%%%%%%%%%%%%%%%%%%%%% New toprule for table defined
+\def\thinline{\global\@thinlinetrue}
+\def\@Tabletitle{}
+\long\def\tabletitle#1{%
+  \def\@tabletitle{#1}%
+  \let\@Tabletitle\@TableTitle
+  \refstepcounter{table}%
+  {\let\footnotemark\@empty
+    \let\footnote\@gobble
+    \addcontentsline{\ext@table}{table}{\protect\numberline{}{\@tabletitle}}}}
+\long\def\tabletitlelet#1{%
+  \def\@tabletitle{#1}%
+  \let\@Tabletitle\@TableLetTitle
+  \refstepcounter{subtable}%
+  {\let\footnotemark\@empty
+    \let\footnote\@gobble
+    \addcontentsline{\ext@table}{table}{\protect\numberline{}{\@tabletitle}}}}
+\def\@TableTitle{%
+  \noindent
+  \if@centertabletitle\hfil\fi
+  {\TableNumFont\fnum@table}\quad{\def\it{\CaptionItFont}\TableTitleFont\@tabletitle}\hfil}
+\def\@TableLetTitle{%
+  \noindent
+  \if@centertabletitle\hfil\fi
+  {\TableNumFont Table \thesubtable}\quad{\def\it{\CaptionItFont}\TableTitleFont\@tabletitle}\hfil}
+\def\table{\long\def\caption##1{\tabletitle{##1}\@TableTitle\par}\@float{table}}
+\@namedef{table*}{\long\def\caption##1{\tabletitle{##1}\@TableTitle\par}\@dblfloat{table}}
+\def\@tabular{
+  \parindent\z@
+  \global\@thinlinefalse
+  \leavevmode
+  \if@centertable\hfil\fi
+  \vbox\bgroup
+  \setbox\@tablebox\hbox\bgroup
+  \baselineskip11pt
+  \scriptsize\renewcommand{\arraystretch}{.916666666667}%
+  $\let\@acol\@tabacol
+  \let\@classz\@tabclassz
+  \let\@classiv\@tabclassiv \let\\\@tabularcr\@tabarray}
+\def\endtabular{%
+  \crcr\egroup\egroup $\egroup
+  \@tablewidth\wd\@tablebox
+  \setbox\@tabletitlebox\hbox{\@Tabletitle}%
+  \ifnum\wd\@tabletitlebox>\@tablewidth
+    {\hsize\@tablewidth\raggedright\global\setbox\@tabletitlebox\vbox{\@Tabletitle}}\fi
+  \global\@tabletitlewidth\wd\@tabletitlebox
+  \ifnum\@tabletitlewidth<\@tablewidth\global\@tabletitlewidth\@tablewidth\fi
+  \if@centertable\hfil\fi\hbox to\@tabletitlewidth{\box\@tabletitlebox}\llstrut\hfil\par
+  \if@tablerules\vskip-8pt\if@centertable\hfil\fi\hbox to\@tabletitlewidth{\if@centertable\hfil\fi\rule{\@tablewidth}{1pt}\hfil}\hfil\par\fi
+  \if@centertable\hfil\fi\hbox to\@tabletitlewidth{\if@centertable\hfil\fi\box\@tablebox\hfil}\hfil\vskip1pt
+  \if@tablerules\if@centertable\hfil\fi\hbox to\@tabletitlewidth{\if@centertable\hfil\fi\rule{\@tablewidth}{\if@thinline .5\p@\else 1\p@\fi}\hfil}\hfil\par\fi
+  \egroup\hfil
+  \vskip 0pt plus 12pt
+  \gdef\@Tabletitle{}}
+\def\tablefooter{\@ifnextchar[{\@tablefooter}{\@tablefooter[\z@]}}
+\def\@tablefooter[#1]{
+  \noindent\hskip #1
+  \if@centertable\hfil\fi
+  \hbox to\@tabletitlewidth\bgroup
+    \hsize\@tabletitlewidth\linewidth\@tabletitlewidth\textwidth\@tabletitlewidth
+    \scriptsize\vbox\bgroup}
+\def\endtablefooter{%
+  \ifhmode\par\fi
+  \vskip-4\p@
+  \noindent\rule{\@tabletitlewidth}{1pt}
+  \egroup\egroup\hfil
+  \vskip 0pt plus 12pt}
+\def\tch#1{\TableColHeadFont #1\llstrut\hfill}
+\def\source#1{\vskip-\lastskip\noindent\TableFootnoteFont #1\vskip 0pt plus 18pt}
+\def\tablename{TABLE}
+\def\thesubtable{\thechapter.\@arabic\c@table\alph{subtable}}
+\def\resettableletter{\setcounter{subtable}{0}}
+\def\llstrut{\rule[-4pt]{0pt}{8pt}}
+\def\flstrut{\rule{0pt}{12pt}}
+\def\tabletitlestrut{\rule{0pt}{12pt}}
+\def\tablefootnotestrut{\rule{0pt}{12pt}}
+\arrayrulewidth0.25pt
+\@centertabletrue
+\@centertabletitlefalse
+\def\centertabletitle{\@centertabletitletrue}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Contributory Page
+%\newenvironment{contributors}
+%{\begin{multicols}[3]\begin{list}}
+%{\end{list}\end{multicols}}
+%%%%%%%
+\newdimen\@colonewidth\@colonewidth1in
+\newdimen\@coltwowidth
+\long\def\variable#1#2{\@ifnextchar[{\@variableset{#1}{#2}}{\@variable{#1}{#2}}}
+\long\def\@variableset#1#2[#3]{\@colonewidth #3\@variable{#1}{#2}}
+\long\def\@variable#1#2{%
+  \ifhmode\par\fi
+  \noindent\parbox[t]{\@colonewidth}{$#1$}\hfill$=$\hfill
+  \@coltwowidth\linewidth
+  \advance\@coltwowidth-\@colonewidth
+  \advance\@coltwowidth-2pc
+  \parbox[t]{\@coltwowidth}{#2}\par}
+
+%%\def\thefootnote{\FootnoteFont\arabic{footnote}}
+\def\thefootnote{\setcounter{footnote}{0}\fnsymbol{footnote}}
+\def\footnoterule{
+  \kern-5\p@
+%  \hrule width \columnwidth height .25pt
+  \hrule width 6pc height .25pt
+  \kern 4.75\p@}
+\skip\footins 36pt
+
+\def\initlists{
+  \def\@listi{
+    \leftmargin\leftmargini
+    \rightmargin 21pt
+    \labelsep 5pt
+    \labelwidth\leftmargin\advance\labelwidth-\labelsep
+    \parsep 0pt
+    \topsep 6pt plus 2pt minus 1pt
+    \itemsep 2pt}}
+\def\@listunnum{%%%%%%% unnumlist as per EEH style
+  \leftmargin 25pt
+  \rightmargin 0pt
+  \itemindent -15pt
+  \parsep 0pt
+  \topsep 4.5pt %%plus 2pt minus 2pt
+  \itemsep 0pt}
+\def\enumerate{\ifnum \@enumdepth >3 \@toodeep\else
+  \def\equation{\ifhmode\par\fi\abovedisplayshortskip\abovedisplayskip
+    \noindent\hskip-\@totalleftmargin\hbox to\textwidth\bgroup\vbox\bgroup$$
+    \refstepcounter{equation}}
+  \def\endequation{\eqno \hbox{\@eqnnum}
+    $$\egroup\egroup\global\@ignoretrue}
+  \let\@eqnarray\enumerate@eqnarray
+  \def\end@eqnarray{\@@eqncr\egroup$$\egroup\egroup\vskip\jot\global\@ignoretrue}
+  \advance\@enumdepth\@ne
+  \edef\@enumctr{enum\romannumeral\the\@enumdepth}\list
+  {\csname label\@enumctr\endcsname}{\usecounter{\@enumctr}
+  \def\makelabel##1{\hss\llap{##1}}}\fi}
+\def\enumerate@eqnarray{\ifhmode\par\fi\vskip\abovedisplayskip
+  \global\@eqnswtrue\m@th
+  \global\@eqcnt\z@\tabskip\@centering\let\\\@eqncr
+  \noindent\hskip-\@totalleftmargin\hbox to\textwidth\bgroup\vbox\bgroup$$
+  \halign to\displaywidth\bgroup\@eqnsel\hskip\@centering
+  $\displaystyle\tabskip\z@{##}$&\global\@eqcnt\@ne
+  \hskip 2\arraycolsep \hfil${##}$\hfil
+  &\global\@eqcnt\tw@ \hskip 2\arraycolsep $\displaystyle\tabskip\z@{##}$\hfil
+  \tabskip\@centering&\llap{##}\tabskip\z@\cr}
+
+\if@FontsAvailable
+\newfont{\BiblioFont}{morg at 9.5pt}
+\newfont{\CAAFont}{tmi at 7pt}
+\newfont{\CAAPlusOneFont}{tmi at 9pt}
+\newfont{\CAFont}{tmr at 10pt}
+\newfont{\CAPlusOneFont}{tmi at 12pt}
+\newfont{\CCOneFont}{morg at 9.5pt}
+\newfont{\CCOneIFont}{moi at 9.5pt}
+\newfont{\CCTwoFont}{morg at 8.5pt}
+\newfont{\CIPFont}{morg at 7pt}
+\newfont{\CaptionFont}{morg at 8.5pt}
+\newfont{\CaptionItFont}{moi at 8.5pt}
+\newfont{\ChapNumFont}{tmr at 72pt}
+\newfont{\ChapTitleFont}{tmr at 24pt}
+\newfont{\DropCapFont}{morg at 46pt}
+\newfont{\EqNumFont}{morg at 9.5pt}
+\newfont{\ExampleHeadFont}{mob at 9.5pt}
+\newfont{\SolutionHeadFont}{cmbxsl10 at 9.5pt} %%%% new created
+\newfont{\FMCAFont}{morg at 8.5pt}
+\newfont{\FMCCFourAFont}{moi at 9.5pt}
+\newfont{\FMCCFourFont}{morg at 9.5pt}
+\newfont{\FMCCOneFont}{tmb at 13pt}
+\newfont{\FMCCThreeAFont}{moi at 11pt}
+\newfont{\FMCCThreeFont}{morg at 11pt}
+\newfont{\FMCCThreeNumFont}{morg at 14pt}
+\newfont{\FMCCTwoFont}{morg at 9.5pt}
+\newfont{\FMCCZeroFont}{tmb at 14pt}
+\newfont{\FMCFont}{tmb at 10pt}
+\newfont{\FMEDFont}{tmb at 11pt}
+\newfont{\FigureNumFont}{mob at 8.5pt}
+\newfont{\FolioFont}{tmr at 9pt}
+\newfont{\FolioBoldFont}{tmb at 9pt}
+\newfont{\FolioBoldFontIndex}{tmb at 8pt}
+\newfont{\FootnoteFont}{morg at 8.5pt}
+\newfont{\PLCPDRPHeadFont}{mob at 9.5pt}
+\newfont{\ParagraphHeadFont}{mobi at 9.5pt}
+%\newfont{\SubParagraphHeadFont}{mobi at 9pt}
+\newfont{\SubParagraphHeadFont}{mob at 9pt}
+\newfont{\PartNumFont}{tmr at 96pt}
+\newfont{\PartTitleFont}{tmr at 36pt}
+\newfont{\PCOneFont}{mob at 9.5pt}
+\newfont{\RHFont}{tmi at 9pt}
+\newfont{\SCAuthorFont}{moi at 9.5pt}
+\newfont{\SEAFont}{tmi at 11pt}
+\newfont{\SEFont}{tmi at 16pt}
+\newfont{\SEIAFont}{tmi at 10pt}
+\newfont{\SEIFont}{tmi at 12pt}
+\newfont{\SectionHeadFont}{tmb at 13pt}
+\newfont{\SubsectionHeadFont}{tmb at 11pt}
+\newfont{\SubsectionItalicFont}{tmbi at 11pt}
+\newfont{\SubsubsectionHeadFont}{tmb at 9.5pt}
+\newfont{\TableBodyFont}{morg at 8pt}
+\newfont{\TableColHeadFont}{morg at 8pt}
+\newfont{\TableFootnoteFont}{morg at 8pt}
+\newfont{\TableNumFont}{mob at 8.5pt}
+\newfont{\TableTitleFont}{morg at 8.5pt}
+\newfont{\TheoremHeadFont}{mobi at 9.5pt}
+\newfont{\TitlePageTitleFont}{tmr at 24pt}
+\else
+\newfont{\BiblioFont}{cmr10 at 9.5pt}
+\newfont{\CAAFont}{cmsl10 at 7pt}
+\newfont{\CAAPlusOneFont}{cmsl10 at 9pt}
+\newfont{\CAFont}{cmr10}
+\newfont{\CAPlusOneFont}{cmsl10 at 12pt}
+\newfont{\CCOneFont}{cmr10 at 9.5pt}
+\newfont{\CCOneIFont}{cmsl10 at 9.5pt}
+\newfont{\CCTwoFont}{cmr10 at 8.5pt}
+\newfont{\CIPFont}{cmr10 at 7pt}
+\newfont{\CaptionFont}{cmr10 at 8.5pt}
+\newfont{\CaptionItFont}{cmsl10 at 8.5pt}
+\newfont{\ChapNumFont}{cmr10 at 72pt}
+\newfont{\ChapTitleFont}{cmr10 at 24pt}
+\newfont{\DropCapFont}{cmr10 at 46pt}
+\newfont{\EqNumFont}{cmr10 at 9.5pt}
+\newfont{\ExampleHeadFont}{cmbx10 at 9.5pt}
+\newfont{\SolutionHeadFont}{cmbxsl10 at 9.5pt} %%%% new created
+\newfont{\FMCAFont}{cmr10 at 8.5pt}
+\newfont{\FMCCFourAFont}{cmsl10 at 9.5pt}
+\newfont{\FMCCFourFont}{cmr10 at 9.5pt}
+\newfont{\FMCCOneFont}{cmbx10 at 13pt}
+\newfont{\FMCCThreeAFont}{cmsl10 at 11pt}
+\newfont{\FMCCThreeFont}{cmr10 at 11pt}
+\newfont{\FMCCThreeNumFont}{cmr10 at 14pt}
+\newfont{\FMCCTwoFont}{cmr10 at 9.5pt}
+\newfont{\FMCCZeroFont}{cmbx10 at 14pt}
+\newfont{\FMCFont}{cmbx10}
+\newfont{\FMEDFont}{cmbx10 at 11pt}
+\newfont{\FigureNumFont}{cmbx10 at 8.5pt}
+\newfont{\FolioFont}{cmr10 at 9pt}
+\newfont{\FolioBoldFont}{cmr10 at 9pt}
+\newfont{\FootnoteFont}{cmr10 at 8.5pt}
+\newfont{\PLCPDRPHeadFont}{cmbx10 at 9.5pt}
+\newfont{\ParagraphHeadFont}{cmbxsl10 at 9.5pt}
+%\newfont{\SubParagraphHeadFont}{cmbxsl10 at 9pt}
+\newfont{\SubParagraphHeadFont}{cmbx10 at 9pt}
+\newfont{\PartNumFont}{cmr10 at 96pt}
+\newfont{\PartTitleFont}{cmr10 at 36pt}
+\newfont{\PCOneFont}{cmbx10 at 9.5pt}
+\newfont{\RHFont}{cmsl10 at 9pt}
+\newfont{\SCAuthorFont}{cmsl10 at 9.5pt}
+\newfont{\SEAFont}{cmsl10 at 11pt}
+\newfont{\SEFont}{cmsl10 at 16pt}
+\newfont{\SEIAFont}{cmsl10}
+\newfont{\SEIFont}{cmsl10 at 12pt}
+\newfont{\SectionHeadFont}{cmbx10 at 13pt}
+\newfont{\SubsectionHeadFont}{cmbx10 at 11pt}
+\newfont{\SubsectionItalicFont}{cmbxsl10 at 11pt}
+\newfont{\SubsubsectionHeadFont}{cmbx10 at 9.5pt}
+\newfont{\TableBodyFont}{cmr10 at 8pt}
+\newfont{\TableColHeadFont}{cmr10 at 8pt}
+\newfont{\TableFootnoteFont}{cmr10 at 8pt}
+\newfont{\TableNumFont}{cmbx10 at 8.5pt}
+\newfont{\TableTitleFont}{cmr10 at 8.5pt}
+\newfont{\TheoremHeadFont}{cmbxsl10 at 9.5pt}
+\newfont{\TitlePageTitleFont}{cmr10 at 24pt}
+\fi
+\newfont{\HugeCalFont}{cmsy10 at 24pt}
+\newfont{\LargeCalFont}{cmsy10 at 16pt}
+
+\if@pdf
+\else
+  \@cip{\rule{0pt}{9pt}0-8493-8597-0/01/\$0.00+\$1.50}{{\tiny\copyright}\ \ 2001 by CRC Press, LLC}\fi
+\ifindex % when index need to be generated
+    \def\@Chapter#1{\thechapter-\@arabic\c@page}
+\else
+    \def\@Chapter#1{{\bf\thechapter}-\@arabic\c@page}
+\fi
+\pagenumbering{Chapter}
+\newcommand{\bm}[1]{{\mbox{$\boldmath#1$}}}
+\def\GH#1{\addvspace{12pt}\noindent\ignorespaces{\SectionHeadFont #1}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% shibu
+\def\bibliographystyle#1{%
+\section*{References}
+  \ifx\@begindocumenthook\@undefined\else
+    \expandafter\AtBeginDocument
+  \fi
+    {\if@filesw
+       \immediate\write\@auxout{\string\bibstyle{#1}}%
+     \fi}}
+\endinput

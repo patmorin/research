@@ -1,0 +1,1165 @@
+%\setcounter{\chapter}{10}
+\chapter{Hash Tables}
+
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\floor}[1]{\lfloor #1 \rfloor}
+\newcommand{\ceil}[1]{\lceil #1 \rceil}
+
+\newcommand{\etal}{et al.}
+
+\begin{chapterauthors}
+\chapterauthor{Pat Morin}{Carleton University}
+\end{chapterauthors}
+
+\index{hash table}
+
+\section{Introduction}
+
+A \emph{set abstract data type (set ADT)}\index{set ADT} is an
+abstract data type that maintains a set $S$ under the following three
+operations:
+
+\begin{enumerate}
+
+\item \textsc{Insert}$(x)$:  Add the key $x$ to the set.
+
+\item \textsc{Delete}$(x)$: Remove the key $x$ from the set.
+
+\item \textsc{Search}$(x)$: Determine if $x$ is contained in the set,
+and if so, return a pointer to $x$. 
+
+\end{enumerate}
+One of the most practical and widely used methods of implementing the
+set ADT is with \emph{hash tables}.  
+
+Note that the three set ADT operations can easily be implemented to
+run in $O(\log n)$ time per operation using balanced binary search
+trees (See Chapter~\ref{external:12:BBST}).  If we assume that the
+input data are integers in the set $U=\{0,\ldots,u-1\}$ then they can
+even be implemented to run in $O(\log\log u)$ time using data
+structures for integer searching
+(Chapter~\ref{external:38?:int-searching}).  However, these data
+structures actually do more than the three basic operations we
+require.  In particular if we search for an element $x$ that is not
+present in $S$ then these data structures can report the smallest item
+in $S$ that is larger than $x$ (the \emph{successor} of $x$) and/or
+the largest item in $S$ that is smaller than $x$ (the
+\emph{predecessor} of $x$).  
+
+Hash tables do away with this extra functionality of finding
+predecessors and successors and only perform exact searches. If we
+search for an element $x$ in a hash table and $x$ is not present then
+the only information we obtain is that $x\notin S$. By dropping this
+extra functionality hash tables can give better performance bounds.
+Indeed, any reasonable hash table implementation performs each of the
+three set ADT operations in $O(1)$ expected time.
+
+The main idea behind all hash table implementations discussed in this
+chapter is to store a set of $n=|S|$ elements in an array (the hash
+table) $A$ of length $m\ge n$.  In doing this, we require a function
+that maps any element $x$ to an array location.  This function is
+called a \emph{hash function}\index{hash function} $h$ and the value
+$h(x)$ is called the \emph{hash value} of $x$.  That is, the element
+$x$ gets stored at the array location $A[h(x)]$.  The \emph{occupancy}
+of a hash table is the ratio $\alpha=n/m$ of stored elements to the
+length of $A$.  
+
+The study of hash tables follows two very different lines. Many
+implementations of hash tables are based on the \emph{integer universe
+assumption}:\index{integer universe assumption} All elements stored in
+the hash table come from the universe $U=\{0,\ldots,u-1\}$.  In this
+case, the goal is to design a hash function $h:U\rightarrow
+\{0,\ldots,m-1\}$ so that for each $i\in \{0,\ldots,m-1\}$, the number
+of elements $x\in S$ such that $h(x)=i$ is as small as possible.
+Ideally, the hash function $h$ would be such that each element of $S$
+is mapped to a unique value in $\{0,\ldots,m-1\}$.  Most of the hash
+functions designed under the integer universe assumption are
+number-theoretic constructions. Several of these are described in
+Section~\ref{hash:sec:integers}.
+
+Historically, the integer universe assumption seems to have been
+justified by the fact that any data item in a computer is represented
+as a sequence of bits that can be interpreted as a binary number.
+However, many complicated data items require a large (or variable)
+number of bits to represent and this make $u$ the size of the universe
+very large.  In many applications $u$ is much larger than the largest
+integer that can fit into a single word of computer memory.  In this
+case, the computations performed in number-theoretic hash functions
+become inefficient.
+
+This motivates the second major line of research into hash tables.
+This research works is based on the \emph{random probing
+assumption\emph{random probing assumption}}: Each element $x$ that is
+inserted into a hash table is a black box that comes with an infinite
+random \emph{probe sequence}\index{probe sequence}
+$x_0,x_1,x_2,\ldots$ where each of the $x_i$ is independently and
+uniformly distributed in $\{0,\ldots,m-1\}$.  Hash table
+implementations based on the random probing assumption are described
+in Section~\ref{hash:sec:uniform}.
+
+Both the integer universe assumption and the random probing
+assumption have their place in practice.  When there is an easily
+computing mapping of data elements onto machine word sized integers
+then hash tables for integer universes are the method of choice.  When
+such a mapping is not so easy to compute (variable length strings are
+an example) it might be better to use the bits of the input items to
+build a good pseudorandom sequence and use this sequence as the probe
+sequence for some random probing data structure. 
+
+To guarantee good performance, many hash table implementations require
+that the occupancy $\alpha$ be a constant strictly less than $1$.
+Since the number of elements in a hash table changes over time, this
+requires that the array $A$ be resized periodically.  This is easily
+done, without increasing the amortized cost of hash table operations
+by choosing three constants $0< \alpha_1 < \alpha_2 < \alpha_3 < 1$ so
+that, whenever $n/m$ is not the interval $(\alpha_1,\alpha_3)$ the
+array $A$ is resized so that its size is $n/\alpha_2$. A simple
+amortization argument (Chapter~\ref{external:1:analysis}) shows that
+the amortized cost of this resizing is $O(1)$ per update
+(Insert/Delete) operation.
+
+
+\section{Hash Tables for Integer Keys}
+\label{hash:sec:integers}
+
+In this section we consider hash tables under the integer universe
+assumption, in which the key values $x$ come from the universe
+$U=\{0,\ldots,u-1\}$.   A \emph{hash function}\index{hash function}
+$h$ is a function whose domain is $U$ and whose range is the set
+$\{0,\ldots,m-1\}$, $m\le u$.  A hash function $h$ is said to be a
+\emph{perfect hash function}\index{hash
+function!perfect}\index{perfect hash function} for a set $S\subseteq
+U$ if, for every $x\in S$, $h(x)$ is unique.  A perfect hash function
+$h$ for $S$ is \emph{minimal}\index{hash function!minimal
+perfect}\index{minimal perfect hash function} if $m=|S|$, i.e., $h$ is
+a bijection between $S$ and $\{0,\ldots,m-1\}$.  Obviously a minimal
+perfect hash function for $S$ is desirable since it allows us to store
+all the elements of $S$ in a single array of length $n$.
+Unfortunately, perfect hash functions are rare, even for $m$ much
+larger than $n$.  If each element of $S$ is mapped independently and
+uniformly to a random element of $\{0,\ldots,m-1\}$ then the birthday
+paradox (See, for example, Feller~\cite{f68}) states that, if $m$ is
+much less than $n^2$ then there will almost surely exist two elements
+of $S$ that have the same hash value.
+
+We begin our discussion with two commonly used hashing schemes that
+are heuristic in nature.  That is, we can not make any non-trivial
+statements about the performance of these schemes when storing an
+arbitrary set $S$.  We then discuss several schemes that have provably
+good performance.
+
+\subsection{Hashing by Division}
+\index{hashing!by division}
+
+In \emph{hashing by division}, we use the hash function
+\[ h(x) = x\bmod m \enspace . \]
+To use this hash function in a data structure, we maintain an array
+$A[0],\ldots,A[m-1]$ where each element of this array is a pointer to
+the head of a linked list (Section~\ref{external:2:linked-list}).  The
+linked list $L_i$ pointed to by the array element $A[i]$ contains all
+the elements $x$ such that $h(x)=i$.  This technique of maintaining an
+array of lists is called \emph{hashing with
+chaining}\index{hashing!with chaining}.
+
+In such a hash table, inserting an element $x$ takes $O(1)$ time;  we
+compute $i=h(x)$ and append (or prepend) $x$ to the list $L_i$.
+However, searching for and/or deleting an element $x$ is not so easy.
+We have to compute $i=h(x)$ and then traverse the list $L_i$ until we
+either find $x$ or reach the end of the list.  The cost of this is
+proportional to the length of $L_i$.  Obviously, if our set $S$
+consists of the elements $0,m,2m,3m,\ldots,nm$ then all elements are
+stored in the list $L_0$ and searches and deletions take linear time.
+
+However, one hopes that such pathological cases do not occur in
+practice. For example, if the elements of $S$ are uniformly and
+independently distributed in $U$ and $u$ is a multiple of $m$ then the
+expected size of any list $L_i$ is only $n/m$.  In this case, searches
+and deletions take $O(1+\alpha)$ expected time.  To help avoid
+pathological cases, the choice of $m$ is important.  In particular,
+$m$ a power of 2 is usually avoided since, in a binary computer,
+taking the remainder modulo a power of 2 means simply discarding some
+high-order bits.  Taking $m$ to be a prime not too close to a power of
+2 is recommended \cite{k97}.
+
+\subsection{Hashing by Multiplication}
+\index{hashing!by multiplication}
+
+The implementation of a hash table using \emph{hashing by
+multiplication} is exactly the same as that hashing by division
+except that the hash function 
+
+\[
+  h(x) = \floor{mxA} \bmod m
+\]
+is used.  Here $A$ is a real-valued constant whose choice we discuss
+below. The advantage of the multiplication method is that the value of
+$m$ is not critical.  We can take $m$ to be a power of 2, which makes
+it convenient for use on binary computers. 
+
+Although any value of $A$ gives a hash function, some values of $A$
+are better than others.  (Setting $A=0$ is clearly not a good idea.)
+
+Knuth \cite{k97} suggests using the \emph{golden ratio}\index{golden
+ratio} for $A$, i.e.,
+setting 
+\[  
+    A=(\sqrt{5}-1)/2=0.6180339887\ldots
+\]   
+This choice of $A$ is motivated by a theorem, first conjectured by
+Oderfeld and later proven by S\'wierczkowski \cite{s58}.  This theorem
+states that the sequence 
+\[
+     mA \bmod m,\,\, 2mA \bmod m,\,\, 3mA \bmod m,\,\,\ldots,\,\, nmA\bmod m
+\] 
+partitions the interval $(0,m)$ into $n+1$ intervals having only three
+distinct lengths.  Furthermore, the next element $(n+1)mA\bmod m$ in
+the sequence is always contained in one of the largest
+intervals.\footnote{In fact, any irrational number has this property
+\cite{sos57}.  The golden ratio is especially good because it is
+not too close to a whole number.}
+
+Of course, no matter what value of $A$ we select, the pigeonhole
+principle implies that for $u\ge nm$ then there will always exist some
+hash value $i$ and some $S\subseteq U$ of size $n$ such that $h(x)=i$
+for all $x\in S$.  In other words, we can always find a set $S$ all of
+whose elements get stored in the same list $L_i$. Thus, the worst case
+of hashing by multiplication is as bad as hashing by division.
+
+
+\subsection{Universal Hashing}
+\label{hash:sec:universal}
+\index{hashing!universal}
+\index{universal hashing}
+
+The argument used at the end of the previous section applies equally
+well to any hash function $h$.  That is, if the table size $m$ is much
+smaller than the universe size $u$ then for any hash function there is
+some large (of size at least $\ceil{u/m}$) subset of $U$ that has the
+same hash value.  To get around this difficulty we need a collection
+of hash functions of which we can choose one that works well for $S$.
+Even better would be a collection of hash functions such that, for any
+given $S$, most of the hash functions work well for $S$.  Then we
+could simply pick one of the functions at random and have a good
+chance of it working well.
+
+Let $\mathcal{H}$ be a collection of hash functions, i.e., functions
+from $U$ onto $\{0,\ldots,m-1\}$.  We say that $\mathcal{H}$ is
+\emph{universal}\index{hash function!universal} if, for each $x,y\in
+U$ the number of $h\in \mathcal{H}$ such that $h(x)=h(y)$ is at most
+$|\mathcal{H}|/m$.  Consider any $S\subseteq U$ of size $n$ and
+suppose we choose a random hash function $h$ from a universal
+collection of hash functions.  Consider some value $x\in U$.  The
+probability that any key $y\in S$ has the same hash value as $x$ is
+only $1/m$.  Therefore, the expected number of keys in $S$, not equal
+to $x$, that have the same hash value as $x$ is only \[ n_{h(x)} =
+\left\{\begin{array}{ll} (n-1)/m & \mbox{if $x\in S$} \\ n/m &
+\mbox{if $x\notin S$} \end{array}\right.  \] Therefore, if we store
+$S$ in a hash table using the hash function $h$ then the expected time
+to search for, or delete, $x$ is $O(1+\alpha)$.
+
+From the preceding discussion, it seems that a universal collection of
+hash functions from which we could quickly select one at random would be
+very handy indeed. With such a collection at our disposal we get an
+implementation of the set ADT that has $O(1)$ insertion time and
+$O(1)$ expected search and deletion time.
+
+Carter and Wegman \cite{cw79} describe three different collections of
+universal hash functions.  If the universe size $u$ is a
+prime number\footnote{This is not a major restriction since, for any
+$u>1$, there always exists a prime number in the set
+$\{u,u+1,\ldots,2u\}$.  Thus we can enforce this assumption by
+increasing the value of $u$ by a constant factor.} then
+\[
+  \mathcal{H} = \{ h_{k_1,k_2,m}(x)=((k_1x+k_2)\bmod u))\bmod m : 1\le k_1< u,
+0\le k_2< u\} 
+\]
+is a collection of universal hash functions.  Clearly, choosing a
+function uniformly at random from $\mathcal{H}$ can be done easily by
+choosing two random values $k_1\in \{1,\ldots,u-1\}$ and $k_2\in
+\{0,\ldots,u-1\}$.  Thus, we have an implementation of the set ADT with
+$O(1)$ expected time per operation.
+
+ 
+\subsection{Static Perfect Hashing}
+\index{perfect hashing!static}
+\index{hashing!static perfect}
+\index{static perfect hashing}
+\label{hash:sec:fks}
+
+The result of Carter and Wegman on universal hashing is very strong,
+and from a practical point of view, it is probably the strongest
+result most people will ever need.  The only thing that could be
+improved about their result is to make it deterministic, so that the
+running times of all operations are $O(1)$ \emph{worst-case}.
+Unfortunately, this is not possible, as shown by Dietzfelbinger \etal\
+\cite{dkmm94}.  
+
+Since there is no hope of getting $O(1)$ worst-case time for all three
+set ADT operations, the next best thing would be to have searches that
+take $O(1)$ worst-case time.  In this section we describe the method
+of Fredman, Koml\'os and Szemer\'edi \cite{fks84}.  This is a static
+data structure that takes as input a set $S\subseteq U$ and builds a
+data structure of size $O(n)$ that can test if an element $x$ is in
+$S$ in $O(1)$ worst-case time.  Like the universal hash functions from
+the previous section, this method also requires that $u$ be a prime
+number. This scheme uses hash functions of the form
+\[
+  h_{k,m}(x) = (kx\bmod u))\bmod m \enspace .\footnote{Actually, it
+turns out that any universal hash function also works in the FKS
+scheme \cite[Section~11.5]{clrs01}.}
+\]
+
+Let $B_{k,m}(S,i)$ be the number of elements $x\in S$ such that
+$h_{k,m}(x)=i$, i.e., the number of elements of $S$ that have hash
+value $i$ when using the hash function $h_{k,m}$.  The function
+$B_{k,m}$ gives complete information about the distribution of hash
+values of $S$.  The main lemma used by Fredman \etal\ is that, if we
+choose $k\in U$ uniformly at random then
+\begin{equation}
+\E\left[\sum_{i=0}^{m-1} {B_{k,m}(S,i)\choose 2}\right] < \frac{n^2}{m}  
+  \enspace . \label{hash:eq:fks-main}
+\end{equation}
+There are two important special cases of this result.
+
+In the \emph{sparse case} we take $m=n^2/\alpha$, for some constant
+$0<\alpha<1$.  In this case, the expectation in
+(\ref{hash:eq:fks-main}) is less than $\alpha$.  Therefore, by
+Markov's inequality, the probability that this sum is greater than or
+equal to 1 is at most $\alpha$.  But, since this sum is a non-negative
+integer, then with probability at least $1-\alpha$ it must be equal to
+0.  In other words, with probability at least $1-\alpha$,
+$B_{k,m}(S,i)\le 1$ for all $0\le i\le m-1$, i.e., the hash function
+$h_{k,m}$ is perfect for $S$.  Of course this implies that we can find
+a perfect hash function very quickly by trying a small number of
+random elements $k\in U$ and testing if they result in perfect hash
+functions. (The expected number of elements that we will have to try
+is only $1/(1-\alpha)$.) Thus, if we are willing to use quadratic
+space then we can perform searches in $O(1)$ worst-case time.
+
+In the \emph{dense case} we assume that $m$ is close to $n$ and
+discover that, for many values of $k$, the hash values are distributed
+fairly evenly among the set $1,\ldots,m$.  More precisely, if we use a
+table of size $m=n$, then 
+\[
+   \E \left[ \sum_{i=0}^{m-1} B_{k,m}(S,i)^2 \right] \le 3n \enspace .
+      \label{hash:eq:fks-space-a}
+\]
+By Markov's inequality this means that
+\begin{equation}
+   \Pr\left\{ \sum_{i=0}^{m-1} B_{k,m}(S,i)^2  \le 3n/\alpha \right\}
+\ge
+	1-\alpha \enspace .
+      \label{hash:eq:fks-space}
+\end{equation}
+Again, we can quickly find a value of $k$ satisfying
+(\ref{hash:eq:fks-space}) by testing a few randomly chosen values of
+$k$.
+
+These two properties are enough to build a two-level data structure
+that uses linear space and executes searches in worst-case constant
+time.  We call the following data structure the FKS-$\alpha$ data
+structure, after its inventors Fredman, Koml\'os and Szemer\'edi.  At
+the top level, the data structure consists of an array
+$A[0],\ldots,A[m-1]$ where $m=n$.  The elements of this array are
+pointers to other arrays $A_0,\ldots,A_{m-1}$, respectively.  To
+decide what will be stored in these other arrays, we build a hash
+function $h_{k,m}$ that satisfies the conditions of
+(\ref{hash:eq:fks-space}).  This gives us the top-level hash function
+$h_{k,m}(x)=(kx\bmod u)\bmod m$. Each element $x\in S$ gets stored in
+the array pointed to by $A[h_{k,m}(x)]$.
+
+What remains is to describe how we use the arrays
+$A_0,\ldots,A_{m-1}$.  Let $S_i$ denote the set of elements $x\in S$
+such that $h_{k,m}(s)=i$.  The elements of $S_i$ will be stored in
+$A_i$.  The size of $S_i$ is $n_i=B_{k,m}(S,i)$.  To store the
+elements of $S_i$ we set the size of $A_i$ to
+$m_i=n_i{}^2/\alpha=B_{k,n}(S,i)^2/\alpha$.  Observe that, by
+(\ref{hash:eq:fks-space}), all the $A_i$'s take up a total space of
+$O(n)$, i.e., $\sum_{i=0}^{m-1} m_i = O(n)$.  Furthermore, by trying a
+few randomly selected integers we can quickly find a value $k_i$ such
+that the hash function $h_{k_i,m_i}$ is perfect for $S_i$.  Therefore,
+we store the element $x\in S_i$ at position $A_i[h_{k_i,m_i}(x)]$ and
+$x$ is the unique element stored at that location.  With this scheme
+we can search for any value $x\in U$ by computing two hash values
+$i=h_{k,m}(x)$ and $j=h_{k_i,m_i}(x)$ and checking if $x$ is stored in
+$A_i[j]$.
+
+Building the array $A$ and computing the values of
+$n_0,\ldots,n_{m-1}$ takes $O(n)$ expected time since for a given
+value $k$ we can easily do this in $O(n)$ time and the expected number
+of values of $k$ that we must try before finding one that satisfies
+(\ref{hash:eq:fks-space}) is $O(1)$.  Similarly, building each subarray
+$A_i$ takes $O(n_i{}^2)$ expected time, resulting in an overall expected
+running time of $O(n)$.  Thus, for any constant $0<\alpha<1$, an
+FKS-$\alpha$ data structure can be constructed in $O(n)$ expected time
+and this data structure can execute a search for any $x\in U$ in
+$O(1)$ worst-case time.
+
+\subsection{Dynamic Perfect Hashing}
+\label{hash:sec:dphash}
+\index{hashing!dynamic perfect}
+\index{dynamic perfect hashing}
+\index{perfect hashing!dynamic}
+The FKS-$\alpha$ data structure is nice in that it allows for searches
+in $O(1)$ time, in the worst case.  Unfortunately, it is only static;
+it does not support insertions or deletions of elements.  In this
+section we describe a result of Dietzfelbinger \etal\ \cite{dkmm94}
+that shows how the FKS-$\alpha$ data structure can be made dynamic
+with some judicious use of partial rebuilding
+(Section~\ref{external:12:Andersson-trees-partial-rebuilding}).
+
+The main idea behind the scheme is simple: be lazy at both the upper
+and lower levels of the FKS-$\alpha$ data structure.  That is, rebuild
+parts of the data structure only when things go wrong.  At the top
+level, we relax the condition that the size $m$ of the upper array $A$
+is exactly $n$ and allow $A$ to have size anywhere between $n$ and
+$2n$.  Similarly, at the lower level we allow the array $A_i$ to have
+a size $m_i$ anywhere between $n_i{}^2/\alpha$ and $2n_i{}^2/\alpha$.
+
+Periodically, we will perform a \emph{global rebuilding}\index{global
+rebuilding} operation in
+which we remove all $n$ elements from the hash table.  Some elements
+which have previously been marked as deleted will be discarded,
+thereby reducing the value of $n$.  We put the remaining elements in a
+list, and recompute a whole new FKS-$(\alpha/2)$ data structure for
+the elements in the list.  This data structure is identical to the
+standard FKS-$(\alpha/2)$ data structure except that, at the top level
+we use an array of size $m=2n$.
+
+Searching in this data structure is exactly the same as for the static
+data structure.  To search for an element $x$ we compute
+$i=h_{k,m}(x)$ and $j=h_{k_i,m_i}(x)$ and look for $x$ at location
+$A_i[j]$.   Thus, searches take $O(1)$ worst-case time.
+
+Deleting in this data structure is done in the laziest manner
+possible.  To delete an element we only search for it and then mark it
+as deleted.  We will use the convention that this type of deletion
+does not change the value of $n$ since it does not change the number
+of elements actually stored in the data structure.  While doing this,
+we also keep track of the number of elements that are marked as
+deleted.  When this number exceeds $n/2$ we perform a global
+rebuilding operation.  The global rebuilding operation takes $O(n)$
+expected time, but only occurs during one out of every $n/2$
+deletions.  Therefore, the amortized cost of this operation is $O(1)$
+per deletion.
+
+The most complicated part of the data structure is the insertion
+algorithm and its analysis.  To insert a key $x$ we know, because of
+how the search algorithm works, that we must ultimately store $x$ at
+location $A_i[j]$ where $i=h_{k,m}(x)$ and $j=h_{k_i,m_i}(x)$.
+However, several things can go wrong during the insertion of $x$:
+
+\begin{enumerate} 
+\item The value of $n$ increases by 1, so it may be that $n$ now
+exceeds $m$.  In this case we perform a global rebuilding
+operation and we are done.
+
+\item We compute $i=h_{k,m}(x)$ and discover that $\sum_{i=0}^{m-1}
+n_i{}^2 > 3n/\alpha$.  In this case, the hash function
+$h_{k,m}$ used at the top level is no longer any good since it is
+producing an overall hash table that is too large.  In this case we
+perform a global rebuilding operation and we are done.
+
+\item We compute $i=h_{k,m}(x)$ and discover that, since the value of
+$n_i$ just increased by one, $n_i{}^2/\alpha > m_i$. In this case, the
+array $A_i$ is too small to guarantee that we can quickly find a
+perfect hash function.  To handle this, we copy the elements of $A_i$
+into a list $L$ and allocate a new array $A_i$ with the new size
+$m_i=2n_i{}^2/\alpha$.  We then find a new value $k_i$ such that
+$h_{k_i,m_i}$ is a perfect hash function for the elements of $L$ and
+we are done.
+
+\item The array location $A_i[j]$ is already occupied by some other
+element $y$.  But in this case, we know that $A_i$ is large enough to
+hold all the elements (otherwise we would already be done after
+Case~3), but the value $k_i$ being used in the hash function
+$h_{k_i,m_i}$ is the wrong one since it doesn't give a perfect hash
+function for $S_i$.  Therefore we simply try new values for $k_i$
+until we find a find a value $k_i$ that yields a perfect hash function
+and we are done.  
+\end{enumerate}
+
+If none of the preceding 4 cases occurs then we can simply place $x$
+at location $A_i[j]$ and we are done.
+
+Handling Case~1 takes $O(n)$ expected time since it involves a global
+rebuild of the entire data structure.  However, Case~1 only happens
+during one out of every $\Theta(n)$ insertions, so the amortized cost
+of all occurrences of Case~1 is only $O(1)$ per insertion.
+
+Handling Case~2 also takes $O(n)$ expected time.  The question is: How
+often does Case~2 occur?  To answer this question, consider the
+\emph{phase}\index{phase} that occurs between two consecutive
+occurrences of Case~1.  During this phase, the data structure holds at
+most $m$ distinct elements.  Call this set of elements $S$.  With
+probability at least $(1-\alpha)$ the hash function $h_{k,m}$ selected
+at the beginning of the phase satisfies (\ref{hash:eq:fks-space}) so
+that Case~2 never occurs during the phase.  Similarly, the probability
+that Case~2 occurs exactly once during the phase is at most
+$\alpha(1-\alpha)$.  In general, the probability that Case~2 occurs
+exactly $i$ times during a phase is at most $\alpha^i(1-\alpha)$.  Thus, the
+expected cost of handling all occurrences of Case~2 during the entire
+phase is at most 
+\[ \sum_{i=0}^\infty \alpha^i(1-\alpha)i\times O(n) =
+	O(n) \enspace .  
+\] 
+But since a phase involves $\Theta(n)$ insertions this means that the
+amortized expected cost of handling Case~2 is $O(1)$ per insertion.
+
+Next we analyze the total cost of handling Case~3.  Define a
+\emph{subphase}\index{subphase} as the period of time between two
+global rebuilding operations triggered either as a result of a
+deletion, Case~1 or Case~2.   We will show that the total cost of
+handling all occurrences of Case~3 during a subphase is $O(n)$ and
+since a subphase takes $\Theta(n)$ time anyway this does not
+contribute to the cost of a subphase by more than a constant factor.
+When Case~3 occurs at the array $A_i$ it takes $O(m_i)$ time.
+However, while handling Case~3, $m_i$ increases by a constant factor,
+so the total cost of handling Case~3 for $A_i$ is dominated by the
+value of $m_i$ at the end of the subphase.  But we maintain the
+invariant that $\sum_{i=0}^{m-1} m_i = O(n)$ during the entire
+subphase.  Thus, handling all occurrences of Case~3 during a subphase
+only requires $O(n)$ time. 
+
+Finally, we consider the cost of handling Case~4.  For a particular
+array $A_i$, consider the \emph{subsubphase}\index{subsubphase}
+between which two occurrences of Case~3 cause $A_i$ to be rebuilt or a
+global rebuilding operation takes place.  During this subsubphase the
+number of distinct elements that occupy $A_i$ is at most
+$\alpha\sqrt{m_i}$.  Therefore, with probability at least $1-\alpha$
+any randomly chosen value of $k_i\in U$ is a perfect hash function for
+this set.   Just as in the analysis of Case~2, this implies that the
+expected cost of handling all occurrences of Case~3 at $A_i$ during a
+subsubphase is only $O(m_i)$.  Since a subsubphase ends with
+rebuilding all of $A_i$ or a global rebuilding, at a cost of
+$\Omega(m_i)$ all the occurrences of Case~4 during a subsubphase do not
+contribute to the expected cost of the subsubphase by more than a
+constant factor.
+
+To summarize, we have shown that the expected cost of handling all
+occurrences of Case~4 is only  a constant factor times the cost of
+handling all occurrences of Case~3.  The cost of handling all
+occurrences of Case~3 is no more than a constant factor times the
+expected cost of all global rebuilds.  The cost of handling all the
+global rebuilds that occur as a result of Case~2 is no more than a
+constant factor times the cost of handling all occurrences of global
+rebuilds that occur as a consequence of Case~1.  And finally, the cost
+of all global rebuilds that occur as a result of Case~1 or of
+deletions is $O(n)$ for a sequence of $n$ update operations.
+Therefore, the total expected cost of $n$ update operation is $O(n)$.
+
+
+\section{Random Probing}
+\label{hash:sec:uniform}
+\index{random probing}
+\index{probing!random}
+
+Next we consider hash table implementations under the random probing
+assumption: Each element $x$ stored in the hash table comes with a
+random sequence $x_0,x_1,x_2,\ldots$ where each of the $x_i$ is
+independently and uniformly distributed in
+$\{1,\ldots,m\}$.\footnote{A variant of the random probing assumption,
+referred to as the \emph{uniform hashing}\index{uniform
+hashing}\index{hashing!uniform} assumption, assumes that
+$x_0,\ldots,x_{m-1}$ is a random permutation of $0,\ldots,m-1$.}  We
+begin with a discussion of the two basic paradigms: hashing with
+chaining and open addressing.  Both these paradigms attempt to store
+the key $x$ at array position $A[x_0]$.  The difference between these
+two algorithms is their \emph{collision resolution
+strategy}\index{collision resolution strategy}, i.e., what the
+algorithms do when a user inserts the key value $x$ but array position
+$A[x_0]$ already contains some other key.
+
+\subsection{Hashing with Chaining}
+\index{hashing!with chaining}
+
+In \emph{hashing with chaining}, a collision is resolved by allowing
+more than one element to live at each position in the table.  Each
+entry in the array $A$ is a pointer to the head of a linked list.  To
+insert the value $x$, we simply append it to the list $A[x_0]$.  To
+search for the element $x$, we perform a linear search in the list
+$A[x_0]$. To delete the element $x$, we search for $x$ in the list
+$A[x_0]$ and splice it out.
+
+It is clear that insertions take $O(1)$ time, even in the worst case.
+For searching and deletion, the running time is proportional to a
+constant plus the length of the list stored at $A[x_0]$.  Notice that
+each of the at most $n$ elements not equal to $x$ is stored in
+$A[x_0]$ with probability $1/m$, so the expected length of $A[x_0]$ is
+either $\alpha=n/m$ (if $x$ is not contained in the table) or
+$1+(n-1)/m$ (if $x$ is contained in the table). Thus, the expected
+cost of searching for or deleting an element is $O(1+\alpha)$.
+
+The above analysis shows us that hashing with chaining supports the
+three set ADT operations in $O(1)$ expected time per operation, as
+long as the occupancy, $\alpha$, is a constant. It is worth noting
+that this does not require that the value of $\alpha$ be less than 1. 
+
+If we would like more detailed information about the cost of searching, we
+might also ask about the \emph{worst-case search time} defined as
+\[
+   W = \max\{\mbox{length of the list stored at $A[i]$} : 0\le i\le m-1 \} 
+	\enspace .
+\]
+It is very easy to prove something quite strong about $W$ using only
+the fact that the length of each list $A[i]$ is a
+$\mathrm{binomial}(n,1/m)$ random variable.  Using Chernoff's bounds
+on the tail of the binomial distribution \cite{c52}, this
+immediately implies that   
+\[
+   \Pr\{\mbox{length of $A[i]$} \ge \alpha c\ln n\} \le n^{-\Omega(c)} \enspace .
+\]
+Combining this with Boole's inequality ($\Pr\{\mbox{$A$ or $B$}\} \le
+\Pr\{A\}+\Pr\{B\}$) we obtain
+\[
+   \Pr\{W \ge \alpha c\ln n\} \le n\times n^{-\Omega(c)} = n^{-\Omega(c)} \enspace .
+\]
+
+Thus, with very high probability, the worst-case search time is
+logarithmic in $n$.  This also implies that $\E[W]=O(\log n)$.  The
+distribution of $W$ has been carefully studied and it is known that,
+\emph{with high probability}\index{high probability}, i.e., with
+probability $1-o(1)$, $W=(1+o(1))\ln n/\ln\ln n$
+\cite{jk77,ksc78}.\footnote{Here, and throughout this chapter, if an
+asymptotic notation does not contain a variable then the variable that
+tends to infinity is implicitly $n$.  Thus, for example, $o(1)$ is the
+set of non-negative functions of $n$ that tend to 0 as
+$n\rightarrow\infty$.} Gonnet has proven a more accurate result that
+$W=\Gamma^{-1}(n) -3/2 + o(1)$ with high probability. Devroye
+\cite{d85} shows that similar results hold even when the distribution
+of $x_0$ is not uniform.
+
+\subsection{Hashing with Open Addressing}
+\index{open addressing}
+\index{hashing!with open addressing}
+
+\label{hash:sec:open-addressing}
+
+\emph{Hashing with open addressing} differs from hashing with chaining in
+that each table position $A[i]$ is allowed to store only one value.
+When a collision occurs at table position $i$, one of the two elements
+involved in the collision must move on to the next element in its
+probe sequence.  In order to implement this efficiently and correctly
+we require a method of marking elements as deleted.  This method could
+be an auxiliary array that contains one bit for each element of $A$,
+but usually the same result can be achieved by using a special key
+value $\mathbf{del}$ that does not correspond to any valid key.
+
+To search for an element $x$ in the hash table we look for $x$ at
+positions $A[x_0]$, $A[x_1]$, $A[x_2]$, and so on until we either
+(1)~find $x$, in which case we are done or (2)~find an empty table
+position $A[x_i]$ that is not marked as deleted, in which case we can
+be sure that $x$ is not stored in the table (otherwise it would be
+stored at position $x_i$).  To delete an element $x$ from the hash
+table we first search for $x$.  If we find $x$ at table location
+$A[x_i]$ we then simply mark $A[x_i]$ as deleted.  To insert a value
+$x$ into the hash table we examine table positions $A[x_0]$, $A[x_1]$,
+$A[x_2]$, and so on until we find a table position $A[x_i]$ that is
+either empty or marked as deleted and we store the value $x$ in
+$A[x_i]$.
+
+Consider the cost of inserting an element $x$ using this method.  Let
+$i_x$ denote the smallest value $i$ such that $x_{i_x}$ is either empty or
+marked as deleted when we insert $x$.  Thus, the cost of inserting $x$
+is a constant plus $i_x$.  The probability that the table position
+$x_0$ is occupied is at most $\alpha$ so, with probability at least
+$1-\alpha$, $i_x=0$.  Using the same reasoning, the probability
+that we store $x$ at position $x_i$ is at most 
+\begin{equation}
+   \Pr\{i_x = i\} \le \alpha^{i}(1-\alpha)  \label{hash:eq:pro}
+\end{equation}
+since the table locations $x_0,\ldots,x_{i-1}$ must be occupied,
+the table location $x_i$ must not be occupied and the $x_i$ are
+independent.  Thus, the expected number of steps taken by the
+insertion algorithm is 
+\[
+   \sum_{i=1}^\infty i\Pr\{i_x = i\} = (1-\alpha)\sum_{i=1}^\infty i\alpha^{i-1}  = 1/(1-\alpha)
+\]
+for any constant $0<\alpha< 1$.  The cost of searching for $x$ and
+deleting $x$ are both proportional to the cost of inserting $x$, so
+the expected cost of each of these operations is
+$O(1/(1-\alpha))$.\footnote{Note that the expected cost of searching
+for or deleting an
+element $x$ is proportional to the value of $\alpha$ \emph{at the time
+$x$ was inserted.}  If many deletions have taken place, this may be
+quite different than the current value of $\alpha$.}   
+
+We should compare this with the cost of hashing with chaining.  In
+hashing with chaining,the occupancy $\alpha$ has very little effect on
+the cost of operations.  Indeed, any constant $\alpha$, even greater
+than $1$ results in $O(1)$ time per operation.  In contrast, open
+addressing is very dependent on the value of $\alpha$.  If we take
+$\alpha>1$ then the expected cost of insertion using open addressing
+is infinite since the insertion algorithm never finds an empty table
+position.  Of course, the advantage of hashing with chaining is that
+it does not require lists at each of the $A[i]$.  Therefore, the
+overhead of list pointers is saved and this extra space can be used
+instead to maintain the invariant that the occupancy $\alpha$ is a
+constant strictly less than 1.
+
+Next we consider the worst case search time of hashing with open
+addressing.  That is, we study the value $W=\max\{i_x: \mbox{$x$ is
+stored in the table at location $i_x$}\}$.  Using (\ref{hash:eq:pro}) and Boole's
+inequality it follows almost immediately that 
+\[
+  \Pr\{W > c\log n\} \le n^{-\Omega(c)} .
+\]
+
+Thus, with very high probability, $W$, the worst case search time, is
+$O(\log n)$.  Tighter bounds on $W$ are known when the probe sequences
+$x_0,\ldots,x_{m-1}$ are random permutations of $0,\ldots,m-1$.  In this
+case, Gonnet shows that
+\[
+  \E[W]=\log_{1/\alpha} n - \log_{1/\alpha}(\log_{1/\alpha} n) + O(1)
+\]
+\cite{g81}. 
+
+Open addressing under the random probing assumption has many nice
+theoretical properties and is easy to analyze.  Unfortunately, it is
+often criticized as being an unrealistic model because it requires a
+long random sequences $x_0,x_1,x_2,\ldots$ for each element $x$ that
+is to be stored or searched for.  Several variants of open addressing
+discussed in the next few sections try to overcome this problem by
+using only a few random values. 
+
+
+\subsection{Linear Probing}
+\index{linear probing}
+\index{hashing!with linear probing}
+ 
+\emph{Linear probing} is a variant of open addressing that requires less
+randomness.  To obtain the probe sequence $x_0,x_1,x_2,\ldots$ we
+start with a random element $x_0\in \{0,\ldots,m-1\}$.  The element
+$x_i$, $i>0$ is given by $x_i=(i+x_0)\bmod m$.  That is, one first
+tries to find $x$ at location $x_0$ and if that fails then one looks
+at $(x_0+1)\bmod m$, $(x_0+2)\bmod m$ and so on.  
+
+The performance of linear probing is discussed by Knuth \cite{k97} who
+shows that the expected number of probes performed during an
+unsuccessful search is at most 
+\[
+	(1+1/(1-\alpha)^2)/2
+\] 
+and the expected
+number of probes performed during a successful search is at most
+\[
+	(1+1/(1-\alpha))/2 \enspace . 
+\] 
+This is not quite as good as for standard hashing with open
+addressing, especially in the unsuccessful case.
+
+Linear probing suffers from the problem of \emph{primary
+clustering}\index{primary clustering}\index{clustering!primary}.  If
+$j$ consecutive array entries are occupied then a newly inserted
+element will have probability $j/m$ of hashing to one of these
+entries. This results in $j+1$ consecutive array entries being
+occupied and increases the probability (to $(j+1)/m$) of another newly
+inserted element landing in this cluster.  Thus, large clusters of
+consecutive elements have a tendency to grow larger.
+
+\subsection{Quadratic Probing}
+\index{quadratic probing}
+\index{hashing!with quadratic probing}
+
+\emph{Quadratic probing} is similar to linear probing;  an element $x$
+determines its entire probe sequence based on a single random choice,
+$x_0$.  Quadratic probing uses the probe sequence
+$x_0,(x_0+k_1+k_2)\bmod m, (x_0+2k_1+2^2k_2)\bmod m,\ldots$.  In
+general, the $i$th element in the probe sequence is
+$x_i=(x_0+ik_1+i^2k_2)\bmod m$.  Thus, the final location of an
+element depends quadratically on how many steps were required to
+insert it.  This method seems to work much better in practice than
+linear probing, but requires a careful choice of $m$, $k_1$ and $k_2$
+so that the probe sequence contains every element of $\{0,\ldots,m-1\}$.
+
+The improved performance of quadratic probing is due to the fact that
+if there are two elements $x$ and $y$ such that $x_i=y_j$ then it is
+not necessarily true (as it is with linear probing) that
+$x_{i+1}=y_{j+1}$.  However, if $x_0=y_0$ then $x$ and $y$ will have
+exactly the same probe sequence.  This lesser phenomenon is called
+\emph{secondary clustering}\index{secondary
+clustering}\index{clustering!secondary}.  Note that this secondary
+clustering phenomenon implies that neither linear nor quadratic
+probing can hope to perform any better than hashing with chaining.
+This is because all the elements that have the same initial hash $x_0$
+are contained in an implicit chain.  In the case of linear probing,
+this chain is defined by the sequence $x_0,x_0+1,x_0+2,\ldots$ while
+for quadratic probing it is defined by the sequence
+$x_0,x_0+k_1+k_2,x_0+2k_1+4k_2,\ldots$
+
+\subsection{Double Hashing}\label{hash:sec:double}
+\index{hashing!double}
+\index{double hashing}
+
+\emph{Double hashing} is another method of open addressing that uses two hash
+values $x_0$ and $x_1$.  Here $x_0$ is in the set $\{0,\ldots,m-1\}$
+and $x_1$ is in the subset of $\{1,\ldots,m-1\}$ that is relatively
+prime to $m$.  With double hashing, the probe sequence for element $x$
+becomes $x_0,(x_0+x_1)\bmod m, (x_0+2x_1)\bmod m,\ldots$.  In general,
+$x_i=(x_0+ix_1)\bmod m$, for $i>0$.  The expected number of probes
+required by double hashing seems difficult to determine exactly.
+Guibas has proven that, asymptotically, and for occupancy $\alpha\le
+.31$, the performance of double hashing is asymptotically equivalent
+to that of uniform hashing.  Empirically, the performance of double
+hashing matches that of open addressing with random probing
+regardless of the occupancy $\alpha$ \cite{k97}.
+
+\subsection{Brent's Method}\label{hash:sec:brent}
+\index{Brent's method}
+\index{hashing!Brent's method}
+
+\emph{Brent's method} \cite{b73} is a heuristic that attempts to
+minimize the average time for a successful search in a hash table with
+open addressing.  Although originally described in the context of
+double hashing (Section~\ref{hash:sec:double}) Brent's method applies
+to any open addressing scheme.  The \emph{age}\index{age} of an element $x$
+stored in an open addressing hash table is the minimum value $i$ such
+that $x$ is stored at $A[x_i]$.  In other words, the age is one less
+than the number of locations we will probe when searching for $x$. 
+
+Brent's method attempts to minimize the total age of all elements in
+the hash table.  To insert the element $x$ we proceed as follows:  We
+find the smallest value $i$ such that $A[x_i]$ is empty; this is where
+standard open-addressing would insert $x$.  Consider the element $y$
+stored at location $A[x_{i-2}]$.  This element is stored there because
+$y_j=x_{i-2}$, for some $j\ge 0$.  We check if the array location
+$A[y_{j+1}]$ is empty and, if so, we move $y$ to location $A[y_{j+1}]$
+and store $x$ at location $A[x_{i-2}]$.  Note that, compared to
+standard open addressing, this decreases the total age by 1.  In
+general, Brent's method checks, for each $2\le k\le i$ the array entry
+$A[x_{i-k}]$ to see if the element $y$ stored there can be moved to
+any of $A[y_{j+1}],A[y_{j+2}],\ldots,A[y_{j+k-1}]$ to make room for
+$x$.  If so, this represents a decrease in the total age of all
+elements in the table and is performed.
+
+Although Brent's method seems to work well in practice, it is
+difficult to analyze theoretically.  Some theoretical analysis of
+Brent's method applied to double hashing is given by Gonnet and Munro
+\cite{gm79}.  Lyon \cite{lyon78}, Munro and Celis \cite{mc99} and
+Poblete \cite{p77} describe some variants of Brent's method.
+
+
+\subsection{Multiple-Choice Hashing}
+\label{hash:sec:multiplechoice}
+\index{hashing!multiple-choice}
+\index{multiple-choice hashing}
+
+It is worth stepping back at this point and revisiting the comparison
+between hash tables and binary search trees.  For balanced binary
+search trees, the average cost of searching for an element is $O(\log
+n)$.  Indeed, it easy to see that for at least $n/2$ of the elements,
+the cost of searching for those elements is $\Omega(\log n)$.  In
+comparison, for both the random probing schemes discussed so far, the
+expected cost of search for an element is $O(1)$.  However, there are
+a handful of elements whose search cost is $\Theta(\log n/\log \log
+n)$ or $\Theta(\log n)$ depending on whether hashing with chaining or
+open addressing is used, respectively.  Thus there is an inversion:
+Most operations on a binary search tree cost $\Theta(\log n)$ but a
+few elements (close to the root) can be accessed in $O(1)$ time.  Most
+operations on a hash table take $O(1)$ time but a few elements (in long
+chains or with long probe sequences) require $\Theta(\log n/\log\log
+n)$ or $\Theta(\log n)$ time to access.  In the next few sections we
+consider variations on hashing with chaining and open addressing that
+attempt to reduce the worst-case search time $W$.
+
+\emph{Multiple-choice hashing} is hashing with chaining in which,
+during insertion, the element $x$ has the choice of $d\ge 2$ different
+lists in which it can be stored.  In particular, when we insert $x$ we
+look at the lengths of the lists pointed to by
+$A[x_0],\ldots,A[x_{d-1}]$ and append $x$ to $A[x_i]$, $0\le i< d$
+such that the length of the list pointed to by $A[x_i]$ is minimum.
+When searching for $x$, we search for $x$ in each of the lists
+$A[x_0],\ldots,A[x_{d-1}]$ \emph{in parallel}.  That is, we look at
+the first elements of each list, then the second elements of each
+list, and so on until we find $x$.  As before, to delete $x$  we first
+search for it and then delete it from whichever list we find it in.  
+
+It is easy to see that the expected cost of searching for an element
+$x$ is $O(d)$ since the expected length of each the $d$ lists is
+$O(1)$.  More interestingly, the worst case search time is bounded by
+$O(dW)$ where $W$ is the length of the longest list.  Azar \etal\
+\cite{abku99} show that 
+\begin{equation}
+    \E[W]=\frac{\ln\ln n}{\ln d} + O(1) \enspace .
+	\label{hash:eq:multiple-choice} 
+\end{equation}
+Thus, the expected worst case search time for multiple-choice hashing
+is $O(\log\log n)$ for any constant $d\ge 2$.
+
+
+\subsection{Asymmetric Hashing}
+\index{hashing!asymmetric}
+\index{asymmetric hashing}
+
+\emph{Asymmetric hashing} is a variant of multiple-choice hashing in
+which the hash table is split into $d$ blocks, each of size $n/d$.
+(Assume, for simplicity, that $n$ is a multiple of $d$.) The probe
+value $x_i$, $0\le i< d$ is drawn uniformly from
+$\{in/d,\ldots,(i+1)n/d-1\}$.   As with multiple-choice hashing, to
+insert $x$ the algorithm examines the lengths of the lists $A[x_0],
+A[x_1],\ldots,A[x_{d-1}]$ and appends $x$ to the shortest of these
+lists.  In the case of ties, it appends $x$ to the list with smallest
+index.  Searching and deletion are done exactly as in multiple-choice
+hashing.
+
+V\"ocking \cite{v99} shows that, with asymmetric hashing the expected
+length of the longest list is 
+\[
+   \E[W] \le \frac{\ln\ln n}{d\ln\phi_d} +O(1) \enspace .
+\] 
+The function $\phi_d$ is a generalization of the \emph{golden
+ratio}\index{golden ratio},
+so that $\phi_2=(1+\sqrt{5})/2$.  Note that this improves
+significantly on standard multiple-choice hashing (\ref{hash:eq:multiple-choice}) for larger values of
+$d$.
+
+\subsection{LCFS Hashing}
+\index{hashing!LCFS}
+\index{LCFS hashing}
+
+\emph{LCFS hashing} is a form of open addressing that changes the
+collision resolution strategy.\footnote{Amble and Knuth \cite{ak74}
+were the first to suggest that, with open addressing, any collision
+resolution strategy could be used.} Reviewing the algorithm for
+hashing with open addressing reveals that when two elements collide,
+priority is given to the first element inserted into the hash table
+and subsequent elements must move on.  Thus, hashing with open
+addressing could also be referred to as \emph{FCFS (first-come
+first-served) hashing}\index{FCFS hashing}\index{hashing!FCFS}.
+
+With LCFS (last-come first-served) hashing, collision resolution is
+done in exactly the opposite way.  When we insert an element $x$, we
+always place it at location $x_0$.  If position $x_0$ is already
+occupied by some element $y$ because $y_j=x_0$ then we place $y$ at
+location $y_{j+1}$, possibly displacing some element $z$, and so on.
+
+Poblete and Munro \cite{pm89} show that, after inserting $n$ elements
+into an initially empty table, the expected worst case search time is
+bounded above by
+\[  \E[W] \le 
+   1 
+   + \Gamma^{-1}(\alpha n)
+   \left( 1+\frac{\ln\ln(1/(1-\alpha))}{\ln \Gamma^{-1}(\alpha n)}
+   + O\left(\frac{1}{\ln^2\Gamma^{-1}(\alpha n)} \right)\right)
+\enspace ,
+\]
+where $\Gamma$ is the gamma function and 
+\[
+  \Gamma^{-1}(\alpha n) = \frac{\ln n}{\ln\ln n}
+	\left(1+\frac{\ln\ln\ln n}{\ln\ln n} + 
+	O\left(\frac{1}{\ln\ln n}\right)\right) \enspace .
+\]
+Historically, LCFS hashing is the first version of open addressing
+that was shown to have an expected worst-case search time that is
+$o(\log n)$.
+
+\subsection{Robin-Hood Hashing}
+\label{hash:sec:robinhood}
+\index{hashing!Robin-Hood}
+\index{Robin-Hood hashing}
+
+Robin-Hood hashing \cite{c86,clm85,vp98} is a form of open addressing
+that attempts to equalize the search times of elements by using a
+fairer collision resolution strategy.  During insertion, if we are
+trying to place element $x$ at position $x_i$ and there is already an
+element $y$ stored at position $y_j=x_i$ then the ``younger'' of the
+two elements must move on.  More precisely, if $i\le j$ then we will
+try to insert $x$ at position $x_{i+1}$, $x_{i+2}$ and so on.
+Otherwise, we will store $x$ at position $x_i$ and try to to insert
+$y$ at positions $y_{j+1}$, $y_{j+2}$ and so on.
+
+Devroye \etal\ \cite{dmv03} show that, after performing $n$ insertions on
+an initially empty table of size $m=\alpha n$ using the Robin-Hood
+insertion algorithm, the worst case search time has expected value
+\[
+	\E[W] = \Theta(\log\log n)
+\]
+and this bound is tight.
+Thus, Robin-Hood hashing is a form of open addressing that
+has doubly-logarithmic worst-case search time.  This makes it
+competitive with the multiple-choice hashing method of
+Section~\ref{hash:sec:multiplechoice}.
+
+\subsection{Cuckoo Hashing}\label{hash:sec:cuckoo}
+\index{hashing!cuckoo}
+\index{cuckoo hashing}
+
+Cuckoo hashing \cite{pr01} is a form of multiple choice hashing in
+which each element $x$ lives in one of two tables $A$ or $B$, each of
+size $m=n/\alpha$.  The element $x$ will either be stored at location
+$A[x_A]$ or $B[x_B]$. There are no other options.  This makes
+searching for $x$ an $O(1)$ time operation since we need only check
+two array locations.
+
+The insertion algorithm for cuckoo hashing proceeds as
+follows:\footnote{The algorithm takes its name from the large but lazy
+cuckoo bird which, rather than building its own nest, steals the nest
+of another bird forcing the other bird to move on.} Store $x$ at
+location $A[x_A]$. If $A[x_A]$ was previously occupied by some element
+$y$ then store $y$ at location $B[y_B]$.  If $B[y_B]$ was previously
+occupied by some element $z$ then store $z$ at location $A[z_A]$, and
+so on.  This process ends when we place an element into a previously
+empty table slot or when it has gone on for more than $c\log n$ steps.
+In the former case, the insertion of $x$ completes successfully.  In
+the latter case the insertion is considered a failure, and the entire
+hash table is reconstructed from scratch using a new probe sequence
+for each element in the table.  That is, if this reconstruction
+process has happened $i$ times then the two hash values we use for an
+element $x$ are $x_A=x_{2i}$ and $x_B=x_{2i+1}$.
+
+Pagh and Rodler \cite{pr01} (see also Devroye and Morin \cite{dm02})
+show that, during the insertion of $n$ elements, the probability of
+requiring a reconstruction is $O(1/n)$. This, combined with the fact
+that the expected insertion time is $O(1)$ shows that the expected
+cost of $n$ insertions in a Cuckoo hashing table is $O(n)$.  Thus,
+Cuckoo hashing offers a somewhat simpler alternative to the dynamic
+perfect hashing algorithms of Section~\ref{hash:sec:dphash}.
+
+\section{Historical Notes}
+
+In this section we present some of the history of hash tables. The
+idea of hashing seems to have been discovered simultaneously by two
+groups of researchers. Knuth \cite{k97} cites an internal IBM
+memorandum in January 1953 by H. P. Luhn that suggested the use of
+hashing with chaining.  Building on Luhn's work, A. D. Linh suggested
+a method of open addressing that assigns the probe sequence
+$x_0,\floor{x_0/10},\floor{x_0/100},\floor{x_0/1000},\ldots$ to the
+element $x$.
+
+At approximately the same time, another group of researchers at IBM:
+G. M. Amdahl, E.~M.~Boehme, N. Rochester and A. L. Samuel implemented
+hashing in an assembly program for the IBM 701 computer.  Amdahl is
+credited with the idea of open addressing with linear probing.
+
+The first published work on hash tables was by A. I. Dumey \cite{d56},
+who described hashing with chaining and discussed the idea of using
+remainder modulo a prime as a hash function.  Ershov \cite{e58},
+working in Russia and independently of Amdahl, described open
+addressing with linear probing.
+
+Peterson \cite{p57} wrote the first major article discussing the
+problem of searching in large files and coined the term ``open
+addressing.''  Buchholz \cite{b63} also gave a survey of the searching
+problem with a very good discussion of hashing techniques at the time.
+Theoretical analyses of linear probing were first presented by Konheim
+and Weiss \cite{kw66} and Podderjugin.  Another, very influential,
+survey of hashing was given by Morris \cite{m68}.  Morris' survey is
+the first published use of the word ``hashing'' although it was
+already in common use by practitioners at that time.
+
+
+
+\section{Other Developments}
+
+The study of hash tables has a long history and many researchers have
+proposed methods of implementing hash tables.  Because of this, the
+current chapter is necessarily incomplete. (At the time of writing,
+the hash.bib bibliography on hashing contains over 800 entries.) We
+have summarized only a handful of the major results on hash tables in
+internal memory.  In this section we provide a few references to the
+literature for some of the other results.   For more information on
+hashing, Knuth \cite{k97}, Vitter and Flajolet \cite{vf90}, Vitter
+and Chen \cite{vc87}, and Gonnet and Baeza-Yates \cite{gb-y91}
+% and Flajolet \etal \cite{X} 
+are useful references.
+
+Brent's method (Section~\ref{hash:sec:brent}) is a collision
+resolution strategy for open addressing that reduces the expected
+search time for a successful search in a hash table with open
+addressing.  Several other methods exist that either reduce the
+expected or worst-case search time.  These include \emph{binary tree
+hashing}\index{hashing!binary tree}\index{binary tree hashing}
+\cite{m77, gm79}, \emph{optimal
+hashing}\index{hashing!optimal}\index{optimal hashing}
+\cite{p76,r78,gm79}, Robin-Hood hashing
+(Section~\ref{hash:sec:robinhood}), and \emph{min-max
+hashing}\index{hashing!min-max}\index{min-max hashing} \cite{g81,c86}.
+One interesting method, due to Celis\index{Celis'
+method}\index{hashing!Celis' method} \cite{c86}, applies to any open
+addressing scheme.  The idea is to study the distribution of the ages
+of elements in the hash table, i.e., the distribution give by 
+\[
+    D_i=\Pr\{\mbox{$x$ is stored at position $x_i$}\} 
+\] 
+and start searching for $x$ at the locations at which we are most
+likely to find it, rather than searching the table positions
+$x_0,x_1,x_2\ldots$ in order.
+
+Perfect hash functions seem to have been first studied by Sprugnoli
+\cite{s77} who gave some heuristic number theoretic constructions of
+minimal perfect hash functions for small data sets.  Sprugnoli is
+responsible for the terms ``perfect hash function'' and ``minimal
+perfect hash function.''  A number of other researchers have presented
+algorithms for discovering minimal and near-minimal perfect hash
+functions.  Examples include Anderson and Anderson \cite{aa79},
+Cichelli \cite{c80a,c80b}, Chang \cite{c84a,c84b}, Gori and Soda
+\cite{gs89}, and Sager \cite{s85}.  Berman \etal\ \cite{bbdo86} and
+K\"orner and Marton \cite{km88} discuss the theoretical limitations of
+perfect hash functions.  A comprehensive, and recent, survey of
+perfect hashing and minimal perfect hashing is given by Czech \etal\
+\cite{chm97}.
+
+Tarjan and Yao \cite{ty79} describe a set ADT implementation that
+gives $O(\log u/\log n)$ worst-case access time.  It is obtained by
+combining a trie (Section~\ref{external:32:tries}) of degree $n$ with a
+compression scheme for arrays of size $n^2$ that contain only $n$
+non-zero elements.  (The trie has $O(n)$ nodes each of which has $n$
+pointers to children, but there are only a total of $O(n)$ children.)
+Although their result is superseded by the results of Fredman \etal\
+\cite{fks84} discussed in Section~\ref{hash:sec:fks}, they are the
+first theoretical results on worst-case search time for hash tables.
+
+Dynamic perfect hashing (Section~\ref{hash:sec:dphash}) and cuckoo
+hashing (Section~\ref{hash:sec:cuckoo}) are methods of achieving
+$O(1)$ worst case search time in a dynamic setting.  Several other
+methods have been proposed  \cite{dm90,dgmp92,bm99}.
+ 
+Yao \cite{y81} studies the \emph{membership problem}\index{membership
+problem}.  Given a set $S\subseteq U$, devise a data structure that
+can determine for any $x\in U$ whether $x$ is contained in $S$. Yao
+shows how, under various conditions, this problem can be solved using
+a very small number of memory accesses per query.  However, Yao's
+algorithms sometimes derive the fact that an element $x$ is in $S$
+without actually finding $x$.  Thus, they don't solve the set ADT
+problem discussed at the beginning of this chapter since they can not
+recover a pointer to $x$.
+
+The ``power of two random choices,'' as used in multiple-choice
+hashing, (Section~\ref{hash:sec:multiplechoice}) has many applications
+in computer science.  Karp, Luby and Meyer auf der Heide
+\cite{klm92,klm93} were the first to use this paradigm for simulating
+PRAM computers on computers with fewer processors. The book chapter by
+Mitzenmacher \etal\ \cite{mrs01} surveys results and applications of
+this technique.
+
+A number of table implementations have been proposed that are suitable
+for managing hash tables in external memory.\index{hashing!external
+memory}\index{external memory!hashing}  Here, the goal is to reduce
+the number of disk blocks that must be accessed during an operation,
+where a disk block can typically hold a large number of elements.
+These schemes include \emph{linear
+hashing}\index{hashing!linear}\index{linear hashing} \cite{l80},
+\emph{dynamic hashing}\index{hashing!dynamic}\index{dynamic hashing}
+\cite{l78}, \emph{virtual hashing}\index{virtual
+hashing}\index{hashing!virtual} \cite{lit78}, \emph{extendible
+hashing}\index{hashing!extendible}\index{extendible hashing}
+\cite{fnps79},  \emph{cascade
+hashing}\index{hashing!cascade}\index{cascade hashing} \cite{kz84},
+and \emph{spiral storage}\index{spiral storage}\index{hashing!spiral
+storage} \cite{m85}.  In terms of hashing, the main difference between
+internal memory and external memory is that, in internal memory, an
+array is allocated at a specific size and this can not be changed
+later.  In contrast, an external memory file may be appended to or be
+truncated to increase or decrease its size, respectively.  Thus, hash
+table implementations for external memory can avoid the periodic
+global rebuilding operations used in internal memory hash table
+implementations.
+
+\section*{Acknowledgement}
+
+The author is supported by a grant from the Natural Sciences and
+Engineering Research Council of Canada (NSERC).
+
+%\input{hashing/hashing.bbl}
+\bibliographystyle{plain}
+\bibliography{hashing/hashing}

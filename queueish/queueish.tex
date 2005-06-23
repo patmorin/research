@@ -1,0 +1,154 @@
+\documentclass[lotsofwhite,ccfonts]{patmorin}
+
+\input{pat.tex}
+
+\title{Periodic Dictionaries}
+\author{Prosenjit Bose \\ Carleton University \and
+	John Iacono \\ Brookly Polytechnic \and
+	Pat Morin \\ Carleton University}
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+We describe a comparison-based dictionary data structure for storing a
+set of $n$ keys.  Using this data structure, the time to execute an
+access sequence $a_1,\ldots,a_m$ is $O(m(\log\mu+\log^* n))$.  Here,
+$\mu=\sum_{i=1}^m (n-w_i)/m$, where $w_i$ is the number of distinct
+elements in $a_j,\ldots,a_i$ and $j<i$ is the largest value such that
+$a_j=a_i$.
+\end{abstract}
+
+\section{Introduction}
+
+Comparison-based dictionary data structures are one of the most
+well-studied topics in computer science.  In their simplest form,
+these data structures store a set $k_1,\ldots,k_n$ of keys from some
+total order $<$ so that searching for a particular key can be done
+efficiently.  The only operations performed on keys are comparisons
+between pairs of keys.
+
+Let $a_1,\ldots,a_m$ be a sequence of keys, where each
+$a_i\in\{k_1,\ldots,k_n\}$.  We define the value $w_i$ as follows: If
+there exists a value $j<i$ such that $a_j=a_i$ then $w_i$ is the
+number of distinct elements in $a_j\ldots,a_i$, otherwise $w_i=n-1$.
+Note that, in the first case, $w_i$ represents the number of distinct
+keys accessed since the last access to $a_i$.
+
+Let $\delta$ be the average value of $w_i$, i.e., $\delta=\sum_{i=1}^m
+w_i/m$.  The value $\delta$ is closely related to the \emph{empirical
+entropy} of the sequence $a_1,\ldots,a_m$ and considerable effort has
+been put into finding data structures that can access sequences in
+$O(m\log\delta)$ time.  Sleator and Tarjan \cite{st85} showed that
+splay trees can access any sequence $a_1,\ldots,a_m$ in
+$O(m\log\delta)$ time.  Goodrich \cite{g00} shows that the same result
+can be obtained using a different tree-based structure.  Iacono
+\cite{i01} showed that a data structure using a set of balanced binary
+trees of sizes $2^{2^i}$, $1\le i\le \log\log n$ achieves the same
+result, but also has $O(\log n)$ worst case access time.
+
+In this paper, we study a different, almost inverse, measure of
+complexity on the sequence $a_1,\ldots,a_m$.  Let $q_i=n-w_i$, so that
+$q_i$ is the number of keys in $\{k_1,\ldots,k_n\}$ \emph{not}
+accessed since the last access to $a_i$.  Then, we define $\mu$ as the
+average value of $q_i$, i.e., $\mu=\sum_{i=1}^m q_i/m$.  The goal of
+the current paper is to develop a data structure that can access the
+sequence $a_1,\ldots,a_m$ in $O(m\log\mu)$ time.
+
+Note that $\mu$ is small when accesses are periodic in nature.  For an
+example of such a periodic sequence, consider a driver's licensing
+office where motorists must come every four years to renew their
+driver's license.  During any 4 year period, most files will be
+accessed and the files accessed on any given day are likely to have
+been last accessed approximately 4 years previously.  Thus, in the
+period between two accesses to a particular file $k_i$, most of the
+other files will have been accessed.
+
+Iacono and Langerman \cite{il02} define queueish dictionaries and
+priority queues.  A dictionary is queueish if the (amortized) cost to
+perform access $a_i$ is $O(\log q_i)$.  It follows that a queueish
+dictionary can access $a_1,\ldots,a_m$ in $O(m\log\mu)$ time.
+Unfortunately, their implementation of queueish dictionaries requires
+$O(\log q_i+\log\log n)$ time to access $a_i$, which means that the
+cost to access the sequence $a_1,\ldots,a_m$ is $O(m(\log\mu +
+\log\log n))$.
+
+In this paper we give a dictionary data structure that can access any
+sequence $a_1,\ldots,a_m$ in $O(m(\log\mu +\log^* n))$ time, where
+$\log^*$ is the iterated logarithm function.  A simple modification of
+this data structure gives a data structure that can access the
+sequence $a_1,\ldots,a_m$ in $O(m(\log\min\{\mu,\delta\} + \log^*n))$
+time.  This is somewhat surprising, since $\mu$ and $\delta$ seem to
+be in conflict with each other.
+
+\section{The Data Structure}
+
+We describe the data structure in several steps.  We first place some
+conditions on $\mu$ and assume that it's value is known in advance and
+then we gradually relax our assumptions.
+
+
+\subsection{When $\mu \ge \log n/\log \mu$ and known}
+
+Assume the value $\mu$ is known in advance, and that $\mu\ge \log n$.
+We can also assume that $\mu\le \sqrt{n}$, otherwise any balanced
+binary tree data structure can access the sequence $a_1,\ldots,a_m$ in
+$O(m\log \mu)=O(m\log n)$ time.
+
+For this case, our data structure consists of two dictionaries $D_1$
+and $D_2$ and a list $L_2$.  At time $i$, the dictionary $D_1$
+contains the $\lceil\mu\rceil^2$ least recently accessed keys.  The
+dictionary $D_2$ always contains all keys.  The list $L_2$ contains
+the subset of $\{k_1,\ldots,k_n\}$ that are not contained in $D_1$,
+sorted by the order of most recent access time.  Each key stored in
+$D_2$ maintains a pointer the node (if any) of $L_2$ that contains the
+same key.
+
+When searching for a value $a_i$ we first search in $D_1$. If we find
+$a_i$ then we delete it from $D_1$, append it to $L_2$, remove the
+last element of $L_2$ and insert this element into $D_1$.  Otherwise
+(we don't find $a_i$ in $D_1$) we search for $a_i$ in $D_2$.  When we
+find it, we remove its current location in $L_2$ and move it to the
+front of $L_2$.
+
+In the first case, the cost of a search is $O(\log\mu)$.  In the
+second case, the cost of a search is $O(\log n)$.  Thus, the total
+cost to access $a_1,\ldots,a_m$ is
+\[
+  T(a_1,\ldots,a_n) = x\times O(\log \mu) + y\times O(\log n) \enspace ,
+\]
+where $a$, respectively $b$, is the number of accesses that finish in
+$D_1$, respectively, $D_2$.  However, since $\mu$ is the average value
+of $q_i$ and $D_1$ contains the $\lceil\mu\rceil^2$ least recently
+accessed elements, $y\le m/\mu$.  Therefore,
+\begin{eqnarray*}
+  T(a_1,\ldots,a_n) & \le & \left(m-\frac{m}{\mu}\right)\times O(\log \mu) 
+	+ \frac{m}{\mu}\times O(\log n) \\
+	& \le & m\times O(\log\mu) + O(m\log\mu) \\
+	& = & O(m\log \mu) \enspace ,
+\end{eqnarray*}
+
+\begin{thm}
+The above data structure accesses the sequence $a_1,\ldots,a_m$ in
+$O(m\log\mu)$ time.
+\end{thm}
+
+\subsection{When $\mu < \log n$ and known}
+
+When $\mu<\log n$, we use a similar approach.  We maintain
+dictionaries $D_1,D_2,\ldots,D_k$, where $D_1$ contains
+$\lceil\mu\rceil^2$ keys and $D_i$, $1<i\le k$ contains at most $\mu
+t(i,\lceil\mu\rceil^2)$ keys.\footnote{The notation $t(i,x)$ denote
+the base 2 tower of $x$ of size $i$, i.e.,
+$t(i,x)=\left.2^{2^{\cdot^{\cdot^{\cdot^x}}}}\right\}i$.} We also
+maintain lists $L_1,\ldots,L_k$, where the elements of these lists
+form a partition of the keys $k_1,\ldots,k_n$.  We maintain the invariant that for all lists, except $L_k$, the elements of $L_i$ are a subset of the elements of $D_i$
+
+
+
+\subsection{When $\mu$ is unknown}
+
+\bibliography{queueish} \bibliographystyle{plain}
+
+
+\end{document}

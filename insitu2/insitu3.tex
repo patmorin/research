@@ -1,0 +1,128 @@
+\documentclass{patmorin}
+\usepackage[noend]{algorithmic}
+
+\title{Space-Efficient Geometric Divide-and-Conquer Algorithms}
+\author{Prosenjit Bose \and
+	Anil Maheshwari \and
+	Pat Morin \and
+	Jason Morrison \and
+	Michiel Smid \and
+	Jan Vahrenhold}
+\date{}
+
+\newcommand{\rt}{\mathrm{right\_turn}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+A \emph{space-efficient} algorithm is one which uses very little space
+beyond the space in which the input is given.  We describe space
+efficient algorithms for some classic geometric problems in the plane,
+including closest-pairs, bichromatic closest-pair and orthogonal segment
+intersection.  These algorithms avoid the use of complicated in-place
+merging and partitioning algorithms by using the concept of
+"reversible" operations.
+\end{abstract}
+
+\section{Reversible Operations}
+
+\subsection{Convex Hull}
+
+\begin{description}
+\item{Input:} An array $A=A[0],\ldots,A[n-1]$ of points sorted by
+$x$-coordinate.
+
+\item{Output (Before Restoring):} The upper convex hull of these
+points stored in $A[0],\ldots,A[h-1]$ and the interior points stored in
+$A[h],\ldots,A[n-1]$ 
+
+\item{Restored Output:} The original points of $A$ sorted by $x$
+coordinate.
+\end{description}
+
+The following algorithm, given by Br\"onnimann etal produces the
+desired output in linear time
+
+\vspace{1ex}
+\noindent\begin{minipage}{\textwidth}
+\textsc{Graham-InPlace-Scan}$(A, n)$
+\begin{algorithmic}[1]
+\STATE{$h\gets 2$}
+\FOR{$i\gets 2\ldots n$}
+  \WHILE{$h\ge 2$ \textbf{and} \textbf{not} $\rt(S[h-2], S[h-1], S[i])$}
+     \STATE{$h\gets h-1$ \COMMENT{ pop top element from the stack }}
+  \ENDWHILE
+  \STATE{\textbf{swap} $S[i]\leftrightarrow S[h]$}
+  \STATE{$h\gets h+1$}
+\ENDFOR
+\STATE{\textbf{return} $h$}
+\end{algorithmic}
+\end{minipage}
+\vspace{1ex}
+ 
+The following algorithm undoes the operations of Graham's Scan
+
+\vspace{1ex}
+\noindent\begin{minipage}{\textwidth}
+\textsc{Graham-InPlace-Undo}$(A, h, n)$
+\begin{algorithmic}[1]
+\FOR{$i\gets n,\ldots,2$}
+  \STATE{$h\gets h-1$}
+  \STATE{\textbf{swap} $A[i]\leftrightarrow A[h]$}
+  \WHILE{$h < i$ \textbf{and} $A[h].x < A[h+1].x$}
+	\STATE{$h\gets h+1$}
+  \ENDWHILE
+\ENDFOR
+\end{algorithmic}
+\end{minipage}
+\vspace{1ex}
+ 
+Finally, note that even if the value of $h$ is not known, it can be
+computed easily in linear time since $A[h-1].x \ge A[h].x$ but
+$A[i-1].x<A[i].x$ for all $1\le i< h$.
+
+\subsection{Partitioning}
+
+Suppose $A=A[0],\ldots,A[n-1]$ is an array of points sorted by
+$y$-coordinate and we wish to partition it into two sets based on the
+value $A[i].x$. The following algorithm is motivated by the 
+
+\vspace{1ex}
+\noindent\begin{minipage}{\textwidth}
+\textsc{Graham-Partition}$(A, i, n)$
+\begin{algorithmic}[1]
+\STATE{\textbf{swap} $A[0]\leftrightarrow A[i]$}
+\STATE{$h\gets 1$}
+\FOR{$i\gets 1\ldots n-1$}
+  \IF{$A[i].x < A[h-1].x$}
+       \STATE{\textbf{swap} $A[i]\leftrightarrow A[h]$}
+       \STATE{\textbf{swap} $A[h-1]\leftrightarrow A[i]$}
+       \STATE{$h\gets h+1$}
+  \ENDIF
+\ENDFOR
+\STATE{\textbf{return} $h$}
+\end{algorithmic}
+\end{minipage}
+\vspace{1ex}
+
+\vspace{1ex}
+\noindent\begin{minipage}{\textwidth}
+\textsc{Graham-Partition-Undo}$(A, h, n)$
+\begin{algorithmic}[1]
+\FOR{$i\gets n-1,\ldots,1$}
+   \IF{$A[h-2].y > A[i].y$}
+      \STATE{$h\gets h-1$}
+      \STATE{\textbf{swap} $A[h-1]\leftrightarrow A[i]$}
+      \STATE{\textbf{swap} $A[h-1]\leftrightarrow A[h]$}
+   \ENDIF
+\ENDFOR
+
+\end{algorithmic}
+\end{minipage}
+\vspace{1ex}
+
+
+
+
+\end{document}

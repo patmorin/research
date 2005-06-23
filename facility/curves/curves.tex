@@ -1,0 +1,603 @@
+\documentclass[charterfonts,lotsofwhite]{patmorin}
+\usepackage{graphicx,ipe}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\input{pat.tex}
+
+\title{\MakeUppercase{Succinct Data Structures for Approximating
+Convex Functions} \\ \MakeUppercase{with Applications}%
+     \thanks{This research was partly supported by NSERC.}}
+\author{Prosenjit Bose\thanks{School of Computer Science, Carleton
+	University, \texttt{\{jit,morin\}@scs.carleton.ca}} \and
+  Luc Devroye\thanks{School of Computer Science, McGill University,
+  	\texttt{luc@cgm.cs.mcgill.ca}} \and 
+  Pat Morin\footnotemark[2]}
+\date{}
+
+\newcommand{\fw}{\mathrm{FW}}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\Real}{\mathbb{R}}
+\newcommand{\E}{\mathbf{E}}
+\newcommand{\dlt}{2\eps}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We study data structures for providing $\epsilon$-approximations 
+of convex functions whose
+slopes are bounded. Since the queries are efficient in these 
+structures requiring
+only $O(\log(1/\eps)+\log\log n)$ time, 
+we explore different applications 
+of such data structures to efficiently solve
+problems in clustering and facility location. Our data structures are succinct
+using only $O((1/\eps)\log^2(n))$ bits of storage. 
+We show that this is optimal by
+providing a matching lower bound showing that any data structure 
+providing such an
+$\epsilon$-approximation requires at least $\Omega((1/\eps)\log^2(n))$ bits of storage.
+\end{abstract}
+
+\section{Introduction}
+
+We consider the problem of approximating convex functions of 
+one variable whose slopes are bounded.  
+We say that a non-negative number $y$ is an
+$\eps$-approximation to a non-negative number $x$ if $(1-\eps)x\le y
+\le x$.\footnote{This definition is a bit more one-sided that the
+usual definition, which allows any $y$ such that $|x-y|\le \eps
+x$.}  We say that a function $g$ is an $\eps$-approximation to a
+function $f$ if $g(x)$ is an $\eps$-approximation to $f(x)$ for all
+$x$ in the domain of $f$.
+
+Let $f:\Real\rightarrow \Real^+$ be a convex function that is
+non-negative everywhere.  In this paper we show that, if the absolute
+value of the slope of $f$ is bounded above by $n$, then there exists a
+piecewise-linear function $g$ that $\eps$ approximates $f$ at all
+points $x$ except where the slope of $f$ is small (less than 1) and
+that consists of $O(\log_E n)$ pieces, where $E=1/(1-\eps)$.  The
+function $g$ can be computed in $O(K\log_E n)$ time, where $K$ is the
+time it takes to evaluate expressions of the form $\sup\{x: f'(x)\le
+t\}$ and $f'$ is the first derivative of $f$.  Once we have computed
+the function $g$, we can store the pieces of $g$ in an array sorted by
+$x$ values so that we can evaluate $g(x)$ for any query value $x$ in
+$O(\log\log_E n)$ time.  Since we are interested in the joint
+complexity as a function of $\eps < 1/2$ and $n \ge 10$, it is worth
+noting that $log_E n = \Theta ( (1/\eps) \log n)$ and thus that
+$\log\log_E n = \Theta (\log (1/\eps) + \log \log n)$.
+
+As an application of these results, we consider functions defined by
+sums of Euclidean distances in $d$ dimensions and show that that they
+can be approximated using the above results.  To achieve this, we use
+a random rotation technique similar to the method of random
+projections \cite{i01}.  We show that the sum of Euclidean distances
+from a point to a set of $n$ points can be closely approximated by
+many sums of Manhattan distances from the point to the set.  This
+technique is very simple and of independent interest.
+
+The remainder of the paper is organized as follows.  \secref{approx}
+presents our result on approximating convex functions using few linear
+pieces.  \secref{ds} discusses how these results can be interpreted in
+terms of data structures for approximating convex functions.
+\secref{lower-bound} gives lower bounds on the space complexity of
+approximating convex function.  \secref{applications} describes
+applications of this work to facility location and clustering
+problems.  Finally, \secref{conclusions} summarizes and concludes the
+paper.
+
+\section{Approximating Convex Functions}\seclabel{approx}
+
+Let $h(x)=c+|nx|$, for some $c,n\ge 0$.  Then, it is clear that the
+function $g$ such that $g(x)=c+(1-\eps)|nx|$ is an
+$\eps$-approximation of $h$.  Furthermore, $g$ is an
+$\eps$-approximation for any function $h_2$ such that $g(x)\le
+h_2(x)\le h(x)$ for all $x\in\Real$. (see \figref{trivial}).  This
+trivial observation is the basis of our data structure for
+approximating convex functions.
+
+\begin{figure}
+\centeripe{trivial}
+\caption{The function $g$ is an approximation of $h$ and
+of $h_2$.}\figlabel{trivial}
+\end{figure}
+
+Let $f$ be a non-negative convex function and let $f'$ be the first
+derivative of $f$.  Assume that $f'(x)$ is defined for all but a
+finite number of values of $x$ and that $|f'(x)|\le n$ for all $x$ in
+the domain of $f'$.  For convenience, we define the \emph{right
+derivative} $f^*(x)$ as follows: If $f'(x)$ is defined, then
+$f^*(x)=f'(x)$.  Otherwise, $f^*(x)=\lim_{\delta\rightarrow 0+}
+f'(x+\delta)$.
+
+Let $a$ be the largest value at which the slope of $f$ is at most
+$-(1-\eps)n$, i.e., 
+\[
+a=\max\{x:f^*(x)\le -(1-\eps)n \} \enspace .
+\]
+(Here, and throughout, we use the convention that
+$\max\emptyset=-\infty$ and $\min\emptyset=\infty$.)  Similarly, let
+$b=\min\{x:f^*(x)\ge (1-\eps) n\}$.  Then, from the above discussion,
+it is clear that the function
+\begin{equation}
+ g(x) = \left\{\begin{array}{ll}
+                 f(a) + (1-\eps)(x-a)n & \mbox{if $x\le a$} \\
+                 f(b) + (1-\eps)(b-x)n & \mbox{if $x\ge b$} \\
+                 f(x)   & \mbox{otherwise} \eqlabel{approx}
+ \end{array}\right.
+\end{equation}
+is an $\eps$-approximation of $f$ (see \figref{approx}).
+
+\begin{figure}
+\centeripe{approx}
+\caption{The function $g$ is a $(1-\eps)$ approximation of
+$f$.}\figlabel{approx}
+\end{figure}
+
+\Eqref{approx} tells us that we can approximate $f$ by using two
+linear pieces and then recursively approximating $f$ in the range
+$(a,b)$.  However, in the range $(a,b)$, $f^*$ is in the range
+$(-(1-\eps)n, (1-\eps)n)$.  Therefore, if we recurse $\lceil \log_E
+n\rceil$ times, we obtain a function $g$ with $O(\log_E n) =
+O((1/\eps) \log n)$ linear pieces that approximates $f$ at all points
+except possibly where $f^*$ is less than one.
+
+\begin{thm}\thmlabel{approx}
+Let $f$ and $f^*$ be defined as above.  Then there exists a piecewise-linear
+function $g$ with $O(\log_E n)$ pieces that is an
+$\eps$-approximation to $f$ at all values except where $|f^*(x)|\le 1$.
+\end{thm}
+
+\section{Data Structures}\seclabel{ds}
+
+In this section, we consider the consequences of \thmref{approx} in
+terms of data structures for approximating convex functions.  By
+storing the pieces of $g$ in an array sorted by $x$ values, we obtain
+the following.
+
+\begin{thm}
+Let $f$ and $f^*$ be defined as in \secref{approx}.  Then there exists
+a data structure of size $O((1/\eps) \log n)$ that can compute an
+$\eps$-approximation to $f(x)$ in $O(\log (1/\eps) + \log \log n)$
+time for any query value $x$ where $|f^*(x)|\ge 1$.
+\end{thm}
+
+Next, we consider a more dynamic model, in which the function $f$ is
+updated over time.  In particular, we consider the following
+operations that are applied to the initial function $f(x)=0$, for all
+$x\in\Real$.
+
+\begin{enumerate}
+\item $\textsc{Query}(x)$: Return an $\eps$-approximation to
+  $f(x)$.
+
+\item $\textsc{Insert}(a)$: Increase the slope of $f$ by 1 in the
+  range $(a,\infty)$, i.e., set $f(x)\gets f(x)+x-a$ for all $x\in
+  [a,\infty)$.
+
+\item $\textsc{Delete}(x)$: Decrease the slope of $f$ by 1 in the
+  range $(x,\infty)$.  In order to maintain convexity, the number of
+  calls to $\textsc{Delete}(x)$ may not exceed the number of calls to
+  $\textsc{Insert}(x)$ for any value of $x$.
+\end{enumerate}
+
+Note that a sequence of \textsc{Insert} and \textsc{Delete} operations
+can only produce a monotonically increasing function $f$ whose slopes
+are all integers.  This is done to simplify the exposition of the data
+structure.  If an application requires that $f$ be allowed to decrease
+and increase then two data structures can be used and their results
+summed.  \comment{Also, if non-integer slopes are required then the data
+structure and algorithms are easily modified to support an additional
+parameter $\delta$, $0<\delta\le 1$ to the \textsc{Insert} and
+\textsc{Delete} procedures that specifies the amount by which the
+slope is to increased or decreased, respectively.}
+
+The function $f$ has some number $m$ of breakpoints, where the slope
+of $f$ changes.  We store these breakpoints in a balanced search tree
+$T$, sorted by $x$-coordinate.  With each breakpoint $x$, we also
+maintain the value $\Delta(x)$ by which the slope of $f$ increases at
+$x$.  In addition, we link the nodes of $T$ in a doubly-linked list,
+so that the immediate successor and predecessor of a node can be found
+in constant time.  It is clear that $T$ can be maintained in $O(\log
+n)$ time per operation using any balanced search tree data structure.
+
+In addition to the search tree $T$, we also maintain an array $A$ of
+size $O((1/\eps) \log n)$ that contains the piecewise linear
+approximation of $f$.  The $i$th element in this array contains the
+value $x_i$ such that $x_i=\min\{x:f^*(x) \ge E^i \}$, a pointer to
+the node in $T$ that contains $x_i$, and the values of $f(x_i)$ and
+$f^*(x_i)$, i.e., the value of $f$ at $x_i$ and slope of $f$ at $x_i$.
+To update this array during an \textsc{Insert} or \textsc{Delete}
+operation, we first update the values of $f(x_i)$ and $f^*(x_i)$ for
+each $i$.  Since there are only $O((1/\eps) \log n)$ array entries,
+this can be done in $O((1/\eps) \log n)$ time.
+
+Next, we go through the array again and check which values of $x_i$
+need to be changed (recall that $x_i=\min\{x:f^*(x) \ge E^i \}$).
+Note that, since \textsc{Insert} or \textsc{Delete} can only change
+the value of $f^*(x)$ by 1, if the value of $x_i$ changes then it
+changes only to its successor or predecessor in $T$.  Since the nodes
+of $T$ are linked in a doubly-linked list, and we store the values of
+$f(x_i)$ and $f^*(x_i)$ we can detect this and update the value of
+$x_i$, $f(x_i)$ and $f^*(x_i)$ in constant time.  Therefore, over all
+array entries, this takes $O((1/\eps) \log n)$ time.
+
+To evaluate an approximation to $f(x)$, we do a binary search on $A$
+to find the index $i$ such that $[x_i,x_{i+1})$ contains $x$ and then
+output $f(x_i) + (x-x_i)f^*(x_i)$.  By the choice of $x_i$, this is a
+$\eps$-approximation to $f(x)$.  We have just proven the
+following:
+
+\begin{thm}
+There exists a data structure of size $O(n)$ that supports the
+operations \textsc{Insert}, \textsc{Delete} in $O((1/\eps) \log n)$
+time and \textsc{Query} in $O(\log (1/\eps) + \log \log n)$ time,
+where $n$ is the maximum slope of the function $f$ being maintained.
+\end{thm}
+
+\section{A Lower Bound on Storage}\seclabel{lower-bound}
+
+In this section we prove an $\Omega((1/\eps)\log^2 n)$
+lower bound on the number of bits required by any data structure that
+provides an $\eps$-approximation for convex functions.  The idea
+behind our proof is to make $m=\Theta((1/\eps) \log n)$ choices from a
+set of $n$ elements.  We then encode these choices in the form of a
+convex function $f$ whose slopes are in $[0,n]$.  We then show that
+given a function $g$ that is an $\eps$-approximation to $f$ we can
+recover the $m=\Theta((1/\eps) \log n)$ choices.  Therefore, any data
+structure that can store an $\eps$-approximation to convex functions
+whose slopes lie in $[0,n]$ must be able to encode $n\choose m$
+different possibilities and must therefore store $\Omega((1/\eps)
+\log^2 n)$ bits in the worst case.
+
+Let $x_1,\ldots,x_n$ be an increasing sequence where $x_1=0$ and each
+$x_i$, $2\le i\le n$ satisfies
+\begin{equation}
+x_{i-1}+(1-\eps)\left(\frac{x_i-x_{i-1}}{1-\dlt}\right) 
+ > x_{i-1}+\frac{x_i-x_{i-1}}{1-\dlt} \enspace , \eqlabel{increasing}
+\end{equation}
+which is always possible since $(1-\epsilon)/(1-\dlt)>1$.
+
+Let $p_1,\ldots,p_m$ be any increasing sequence of $m=\lfloor\log_{E'}
+n\rfloor$ integers in the range $[1,n]$, where $E'=1/(1-2\eps)$.  We
+construct the function $f$ as follows:
+\begin{enumerate}
+\item For $x\in [-\infty,0)$, $f(x)=0$.
+\item For $x\in (x_{p_i},x_{p_{i+1}})$, $f(x)$ has slope $1/(1-\dlt)^i$.
+\item For $x>p_m$, $f(x)$ has slope $n$.
+\end{enumerate}
+
+The following lemma, illustrated in \figref{encoding} allows us to
+decode the values of $p_1,\ldots,p_m$ given an
+$\eps$-approximation to $f$.
+
+\begin{figure}
+\centeripe{encoding}
+\caption{An illustration of \lemref{encoding}.}\figlabel{encoding}
+\end{figure}
+
+\begin{lem}\lemlabel{encoding}
+  For the function $f$ defined above and for any $i$ such that $i=p_j$
+  for some $1\le j\le m$, 
+  \[  (1-\eps)f(x_{p_{j+1}}) > f(x_{p_j}) + \frac{x_{p_{j+1}}-x_{p_j}}{(1-\dlt)^{j-1}} 
+  \enspace .\]
+\end{lem}
+
+\begin{proof}
+  The lemma follows (with some algebra) from \eqref{increasing}.
+\end{proof}
+
+Suppose that $g$ is an $\eps$-approximation to $f$, i.e, for all
+$x\in\Real$, $g(x)$ satisfies $(1-\eps)f(x)\le g(x)\le f(x)$.  Then
+\lemref{encoding} can be used to recover the values of
+$p_1,\ldots,p_m$ from $g$.  Suppose, that we have already recovered
+$p_1,\ldots,p_{j}$ and that we now wish to recover $p_{j+1}$.  Note
+that, since we have recovered $p_1,\ldots,p_{j}$ we can compute the
+exact value of $f(x_{p_j})$.  We then evaluate $g(x_{p_j}+1)$,
+$g(x_{p_j}+2)$, and so on until encountering a value $k$ such that
+\[
+   g(x_{p_j}+k)>f(x_{p_j})+\frac{x_{p_j}+k-x_{p_j}}{(1-\dlt)^j}
+\]
+\lemref{encoding} then guarantees that $p_{j+1}=p_{j}+k-1$.  In this
+way, we can reconstruct the entire function $f$ and recover the values
+of $p_1,\ldots,p_m$.
+
+Although in the above discussion the slopes used in the construction
+of $f$ are not always integral it is clear that carefully rounding
+values appropriately would yield the same results using only integer
+valued slopes.  Since we can encode $n\choose m$ different choices of
+$p_1,\ldots,p_m$ in this manner and 
+$\log {{n}\choose{m}} =\Omega((1/\eps)\log^2n)$, 
+we conclude the following:
+
+\begin{thm}
+Any data structure that can represent an $\eps$-approximation to any
+convex function whose slopes are integers in the range $[0,n]$ must
+use $\Omega((1/\eps)\log^2 n)$ bits of storage in the worst
+case.
+\end{thm}
+
+\begin{rem}
+Some readers may complain that the function used in our lower bound
+construction uses linear pieces whose lengths are exponential in $n$.
+However, one should take into account that the endpoints of these
+pieces have $x$-coordinates that are integral powers of 2 and they can
+therefore be encoded in $O(\log n)$ bits each using, e.g., a floating
+point representation.
+\end{rem}
+
+\begin{rem}
+Another easy consequence of \lemref{encoding} is that any piecewise
+linear function that $\eps$-approximates $f$ has $\Omega((1/\eps) \log
+n)$ pieces.
+\end{rem}
+
+\section{Applications}\seclabel{applications}
+
+Next, we consider applications of our approximation technique for
+convex functions to the problem of approximating sums of distances in
+$d$ dimensions.  Let $S$ be a set of $n$ points in $d$ dimensions.
+The \emph{Fermat-Weber weight} of a point $q\in\Real^d$ is
+\[
+   \fw(p) = \sum_{p\in S} \|pq\| \enspace ,
+\]
+where $\|pq\|$ denotes the distance between points $p$ and $q$. Of
+course, different definitions of distance (e.g., Euclidean distance,
+Manhattan distance) yield different Fermat-Weber weights.
+
+\subsection{The 1-dimensional case}
+
+One setting in which distance is certainly well defined is in one
+dimension.  In this case,
+\[ 
+\|pq\| = |p-q| \enspace ,
+\]
+so the Fermat-Weber weight of $x$ is given by
+\[
+   \fw(x) = f(x) = \sum_{y\in S} |x-y|  \enspace .
+\]
+Note that the function $f$ is convex (it is the sum of $n$ convex
+functions) and has slopes bounded below by $-n$ and above by $n$, so
+it can be approximated using the techniques \secref{ds}.  Furthermore,
+adding or removing a point $p$ to/from $S$ decreases the slope of $f$
+by 1 in the range $(-\infty,p)$ and increases the slope of $f$ by 1 in
+the range $(p,\infty)$, so the dynamic data structure of the previous
+section can be used to maintain an $\eps$-approximation of $f$ in
+$O(\log_E n)= O((1/\eps) \log n)$ time per update.
+
+Given the set $S$, constructing the $\eps$-approximation for $f$
+can be done in $O(n/\eps)$ time by a fairly straightforward
+algorithm.  Using a linear-time selection algorithm, one finds the
+elements of $S$ with ranks $\lfloor\eps n/2\rfloor$ and
+$\lceil(1-\eps/2) n\rceil$.  These are the values $a$ and $b$ in
+\eqref{approx}.  Once this is done, the remaining problem has size
+$(1-\eps) n$ and is solved recursively.  Although some care is
+required to compute the values $f(a)$ and $f(b)$ at each stage, the
+deatails are not difficult and are left to the interested reader.
+
+\begin{rem} 
+A general result of Agarwal and Har-Peled \cite{ah01} implies that the
+Fermat-Weber weight of points in one dimension can actually be
+$\eps$-approximated by a piecewise-linear function with $O(1/\eps)$
+pieces.  However, it is not clear how easily this approach can be made
+dynamic to handle insertion and deletions of points.
+\end{rem}
+
+\subsection{The Manhattan case}
+
+The Manhattan distance between two points $p$ and $q$ in $\Real^d$ is
+\[
+\|pq\|_1 = \sum_{i=1}^d |p_i-q_i| \enspace ,
+\]
+where $p_i$ denotes the $i$th coordinate of point $p$.  We simply
+observe that Manhattan distance is the sum of $d$ one-dimensional
+distances, so the Fermat-Weber weight under the Manhattan distance can
+be approximated using $d$ one-dimensional data structures.
+
+\subsection{The Euclidean case}
+
+The Euclidean distance between two points $p$ and $q$ in $\Real^d$ is
+\[
+\|pq\|_2 = \left(\sum_{i=1}^d (p_i-q_i)^2\right)^{1/2} \enspace .
+\]
+
+A general technique used to approximate Euclidean distance is to use a
+polyhedral distance function, in which the unit sphere is replaced
+with a polyhedron that closely resembles a sphere.  For example, the
+Manhattan distance function is a polyhedral distance function in which
+the unit sphere is replaced with a unit hypercube.  Although this
+technique works well when $d$ is small, such metrics generally require
+a polyhedron with a number of vertices that is exponential in $d$,
+making them poorly suited for high dimensional applications.
+
+Another technique, that works well when $d$ is very large (greater
+than $\log n$), and for most distance functions, is that of random
+projections \cite{i01}. Here, a random $O(\log n)$-flat is chosen and
+the points of $S$ are projected orthogonally onto this flat.  With
+high probability, all interpoint distances are faithfully preserved
+after the projection, so the problem is reduced to one in which the
+dimension of the point set is $O(\log n)$.  The difficulty with this
+approach, when using Euclidean distances, is that sums of Euclidean
+distances are difficult to deal with even when $d=2$ \cite{b88}, thus
+the reduction in dimension does not help significantly.
+
+Here we present a third approach that combines both of these
+techniques and adds two new twists: (1)~we obtain a polyhedral metric
+as the sum of several Manhattan metrics and (2)~our polyhedron is
+random.  The first twist allows us to apply approximate data
+structures for one-dimensional convex functions while the second
+allows us to achieve approximation guarantees using an a number of
+vertices that increases only linearly with $d$.
+
+Let $f(p)$ denote the Fermat-Weber weight of $p$ under the Euclidean
+distance function.  Choose $k$ independent random orientations of the
+coordinate axes.  Let $f_i(p)$ denote the Fermat-Weber weight of $p$
+under the Manhattan distance function after rotating the axes
+according to the $i$th random orientation.  Then $f_i(p)$ may take on
+any value in the range $[f(p),\sqrt df(p)]$.  In particular, $f_i(p)$
+has an expected value 
+\[
+   \E[f_i(p)]=c_df(p) \enspace ,
+\]
+where $c_d$ is a constant, dependent only on $d$, whose value is
+derived in \appref{luc}.  Consider the function
+\[
+  g(p) = \frac{1}{kc_d}\times\sum_{i=1}^k f_i(p) 
+\]
+that approximates the Fermat-Weber weight under Euclidean distance.
+
+\begin{lem}
+$\Pr\{|g(p)-f(p)| \ge \eps f(p)\} = \exp(-\Omega(\eps^2k))$
+\end{lem}
+
+\begin{proof}
+The value of $g(p)$ is a random variable whose expected value is
+$f(p)$ and it is the sum of $k$ independent random variables, all of
+which are in the range $[f(p),\sqrt d f(p)]$.  Applying Hoeffding's
+inequality \cite{h63} immediately yields the desired result.
+\end{proof}
+
+In summary, $g(p)$ is an $\eps$-approximation of $f(p)$ with
+probability $1-e^{-\Omega(\eps^2k)}$.  Furthermore, $g(p)$ is the sum
+of $k$ Fermat-Weber weights of points under the Manhattan distance
+function.  Each of these Manhattan distance functions is itself a sum
+of $d$ Fermat-Weber weights in 1 dimension.  These 1-dimensional
+Fermat-Weber weights can be approximated using the results of
+\secref{ds} or the results of Agarwal and Har-Peled \cite{ah01}.
+
+\subsection{Clustering and Facility Location}
+
+Bose \etal\ \cite{bmm02} describe data structures for approximating
+sums of distances.  They show how to build a data structure in
+$O(n\log n)$ time that can $(1-\eps)$-approximate the Fermat-Weber
+weight of any point in $O(\log n)$ time.  However, the constants in
+their algorithms depend exponentially on the dimension $d$.
+
+The same authors also give applications of this data structure to a
+number of facility-location and clustering problems, including
+evaluation of the Medoid and AverageDistance clustering measures, the
+Fermat-Weber problem, the constrained Fermat-Weber problem, and the
+constrained obnoxious facility-location problem.  All of these
+applications also work with the data structure of \secref{ds}, many
+with improved running times.  A summary of these results is given in
+\tabref{applications}.
+
+
+\begin{table}
+\begin{minipage}{\textwidth}
+\begin{center}\begin{tabular}{l|cccc}
+Problem      & Exact solution & Previous $\eps$-approx. & Ref. & New $\eps$-approx. \\ \hline
+Average distance  & $O(n^2)$ & $O(n)^a$ $O(n\log n)$ & 
+    \cite{i99,bmm02} & $O(n\log\log n)$ \\
+Medoid (1-Median) & $O(n^2)$ & $O(n)^a$ $O(n\log n)$ & 
+    \cite{i99,bmm02} & $O(n\log\log n)$ \\
+Discrete Fermat-Weber & $O(n^2)$ & $O(n)^a$ $O(n\log n)$ & 
+    \cite{i99,bmm02} & $O(n\log\log n)$ \\
+Fermat-Weber & -- & $O(n)^b$ $O(n\log n)$ & 
+    \cite{i99,bmm02} & $O(n)$ \\
+Constrained Fermat-Weber & $O(n^2)$ & $O(n)^b$ $O(n\log n)$ & 
+    \cite{i99,bmm02} & $O(n)$ \\
+Constrained OFL & $O(n^2)$ & $O(n)^a$ $O(n\log n)$ & 
+    \cite{i99,k97,bmm02} & $O(n\log\log n)$ 
+\end{tabular}\end{center}
+\footnotetext[1]{Refers to a randomized algorithm that
+  outputs a  $(1-\epsilon)$-approximation with constant probability.}
+\footnotetext[2]{Refers to a randomized algorithm that outputs a
+  $(1-\epsilon)$-approximation with high probability, i.e., with probability
+  $1-n^{-c}$, for some $c>0$.}
+\end{minipage}
+\caption{Applications of the data structure for evaluating the Fermat-Weber
+  weights of points under the Euclidean distance function.}
+\tablabel{applications}
+\end{table}
+
+
+
+\section{Summary and Conclusions}\seclabel{conclusions}
+
+We have given static and dynamic data structures for approximating
+convex functions of one variable whose slopes are bounded.  These data
+structures have applications to problems involving sums of distances
+in $d$ dimensions under both the Manhattan and Euclidean distance
+functions.  In developing these applications we have arrived at a
+technique of independent interest, namely that of approximating
+Euclidean distance as the sum of several Manhattan distances under
+several different orientations of the coordinate system.
+
+\bibliographystyle{plain}
+\bibliography{curves}
+
+
+\appendix
+\section{The value of $\mathbf{c_d}$}\applabel{luc}
+
+The value of $c_d$ is given by
+\[
+  c_d = \E \left[\sum_{i=1}^d|X_i| \right] \enspace ,
+\]
+where $(X_1,\ldots,X_d)$ is a point taken from the uniform
+distribution on the surface of the unit ball in $\mathbb{R}^d$.
+We observe that $(X_1^2,\ldots,X_d^2)$ is distributed as 
+\[
+\left(\frac{N_1^2}{N^2},\ldots,\frac{N_d^2}{N^2}\right) \enspace ,
+\]
+where $N^2=\sum_{i=1}^d N_i^2$ and $(N_1,\ldots,N_d)$ are i.i.d.\
+$\mathrm{normal}(0,1)$.  Clearly,
+\[
+\frac{N_1^2}{N^2} = \frac{N_1^2}{N_1^2+\sum_{i=2}^dN_i^2}
+  \stackrel{\mathcal{L}}{=} \frac{G(\frac{1}{2})}{G(\frac{1}{2})+G(\frac{d-1}{2})}
+\]
+where $G(\frac{1}{2})$, and $G(\frac{d-1}{2})$ are independent
+$\mathrm{gamma}(\frac{1}{2})$ and $\mathrm{gamma}(\frac{d-1}{2})$
+random variables, respectively.  Thus, $N_1^2/N$ is distributed as a
+$\mathrm{beta}(\frac{1}{2},\frac{d-1}{2})$ random variable,
+$\beta(\frac{1}{2},\frac{d-1}{2})$.  We have:
+\begin{eqnarray*}
+\E\left[\sum_{i=1}^d |X_i|\right]
+ & = & d\,\E\left[\sqrt{\beta\left(\frac{1}{2},\frac{d-1}{2}\right)}\right] \\
+ & = & d\int_0^1\frac{x^{\frac{1}{2}-1}(1-x)^{\frac{d-1}{2}-1}}
+                    {B(\frac{1}{2},\frac{d-1}{2})}\cdot\sqrt{x} \quad dx\\
+ & = & d\cdot\frac{B(1,\frac{d-1}{2})}{B(\frac{1}{2},\frac{d-1}{2})}\\
+\comment{ & = & d\cdot 
+       \frac{\Gamma(\frac{d-1}{2})}
+            {\Gamma(\frac{d+1}{2})} \cdot
+       \frac{\Gamma(\frac{d}{2})}
+            {\Gamma(\frac{1}{2})\cdot\Gamma(\frac{d-1}{2})} \\
+ & = & \frac{d\Gamma(\frac{d}{2})}
+            {\Gamma(\frac{1}{2})\cdot\Gamma(\frac{d+1}{2})} \\ 
+ & = & \frac{2\Gamma(\frac{d}{2}+1)}
+            {\Gamma(\frac{1}{2})\cdot\Gamma(\frac{d+1}{2})} \\
+}
+ & = & \frac{2}{B(\frac{1}{2},\frac{d+1}{2})} \enspace , 
+\end{eqnarray*}
+where $B(a,b)$ is the beta function.
+
+>From Mitrinovic \cite[p.~286]{m70}, we note:
+\begin{eqnarray}
+\frac{2}{B(\frac{1}{2},\frac{d+1}{2})} & \ge &
+  \sqrt{\frac{d}{2}+\frac{1}{4}+\frac{1}{16d+32}}\cdot 
+     \frac{1}{\Gamma(\frac{1}{2})} \\
+ & = & 2\sqrt{\frac{d}{2}+\frac{1}{4}+\frac{1}{16d+32}}\cdot
+      \frac{1}{\sqrt{\pi}} \\
+ & \ge & \sqrt{\frac{2d+1}{\pi}} \enspace .
+\end{eqnarray}
+
+Furthermore,
+\begin{eqnarray*}
+\E\left[\sum_{i=1}^d|X_i|\right] & = & d\,\E[|X_1|] \\
+  & \le & \frac{d+1}{\sqrt{\pi}\cdot\sqrt{\frac{d}{2}+
+                       \frac{3}{4}+\frac{1}{16d+48}}} \\
+  & \le & \frac{2(d+1)}{\sqrt{\pi}\cdot\sqrt{2d+3}} \\ 
+  & \le & \sqrt\frac{2(d+1)}{\pi} \enspace . 
+\end{eqnarray*}
+
+In summary,
+\[
+\sqrt\frac{2d+1}{\pi} \le c_d = \frac{2\Gamma(\frac{d}{2}+1)}
+                            {\sqrt{\pi}\cdot\Gamma(\frac{d+1}{2})}
+ \le \sqrt{\frac{2(d+1)}{\pi}} \enspace .
+\]
+
+
+\end{document}

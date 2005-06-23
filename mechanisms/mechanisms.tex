@@ -1,0 +1,177 @@
+\documentclass{article}
+\usepackage{amsthm}
+
+\input{pat.tex}
+
+\newcommand{\E}{\mathrm{E}}
+
+\title{Notes on Mechanism Design}
+\author{Pat Morin}
+
+\begin{document}
+\maketitle
+
+\section{Mechanisms for Selection by Rank}
+
+Throughout this section $t_1,\ldots,t_k$ are the types of the agents
+in increasing order and the utility of agent $i$ is $-t_i$ if agent
+$i$ is selected and 0 otherwise.  Note, selecting the smallest element
+in a set is the classic Vickrey auction (sacrificial goat) problem and
+is achieved by making a payment of $t_2$ (the second smallest value) to
+the element selected and 0 to all other elements.
+
+\begin{thm}\thmlabel{no-select}
+There is no truthful mechanism for selecting the $k$-th smallest
+element, for any $2\le k\le n$.
+\end{thm}
+
+\begin{proof} 
+The payment $p_k$ to the selected element must be at least $t_k$
+otherwise agent $k$ will be encouraged to lie.  On the other hand, the
+payment must be at most $t_{k-1}$ otherwise agent $k-1$ is encouraged
+to lie.  So we have $p_k \le t_{k-1}$ and $p_k \ge t_{k}$, which is
+impossible because there exist inputs where $t_{k-1}<t_k$.  
+\end{proof}
+
+Note, an interesting and non-intuitive special case of
+\thmref{no-select} occurs when $k=n$, i.e., we are trying to select
+the maximum of $n$ elements.  This is somewhat surprising, since
+selecting the smallest element is a classic Vickrey auction.  However,
+the two problems are quite different since in a Vickrey auction we can
+rely on agent 2 to give us an upper bound on the payment required to
+make agent 1's utility non-negative.  For the problem of finding the
+maximum the only upper bound we have is given by agent $n$, who will
+want to exagerate this value in order to increase his payment.
+
+\begin{op}
+Is there a truthful mechanism for selecting an approximate median, i.e.,
+some element whose rank is between $(1-\alpha)n/2$ and $(1+\alpha)n/2$
+for some constant $0<\alpha < 1/2$?
+\end{op}
+
+Next we consider the problem of selecting the $k$ smallest elements
+among a set of $n$ elements.
+
+\begin{thm}\thmlabel{k-smallest}
+For any $1\le k< n$, there exists a truthful mechanism for selecting
+the $k$ smallest elements.  
+\end{thm}
+
+\begin{proof} 
+The problem of finding the $k$ smallest elements can be restarted as
+the problem of finding a subset $X\subseteq\{1,\ldots,n\}$, $|X|=k$
+such that $g(X) = \sum_{x\in X} -t_x$ is maximized.  This is a
+Vickrey-Clarke-Groves (VCG) type problem and can be solved with a VCG
+mechanism.
+\end{proof}
+
+A particularly convenient mechanism for implementing
+\thmref{k-smallest} is the mechanism that pays 0 to each unselected
+element and pays $t_{k+1}$ to each selected element.  
+
+The following ``meta-theorem'' about random sampling allows for
+truthful mechanisms to sample in subsets that can be found by truthful
+mechanisms.
+
+\begin{thm}\thmlabel{random-sample}
+Suppose there exists a truthful mechanism $M$ for selecting a subset
+$S$ of some fixed size $k$ according to some criteria.  Then there
+exists a weakly truthful mechanism for selecting a (uniformly
+distributed) random element from $S$.
+\end{thm}
+
+\begin{proof}
+Create a new mechanism $M'$ where the selected element is paid his
+payment in $M$ and all other elements are paid 0.  The expected
+utility of any agent participating in $M'$ is $1/k$ times that agent's
+utility when participating in $M$.  Since multiplying by a positive
+constant does not change the sign of any expression involving
+utilities the mechanism $M'$ is truthful provided that $M$ is
+truthful.
+\end{proof}
+
+Note that there are other mechanisms that could be used in the proof
+of \thmref{random-sample}.  In particular, the mechanism that gives
+each element selected by $M$ a payment of $1/k$ times its payment in
+$M$.
+
+Also note \thmref{random-sample} requires that the value of $k$ be fixed in
+advance, independently of $t_1,\ldots,t_n$.  Otherwise, an agent whose
+utility in $M$ greater than 0 might lie in order to to decrease the
+value of $k$ and increase his expected utility.
+
+
+\thmref{random-sample} and \thmref{k-smallest} immediately lead to the
+following result:
+
+\begin{cor}
+For any $1\le k\le n$, there exists a truthful mechanism for selecting
+a random element from the $k$ smallest elements.
+\end{cor}
+
+
+\begin{op}[Rank-Weighted Random Selection]
+Is there a truthful mechanism for selecting a non-uniformly
+distributed element where the probability of selecting element $i$ is
+a function of the type vector $t$?  This can't be true in general
+since it would contradict (for example) \thmref{no-select}.
+\end{op}
+
+\begin{op}[Agent-Weighted Random Selection]
+Is there a truthful mechanism for selecting a non-uniformly
+distributed element among the $k$ smallest elements where the
+probability of selecting element $i$ is a function only of $i$?
+\end{op}
+
+\section{Mechanisms for Selection by Weight}
+
+The following result is particularly useful in approximation
+algorithms for identifying approximate minima.
+
+\begin{thm}
+There exists a truthful mechanism for selecting all elements $i$ such
+that $t_i \le \beta t_1$, for any constant $\beta > 1$.
+\end{thm}
+
+\begin{proof}
+The mechanism pays $\beta t_2$ to the minimum element, pays $\beta
+t_1$ to every other selected element and pays 0 to non-selected
+elements.  The minimum element has no incentive to lie because doing
+so will never increase its payoff beyond $\beta t_2$.  The other
+selected elements have no incentive to lie because doing so will only
+either decrease their utility to 0 (if they report more than $\beta
+t_1$) or do nothing to their payment (if they report something smaller
+than their true value).   The unselected elements have no reason to
+lie because, if they are selected, they can not receive more than
+$\beta t_1$, which would make their utility negative.
+\end{proof}
+
+\begin{conj}
+There exists a truthful mechanism for selecting a (uniformly
+distributed) random element from among all elements $i$ such that
+$t_i\le \beta t_1$, for any constant $\beta > 1$.
+\end{conj}
+
+\begin{proof}[Sketch]
+This would be a mechanism where the expected payment to the smallest
+element, if selected, is
+\[
+\frac{k'}{k}\beta t_2 + \left(1-\frac{k'}{k} \right)\frac{1}{\beta}
+t_{k'+1}
+\]
+where $k$ is the number of elements less than or equal to $\beta t_2$
+and $k'$ is the number of elements less than or equal to $\beta t_1$.
+Note that Nisan and Ronin's mechanism is a special case of the above
+when $n=2$.  Intuitively, this is fair because the value of $k'$ is
+under the control of agent 1, while the value of $k$ is not.
+This mechanism makes the expected utility of agent 1 equal to
+\begin{eqnarray*}
+\E[u_1] & = & \frac{1}{k'}\left(\frac{k'}{k}\beta t_2 
+   + \left(1-\frac{k'}{k} \right)\frac{1}{\beta} t_{k'+1}-t_1\right) \\
+   & = & \frac{1}{k}\beta t_2 + -
+\left(\frac{1}{k'}-\frac{1}{k}\right)\frac{1}{\beta}
+t_{k'+1} - \frac{1}{k'}t_1 \enspace .
+\end{eqnarray*}
+\end{proof}
+
+\end{document}

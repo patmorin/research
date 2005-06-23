@@ -1,0 +1,907 @@
+\documentclass{article}
+\usepackage{IJCGA}
+\usepackage{amsfonts}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{ipe}
+
+\newcommand{\centeripe}[1]{\begin{center}\Ipe{#1}\end{center}}
+\newcommand{\comment}[1]{}
+\newcommand{\erik}[1]{#1}
+\newcommand{\new}{\makebox[0cm]{$\bigotimes$}}
+\newcommand{\centerpsfig}[1]{\centerline{\psfig{#1}}}
+
+\newcommand{\etal}{\emph{et al.}}
+
+\newcommand{\seclabel}[1]{\label{sec:#1}}
+\newcommand{\secref}[1]{\mbox{Section~\ref{sec:#1}}}
+
+\newcommand{\tablabel}[1]{\label{tab:#1}}
+\newcommand{\tabref}[1]{Table~\ref{tab:#1}}
+
+\newcommand{\figlabel}[1]{\label{fig:#1}}
+\newcommand{\Figref}[1]{Figure~\ref{fig:#1}}
+\newcommand{\figref}[1]{\mbox{Fig.~\ref{fig:#1}}}
+
+\newcommand{\eqlabel}[1]{\label{eq:#1}}
+\newcommand{\eqref}[1]{(\ref{eq:#1})}
+
+\newtheorem{thm}{Theorem}{\bfseries}{\itshape}
+\newcommand{\thmlabel}[1]{\label{thm:#1}}
+\newcommand{\thmref}[1]{Theorem~\ref{thm:#1}}
+
+\newtheorem{lem}{Lemma}{\bfseries}{\itshape}
+\newcommand{\lemlabel}[1]{\label{lem:#1}}
+\newcommand{\lemref}[1]{Lemma~\ref{lem:#1}}
+
+\newtheorem{cor}{Corollary}{\bfseries}{\itshape}
+\newcommand{\corlabel}[1]{\label{cor:#1}}
+\newcommand{\corref}[1]{Corollary~\ref{cor:#1}}
+
+\newtheorem{clm}{Claim}{\bfseries}{\itshape}
+\newcommand{\clmlabel}[1]{\label{clm:#1}}
+\newcommand{\clmref}[1]{Claim~\ref{clm:#1}}
+
+\newtheorem{obs}{Observation}{\bfseries}{\itshape}
+\newcommand{\obslabel}[1]{\label{obs:#1}}
+\newcommand{\obsref}[1]{Observation~\ref{obs:#1}}
+
+\newtheorem{assumption}{Assumption}{\bfseries}{\rm}
+\newenvironment{ass}{\begin{assumption}\rm}{\end{assumption}}
+\newcommand{\asslabel}[1]{\label{ass:#1}}
+\newcommand{\assref}[1]{Assumption~\ref{ass:#1}}
+
+\newcommand{\proclabel}[1]{\label{alg:#1}}
+\newcommand{\procref}[1]{Procedure~\ref{alg:#1}}
+
+\newcommand{\vsrc}{s}
+\newcommand{\vdest}{t}
+\newcommand{\N}{N}
+
+\newcommand{\cw}{\mathrm{cw}}
+\newcommand{\ccw}{\mathrm{ccw}}
+\newcommand{\rot}{\mathrm{rot}}
+\newcommand{\gc}{\textsc{greedy-compass}}
+\newcommand{\rc}{\textsc{random-compass}}
+\newcommand{\gct}{\textsc{greedy-compass-2}}
+\newcommand{\compass}{\textsc{compass}}
+\newcommand{\greedy}{\textsc{greedy}}
+
+\newcommand{\DT}{\mathit{DT}}
+
+\setlength{\parskip}{1ex}
+
+\title{Online Routing in Convex Subdivisions\thanks{ 
+	This research was partly funded by the
+	Natural Sciences and Engineering Research Council of Canada.}}
+
+\author{Prosenjit Bose\thanks{ School of Computer Science, Carleton University, 1125 Colonel By Dr., Ottawa, Ontario, Canada, \mbox{K1S 5B6}, \texttt{\{jit,morin\}@scs.carleton.ca}}
+\and Andrej Brodnik\thanks{IMFM, University of Ljubljana, Jadranska 11, SI-1111 Ljubljana, Slovenia and Department of Computer Science, Lule\aa\ Technical University, SE-971 87 Lule\aa, Sweden.  \texttt{Andrej.Brodnik@IMFM.Uni-Lj.SI}}
+\and Svante Carlsson\thanks{ University of Karlskona/Ronneby, 371 41 KARLSKRONA, Sweden, \texttt{svante.carlsson@sm.luth.se}}
+\and Erik D. Demaine\thanks{Department of Computer Science, University of Waterloo, Waterloo, Ontario, Canada, \mbox{N2L 3G1}, \texttt{\{eddemain,rudolf,imunro\}@uwaterloo.ca}}
+\and Rudolf Fleischer$^\P$
+\and Alejandro L\'opez-Ortiz$^\P$
+\and Pat Morin$^\dagger$
+\and J. Ian Munro$^\P$}
+
+\date{}
+
+
+\begin{document}
+\copyrightheading
+
+% This produces an error
+% \symbolfootnote
+% so use this instead
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+
+\textlineskip
+
+\begin{center}
+\cgatitle{\MakeUppercase{Online Routing in Convex Subdivisions}%
+	\footnote{This research was funded by the Natural Sciences and 
+	Engineering Research Council of Canada.}}
+
+\vspace{24pt}
+
+\smalllineskip
+{\authorfont \MakeUppercase{Prosenjit Bose}}
+
+\vspace{2pt}
+
+\addressfont{School of Computer Science, Carleton University 
+	Ottawa, K1S 5B6, Canada}
+
+\vspace{10pt}
+{\authorfont \MakeUppercase{Andrej Brodnik}}
+
+\vspace{2pt}
+
+\addressfont{IMFM, University of Ljubljana, Ljubljana, Slovenia and Department of Computer Science, Lule\aa\ Technical University, SE-971 87 Lule\aa, Sweden}
+
+\vspace{10pt}
+{\authorfont \MakeUppercase{Svante Carlsson}}
+
+\vspace{2pt}
+
+\addressfont{University of Karlskona/Ronneby, 371 41 KARLSKRONA, Sweden}
+
+\vspace{10pt}
+{\authorfont \MakeUppercase{Erik D. Demaine}}
+
+\vspace{2pt}
+
+\addressfont{Massachusetts Inst. Tech., Lab. for Computer Science
+Cambridge, MA, 02139, USA}
+
+\vspace{10pt}
+{\authorfont \MakeUppercase{Rudolf Fleischer}}
+
+\vspace{2pt}
+
+\addressfont{Department of Computer Science
+The Hong Kong University of Science and Technology, Kowloon
+Hong Kong}
+
+\vspace{10pt}
+{\authorfont \MakeUppercase{Alejandro L\'opez-Ortiz}}
+
+\vspace{2pt}
+
+\addressfont{Department of Computer Science, University of Waterloo, Waterloo, \mbox{N2L 3G1}, Canada}
+
+\vspace{10pt}
+{\authorfont \MakeUppercase{Pat Morin}}
+
+\vspace{2pt}
+
+\addressfont{School of Computer Science, Carleton University
+	Ottawa, K1S 5B6, Canada}
+
+\vspace{10pt}
+
+and
+
+\vspace{10pt}
+
+{\authorfont \MakeUppercase{J. Ian Munro}}
+
+\vspace{2pt}
+
+\addressfont{Department of Computer Science, University of Waterloo, Waterloo, \mbox{N2L 3G1}, Canada }
+
+\vspace{10pt}
+
+\vspace{20pt}
+%% authors need not care about this
+\publisher{(received date)}{(revised date)}{Editor's name}
+\end{center}
+
+\alphfootnote
+
+
+\begin{abstract}
+We consider online routing algorithms for finding paths between the
+ vertices of plane graphs.  We show (1)~there exists a routing
+algorithm for arbitrary triangulations that has no memory and uses
+no randomization, (2)~no equivalent result is possible for convex
+subdivisions, (3)~there is no competitive online routing algorithm
+under the Euclidean distance metric in arbitrary triangulations, and
+(4)~there is no competitive online routing algorithm under the link
+distance metric even when the input graph is restricted to be a Delaunay,
+greedy, or minimum-weight triangulation.
+\end{abstract}
+
+%========================================================================
+\textlineskip
+\section{Introduction}
+
+Path finding, or routing, is central to a number of fields including
+geographic information systems, urban planning, robotics, and
+communication networks.  In many cases, knowledge about the
+environment in which routing takes place is not available beforehand,
+and the vehicle/robot/packet must learn this information through
+exploration.  Algorithms for routing in these types of environments
+are referred to as \emph{online} \cite{be98} routing algorithms.
+
+In this paper we consider online routing in the following abstract
+setting \cite{bm99a}: The environment is a plane graph, $G$ (i.e., the
+planar embedding of $G$) with $n$ vertices. The source $\vsrc$ and
+destination $\vdest$ are vertices of $G$, and a packet can only travel
+on edges of $G$.  Initially, a packet only knows the coordinates of
+$\vsrc$, $\vdest$, and $\N(\vsrc)$, where $\N(v)$ denotes the set of
+vertices adjacent to a node $v$.  When a packet visits a node $v$, it learns
+the coordinates of $N(v)$.
+
+\mbox{Bose} and \mbox{Morin} \cite{bm99a} classify routing algorithms
+based on their use of memory and/or randomization.  A deterministic
+routing algorithm is \emph{memoryless} or \emph{oblivious} if, given a
+packet currently at vertex $v$ and destined for node $\vdest$, the
+algorithm decides where to forward the packet based only on the
+coordinates of $v$, $\vdest$ and $N(v)$. A randomized algorithm is
+oblivious if it decides where to move a packet based only on the
+coordinates of $v$, $\vdest$, $N(v)$, and the output of a random
+oracle.  An algorithm $\mathcal{A}$ is \emph{defeated} by a graph $G$
+if there exists a pair of vertices $\vsrc,\vdest\in G$ such that a
+packet stored at $\vsrc$ will never reach $\vdest$ when being routed
+using $\mathcal{A}$.  Otherwise, we say that $\mathcal{A}$
+\emph{works} for $G$.
+
+Let $\mathcal{A}(G,\vsrc,\vdest)$ denote the length of the walk taken
+by routing algorithm $\mathcal{A}$ when travelling from vertex $\vsrc$
+to vertex $\vdest$ of $G$, and let $\mathit{SP}(G,\vsrc,\vdest)$
+denote the length of the shortest path between $\vsrc$ and $\vdest$.
+We say that $\mathcal{A}$ is \emph{$c$-competitive} for a class of
+graphs $\mathcal{G}$ if
+\[
+	\frac{\mathcal{A}(G,\vsrc,\vdest)}{\mathit{SP}(G,\vsrc,\vdest)} \le c
+\]
+for all graphs $G\in\mathcal{G}$ and all $\vsrc,\vdest\in G$,
+$\vsrc\neq\vdest$.  We say that $\mathcal{A}$ is simply
+\emph{competitive} if $\mathcal{A}$ is $c$-competitive for some
+constant $c$.
+
+Recently, several papers have dealt with online routing and related
+problems in geometric settings.  Kalyanasundaram and Pruhs
+\cite{KaPr94}\ give a 16-competitive algorithm to \emph{explore} any
+unknown plane graph, i.e., visit all of its nodes.  This online
+exploration problem makes the same assumptions as those made here, but
+the goal of the problem is to visit all vertices of $G$, not just
+$\vdest$.  This difference leads to inherently different solutions.
+
+Kranakis \etal\ \cite{ksu99} give a deterministic oblivious routing
+algorithm that works for any Delaunay triangulation, and give a
+deterministic non-oblivious algorithm that works for any connected
+plane graph.
+
+Bose and Morin \cite{bm99a} also study online routing in geometric
+settings, particularly triangulations.  They give a randomized
+oblivious routing algorithm that works for any triangulation, and ask
+whether there is a deterministic oblivious routing algorithm for all
+triangulations.  They also give a competitive non-oblivious routing
+algorithm for Delaunay triangulations.
+
+Cucka et al.~\cite{CuNeRo96}\ experimentally evaluate the performance
+of routing algorithms very similar to those described by Kranakis
+\etal\ \cite{ksu99} and Bose and Morin \cite{bm99a}.  When considering
+the Euclidean distance travelled during point-to-point routing, their
+results show that the \greedy\ routing algorithm \cite{bm99a} performs
+better than the \compass\ routing algorithm \cite{bm99a,ksu99} on
+random graphs, but does not do as well on Delaunay triangulations of
+random point sets.\footnote{Cucka \etal\ call these algorithms
+\textsc{p-dfs} and \textsc{d-dfs}, respectively.}  However, when one
+considers not the Euclidean distance, but the number of edges
+traversed (link distance), then the \compass\ routing algorithm is
+slightly more efficient for both random graphs and Delaunay
+triangulations.
+
+In this paper we present a number of new fundamental theoretical
+results that help further the understanding of online routing in plane
+graphs.
+
+\begin{enumerate}
+\item We give a deterministic oblivious routing algorithm for all
+triangulations, solving the open problem posed by Bose and Morin
+\cite{bm99a}.
+
+\item We prove that no deterministic oblivious routing algorithm
+works for all convex subdivisions, showing some limitations of
+deterministic oblivious routing algorithms.
+
+\item We prove that the randomized oblivious routing algorithm \rc\
+described by Bose and Morin \cite{bm99a} works for any convex
+subdivision.
+
+\item We show that, under the Euclidean metric, no routing algorithm
+exists that is competitive for all triangulations, and under the link
+distance metric, no routing algorithm exists that is competitive for
+all Delaunay, greedy, or minimum-weight triangulations.
+\end{enumerate}
+
+The remainder of the paper is organized as follows: In
+\secref{triangulations} we give our deterministic oblivious
+algorithm for routing in triangulations.  \secref{convex} presents our
+results for routing in convex subdivisions.  \secref{competitive}
+describes our impossibility results for competitive
+algorithms. Finally, \secref{conclusions} summarizes and concludes
+with open problems.
+
+%========================================================================
+\section{Oblivious Routing in Triangulations}\seclabel{triangulations}
+
+A \emph{triangulation} $T$ is a plane graph for which every face is a
+triangle, except the outer face, which is the complement of a convex
+polygon.  In this section we describe a deterministic oblivious
+routing algorithm that works for all triangulations.  \erik{The algorithm is
+a carefully designed combination of two existing algorithms
+\cite{bm99a}.  The \greedy\ algorithm always moves a packet to a
+neighbouring node that minimizes the distance to $\vdest$.  The
+\compass\ algorithm always moves a packet to the node that is most
+``inline'' with $\vdest$.  Both these algorithms are defeated by
+certain types of triangulations, but the ways in which they are
+defeated are very different.  By combining them, we obtain an algorithm
+that works for any triangulation.
+}
+
+We use the notation $\angle a,b,c$ to denote the angle formed by $a$
+$b$ and $c$ as measured in the counterclockwise direction.  Let
+$\cw(v)$ be the vertex in $N(v)$ which minimizes the angle $\angle
+cw(v),v,\vdest$ and let $\ccw(v)$ be the vertex in $N(v)$ which
+minimizes the angle $\angle\vdest,v,\ccw(v)$.  If $v$ has a neighbour
+$w$ on the line segment $(v,\vdest)$, then $\cw(v)=\ccw(v)=w$.  In
+particular, the vertex $t$ is contained in the wedge
+$\cw(v),v,\ccw(v)$.  Refer to \figref{cw-ccw} for an illustration.
+
+\begin{figure}
+\centeripe{cw-ccw.ipe}
+\caption{Definition of $\cw(v)$ and $\ccw(v)$.}
+\figlabel{cw-ccw}
+\end{figure}
+
+The \gc\ algorithm always moves to the vertex among
+$\{\cw(v),\ccw(v)\}$ that minimizes the distance to $\vdest$.  If the
+two distances are equal, or if $\cw(v)=\ccw(v)$, then \gc\ chooses one of
+$\{\cw(v),\ccw(v)\}$ arbitrarily.
+
+\begin{thm}\thmlabel{gc}
+Algorithm \gc\ works for any triangulation.
+\end{thm}
+
+\proof{
+Suppose, by way of contradiction that a triangulation $T$ and a pair
+of vertices $\vsrc$ and $\vdest$ exist such that \gc\ does not find a
+path from $\vsrc$ to $\vdest$.
+
+In this case there must be a cycle of vertices $C=\langle
+v_0,\ldots,v_{k-1}\rangle $ of $T$ such that \gc\ moves from $v_i$ to
+$v_{i+1}$ for all $0\le i\le k$, i.e., \gc\ gets trapped cycling
+through the vertices of $C$ (see also Lemma~1 of
+\cite{bm99a}).\footnote{Here, and in the remainder of this proof, all
+subscripts are taken $\bmod\ k$.}  Furthermore, it follows from Lemma~2
+of \cite{bm99a} that the destination $\vdest$ is contained in the
+interior of $C$.
+
+\begin{clm}
+All vertices of $C$ must lie on the boundary of a disk $D$ centered at
+$\vdest$.
+\end{clm}
+
+\proof{(of claim)
+Suppose, by way of contradiction, that there is no such disk $D$.
+Then let $D$ be the disk centered at $\vdest$ and having the furthest
+vertex of $C$ from $\vdest$ on its boundary.  Consider a vertex $v_i$
+in the interior of $D$ such that $v_{i+1}$ is on the boundary of
+$D$. (Refer to \figref{gc-proof}.)  Assume, w.l.o.g., that
+$v_{i+1}=\ccw(v_i)$.  Then it must be that $\cw(v_i)$ is not in the
+interior of $D$, otherwise \gc\ would not have moved to $v_{i+1}$.
+But then the edge $(\cw(v_i),\ccw(v_i))$ cuts $D$ into two regions,
+$R_1$ containing $v_i$ and $R_2$ containing $\vdest$.  Since $C$
+passes through both $R_1$ and $R_2$ and is contained in $D$ then it
+must be that $C$ enters region $R_1$ at $\cw(v_i)$ and leaves $R_1$ at
+$v_{i+1}=\ccw(v_i)$.  However, this cannot happen because both
+$\cw(\cw(v_i))$ and $\ccw(\cw(v_i))$ are contained in the halfspace
+bounded by the supporting line of $(\cw(v_i),\ccw(v_i))$ and
+containing $\vdest$, and are therefore not contained in $R_1$.
+\begin{figure}
+\centeripe{gc-proof.ipe}
+\caption{The proof of \thmref{gc}.}
+\figlabel{gc-proof}
+\end{figure}
+}
+
+Thus, we have established that all vertices of $C$ are on the boundary
+of $D$.  However, since $C$ contains $\vdest$ in its interior and the
+triangulation $T$ is connected, it must be that for some vertex $v_j$
+of $C$, $\cw(v_j)$ or $\ccw(v_j)$ is in the interior of $D$.  Suppose
+that it is $\cw(v_j)$.  But then we have a contradiction, since the
+\gc\ algorithm would have gone to $\cw(v_j)$ rather than $v_{j+1}$.
+}
+
+%========================================================================
+\section{Oblivious Routing in Convex Subdivisions}\seclabel{convex}
+
+A \emph{convex subdivision} is an embedded plane graph such that each
+face of the graph is a convex polygon, except the outer face which is
+the complement of a convex polygon.  Triangulations are a special case
+of convex subdivisions in which each face is a triangle; thus it is
+natural to ask whether the \gc\ algorithm can be generalized to convex
+subdivisions.  In this section, we show that there is no deterministic
+oblivious routing algorithm for convex subdivisions.  However, there
+is a randomized oblivious routing algorithm that uses only one random
+bit per step.
+
+\subsection{Deterministic Algorithms}
+
+\begin{thm}\thmlabel{no-convex}
+Every deterministic oblivious routing algorithm is defeated by some
+convex subdivision.
+\end{thm}
+
+\proof{
+We exhibit a finite collection of convex subdivisions such that any
+deterministic oblivious routing algorithm is defeated by at least one
+of them.
+
+There are 17 vertices that are common to all of our subdivisions. The
+destination vertex $\vdest$ is located at the origin.  The other 16
+vertices $V=\{v_0,\ldots,v_{15}\}$ are the vertices of a regular
+16-gon centered at the origin and listed in counterclockwise
+order.\footnote{In the remainder of this proof, all subscripts are
+implicitly taken $\bmod\ 16$.}  In all our subdivisions, the
+even-numbered vertices $v_0,v_2,\ldots,v_{14}$ have degree 2.  The
+degree of the other vertices varies.  All of our subdivisions contain the
+edges of the regular 16-gon.
+
+Assume, by way of contradiction, that there exists a routing algorithm
+$\mathcal{A}$ that works for any convex subdivision.  Since the
+even-numbered vertices in our subdivisions always have the same two
+neighbours in all subdivisions, $\mathcal{A}$ always makes the same
+decision at a particular even-numbered vertex.  Thus, it makes sense
+to ask what $\mathcal{A}$ does when it visits an even-numbered vertex,
+without knowing anything else about the particular subdivision that
+$\mathcal{A}$ is routing on.
+
+For each vertex $v_i \in V$, we color $v_i$ black or white depending
+on the action of $\mathcal{A}$ upon visiting $v_i$, specifically,
+black for moving counterclockwise and white for moving clockwise
+around the regular 16-gon.  We claim that all even-numbered vertices
+in $V$ must have the same color.  If not, then there exists two
+vertices $v_i$ and $v_{i+2}$ such that $v_i$ is black and $v_{i+2}$ is
+white.  Then, if we take $\vsrc=v_i$ in the convex subdivision shown
+in \figref{no-convex}.a, the algorithm becomes trapped on one of the
+edges $(v_i,v_{i+1})$ or $(v_{i+1},v_{i+2})$ and never reaches the
+destination $\vdest$, contradicting the assumption that $\mathcal{A}$
+works for any convex subdivision.
+
+
+\begin{figure}
+\begin{center}\begin{tabular}{cc}
+\Ipe{small-blackwhite.ipe} &
+\Ipe{small-single.ipe} \\ 
+(a) & (b) \\
+\multicolumn{2}{c}{\Ipe{small-cyclic.ipe}} \\
+\multicolumn{2}{c}{(c)} 
+\end{tabular}\end{center}
+\caption{The proof of \thmref{no-convex}.}
+\figlabel{no-convex}
+\end{figure}
+
+
+Therefore, assume w.l.o.g.~that all even-numbered vertices of $V$ are
+black, and consider the convex subdivision shown in \figref{no-convex}.b.
+From this figure it is clear that, if we take $\vsrc=v_1$,
+$\mathcal{A}$ cannot visit $x$ after $v_1$, since then it gets
+trapped among the vertices $\{v_{12},v_{13},v_{14},v_{15},v_0,v_1,x\}$
+and never reaches $\vdest$.
+
+Note that we can rotate \figref{no-convex}.b by integral multiples of
+$\pi/4$ while leaving the vertex labels in place and make similar
+arguments for $v_3$, $v_5$, $v_7$, $v_9$, $v_{11}$, $v_{13}$ and
+$v_{15}$.  However, this implies that $\mathcal{A}$ is defeated by the
+convex subdivision shown in \figref{no-convex}.c since if it begins at
+any vertex of the regular 16-gon, it never enters the interior of the
+16-gon.  We conclude that no oblivious online routing algorithm works
+for all convex subdivisions.
+}
+
+We note that, although our proof uses subdivisions in which some of
+the faces are not strictly convex (i.e., have vertices with interior
+angle $\pi$), it is possible to modify the proof to use only strictly
+convex subdivisions, but doing so leads to more cluttered diagrams.
+\erik{These diagrams are shown in \figref{strictly-convex}. We leave
+the details to the interested reader.
+\begin{figure}
+\begin{center}\begin{tabular}{cc}
+\IpeFit{1.7in}\Ipe{big-bw.ipe} &
+\IpeFit{1.7in}\Ipe{big-single.ipe} \\ 
+\multicolumn{2}{c}{\IpeFit{1.7in}\Ipe{big-cyclic.ipe}} \\
+\end{tabular}\end{center}
+\caption{Strictly convex subdivisions that can be used in the proof of
+\thmref{no-convex}.}
+\figlabel{strictly-convex}
+\end{figure}
+}
+
+\subsection{Randomized Algorithms}
+
+Bose and Morin \cite{bm99a} describe the \rc\ algorithm and show that
+it works for any triangulation. For a packet stored at node $v$, the
+\rc\ algorithm selects a vertex from $\{\cw(v),\ccw(v)\}$ uniformly at
+random and moves to it.  In this section we show that \rc\ works for
+any convex subdivision.
+
+Although it is well known that a random walk on any graph $G$ will
+eventually visit all vertices of $G$, the \rc\ algorithm has two
+advantages over a random walk.  The first advantage is that the \rc\
+algorithm is more efficient in its use of randomization than a random
+walk.  It requires only one random bit per step, whereas a random walk
+requires $\log k$ random bits for a vertex of degree $k$.  The second
+advantage is that the \rc\ algorithm makes use of geometry to guide
+it, and the result is that \rc\ generally arrives at $\vdest$ much
+more quickly than a random walk.  Nevertheless, it can be helpful to
+think of \rc\ as a random walk on a directed graph in which every node
+has out-degree 1 or 2 except for $\vdest$ which is a sink.
+
+Before we can make statements about which graphs defeat \rc, we must
+define what it means for a graph to defeat a randomized algorithm.  We
+say that a graph $G$ defeats a (randomized) routing algorithm if there
+exists a pair of vertices $\vsrc$ and $\vdest$ of $G$ such that a
+packet originating at $\vsrc$ with destination $\vdest$ has
+probability 0 of reaching $\vdest$ in any finite number of steps.
+Note that, for oblivious algorithms, proving that a graph does not
+defeat an algorithm implies that the algorithm will reach its
+destination with probability 1.
+
+\begin{thm}
+Algorithm \rc\ works for any convex subdivision.
+\end{thm}
+
+\proof{
+Assume, by way of contradiction, that there is a convex subdivision
+$G$ with two vertices $\vsrc$ and $\vdest$ such that the probability
+of reaching $\vsrc$ from $\vdest$ using \rc\ is 0.  Then there is a
+subgraph $H$ of $G$ containing $\vsrc$, but not containing $\vdest$,
+such that for all vertices $v\in H$, $\cw(v)\in H$ and $\ccw(v)\in H$.
+
+The vertex $\vdest$ is contained in some face $f$ of $H$.  We claim
+that this face must be convex.  For the sake of contradiction, assume
+otherwise.  Then there is a reflex vertex $v$ on the boundary of $f$
+such that the line segment $(\vdest,v)$ does not intersect any edge of
+$H$.  However, this cannot happen, since $\ccw(v)$ and $\cw(v)$ are
+in $H$, and hence $v$ would not be reflex.
+
+Since $G$ is connected, it must be that for some vertex $u$ on the
+boundary of $f$, $\cw(u)$ or $\ccw(u)$ is contained in the interior of
+$f$.  But this vertex in the interior of $f$ is also in $H$,
+contradicting the fact that $f$ is a convex face of $H$.  We conclude
+that there is no convex subdivision that defeats \rc.
+}
+
+
+%========================================================================
+\section{Competitive Routing Algorithms}\seclabel{competitive}
+
+If we are willing to accept more sophisticated routing algorithms that
+make use of memory, then it is sometimes possible to find competitive
+routing algorithms.  Bose and Morin \cite{bm99a} give a competitive
+algorithm for Delaunay triangulations under the Euclidean distance
+metric.  Two questions arise from this: (1)~Can this result be
+generalized to arbitrary triangulations? and (2)~Can this result be
+duplicated for the link distance metric?  In this section we show
+that the answer to both these questions is negative.
+
+\subsection{Euclidean Distance}
+
+In this section we show that, under the Euclidean metric, no
+deterministic routing algorithm is $o(\sqrt{n})$-competitive for all
+triangulations.  Our proof is a modification of that used by
+Papadimitriou and Yannakakis \cite{PaYa91}\ to show that no online
+algorithm for finding a destination point among $n$ axis-oriented
+rectangular obstacles in the plane is $o(\sqrt{n})$-competitive.
+
+\begin{thm}
+Under the Euclidean distance metric, no deterministic routing
+algorithm is $o(\sqrt{n})$ competitive for all triangulations.
+\end{thm}
+
+\begin{figure}
+\begin{center}\begin{tabular}{c}
+\Ipe{no-eucl-proof-a.ipe} \\
+(a) \\[2ex]
+\Ipe{no-eucl-proof-b.ipe} \\
+(b)
+\end{tabular}\end{center}
+\caption{(a)~The triangulation $T$ with the path found by
+$\mathcal{A}$ indicated. (b)~The resulting triangulation $T'$ with
+the ``almost-vertical'' path shown in bold.}  \figlabel{lattice}
+\end{figure}
+
+\proof{
+Consider an $n\times n$ hexagonal lattice with the following
+modifications.  The lattice has had its $x$-coordinates scaled so that
+each edge is of length $\Theta(n)$.  The lattice also has two
+additional vertices, $\vsrc$ and $\vdest$, centered horizontally, at
+one unit below the bottom row and one unit above the top row,
+respectively.  Finally, all vertices of the lattice and $\vsrc$ and
+$\vdest$ have been completed to a triangulation $T$.  See
+\figref{lattice}.a for an illustration.
+
+Let $\mathcal{A}$ be any deterministic routing algorithm and observe
+the actions of $\mathcal{A}$ as it routes from $\vsrc$ to $\vdest$.
+In particular, consider the first $n+1$ steps taken by $\mathcal{A}$
+as it routes from $\vsrc$ to $\vdest$.  Then $\mathcal{A}$ visits at
+most $n+1$ vertices of $T$, and these vertices induce a subgraph
+$T_\mathrm{vis}$ consisting of all vertices visited by $\mathcal{A}$
+and all edges adjacent to these vertices.
+
+For any vertex $v$ of $T$ not equal to $\vsrc$ or $\vdest$, define the
+\emph{$x$-span} of $v$ as the interval between the rightmost and
+leftmost $x$-coordinate of $N(v)$.  The length of any $x$-span is
+$\Theta(n)$, and the width of the original triangulation $T$ is
+$\Theta(n^2)$.  This implies that there is some vertex $v_b$ on the
+bottom row of $T$ whose $x$-coordinate is at most $n\sqrt{n}$ from the
+$x$-coordinate of $\vsrc$ and is contained in $O(\sqrt{n})$ $x$-spans
+of the vertices visited in the first $n+1$ steps of $\mathcal{A}$.
+
+We now create the triangulation $T'$ that contains all vertices and
+edges of $T_\mathrm{vis}$.  Additionally, $T'$ contains the set of
+edges forming an ``almost vertical'' path from $v_b$ to the top row of
+$T'$.  This almost vertical path is a path that is vertical wherever
+possible, but uses minimal detours to avoid edges of $T_\mathrm{vis}$.
+Since only $O(\sqrt n)$ detours are required, the length of this path
+is $O(n\sqrt n)$.  Finally, we complete $T'$ to a triangulation in
+some arbitrary way that does not increase the degrees of vertices on
+the first $n+1$ steps of $\mathcal{A}$.  See \figref{lattice}.b for an
+example.
+
+Now, since $\mathcal{A}$ is deterministic, the first $n+1$ steps taken
+by $\mathcal{A}$ on $T'$ will be the same as the first $n+1$ steps
+taken by $\mathcal{A}$ on $T$, and will therefore travel a distance of
+$\Theta(n^2)$.  However, there is a path in $T'$ from $\vsrc$ to
+$\vdest$ that first visits $v_b$ (at a cost of $O(n\sqrt n)$), then
+uses the ``almost-vertical'' path to the top row of $T'$ (at a cost of
+$O(n\sqrt n)$) and then travels directly to $\vdest$ (at a cost of
+$O(n\sqrt n)$).  Thus, the total cost of this path, and hence the
+shortest path, from $\vsrc$ to $\vdest$ is $O(n\sqrt n)$.
+
+We conclude that $\mathcal{A}$ is not $o(\sqrt{n})$-competitive for
+$T'$.  Since the choice of $\mathcal{A}$ is arbitary, and $T'$
+contains $O(n)$ vertices, this implies that no deterministic routing
+algorithm is $o(\sqrt{n})$ competitive for all triangulations with $n$
+vertices.
+}
+
+
+
+
+\comment{
+ of width at least one
+in the plane can be better than
+$\sqrt{n}$-competitive, where $n$ is the distance between
+the start and destination positions.
+We simply observe that their lower bound construction 
+can be transformed into our setting of triangulated planar graphs.
+Note that the theorem even holds for non-oblivious online algorithms.
+
+
+\begin{thm}\thmlabel{nocomp}
+There is no online routing algorithm (even with unbounded memory)
+on triangulated graphs with bounded competitive ratio.
+\end{thm}
+
+\proof{
+Let $n$ be an arbitrary large integer.
+Assume the start position is at $(0,0)$, and the
+destination is at $(n,0)$.
+While traversing the graph, the algorithm always sees the
+same picture as in \figref{fig_nocomp}. 
+
+\begin{figure}
+\begin{center}
+\input{fig_nocomp.tex}
+\caption{All nodes look the same.}
+\figlabel{fig_nocomp}
+\end{center}
+\end{figure}
+
+Let us assume it visits $k$ nodes before reaching any node
+with x-coordinate $n$.
+Then the rectangle with vertical sides at x-coordinate $0$ and $n$,
+respectively, and horizontal sides at y-coordinate
+$m$ and $-m$ where $m=\sqrt{k}\cdot n$,
+respectively, contains much 'empty' space,
+i.e., space which the algorithm has never seen.
+We can then extend the explored triangulated part of the graph
+such that this empty space can be traversed directly
+from left to right.
+In particular, there must be one y-coordinate which needs only
+${2kn\over m}$ many detours (of length at most $n$ each),
+so the shortest path to the destination has length at most
+$2m + n + {2kn\over m}\cdot n$.
+On the other hand, the algorithm has traveled a distance of
+$\Omega(k\cdot n)$.
+This gives a competitive ratio of $O(\sqrt{n})$.
+Note that the graph constructed will have $O(n)$ many nodes.
+}
+}
+
+\subsection{Link Distance}
+
+The link distance metric simply measures the number of edges traversed
+by a routing algorithm.  For many networking applications, this metric
+is more meaningful than Euclidean distance.  In this section we show
+that competitive algorithms under the link distance metric are harder
+to come by than under the Euclidean distance metric.  Throughout this
+section we assume that the reader is familiar with the definitions of
+Delaunay, greedy and minimum-weight triangulations (\emph{cf}.~Preparata and
+Shamos \cite{ps85}).
+
+We obtain this result by constructing a ``bad'' family of point sets
+as follows.  Let $C_i$ be the set of $\sqrt{n}$ points
+$\{(i\sqrt{n},1),(i\sqrt{n},2),\ldots,(i\sqrt{n},\sqrt{n})\}$.  We
+call $C_i$ the {\em $i$th column.}  Let
+$D_i=\{(i\sqrt{n},1),(i\sqrt{n},\sqrt{n})\}$, and define a family of
+point sets $S=\bigcup_{j=1}^\infty \{S_{j^2}\}$ where
+$S_n=\{S_{n,1},\ldots,S_{n,\sqrt{n}}\}$ and
+\begin{equation}
+S_{n,i} = \bigcup_{j=1}^{i-1}C_j \cup D_i \cup \bigcup_{j=i+1}^{\sqrt{n}}C_j
+	\cup \{(\sqrt{n}/2, 0), (\sqrt{n}/2,\sqrt{n}+1) \} 
+\end{equation}
+Two members of the set $S_{49}$ are shown in \figref{no-link-proof}.
+
+\begin{figure}
+\begin{center}\begin{tabular}{c@{\hspace{.5in}}c}
+\Ipe{no-link-proof-b.ipe} \\
+(a) \\[1cm]
+\Ipe{no-link-proof-a.ipe} \\ 
+(b)
+\end{tabular}\end{center}
+\caption{The point sets (a)~$S_{49,2}$ and (b)~$S_{49,5}$ along with
+	their Delaunay triangulations.}
+\figlabel{no-link-proof}
+\end{figure}
+
+
+\begin{thm}\thmlabel{no-link-competitive}
+Under the link distance metric, no routing algorithm is
+$o(\sqrt{n})$-competitive for all Delaunay
+triangulations.\index{Delaunay triangulation}
+\end{thm}
+
+\proof{
+We use the notation $\DT(S_{n,i})$ to denote the Delaunay
+triangulation of $S_{n,i}$.  Although the Delaunay triangulation of
+$S_{n,i}$ is not unique, we will assume $\DT(S_{n,i})$ is triangulated
+as in \figref{no-link-proof}.  Note that, in $\DT(S_{n,i})$, the
+shortest path between the topmost vertex $\vsrc$ and bottom-most
+vertex $\vdest$ is of length 3, independent of $n$ and $i$.
+Furthermore, any path from $\vsrc$ to $\vdest$ whose length is less
+than $\sqrt{n}$ must visit vertices from one of the columns $C_{i-1}$,
+$C_{i}$, or $C_{i+1}$.
+
+The rest of the proof is based on the following observation: If we
+choose an element $i$ uniformly at random from $\{1,\ldots,\sqrt{n}\}$, then
+the probability that a routing algorithm $\mathcal{A}$ has visited a
+vertex of $C_{i-1}$, $C_{i}$, or $C_{i+1}$ after $k$ steps is at most
+$3k/\sqrt{n}$.  Letting $k=\sqrt{n}/6$, we see that the probability
+that $\mathcal{A}$ visits a vertex of $C_{i-1}$, $C_{i}$, or $C_{i+1}$
+after $\sqrt{n}/6$ steps is at most $1/2$.
+
+Letting $d_i$ denote the (expected, in the case of randomized
+algorithms) number of steps when routing from $\vsrc$ to $\vdest$ in
+$S_{n,i}$ using routing algorithm $\mathcal{A}$, we have
+\begin{equation}
+\frac{1}{\sqrt{n}}\cdot\sum_{i=1}^{\sqrt{n}}d_i \ge \sqrt{n}/{12} \enspace .
+\end{equation}
+Since, for any $S_{n,i}$, the shortest path from $\vsrc$ to $\vdest$
+is 3 there must be some $i$ for which the competitive ratio of
+$\mathcal{A}$ for $S_{n,i}$ is at least
+$\sqrt{n}/36\in\Omega(\sqrt{n})$.
+}
+
+\begin{thm}
+Under the link distance metric, no routing algorithm is
+$o(\sqrt{n})$-competitive for all greedy triangulations.\index{greedy
+triangulation}
+\end{thm}
+
+\proof{
+This follows immediately from the observation that for any $S_{n,i}$,
+a Delaunay triangulation of $S_{n,i}$ is also a greedy triangulation
+of $S_{n,i}$.
+}
+
+
+\begin{thm}
+Under the link distance metric, no routing algorithm is
+$o(\sqrt{n})$-competitive for all minimum-weight
+triangulations.\index{minimum-weight triangulation}
+\end{thm}
+
+\proof{
+We claim that for members of $S$, any greedy triangulation is also a
+minimum-weight triangulation.  To prove this, we use a result on
+minimum-weight triangulations due to Aichholzer \etal\ \cite{aack96}.
+Let $K_{n,i}$ be the complete graph on $S_{n,i}$.  Then an edge $e$ of
+$K_{n,i}$ is said to be a {\em light edge}\index{light edge} if every
+edge of $K_{n,i}$ that crosses $e$ is not shorter than $e$.
+Aichholzer \etal\ prove that if the set of light edges contains the
+edges of a triangulation then that triangulation is a minimum-weight
+triangulation.
+
+There are only 5 different types of edges in the greedy triangulation
+of $S_{n,i}$;  (1)~vertical edges within a column, (2)~horizonal edges
+between adjacent columns, (3)~diagonal edges between adjacent columns,
+(4)~edges used to triangulate column $i$, and (5)~edges used to join
+$\vsrc$ and $\vdest$ to the rest of the graph.  It is straightforward
+to verify that all of these types of edges are indeed light edges.
+}
+
+%========================================================================
+\section{Conclusions}\seclabel{conclusions}
+
+We have presented a number of results concerning online routing in
+plane graphs.  \tabref{summary} summarizes what is currently known
+about online routing in plane graphs.  An arrow in a reference
+indicates that the result is implied by the more general result
+pointed to by the arrow.  An F indicates that the result is trivial
+and/or folklore.
+
+\begin{table}
+\begin{center}\begin{tabular}{l|crcrcrcr}
+Class of & \multicolumn{2}{c}{Deterministic} 
+	& \multicolumn{2}{c}{Randomized} 
+	& \multicolumn{2}{c}{Euclidean}
+   	& \multicolumn{2}{c}{Link}        \\
+graphs  & \multicolumn{2}{c}{oblivious}     
+	& \multicolumn{2}{c}{oblivious\footnotemark}  
+	& \multicolumn{2}{c}{competitive} 
+	& \multicolumn{2}{c}{competitive} \\ \hline
+DT       & Yes & \cite[$\downarrow$]{bm99a,ksu99} & Yes & [$\leftarrow$] & Yes & \cite{bm99a}
+	& No & [here] \\
+GT/MWT   & Yes & [$\downarrow$] & Yes & [$\downarrow$]
+	& Yes & \cite{bm00} & No & [here] \\
+Triangulations & Yes & [here] & Yes & \cite[$\leftarrow$]{bm99a} & No & [here] 
+	& No & [$\uparrow$] \\
+Conv. Subdv. & No & [here] & Yes & [here] & No & [$\uparrow$]
+	& No & [$\uparrow$] \\
+Plane graphs & No & [F] & No & [F] & No & [F] & No & [F] \\
+\end{tabular}\end{center}
+\caption{A summary of known results for online routing in plane graphs.}
+\tablabel{summary}
+\end{table}
+
+\footnotetext{In this column, we consider only algorithms that use a
+constant number of random bits per step.  Otherwise, it is well known
+that a random walk on any graph $G$ will eventually visit all vertices
+of $G$.}
+
+We have also implemented a simulation of the \gc\ algorithm as well as
+the algorithms described by Bose and Morin \cite{bm99a} and compared
+them under the Euclidean distance metric. These results will be
+presented in the full version of the paper.  Here we only summarize
+our main observations.
+
+For Delaunay triangulations of random point sets, we found that the
+performance of \gc\ is comparable to that of the \compass\ and
+\greedy\ algorithms \cite{bm99a,CuNeRo96,ksu99}.  For triangulations
+obtained by performing Graham's scan \cite{g72} on random point sets,
+the \gc\ algorithm does significantly better than the \compass\ or
+\greedy\ algorithms.
+
+We also implemented a variant of \gc\ that we call \gct\ that, when
+located at a vertex $v$, moves to the vertex $u\in \{\cw(v),\ccw(v)\}$
+that minimizes $d(v,u)+d(u,\vdest)$, where $d(a,b)$ denotes the
+Euclidean distance between $a$ and $b$.  Although there are
+triangulations that defeat \gct, it worked for all our test
+triangulations, and in fact seems to be twice as efficient as \gc\ in
+terms of the Euclidean distance travelled.
+
+We note that currently, under the link distance metric, there are no
+competitive routing algorithms for any interesting class of geometric
+graphs (meshes do not count). The reason for this seems to be that the
+properties used in defining many geometric graphs make use of
+properties of Euclidean space, and link distance in these graphs is
+often independent of these properties.  We consider it an open problem
+to find competitive algorithms, under the link distance metric, for an
+interesting and naturally occuring class of geometric graphs.
+
+\section{Acknowledgements}
+
+This work was initiated at Schloss Dagstuhl Seminar on Data
+Structures, held in Wadern, Germany, February--March 2000, and
+co-organized by \mbox{Susanne Albers}, \mbox{Ian Munro}, and
+\mbox{Peter Widmayer}.  The authors would also like to thank
+\mbox{Jorge Urrutia} and \mbox{Lars Jacobsen} for helpful discussions.
+
+\bibliographystyle{plain}
+\bibliography{online}
+
+\end{document}
+
+
+
+
+
+

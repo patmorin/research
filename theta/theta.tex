@@ -1,0 +1,556 @@
+\documentclass{elsart}
+%\usepackage{charter}
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\journal{CGTA}
+
+\newcommand{\spanratio}[1]{1/(\cos(#1)-\sin(#1))}
+\newcommand{\goob}[1]{(1+\epsilon)\ln #1}
+\newcommand{\rank}{\mathrm{rank}}
+\newcommand{\E}{\mathbf{E}}
+
+\input{pat.tex}
+
+\begin{document}
+\begin{frontmatter}
+\title{Ordered Theta Graphs\thanksref{nserc}}
+\thanks[nserc]{This research was partially supported by NSERC.}
+
+\author[carleton]{Prosenjit Bose},
+\author[eindhoven]{Joachim Gudmundsson} and 
+\author[carleton]{Pat Morin}
+\address[carleton]{School of Computer Science, Carleton University,
+	1125 Colonel By Drive, \\ Ottawa, Ontario, Canada, K1S~5B6}
+\address[eindhoven]{Faculty of Mathematics and Computer Science,
+	TU Eindhoven, \\ 5600 MB Eindhoven, The Netherlands}
+
+\begin{abstract}
+Let $V$ be a set of $n$ points in $\mathbb{R}^2$.  The $\theta$-graph
+of $V$ is a geometric graph with vertex set $V$ that has been studied
+extensively and which has several nice properties.  We introduce a new
+variant of $\theta$-graphs which we call \emph{ordered
+$\theta$-graphs}.  These are graphs that are built incrementally by
+inserting the vertices one by one so that the resulting graph depends
+on the insertion order. We show that careful insertion orders can
+produce graphs with desirable properties including low spanning ratio,
+logarithmic maximum degree and logarithmic diameter.
+\end{abstract}
+\end{frontmatter}
+
+\section{Introduction}
+
+Let $V$ be a set of $n$ points in the plane.  A \emph{$t$-spanner} of
+$V$ is a geometric graph $G=(V,E)$ whose edges are weighted by the
+distance between their endpoints and which has the property
+\[
+  \max\left\{\frac{\|uv\|_G}{\|uv\|} : u,v\in V, u\neq v\right\} 
+	\le t \enspace,
+\]
+where $\|uv\|$, respectively $\|uv\|_G$, denotes the Euclidean
+distance, respectively the length of the shortest path in $G$, between
+$u$ and $v$.  We call a path $P$ from $u$ to $v$ a \emph{$t$-path} if
+$\|uv\|_P/\|uv\|\le t$.  Thus, $G$ is a $t$-spanner if and only if
+every pair of vertices in $G$ has a $t$-path between them.
+
+It has long been known that, for any constant $t>1$, every point set
+$V$ has a $t$-spanner with $O(n)$ edges.  One such construction is the
+$\theta$-graph of $V$ \cite{k88,kg92}.  Let $\theta<\pi/4$ be a value
+such that $k_\theta=2\pi/\theta$ is a positive integer.  The
+$\theta$-graph of $V$ is obtained by drawing $k_\theta=2\pi/\theta$
+non-overlapping cones around each $p\in S$, each spanning an angle of
+$\theta$, and connecting $p$ to the point in each cone whose
+orthogonal projection onto one of the walls of the cone is closest to
+$p$.  The result is a $t_\theta$-spanner with at most $nk_\theta$
+edges.  Here, and throughout the rest of the paper,
+\[
+  t_\theta = \spanratio{\theta} \enspace .
+\]
+
+This paper studies a variant of $\theta$-graphs that we call
+\emph{ordered $\theta$-graphs}.  An ordered $\theta$-graph of $V$ is
+obtained by inserting the points of $V$ in some order.  When a point
+$p$ is inserted, we draw the same cones around $p$ and connect $p$ to
+its closest previously-inserted neighbour in each cone.  An ordered
+$\theta$-graph is dependent on the order imposed on $V$; different
+orderings of $V$ can produce different graphs (see \figref{order}).
+Nevertheless, in \secref{ographs} we show that ordered $\theta$-graphs
+are also $t_\theta$-spanners, regardless of the ordering used.
+
+\begin{figure}
+\begin{center}\begin{tabular}{c@{\hspace{1cm}}c}
+\includegraphics{theta-a} & \includegraphics{theta-b} 
+\end{tabular}\end{center}
+\caption{Different orderings lead to different ordered $\theta$-graphs.}
+\figlabel{order}
+\end{figure}
+
+We also study different properties that can be obtained by carefully
+choosing orderings of $V$.  In \secref{small-degree} we show that
+every point set has an ordering such that the ordered $\theta$-graph
+has maximum degree $O(k_\theta\log n)$.  In \secref{small-diameter} we
+show that for every point set there exists an ordering such that, in
+the resulting ordered $\theta$-graph, there is a $t_\theta$-path with
+$O(\log n)$ edges between every pair of vertices.  We say that such a
+graph has $O(\log n)$ \emph{spanner diameter}.
+
+The two results described above are not new.  Sink spanners
+\cite{admss95} are a transformation of $\theta$-graphs that achieve a
+somewhat stronger result, namely a $t_\theta$-spanner with degree at
+most $k_\theta{}^2+k_\theta$.  Skiplist spanners \cite{ams99} use
+random-sampling of vertices to obtain a graph with spanner diameter
+$O(\log n)$, and $O(nk_\theta)$ edges.  However, ordered
+$\theta$-graphs show the existence of spanners with small degree and
+spanners with small diameter using a unified approach.  Also, in the
+case of small diameter, the proof improves the constants in skiplist
+spanners since an ordered $\theta$-graph of $n$ points contains at
+most $nk_\theta$ edges.
+
+In \secref{generalizations} we show that two generalizations of
+$\theta$-graphs also apply to ordered $\theta$-graphs.  Finally, in
+\secref{conclusions} we summarize and conclude with open problems.
+
+\section{Ordered $\theta$-Graphs}\seclabel{ographs}
+
+In this section, we give a formal definition of ordered
+$\theta$-graphs and prove some basic properties about them.  Let $V$
+be a set of $n$ points in the plane and let $\theta<\pi/4$ be an angle
+such that $k_\theta=2\pi/\theta$ is a positive integer.  Define any
+total order $\pi$ on $V$ so that $\pi_v$ is the rank of $v$ in this
+order.  Let $P_v$ denote the predecessors of $v$ in $\pi$, i.e.,
+$P_v=\{u\in V:\pi_u<\pi_v\}$ and let $S_v$ denote the successors of
+$v$ in $\pi$, i.e., $S_v=V\setminus(\{v\}\cup P_v)$.
+
+The $\pi$-ordered $\theta$-graph of $V$ is obtained by repeating the
+following for each point $v\in V$ (see \figref{theta-cones}).
+Partition the plane into $k_\theta$ cones each spanning an angle of
+$\theta$ and having their apexes on $v$.  Next, project each point of
+$P_v$ orthogonally onto the counterclockwise wall of the cone that
+contains it.  Finally, make an edge joining $v$ to the point in each
+cone whose projection is closest to $v$.  We call the vertices
+connected to $v$ in this way the \emph{$\theta$-neighbours} of $v$. 
+
+\begin{figure}
+\begin{center}\includegraphics{theta-fig}\end{center}
+\caption{The $\theta$-cones of $v$.}\figlabel{theta-cones}
+\end{figure}
+
+\begin{lem}\lemlabel{spanning}
+For any point set $V$ and any ordering $\pi$, the $\pi$-ordered
+$\theta$-graph $G=(V,E)$ of $V$ is a $t_\theta$-spanner with at most
+$k_\theta n$ edges.
+\end{lem}
+
+\begin{proof}
+It follows immediately from the definition that $G$ has at most
+$k_\theta n$ edges.
+
+To prove that $G$ is a $t_\theta$-spanner, consider any pair of points
+$u,v\in V$.  We use induction on $\max\{\pi_u,\pi_v\}$.  Without loss
+of generality, assume $\pi_u>\pi_v$.  If $\pi_u=2$ then $\pi_v=1$ and
+there is a direct edge from $u$ to $v$ so the claim is trivial.
+Otherwise, consider the $\theta$-cone $c$ of $u$ that contains $v$ and
+let $w$ be the $\theta$-neighbour of $u$ in $c$.  If $w=v$ then we are done.
+Otherwise, the projection of $w$ onto the counterclockwise wall of $c$
+is closer than the projection of $v$ onto the counterclockwise wall of
+$c$.  Simple trigonometry shows that
+\begin{equation}
+  \|uw\| + t_\theta\|wv\| \le t_\theta\|uv\| \enspace .
+  \eqlabel{triangle}
+\end{equation}
+Since $\pi_w<\pi_u$ we have 
+\[
+   \|uv\|_G\le \|uw\| + \|wv\|_G \le \|uw\| + t_\theta\|wv\| \le t_\theta\|wv\| \enspace ,
+\]
+where the second inequality follows from the inductive hypothesis and
+the third follows from \eqref{triangle}.  This completes the proof.
+\end{proof}
+
+Note that the above proof gives an algorithm for finding a path
+between $u$ and $v$ that works by constructing the path from both
+ends.  If $\pi_u>\pi_v$ then the second vertex in the path from $u$ to
+$v$ is the neighbour $w$ of $u$ that is contained in the same
+$\theta$-cone of $u$ as $v$.  Otherwise, the second last vertex in the
+path from $u$ to $v$ is the neighbour $w$ of $v$ that is contained in
+the same $\theta$-cone of $v$ as $u$.  We call the path produced by
+this algorithm the \emph{$\theta$-path} from $u$ to $v$.
+
+While it is nice to know that ordered $\theta$-graphs have good
+spanning properties, it is still important to be able to compute them
+efficiently.
+
+\begin{lem}\lemlabel{construction}
+For any set $V$ of $n$ points in $\mathbb{R}^2$ and any ordering $\pi$
+on $V$, the $\pi$-ordered $\theta$-graph of $V$ can be computed in
+$O(k_\theta n\log n)$ time.
+\end{lem}
+
+\begin{proof}
+The crucial part of the construction algorithm is finding the
+neighbours of each point $v\in S$.  For this, we use $k_\theta$ range
+trees \cite{b78}, one for each cone direction.  In each tree we store
+the points of $V$ with their coordinates represented in terms of the
+walls of one of the cones, i.e., in a coordinate system in which the
+$x$ and $y$ axes meet at an angle of $\theta$ (see \figref{cones}).
+
+Once this coordinate transformation is done, finding the neighbour of
+$u$ in a cone $c$ is equivalent to finding the point with minimum $y$
+coordinate that has both $x$ and $y$ coordinates larger than the $x$
+and $y$ coordinates of $u$.  These \emph{dominance queries} are
+exactly the types of queries that are answered by range trees.
+
+\begin{figure}
+\begin{center}\includegraphics{cones}\end{center}
+\caption{Finding the neighbour of $u$ in $c$ is equivalent to finding
+	the point in the upper right quadrant of $u$ with minimum $y$
+	coordinate.}
+	\figlabel{cones}
+\end{figure}
+
+To construct the $\pi$-ordered $\theta$-graph we work backwards
+through the sequence $\pi$.  We first choose the point $v\in V$ such
+that $\pi_v=n$, delete $v$ from all range trees and then use the range
+trees to find the neighbours of $v$.  We continue in this manner for
+the point $u\in V$ such that $\pi_u=n-1$ and so on until we have
+computed the entire $\pi$-ordered $\theta$-graph of $V$.
+
+Thus, computing the neighbours of each point $v$ involves $k_\theta$
+deletions and searches in range trees.  A version of range trees that
+supports construction in $O(n\log n)$ time, and queries and deletions
+in $O(\log n)$ amortized time is given by Mehlhorn and N\"aher
+\cite{mn90}.  Using this implementation of range trees, the above
+algorithm constructs the $\pi$-ordered $\theta$-graph in $O(k_\theta
+n\log n)$ time.
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Ordered $\theta$-Graphs with Low Degree}\seclabel{small-degree}
+
+So far, we have established that ordered $\theta$-graphs have the same
+spanning properties as $\theta$-graphs and can be constructed
+efficiently.  In this section, we show that a carefully chosen
+ordering $\pi$ yields a $\pi$-ordered $\theta$-graph in which each
+vertex has small degree.
+
+
+\begin{thm}\thmlabel{small-degree}
+Every point set $V$ of size $n$ has an ordered $\theta$-graph in which
+each vertex has degree at most $k_\theta(H_{n-1}+1)$.\footnote{Here,
+and throughout, $H_m=\sum_{i=1}^m 1/i$ denotes the $m$th harmonic
+number.  It is well known that $\ln m \le H_m \le \ln m + 1$
+\cite{gkp94}.}  Furthermore, this ordered $\theta$-graph can be
+constructed in $O(k_\theta n\log n)$ time.
+\end{thm}
+
+\begin{proof} 
+We construct the ordering incrementally.  Initally we choose an
+arbitrary vertex $v_n\in V$, mark $v_n$ and set $\pi_{v_n}\gets n$.
+This determines up to $k_\theta$ edges of the $\pi$-ordered
+$\theta$-graph.  In the second step we choose some unmarked vertex
+$v_{n-1}\in V$ of degree 1 (this will be a neighbour of $v_n$), mark
+$v_{n-1}$ and set $\pi_{v_{n-1}}\gets n-1$.  In general, in the $i$th
+step (beginning at $i=0$) we choose an unmarked vertex $v$ of maximum
+degree, mark $v$ and set $\pi_v\gets n-i$, thereby fixing up to
+$k_\theta$ more edges of $\pi$-ordered $\theta$-graph.
+
+To prove that the above algorithm gives the desired degree bound, we
+relate it to the following game: Imagine we have a set of $n$ buckets
+and two players $P_1$ and $P_2$.  In one round, $P_1$ removes a bucket
+containing the maximum number of balls and $P_2$ adds a total of at
+most $k_\theta$ balls to some subset of buckets.  The game ends after
+$n$ rounds.  Dietz and Sleator \cite{ds87} show that, no matter what
+$P_2$'s strategy is, the maximum number of balls contained in any
+bucket at any point during the execution of the game does not exceed
+$k_\theta(H_{n-1}+1)$.  This game and the above algorithm for
+constructing $\pi$ are completely analagous if we think of the buckets
+as $V$, $P_1$ as our algorithm and $P_2$ as the geometry of $V$ that
+determines which edges that are fixed each time we fix the rank of a
+vertex in $\pi$.  Thus, the result of Dietz and Sleator implies that
+the degree of a vertex in the resulting $\pi$-ordered $\theta$-graph
+does not exceed $k_\theta(H_{n-1}+1)$, as required.
+
+As in the proof of \lemref{construction}, the above algorithm is
+easily implemented to run in $O(k_\theta n\log n)$ time using the
+deletion only range tree data structure of Mehlhorn and N\"aher
+\cite{mn90}.
+\end{proof}
+
+While the bound in the proof of \thmref{small-degree} is optimal for
+the pebble game used in the proof, we have no example of a point set
+for which every ordering produces an ordered $\theta$-graph with
+$\omega(k_\theta)$ degree at some vertex.
+
+Before continuing, we remark that the algorithm in the proof of
+\thmref{small-degree} can produce a graph with diameter $n-1$.  This
+happens, for example if the point set $V$ lies on a line and the
+algorithm begins by choosing one of the extreme points of $V$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Ordered $\theta$-Graphs with Logarithmic Diameter}
+\seclabel{small-diameter}
+
+In this section, we show that an ordered $\theta$-graph constructed by
+choosing a random ordering has $\theta$-paths that use only $O(\log
+n)$ edges.
+
+\comment{
+\begin{thm}\thmlabel{expected}
+Let $V$ be any set of $n$ points and let $\pi$ be a random ordering of
+the points in $V$.  Then, for any pair of points $u,v\in S$, the
+expected number edges in the $\theta$-path from $u$ to $v$ is no more
+than $2+\ln n$, for any $\epsilon>0$.
+\end{thm}
+
+\begin{proof}
+Let $T_{n,m}$ denote the expected number of edges in the $\theta$-path
+from the vertex $u$ such that $\pi_u=n$ to the vertex $v$ such that
+$\pi_v=m$, $n>m$.  The $\theta$-path from $u$ to $v$ begins by moving
+to the neighbour $w$ of $u$ that is contained in the same
+$\theta$-cone of $u$ as $v$.  If $w=v$ then the statement of the
+theorem is clearly true.  Otherwise, observe that $\pi_w$ is equally
+likely to be any of the $n-2$ values $\{0,\ldots,
+m-1,m+1,\ldots,n-1\}$.  Therefore, the expected length of the
+$\theta$-path from $u$ to $v$ is bounded by the recurrence
+\[
+  T_{n,m} \le 1+ \frac{1}{n-2}\left(\sum_{i=1}^{m-1} T_{m,i} + 
+	\sum_{i=m+1}^{n-1} T_{i,m} \right) \enspace ,
+\]
+which we solve as follows:
+\begin{eqnarray*}
+T_{n,m} & \le & 1 + \frac{1}{n-2}\left(\sum_{i=1}^{m-1} T_{m,i}
+		+ \sum_{i=m+1}^{n-1} T_{i,m}\right) \\
+   & \le & 1 + \frac{c}{n-2}\left((m-1)(2+\ln m)+
+	\sum_{i=m+1}^{n-1}(2+\ln i)\right) \\
+   & \le & 1 + \frac{c}{n-2}\left((m-1)(2+\ln m)+
+	\sum_{i=m+1}^{n-1}(2+\ln i)\right) \\
+   & = & 1 + \frac{c}{n-2}\left((m-1)\ln m+
+	\sum_{i=1}^{n-1}\ln i - \sum_{i=1}^m\ln i\right) \\
+   & \le & 1 + \frac{c}{n-2}\left((m-1)\ln m+
+	\int_{1}^{n}\ln x\, dx - \int_{1}^m\ln x\,dx\right) \\
+   & \le & 1 + \frac{c}{n-2}\left((m-1)\ln m+
+	n\ln n - n - m\ln m + m \right) \\
+   & = & 1 + \frac{c}{n-2}\left(n\ln n - \ln m - n + m \right) \\
+   & \le & 1 + \frac{c}{n-2}\left(n\ln n - \ln m - 1 \right) \\
+\end{eqnarray*}
+which solves to $\goob{n}$, as required.
+\end{proof}
+}
+
+\begin{thm}
+Let $G=(V,E)$ be an ordered $\theta$-graph of $V$ obtained by taking
+the points of $V$ in random order.  Then the probability that there
+exists a pair $u,v\in V$ such that the $\theta$-path from $u$ to $v$
+has more than $c\log n$ edges is $n^{-\Omega(c)}$.
+\end{thm}
+
+\begin{proof}
+Consider two consecutive steps of the algorithm for finding a
+$\theta$-path from $u$ to $v$.  These steps either complete the path,
+or reduce the problem of finding a path between $u,v\in V$ to a
+problem of finding a path between $w,x\in V$.  We say that two
+consecutive steps are \emph{successful} if they complete the path, or
+if $\max\{\pi_w,\pi_x\}<\alpha\max\{\pi_u,\pi_v\}$, for some constant
+$0<\alpha<1$.  A simple cases analysis shows that the probability that
+two consecutive steps are successful is at least $\alpha^2$, and this
+statement is true regardless of any previous steps taken by the
+algorithm.
+
+Observe that, since the length of a path is bounded by $n$, any run of
+the algorithm for finding a $\theta$-path has at most
+$\log_{1/\alpha^2}n$ successes.  Therefore, if we let $X$ denote the
+number of edges in the $\theta$-path from $u$ to $v$ and let $B$
+denote a $\mathrm{binomial}(2c\log_{1/\alpha^2} n, \alpha^2)$ random
+variable then
+\begin{eqnarray*}
+  \Pr\left\{X\ge2c\log_{1/\alpha^2} n\right\} 
+  & \le & \Pr\left\{B\le 2\log_{1/\alpha^2} n\right\} \\
+  & = & \Pr\left\{B\le \frac{1}{\alpha^2c}\E B\right\} \\
+  & \le & \comment{\exp\left(-\left(1-\frac{1}{\alpha^2c}\right)^2\alpha^2c\log_{1/\alpha^2} n\right) \\
+  & = &} n^{-\left(1-\frac{1}{\alpha^2c}\right)^2\alpha^2c/\ln(1/\alpha^2)} \\
+  & = &  n^{-\Omega(c)} \enspace ,
+\end{eqnarray*}
+where the second inequality follows from Chernoff's bound on the head
+of the binomial distribution.  Thus, the probability that there exists
+any pair of vertices $u,v\in V$ such that the $\theta$-path from $u$
+to $v$ has more than $2c\log_{1/\alpha^2} n$ edges is at most
+${n\choose 2}n^{-\Omega(c)}=n^{-\Omega(c)}$, as required.
+\end{proof}
+
+We remark that, unfortunately, a random ordering does not necessarily
+produce an ordered $\theta$-graph in which every vertex has low
+degree.  For example, consider a point set $V$ such that the
+(unordered) $\theta$-graph of $V$ has a vertex $v$ of degree $n-1$.
+In this case, the expected degree of $v$ in the randomly ordered
+$\theta$-graph is
+\[
+  \frac{1}{n}\sum_{i=1}^n (n-i) = (n-1)/2 \enspace . 
+\]
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Generalizations}\seclabel{generalizations}
+
+In this section we discuss two generalizations of ordered
+$\theta$-graphs that follow from the corresponding generalizations of
+(unordered) $\theta$-graphs.
+
+%=======================================================================
+\subsection{Higher Dimensions}
+
+Ruppert and Seidel \cite{rs91} give a natural generalization of
+$\theta$-graphs to $d$-dimensions that can be constructed in
+$O(n\log^{d-1} n)$ time and yield a $t_\theta$-spanner with
+$O(k_{d,\theta}n)$ edges, where $k_{d,\theta}=(d/\theta)^{O(d)}$.  A
+close inspection of the proofs in Sections~\ref{sec:small-degree} and
+\ref{sec:small-diameter} will reveal that they make no use of the
+dimension of the point set $V$.  Thus, Theorems~{1} and {2} hold also
+in $d$ dimensions, with $k_\theta$ replaced by $k_{d,\theta}$.
+
+\begin{thm}
+Let $V$ be any set of $n$ points in $\mathbb{R}^d$.  Then $V$ has an
+ordered $\theta$-graph in which each vertex has degree at most
+$k_{d,\theta}(H_{n-1}+1)$.  Furthermore, this ordered $\theta$-graph
+can be constructed in $O(k_{d,\theta} n\log^{d-1} n)$ time.
+\end{thm}
+
+\begin{thm}
+Let $V$ be a set of $n$ points in $\mathbb{R}^d$ and let $G=(V,E)$ be
+an ordered $\theta$-graph of $V$ obtained by taking the points of $V$
+in random order.  Then the probability that there exists a pair
+$u,v\in V$ such that the $\theta$-path from $u$ to $v$ has more than
+$c\log n$ edges is $n^{-\Omega(c)}$.
+\end{thm}
+
+
+\comment{
+%=======================================================================
+\subsection{Low Weight}
+
+The weight of a geometric graph $G=(V,E)$ is the sum of its edge
+weights, i.e., $w(G)=\sum_{(u,v)\in E}\|uv\|$.  A desirable property
+of a geometric graph is that it have low weight.  Normally, this means
+that the weight of $G$ is a constant multiple of the weight of the
+minimum spanning tree of $V$.  
+
+Unfortunately, with ordered $\theta$-graphs, there are some point sets
+for which no ordering produces a graph with this property.  Such a
+point set is obtained when $V$ consists of $n/2$ pairs of points where
+the $i$th pair are at positions $(0,i\epsilon)$ and $(1,i\epsilon)$.
+In any ordering of $V$ there is an edge joining each pair of points,
+so the total weight of any $\theta$-graph is at least $n/2$.  On the
+other hand, by making $\epsilon$ sufficient small, the weight of the
+minimum spanning tree of $V$ can be made arbitrarily close to 1.
+
+On the positive side, a general greedy technique can be used to find a
+subset of any graph $G$ that is a $t'$-spanner and has weight
+proportional to the minimum spanning tree of $G$.
+}
+
+\subsection{Fault-Tolerant Ordered $\theta$-Graphs}
+
+We say that a graph $G=(V,E)$ is an \emph{$f$ fault-tolerant
+$t$-spanner} if $G\setminus V'$ is a $t$-spanner for any subset
+$V'\subseteq V$ of size at most $f$.  Lukovszki \cite{l99} shows that,
+if we modify the construction of $\theta$-graphs so that each vertex
+connects to $f+1$ vertices in each cone, then we obtain an $f$
+fault-tolerant $t_\theta$-spanner with at most $fk_\theta n$ edges.
+
+Applying the same modification to ordered $\theta$-graphs, i.e.,
+connecting the vertex $v$ to the nearest $f+1$ elements of $P_v$ in
+each cone, yields the same result for ordered $\theta$-graphs.  We
+call such graphs $f$-fault tolerant ordered $\theta$-graphs.  The
+results of Sections~\ref{sec:small-degree} and
+\ref{sec:small-diameter} generalize immediately:
+
+\begin{thm}
+Let $V$ be any set of $n$ points in $\mathbb{R}^d$.  Then $V$ has an
+$f$-fault tolerant ordered $\theta$-graph in which each vertex has
+degree at most $fk_{d,\theta}(H_{n-1}+1)$.  Furthermore, this ordered
+$\theta$-graph can be constructed in $O(fk_{d,\theta} n\log^{d-1} n)$
+time.
+\end{thm}
+
+\begin{thm}
+Let $V$ be a set of $n$ points in $\mathbb{R}^d$ and let $G=(V,E)$ be
+an ordered $\theta$-graph of $V$ obtained by taking the points of $V$
+in random order.  For any $V'\subset V$ of at most $f$ vertices in
+$V$, the probability that there exists a pair $u,v\in V\setminus V'$
+such that the $\theta$-path from $u$ to $v$ in $G\setminus V'$ has
+more than $c\log n$ edges is $n^{-\Omega(c)}$.  It follows that the
+probability that there exists any subset $V'\subseteq V$ such that the
+$\theta$-path from $u$ to $v$ in $G\setminus V'$ has more than $c\log
+n$ edges is $n^{f-\Omega(c)}$.
+\end{thm}
+
+\comment{
+Combining this modification with the ordering algorithm in
+\secref{small-degree} yields an $f$ fault-tolerant $t_\theta$-spanner
+in which each vertex has degree $O(fk\log n)$.  Using a random
+ordering as in \secref{small-diameter} gives an ordered $\theta$-graph
+$G$ with $O(\log n)$ spanner diameter, with high probability.
+Furthermore, $G$ continues to have $O(\log n)$ spanner diameter (with
+high probability) even after the removal of up to $f$ vertices.
+}
+
+
+\section{Summary and Conclusions}\seclabel{conclusions}
+
+We have defined ordered $\theta$-graphs, a variant of $\theta$-graphs
+that allow some flexibility in their construction.  This flexibility
+allows us to construct spanners with low degree and spanners with low
+spanner diameter, but is close enough to the original definition
+$\theta$-graphs that existing generalizations of $\theta$-graphs also
+hold for ordered $\theta$-graphs.
+
+We construct ordered $\theta$-graphs by projecting points onto the
+walls of cones.  A better spanning ratio of
+$(1/(1-2\sin(\theta/2))<t_\theta$ can be obtained if, instead, we
+project points onto the central axes of cones.  While it is possible
+to do this, the deletion only range tree data structure of Mehlhorn
+and N\"aher does not support the types of queries we need to perform.
+Using standard range trees increases the runnning time of the
+construction algorithm to $O(k_\theta n\log^2 n)$.
+
+\begin{op}
+Give an $O(k_\theta n\log n)$ time algorithm for constructing the
+ordered $\theta$-graph obtained by projecting points onto central axes
+of cones.
+\end{op}
+
+Although we have shown that every point set $V$ of size $n$ has an
+ordering in which the maximum degree of a vertex in the ordered
+$\theta$-graph is $O(k_\theta\log n)$ we do not know if this result is
+tight.
+\begin{op}
+Does every vertex set $V$ have an ordering $\pi$ such that the
+$\pi$-ordered $\theta$-graph of $V$ has degree bounded by some
+function of $k_\theta$?
+\end{op}
+
+There are constructions of spanner that simultaneously have small
+spanner diameter and small degree \cite{admss95}.  Is it possible to
+obtain similar results using only ordered $\theta$-graphs?
+
+
+\begin{op}
+Does every vertex set $V$ have an ordering $\pi$ such that the
+$\pi$-ordered $\theta$-graph has small degree and $O(\log n)$ spanner
+diameter?
+\end{op}
+
+\section*{Acknowledgements}
+
+This research was started during the Carleton-Utrecht Workshop on
+Geometric Networks held in Hilversum, The Netherlands, March 2--7,
+2002.  We would like to thank the other workshop participants, namely
+Pankaj~Agarwal, Tetsuo~Asano, Mark~de~Berg, Sergio~Cabello,
+Otfried~Cheong, Hazel~Everett, Danny~Halperin, Herman~Haverkort,
+Marc~van~Kreveld, Giri~Narasimhan, Mark~Overmars, Bettina~Speckmann,
+Alexander~Wolff, and David~Wood for providing a stimulating work
+environment.  We would also like to thank Michiel~Smid for helpful
+discussions and for leading us to the paper of Dietz and Sleator
+\cite{ds87}.
+
+\bibliography{theta}
+\bibliographystyle{plain}
+
+\end{document}

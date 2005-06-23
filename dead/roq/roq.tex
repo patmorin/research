@@ -1,0 +1,256 @@
+\documentclass[lotsofwhite]{patmorin}
+\usepackage{graphicx,ipe}
+\usepackage{charter}
+\usepackage{amsthm}
+
+\newcommand{\floor}[1]{\lfloor #1 \rfloor}
+\newcommand{\ceil}[1]{\lceil #1 \rceil}
+
+\input{pat.tex}
+\title{\MakeUppercase{Range-Searching Queries on Arrays}}
+\author{Prosenjit Bose%
+	\thanks{School of Computer Science, 
+		Carleton University, 
+		1125 Colonel By Drive, 
+		Ottawa, CANADA, K1S~5B6 \newline
+	\texttt{\{jit,morin,michiel\}@cs.carleton.ca} .}
+	\and Danny Krizanc%
+	\thanks{Computer Science Group,
+		Mathematics Department, 
+ 		Wesleyan University,
+		Middletown, CT 06459 USA \newline
+		\texttt{dkrizanc@wesleyan.edu}}
+	\and Pat Morin\footnotemark[1] 
+	\and Michiel Smid\footnotemark[1]}
+\date{}
+
+\newcommand{\eps}{\epsilon}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The following question is studied: Given an array $A=a_1,\ldots,a_n$
+and a function $f$ on subsets of $A$, how do we preprocess $A$ so that
+for any range $1\le i\le j\le n$ we can quickly evaluate
+$f(a_i,\ldots,a_j)$?  In the case where $f(a_i,\ldots,a_j)=a_i\oplus
+a_{i+1}\oplus\cdots\oplus a_j$ and $\oplus$ is any associative
+operator we describe a family of data structure that satisfy
+$S_n\times Q_n=O(n(\alpha(n))^2)$, where $S_n$ and $Q_n$ are the size and
+query time, respectively, of the data structure and where $\alpha(n)$
+is the functional inverse of Ackerman's function.  When $f$ is the
+function that computes the median of its inputs, we give a family of
+data structures that satisfies $S_n\times Q_n=O(n\log n)$.
+\end{abstract}
+
+\section{Introduction}
+
+In this paper we consider the following data structuring problem on
+arrays.  Given an array $A=a_1,\ldots,a_n$ and a function $f$ on
+subsets of $A$, how do we preprocess $A$ so that for any range $1\le
+i\le j\le n$ we can quickly evaluate $f(a_i,\ldots,a_j)$?
+
+In many cases of interest, $f(a_i,\ldots,a_j)=a_i\oplus
+a_{i+1}\oplus\cdots\oplus a_j$ where $\oplus$ is some associative
+binary operator.  A particularly trivial case is when $\oplus$ is the
+addition operator.  In this case, $A$ can be preprocessed in $O(n)$
+time to obtain an $O(n)$ size data structure that answers queries in
+$O(1)$ time.  This preprocessing involves computing an array
+$B=b_0,\ldots,b_n$ where $b_0=0$ and $b_i=\sum_{j=1}^i a_i$ for $i>0$.
+Once this is done, the answer to the query $(i,j)$ is simply
+$b_j-a_{i-1}$.  Clearly this generalizes to any setting where each
+element has an easily computable inverse with respect to $\oplus$, but
+does not seem to generalize any further.
+
+Another case which has received considerable attention is the case
+where $\oplus$ is the $\min$ (or $\max$) operator, which computes the
+minimum (respectively maximum) of its inputs.  Bender and
+Farach-Colton \cite{bfc00} describe a data structure of size $O(n)$
+that can be built in $O(n)$ time and can answer range-minimum queries
+in $O(1)$ time.  They arrive at this result by exploiting a beautiful
+relationship between range minimum queries and lowest common ancestor
+queries in trees.  Unfortunately, their results rely heavily on this
+relationship and so they do not generalize to other operators.
+
+In order to describe the complexity of results in this paper, we need
+to define some extremely slow growing functions related to Ackerman's
+function \cite{X}. Let $t:\mathbb{N}\rightarrow\mathbb{N}$ be any
+function for which $t(n)<n$ for all $n\ge n_0$ and define $t^*(n)$ as
+the \emph{iterated $t$ function}, i.e., $t^*$ is the minimum value of
+$i$ for which
+\[  \begin{array}{c@{}c@{}c@{\,}c}\underbrace{t(t(t(\cdots t(}&n&\underbrace{)\cdots)))}&<n_0 \\
+  i& &i\end{array} \enspace .
+\]
+Next we define the function 
+\[
+  \alpha_i(n) = \left\{\begin{array}{ll}
+  \log n & \mbox{if $i=0$, and} \\
+  \alpha_{i-1}^*(n) & \mbox{otherwise.} \end{array}\right.
+\]
+Finally, the function $\alpha(n)$ is the minimum value of $i$ such
+that $\alpha_i(n)<c$ for some constant $c$.  The function $\alpha(n)$
+is often referred to in the literature as the \emph{inverse Ackerman
+function}.
+
+In this paper, we show that for any associative operator $\oplus$,
+there is a data structure of size $S_n=O(n\alpha(n))$ that can be
+constructed in time $P_n=O(n\alpha(n))$ and that answers
+range-$\oplus$-queries in time $Q_n=\alpha(n)$.  More generally, We
+show that, for any $i$, we can achieve $S_n=\alpha_i(n)$ and
+$Q_n=O(i)$.  Applying a standard grouping trick, this implies a family
+of data structures for which $S_n\times Q_n=n(i\alpha_i(n))$
+
+We also consider a particular case where $f$ is not defined in terms
+of a binary operator; this is the case where $f$ is the function that
+outputs the median of its inputs (which come from some total order).
+In this case, we give a data structure with size $S_n=O(n\log n)$
+and query time $Q_n=O(\log n)$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Associative Operators}
+
+In this section, we consider range-$\oplus$-queries, where $\oplus$ is
+an arbitrary associative binary operator.  We begin by giving a simple
+data structure with size $O(n\log n)$ and then show how to take any
+data structure of size $n\times o(n)$ and make it into an even smaller
+data structure (with a constant increase in running time).
+
+\begin{lem}\lemlabel{basecase}
+There exists a range-$\oplus$-query data structure with size $S_n=O(n\log n)$
+and query time $O(1)$.
+\end{lem}
+
+\begin{proof}
+This data structure is a complete binary tree on the elements of $A$.
+At the root of the tree, we store two arrays $L$ and $R$, where $l_i =
+\bigoplus_{j=i}^{n/2} a_i$ and $r_i = \bigoplus_{j=n/2+1}^i a_i$.  The
+left and right subtrees are built recursively on the subarrays
+$a_1,\ldots,a_{n/2}$ and $a_{n/2+1},\ldots,a_n$, respectively.  This tree
+has $O(\log n)$ levels and uses $O(n)$ space per level, so the total
+size of the data structure is $S_n=O(n\log n)$.
+
+To answer the query $(i,j)$ using this data structure, we look at
+lowest common ancestor, $v$, of the leaves corresponding to $a_i$ and
+$a_j$.  This can be done in constant time after $O(n)$ preprocessing
+using any number of data structures for computing lowest common
+ancestors (see, e.g., \cite{X}). Alternatively, since our tree is a
+binary tree, this node can be found in constant time using only a few
+arithmetic operations on $i$ and $j$ \cite{X}.  Consider the $L$ and
+$R$ arrays stored within the node $v$.  Let $x$ be the index of $a_i$
+in $L$ and let $y$ be the index of $a_j$ in $R$.  Then, the answer to
+the query can be computed in constant time as $l_x+r_y$.
+\end{proof}
+
+
+\begin{lem}\lemlabel{bootstrap}
+If there exists a range-$\oplus$-query data structure with size
+$nt(n)$ and query time $q(n)$ then there also exists a data structure
+with size $nt^*(n)$ and query time $q(n)+O(1)$.
+\end{lem}
+
+\begin{proof}
+We build a tree shaped data structure where each node of the tree
+contains one of the original range-$\oplus$-query data structures
+assumed by the theorem.  To do this, we partition the elements of $A$
+into $n/t(n)$ blocks each of size $t(n)$, so that the $i$th block
+consists of elements $a_{it(n)},\ldots,a_{(i+1)t(n)-1}$, and we let
+$b_{i,j}$ refer to the $j$th element of hte $i$th block.
+
+At the root of our tree, we compute an array
+$B=b_1,\ldots,b_{n/t(n)}$, where
+\[
+b_i = \bigoplus_{j=1}^{t(n)} b_{i,j} \enspace .
+\]
+and build a range-$\oplus$-query data structure on $B$.  In addition,
+we store two tables, $P$ and $S$, where
+\[
+p_{i,j} = \bigoplus_{k=1}^{j} b_{i,k}
+\]
+and 
+\[
+s_{i,j} = \bigoplus_{k=j}^{t(n)-1} b_{i,k}
+\]
+for all $i\le i\le n/t(n)$ and $1\le j\le t(n)$.  We call $P$ the
+\emph{block prefix array} and we call $S$ the \emph{block suffix
+array}.  It is clear that the arrays $P$ and $S$ and the data
+structure on $B$ each use $O(n)$ space, for a total of $O(n)$ space.
+We then recursively build the same data structure on each block. This
+gives us a tree-shaped data structure that has $t^*(n)$ levels and
+that uses $O(n)$ space at each level, for a total of $nt^*(n)$ space.
+
+To answer a range-$\oplus$-query $(i,j)$ with this data structure, we
+find the unique node of our tree that contains $a_i$ and $a_j$, but in
+different blocks. (Again, this is the lowest common ancestor of the
+leaves corresponding to $a_i$ and $a_j$.)  Let $x_1$ be the block that
+contains $a_i$ and let $x_2$ be the position of $a_i$ within this
+block.  Similarly, let $y_1$ and $y_2$ be the block and position
+within block of $a_j$. Then the answer to the query $(i,j)$ is given
+by
+\begin{equation}
+   \bigoplus_{k=i}^j a_k = s_{x_1,x_2}\oplus \left(\bigoplus_{k=x_1+1}^{y_1-1} b_k\right) \oplus p_{x_1,x_2} \eqlabel{addthree}
+\end{equation}
+(see \figref{addthree}).  The first and third terms in \eqref{addthree}
+are already precomputed in the $P$ and $S$ arrays while the second
+term can be computed using a call to the auxilliary data structure, so
+that the time to complete the query is $O(1)+q(n)$.
+\begin{figure}
+\centeripe{addthree}
+\caption{The answer to a range-$\oplus$-query involves three easily
+computed terms.}\figlabel{addthree}
+\end{figure}
+\end{proof}
+
+
+
+\begin{thm}\thmlabel{associative}
+For any $i$, there exists a range-$\oplus$-query data structure with
+size $S_n=O(n\alpha_i(n))$ and query time $O(i)$. In particular, there
+exists a data structure with size $S_n=O(n\alpha(n))$ and query time
+$O(\alpha(n))$.
+\end{thm}
+
+\begin{proof}
+For the first part of the theorem, start with the data structure of
+\lemref{basecase} and apply \lemref{bootstrap} $i$ times.  For the
+second part of the theorem, apply the first part of the theorem with
+$i=\alpha(n)$.
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Medians}
+
+\begin{lem}
+Given two augmented search trees $T_1$ and $T_2$ storing sets $U_1$
+and $U_2$, respectively, and having heights $h_1$ and $h_2$,
+respectively, we can compute the median of all elements in $U_1\cup
+U_2$ in time $O(h_1+h_2)$.
+\end{lem}
+
+\begin{proof}
+We give an algorithm which, at each step, advances by one level in one
+of the two trees.
+\end{proof}
+
+\begin{thm}
+There exists a range-median-query data structure with size
+$S_n=O(n\log^2 n)$ and query time $O(\log n)$.
+\end{thm}
+
+\begin{proof}
+Use persistent search trees on top of a binary tree.
+\end{proof}
+
+\begin{thm}
+There exists a range-median-query data structure with size
+$S_n=O(n\alpha_i(n))$ and query time $O(\log^i n)$.
+\end{thm}
+
+\begin{proof}
+Use the same iterative procedure used in the proof of
+\thmref{associative}.
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusions}
+
+\end{document}

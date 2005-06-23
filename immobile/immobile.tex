@@ -1,0 +1,274 @@
+\documentclass[lotsofwhite,charterfonts]{patmorin}
+\usepackage{graphicx}
+\input{pat.tex}
+
+\title{\MakeUppercase{Testing the Mobility of Polygons}}
+\author{Jurek Czyzowicz \and Pat Morin}
+\date{}
+
+
+\newcommand{\Rtwo}{\mathbb{R}^2}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We consider the problem of testing whether a given set of $n$ frictionless
+point contacts (pins) on the edges of a polygon $P$ immobilizes $P$ in the
+sense that any non-trivial continuous motion of $P$ will cause at least one of
+the pins to enter the interior of $P$ during the motion.  Our main result is
+that this problem can be solved in linear time.  A corollary of our algorithm
+is a Helly-type theorem which states that, if a set of $n$ pins immobilizes $P$
+then there is a subset of $k\le 5$ of the pins that also immobilizes $P$.  This
+theorem is tight in that there exists an example of a polygon and 5 pins that
+is immobilized but removing any one of the pins causes the polygon to become
+mobile. 
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+Let $P$ be a simple polygon with $m$ vertices and let $S$ be a set of
+$n$ points in the interiors of the edges of $P$.  We refer to the
+elements of $S$ as \emph{pins}.  The set $S$ of pins
+\emph{immobilizes} $P$ if, during any continuous non-trivial rigid
+motion of $P$, some pin enters the interior of $P$.  In
+\figref{examples}, the first three polygons are immobilized (see
+Czyzowicz \etal\ \cite{X} for the proof that the triangle in
+\figref{examples}.c is immobilized) and the last two polygons are
+mobile and a mobilizing motion is shown.
+
+\begin{figure}
+\begin{center}\begin{tabular}{ccccc}
+\includegraphics{im-square} &
+\includegraphics{im-wings} &
+\includegraphics{im-triangle} &
+\includegraphics{m-square} &
+\includegraphics{m-square2} \\
+(a) & (b) & (c) & (d) & (e)
+\end{tabular}\end{center}
+\caption{Examples of three polygons (a, b and c) that are immobile and two polygons
+(c and d) that are mobile.}
+\figlabel{examples}
+\end{figure}
+
+This definition of immobility seems to have been first introduced by Czyzowicz
+\etal\ \cite{X}.  There are many other definitions of immobility, which may be
+more or less relevant depending on the application being considered.  One of
+the most well-studied of these is Reuleaux's definition of \emph{form closure}
+\cite{X} which disallows infinitesmal motions. Under Reuleaux's definition, the
+3 pins in \figref{examples}.c do not achieve form closure since an infinitesmal
+rotation of the triangle about the small circle is possible. (If we rotate the
+pins about the small circle they trace arcs that are tangent to the edges of
+the triangle.)
+
+Many authors have studied the problem of immobilizing convex polygons using a
+small set of pins.  Czyzowicz \etal\ \cite{X} show that 4 pins which can be
+found in $O(m)$ time are always sufficient and sometimes necessary to
+immobilize any convex polygon.  The same authors show that, if the polygon
+does not have any parallel sides then $3$ pins are always sufficient.  The
+number of pins required to immobilize a convex polytope in $d$ dimensions is
+always between $d+1$ and $2d$ \cite{X}.  So and So \cite{ssXX} have shown that
+4 pins are always necessary and sufficient to achieve form closure on any
+convex polygon and the locations of these pins can be computed in linear time
+\cite{X}.
+
+For non-convex polygons these problems become somewhat more complicated.  While
+4 pins is always sufficient to immobilize any simple polygon, sometimes 2 or 3
+pins are also sufficient, and determining the minimum number required seems
+difficult.  Cheong \etal\ study this problem and give an algorithm that
+determines if 2 pins are sufficient to achieve form closure on a polygon in
+$O(m^{4/3}\log^{1/3} m)$ time.  The same authors also give an algorithm for
+determinining if 3 pins are sufficient to achieve form closure that runs in
+$O(m^2 \log^2 m)$ time and an algorithm to test if 3 pins are sufficient to
+achieve immobility that runs in $O(m^2\log^4 m)$ time. 
+
+In this paper we study a closely related problem, namely that of testing if a
+given set $S$ of $n$ pins immobilizes a polygon $P$ with $m$ edges.  Our
+algorithm runs in $O(n)$ time if the input is given in such a way that each
+element of $S$ has a pointer to the edge of $P$ on which it lies.  Otherwise,
+these pointers can be precomputed in $O(n + m\log n)$ time.  A somewhat
+surprising consequence of our algorithm is the following analog of
+\emph{Helly's Theorem}: If $S$ immobilizes $P$, then $S$ contains a subset $S'$
+of size at most 5 that also immobilizes $P$, and this is tight;  there are
+examples in which a set of 5 pins immobilizes $P$ but no subset of 4 pins
+immobilizes $P$.  
+
+Note that testing if $S$ achieves form closure is easy since it involves
+testing if a certain set of 3-dimensional vectors contains the origin in the
+interior of its convex hull \cite{A,B,C,D}.  Therefore, using linear-time
+linear programming \cite{X,X} we can solve this problem in linear time.  Our
+algorithm for testing immobility uses this same linear program, but requires
+significant care in handling the special case where the origin is on the
+boundary of the convex hull. 
+
+We also consider lower bounds for determining the minimum number of pins
+required to achieve form closure on a simple polygon.  We show that testing if
+2 pins is sufficient to achieve form closure is as hard as Hopcroft's problem
+and testing if 3 pins is sufficient is as hard as determining if any 3 points
+of a point set lie on a common line.  These lower bounds show that the results
+of Cheong \etal\ cite{X} are probably close to optimal since they are within a
+polylogarithmic factor of the conjectured lower bounds for these two problems.
+
+The remainder of this paper is organized as follows:  In \secref{prelim} we
+review some background and present some basic preliminary results.  In
+\secref{testing} we describe our algorithm for testing if a set $S$ of pins
+immobilizes a polygon $P$. In \secref{lower-bounds} we present our lower-bound
+constructions.  Finally, in \secref{conclusions} we summarize and conclude with
+open problems.
+
+%===============================================================================
+\section{Motion Space, Configuration Space and Helicoidal Halfspaces}
+
+Any rigid motion of $\Rtwo$ can be expressed as a rotation about the origin
+followed by a translation.  Thus, we can express any such motion as a triple
+$(x,y,\theta)\in \mathbb{R}^3$, where $\theta$ represents the angle of rotation
+and $(x,y)$ is the vector of translation.  This gives us a 3-dimensional
+\emph{motion space} in which the origin $(0,0,0)$ represents the trivial
+motion.  For a motion $M$ in the motion space, define $M(P)$ as the image of
+$P$ under the motion $M$.
+
+We are interested in a subset of the motion space called the
+\emph{configuration space of $P$ with respect to $S$} or, simply, the
+\emph{configuration space}.  This is the subset of the motion space that
+consists of all motions $M$ such that $M(P)$ does not contain any points of $S$
+in its interior.  In general, the configuration space can have many connected
+components.  Because the set $S$ consists of points on the boundary of $P$, we
+know that one of these components contains the trivial motion $(0,0,0)$.  
+
+We represent a continuous motion of $P$ as a continuous curve
+$f:[0,1]\rightarrow \mathbb{R}^3$ in motion space where $f(0)=(0,0,0)$, so that
+$f(t)$ defines the motion of $P$ at time $t$.  The continuous motion $f$ is
+\emph{allowable} if $f(t)$ is contained in the configuration space for all
+$0\le t\le 1$. The continuous motion $f$ is \emph{non-trivial} if $f(t)\neq
+(0,0,0)$ for some $0\le t\le 1$.  Thus, determining if $S$ immobilizes $P$ is
+equivalent to determining if there is some non-trivial allowable continuous
+motion $f$.  Of course, such a motion $f$ exists if and only if $(0,0,0)$ is
+not the only point in its component of the configuration space.
+
+One method of determining whether $P$ is immobilized by $S$ would be to
+explicitly compute the entire configuration space, but this would result in an
+algorithm with a large (but still polynomial) running time.  Rather than take
+this approach, we will approximate the configuration space at two different
+levels.  At the first level, we approximate by only considering a small part of
+the configuration space.  At the second level, we approximate the (non-linear)
+configuration space by a set of linear constraints. 
+
+First, observe that there is a non-trivial allowable continuous motion $f$ if
+and only if there is a non-trivial allowable continuous motion $f'$ such that
+$f'(t)$ is contained in a ball of radius $\epsilon$ centered at $(0,0,0)$, for
+any $\epsilon >0$.  The utility of this is obvious:  We need only consider the
+part of the configuration space that is contained in a ball of radius
+$\epsilon$ centered at $(0,0,0)$.
+
+In order to get some idea of what the configuration space looks like, we will
+consider the case where $P$ is a halfplane with one pin on its boundary.  Note
+that, if we consider only motions with no rotational component, i.e., in the
+motion plane $\theta=0$, then the set of allowable translations is a closed
+halfplane whose bounding line is parallel to the bounding line of $P$ and that
+contains the origin $(0,0)$.  Blah, blah, blah the configuration space is
+closed and its boundary is a helicoid.  We call such an object a
+\emph{helicoidal halfspace}.
+
+\begin{figure}
+\begin{center}\begin{tabular}{cccc}
+\includegraphics{halfplane-a} & \includegraphics{halfplane-b}
+\end{tabular}\end{center}
+\end{figure}
+
+Now, suppose $P$ is a polygon and the pins in $S$ are in the interiors of the
+is edges of $P$.  Let $p$ be some pin in $S$.  Observe that, since $p$ is in
+the interior of an edge of $P$, then there is a value of $\epsilon >0$ such
+that the intersection of the configuration space of $P$ with respect to $\{p\}$
+and the ball of radius $\epsilon$ is the same as the intersection of the
+configuration space of a halfplane with respect to $\{p\}$ and the ball of
+radius $\epsilon>0$. Therefore, for each pin $p\in S$ we obtain a helicoidal
+halfspace that is the configuration space of a halfplane with respect to
+$\{p\}$.  The polygon $P$ is immobilized if and only if the intersection of
+these helicoidal halfspaces leaves the point $(0,0,0)$ in a component with no
+other points. 
+
+To summarize, we have reduced the problem of determining if $S$ immobilizes $P$
+to a problem of determining whether the intersection of a set of $n$ helicoidal
+halfspaces, each of which contains $(0,0,0)$ on its boundary leaves the point
+$(0,0,0)$ in a component by itself.  This does not seem like much progress
+since (1)~the problem is non-linear and (2)~helicoidal halfspaces not convex,
+so the problem is not even convex.  In the next section we will show how a
+careful use of linear programming will solve both these problems.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Reduction to Linear Programming}
+
+Recall that we are only interested in studying the configuration space
+restricted to an $\epsilon$ ball around the origin $(0,0,0)$ and that each of
+our helicoidal halfspaces contains the origin on its boundary.  To avoid
+dealing with the complexities of helicoids, we will approximate each helicoid
+by a closed halfspace whose bounding plane is tangent to the helicoid at the
+origin.  We call such a halfspace the \emph{halfspace approximation} of the
+helicoid.
+
+Let $h$ be a helicoidal halfspace and let $h'$ be the halfspace approximation
+of $h$.  Let $C$ be a cone contained in $h$ whose apex is at $(0,0,0)$, whose
+axis is orthogonal to $h'$, and that has internal angle $\alpha <\pi$.  Then,
+there exists a value of $\epsilon >0$ such that the intersection of the
+$\epsilon$ ball centered at $(0,0,0)$ with $C$ is contained in $h$.  
+
+Suppose we compute the intersection of the $n$ halfspace approximations.  Then
+there are several cases depending on the dimension of the resulting set.
+
+%===============================================================================
+\subsection{The Intersection has Volume}
+
+If the intersection of the $n$ halfspace approximations has volume then we
+claim that $P$ is not immobized by $S$.  To see this, just take any ray
+originating at $(0,0,0)$ that enters the volume and observe that by \lemref{X}
+there is an initial segment of this ray that defines a non-trivial allowable
+continuous motion of $P$.
+
+%===============================================================================
+\subsection{The Intersection is the Point $(0,0,0)$}
+
+If the intersection of the $n$ halfspace approximations is the point $(0,0,0)$
+then we claim that $P$ is immobilized.\footnote{Indeed, in this case it is not
+hard to verify that the set $S$ achieves the stronger notion of form closure
+\cite{X}.}  To see this, consider any smooth motion $f$ and let $r$ be the ray
+tangent to $f$ at $(0,0,0)$.  Since the halfspace approximations are closed, it
+must be the case that $r$ is not contained on the boundary of any of the
+halfspaces (otherwise their intersection would contain $r$).  Therefore, there
+is some halfspace approximation $h'$ that does not contain $r$.  Since $r$ is
+tangent to $f$ at $(0,0,0)$ but not tangent to $h'$, it follows that $f$ is not
+tangent to $h'$.  Therefore, by \lemref{X}, some part of $f$ very close to
+$(0,0,0)$ is not contained in one of the helicoidal halfspaces so $f$ is not an
+allowable motion. 
+
+%===============================================================================
+\subsection{The Intersection is a Line Segment or Ray}
+
+
+%===============================================================================
+\subsection{The Intersection is a Surface}
+
+If the intersection of the $n$ halfspace approximations is a 2-dimensional
+surface then two of the halfspace approximations must meet in a plane and the
+surface is contained in this plane.  These two halfspace approximations
+correspond to a very special configuration of two pins.   Note that this plane
+intersects the plane $\theta=0$ in a line, which means that the two pins are on
+parallel edges.  Furthermore, these two pins define only one plane which means
+that the line joining the two pins is orthogonal to the edges that contain
+these pins.  Finally, since the two halfspace approximatios are oriented in
+opposite directions this means that one of the pins is 
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Testing Mobility}\seclabel{testing}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Lower Bounds for Computing Form Closure Grasps}\seclabel{lower-bounds}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Summary and Conclusions}\seclabel{conclusions}
+
+\end{document}
+

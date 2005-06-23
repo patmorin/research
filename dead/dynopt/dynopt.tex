@@ -1,0 +1,154 @@
+\documentclass[charterfonts,lotsofwhite]{patmorin}
+\usepackage{algorithmic}
+\input{pat.tex}
+
+\newcommand{\prnt}{\mathord{parent}}
+\newcommand{\visiblecomment}[1]{\noindent*** #1 ***}
+
+\title{\MakeUppercase{Dynamically Optimal Binary Search Trees}}
+\author{Pat Morin}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We show that a slightly sped-up version of the move-to-root
+restructuring heuristic for binary search trees takes time $O(W(A))$ to
+execute an access sequence $A$, where $W(A)$ denotes Wilbur's second lower
+bound for executing $A$ with a binary search tree.  Among other things,
+this implies that this data structure can execute any access sequence
+$A$ at least as fast as a splay tree, so any theorem about the
+performance of splay trees also applies to this modified move-to-root
+heuristic.
+\end{abstract}
+
+\section{Introduction}
+
+
+\section{The Data Structure}
+
+All our trees contain the integers $1,\ldots,n$ and we are always
+interested in the access sequence $A=a_1,\ldots,a_m$.  The initial
+tree is always the "list tree," i.e., the list $1,\ldots,n$ in which
+the root contain the value $1$ and the node containing the value $i$
+has right child $i+1$ for $1\le i< n$.  
+
+We first describe the original move-to-root heuristic and the sequence
+of trees $T_1,\ldots,T_m$ produced by this heuristic.  We then
+describe Wilbur's lower bound $W(A)$, which is defined in terms of the
+trees $T_1,\ldots,T_m$.  Finally, we describe a simple trick to speed
+up the move-to-root heuristic so that the time to execute any sequence
+$A$ using this modified move-to-root heuristic is $O(W(A))$.
+
+\subsection{The Move-to-Root Heuristic}
+
+The move-to-root heuristic is one of the first heuristics proposed for
+self-organizing search trees. When accessing the item $a_i$, a
+standard search is performed in the search tree to find the node
+containing $a_i$ and then rotations are repeatedly performed on the
+parent of $a_i$ to bring $a_i$ to the root of the search tree.  More
+precisely, the following algorithm is used to bring $a_i$ to the root
+of the tree.
+
+\begin{algorithmic}[1]
+\WHILE{$a_i$ is not the root}
+   \IF{$a_i$ is the left child of its parent}
+       \STATE{$\textsc{RightRotate}(\prnt(a_i))$}
+   \ELSE
+       \STATE{$\textsc{LeftRotate}(\prnt(a_i))$}
+   \ENDIF
+\ENDWHILE
+\end{algorithmic}
+
+Let us call the resulting tree (the tree obtained after accessing
+$a_i$) $T_i$.  Then, with this definition the cost of searching in a
+move-to-root tree is proportional to the length of the path from the
+root of $T_{i-1}$ to the node containing $a_i$.  This path will be
+important to us, so we will name it $P_A(i)$.
+
+Unfortunately, the move-to-front heuristic has very bad worst-case
+performance.  Indeed, it is not hard to verify that the access
+sequence $A=n,n-1,n-2,\ldots,2,1$ takes $\Omega(n^2)$ time to execute
+using this heuristic.  (See \figref{quadratic}.)
+
+\subsection{Wilbur's Lower Bound}
+
+An interesting aspect of binary search trees is that there are
+individual access sequences that have non-trivial lower bounds on the
+time required to execute them.  More precisely, consider the
+\emph{binary search tree model of computation} in which we are given
+the tree $T_0$ and a pointer $p$ to the root of $T_0$.  In unit time,
+we can move $p$ from its current node to one of the neighbours
+(parent, left child or right child) of the current node or execute a
+left or right rotation at the current node.  We say that a sequence of
+such operations executes the access sequence $A=a_1,\ldots,a_m$ if $A$
+is a subsequence of the sequence of nodes that $p$ points to during
+the sequence of operations.  It is in this model that Wilbur considers
+lower bounds on accessing sequences.
+
+Wilbur's lower bound is based on the sequence of move-to-front trees
+$T_1,\ldots,T_m$.  Recall that $P_A(i)$ denotes the path from the root
+of $T_{i-1}$ to the node containing $a_i$.  We say that a node $v$ on
+this path is an \emph{alternation} if $v$ is the left child of its
+parent but the node that follows $v$ in $P_A(i)$ is the right child of
+$v$.
+
+\begin{thm}[Wilbur's Lower Bound]
+In the binary search tree model of computation, the cost of accessing
+the sequence $A$ using a binary search tree is $\Omega(W(A))$ where $W(A)=\sum_{i=1}^{m}
+W_A(i)$ and $W_A(i)$ denotes the number of alternations in
+$P_A(i)$.
+\end{thm}
+
+\visiblecomment{A slight lie.  It's actually the lower bound on
+accessing $n,n-1,n-2,\ldots,2,1,a_1,\ldots,a_m$.}
+
+Thus, we see that the cost of accessing $A$ using the move-to-front
+heuristic is very closely related to Wilbur's lower bound since the
+cost of accessing it
+is the length of $P_A(i)$, where Wilbur's lower bound implies that it
+is at least the number of alternations in .
+
+Note that Wilbur's Lower Bound applies, for example, to splay trees
+and to move-to-root trees since both of these trees naturally fit into
+the binary search tree model of computation.  Two of the biggest open
+problems in this field are whether Wilbur's lower bound is tight and,
+if so, whether the cost of executing an access sequence $A$ using a
+splay tree is always within a constant factor of Wilbur's lower bound.
+
+\subsection{Speeding up the Move-to-Root Heuristic}
+
+Next we consider how the move-to-root heuristic can be sped up in
+order to eliminate its quadratic worst-case performance and actually
+reduce its running time to match Wilbur's lower bound.  Before we
+begin, it will be helpful to look a little more closely at the cost of
+the move-to-root heuristic.
+
+The cost of accessing $a_i$ using the move to root heuristic consists
+of two parts: (1)~the cost of searching for $a_i$ and (2)~the cost of
+performing rotations to bring $a_i$ to the root.  Both these costs are
+essentially the same, since if the search path $P_A(i)$ has length $k$
+then $k$ rotations are required to bring $a_i$ to the root. (Each
+rotation reduces the distance between $a_i$ and the root by one.)
+
+To reduce the second cost we observe that, although it is possible to
+use $k$ rotations to bring $a_i$ to the root, the same result can be
+achieved by changing only a constant number of pointers in the
+neighbourhood of each alternation of $P_A(i)$. (See
+\figref{net-result}.)  Indeed, if we are given the list of
+alternations of $P_A(i)$ then the net result of rotating $a_i$ to the
+root can be achieved in $O(W_A(i))$ time.  Thus, all the restructuring
+performed by the move-to-root heuristic to access sequence $A$ can be
+accomplished in $O(W(A))$ time.
+
+
+
+at a few motivating examples.
+
+Consider what happens when the first access
+
+
+
+\end{document}
+

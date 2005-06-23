@@ -1,0 +1,350 @@
+\documentclass{article}
+\usepackage{fullpage}
+
+\newcommand{\comment}[1]{}
+
+\setlength{\parskip}{1.5ex}
+\newenvironment{comm}{\noindent\textbf{Referee's Comment:}}{}
+\newenvironment{resp}{\noindent\textbf{Authors' Response:}}{}
+
+\title{Revision Document:\\
+  Space-Efficient Planar Convex Hull Algorithms}
+
+\begin{document}
+\maketitle
+
+\section{Referee C}
+
+\noindent\textbf{Note:} Referee C's comments have been paraphrased
+since I am unable to cut and paste them from a postscript file.
+
+\begin{comm}
+You need to define the convex hull problem in such a way that Shamos'
+lower bound holds.
+\end{comm} 
+
+\begin{resp}
+We now define the convex hull problem as that of outputting the
+convex hull vertices in the order in which they appear on the hull.
+\end{resp} 
+
+\begin{comm}
+It is conceivable that an algorithm produces the ouput point by point
+and prints it to a file.
+\end{comm} 
+
+\begin{resp} 
+This is true, but I'm not sure what I should say about it.
+\end{resp} 
+
+\begin{comm}
+$S[h-1]$ should be $S[h-2]$ in Figure 1.
+\end{comm} 
+
+\begin{resp}
+Corrected.
+\end{resp}
+ 
+\begin{comm}
+Lines 2 and 3 of Graham-InPlaceHull can implemented a bit more cheaply
+by shifting and moving $a$.
+\end{comm} 
+
+\begin{resp} 
+This is true, but we wrote all our algorithms in terms of swaps for
+the sake of consistency and brevity.  It should be clear to anyone who
+implements this algorithm that they can do this.
+\end{resp} 
+
+\begin{comm}
+``further reduce'' This is strange because so far no constants have
+been reduced.
+\end{comm} 
+
+\begin{resp} 
+In the previous paragraph we show how to reduce the constants in the
+algorithm by first partitioning the set into upper hull and lower hull
+candidates.  In fact, the previous paragraph begins with the sentence
+``We can reduce the constants in Graham-InPlace-Hull by\ldots
+\end{resp} 
+
+
+\begin{comm}
+The definitions of $S^i$ are different from those in the original
+paper.  
+\end{comm} 
+
+\begin{resp}
+The definitions of the $S^i$ have been changed so that we can have
+$S^0$, $S^1$ and $S^2$ appear in that order in the output array.  If
+we stuck with Chan's definition we would have $S^0$ followed by $S^2$
+followed by $S^1$.  Since this is more a matter of taste than anything
+else we did not change to Chan's original notation.
+\end{resp}
+
+
+\begin{comm}
+The notation $(a,b)$ is confusing; is it the line segment from
+$a$ to $b$ or the line through $a$ and $b$?
+\end{comm} 
+
+\begin{resp} 
+We now define the notation in the previous paragraph.
+\end{resp} 
+
+\begin{comm}
+This is just an incarnation of the Dutch National Flag problem and can be solved much more simply.
+\end{comm} 
+
+\begin{resp} 
+Referee A also noticed this (but didn't tell us the name Dutch
+National Flag).  We updated the write-up with a simple algorithm and
+reference to the DNF problem.
+\end{resp} 
+
+\begin{comm}
+Why $3n/4$ and not $n/2$?
+\end{comm} 
+
+\begin{resp}
+This is a good observation.  We wrote $S^0\le 3n/4$ but the referee is correct in pointing out that we actually have the stronger condition $S^0\le n/2$.  This has been updated.
+\end{resp} 
+
+\begin{comm}
+I don't see where in-place comes from.  Megiddo's algorithm uses
+median finding which takes $O(\log n)$ extra space (so is not
+in-place).
+\end{comm} 
+
+\begin{resp}
+There are in-place median finding algorithms.  We
+now cite one of these (Lai and Wood).
+\end{resp} 
+
+\begin{comm}
+Clarkson's algorithm looks like it is in-place and finds the $h$
+extreme points in $O(nh)$ time.
+\end{comm} 
+
+\begin{resp} 
+We now discuss Clarkson's algorithm in the conclusion.
+\end{resp} 
+
+\comment{
+
+\section{Referee A}
+
+\textbf{Note:} There are some typos in referee A's comments due to
+cutting and pasting from a PDF file.
+
+\begin{comm}
+Graham s scan is basically already in-place, and I am sure some of the
+existing implementations are in-place (e.g.,
+http://cm.bell-labs.com/cm/cs/who/clarkson/2dch.c), so this section is
+mostly a review . 
+\end{comm} 
+
+\begin{resp} 
+We have added a sentence in the introduction observing that Graham's
+scan is inherently in-place (once the sorting is done).
+\end{resp} 
+
+\begin{comm}
+Concerning the issue on how to divide into/combine
+upper and lower hulls (where the paper presents two options), here is
+a third option: don t! The original version (or the version in Cormen,
+Leiserson, and Rivest, instead of Andrew s paper) sorts by angle
+instead of x-coordinates and computes the entire convex hull at
+once. The main disadvantage is that the number of right turn tests is
+\end{comm}
+
+\begin{resp}
+We have added a paragraph discussing this option at the end of Section~2.
+\end{resp}
+
+\begin{comm}
+First, in the equation, it should be mentioned that the notation                    !  refers to the line segment between the two points, not the line (this causes some confusion on my first reading).
+\end{comm}
+
+\begin{resp}
+Done.
+\end{resp}
+
+\begin{comm}
+Second, I may have missed a subtle point, but I wonder whether the
+partitioning into can be done more simply. 
+\end{comm}
+
+\begin{resp}
+This is an excellent idea that we missed.  It is much simpler than the
+method we proposed.  The old algorithm has been replaced with this
+method.
+\end{resp}
+
+\begin{comm}
+Third paragraph: Unlike the previous algorithm, partitioning . . . is
+trivial.  Are we using quicksort s partition twice here?
+\end{comm}
+
+\begin{resp}
+Two applications of quicksort's partition would work. Another option
+is to use two scans to first compute the sizes ofthe three groups and
+then to move the elements to their correct locations.
+\end{resp}
+
+\begin{comm}
+Next paragraph: Period after a question mark (finally a typo!).
+\end{comm}
+
+\begin{resp}
+Fixed.
+\end{resp}
+
+\begin{comm}
+As a matter of personal taste, it seems better to stay in primal space
+for the bridge algorithm, rather than switching to the dual. One
+reason is that the parallelism between CSY and KS is currently lost
+(that both CSY and Megiddo uses pairing is no coincidence). Otherwise,
+at least change 2D linear programming to 2D separated linear
+programming in Theorem 5 (it probably holds for general 2D linear
+programming, but hasn t been fully demonstrated).
+\end{comm}
+
+\begin{resp}
+The statement of Theorem 5 has been changed to separated 2D linear
+programming.
+\end{resp}
+
+\begin{comm}
+7th paragraph: The point ( Ç)+*, -Û is on the convex hull of ( if and
+only if ( .)/*102 is on the convex hull of ( and the triangle (
+Ç)/*304Û5 ( .)6*, -7 ( 82 is oriented clockwise.  Generally, I am a
+little unclear as to what the overall test looks like. This particular
+sentence is confusing. By definition of ) , ( Ç)9*1 - is always on the
+convex hull. Rather, if I understand correctly, this sentence refers
+to testing whether a given index is equal to ):*; . Secondly, the
+condition ( .)<*304 is on the convex hull of ( is not intended to be
+tested recursively, I hope.
+\end{comm}
+
+\begin{resp}
+This entire paragraph has been rewritten in a cleaner way and a figure
+has been added that illustrates the test.
+\end{resp}
+
+\begin{comm}
+ Experimentally, the speedup of the in-place versions
+ . . . varies. . . For Graham s scan, we typically find a speedup of
+ roughly 15\% compared to the non-in-place version.  I was a little
+ intrigued by this statement. What non-in-place version of Graham s
+ scan are we comparing against? To me, most sufficiently careful
+ implementation of Graham s scan is already in-place. Are we storing
+ the stack externally? Is the extra cost due to copying (which causes
+ only a difference in the linear term)? Or is the extra cost a result
+ of the =>°@?A -line trick of Section 2.2 (in which case the speedup
+ is not so much due to in-place vs. non-in-place)? The reason for
+ picking on this statement is that generally I would expect a
+ nontrivial in-place algorithm not to have a speedup but a slow-down
+ (because we are trading off space for time). For example, the in-situ
+ CSY algorithm (which uses in-place selection) would probably be
+ slower.
+
+I was unable to locate [3] for the timing results.
+\end{comm}
+
+\begin{resp}
+The discussion on timing results has been removed.
+\end{resp}
+
+\begin{comm}
+In the last sentence, smallest enclosing disks can be solved by Welzl
+s variant on Seidel s algorithm, which would appear to be in-place.
+\end{comm}
+
+\begin{resp}
+Of course.  Smallest enclosing disk was removed from the list of open
+problems.
+\end{resp}
+
+\section*{Referee B}
+
+\begin{comm}
+Last line of abstract: I love wit as much as anyone, but the abstract
+is not the place for it.
+\end{comm}
+
+\begin{resp}
+The last line of the abstract was removed.
+\end{resp}
+
+\begin{comm}
+p 1: mention that the model of computation must allow the evaluation
+of quadratic polynomials (not needed for sorting).
+\end{comm}
+
+\begin{resp}
+Done.
+\end{resp}
+
+\begin{comm}
+p 2: any relevance to I/O efficient, external-memory algorithms?
+\end{comm}
+
+\begin{resp}
+One might hope that, because space-efficient algorithms only store a
+small amount of extra data (including pointers) that they would
+naturally be IO efficient. Unfortunately, space-efficient algorithm
+may do pointer arithmetic that eliminates any locality of reference
+one might hope for (e.g., Chan's $O(n\log h)$ algorithm).
+\end{resp}
+
+\begin{comm}
+p 5: discuss the relevance of stability in partitioning.
+\end{comm}
+
+\begin{resp}
+Done.
+\end{resp}
+
+\begin{comm}
+p 8: 2 observations -> two observations
+\end{comm}
+
+\begin{resp}
+This section has been removed.
+\end{resp}
+
+\begin{comm}
+p 9: in to -> into
+\end{comm}
+
+\begin{resp}
+Changed.
+\end{resp}
+
+\begin{comm}
+Why is in situ in italics? 
+\end{comm}
+
+\begin{resp}
+Because it's Latin. In my dictionary (The Oxford Canadian) it is also
+printed that way.
+\end{resp}
+
+\section*{Referee C}
+
+\begin{comm}
+In the statement of the Theorem 3 you say that no 
+lexicographic comparisons are used, but to obtain
+this result you write in the previous paragraph that you use
+a partitioning algorithm which performs O(n) comparisons.
+It could be helpful for some readers if you write that 
+these comparisons are performed as right turn tests. 
+\end{comm}
+
+\begin{resp}
+Done.
+\end{resp}
+}
+
+\end{document}

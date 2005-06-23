@@ -14,22 +14,12 @@
 \title{\MakeUppercase{Realizing Partitions Respecting Full
 and Partial Order Information}}
 \author{
-	Justin Colannino \and
 	Erik Demaine \and
-	Vida Dujmovi\'c \and
 	Jeff Erickson \and
-	John Iacono \and
 	Danny Krizan\'c \and
-	Stefan Langerman \and
-	Erin McLeish \and
 	Henk Meijer \and
 	Pat Morin \and
 	Mark Overmars \and
-	David Rappaport \and
-	Diane Souvaine \and
-	Ileana Streinu \and
-	Perouz Taslakian \and
-	Remco Veltcamp \and
 	Sue Whitesides
 }
 \date{}
@@ -41,75 +31,115 @@ and Partial Order Information}}
 \begin{document}
 \maketitle
 
-\begin{abstract}
-We consider the problem of partitioning the interval $[0,n]$ into $k$
-subintervals of positive integer lengths $\ell_1,\ldots,\ell_k$ such that
-the lengths satisfy a set of simple constraints of the form $\ell_i
-\opij \ell_j$ where $\opij$ is one of $<$, $>$, or $=$.  In the
-\emph{full information} case, $\opij$ is given for all $1\le i,j\le
-k$.  In the \emph{sequential information} information case, $\opij$ is
-given for all $1\le i\le k$ and $j=i\pm 1$.  That is, only the
-relations between the lengths of consecutive intervals are specified.
-We show that both versions of the problem can be solved
-in time polynomial in $k$ and $\log n$.
+\begin{abstract} 
+For $n\in\N$, we consider the problem of partitioning the interval
+$[0,n)$ into $k$ subintervals of positive integer lengths
+$\ell_1,\ldots,\ell_k$ such that the lengths satisfy a set of simple
+constraints of the form $\ell_i \opij \ell_j$ where $\opij$ is one of
+$<$, $>$, or $=$.  In the \emph{full information} case, $\opij$ is
+given for all $1\le i,j\le k$.  In the \emph{sequential information}
+information case, $\opij$ is given for all $1< i< k$ and $j=i\pm 1$.
+That is, only the relations between the lengths of consecutive
+intervals are specified.  The \emph{cyclic information} case is an
+extension of the sequential information case in which the 
+relationship $\op_{1k}$ between $\ell_1$ and $\ell_k$ is also given.
+We show that all three versions of the problem can be solved in time
+polynomial in $k$ and $\log n$.
 \end{abstract}
 
-\section{Introduction}
+\noindent\textbf{Keywords:} Integer partitions, integer sequences,
+subset-sum, rhythm pattern, rhythm perception, modular arithmetic
 
+\section{Introduction}
 We consider problems of realizing a sequence having restrictions on
 its sum and the relative sizes of its terms.  In particular, we
-consider the problem of partitioning the interval $[0,n]$ into $k$
-subintervals of positive integer lengths $\ell_1,\ldots,\ell_k$ such
-that the lengths satisfy a set of simple constraints of the form
-$\ell_i \opij \ell_j$ where $\opij$ is one of $<$, $>$, or $=$.  In
-the \emph{full information} case, $\opij$ is given for all $1\le
-i,j\le k$.  In the \emph{sequential information} information case,
-$\opij$ is given for all $1\le i\le k$ and $j=i\pm 1$. 
+consider the following problem:  Given positive integers $n$ and $k$,
+partition $[0,n)$ into $k$ subintervals of positive integer lengths
+$\ell_1,\ldots,\ell_k$ such that the lengths satisfy a set of simple
+constraints of the form $\ell_i \opij \ell_j$ where $\opij$ is one of
+$<$, $>$, or $=$.  In the \emph{full information} case, $\opij$ is
+given for all $1\le i,j\le k$.  In the \emph{sequential information}
+information case, $\opij$ is given for all $1\le i\le k$ and $j=i\pm
+1$.  The \emph{cyclic information} case is an extension of the
+sequential information case in which the relationship $\op_{1k}$
+between $\ell_1$ and $\ell_k$ is also given. 
 
-\comment{
+For an example of the full information case observe that, for $n=12$,
+the comparison matrix in \figref{example} is satisfied by the
+sequences $\langle\ell_1,\ldots,\ell_4\rangle\in \{\langle1,1,8,2\rangle,
+\langle1,1,7,3\rangle, \langle1,1,6,4\rangle,
+\langle2,2,5,3\rangle\}$.  On the other hand, for $n=6$ no solution is
+possible since the smallest sequence satisfying the comparison matrix
+is $\langle1,1,3,2\rangle$ and $1+1+3+2=7$.
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{r|cccc}
+$i\backslash j$ & 1 & 2 & 3 & 4 \\ \hline
+1 & $=$ & $=$ & $<$ & $<$ \\
+2 & $=$ & $=$ & $<$ & $<$ \\
+3 & $>$ & $>$ & $=$ & $>$ \\
+4 & $>$ & $>$ & $<$ & $=$ \\
+\end{tabular}
+\end{center}
+\caption{A comparison matrix for the full information case.}
+\figlabel{example}
+\end{figure}
+
 The motivation for studying these types of problems comes from the
-study of the perception of musical melody and rhythm.  Experimental
-evidence shows that humans can recognize tunes given only the
-melodic-contour, i.e., the sequence that specifies whether one note is
-at a higher, lower, or the same pitch as the previous note.  It then
-becomes a natural question to ask whether a given melodic contour can
-be realized 
+study of the perception of musical rhythm.  Mathematically, a rhythm
+is a partition  of $[0,n)$ into $k$ open intervals called
+\emph{off-sets} and $k$ integer points called \emph{on-sets} (see
+References~\cite{t02,t03a,t03b,dfgrt04,t04}).  Musically, we interpret
+the on-sets as points in time (modulo $n$) when a percussion
+instrument is to be struck.  Experimental evidence shows that humans
+often do not distinguish between rhythms with the same \emph{rhythmic
+contour}, i.e.  the sequence that specifies whether one off-set is
+longer than, shorter than or equal to the previous off-set (see
+References~\cite{d78,ftrkp04,l96,kcgv00}).  It then becomes a natural
+question to ask whether and how a given rhythmic contour can be
+realized.
 
-These types of reconstruction problems arise in the analysis of
-musical rhythm\ldots
-}
+In this paper, we give polynomial (in $k$ and $\log n$) time
+algorithms for all three versions of the problem under study.  In
+particular, for the full information case we give an algorithm that
+runs in $O(k^2 + \log^cn)$ time, for the sequential information case
+we give an algorithm that runs in $O(k^4+\log^c n)$ time, and for the
+cyclic information case we give an algorithm that runs in
+$O(k^5+\log^c n)$ time.  The exponent $c$ is given by the time it
+takes to compute the residue $n\bmod k$ and is not more than $2$.
 
-
-Both versions of this problem reduce to special cases of
+All versions of this problem reduce to special cases of
 $\textsc{Subset-Sum}$ with multiplicity, where there are special
 constraints on the allowable multiplicities.  The efficiency and
 correctness of our algorithms for solving these problems rely
 primarily on properties of modular arithmetic. Throughout this paper,
 we use some standard number-theoretical notations: $\Z_k\defeq
-\{0,\ldots,k-1\}$, $\N_k\defeq\Z_k\setminus\{0\}$, $\Z\defeq\Z_\infty$,
-$\N\defeq\N_\infty$, and $\Z_k^+$ is the group whose elements are
-$\Z_k$ and whose operator is addition modulo $k$.
+\{0,\ldots,k-1\}$, $\N_k\defeq\Z_k\setminus\{0\}$,
+$\Z\defeq\Z_\infty$, $\N\defeq\N_\infty$, and $\Z_k^+$ is the group
+whose elements are $\Z_k$ and whose operator is addition modulo $k$.
 
 The remainder of the paper is organized as follows.  In
 \secref{full-information} we given an algorithm for the full
-information case.  In \secref{partial-information} we given an
-algorithm for the sequential information case.  \Secref{conclusions}
-summarizes our results and concludes with directions for future
-research.
+information case.  In \secref{sequential-information} we given an
+algorithm for the sequential information case.  In
+\secref{cyclic-information} we give an algorithm for the cyclic
+information case. Finally, \secref{conclusions} summarizes our results
+and concludes with directions for future research.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Full Information}\seclabel{full-information}
 
-In this section we consider the full information case, in which for
-each $1\le i,j \le k$ we are told either that $\ell_i< \ell_j$,
-$\ell_i > \ell_j$ or $\ell_i = \ell_j$.  We assume that this
-information is given (implicitly or explicitly) in the form of a
-comparison matrix $\op$ so that we can determine in constant time
+In this section we consider the full information case in which $n$ and
+$k$ are given and, for each $1\le i,j \le k$ we are told either that
+$\ell_i< \ell_j$, $\ell_i > \ell_j$ or $\ell_i = \ell_j$.  We assume
+that this information is given (implicitly or explicitly) in the form
+of a comparison matrix $\op$ so that we can determine in constant time
 which of the three cases applies to $\ell_i$ and $\ell_j$.  The
 algorithm we describe will either find a sequence
-$\ell_1,\ldots\ell_k\in\N$ such that $\sum_{i=1}^k\ell_i = n$ and
-$\ell_i\opij\ell_j$ for all $1\le i,j\le n$ or the algorithm will
-conclude that no such partition exists.
+$\ell_1,\ldots,\ell_k\in\N$ such that $\sum_{i=1}^k\ell_i = n$ and
+$\ell_i\opij\ell_j$ for all $1\le i,j\le k$ or the algorithm will
+conclude that no such sequence exists.
 
 We first observe that, because we are given the entire comparison
 matrix $\op$, we can run any reasonable sorting algorithm to partition
@@ -123,7 +153,7 @@ m$ and $\sum_{i=1}^m{v_i|C_i|} = n$.  Then by assigning $l_i=v_{i'}$
 for all $i\in C_{i'}$ we obtain a solution to the original problem.
 The restriction $v_i < v_{i+1}$ is slightly inconvenient and we
 can remove it with a rewording of the problem.  Let $t_1 = k$,
- and let $t_i=t_{i-1}-|C_{i-1}|$ for $i>1$.  Then
+ and let $t_i=t_{i-1}-|C_{i-1}|$ for $1\le i\le m$.  Then
 it suffices to find $w_1,\ldots,w_m\in\N$ such that
 \begin{equation}
        \sum_{i=1}^m w_it_i = n \enspace . \eqlabel{wis}
@@ -139,13 +169,13 @@ $w_1,\ldots,w_k$. The area under the
 curve is $n$.} \figlabel{graphical}
 \end{figure}
 
-At this point it is tempting to immediately apply dynamic programming
+At this point it is tempting to apply dynamic programming immediately
 to solve \eqref{wis} directly.  However, this would lead to an
 algorithm with running time $O(k^a n^b)$, for some constants $a$ and
 $b$.  In general, this is superpolynomial in the input size since the
 input is a $k\times k$ comparison matrix and an integer $n$, all of
 which can be encoded in $O(k^2 + \log n)$ bits.  In the following, we
-describe a representation that allows us to eliminate the dependence
+describe a representation that allows us to reduce the dependence
 on $n$.
 
 Let 
@@ -161,7 +191,8 @@ $x$ then $S_i$ also contains $x+k$, $x+2k$, $x+3k$, and so on.  Thus,
 we can represent $S_i$ by storing, for each $y\in \Z_k$,
 the value 
 \[
-   D_{i}(y) = \min \{x :\mbox{$x\in S_i$ and $x\equiv y\pmod k$}\}. 
+   D_{i}(y) = \min (\{\infty\}\cup\{x: \mbox{$x\equiv y\pmod k$ and
+$x\in S_i$} \}) \enspace . 
 \]
 \begin{lem}\lemlabel{firstalg}
 Given $D_{i-1}$, $D_i$ can be computed in $O(k)$ time.
@@ -170,10 +201,11 @@ Given $D_{i-1}$, $D_i$ can be computed in $O(k)$ time.
 \begin{proof}
 We show that a careful reordering of the elements of $\Z_k$ allows us
 to compute $D_i$ by a sequence of $k/r$ lower envelope computations
-each taking time $O(r)$.  Here, $r=k/\gcd(k,\ell_i)$ is the length of
-the \emph{orbit} of $\ell_i$ in the group $\mathbb{Z}_k^+$.  An
-example of the lower envelope we use is illustrated in
-\figref{envelope}.
+each taking time $O(r)$; here, $r=k/\gcd(k,\ell_i)$ is the length of
+the \emph{orbit} of $\ell_i$ in the group $\mathbb{Z}_k^+$.  The
+example of 
+the lower envelope in
+\figref{envelope} may be useful in what follows.
 
 \begin{figure}
 \begin{center}
@@ -194,7 +226,7 @@ q_{2}, \ldots, q_{k/r}$ to give a total running time of
 $O(r)\times k/r= O(k)$.
 The main observation we use is that
 \begin{equation}
-    f(j) \defeq D_{i}(q_{0,j}) = \min\{D_{i-1}(q_{0,(j-x)\bmod k}+x\ell_i) :
+    f(j) \defeq D_{i}(q_{0,j}) = \min\{D_{i-1}(q_{0,(j-x)\bmod k})+x\ell_i :
 x\in \N_k\} \enspace .
 \end{equation}
 
@@ -231,7 +263,7 @@ first result:
 
 \begin{thm}
 The realization problem with full information can be solved in
-$O(k^2)$ time.
+$O(k^2+\log^c n)$ time.
 \end{thm}
 
 
@@ -254,7 +286,7 @@ $w_i$ might be zero, which is not valid for us.
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Sequential Information}\seclabel{partial-information}
+\section{Sequential Information}\seclabel{sequential-information}
 
 Next we consider the realization problem given only sequential
 information.  That is, for each $i\in\{1,\ldots,k-1\}$ we are told
@@ -307,14 +339,14 @@ which values of $w_i$ are admissible depends on
 $\sum_{j=1}^{i-1}w_js_j$, which can be different for each value of $y$.
 Instead, we maintain a two-dimensional table
 \[
-   D_i(y,h) = \min\left\{
+   D_i(y,h) = \min\left(\{\infty\}\cup \left\{
     \begin{array}{ll}
-          & \mbox{there exists admissible $w_1,\ldots,w_i$ such that
-                                      $\sum_{j=1}^i w_js_jt_j = x$ and} \\
-        x :  & \mbox{$\sum_{j=1}^i w_js_j = h$ and} \\
-          & \mbox{$x\equiv y\pmod{k}$} 
+          & \mbox{there exists admissible $w_1,\ldots,w_i$ such that} \\
+        \mbox{$x\equiv y\pmod{k}$} : & \mbox{$\sum_{j=1}^i w_js_jt_j = x$ and} \\
+          & \mbox{$\sum_{j=1}^i w_js_j = h$} \\
+          
     \end{array}
-    \right\}
+    \right\}\right)
     \enspace .
 \]
 
@@ -397,7 +429,7 @@ $q_{c,j}=(c+jt_i)\bmod k$.
 Using exactly the same scanning algorithm used in \lemref{firstalg} we
 can compute $D_i(q_{0,j},j)$ for all $1\le j\le H+(m-i)k$ in $O(H)$ time.
 Again, this is because the univariate function
-\[ f(j) = D_i(q_{0,j},j) = \min\{ D_{i-1}(q_{0,j-x}+xt_i,j-x) : 1\le
+\[ f(j) = D_i(q_{0,j},j) = \min\{ D_{i-1}(q_{0,j-x},j-x) + xt_i : 1\le
 x\le j\} 
 \]
 is the lower envelope of $H+(m-i)k$ parallel half-lines.
@@ -429,39 +461,107 @@ second theorem:
 
 \begin{thm}
 The realization problem with sequential information can be solved in
-$O(k^4)$ time.
+$O(k^4+\log^c n)$ time.
 \end{thm}
 
- 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The Cyclic Information Case}\seclabel{cyclic-information}
+
+In this section we consider the cyclic version of the realization
+problem.  The cyclic version is identical to the sequential version
+except that one additional constraint, namely the relationship between
+$\ell_1$ and $\ell_k$, is given.  We show that the cyclic version of
+the problem can be solved using $O(k)$ applications of the algorithm
+for the sequential version of the problem.  
+
+Let $t_1,\ldots,t_m$ and $s_1,\ldots,s_m$ be defined as in the
+previous section and suppose that there exists $w_1,\ldots,w_m\in\N$ such
+that
+\[
+   \sum_{j=1}^m w_js_jt_j = n \enspace ,
+\]
+\[
+  \sum_{j=1}^i w_js_j \ge 1 \enspace \mbox{for all $i\in \{1,\ldots,m\}$}
+   \enspace ,
+\]
+\[
+  w_1s_1 \le \sum_{j=1}^i w_js_j
+     \enspace\mbox{for all $i\in\{ 3,\ldots m-1\}$}
+     \enspace ,
+\] 
+and
+\[
+  w_1s_1 < \sum_{j=1}^i w_js_j
+     \enspace\mbox{for all $i\in\{ 2,m\}$}
+     \enspace .
+\]
+Then, rearranging the above equations we get the equivalent statements
+\begin{equation}
+\sum_{j=2}^m w_js_jt_j = n - w_1t_1 = n-w_1k  \eqlabel{sum-n-2}
+\end{equation}
+and
+\begin{equation}
+   \sum_{j=2}^i w_js_j \ge 0
+       \enspace\mbox{for all $i\in\{3,\ldots,m-1\}$}
+       \enspace .  
+\end{equation}
+\begin{equation}
+   \sum_{j=2}^i w_js_j \ge 1
+       \enspace\mbox{for all $i\in\{2,m\}$}
+       \enspace .  \eqlabel{admissible-2}
+\end{equation}
+
+Note that Equations~(\ref{eq:sum-n-2})--\eqref{admissible-2} are
+almost identical to Equations~(\ref{eq:sum-n}) and \eqref{admissible}
+and that the existence of $w_2,\ldots,w_m$ satisfying these equations
+can be tested in $O(k^4+\log^c n)$ time using the algorithm from the
+previous section.  This means that, if there exists a solution to our
+cyclic information problem in which the elements of class $C_1$ are
+assigned a value not exceeding any value assigned to any other class
+$C_i$, $i\neq 1$, then we can find this solution in $O(k^4+\log^c n)$
+time.  However, if there exists any solution then at least one of the
+classes $C_i$ must be assigned a minimum value in this solution.
+Thus, by running the algorithm from the previous section $m$ times we
+can determine if there exists any solution.
+
+\begin{thm}
+The realization problem with cyclic information can be solved in
+$O(k^5+\log^c n)$ time.
+\end{thm}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusions}\seclabel{conclusions}
 
-We have considered the problem of partitioning the interval $[0,n]$
+We have considered the problem of partitioning the interval $[0,n)$
 into $k$ positive integer length subintervals satisfying some simple
 order requirements.  The types of requirements we have considered
 include full information, in which the relative length of each pair of
-subintervals is given and sequential information, in which only the
-relative lengths of consecutive subintervals is given.  Our algorithms
-run in $O(k^2)$ and $O(k^4)$ time, respectively.
+subintervals is given, sequential information, in which only the
+relative lengths of consecutive subintervals is given, and cyclic
+information in which the relationships between consecutive
+subintervals and the first and last subinterval are given.  Our
+algorithms run in $O(k^2+\log^c n)$, $O(k^4+\log^c n)$ and
+$O(k^5+\log^cn)$ time, respectively.
 
-The first problem we study considers the case when the total order of
-$l_1,\ldots,l_k$ is given.  An obvious generalization of this problem
-is the following: Given any partial order over $1,\ldots,k$, find a
-sequence $l_1,\ldots,l_k\in\N$ that respects this partial order and
+The most general version of this class of problems is as follows:
+Given any subset of the order matrix $\op$, find a sequence
+$l_1,\ldots,l_k\in\N$ that respects all relations in this matrix and
 whose sum is $n$. This remains an open problem.
 
-Another open problem, that would be useful in performing perceptual
-tests on rhythms, is that of selecting uniformly at random from all
-partitions of $1,\ldots,n$ that satisfy sequential or total
-information.  Such an algorithm would be useful for testing hypotheses
-of the form:  ``All rhythms of length $n$ and having $k$ onsets that
-satisfying some total information matrix sound alike.''
+Another problem, whose solution would be useful in performing
+perceptual tests on rhythms, is that of selecting uniformly at random
+from all partitions of $[0,n)$ that satisfy some sequential, cyclic or
+total information constraints.  Such an algorithm would be useful for
+testing hypotheses of the form:  ``All rhythms of length $n$ and
+having $k$ onsets that satisfy some set of constraints sound alike to
+most listeners.''
 
-The second problem we study is motivated by the 3-level ($+-0$)
-contour representation studied by Dowling \cite{d78}.  This
-representation has been generalized to multi-level contours
-\cite{l96,kcgv00} where we are given, for each $l_i$, a range
+The sequential and cyclic information problems we study are motivated
+by the 3-level ($+-0$) contour representation studied by Dowling
+\cite{d78}.  This representation has been generalized to multi-level
+contours \cite{l96,kcgv00} where we are given, for each $l_i$, a range
 relative to $l_{i-1}$.  For example, we may be told that $l_{i}\in
 [l_{i-1} + 50, l_{i-1}+100]$.  The problem is then to find
 $l_1,\ldots,l_k$ that satisfy all these constraints and whose sum is
@@ -477,10 +577,20 @@ lead to the current paper.  The authors are also grateful to the other
 workshop participants, namely 
 Greg Aloupis,
 David Bremner,
+Justin Colannino,
 Mirela Damian, 
+Vida Dujmovi\'c,
 Francisco Gomez,
 Ferran Hurtado, 
+John Iacono,
+Stefan Langerman,
+Erin McLeish,
 Suneeta Ramaswami,
+David Rappaport,
+Diane Souvaine,
+Ileana Streinu,
+Perouz Taslakian,
+Remco Veltcamp,
 and David Wood,
 for providing a
 stimulating work environment.

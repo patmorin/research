@@ -186,7 +186,7 @@ line segment into a vertical line segment requires $\Omega(n^2)$
 8-local interchanges.
 
 It is also worth noting that our proof technique, and resulting
-algorithms, is of a different style than those used by Rosenfeld and
+algorithms, are of a different style than those used by Rosenfeld and
 Nakamura \cite{rn02} and Dumitrescu and Pach \cite{dp04}. For $(a,b)\in\{(4,8),(8,4),(8,8)\}$, we obtain
 our results by showing that, as long as $I$ is not a vertical segment, there is always a set of at most $4$ black pixels that can move one by one such that the resulting image is more to the ``left'' or ``upwards'' than the one we started with. By repeatedly performing this sequence of at most four $8$-local interchanges the image organizes itself into a vertical line segment.  This is unlike
 previous algorithms \cite{dp04,rn02} in that the entire process takes
@@ -208,55 +208,127 @@ $\N^{(k)}(p)=\N\N^{(k-1)}(p)$.  We also use the regular expression
 notations $*$ and $+$ so that, for example $\N^+(p)=\{\N^{(k)}(p):
 k>0\}$ and $N^*(p)=\{\N^{(k)}(p): k\ge 0\}$.
  
-For a graph $G$, let $V(G)$ and $E(G)$ denote the vertex and edge sets of $G$. The subgraph of $G$ \emph{induced} by a set of vertices $S\se V(G)$ has vertex set $S$ and edge set $\{vw\in E(G):v, w\in S\}$, and is denoted by $G[S]$.  A non-empty graph $G$ is called \emph{connected} if there is a path between any pair of vertices in $G$, otherwise $G$ is \emph{disconnected}. A maximal connected subgraph of a $G$ is called a \emph{component} of $G$. A \emph{cut vertex} of a connected graph $G$ is a vertex $v$ whose removal disconnects $G$, that is  $G[V(G)\sm v]$ has at least two components. For brevity we will often write $G\sm v$ instead of $G[V(G)\sm v]$. Note that for any image $I$, since $B_a(I)$ is finite, each cut vertex in $W_b(I)$ splits $W_b(I)$ into $k\geq 2$ components  $k-1$ of which are finite and one of which is infinite. 
+For a graph $G$, let $V(G)$ and $E(G)$ denote the vertex and edge sets
+of $G$. The subgraph of $G$ \emph{induced} by a set of vertices $S\se
+V(G)$ has vertex set $S$ and edge set $\{vw\in E(G):v, w\in S\}$, and
+is denoted by $G[S]$.  A non-empty graph $G$ is called
+\emph{connected} if there is a path between any pair of vertices in
+$G$, otherwise $G$ is \emph{disconnected}. A maximal connected
+subgraph of a $G$ is called a \emph{component} of $G$. A \emph{cut
+vertex} of a connected graph $G$ is a vertex $v$ whose removal
+disconnects $G$, that is  $G[V(G)\sm \{v\}]$ has at least two components.
+For brevity we will often write $G\sm v$ instead of $G[V(G)\sm \{v\}]$.
+Note that for any image $I$, since $B_a(I)$ is finite, each cut vertex
+in $W_b(I)$ splits $W_b(I)$ into $k\geq 2$ components  $k-1$ of which
+are finite and one of which is infinite. 
 
-For a graph $G$ and a vertex $v\in V(G)$, let \A{v}{G} denote the set of all the vertices in $V(G)\sm v$ that are adjacent to $v$. Furthermore, let  $\AC{v}{G}=\A{v}{G}\cup v$. We start with two simple but useful observations. The first one is a well known graph theoretic fact. 
+For a graph $G$ and a vertex $v\in V(G)$, let \A{v}{G} denote the set
+of all the vertices in $V(G)\sm v$ that are adjacent to $v$.
+Furthermore, let  $\AC{v}{G}=\A{v}{G}\cup v$. We start with two simple
+but useful observations. The first one is a well known graph theoretic
+fact. 
 
 \begin{obs}\obslabel{non-cut}
-For a graph $G$, a vertex $v\in V(G)$ and any set $S\se V(G)\sm v$, if $G[\A{v}{G}\cup S]$ is connected then $v$ in not a cut-vertex of $G$. As a special case,  consider two vertices $v, w\in V(G)$, if $\A{v}{G}\se \AC{w}{G}$, then $v$ in not a cut-vertex of $G$.
-%For a graph $G$ and a vertex $v\in V(G)$, if $G[\A{v}{G}]$ is connected then $v$ in not a cut-vertex of $G$. Furthermore,  consider two vertices $v, w\in V(G)$, if $\A{v}{G}\se \AC{w}{G}$, then $v$ in not a cut-vertex of $G$.
+For a graph $G$, a vertex $v\in V(G)$ and any set $S\se V(G)\sm
+\{v\}$, if $G[\A{v}{G}\cup S]$ is connected then $v$ in not a
+cut-vertex of $G$.  As a special case,  consider two vertices $v, w\in
+V(G)$, if $\A{v}{G}\se \AC{w}{G}$, then $v$ in not a cut-vertex of
+$G$.
+%For a graph $G$ and a vertex $v\in V(G)$, if $G[\A{v}{G}]$ is
+%connected then $v$ in not a cut-vertex of $G$. Furthermore,  consider
+%two vertices $v, w\in V(G)$, if $\A{v}{G}\se \AC{w}{G}$, then $v$ in
+%not a cut-vertex of $G$.
 \end{obs}
 
-Our second observation gives a sufficient condition for an interchange to preserve connectivity.
+Our second observation gives a sufficient condition for an interchange
+to preserve connectivity.
 
-\begin{obs}\obslabel{cut-vertex}
-For an $\textsf{B}_a,\textsf{W}_b$--connected image $I$, let $p$ be a black pixel that is not a cut vertex in $B_a(I)$ and $q$ a white pixel that is not a cut vertex in $W_b(I)$. If $p$ has a white $b$-neighbour in $I$ other than $q$ and $q$ has a black $a$-neighbour in $I$ other than $p$, then the interchange $\ic{p}{q}$ preserves $\textsf{B}_a,\textsf{W}_b$--connectivity.
+\begin{obs}\obslabel{cut-vertex} 
+For a $\textsf{B}_a,\textsf{W}_b$--connected image $I$, let $p$ be a
+black pixel that is not a cut vertex in $B_a(I)$ and $q$ a white pixel
+that is not a cut vertex in $W_b(I)$. If $p$ has a white $b$-neighbour
+in $I$ other than $q$ and $q$ has a black $a$-neighbour in $I$ other
+than $p$, then the interchange $\ic{p}{q}$ preserves
+$\textsf{B}_a,\textsf{W}_b$--connectivity.  
 \end{obs}
 
 
-For a pixel $p=(x,y)$, we say $x$ is the \emph{\x-coordinate} of $p$ and $y$ is the \emph{\y-coordinate} of $p$. A $\textsf{B}_a,\textsf{W}_b$--connected image $I$ is \emph{vertical} if all black pixels in $I$ have the same \x-coordinate, otherwise $I$ is \emph{non-vertical}. We prove that each $\textsf{B}_a,\textsf{W}_b$--connected image $I$, $(a,b)\in \{(4,8), (8,4), (8,8)\}$ is $(a,b)$-IP-equivalent to some vertical image. Our approach to, or more precisely, the sequence of interchanges used in solving  all but the $(4,4)$ version of the problem have some commonalities.  We describe these commonalities in the reminder of this section. 
+For a pixel $p=(x,y)$, we say $x$ is the \emph{\x-coordinate} of $p$
+and $y$ is the \emph{\y-coordinate} of $p$. A
+$\textsf{B}_a,\textsf{W}_b$--connected image $I$ is \emph{vertical} if
+all black pixels in $I$ have the same \x-coordinate, otherwise $I$ is
+\emph{non-vertical}. We prove that each
+$\textsf{B}_a,\textsf{W}_b$--connected image $I$, $(a,b)\in \{(4,8),
+(8,4), (8,8)\}$ is $(a,b)$-IP-equivalent to some vertical image. Our
+approach to, or more precisely, the sequence of interchanges used in
+solving  all but the $(4,4)$ version of the problem have some
+commonalities.  We describe these commonalities in the reminder of
+this section. 
 
-\subsection{Our approach to solving $\mathbf{(4,8), (8,4)}$, and $\mathbf{(8,8)}$ versions of the problem}
+\subsection{Our approach to solving $\mathbf{(4,8), (8,4)}$, and
+$\mathbf{(8,8)}$ versions of the problem}
 
-To prove that each $\textsf{B}_a,\textsf{W}_b$--connected image $I$, $(a,b)\in \{(4,8), (8,4), (8,8)\}$ is $(a,b)$-IP-equivalent to some vertical image we use the following kinds of interchanges only.
+To prove that each $\textsf{B}_a,\textsf{W}_b$--connected image $I$,
+$(a,b)\in \{(4,8), (8,4), (8,8)\}$ is $(a,b)$-IP-equivalent to some
+vertical image we use the following kinds of interchanges only.
 
-For a $\textsf{B}_a,\textsf{W}_b$--connected image $I$, and an integer $k\geq 1$, we say that $I$ admits an \emph{$k$-vertical interchange} if there exists a sequence of at most $k$ $8$-local interchanges $(\ic{p_i}{q_i}\, :\, 1\leq i\leq k)$ such that $p_i$ is black and it is not a black pixel  with minimum \x-coordinate in $I$, $q_i$ is white, and 
-\begin{itemize}
-\item if $k>1$, then for all $i<k$, $q_i=\E(p_i)$ and $q_k\in\{\NW(p_k),\N(p_k),\NE(p_k)\}$ 
-\item otherwise, $k=1$, and $q_1\in\{\W(p_1),\NW(p_1),\N(p_1),\NE(p_1)\}$.
+For a $\textsf{B}_a,\textsf{W}_b$--connected image $I$, and an integer
+$k\geq 1$, we say that $I$ admits a \emph{$k$-vertical interchange} if
+there exists a sequence of at most $k$ $8$-local interchanges
+$(\ic{p_i}{q_i}\, :\, 1\leq i\leq k)$ such that $p_i$ is black and it
+is not a black pixel  with minimum \x-coordinate in $I$, $q_i$ is
+white, and 
 
-\item[]Moreover, after each interchange $\ic{p_i}{q_i}$, the resulting image $I^i$ is $\textsf{B}_a,\textsf{W}_b$--connected. 
+\begin{itemize} 
+
+\item if $k>1$, then for all $i<k$, $q_i=\E(p_i)$ and
+$q_k\in\{\NW(p_k),\N(p_k),\NE(p_k)\}$ 
+
+\item otherwise, $k=1$, and
+$q_1\in\{\W(p_1),\NW(p_1),\N(p_1),\NE(p_1)\}$.
+
+Moreover, after each interchange $\ic{p_i}{q_i}$, the resulting
+image $I_i$ is $\textsf{B}_a,\textsf{W}_b$--connected. 
 \end{itemize}
 
-To simplify the exposition in \secref{foureight}, \secref{eightfour} and \secref{eighteight}, we will use word interchange in place of $1$-vertical interchange. This will not cause confusion since the only type of interchanges we use in these three section are $k$-vertical interchanges.
+To simplify the exposition in \secref{foureight}, \secref{eightfour}
+and \secref{eighteight}, we will use the term \emph{interchange} in
+place of $1$-vertical interchange. This will not cause confusion since
+the only type of interchanges we use in these three section are
+$k$-vertical interchanges.
 
-\begin{lem}\lemlabel{segment}
-Suppose that each non-vertical $\textsf{B}_a,\textsf{W}_b$--connected binary image admits a $k$-vertical interchange, for some integer $k\geq 1$. Then every $\textsf{B}_a,\textsf{W}_b$--connected binary image $I$ is $(a,b)$-IP-equivalent to some vertical image. Furthermore, $I$ can be converted into a vertical image by a sequence of $O(kn^2)$ 8-local interchanges, where $n$ is the number of black pixels is $I$.
+\begin{lem}\lemlabel{segment} 
+Suppose that each non-vertical $\textsf{B}_a,\textsf{W}_b$--connected
+binary image admits a $k$-vertical interchange, for some integer
+$k\geq 1$. Then every $\textsf{B}_a,\textsf{W}_b$--connected binary
+image $I$ is $(a,b)$-IP-equivalent to some vertical image.
+Furthermore, $I$ can be converted into a vertical image by a sequence
+of $O(kn^2)$ 8-local interchanges, where $n$ is the number of black
+pixels in $I$.
 \end{lem}
 
 \begin{proof} 
 
-Without loss of generality, assume that minimum \x-coordinate of
-all black pixels of $I$ is 0 and that of all black pixels with
-\x-coordinate 0, minimum \y-coordinate is 0.  Let $p_0$ be the
+Without loss of generality, assume that minimum \x-coordinate of all
+black pixels of $I$ is 0 and that of all black pixels with
+\x-coordinate 0, the minimum \y-coordinate is 0.  Let $p_0$ be the
 black pixel $(0,0)$. Define the \emph{potential} of a black pixel
-$p=(x,y)$ as $\Phi(p)=x +(k+1)(n-y)$ and define the potential $\Phi(I)$ of
-image $I$ as the sum the potentials of all black pixels in $I$.
-Because $p_0$ is black and $B_a(I)$ is connected, it is easily
-verified that $\Phi(p)< (2k+3)n$ for any black pixel $p$ in $I$ and therefore
-$\Phi(I)< (2k+3)n^2$. Furthermore, any image that has no black pixel with negative \x-coordinate has non-negative potential.
+$p=(x,y)$ as $\Phi(p)=x +(k+1)(n-y)$ and define the potential
+$\Phi(I)$ of image $I$ as the sum the potentials of all black pixels
+in $I$.  Because $p_0$ is black and $B_a(I)$ is connected, it is
+easily verified that $\Phi(p)< (2k+3)n$ for any black pixel $p$ in $I$
+and therefore $\Phi(I)< (2k+3)n^2$. Furthermore, any image that has no
+black pixel with negative \x-coordinate has non-negative potential.
 
-It is simple to verify that applying a $k$-vertical interchange to $I$, results in an image $I'$ with smaller potential than $I$, that is $\Phi(I')<\Phi(I)$. Thus by applying at most $(2k+3)n^2$ $k$-vertical interchanges to $I$ we obtain an image $J$ such that $\Phi(J)< 0$. However, that cannot occur unless we, at some point, performed an interchange involving a black pixel with \x-coordinate $0$ which is not possible given the definition of $k$-vertical interchange.
+It is simple to verify that applying a $k$-vertical interchange to
+$I$, results in an image $I'$ with smaller potential than $I$, that is
+$\Phi(I')<\Phi(I)$. Thus by applying at most $(2k+3)n^2$ $k$-vertical
+interchanges to $I$ we obtain an image $J$ such that $\Phi(J)< 0$.
+However, that cannot occur unless we, at some point, performed an
+interchange involving a black pixel with \x-coordinate $0$ which is
+not possible given the definition of $k$-vertical interchange.  We
+conclude that at some point during the first $(2k+3)n^2$ interchanges
+we obtained a vertical image.
 \end{proof}
 
 
@@ -284,7 +356,21 @@ Let $p=(x,y)$ be the pixel such that
   \item all pixels in $\E^+\N^*(p)$ are white, and
   \item $y$ is maximum.
 \end{enumerate}
-Such a pixel always exists because a pixel satisfying the first four conditions can be found in the set of black pixels with maximum \x-coordinate and a pixel satisfying the fifth condition is guaranteed by finiteness. Furthermore, $p$ is not a vertex with minimum \x-coordinate in $I$, as otherwise $I$ would be vertical or $B_4(I)$ would be disconnected. We will show that each pixel $p_i$ in the $2$-vertical interchange $\ic{p_i}{q_i}$,$1\leq i\leq 2$,  we are looking for must exist somewhere near $p$. To simplify the exposition, in what follows we will argue that $p_i$ is a not black pixel with minimum \x-coordinate only when it is not obvious. Furthermore, only in the last case, the case 2b, we will be using $2$-vertical interchanges. On all other occasions we will be using a $1$-vertical interchange, that is an interchange $\ic{p_1}{q_1}$ where $q\in\{\W(p_1),\NW(p_1),\N(p_1),\NE(p_1)\}$. To prove the lemma we distinguish between two main cases.
+Such a pixel always exists because a pixel satisfying the first four
+conditions can be found in the set of black pixels with maximum
+\x-coordinate and a pixel satisfying the fifth condition is guaranteed
+by finiteness. Furthermore, $p$ is not a pixel with minimum
+\x-coordinate in $I$, as otherwise $I$ would be vertical or $B_4(I)$
+would be disconnected. We will show that each pixel $p_i$ in the
+$2$-vertical interchange $\ic{p_i}{q_i}$,$1\leq i\leq 2$,  we are
+looking for must exist somewhere near $p$. To simplify the exposition,
+in what follows we will argue that $p_i$ is a not black pixel with
+minimum \x-coordinate only when it is not obvious. Furthermore, only
+in the last case, 2b, will we be using $2$-vertical
+interchanges. On all other occasions we will be using a $1$-vertical
+interchange, i.e., an interchange $\ic{p_1}{q_1}$ where
+$q\in\{\W(p_1),\NW(p_1),\N(p_1),\NE(p_1)\}$. To prove the lemma we
+distinguish between two main cases.
 
 
 \paragraph{Case 1: $p$ is not a cut vertex of $B_4(I)$.}  In this
@@ -325,9 +411,13 @@ why this is so, we first observe that, by the choice of $p$, all
 pixels in $\N^+(p)$ and $\N^+\W(p)$ are white (\figref{fe-one}.d). If $\NW(p)$ is not a cut vertex in $W_8(I)$ then the claim follows by \obsref{cut-vertex}.  The only way in which $\NW(p)$ could be a cut vertex in $W_8(I)$ is if $\W\NW(p)$ is black (\figref{fe-one}.e). But in this case, the choice of $p$ ensures that $\W\W(p)$ is black (\figref{fe-one}.f) contradicting the assumption that  $\NW(p)$ is a cut vertex of $W_8(I)$.
 
 \paragraph{Case 2: $p$ is a cut vertex of $B_4(I)$.} In this case,
-$\N(p)$ and $\W(p)$ must be black or else $p$ would have less than
-2 neighbours in $B_4(I)$ and could not be a cut vertex.  Also,
-$\NW(p)$ must be white (\figref{fe-two}.a) otherwise the graph induced by \A{p}{B_4} would be connected and thus $p$ would not be a cut vertex. By the same reasoning, if the interchange $\ic{p}{\NW(p)}$ does not preserve connectivity, it is because $\NW(p)$ is a cut vertex in $W_8(I)$.  We now consider ways in which this can happen.
+$\N(p)$ and $\W(p)$ must be black or else $p$ would have less than 2
+neighbours in $B_4(I)$ and could not be a cut vertex.  Also, $\NW(p)$
+must be white (\figref{fe-two}.a) otherwise the graph induced by
+\A{p}{B_4} would be connected and thus $p$ would not be a cut vertex.
+By the same reasoning, if the interchange $\ic{p}{\NW(p)}$ does not
+preserve connectivity, it is because $\NW(p)$ is a cut vertex in
+$W_8(I)$.  We now consider the possible ways in which this can happen.
 
 \begin{figure}[htbp]
 \begin{center}
@@ -345,14 +435,34 @@ $\NW(p)$ must be white (\figref{fe-two}.a) otherwise the graph induced by \A{p}{
 \figlabel{fe-two}
 \end{figure}
 
-If $\NW\W(p)$ is white, (\figref{fe-two}. b) then $\N\N(p)$ is white (\figref{fe-two}. c), otherwise $\A{\NW(p)}{W_8}\se \AC{\NW\W(p)}{W_8}$ and thus by \obsref{non-cut}, $\NW(p)$ would not be a cut vertex in $W_8(I)$. Having $\N\N(p)$ white implies by the choice of $p$ that $\N\N^+(p)$, $\W\N^+(p)$ and $\W\W\N^+(p)$ are white. In that case the graph induced by \A{\NW(p)}{W_8} in $W_8(I)$ is connected and again by \obsref{non-cut}, $\NW(p)$ is not a cut vertex in $W_8(I)$.
+If $\NW\W(p)$ is white, (\figref{fe-two}. b) then $\N\N(p)$ is white
+(\figref{fe-two}. c), otherwise $\A{\NW(p)}{W_8}\se
+\AC{\NW\W(p)}{W_8}$ and thus by \obsref{non-cut}, $\NW(p)$ would not
+be a cut vertex in $W_8(I)$. Having $\N\N(p)$ white implies by the
+choice of $p$ that $\N\N^+(p)$, $\W\N^+(p)$ and $\W\W\N^+(p)$ are
+white. In that case the graph induced by \A{\NW(p)}{W_8} in $W_8(I)$
+is connected and again by \obsref{non-cut}, $\NW(p)$ is not a cut
+vertex in $W_8(I)$.
 
 
-Therefore, assume $\NW\W(p)$ is black, (\figref{fe-two}. d). Let $g=\NW\W(p)$. Every path from $g$ to $p$ in $B_4(I)$ goes through  either $\W(p)$  (\figref{fe-two}. e) or $\N(p)$  (\figref{fe-two}. f). \footnote{Otherwise, if there is a path through $\W(p)$ and a path through $\N(p)$, then $W_8(I)$ would be disconnected; or, if there is neither a path through $\W(p)$ nor $\N(p)$, then $B_4(I)$ would be disconnected.} Based on that we now have two cases to consider.
+Therefore, assume $\NW\W(p)$ is black, (\figref{fe-two}. d). Let
+$g=\NW\W(p)$. It is either the case that every path from $g$ to $p$ in
+$B_4(I)$ goes through $\W(p)$  (\figref{fe-two}.e) or every path from
+$g$ to $p$ in $B_4(I)$ goes through $\N(p)$
+(\figref{fe-two}.f).\footnote{Otherwise, if there is a path through
+$\W(p)$ and a path through $\N(p)$, then $W_8(I)$ would be
+disconnected; or, if there is neither a path through $\W(p)$ nor
+$\N(p)$, then $B_4(I)$ would be disconnected.} Based on that we now
+have two cases to consider.
 
-\noindent Case 2a: Every path from $g$ to $p$ in $B_4(I)$ goes through $\W(p)$ (\figref{fe3}. a). 
+\noindent Case 2a: Every path from $g$ to $p$ in $B_4(I)$ goes through
+$\W(p)$ (\figref{fe3}. a). 
 
-If $\W\W(p)$ is black (\figref{fe3}.b), then $\N\N\W\W(p)$ is white, $\N\N\W(p)$ is black and  $\N\N(p)$ is white (\figref{fe3}.c), as otherwise $\NW(p)$ is not a cut vertex of $W_8(I)$, by \obsref{non-cut}. However that is not possible due to the choice of $p$.
+If $\W\W(p)$ is black (\figref{fe3}.b), then $\N\N\W\W(p)$ is white,
+$\N\N\W(p)$ is black and  $\N\N(p)$ is white (\figref{fe3}.c), as
+otherwise $\NW(p)$ is not a cut vertex of $W_8(I)$, by
+\obsref{non-cut}. However this is not possible due to the choice of
+$p$.
 
 \begin{figure}[htbp]
 \begin{center}
@@ -565,9 +675,42 @@ First consider the case that  $h=g$ and thus $\N(g)$ is white. If both $\NW(g)$ 
 \end{figure}
 
 
-Thus assume $h\not=g$ and consider the case the all paths from  $g$ to $p$ go through $\SW(g)$. Since $h\not=g$, $\N(g)$ is black (\figref{ef-twoII}.d). We claim the interchange $\ic{g}{\NE(g)}$ preserves connectivity. To see that $W_4(I^1)$ is connected, observe that $W_4(I)\sm \NE(g)$ has two components, the finite one containing $\W(g)$ and the infinite one containing $\E(g)$. Therefore, $W_4(I^1)$ is connected since it can be obtained by adding $g$ to $W_4(I)\sm \NE(g)$ where $g$ is adjacent in $W_4(I^1)$ to a vertex of the finite component, in particular $\W(g)$, and a vertex of the infinite component, in particular $\E(g)$. To see that $B_8(I^1)$ is connected observe that $B_8(I)\sm g$ has two components, one containing $\N(g)$ and the other $\SW(g)$, $p$ and $\N(p)$ . Therefore, $B_8(I^1)$ is connected since it can be obtained by adding $\NE(g)$ to $B_8(I)\sm g$ where $\NE(g)$ is adjacent in $B_8(I^1)$ to a vertex of the first component, in particular $\N(g)$, and a vertex of the second component, in particular $\N(p)$. 
+Thus assume $h\not=g$ and consider the case the all paths from  $g$ to
+$p$ go through $\SW(g)$. Since $h\not=g$, $\N(g)$ is black
+(\figref{ef-twoII}.d). We claim the interchange $\ic{g}{\NE(g)}$
+preserves connectivity. To see that $W_4(I^1)$ is connected, observe
+that $W_4(I)\sm \NE(g)$ has two components, the finite one containing
+$\W(g)$ and the infinite one containing $\E(g)$. Therefore, $W_4(I^1)$
+is connected since it can be obtained by adding $g$ to $W_4(I)\sm
+\NE(g)$ where $g$ is adjacent in $W_4(I^1)$ to a vertex of the finite
+component, in particular $\W(g)$, and a vertex of the infinite
+component, in particular $\E(g)$. To see that $B_8(I^1)$ is connected
+observe that $B_8(I)\sm g$ has two components, one containing $\N(g)$
+and the other $\SW(g)$, $p$ and $\N(p)$ . Therefore, $B_8(I^1)$ is
+connected since it can be obtained by adding $\NE(g)$ to $B_8(I)\sm g$
+where $\NE(g)$ is adjacent in $B_8(I^1)$ to a vertex of the first
+component, in particular $\N(g)$, and a vertex of the second
+component, in particular $\N(p)$. 
 
-Finally, assume $h\not=g$ and all the paths from $g$ to $p$ go through $\NW(h)$. Since $h\not=g$, $\S(h)$ is black (\figref{ef-twoII}.e).  We claim that the $2$-vertical interchange $(\ic{h}{\E(h)}$, $\ic{\E\E(h)}{\E\E\E\N(h)})$ preserves connectivity of both images $I^1$ and $I^2$. To see that $W_4(I^1)$ is connected, observe that $W_4(I)\sm \E(h)$ has two components, the finite one containing $\N(h)$ and the infinite one containing $\W(h)$. Therefore, $W_4(I^1)$ is connected since it can be obtained by adding $h$ to $W_4(I)\sm \E(h)$ where $h$ is adjacent in $W_4(I^1)$ to a vertex of the finite component, in particular $\N(h)$, and a vertex of the infinite component, in particular $\W(h)$. To see that $B_8(I^1)$ is connected observe that $B_8(I)\sm h$ has two components, one containing $\NW(h)$ and $p$ (and $\E\E(h)$) and the other $\S(h)$. Therefore, $B_8(I^1)$ is connected since it can be obtained by adding $\E(h)$ to $B_8(I)\sm h$ where $\E(h)$ is adjacent to a vertex of the first component, in particular $\E\E(h)$, and a vertex of the second component, in particular $\S(h)$. See \figref{ef-twoII}.f for the resulting image $I^1$. It is now simple to verify that the second interchange, $\ic{\E\E(h)}{\E\E\N(h)}$ preserves the connectivity of $I^2$.
+Finally, assume $h\not=g$ and all the paths from $g$ to $p$ go through
+$\NW(h)$. Since $h\not=g$, $\S(h)$ is black (\figref{ef-twoII}.e).  We
+claim that the $2$-vertical interchange $(\ic{h}{\E(h)}$,
+$\ic{\E\E(h)}{\E\E\E\N(h)})$ preserves connectivity of both images
+$I^1$ and $I^2$. To see that $W_4(I^1)$ is connected, observe that
+$W_4(I)\sm \E(h)$ has two components, the finite one containing
+$\N(h)$ and the infinite one containing $\W(h)$. Therefore, $W_4(I^1)$
+is connected since it can be obtained by adding $h$ to $W_4(I)\sm
+\E(h)$ where $h$ is adjacent in $W_4(I^1)$ to a vertex of the finite
+component, in particular $\N(h)$, and a vertex of the infinite
+component, in particular $\W(h)$. To see that $B_8(I^1)$ is connected
+observe that $B_8(I)\sm h$ has two components, one containing $\NW(h)$
+and $p$ (and $\E\E(h)$) and the other $\S(h)$. Therefore, $B_8(I^1)$
+is connected since it can be obtained by adding $\E(h)$ to $B_8(I)\sm
+h$ where $\E(h)$ is adjacent to a vertex of the first component, in
+particular $\E\E(h)$, and a vertex of the second component, in
+particular $\S(h)$. See \figref{ef-twoII}.f for the resulting image
+$I^1$. It is now simple to verify that the second interchange,
+$\ic{\E\E(h)}{\E\E\N(h)}$ preserves the connectivity of $I^2$.
 
 \end{proof}
 
@@ -587,36 +730,55 @@ sequence of $O(n^2)$ 8-local interchanges.
 
 
 
-\begin{lem}\lemlabel{eighteight}
-Any  non-vertical $\eighteight$--connected binary image $I$ admits a $1$-vertical interchange.\end{lem}
+\begin{lem}\lemlabel{eighteight} 
+Any  non-vertical $\eighteight$--connected binary image $I$ admits a
+$1$-vertical interchange.
+\end{lem}
 
 \begin{proof}
-Let $p=(x,y)$ be the pixel defined exactly as in the proof of \lemref{eightfour}.
-%Let $p=(x,y)$ be the pixel such that
-%\begin{enumerate}
-%  \item $p$ is black, 
-%  \item $S(p)$ is white,
-%  \item There exists an integer $k\ge 0$ such that all pixels
-%	$\N^{(1)}(p),\ldots,\N^{(k)}(p)$ are black and 
-%        all pixels in $\N^{+}\N^{(k)}(p)$ are white,
-%  \item all pixels in $\S\E^+\N^*(p)$ are white, and
-%  \item $y$ is maximum.
-%\end{enumerate}
-%Such a pixel always exists because a pixel satisfying the first four conditions can be found in the set of black pixels with maximum \x-coordinate and a pixel satisfying the fifth condition is guaranteed by finiteness. Furthermore, $p$ is not a vertex with minimum \x-coordinate in $I$, as otherwise $I$ would be vertical segment or $B_8(I)$ would be disconnected. 
+Let $p=(x,y)$ be the pixel defined exactly as in the proof of
+\lemref{eightfour}.
+%Let $p=(x,y)$ be the pixel such that \begin{enumerate} \item $p$ is
+%black, \item $S(p)$ is white, \item There exists an integer $k\ge 0$
+%such that all pixels $\N^{(1)}(p),\ldots,\N^{(k)}(p)$ are black and
+%all pixels in $\N^{+}\N^{(k)}(p)$ are white, \item all pixels in
+%$\S\E^+\N^*(p)$ are white, and \item $y$ is maximum.  \end{enumerate}
+%Such a pixel always exists because a pixel satisfying the first four
+%conditions can be found in the set of black pixels with maximum
+%\x-coordinate and a pixel satisfying the fifth condition is
+%guaranteed by finiteness. Furthermore, $p$ is not a vertex with
+%minimum \x-coordinate in $I$, as otherwise $I$ would be vertical
+%segment or $B_8(I)$ would be disconnected. 
 %
-We will show that each pixel $p_1$ in the $1$-vertical interchange $\ic{p_1}{q_1}$, where $q_1\in\{\W(p_1),\NW(p_1),\N(p_1),\NE(p_1)\}$ must exist somewhere near $p$. To prove the lemma we distinguish between two main cases.
+We will show that each pixel $p_1$ in the $1$-vertical interchange
+$\ic{p_1}{q_1}$, where $q_1\in\{\W(p_1),\NW(p_1),\N(p_1),\NE(p_1)\}$
+must exist somewhere near $p$. To prove the lemma we distinguish
+between two main cases.
 
 
 \paragraph{Case 1: $p$ is not a cut vertex of $B_8(I)$.} 
 
-In this case, if $\N(p)$ is black (\figref{ee-one}.a) then we can perform
-the interchange $\ic{p}{\NE(p)}$.  Since $p$ is not a cut vertex of
-$B_8(I)$ and $\NE(p)$ is not a cut vertex of $W_8(I)$,
+In this case, if $\N(p)$ is black (\figref{ee-one}.a) then we can
+perform the interchange $\ic{p}{\NE(p)}$.  Since $p$ is not a cut
+vertex of $B_8(I)$ and $\NE(p)$ is not a cut vertex of $W_8(I)$,
 \obsref{cut-vertex}, implies that this interchange preserves
 connectivity.
 
-Therefore, we may assume that $\N(p)$ is white. Then if at least one of $\{\NW(p), \W(p)\}$ is black (\figref{ee-one}.b and c), the interchange $\ic{p}{\N(p)}$ preserves connectivity since $\N(p)$ is not a cut vertex of $W_8(I)$ by the choice of $p$ and \obsref{non-cut}. Thus assume both $\W(p)$ and $\NW(p)$ are white and $\SW(p)$ is black (\figref{ee-one}.d). Then by the choice of $p$, $\W\N^+(p)$ is white. That implies that the graph induced by \A{\NW(p)}{W_8} is connected and that $\NW(p)$ is not a cut vertex of  $W_8(I)$. Therefore, if $\W\W(p)$ is black  (\figref{ee-one}.e) the interchange $\ic{p}{\NW(p)}$ preserves connectivity by \obsref{cut-vertex}. Finally, if $\W\W(p)$ is white (\figref{ee-one}.f), then the graph induced by $\{\A{\W(p)}{W_8}\cup \E(p)\}$ is connected thus by \obsref{non-cut}, $\W(p)$ is not a cut vertex in $W_8(I)$, and the interchange $\ic{p}{\W(p)}$ preserves connectivity.
-
+Therefore, we may assume that $\N(p)$ is white. Then if at least one
+of $\{\NW(p), \W(p)\}$ is black (\figref{ee-one}.b and c), the
+interchange $\ic{p}{\N(p)}$ preserves connectivity since $\N(p)$ is
+not a cut vertex of $W_8(I)$ by the choice of $p$ and
+\obsref{non-cut}. Thus assume both $\W(p)$ and $\NW(p)$ are white and
+$\SW(p)$ is black (\figref{ee-one}.d). Then by the choice of $p$,
+$\W\N^+(p)$ is white. That implies that the graph induced by
+\A{\NW(p)}{W_8} is connected and that $\NW(p)$ is not a cut vertex of
+$W_8(I)$. Therefore, if $\W\W(p)$ is black  (\figref{ee-one}.e) the
+interchange $\ic{p}{\NW(p)}$ preserves connectivity by
+\obsref{cut-vertex}. Finally, if $\W\W(p)$ is white
+(\figref{ee-one}.f), then the graph induced by $\{\A{\W(p)}{W_8}\cup
+\E(p)\}$ is connected thus by \obsref{non-cut}, $\W(p)$ is not a cut
+vertex in $W_8(I)$, and the interchange $\ic{p}{\W(p)}$ preserves
+connectivity.
 
 \begin{figure}[htbp]
 \begin{center}
@@ -637,7 +799,14 @@ Therefore, we may assume that $\N(p)$ is white. Then if at least one of $\{\NW(p
 
 
 
-\paragraph{Case 2: $p$ is a cut vertex of $B_8(I)$.} In this case $\W(p)$ is white, otherwise $\A{p}{B_8}\se \AC{\W(p)}{B_8}$ and by \obsref{non-cut}, $p$ would not be a cut vertex in $B_8(I)$. Similarly, $\SW(p)$ has to be black (\figref{ef-two}.a) as otherwise, the graph induced by $\A{p}{B_8}$ would be connected and $p$ would not be a cut vertex in $B_8(I)$. Finally, for the same reason, at least one of $\{\N(p), \NW(p)\}$ has to be black. Since $p$ is a cut vertex, each path from $\{\N(p), \NW(p)\}$ to $\SW(p)$ goes through $p$.
+\paragraph{Case 2: $p$ is a cut vertex of $B_8(I)$.} In this case
+$\W(p)$ is white, otherwise $\A{p}{B_8}\se \AC{\W(p)}{B_8}$ and by
+\obsref{non-cut}, $p$ would not be a cut vertex in $B_8(I)$.
+Similarly, $\SW(p)$ has to be black (\figref{ef-two}.a) as otherwise,
+the graph induced by $\A{p}{B_8}$ would be connected and $p$ would not
+be a cut vertex in $B_8(I)$. Finally, for the same reason, at least
+one of $\{\N(p), \NW(p)\}$ has to be black. Since $p$ is a cut vertex,
+each path from $\{\N(p), \NW(p)\}$ to $\SW(p)$ goes through $p$.
 
 \begin{figure}[htbp]
 \begin{center}
@@ -657,45 +826,120 @@ Therefore, we may assume that $\N(p)$ is white. Then if at least one of $\{\NW(p
 \end{figure}
 
 
-Assume first that $\NW(p)$ is black. (\figref{ef-two}.b). Then $\W\W(p)$ has to be white (\figref{ef-two}.c) as otherwise $p$ is not cut vertex of $B_8(I)$ since the path $\NW(p),\W\W(p) , \SW(p)$ does not go through $p$. We claim that $\W(p)$ is not a cut vertex of $W_8(I)$ and thus that the interchange $\ic{p}{\W(p)}$ preserves connectivity.  $W_8(I^1)$ can only be disconnected if $B_8(I^1)$ contains a cycle $C$ in which each pair of consecutive pixels in $C$ are $4$-neighbours in $I'$ (that is, $C$ is a cycle in $B_4(I^1)$ - recall the observation made on page 1 with regards to the connectivity of images), we call such a cycle a $4$-neighbourhood cycle. Thus if  $\W(p)$ is a cut vertex of $W_8(I)$ then $B_8(I^1)$ has a  $4$-neighbourhood cycle $C$ containing  $\W(p)$. Every $4$-neighbourhood cycle $C$ containing  $\W(p)$ has to contain two vertices from the $4$-neighbourhood of $\W(p)$ in $B_8(I^1)$. $\W(p)$ has only two such neighbours in $B_8(I^1)$ (\figref{ef-two}.c), namely $\NW(p)$ and $\SW(p)$. However having $C$ contain  $\NW(p)$, $\SW(p)$ and $\W(p)$ implies that there is a path in $B_8(I)$ between $\NW(p)$  and $\SW(p)$ that does not go through $p$ which contradicts the assumption that $p$ is a cut vertex in $B_8(I)$.
+Assume first that $\NW(p)$ is black. (\figref{ef-two}.b). Then
+$\W\W(p)$ has to be white (\figref{ef-two}.c) as otherwise $p$ is not
+cut vertex of $B_8(I)$ since the path $\NW(p),\W\W(p) , \SW(p)$ does
+not go through $p$. We claim that $\W(p)$ is not a cut vertex of
+$W_8(I)$ and thus that the interchange $\ic{p}{\W(p)}$ preserves
+connectivity.  $W_8(I^1)$ can only be disconnected if $B_8(I^1)$
+contains a cycle $C$ in which each pair of consecutive pixels in $C$
+are $4$-neighbours in $I'$ (that is, $C$ is a cycle in $B_4(I^1)$ -
+recall the observation made on page 1 with regards to the connectivity
+of images), we call such a cycle a $4$-neighbourhood cycle. Thus if
+$\W(p)$ is a cut vertex of $W_8(I)$ then $B_8(I^1)$ has a
+$4$-neighbourhood cycle $C$ containing  $\W(p)$. Every
+$4$-neighbourhood cycle $C$ containing  $\W(p)$ has to contain two
+vertices from the $4$-neighbourhood of $\W(p)$ in $B_8(I^1)$. $\W(p)$
+has only two such neighbours in $B_8(I^1)$ (\figref{ef-two}.c), namely
+$\NW(p)$ and $\SW(p)$. However having $C$ contain  $\NW(p)$, $\SW(p)$
+and $\W(p)$ implies that there is a path in $B_8(I)$ between $\NW(p)$
+and $\SW(p)$ that does not go through $p$ which contradicts the
+assumption that $p$ is a cut vertex in $B_8(I)$.
 
-Assume finally that $\NW(p)$ is white. Then as noted above $\N(p)$ is black (\figref{ef-two}.d). If $\W(p)$ is not a cut vertex of $W_8(I)$ then  the interchange $\ic{p}{\W(p)}$ preserves connectivity. Thus assume $\W(p)$ to be a cut vertex of $W_8(I)$. The only black pixels in the $4$-neighborhood of $\W(p)$ in $(B_8(I)\sm p)$ are $\SW(p)$ and possibly $\W\W(p)$. Thus by the same arguments as in the previous paragraph, $(B_8(I)\sm p)\cup \W(p) $ has a 4-neighbourhood cycle $C_1$ that has  as consecutive vertices $\W\W(p), \W(p), \SW(p)$. Therefore, $\W\W(p)$ is black and there is a path from $\W\W(p)$ to $\SW(p)$ that does not go through $p$ (\figref{ef-two}.e). We claim that the interchange $\ic{p}{\NW(p)}$ preserves connectivity. $B_8(I^1)$ is clearly connected. $W_8(I^1)$ can only be disconnected if $\NW(p)$ is a cut vertex of $W_8(I)$. In that case $\NW\W(p)$ has to be black, as otherwise the graph induced by $\A{\NW(p)}{W_8}\cup \{\NE(p), \E(p), \S(p)\}$ would be connected and, by \obsref{non-cut}, $\NW(p)$ would not be a cut vertex of $W_8(I)$. Therefore, since $\NW\W(p)$ is black, $\N\NW(p)$ has to be  white (\figref{ef-two}.f) as otherwise, there would be a path from $\SW(p)$ to $\N(p)$  that does not contain $p$ contradicting the assumption that $p$ is a cut vertex.  Now the only black pixels in the $4$-neighborhood of $\NW(p)$ are $\NW\W(p)$ and  $\N(p)$. Thus by the same arguments as in the  previous paragraph, $(B_8(I)\sm p)\cup \NW(p) $ has a 4-neighbourhood cycle $C_2$ that has as consecutive vertices $\N(p), \NW(p), \N\W\W(p)$ (\figref{ef-two}.f). That however implies again a path in $B_8(I)$ from $\SW(p)$ to $\N(p)$ that does not contain $p$, contradicting the assumption that $p$ is a cut vertex. 
+Assume finally that $\NW(p)$ is white. Then as noted above $\N(p)$ is
+black (\figref{ef-two}.d). If $\W(p)$ is not a cut vertex of $W_8(I)$
+then  the interchange $\ic{p}{\W(p)}$ preserves connectivity. Thus
+assume $\W(p)$ to be a cut vertex of $W_8(I)$. The only black pixels
+in the $4$-neighborhood of $\W(p)$ in $(B_8(I)\sm p)$ are $\SW(p)$ and
+possibly $\W\W(p)$. Thus by the same arguments as in the previous
+paragraph, $(B_8(I)\sm p)\cup \W(p) $ has a 4-neighbourhood cycle
+$C_1$ that has  as consecutive vertices $\W\W(p), \W(p), \SW(p)$.
+Therefore, $\W\W(p)$ is black and there is a path from $\W\W(p)$ to
+$\SW(p)$ that does not go through $p$ (\figref{ef-two}.e). We claim
+that the interchange $\ic{p}{\NW(p)}$ preserves connectivity.
+$B_8(I^1)$ is clearly connected. $W_8(I^1)$ can only be disconnected
+if $\NW(p)$ is a cut vertex of $W_8(I)$. In that case $\NW\W(p)$ has
+to be black, as otherwise the graph induced by $\A{\NW(p)}{W_8}\cup
+\{\NE(p), \E(p), \S(p)\}$ would be connected and, by \obsref{non-cut},
+$\NW(p)$ would not be a cut vertex of $W_8(I)$. Therefore, since
+$\NW\W(p)$ is black, $\N\NW(p)$ has to be  white (\figref{ef-two}.f)
+as otherwise, there would be a path from $\SW(p)$ to $\N(p)$  that
+does not contain $p$ contradicting the assumption that $p$ is a cut
+vertex.  Now the only black pixels in the $4$-neighborhood of $\NW(p)$
+are $\NW\W(p)$ and  $\N(p)$. Thus by the same arguments as in the
+previous paragraph, $(B_8(I)\sm p)\cup \NW(p) $ has a 4-neighbourhood
+cycle $C_2$ that has as consecutive vertices $\N(p), \NW(p),
+\N\W\W(p)$ (\figref{ef-two}.f). That however implies again a path in
+$B_8(I)$ from $\SW(p)$ to $\N(p)$ that does not contain $p$,
+contradicting the assumption that $p$ is a cut vertex.  
 \end{proof}
 
 \lemref{segment} and \lemref{eighteight} imply the following theorem.
 
 
 \begin{thm}\thmlabel{th:88}
-Any two \eighteight--connected images $I$ and $J$ each having $n$ black
-pixels are $(8,8)$-IP-equivalent and $I$ can be converted into $J$ using a
-sequence of $O(n^2)$ 8-local interchanges.
+Any two \eighteight--connected images $I$ and $J$ each having $n$
+black pixels are $(8,8)$-IP-equivalent and $I$ can be converted into
+$J$ using a sequence of $O(n^2)$ 8-local interchanges.
 \end{thm}
 
 
 We should note that if $I$ and $J$ are \foureight--connected or
-\eightfour--connected then $(8,8)$-IP-equivalence of $I$ and $J$ follows
-from \thmref{th:48} and \thmref{th:84} (even if $I$ is \foureight--connected and
-$J$ is \eightfour--connected).
+\eightfour--connected then $(8,8)$-IP-equivalence of $I$ and $J$
+follows from \thmref{th:48} and \thmref{th:84} (even if $I$ is
+\foureight--connected and $J$ is \eightfour--connected).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% 4-4 %%%%%%%%%%%%%%%%%%%%%
 
 \section{Maintaining \fourfour--Connectivity}\seclabel{fourfour}
 
-Our approach for solving $\fourfour$ version of the problem is significantly different from that used in the previous three versions. To appreciate a difficulty of this version consider for instance the image in \figref{bad-example}.  \Comment{I am still not sure if it makes sense to keep this example. Let me know what you think.} This non-vertical image does not admit $1$-vertical interchange while  maintaining\ \fourfour--connectivity. No such example exists for \foureight\ and \eighteight\ versions\footnote{We can prove that each non-vertical $\foureight$--connected binary image admits a  $1$-vertical interchange, but the proof is considerably more complicated than that given in \lemref{foureight}.} of the problem and we believe that neither does such example exist for \eightfour\ version. 
+Our approach for solving $\fourfour$ version of the problem is
+significantly different from that used in the previous three versions.
+To appreciate a difficulty of this version consider for instance the
+image in \figref{bad-example}.  \Comment{I am still not sure if it
+makes sense to keep this example. Let me know what you think.} This
+non-vertical image does not admit $1$-vertical interchange while
+maintaining\ \fourfour--connectivity. No such example exists for
+\foureight\ and \eighteight\ versions\footnote{We can prove that each
+non-vertical $\foureight$--connected binary image admits a
+$1$-vertical interchange, but the proof is considerably more
+complicated than that given in \lemref{foureight}.} of the problem and
+we believe that neither does such example exist for \eightfour\
+version. 
 
 \begin{figure}[htbp]
 \begin{center}
 \includegraphics{bad-example}
 \end{center}
-\caption{An example of a \fourfour--connected image that does not admit a $1$-vertical interchange, that is no black pixel can be moved $\W$, $\NW$, $\N$, or $\NE$ while maintaining \fourfour--connectivity.}
+\caption{An example of a \fourfour--connected image that does not
+admit a $1$-vertical interchange, that is no black pixel can be moved
+$\W$, $\NW$, $\N$, or $\NE$ while maintaining
+\fourfour--connectivity.}
 \figlabel{bad-example}
 \end{figure}
 
-The \emph{width} of an image $I$, is defined as one plus the difference between the maximum and the minimum \x-coordinate of the black pixels in $I$. For example, a $\textsf{B}_a,\textsf{W}_b$-connected image has width one if and only if it is vertical. We will prove that the width of every non-vertical \fourfour--connected image $I$ can be reduced by one after $O(n^3)$ interchanges. That will imply the desired result, namely that any two \fourfour--connected images $I$ and $J$ each having $n$ black pixels are $(4,4)$-IP-equivalent and that $I$ can be converted into $J$ using a sequence of $O(n^4)$ interchanges.
+The \emph{width} of an image $I$, is defined as one plus the
+difference between the maximum and the minimum \x-coordinate of the
+black pixels in $I$. For example, a
+$\textsf{B}_a,\textsf{W}_b$-connected image has width one if and only
+if it is vertical. We will prove that the width of every non-vertical
+\fourfour--connected image $I$ can be reduced by one after $O(n^3)$
+interchanges. That will imply the desired result, namely that any two
+\fourfour--connected images $I$ and $J$ each having $n$ black pixels
+are $(4,4)$-IP-equivalent and that $I$ can be converted into $J$ using
+a sequence of $O(n^4)$ interchanges.
 
 
-We will make use of the following notions defined on a \fourfour-connected image $I$. A pixel $p$ is an \emph{elbow} in $I$ if it is black and each pixel in $\{\E(p), \S(p), \SE(p)\}$ is white. If in addition $p$ is a cut vertex in $B_4(I)$, we say that $p$ is a \emph{cut elbow} in $I$. Note that if $p$ is a cut elbow, then $\N(p)$ and $\W(p)$ are black and $\NW(p)$ is white. Consider a (possibly empty) set of elbows $\{p_i\, :\, 1\leq i\leq k, \, k\geq 0\}$ in $I$, such that for each $1\leq i< k$, $p_i=\N\N\W\W(p_{i+1})$. We say that $I$ admits an \emph{$k$--diagonal interchange at $p_k$} if 
+We will make use of the following notions defined on a
+\fourfour-connected image $I$. A pixel $p$ is an \emph{elbow} in $I$
+if it is black and each pixel in $\{\E(p), \S(p), \SE(p)\}$ is white.
+If in addition $p$ is a cut vertex in $B_4(I)$, we say that $p$ is a
+\emph{cut elbow} in $I$. Note that if $p$ is a cut elbow, then $\N(p)$
+and $\W(p)$ are black and $\NW(p)$ is white. Consider a (possibly
+empty) set of elbows $\{p_i\, :\, 1\leq i\leq k, \, k\geq 0\}$ in $I$,
+such that for each $1\leq i< k$, $p_i=\N\N\W\W(p_{i+1})$. We say that
+$I$ admits an \emph{$k$--diagonal interchange at $p_k$} if 
 
 %either the sequence of interchanges $(\ic{p_i}{\NW(p_i)}\,\ :\, 1\leq i\leq k)$ or the sequence of interchanges $(\ic{p_i}{\SE(p_i)}\,\ :\, 1\leq i\leq k-1)$ preserves 
 

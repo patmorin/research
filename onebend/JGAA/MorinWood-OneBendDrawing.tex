@@ -1,76 +1,108 @@
-\documentclass[10pt,a4paper]{article}
-\usepackage{amsfonts,amsmath,graphicx}
+\documentclass[a4paper]{article}
+\usepackage{amsthm,amsfonts,amsmath,graphicx,jgaa-article}
 \usepackage[sort&compress,numbers]{natbib}
-\listfiles
 
-\input{myTheorems}
-\input{myLabels}
-\input{myCommands}
+\newcommand{\Oh}[1]{\ensuremath{\protect\mathcal{O}(#1)}}
+\newcommand{\FLOOR}[1]{\ensuremath{\protect\left\lfloor#1\right\rfloor}}
+\newcommand{\floor}[1]{\ensuremath{\protect\lfloor#1\rfloor}}
+\newcommand{\bracket}[1]{\ensuremath{\protect\left(#1\right)}}
+\newcommand{\BRACKET}[1]{\ensuremath{\protect\left(#1\right)}}
+\newcommand{\ceil}[1]{\ensuremath{\protect\lceil#1\rceil}}
+\newcommand{\CEIL}[1]{\ensuremath{\protect\left\lceil#1\right\rceil}}
+\newcommand{\HALF}{\ensuremath{\protect\dfrac{1}{2}}}
+\newcommand{\half}{\ensuremath{\protect\tfrac{1}{2}}}
 
-\renewcommand{\tabcolsep}{2mm}
-\Settings{1.2}{35mm}{30mm}{0cm}{1cm}
+\newcommand{\Figure}[4][htb]{
+\begin{figure}[#1]
+	\begin{center}#3\end{center}
+	\vspace*{-2ex}
+	\caption{\figlabel{#2}#4}
+\end{figure}
+}
+
+\newcommand{\mySection}[2]{\section{#1}\seclabel{#2}}
+
+\newcommand{\seclabel}[1]{\label{sec:#1}}
+\newcommand{\figlabel}[1]{\label{fig:#1}}
+\newcommand{\tablabel}[1]{\label{tab:#1}}
+\newcommand{\thmlabel}[1]{\label{thm:#1}}
+\newcommand{\lemlabel}[1]{\label{lem:#1}}
+\newcommand{\corlabel}[1]{\label{cor:#1}}
+\newcommand{\eqnlabel}[1]{\label{eqn:#1}}
+
+\newcommand{\lemref}[1]{Lemma~\ref{lem:#1}}
+\newcommand{\thmref}[1]{Theorem~\ref{thm:#1}}
+\newcommand{\figref}[1]{Figure~\ref{fig:#1}}
+\newcommand{\secref}[1]{Section~\ref{sec:#1}}
+\newcommand{\corref}[1]{Corollary~\ref{cor:#1}}
+\newcommand{\tabref}[1]{Table~\ref{tab:#1}}
+\newcommand{\eqnref}[1]{\eqref{eqn:#1}}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
 
-\title{\textbf{Three-Dimensional 1-Bend\\ Graph Drawings}\,\footnote{School
-of Computer Science, Carleton University, Ottawa, Canada. Email:
-\texttt{\{morin,davidw\}@scs.carleton.ca}. Research supported by NSERC.}}
+\Issue{0}{0}{0}{0}{2005}
+\HeadingAuthor{Morin \& Wood}
+\HeadingTitle{1-Bend Graph Drawings}
+\Title{Three-Dimensional 1-Bend Graph Drawings}
 
-\author{Pat Morin \and  David R. Wood}
+\Author{Pat Morin}
+\Institution{School of Computer Science\\
+Carleton University\\
+Ottawa, Canada\\
+\Email{morin@scs.carleton.ca}}
 
-\maketitle
+\Author{David R. Wood}
+\Institution{Departament de Matem{\`a}tica Aplicada II\\
+Universitat Polit{\`e}cnica de Catalunya\\
+Barcelona, Spain\\
+\Email{david.wood@upc.edu}}
 
-\begin{abstract} We consider three-dimensional  grid-drawings of graphs with at
-most one bend per edge.  Under the additional requirement that the vertices be
-collinear, we prove that the minimum volume of such a drawing is $\Theta(cn)$,
-where $n$ is the number of vertices and $c$ is the cutwidth of the graph. We
-then prove  that every graph has a  three-dimensional  grid-drawing with
-\Oh{n^3/\log^2 n} volume and one bend per edge. The best previous bound was
-\Oh{n^3}. \end{abstract}
+
+\begin{abstract} 
+We consider three-dimensional  grid-drawings of graphs with at most one bend per edge.  Under the additional requirement that the vertices be collinear, we prove that the minimum volume of such a drawing is $\Theta(cn)$, where $n$ is the number of vertices and $c$ is the cutwidth of the graph. We then prove  that every graph has a  three-dimensional  grid-drawing with \Oh{n^3/\log^2 n} volume and one bend per edge. The best previous bound was \Oh{n^3}. 
+\end{abstract}
+
+\History{concise paper}{G.\ Liotta}{April 2004}{March 2005}
+\Ack{Presented at the 16th Canadian Conference on Computational Geometry (CCCG '04), Concordia University, Montr\'eal, Canada, August 9--11, 2004.\\
+Research of Pat Morin supported by NSERC.\\
+Research of David Wood supported by the Government of Spain grant MEC SB2003-0270, and partially completed at Carleton University, Canada.}
+\Body
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \mySection{Introduction}{Introduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-We consider  undirected, finite, and simple graphs $G$ with  vertex set $V(G)$
-and edge set $E(G)$. The number of vertices and edges of $G$ are respectively
-denoted by $n=|V(G)|$ and $m=|E(G)|$. A \emph{three-dimensional polyline
-grid-drawing} of a graph, henceforth called a \emph{polyline drawing},
-represents the vertices by distinct points in $\mathbb{Z}^3$ (called
-\emph{gridpoints}), and represents each edge as a polyline between its
-endpoints with bends (if any) also at gridpoints, such that distinct edges only
-intersect at common endpoints, and each edge only intersects a vertex that is
-an endpoint of that edge. A polyline drawing with at most $b$ bends per edge is
-called a \emph{$b$-bend drawing}. A $0$-bend drawing is called a
-\emph{straight-line drawing}. 
+We consider  undirected, finite, and simple graphs $G$ with  vertex set $V(G)$ and edge set $E(G)$. The number of vertices and edges of $G$ are respectively denoted by $n=|V(G)|$ and $m=|E(G)|$. 
 
-A folklore result states that every graph has a straight-line drawing. Thus we
-are interested in optimising certain  measures of the aesthetic quality of such
-drawings.  The \emph{bounding box} of a polyline drawing  is the minimum
-axis-aligned box containing the drawing. If the bounding box has side lengths
-$X-1$, $Y-1$ and $Z-1$, then  we speak of an $X\times Y\times Z$ polyline
-drawing with \emph{volume} $X\cdot Y\cdot Z$. That is, the volume of a polyline
-drawing is the number of gridpoints in the bounding box.   This definition is
-formulated so that two-dimensional drawings have positive volume.  This paper
-continues the study of upper bounds on the volume  and number of bends per edge
-in polyline drawings. The volume of straight-line drawings has been widely
-studied \citep{DujWoo-SubQuad-AMS, Giacomo-GD03, DM-GD03, Hasunuma-GD03,
-DujWoo-WG03, Wood-FSTTCS02, CS-IPL97, CELR-Algo96, DMW-GraphLayout, DMW-GD02,
-FLW-GD01, PTT99, BCMW-JGAA}.  Only recently have (non-orthogonal) polyline
-drawings been considered \citep{DujWoo-Subdivisions,Wismath-TR04}.
-\tabref{VolumeUpperBounds} summarises the best known upper bounds on the volume
-and bends per edge in polyline drawings. 
+Graph drawing is concerned with the automatic generation of aesthetically
+pleasing geometric representations of graphs. Graph drawing in the plane is
+well-studied (see \cite{DETT99, KaufmannWagner01}). Motivated by experimental
+evidence suggesting that displaying a graph in three dimensions is better than
+in two \cite{WF94, WF96}, and applications including information visualisation
+\cite{WF94}, VLSI circuit design \cite{LR86}, and software engineering
+\cite{WHF93}, there is a growing body of research in three-dimensional graph
+drawing. 
 
+A \emph{three-dimensional polyline grid-drawing} of a graph, henceforth called a \emph{polyline drawing}, represents the vertices by distinct points in $\mathbb{Z}^3$ (called \emph{gridpoints}), and represents each edge as a polyline between its endpoints with bends (if any) also at gridpoints, such that distinct edges only intersect at common endpoints, and each edge only intersects a vertex that is an endpoint of that edge. A polyline drawing with at most $b$ bends per edge is called a \emph{$b$-bend drawing}. A $0$-bend drawing is called a \emph{straight-line drawing}. 
+
+A folklore result states that every graph has a straight-line drawing. Thus we are interested in optimising certain  measures of the aesthetic quality of such drawings.  The \emph{bounding box} of a polyline drawing  is the minimum axis-aligned box containing the drawing. If the bounding box has side lengths $X-1$, $Y-1$ and $Z-1$, then  we speak of an $X\times Y\times Z$ polyline drawing with \emph{volume} $X\cdot Y\cdot Z$. That is, the volume of a polyline drawing is the number of gridpoints in the bounding box.   This definition is formulated so that two-dimensional drawings have positive volume.  This paper continues the study of upper bounds on the volume  and number of bends per edge in polyline drawings. The volume of straight-line drawings has been widely studied \citep{DujWoo-SubQuad-AMS, Giacomo-GD03, DM-GD03, Hasunuma-GD03, CS-IPL97, DujWoo-Subdivisions-DMTCS, CELR-Algo96, DMW-SJC05, FLW-JGAA03, PTT99, BCMW-JGAA04}.  Only recently have (non-orthogonal) polyline drawings been considered \citep{DujWoo-Subdivisions-DMTCS, Wismath-TR04}. \tabref{VolumeUpperBounds} summarises the best known upper bounds on the volume and bends per edge in polyline drawings. 
+
+\renewcommand{\tabcolsep}{0.75mm}
 \begin{table*}[htb]
 \begin{center}
-\caption{Volume of 3D polyline drawings of graphs with $n$ vertices and $m\geq n$ edges.}
+\caption{Volume of 3D polyline drawings of $n$-vertex graphs with $m\geq n$ edges.}
 \vspace*{1ex}
 \tablabel{VolumeUpperBounds}
 \begin{tabular}{lcll}
 \hline
-\multicolumn{2}{l}{graph family\hspace*{2cm}bends per edge}	& volume	
+\multicolumn{2}{l}{graph family\hspace*{9mm}bends per edge}	& volume	
 & reference\\\hline
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 arbitrary				& 0		& \Oh{n^3}			
@@ -87,49 +119,32 @@ bounded maximum degree 			& 0		& \Oh{n^{3/2}}
 & \citet{DujWoo-SubQuad-AMS}\\
 $H$-minor free ($H$ fixed) 		& 0 		& \Oh{n^{3/2}}
 & \citet{DujWoo-SubQuad-AMS}\\
-bounded tree-width			& 0 		& \Oh{n}			
-& Dujmovi{\'c}\etal\citep{DMW-GraphLayout,DujWoo-WG03}\\ 
+bounded treewidth			& 0 		& \Oh{n}			
+& \citet{DMW-SJC05}\\ 
 $k$-colourable $q$-queue		& 1		& \Oh{kqm}			
-& \citet{DujWoo-Subdivisions}\\
+& \citet{DujWoo-Subdivisions-DMTCS}\\
 arbitrary				& 1		& \Oh{nm}
-& \citet{DujWoo-Subdivisions}\\
+& \citet{DujWoo-Subdivisions-DMTCS}\\
 cutwidth $c$				& 1		& \Oh{cn}
 & \thmref{CollinearVertices}\\
-arbitrary				& 1		& \Oh{n^3/\log^2 n}
+arbitrary				& 1		& \Oh{n^3/\log^2 n}\;
 & \thmref{Main}\\
 $q$-queue 				& 2		& \Oh{qn}			
-& \citet{DujWoo-Subdivisions}\\
+& \citet{DujWoo-Subdivisions-DMTCS}\\
 $q$-queue (constant $\epsilon>0$)	
 					& \Oh{1}	& \Oh{mq^\epsilon}	
-& \citet{DujWoo-Subdivisions}\\
-$q$-queue 				& \Oh{\log q}	& \Oh{m \log q}		
-& \citet{DujWoo-Subdivisions}\\
+& \citet{DujWoo-Subdivisions-DMTCS}\\
+$q$-queue 				& \!\!\Oh{\log q}\;\;	& \Oh{m \log q}		
+& \citet{DujWoo-Subdivisions-DMTCS}\\
 \hline
 \end{tabular}
 \vspace*{-1ex}
 \end{center}
 \end{table*}
 
-\citet{CELR-Algo96} proved that the complete graph $K_n$ (and hence every
-$n$-vertex graph) has a straight-line drawing with \Oh{n^3} volume, and that
-$\Omega(n^3)$ volume was necessary. \citet{Wismath-TR04} recently proved that
-$K_n$ has a $2$-bend drawing with \Oh{n^2} volume. The same conclusion can be
-reached from the \Oh{qn} volume bound of \citet{DujWoo-Subdivisions}, since
-trivially every graph has a ($n-1)$-queue layout. \citet{Wismath-TR04} asked
-the interesting question: what is the minimum volume in a $1$-bend drawing of
-$K_n$? The best known upper bound at the time was \Oh{n^3}, while $\Omega(n^2)$
-is the best known lower bound. (\citet{BCMW-JGAA} proved that all polyline
-drawings have $\Omega(n+m)$ volume.)\ 
+\citet{CELR-Algo96} proved that the complete graph $K_n$ (and hence every $n$-vertex graph) has a straight-line drawing with \Oh{n^3} volume, and that $\Omega(n^3)$ volume is necessary. \citet{Wismath-TR04} recently proved that $K_n$ has a $2$-bend drawing with \Oh{n^2} volume. The same conclusion can be reached from the \Oh{qn} volume bound of \citet{DujWoo-Subdivisions-DMTCS}, since trivially every graph has a ($n-1$)-queue layout. \citet{Wismath-TR04} asked the interesting question: what is the minimum volume in a $1$-bend drawing of $K_n$? The best known upper bound at the time was \Oh{n^3}, while $\Omega(n^2)$ is the best known lower bound. (\citet{BCMW-JGAA04} proved that all polyline drawings have $\Omega(n+m)$ volume.)\ 
 
-In this paper we prove two results.  The first concerns \emph{collinear}
-polyline drawings in which all the vertices are in a single line.  Let $G$ be a
-graph, and let $\sigma$ be a linear order of $V(G)$.  Let $L_\sigma(e)$ and
-$R_\sigma(e)$ denote the endpoints of each edge $e$ such that
-$L_\sigma(e)<_\sigma R_\sigma(e)$. For each vertex $v\in V(G)$, the set $\{e\in
-E(G):L_\sigma(e)\leq_\sigma v<_\sigma R_\sigma(e)\}$ is called the \emph{cut}
-in $\sigma$ at $v$. The \emph{cutwidth} of $\sigma$ is the maximum size of a
-cut in $\sigma$. The \emph{cutwidth} of $G$ is the minimum cutwidth of a linear
-order of $V(G)$.  Cutwidth is a widely studied graph parameter (see \citep{DPS-GraphLayouts}).
+In this paper we prove two results.  The first concerns \emph{collinear} polyline drawings in which all the vertices are in a single line.  Let $G$ be a graph, and let $\sigma$ be a linear order of $V(G)$.  Let $L_\sigma(e)$ and $R_\sigma(e)$ denote the endpoints of each edge $e$ such that $L_\sigma(e)<_\sigma R_\sigma(e)$. For each vertex $v\in V(G)$, the set $\{e\in E(G):L_\sigma(e)\leq_\sigma v<_\sigma R_\sigma(e)\}$ is called the \emph{cut} in $\sigma$ at $v$. The \emph{cutwidth} of $\sigma$ is the maximum size of a cut in $\sigma$. The \emph{cutwidth} of $G$ is the minimum cutwidth of a linear order of $V(G)$.  Cutwidth is a widely studied graph parameter (see \citep{DPS-GraphLayouts}).
 
 \begin{theorem}
 \thmlabel{CollinearVertices} 
@@ -138,8 +153,7 @@ a $1$-bend collinear drawing of $G$ is $\Theta(cn)$.
 \end{theorem}
 
 \thmref{CollinearVertices} represents a qualitative improvement over the
-\Oh{nm} volume bound for $1$-bend drawings by \citet{DujWoo-Subdivisions}. Our
-second result improves the best known upper bound for $1$-bend drawings of
+\Oh{nm} volume bound for $1$-bend drawings by \citet{DujWoo-Subdivisions-DMTCS}. Our second result improves the best known upper bound for $1$-bend drawings of
 $K_n$. 
 
 \begin{theorem}
@@ -149,21 +163,7 @@ $\Oh{\log n}\times\Oh{n}\times\Oh{n^2/\log^3n}$ drawing with $\Oh{n^3/\log^2 n}$
 volume.
 \end{theorem}
 
-It is not straightforward to compare the volume bound in \thmref{Main} with the
-\Oh{kqm} bound by \citet{DujWoo-Subdivisions} for $k$-colourable $q$-queue
-graphs (see \tabref{VolumeUpperBounds}). However, since $k\leq 4q$ and $m\leq
-2qn$ (see \citep{DujWoo-LinearLayouts}), we have that $\Oh{kqm} \in \Oh{q^3n}$,
-and thus the \Oh{kqm} bound by \citet{DujWoo-Subdivisions} is no more than the 
-bound in \thmref{Main} whenever the graph has a \Oh{(n/\log n)^{2/3}}-queue
-layout. On the other hand, $kqm\geq m^2/n$. So for dense graphs with
-$\Omega(n^2)$ edges the \Oh{kqm} bound  by \citet{DujWoo-Subdivisions} is cubic
-(in $n$), and the bound in \thmref{Main} is necessarily smaller. In particular,
-\thmref{Main} provides a partial solution to the above-mentioned open problem
-of \citet{Wismath-TR04} regarding the minimum volume of a $1$-bend drawing of
-$K_n$.
-
-%For the most part, we choose to present relatively simple proofs rather than
-%lose the reader in laborious details aimed at improving the constants.
+It is not straightforward to compare the volume bound in \thmref{Main} with the \Oh{kqm} bound by \citet{DujWoo-Subdivisions-DMTCS} for $k$-colourable $q$-queue graphs (see \tabref{VolumeUpperBounds}). However, since $k\leq 4q$ and $m\leq 2qn$ (see \citep{DujWoo-LinearLayouts-DMTCS04}), we have that $\Oh{kqm}\subseteq\Oh{q^3n}$, and thus the \Oh{kqm} bound by \citet{DujWoo-Subdivisions-DMTCS} is no more than the  bound in \thmref{Main} whenever the graph has a \Oh{(n/\log n)^{2/3}}-queue layout. On the other hand, $kqm\geq m^2/n$. So for dense graphs with $\Omega(n^2)$ edges the \Oh{kqm} bound  by \citet{DujWoo-Subdivisions-DMTCS} is cubic (in $n$), and the bound in \thmref{Main} is necessarily smaller. In particular, \thmref{Main} provides a partial solution to the above-mentioned open problem of \citet{Wismath-TR04} regarding the minimum volume of a $1$-bend drawing of $K_n$.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \mySection{Proof of \thmref{CollinearVertices}}{Collinear}
@@ -173,30 +173,16 @@ First we prove the lower bound in \thmref{CollinearVertices}.
 
 \begin{lemma}
 \lemlabel{CutwidthLowerBound}
-Let $G$ be a graph with $n$ vertices and cutwidth $c$. Then
-every $1$-bend collinear drawing of $G$ has at least $cn/2$ volume.
+Let $G$ be a graph with $n$ vertices and cutwidth $c$. Then every $1$-bend collinear drawing of $G$ has at least $cn/2$ volume.
 \end{lemma}
 
-\begin{proof} Consider a $1$-bend collinear drawing of $G$ in an $X\times
-Y\times Z$  bounding box. Let $L$ be the line containing the vertices.  If $L$
-is not contained in a grid-plane, then $X,Y,Z\geq n$, and the volume is at
-least $n^3\geq cn$. 
+\begin{proof} Consider a $1$-bend collinear drawing of $G$ in an $X\times Y\times Z$  bounding box. Let $L$ be the line containing the vertices.  If $L$ is not contained in a grid-plane, then $X,Y,Z\geq n$, and the volume is at least $n^3\geq cn$. 
 
-Now assume, without loss of generality, that $L$ is contained in the $Z=0$
-plane.  Let $\sigma$ be a linear order of the vertices determined by $L$.  Let
-$B$ be the set of bends corresponding to the edges in the largest cut in
-$\sigma$. Then $|B|\geq c$. For every line $L'$ parallel to $L$, there is at
-most one bend in $B$ on $L'$, as otherwise there is a crossing. 
+Now assume, without loss of generality, that $L$ is contained in the $Z=0$ plane.  Let $\sigma$ be a linear order of the vertices determined by $L$.  Let $B$ be the set of bends corresponding to the edges in the largest cut in $\sigma$. Then $|B|\geq c$. For every line $L'$ parallel to $L$, there is at most one bend in $B$ on $L'$, as otherwise there is a crossing. 
 
-First suppose that $L$ is axis-parallel. Without loss of generality, $L$ is the
-$X$-axis. Then $X\geq n$. The gridpoints in the bounding box can be covered by
-$YZ$ lines parallel to $L$.  Thus $YZ\geq|B|\geq c$, and the volume $XYZ\geq
-cn$.
+First suppose that $L$ is axis-parallel. Without loss of generality, $L$ is the $X$-axis. Then $X\geq n$. The gridpoints in the bounding box can be covered by $YZ$ lines parallel to $L$.  Thus $YZ\geq|B|\geq c$, and the volume $XYZ\geq cn$.
 
-Now suppose that $L$ is not axis-parallel. Thus $X\geq n$ and $Y\geq n$. The
-gridpoints in the bounding box can be covered by $Z(X+Y)$ lines parallel to
-$L$.  Thus $Z(X+Y)\geq|B|\geq c$, and the volume $XYZ\geq XY\,c/(X+Y)\geq
-cn/2$. \end{proof}
+Now suppose that $L$ is not axis-parallel. Thus $X\geq n$ and $Y\geq n$. The gridpoints in the bounding box can be covered by $Z(X+Y)$ lines parallel to $L$.  Thus $Z(X+Y)\geq|B|\geq c$, and the volume $XYZ\geq XY\,c/(X+Y)\geq cn/2$. \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -249,61 +235,35 @@ Now we prove the following strengthening of the upper bound in
 \begin{lemma}
 \lemlabel{CutwidthUpperBound} 
 Let $G$ be a graph with $n$ vertices and cutwidth $c$. 
-For all integers
-$X\geq1$, $G$ has a $1$-bend collinear  $X\times\Oh{c/X}\times n$
-drawing with the vertices on the $Z$-axis. The volume is \Oh{cn}.
+For all integers $X\geq1$, $G$ has a $1$-bend collinear  $X\times\Oh{c/X}\times n$ drawing with the vertices on the $Z$-axis. The volume is \Oh{cn}.
 \end{lemma}
 
-\begin{proof} Let $\sigma$ be a vertex ordering of $G$ with cutwidth $c$. For
-all pairs of distinct edges $e$ and $f$, say $e\prec f$ whenever
-$R_\sigma(e)\leq_\sigma L_\sigma(f)$. Then $\preceq$ is a partial order on
-$E(G)$, where an antichain in $\preceq$ is a cut in $\sigma$. By Dilworth's
-Theorem \citep{Dilworth50}, there is a partition of $E(G)$ into chains
-$E_1,E_2,\dots,E_c$, such that each $E_i=(e_{i,1},e_{i,2},\dots,e_{i,k_i})$ and
-$R_\sigma(e_{i,j})\leq_\sigma L_\sigma(e_{i,j+1})$ for all $1\leq j\leq k_i-1$.
+\begin{proof} 
+Let $\sigma$ be a vertex ordering of $G$ with cutwidth $c$. For all pairs of distinct edges $e$ and $f$, say $e\prec f$ whenever $R_\sigma(e)\leq_\sigma L_\sigma(f)$. Then $\preceq$ is a partial order on $E(G)$. A \emph{chain} (respectively, \emph{antichain}) in a partial order is a set of pairwise comparable (incomparable) elements. Thus an antichain in $\preceq$ is exactly a cut in $\sigma$. Dilworth's Theorem \citep{Dilworth50} states that every partial order with no ($k+1$)-element antichain can be partitioned into $k$ chains. Thus there is a partition of $E(G)$ into chains $E_1,E_2,\dots,E_c$, such that each $E_i=(e_{i,1},e_{i,2},\dots,e_{i,k_i})$ and $R_\sigma(e_{i,j})\leq_\sigma L_\sigma(e_{i,j+1})$ for all $1\leq j\leq k_i-1$.
 
-By \lemref{VisiblePoints} with $Y=\ceil{4\pi^2c/3X}$,  there is a set
-$S=\{(x_i,y_i):1\leq i\leq c, 1\leq x_i\leq X,1\leq y_i\leq Y\}$ of gridpoints
-that are visible from the origin. Position the $i$th vertex in $\sigma$ at
-$(0,0,i)$ on the $Z$-axis, and position the bend for each edge $e_{i,j}$ at
-$(x_i,y_i,j)$. Edges in distinct chains are contained in distinct planes that
-only intersect in the $Z$-axis. Thus such edges do not cross. Edges within each
-chain $E_i$ do not cross since no two edges in $E_i$ are nested or crossing in
-$\sigma$, and the $Z$-coordinates of the bends of the edges in $E_i$ agrees with 
-the order of their endpoints on the $Z$-axis, as illustrated in
-\figref{CutwidthConstruction}. The bounding box is
-$X\times\ceil{4\pi^2c/3X}\times n$, since the number of edges in a single chain
-is at most $n-1$. \end{proof}
+By \lemref{VisiblePoints} with $Y=\ceil{4\pi^2c/3X}$,  there is a set $S=\{(x_i,y_i):1\leq i\leq c, 1\leq x_i\leq X,1\leq y_i\leq Y\}$ of gridpoints that are visible from the origin. Position the $i$th vertex in $\sigma$ at $(0,0,i)$ on the $Z$-axis, and position the bend for each edge $e_{i,j}$ at $(x_i,y_i,j)$. Edges in distinct chains are contained in distinct planes that only intersect in the $Z$-axis. Thus such edges do not cross. Edges within each chain $E_i$ do not cross since no two edges in $E_i$ are nested or crossing in $\sigma$, and the $Z$-coordinates of the bends of the edges in $E_i$ agrees with the order of their endpoints on the $Z$-axis, as (imprecisely) illustrated in \figref{CutwidthConstruction}. The bounding box is $X\times\ceil{4\pi^2c/3X}\times n$, since each chain has at most $n-1$ edges. \end{proof}
 
-\Figure{CutwidthConstruction}{\includegraphics{CutwidthConstruction}}{Construction
-of collinear $1$-bend drawing in \lemref{CutwidthUpperBound}.}
+\Figure{CutwidthConstruction}{\includegraphics{CutwidthConstruction}}{Construction of collinear $1$-bend drawing in \lemref{CutwidthUpperBound}.}
 
 The constants in  \lemref{CutwidthUpperBound} can be tweaked as follows.
 
 \begin{lemma}
 \lemlabel{CutwidthUpperBoundSmall} 
-Let $G$ be a graph with $n$ vertices and cutwidth $c$.
-Then $G$ has a $1$-bend collinear  $3\times\ceil{(c-2)/2}\times n$
-drawing. The volume is at most $3(c-1)n/2$.
+Let $G$ be a graph with $n$ vertices and cutwidth $c$. Then $G$ has a $1$-bend collinear  $3\times\ceil{(c-2)/2}\times n$ drawing. The volume is at most $3(c-1)n/2$.
 \end{lemma}
 
-%S = \{(-1,0),(1,0)\} \cup \{(x,y) : y\in\{-1,1\}, -1\le x\le 
-%\ceil(c-6)/2\rceil\}
-
-\begin{proof} Let $S=\{(-1,0),(1,0)\}\cup\{(x,y):y\in\{-1,1\},-1\leq x\leq
+\begin{proof} 
+Let $S=\{(-1,0),(1,0)\}\cup\{(x,y):y\in\{-1,1\},-1\leq x\leq
 \ceil{(c-6)/2}\}$. Then $S$ consists of at least $c$ gridpoints that  are
 visible from the origin.  The result follows from the proof of
-\lemref{CutwidthUpperBound}. \end{proof}
+\lemref{CutwidthUpperBound}. 
+\end{proof}
 
 Since the cutwidth of $K_n$ is $n^2/4$ we have:
 
 \begin{corollary}
 \corlabel{CollinearCompleteGraph} 
-The minimum volume for a $1$-bend collinear drawing of the complete graph $K_n$ 
-is $\Theta(n^3)$. For all $X\geq1$, $K_n$  has a $1$-bend collinear 
-$X\times\Oh{n^2/X}\times n$ drawing with the vertices on the $Z$-axis.
-Furthermore, $K_n$ has a $1$-bend collinear  
-$3\times\ceil{n^2/8}\times n$ drawing with volume at most $3n^3/8$.\qed
+The minimum volume for a $1$-bend collinear drawing of the complete graph $K_n$  is $\Theta(n^3)$. For all $X\geq1$, $K_n$  has a $1$-bend collinear  $X\times\Oh{n^2/X}\times n$ drawing with the vertices on the $Z$-axis. Furthermore, $K_n$ has a $1$-bend collinear   $3\times\ceil{n^2/8}\times n$ drawing with volume at most $3n^3/8$.\qed
 \end{corollary}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -327,7 +287,7 @@ $e=(v_{a,i},v_{b,j})$,  and position the bend for $e$ at
 \begin{equation*}
 r_e\;=\;(2a+1,\,bQ+j,\,4^{P-a}\, Q-i)\enspace,
 \end{equation*}
-as illustrated in \figref{VertexLayout}. We say $v_{a,i}r_e$ is an
+as (imprecisely) illustrated in \figref{VertexLayout}. We say $v_{a,i}r_e$ is an
 \emph{outgoing} segment at $v_{a,i}$, and $r_ev_{b,j}$ is an \emph{incoming}
 segment at $v_{b,j}$.
 
@@ -397,10 +357,173 @@ $4^{P-c-1}>1$,
 which is true since $c\leq P-2$.
 This completes the proof.
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibliographystyle{myBibliographyStyle}
-\bibliography{myBibliography,myConferences}
+\subsection*{Acknowledgements}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Thanks to Stephen Wismath for suggesting the problem.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\bibliographystyle{myNatbibStyle}
+%\bibliography{myBibliography,myConferences}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\soft#1{\leavevmode\setbox0=\hbox{h}\dimen7=\ht0\advance \dimen7
+  by-1ex\relax\if t#1\relax\rlap{\raise.6\dimen7
+  \hbox{\kern.3ex\char'47}}#1\relax\else\if T#1\relax
+  \rlap{\raise.5\dimen7\hbox{\kern1.3ex\char'47}}#1\relax \else\if
+  d#1\relax\rlap{\raise.5\dimen7\hbox{\kern.9ex \char'47}}#1\relax\else\if
+  D#1\relax\rlap{\raise.5\dimen7 \hbox{\kern1.4ex\char'47}}#1\relax\else\if
+  l#1\relax \rlap{\raise.5\dimen7\hbox{\kern.4ex\char'47}}#1\relax \else\if
+  L#1\relax\rlap{\raise.5\dimen7\hbox{\kern.7ex
+  \char'47}}#1\relax\else\message{accent \string\soft \space #1 not
+  defined!}#1\relax\fi\fi\fi\fi\fi\fi} \def\cprime{$'$}
+\begin{thebibliography}{24}
+\providecommand{\natexlab}[1]{#1}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi:\discretionary{}{}{}#1}\else
+  \providecommand{\doi}{doi:\discretionary{}{}{}\begingroup
+  \urlstyle{rm}\Url}\fi
+
+\bibitem[{Bose \emph{et~al.}(2004)Bose, Czyzowicz, Morin, and
+  Wood}]{BCMW-JGAA04}
+\textsc{Prosenjit Bose, Jurek Czyzowicz, Pat Morin, and David~R. Wood}.
+\newblock The maximum number of edges in a three-dimensional grid-drawing.
+\newblock \emph{J. Graph Algorithms Appl.}, 8(1):21--26, 2004.
+
+\bibitem[{Calamoneri and Sterbini(1997)}]{CS-IPL97}
+\textsc{Tiziana Calamoneri and Andrea Sterbini}.
+\newblock {3D} straight-line grid drawing of 4-colorable graphs.
+\newblock \emph{Inform. Process. Lett.}, 63(2):97--102, 1997.
+
+\bibitem[{Cohen \emph{et~al.}(1996)Cohen, Eades, Lin, and Ruskey}]{CELR-Algo96}
+\textsc{Robert~F. Cohen, Peter Eades, Tao Lin, and Frank Ruskey}.
+\newblock Three-dimensional graph drawing.
+\newblock \emph{Algorithmica}, 17(2):199--208, 1996.
+
+\bibitem[{{Di Battista} \emph{et~al.}(1999){Di Battista}, Eades, Tamassia, and
+  Tollis}]{DETT99}
+\textsc{Guiseppe {Di Battista}, Peter Eades, Roberto Tamassia, and Ioannis~G.
+  Tollis}.
+\newblock \emph{Graph Drawing: Algorithms for the Visualization of Graphs}.
+\newblock Prentice-Hall, 1999.
+
+\bibitem[{Di~Giacomo(2004)}]{Giacomo-GD03}
+\textsc{Emilio Di~Giacomo}.
+\newblock Drawing series-parallel graphs on restricted integer {3D} grids.
+\newblock In  \cite{GD03}, pp. 238--246.
+
+\bibitem[{Di~Giacomo and Meijer(2004)}]{DM-GD03}
+\textsc{Emilio Di~Giacomo and Henk Meijer}.
+\newblock Track drawings of graphs with constant queue number.
+\newblock In  \cite{GD03}, pp. 214--225.
+
+\bibitem[{D{\'i}az \emph{et~al.}(2002)D{\'i}az, Petit, and
+  Serna}]{DPS-GraphLayouts}
+\textsc{Josep D{\'i}az, Jordi Petit, and Mar{\'i}a Serna}.
+\newblock A survey of graph layout problems.
+\newblock \emph{ACM Comput. Surveys}, 34(3):313--356, 2002.
+
+\bibitem[{Dilworth(1950)}]{Dilworth50}
+\textsc{Robert~P. Dilworth}.
+\newblock A decomposition theorem for partially ordered sets.
+\newblock \emph{Ann. of Math.} (2), 51:161--166, 1950.
+
+\bibitem[{Dujmovi{\'c} \emph{et~al.}(2005)Dujmovi{\'c}, Morin, and
+  Wood}]{DMW-SJC05}
+\textsc{Vida Dujmovi{\'c}, Pat Morin, and David~R. Wood}.
+\newblock Layout of graphs with bounded tree-width.
+\newblock \emph{SIAM J. Comput.}, 34(3):553--579, 2005.
+
+\bibitem[{Dujmovi{\'c} and   Wood(2004{\natexlab{b}})}]{DujWoo-LinearLayouts-DMTCS04}
+\textsc{Vida Dujmovi{\'c} and David~R. Wood}.
+\newblock On linear layouts of graphs.
+\newblock \emph{Discrete Math. Theor. Comput. Sci.}, 6(2):339--358,
+  2004{\natexlab{b}}.
+
+\bibitem[{Dujmovi{\'c} and Wood(to appear)}]{DujWoo-Subdivisions-DMTCS}
+\textsc{Vida Dujmovi{\'c} and David~R. Wood}.
+\newblock Stacks, queues and tracks: Layouts of graph subdivisions.
+\newblock \emph{Discrete Math. Theor. Comput. Sci.}, to appear.
+\newblock Layouts of graph subdivisions.
+\newblock In \textsc{J\'{a}nos Pach}, ed., \emph{Proc. 12th International Symp.
+  on Graph Drawing} (GD '04), vol. 3383 of \emph{Lecture Notes in Comput.
+  Sci.}, pp. 133--143. Springer, 2004{\natexlab{a}}.
+
+\bibitem[{Dujmovi{\'c} and Wood(2004{\natexlab{c}})}]{DujWoo-SubQuad-AMS}
+\textsc{Vida Dujmovi{\'c} and David~R. Wood}.
+\newblock Three-dimensional grid drawings with sub-quadratic volume.
+\newblock In \textsc{J\'{a}nos Pach}, ed., \emph{Towards a Theory of Geometric
+  Graphs}, vol. 342 of \emph{Contemporary Mathematics}, pp. 55--66. Amer. Math.
+  Soc., 2004{\natexlab{c}}.
+
+\bibitem[{Dyck \emph{et~al.}(2004)Dyck, Joevenazzo, Nickle, Wilsdon, and
+  Wismath}]{Wismath-TR04}
+\textsc{B.~Dyck, J.~Joevenazzo, E.~Nickle, J.~Wilsdon, and Stephen~K. Wismath}.
+\newblock Drawing ${K}_n$ in three dimensions with two bends per edge.
+\newblock Tech. Rep. TR-CS-01-04, Department of Mathematics and Computer
+  Science, University of Lethbridge, 2004.
+
+\bibitem[{Felsner \emph{et~al.}(2003)Felsner, Liotta, and Wismath}]{FLW-JGAA03}
+\textsc{Stefan Felsner, Giussepe Liotta, and Stephen~K. Wismath}.
+\newblock Straight-line drawings on restricted integer grids in two and three
+  dimensions.
+\newblock \emph{J. Graph Algorithms Appl.}, 7(4):363--398, 2003.
+
+\bibitem[{Hardy and Wright(1979)}]{HW79}
+\textsc{Godfrey~H. Hardy and Edward~M. Wright}.
+\newblock \emph{An introduction to the theory of numbers}.
+\newblock Clarendon, 5th edn., 1979.
+
+\bibitem[{Hasunuma(2004)}]{Hasunuma-GD03}
+\textsc{Toru Hasunuma}.
+\newblock Laying out iterated line digraphs using queues.
+\newblock In  \cite{GD03}, pp. 202--213.
+
+\bibitem[{Kaufmann and Wagner(2001)}]{KaufmannWagner01}
+\textsc{Michael Kaufmann and Dorothea Wagner}, eds.
+\newblock \emph{Drawing Graphs: Methods and Models}, vol. 2025 of \emph{Lecture
+  Notes in Comput. Sci.}
+\newblock Springer, 2001.
+
+\bibitem[{Leighton and Rosenberg(1986)}]{LR86}
+\textsc{F.~Thomson Leighton and Arnold~L. Rosenberg}.
+\newblock Three-dimensional circuit layouts.
+\newblock \emph{SIAM J. Comput.}, 15(3):793--813, 1986.
+
+\bibitem[{Liotta(2004)}]{GD03}
+\textsc{Guiseppe Liotta}, ed.
+\newblock \emph{Proc. 11th International Symp. on Graph Drawing} (GD '03), vol.
+  2912 of \emph{Lecture Notes in Comput. Sci.} Springer, 2004.
+
+\bibitem[{Pach \emph{et~al.}(1999)Pach, Thiele, and T\'{o}th}]{PTT99}
+\textsc{J\'{a}nos Pach, Torsten Thiele, and G\'{e}za T\'{o}th}.
+\newblock Three-dimensional grid drawings of graphs.
+\newblock In \textsc{Bernard Chazelle, Jacob~E. Goodman, and Richard Pollack},
+  eds., \emph{Advances in discrete and computational geometry}, vol. 223 of
+  \emph{Contemporary Mathematics}, pp. 251--255. Amer. Math. Soc., 1999.
+
+\bibitem[{Ware and Franck(1994)}]{WF94}
+\textsc{Colin Ware and Glenn Franck}.
+\newblock Viewing a graph in a virtual reality display is three times as good
+  as a 2{D} diagram.
+\newblock In \textsc{Allen~L. Ambler and Takyuki~D. Kimura}, eds., \emph{Proc.
+  IEEE Symp. Visual Languages} (VL '94), pp. 182--183. IEEE, 1994.
+
+\bibitem[{Ware and Franck(1996)}]{WF96}
+\textsc{Colin Ware and Glenn Franck}.
+\newblock Evaluating stereo and motion cues for visualizing information nets in
+  three dimensions.
+\newblock \emph{ACM Trans. Graphics}, 15(2):121--140, 1996.
+
+\bibitem[{Ware \emph{et~al.}(1993)Ware, Hui, and Franck}]{WHF93}
+\textsc{Colin Ware, David Hui, and Glenn Franck}.
+\newblock Visualizing object oriented software in three dimensions.
+\newblock In \emph{Proc. IBM Centre for Advanced Studies Conf.} (CASCON '93),
+  pp. 1--11. 1993.
+
+\end{thebibliography}
 
 \end{document}
 

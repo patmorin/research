@@ -1,0 +1,29 @@
+#!/bin/bash
+# Converts the picture elements in ipe file to pdf files
+# Usage : ipe2pdf [<file1> <file2> ...]
+
+if [ "$1" == '' ] ; then
+    files=*.xml
+else
+    files=$1
+fi
+
+for f in $files ; do
+    if [[ ! -e $f  ]] ; then
+	echo "Can't find file $f"
+	exit -1
+    fi
+done
+
+for f in $files ; do
+    r=${f%.xml}
+    if [[ ( ! -e "$r.pdf" ) || ( $r.xml -nt "$r.pdf" ) ]] ; then
+	echo "$r.xml => $r.pdf"
+	ipetoipe -pdf -export "$r.xml" "${r}.pdf"
+    fi
+    if [[ ( ! -e "$r.eps" ) || ( "$r.xml" -nt "$r.eps" ) ]] ; then
+	echo "$r.xml => $r.eps"
+	ipetoipe -eps -export "$r.xml" "$r.eps"
+    fi
+done
+

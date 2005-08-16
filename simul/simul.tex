@@ -1,0 +1,76 @@
+\documentclass{article}
+\usepackage{fullpage}
+\setlength{\parskip}{1ex}
+\newcommand{\problem}[1]{\section*{#1}}
+
+\begin{document}
+
+\problem{Simultaneous Planar Point Location}
+
+Let $S_1,\ldots,S_k$ each be sets of lines in the plane.  Each set
+$S_i$ contains $n$ parallel lines, but the lines in $S_j$ are not
+parallel to the lines in $S_i$, for $i\neq j$.  The problem is to
+preprocess $S_1,\ldots,S_k$ into a data structure so that for any
+query point $q$ we can return, for each $1\le i\le k$, the line in
+$S_i$ that is directly above $q$. 
+
+This problem has two trivial solutions.  Sorting each $S_i$ gives a
+data structure of optimal size $O(kn)$ with query time $O(k\log n)$.
+At the other extreme, we can compute the arrangement of
+$\bigcup_{i=1}^k S_i$, preprocess it for point location and label each
+cell with the solution.  This gives an $O(k^3n^2)$ space data
+structure with optimal query time $O(k + \log n)$.  (The space can
+probably be reduced to $O(k^2n^2)$ by using a walking trick, like in
+Bose, Lubiw and Munro \cite{blm02}.)
+
+During the conference, shortly after posing this problem, Stefan
+Langerman and Jason Morrison discovered a time-space tradeoff using
+cuttings \cite{m98}. Take a $\frac{x}{n}$-cutting of the input lines.
+This gives a triangulation of the plane consisting of $c(kn)^2/x^2$
+triangles, each of which intersects at most $x$ of the input lines.
+With each triangle $\Delta$ of the cutting, we store a trivial data
+structure for the sets $S_1^\Delta,\ldots,S_k^\Delta$, where each
+$S_i^\Delta$ is the subset of $S_i$ that intersects $\Delta$ plus the
+(at most) one line of $S_i$ that passes directly above $\Delta$.  This
+data structure uses space $O(k(kn)^2/x^2)$.  To perform a query in
+this data structure we do an $O(\log (n/x))$ time point location query in the cutting to
+locate the triangle $\Delta_q$ that contains $q$ and then use the
+trivial data structure for $\Delta_q$ to complete the query in
+$O(k\log x)$ time.  Thus, queries take time $O(\log(n/x) + k\log
+x)$.   A particular interesting choice of $x$ is obtained with
+$x=n^{d/k}$.  In this case, the space becomes $O(k(kn)^{2-2d/k}))$ and
+the query time becomes $O(k + d\log n)$.  (One of the $k$ factors in
+the space can be traded for an $n^\epsilon$ factor using a hierarchy
+of cuttings.) 
+
+This problem is a generalization of 1-dimensional iterated search,
+which can be solved optimally (using $O(kn)$ space and $O(k+\log n)$
+query time) using fractional cascading \cite{cg86}.  It is also a
+special case of 2-dimensional iterated point location: Given $k$
+planar subdivisions $S_1,\ldots,S_k$ each of size $O(n)$ preprocess
+them so that for any query point $q$ we can determine, for each $1\le
+i\le k$, which face of $S_i$ contains $q$. The time-space tradeoff
+based on cuttings works also for this generalized problem.  There
+seems to be no obvious existing lower bound result to imply that an
+$O(kn)$ space $O(k+\log n)$ query time data structure should not exist
+even for the general point-location problem.  Like fractional
+cascading, such a solution could (if general enough) lead to improved
+query times for many multi-level range searching data structures for
+which the secondary structure is a planar subdivision.
+
+Finally, we note that this problem is even of interest when $k$ is
+small, in which case the problem is to minimize the exact number of
+point-line comparisons used by the data structure.  For $k=1$ the
+trivial data structure is optimal since $\log_2 (n+1)$ is a lower
+bound on the number of comparisons and binary search achieves this.
+For $k=2$ the trivial data structure is also optimal since the
+arrangement of the $2n$ lines has $(n+1)^2$ cells so $2\log_2 (n+1)$
+comparisons are necessary.  However, for $k=3$ the arrangement only
+has $O(n^2)$ cells so the only lower bound on the number of tests
+required is $2\log_2 n + o(\log n)$.  A first open problem is to find
+a linear size data structure that uses $c\log_2 n + o(\log n)$
+comparisons with $c<3$ for the case $k=3$. 
+
+\bibliographystyle{plain}
+\bibliography{simul}
+\end{document}

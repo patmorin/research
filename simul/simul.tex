@@ -71,6 +71,34 @@ required is $2\log_2 n + o(\log n)$.  A first open problem is to find
 a linear size data structure that uses $c\log_2 n + o(\log n)$
 comparisons with $c<3$ for the case $k=3$. 
 
+\section{The Case $k=3$}
+
+Suppose $S_1$ contains diagonal lines, $S_2$ contains vertical lines
+and $S_3$ contains horizontal lines. Define the \emph{weight} of a
+diagonal slab as the number of intersections that occur in that slab.
+Select $r-1$ equally spaced elements of $S_1$ in order to define $r$
+diagonal \emph{superslabs}.  Store these slabs in a weight-biased
+search tree based on their weight.  The time to determine which
+diagonal slab a query point lies in is then $\log (n^2/I) + \log (n/r)
++ O(1)$, where $I$ is the number of intersections that occur in the
+superslab.  Now, for each superslab we store the $n$ vertical slabs in
+a weight-biased search tree where the weight of a vertical slab is the
+number of horizontal lines that intersects that vertical slab within
+the diagonal superslab.  The total weight in this tree is $I$ and the
+time to search for a node is $\log (I/H)$ where $H$ is the number of
+horizontal lines that intersects that vertical slab inside its
+enclosing superslab. Notice that the set of $H$ horizontal lines that
+intersect that slab is a contiguous subset of the $H$ horizontal lines
+and can be specified as two indices into an array.  Given these
+indices, the location of the query point in $S_3$ can be found in an
+additional $\log H + O(1)$ time.
+
+Thus, the total query time is $\log (n^2/I) + \log(I/H) + \log H +
+\log (n/r)+O(1)= 2\log n+\log(n/r)+O(1)$ and the total space is
+$O(nr)$.  Taking, for example $r=\sqrt{n}$ given $O(n^{3/2})$ space
+and $2.5\log n + O(1)$ query time.
+
+
 \bibliographystyle{plain}
 \bibliography{simul}
 \end{document}

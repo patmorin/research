@@ -98,6 +98,55 @@ Thus, the total query time is $\log (n^2/I) + \log(I/H) + \log H +
 $O(nr)$.  Taking, for example $r=\sqrt{n}$ given $O(n^{3/2})$ space
 and $2.5\log n + O(1)$ query time.
 
+\section{A Linear Space Solution}
+
+Let $m=kn$. In the dual, our $m$ lines become $m$ points, all of which
+lie on $k$ vertical lines.  Given a query line, we are asked to find
+the lowest point on each of the $k$ vertical lines that is above our
+query line.  Alternatively, we can join consecutive points on the
+lines to get a set of $m+k$ vertical line segments ($2k$ of these are
+infinite) and our query asks for the set of all segments intersected
+by a query line.  (The upper endpoints of these segments are the
+answers to our query.)
+
+Partition our $m$ points into 6 sets using one vertical line to split
+the sets of vertical lines into 2 equal pieces and one vertical plus
+one horizontal line to split the points into $4$ equal pieces.  This
+splits our intervals into 6 sets of size total size $m+k$ and maximum
+size $m/4+k/2$.  Recursively build a partition tree this way.  
+
+The total number of extra intervals that are created by splitting is
+given by the recurrence
+\[
+   S_{m,k} \le k + \sum_{i=1}^6 S_{m_i,k_i}
+\]
+subject to
+\[ m_i\le m/4 \]
+\[ k_i\le k/2 \]
+\[ \sum m_i=m \]
+\[ \sum k_i \le 2k \enspace , \] 
+which is bounded by $O(2^{\log_4 m})=O(\sqrt{m})$.  Check!
+
+The query time of this data structure is given by the recurrence
+\[
+  Q_{m,k} \le \sum_{i=1}^4 Q_{m_i,k_i}
+\]
+subject to the constraints
+\[ m_i\le m/4 \]
+\[ k_i\le k/2 \]
+\[ \sum m_i\le 3m/4 \]
+\[ \sum k_i\le 3k/2 \enspace , \] 
+which is bounded by $O(k+n^{\log_4 3})=O(k+n^{0.79})$.  Check!
+
+These bounds can probably be improved, and maybe a similar trick can
+be applied to Matou\v{s}ek's Efficient Partition Trees to give a query
+time of $O(\sqrt{n}+k)$
+
+\section{A Heavyweight Solution}
+
+Partition the dual points by their median $y$ coordinate
+
+
 
 \bibliographystyle{plain}
 \bibliography{simul}

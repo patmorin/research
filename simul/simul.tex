@@ -3,9 +3,12 @@
 \setlength{\parskip}{1ex}
 \newcommand{\problem}[1]{\section*{#1}}
 
-\begin{document}
+\title{Notes on Simultaneous Planar Point Location}
 
-\problem{Simultaneous Planar Point Location}
+\begin{document}
+\maketitle
+
+\section{Introduction}
 
 Let $S_1,\ldots,S_k$ each be sets of lines in the plane.  Each set
 $S_i$ contains $n$ parallel lines, but the lines in $S_j$ are not
@@ -13,6 +16,37 @@ parallel to the lines in $S_i$, for $i\neq j$.  The problem is to
 preprocess $S_1,\ldots,S_k$ into a data structure so that for any
 query point $q$ we can return, for each $1\le i\le k$, the line in
 $S_i$ that is directly above $q$. 
+
+This problem is a generalization of 1-dimensional iterated search,
+which can be solved optimally (using $O(kn)$ space and $O(k+\log n)$
+query time) using fractional cascading \cite{cg86}.  It is also a
+special case of 2-dimensional iterated point location: Given $k$
+planar subdivisions $S_1,\ldots,S_k$ each of size $O(n)$ preprocess
+them so that for any query point $q$ we can determine, for each $1\le
+i\le k$, which face of $S_i$ contains $q$. The time-space tradeoff
+based on cuttings (below) works also for this generalized problem.
+There seems to be no obvious existing lower bound result to imply that
+an $O(kn)$ space $O(k+\log n)$ query time data structure should not
+exist even for the general point-location problem.  Like fractional
+cascading, such a solution could (if general enough) lead to improved
+query times for many multi-level range searching data structures for
+which the secondary structure is a planar subdivision.
+
+Finally, we note that this problem is even of interest when $k$ is
+small, in which case the problem is to minimize the exact number of
+point-line comparisons used by the data structure.  For $k=1$ the
+trivial data structure is optimal since $\log_2 (n+1)$ is a lower
+bound on the number of comparisons and binary search achieves this.
+For $k=2$ the trivial data structure is also optimal since the
+arrangement of the $2n$ lines has $(n+1)^2$ cells so $2\log_2 (n+1)$
+comparisons are necessary.  However, for $k=3$ the arrangement only
+has $O(n^2)$ cells so the only lower bound on the number of tests
+required is $2\log_2 n + o(\log n)$.  A first open problem is to find
+a linear size data structure that uses $c\log_2 n + o(\log n)$
+comparisons with $c<3$ for the case $k=3$. 
+
+
+\section{Trivial Solutions}
 
 This problem has two trivial solutions.  Sorting each $S_i$ gives a
 data structure of optimal size $O(kn)$ with query time $O(k\log n)$.
@@ -23,6 +57,7 @@ structure with optimal query time $O(k + \log n)$.  (The space can
 probably be reduced to $O(k^2n^2)$ by using a walking trick, like in
 Bose, Lubiw and Munro \cite{blm02}.)
 
+\section{A Time-Space Tradeoff Using Cuttings}
 
 Here is a time-space tradeoff using cuttings \cite{m98}. Take a
 $\frac{x}{n}$-cutting of the input lines.  This gives a triangulation
@@ -43,60 +78,36 @@ time becomes $O(k + d\log n)$.  (One of the $k$ factors in the space
 can be traded for an $n^\epsilon$ factor using a hierarchy of
 cuttings.) 
 
-This problem is a generalization of 1-dimensional iterated search,
-which can be solved optimally (using $O(kn)$ space and $O(k+\log n)$
-query time) using fractional cascading \cite{cg86}.  It is also a
-special case of 2-dimensional iterated point location: Given $k$
-planar subdivisions $S_1,\ldots,S_k$ each of size $O(n)$ preprocess
-them so that for any query point $q$ we can determine, for each $1\le
-i\le k$, which face of $S_i$ contains $q$. The time-space tradeoff
-based on cuttings works also for this generalized problem.  There
-seems to be no obvious existing lower bound result to imply that an
-$O(kn)$ space $O(k+\log n)$ query time data structure should not exist
-even for the general point-location problem.  Like fractional
-cascading, such a solution could (if general enough) lead to improved
-query times for many multi-level range searching data structures for
-which the secondary structure is a planar subdivision.
+\section{A Time-Space Tradeoff Using Biased Search Trees}
 
-Finally, we note that this problem is even of interest when $k$ is
-small, in which case the problem is to minimize the exact number of
-point-line comparisons used by the data structure.  For $k=1$ the
-trivial data structure is optimal since $\log_2 (n+1)$ is a lower
-bound on the number of comparisons and binary search achieves this.
-For $k=2$ the trivial data structure is also optimal since the
-arrangement of the $2n$ lines has $(n+1)^2$ cells so $2\log_2 (n+1)$
-comparisons are necessary.  However, for $k=3$ the arrangement only
-has $O(n^2)$ cells so the only lower bound on the number of tests
-required is $2\log_2 n + o(\log n)$.  A first open problem is to find
-a linear size data structure that uses $c\log_2 n + o(\log n)$
-comparisons with $c<3$ for the case $k=3$. 
-
-\section{The Case $k=3$}
-
-Suppose $S_1$ contains diagonal lines, $S_2$ contains vertical lines
-and $S_3$ contains horizontal lines. Define the \emph{weight} of a
-diagonal slab as the number of intersections that occur in that slab.
-Select $r-1$ equally spaced elements of $S_1$ in order to define $r$
-diagonal \emph{superslabs}.  Store these slabs in a weight-biased
-search tree based on their weight.  The time to determine which
-diagonal slab a query point lies in is then $\log (n^2/I) + \log (n/r)
-+ O(1)$, where $I$ is the number of intersections that occur in the
-superslab.  Now, for each superslab we store the $n$ vertical slabs in
-a weight-biased search tree where the weight of a vertical slab is the
-number of horizontal lines that intersects that vertical slab within
-its enclosing diagonal superslab.  The total weight in this tree is $I$ and the
-time to search for a node is $\log (I/H)$ where $H$ is the number of
-horizontal lines that intersects that vertical slab inside its
-enclosing superslab. Notice that the set of $H$ horizontal lines that
-intersect that slab is a contiguous subset of the $H$ horizontal lines
-and can be specified as two indices into an array.  Given these
-indices, the location of the query point in $S_3$ can be found in an
-additional $\log H + O(1)$ time.
+Consider the case $k=3$.  Suppose $S_1$ contains diagonal lines, $S_2$
+contains vertical lines and $S_3$ contains horizontal lines. Define
+the \emph{weight} of a diagonal slab as the number of intersections
+that occur in that slab.  Select $r-1$ equally spaced elements of
+$S_1$ in order to define $r$ diagonal \emph{superslabs}.  Store these
+slabs in a weight-biased search tree based on their weight.  The time
+to determine which diagonal slab a query point lies in is then $\log
+(n^2/I) + \log (n/r) + O(1)$, where $I$ is the number of intersections
+that occur in the superslab.  Now, for each superslab we store the $n$
+vertical slabs in a weight-biased search tree where the weight of a
+vertical slab is the number of horizontal lines that intersects that
+vertical slab within its enclosing diagonal superslab.  The total
+weight in this tree is $I$ and the time to search for a node is $\log
+(I/H)$ where $H$ is the number of horizontal lines that intersects
+that vertical slab inside its enclosing superslab. Notice that the set
+of $H$ horizontal lines that intersect that slab is a contiguous
+subset of the $H$ horizontal lines and can be specified as two indices
+into an array.  Given these indices, the location of the query point
+in $S_3$ can be found in an additional $\log H + O(1)$ time.
 
 Thus, the total query time is $\log (n^2/I) + \log(I/H) + \log H +
 \log (n/r)+O(1)= 2\log n+\log(n/r)+O(1)$ and the total space is
 $O(nr)$.  Taking, for example $r=\sqrt{n}$ given $O(n^{3/2})$ space
 and $2.5\log n + O(1)$ query time.
+
+This solution generalizes to arbitrary values of $k$ in a
+straightforward way, giving about the same tradeoff as the solution
+based on cuttings.
 
 \section{A Linear Space Solution}
 
@@ -125,7 +136,8 @@ subject to
 \[ k_i\le k/2 \]
 \[ \sum m_i=m \]
 \[ \sum k_i \le 2k \enspace , \] 
-which is bounded by $O(2^{\log_4 m})=O(\sqrt{m})$.  Check!
+which is bounded by $O(2^{\log_4 m})=O(\sqrt{m})$.  Check! Thus the
+total space is $O(m+\sqrt{m}) = O(m)$.
 
 The query time of this data structure is given by the recurrence
 \[

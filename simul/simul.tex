@@ -2,6 +2,7 @@
 \usepackage{fullpage}
 \setlength{\parskip}{1ex}
 \newcommand{\problem}[1]{\section*{#1}}
+\newcommand{\polylog}{\log^{O(1)}}
 
 \title{Notes on Simultaneous Planar Point Location}
 
@@ -75,8 +76,7 @@ $O(k\log x)$ time.  Thus, queries take time $O(\log(n/x) + k\log x)$.
 A particular interesting choice of $x$ is obtained with $x=n^{d/k}$.
 In this case, the space becomes $O(k(kn)^{2-2d/k}))$ and the query
 time becomes $O(k + d\log n)$.  (One of the $k$ factors in the space
-can be traded for an $n^\epsilon$ factor using a hierarchy of
-cuttings.) 
+can gotten rid of by using hierarchichal cuttings.)
 
 \section{A Time-Space Tradeoff Using Biased Search Trees}
 
@@ -109,7 +109,7 @@ This solution generalizes to arbitrary values of $k$ in a
 straightforward way, giving about the same tradeoff as the solution
 based on cuttings.
 
-\section{A Linear Space Solution}
+\section{A Near-Linear Space Solution}
 
 Let $m=kn$. In the dual, our $m$ lines become $m$ points, all of which
 lie on $k$ vertical lines.  Given a query line, we are asked to find
@@ -120,54 +120,29 @@ infinite) and our query asks for the set of all segments intersected
 by a query line.  (The upper endpoints of these segments are the
 answers to our query.)
 
-Partition our $m$ points into 6 sets using one vertical line to split
-the sets of vertical lines into 2 equal pieces and one vertical plus
-one horizontal line to split the points into $4$ equal pieces.  This
-splits our intervals into 6 sets of size total size $m+k$ and maximum
-size $m/4+k/2$.  Recursively build a partition tree this way.  
+Matou\v{s}ek \cite[Lemma~6.3]{m92} describes a data structure that
+stores a set of $n$ line segments, is of size $O(n\polylog n)$, can be
+constructed in $O(n\polylog n)$ time, and that can return the set of
+line segments intersected by any query line in $O(\sqrt{n}\polylog n+
+k)$ time.  Using this data structure gives a near-linear space data
+structure that answers our queries in $O(\sqrt{nk}\polylog n + k)$.
 
-The total number of extra intervals that are created by splitting is
-given by the recurrence
-\[
-   S_{m,k} \le k + \sum_{i=1}^6 S_{m_i,k_i}
-\]
-subject to
-\[ m_i\le m/4 \]
-\[ k_i\le k/2 \]
-\[ \sum m_i=m \]
-\[ \sum k_i \le 2k \enspace , \] 
-which is bounded by $O(2^{\log_4 m})=O(\sqrt{m})$.  Check! Thus the
-total space is $O(m+\sqrt{m}) = O(m)$.
+Does this solution generalize to the case where we have $k$ planar
+subdivisions?  We can store the segments of our subdivisions in a
+segment tree so that we can extract, in $O(\log n)$ time a set of
+$O(\log n)$ canonical subsets of line segments that overlap the
+$x$-coordinate of our query point.  Now, if we dualize each canonical
+subset we get a set of points coming from $k$ color classes and we can
+connect the points of each color class into $k$ $y$-monotone chains.
+Now, storing these chains in Matou\v{s}ek's structure (as above)
+allows us to find all the (at most $k$) segments intersecting our
+query line in $O(\sqrt{|S|}\polylog n + k)$ time, where $S$ is the
+canonical subset in question.  Unfortunately, we have $O(\log n)$
+canonical subsets, so we get an overall query time of
+$O(\sqrt{n}\polylog n + k\log n)$.  Can we use fractional cascading
+within each color class to get rid of the $\log n$ factor on the
+second term?
 
-The query time of this data structure is given by the recurrence
-\[
-  Q_{m,k} \le \sum_{i=1}^4 Q_{m_i,k_i}
-\]
-subject to the constraints
-\[ m_i\le m/4 \]
-\[ k_i\le k/2 \]
-\[ \sum m_i\le 3m/4 \]
-\[ \sum k_i\le 3k/2 \enspace , \] 
-which is bounded by $O(k+n^{\log_4 3})=O(k+n^{0.79})$.  Check!
-
-\section{A Heavyweight Solution}
-
-An $O(n)$ space, $O(\sqrt{n} + k)$ query time solution can
-be obtained using Matou\v{s}ek's efficient partition trees.  In his
-triangle finding/assignment algorithm, assign the $n/r$ points to the
-triangle he wants, but leave the bottom (at most $k$ points) in the
-set.  This causes at most $k\sqrt{r}$ points to appear in more than
-one triangle.  We then get a recurrence for the space of the form
-\[
-    S_{m,k} = \sum_{i=1}^r S_{m_i+k_i,k_i}
-\]
-subject to 
-\[ m_i \le 2n/r \enspace , \]
-\[ \sum m_i=m \enspace , \]
-and
-\[ \sum k_i \le k\sqrt{r} \enspace . \] 
-The base cases of this recurrence are:
-$S_{m,1} = O(m)$ and $S_{1,k}=O(k)$
 
 \bibliographystyle{plain}
 \bibliography{simul}

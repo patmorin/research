@@ -1,38 +1,313 @@
 \documentclass[lotsofwhite]{patmorin}
+\usepackage{amsthm}
 
-\title{\MakeUppercase{Centerpoint Theorems for Wedges}}
+\title{\MakeUppercase{A Centerpoint Theorem for Wedges}}
 \author{Jeff Erickson \and
 	Ferran Hurtado \and
 	Pat Morin \and
 	Perouz Taslakian \and
-	David Wood}
+	David R. Wood}
 \date{}
+\input{pat.tex}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-The \emph{Centerpoint Theorem} states that, for any set $S$ of $n$ points
-in $\mathbb{R}^2$, there exists a point $p$ in $\mathbb{R}^2$ such
-that every halfplane containing $p$ contains at least $n/3$ points of
-$S$ and such a point can be found in $O(n)$ time using an algorithm of
-Mukhopadhya and XXX (1996).  We consider a generalization of the
-Centerpoint Theorem in which halfplanes are replaced with cones of
-angle $\alpha$.
+The \emph{Centerpoint Theorem} states that, for any set $S$ of $n$
+points in $\mathbb{R}^2$, there exists a point $p$ in $\mathbb{R}^2$
+such that every halfplane containing $p$ contains at least $\ceil{n/3}$
+points of $S$ and such a point can be found in $O(n)$ time using an
+algorithm of Jadhav and Mukhopadhyay (1994).  We consider a
+generalization of the Centerpoint Theorem in which halfplanes are
+replaced with wedges (cones) of angle $\alpha$.
 \end{abstract}
 
 \section{Introduction}
 
 Let $S$ be a set of $n$ points in $\mathbb{R}^d$.  The \emph{halfspace
-depth} \cite{t73} of a point $p$ with respect to $S$ is defined as
-\begin{equation}
-H(p) = \min\{|h\cap S| : \mbox{$h$ is a closed halfspace that contains $p$} \}
-\enspace .
-\end{equation}
+depth} \cite{t75} of a point $p$ with respect to $S$ is defined as
+\[
+D_\pi(p,S) = 
+   \min\{|h\cap S| : \mbox{$h$ is a closed halfspace that contains $p$} \}
+    \enspace .
+\]
 The \emph{Centerpoint Theorem}, which is a simple consequence of
-Helly's Theorem \cite{X} states that for any point set $S$, there
-exists a point whose halfspace depth is at least $n/(d+1)$.  
+Helly's Theorem \cite{e93} states that for any point set $S$, there
+exists a point whose halfspace depth is at least $\ceil{n/(d+1)}$.
+Furthermore, for every $n$, there exists a point set $S$ in
+$\mathbb{R}^d$ of size $n$ for which no point in $\mathbb{R}^d$ has
+halfspace depth greater than $\ceil{n/(d+1)}$. 
 
 In this paper we consider a generalization of halfspace depth called
-\emph{$\alpha$ wedge depth}.  The $\alpha$ wedge depth
+\emph{$\alpha$-wedge depth}. Let $r$ be a ray with endpoint $q$.  An
+$\alpha$-wedge with apex $q$ and axis $r$ is the set of all points $x$
+such that the angle\footnote{We use the convention that the angle
+between two line segments with an endpoint in common is the smaller of
+the two angles occuring at the common point.} between $pq$ and $r$ is
+at most $\alpha/2$.  The $\alpha$ wedge depth of a point $p$ with
+respect to a point set $S$ is defined as
+\[
+D_\alpha(p,S) =
+   \min\{|h\cap S| : \mbox{$h$ is an $\alpha$-wedge that contains $p$} \} 
+   \enspace .
+\]
+Define the function $f^d_\alpha(n)$ as follows:
+\[
+   f^d_\alpha(n) = \min\left\{\max\{D_\alpha(p,S):p\in
+\mathbb{R}^d\}: S\subseteq\mathbb{R}^d\, ,\, |S|=n\right\}
+\]
+That is, $f^d_\alpha$ defines, for each $n$, the maximum value $k$ for
+which every point set $S$ of size $n$ is guaranteed to define a point
+whose $\alpha$-wedge depth with respect to $S$ is at least $k$.  The
+Centerpoint Theorem states that $f^d_\pi(n) = \ceil{n/(d+1)}$.  In this paper
+we prove the following Theorem about 2-dimensional point sets:
+
+\begin{thm}\thmlabel{twod-result}
+\[
+   f^2_\alpha(n) = \left\{\begin{array}{ll}
+                        1 & \mbox{if $\alpha < \pi$} \\
+                        \ceil{n/3} & \mbox{if $\pi\le \alpha < 4\pi/3$} \\
+                        \ceil{n/2} & \mbox{if $4\pi/3\le \alpha < 2\pi$} \\
+                        n & \mbox{if $\alpha = 2\pi$\enspace .} 
+                       \end{array}\right.
+\]
+Furthermore, for any $\alpha$ and any point set $S$ of size $n$, a
+point $p$ such that $D_\alpha(p) \ge
+f^2_\alpha(n)$ can be found in $O(n)$ expected time.
+\end{thm}
+
+\section{Proof of \thmref{twod-result}}
+
+In this section we prove a sequence of lemmata that immediately imply
+\thmref{twod-result}.
+
+\begin{lem}\lemlabel{a}
+If $\alpha < \pi$ then $f^2_\alpha(n) = 1$ and a point $p$ such that
+$D_\alpha(p)\ge 1$ can be found in $O(1)$ time.
+\end{lem}
+
+\begin{proof}
+To prove the lower bound, we simply observe that for any non-empty
+point set $S$, every point $p\in S$ satisfies $D_\alpha(p,S)\ge 1$, so
+$f^2_\alpha(n) \ge 1$. This proves the lower bound and gives an $O(1)$
+time algorithm for finding $p$. 
+
+For the upper bound, simply consider a set $S$ of points that are all
+on the $x$-axis.  For any point $p$ on or above the $x$ axis, the
+$\alpha$-wedge whose axis is vertical and upwards intersects the $x$
+axis in at most one point, therefore $D_\alpha(p) \le 1$.  For any
+point $p$ below the $x$ axis, the $\alpha$-wedge whose axis is
+vertical and downwards does not intersect the $x$ axis at all, so
+$D_\alpha(p)=0$.  In either case, $D_\alpha(p)\le 1$ so $f^2_\alpha(n)
+\le 1$.
+\end{proof}
+
+\begin{lem}\lemlabel{b}
+If $\pi\le \alpha < 4\pi/3$ then $f^2_\alpha(n) = \ceil{n/3}$ and a
+point $p$ such that $D_\alpha(p)\ge \ceil{n/3}$ can be found in $O(n)$ time.
+\end{lem}
+
+\begin{proof} 
+For the lower bound, we observe that every $\alpha$-wedge containing
+$p$ also contains a halfspace containing $p$.  Therefore, the
+Centerpoint Theorem implies that $f^2_\alpha(n) \ge \ceil{n/3}$.  This
+proves the lower bound and the algorithm of Jadhav and Mukhopadhyay
+\cite{jm94} gives an $O(n)$ time algorithm for finding $p$.
+
+For the upper bound, we consider a point set in which $\ceil{n/3}$ or
+$\floor{n/3}$ points occur on each of 3 rays originating from the
+origin and such that the angle between any two rays is $2\pi/3$.  For
+any point $p\in\mathbb{R}^2$, there exists a $4\pi/3$-wedge whose apex
+is at $p$ and whose interior intersects only one of the three rays
+(the axis of this wedge is parallel to this ray). This $4\pi/3$ wedge
+contains an $\alpha$-wedge that contains $p$ and intersects only one
+of the three rays, therefore $D_\alpha(p,S)\le \ceil{n/3}$.  Since the choice
+of $p$ is arbitrary, this implies that $f^2_\alpha(n) \le \ceil{n/3}$.
+\end{proof}
+
+The next part of the proof uses the notion of halving lines.  A line
+$\ell$ is a \emph{halving line} of a (2-dimensional) point set $S$ of
+size $n$ if $\ell$ contains at least one point of $S$ and each of the
+two closed halfplanes bounded by $\ell$ contains at least $\ceil{n/2}$
+points of $S$.  The following lemma was proven by Fekete and Meijer
+\cite[Lemma~2]{fm00}.  However, we include a slightly different proof
+because ideas from the proof will be used in the algorithm we present
+later on.
+
+\begin{lem}\lemlabel{construction}
+For any point set $S$ there exists three concurrent halving lines 
+of $S$ such that the angle\footnote{We use the convention that
+the angle between a pair of lines is the smaller of the two angles
+defined by the two lines.} between any pair of lines is $\pi/3$.
+\end{lem}
+
+\begin{proof}
+To prove the existence of these three halving lines we start with one
+vertical halving line and the other two halving lines forming angles
+of $\pi/3$ with it, one having positive slope and the other
+having negative slope.  If these three halving lines are concurrent
+then the construction is complete. 
+
+If the three halving lines are not concurrent then they bound an
+equilateral triangle.  Suppose that initially the lines are directed
+so that the edges of this triangle are directed counterclockwise.
+Define the \emph{signed area} of a directed triangle to be the area of
+the triangle if its edges are directed counterclockwise and the
+negation of the area of the triangle if its edges are directed
+clockwise.  Imagine continuously rotating the three directed lines while
+maintaining the invariant that they are all halving lines and that the
+angle between any two is $\pi/3$.  Note that, during this process, the
+signed area of the triangle bounded by the three lines changes
+continuously.  However, after having rotated the lines by an angle of
+$\pi$, the three halving lines are identical to their initial
+configuration but their directions are reversed and therefore the
+signed area of the triangle is negated.  We conclude that at some
+point during this process the signed area of the triangle must have
+been equal to 0, at which point the three lines were concurrent.  This
+completes proof.
+\end{proof}
+
+\begin{lem}\lemlabel{algorithm}
+Three halving lines satisfying the conditions of \lemref{construction}
+can be found in $O(n)$ time.
+\end{lem}
+
+\begin{proof}
+
+To find the three halving lines we apply the prune-and-search paradigm
+in much the same way as the algorithm of Lo, Matou\v{s}ek and Steiger
+\cite{lms94} for finding planar ham-sandwich cuts.  In the standard
+``computational geometry dual'' \cite[Chapter~X]{dbeXX}, our problem
+is to find three points on the median level of $n$ lines such that
+these points are collinear and their $x$-coordinates satisfy a certain
+equation.  
+
+More precisely, given a set $S^*$ of $n$ lines (that are dual to the
+points of $S$), let
+\[
+    h_k(x) = \min\{ y : 
+        \mbox{$(x,y)$ is on or above at least $k$ lines of
+$S^*$}\} 
+\]
+and let $h=h_{\ceil{n_2}}$.
+Then our problem is to find a value $x$ such that the three points
+$(x,h(x))$, $(g_1(x),h(g_1(x)))$ and $(g_2(x),h(g_2(x)))$ are collinear.
+Here $g_1(x)=blah$ and
+$g_2(x)=blah$ which captures the condition that each pair of halving
+lines form an angle of $\pi/3$.  [Informally, the continuity argument in
+the proof of \lemref{construction} is equivalent to the observation
+that, if the sequence of points $\langle(-\infty,h(-\infty)),
+(g_1(-\infty),h(g_1(-\infty)), (g_2(-\infty),h(g_2(-\infty))\rangle$ form
+a right (respectively left) turn then the points $\langle(\infty,h(\infty)),
+(g_1(\infty),h(g_1(\infty)), (g_2(\infty),h(g_2(\infty))\rangle$ form a
+left (respectively right) turn, so there must be some
+$x\in(-\infty,\infty)$ such that 
+$(x,h(x))$, $(g_1(x),h(g_1(x)))$ and $(g_2(x),h(g_2(x)))$ are
+collinear.]
+
+The algorithm we describe is recursive, and the recursive subproblems
+it solves are slightly more general.  Given a set $S^*$ of $m$ lines,
+two $x$-coordinates $x_1$ and $x_2$ and three integers $k$, $k_1$ and
+$k_2$, the algorithm finds an $x$-coordinate $x\in[x_1,x_2]$ such that
+the three points $(x,h_k(x))$, $(g_1(x),h_{k_1}(g_1(x)))$ and
+$(g_2(x),h_{k_2}(g_2(x)))$ are collinear.  Such a value $x$ is
+guaranteed \emph{a priori} to exist.  Note that, for our initial
+recursive call we set $x_1=-\infty$, $x_2=\infty$, and
+$k=k_1=k_2=\ceil{n/2}$.
+ 
+To implement a single step of our algorithm, we create a set $X$ of
+$x$-coordinates that initially contains the values $x_1$ and $x_2$.
+Next we add to $X$ an additional $O(1)$ values so that between any
+consecutive pair of $x$-coordinates in $X$, the arrangement of our $m$
+lines contains at most $\delta m^2/40$ vertices, for some constant
+$\delta$ to be specified later.  These points can be found in $O(m)$
+time using the algorithm of Chazelle \cite{X}.  Finally, for each
+value $x\in X$ we add the values $g_1^{-1}(x)$ and $g_2^{-1}(x)$ to
+$X$.  
+
+Now, in $O(m)$ time we can determine two consecutive elements $x_1'$
+and $x_2'$ of $X$ such that $x_1',x_2'\in[x_1,x_2]$ and a solution to our
+problem lies in the interval $[x_1',x_2']$.  Consider the trapezoid
+$T$ whose four corners are given by $(x_1',h_{k\pm\ceil{\delta
+m/2}}(x_1'))$ and $(x_2',h_{k\pm\ceil{\delta m/2}}(x_2'))$.  A simple
+argument \cite[Lemma~X]{lms94} shows that this trapezoid intersects at
+most $\delta m$ lines of $S^*$ and that the $k$ level of $S^*$ does
+not intersect the top or bottom sides of this trapezoid.  Similarly,
+there are trapezoids $T_1$ and $T_2$ defined by the four points 
+$(g_1(x_1'),h_{k_1\pm\ceil{\delta m/2}}(g_1(x_1')))$ and
+$(g_1(x_2'),h_{k_1\pm\ceil{\delta m/2}}(g_1(x_2')))$ and the four
+points
+$(g_2(x_1'),h_{k_1\pm\ceil{\delta m/2}}(g_2(x_1')))$ and
+$(g_2(x_2'),h_{k_1\pm\ceil{\delta m/2}}(g_2(x_2')))$, respectively.
+Neither $T_1$ nor $T_2$ intersect more than $\delta m$ lines in $S^*$
+and the $k_1$-level (respectively $k_2$-level) of $S^*$ does not
+intersect the top or bottom sides of $T_1$ (respectively $T_2$).
+
+Altogether, this means that there are at least $m-3\delta m$ lines in
+$S^*$ that do not intersect any of the trapezoids $T$, $T_1$ or $T_2$.
+When we recurse, we discard these lines, set $x_1=x_1'$, $x_2=x_2'$,
+and subtract from $k$ (respectively $k_1$ and $k_2$) the number of
+discarded lines that pass below $T$ (respectively $T_1$ and $T_2$).
+Each iteration of the algorithm takes time linear in the size of $S^*$
+and decreases the size of $S^*$ by a factor of $3\delta$.  Thus, the
+running time of this algorithm is $O(n)$, provided that we select
+$\delta < 1/3$.
+\end{proof}
+
+\begin{lem}\lemlabel{c}
+If $4\pi/3\le \alpha < 2\pi$ then $f^2_\alpha(n) = n/2$ and a point
+$p$ such that $D_\alpha(p)\ge n/2$ can be found in $O(n)$ time.
+\end{lem}
+
+\begin{proof}
+For the lower bound, consider the three halving lines whose existence
+is given by \lemref{construction}.  These three halving lines
+naturally define six $\pi/3$-wedges.  Observe that if we take $p$ to
+be the common intersection point of the three halving lines then any
+$\alpha$-wedge that contains $p$ contains at least 3 consecutive
+wedges and therefore contains at least $\ceil{n/2}$ points of $S$
+(because it contains a closed halfplane bounded by one of the
+halving lines).  Therefore, $f^2_\alpha(n)\ge \ceil{n/2}$, and the
+point $p$ such that $D_\alpha(p)\ge \ceil{n/2}$ can be found in $O(n)$
+time using \lemref{algorithm}.
+
+ 
+For the upper bound, we consider a point set in which the points have
+been clustered into two groups of size $\floor{n/2}$ and $\ceil{n/2}$.
+Each of the two groups is contained in a unit ball and the distance
+between the two groups is very large, say $r$.  Now, observe that
+any point $p$ must be at distance $r/2$ from at least one of the
+two groups.  This means that, if $r$ is sufficiently large, then
+there exists a $(2\pi-\alpha)$-wedge whose apex is $p$ and that
+contains this group in its interior.  The complementary $\alpha$-wedge
+contains $p$ and does not contain any points of this group.
+Therefore, $D_\alpha(p)\le \ceil{n/2}$.  Since $p$ was chosen
+arbitrarily, we conclude that $f^2_\alpha(n)\le \ceil{n/2}$.
+\end{proof}
+
+Lemmata \ref{lem:a}, \ref{lem:b} and \ref{lem:c} immediately imply
+\thmref{twod-result}.
+
+\section{Conclusions}
+
+\begin{enumerate}
+\item Given a point set $S$ in $\mathbb{R}^2$, what is the complexity
+of finding a point $p\in\mathbb{R}^2$ that maximizes $D_\alpha(p,S)$?
+For $\alpha=\pi$, i.e., halfplane depth, Chan has given an $O(n\log
+n)$ time algorithm.
+
+\item Prove a theorem in $d$ dimensions.
+
+\end{enumerate}
+
+
+
+\bibliographystyle{plain}
+\bibliography{wedge}
+
+
+
+
+
 \end{document}

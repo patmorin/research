@@ -1,7 +1,7 @@
 \documentclass[lotsofwhite]{patmorin}
 \usepackage{amsthm}
 
-\title{\MakeUppercase{A Centerpoint Theorem for Wedges}}
+\title{\MakeUppercase{Centerpoint Theorems for Wedges}}
 \author{Jeff Erickson \and
 	Ferran Hurtado \and
 	Pat Morin \and
@@ -80,6 +80,26 @@ point $p$ such that $D_\alpha(p,S) \ge
 f^2_\alpha(n)$ can be found in $O(n)$ expected time.
 \end{thm}
 
+We then generalize the bounds of \thmref{twod-result} to point sets in
+$\mathbb{R}^d$ and obtain the following theorem:
+
+\begin{thm}\thmlabel{dd-result}
+\[
+   f^d_\alpha(n) = \left\{\begin{array}{ll}
+                        1 & \mbox{if $\alpha < \pi$} \\
+                        \ceil{n/(d+1)} & \mbox{if $\pi\le \alpha < blah(d)$} \\
+                        \ceil{n/2} & \mbox{if $blah(d)\le \alpha < 2\pi$} \\
+                        n & \mbox{if $\alpha = 2\pi$\enspace .} 
+                       \end{array}\right.
+\]
+\end{thm}
+In \thmref{dd-result}, the expression $blah(d)=2\pi-gaa(d)$, comes
+from the geometric fact that the angle between
+two rays that have their endpoints at the center of a regular
+$d$-simplex and that pass through two vertices of this simplex is
+$gaa(d)$. 
+
+
 \section{Proof of \thmref{twod-result}}
 
 In this section we prove a sequence of lemmata that immediately imply
@@ -155,23 +175,18 @@ of $\pi/3$ with it, one having positive slope and the other
 having negative slope.  If these three halving lines are concurrent
 then the construction is complete. 
 
-If the three halving lines are not concurrent then they bound an
-equilateral triangle.  Suppose that initially the lines are directed
-so that the edges of this triangle are directed counterclockwise.
-Define the \emph{signed area} of a directed triangle to be the area of
-the triangle if its edges are directed counterclockwise and the
-negation of the area of the triangle if its edges are directed
-clockwise.  Imagine continuously rotating the three directed lines while
-maintaining the invariant that they are all halving lines and that the
-angle between any two is $\pi/3$.  Note that, during this process, the
-signed area of the triangle bounded by the three lines changes
-continuously.  However, after having rotated the lines by an angle of
-$\pi$, the three halving lines are identical to their initial
-configuration except that their directions are reversed and therefore the
-signed area of the triangle is negated.  We conclude that at some
-point during this process the signed area of the triangle must have
-been equal to 0, at which point the three lines were concurrent.  This
-completes proof.
+Otherwise, let one of the lines, call it $\ell$, be distinguished and
+directed so that the intersection point $p$ of the remaining two lines
+is to the right of $\ell$.  Imagine continuously rotating the three
+lines while maintaining the invariant that they are all halving lines
+and that the angle between any two is $\pi/3$.  After having rotated
+the lines by an angle of $\pi$, the three halving lines are identical
+to their initial configuration except that the direction of $\ell$ is
+reversed, so now the intersection point of the other two lines is to
+the left of $\ell$.  We conclude that at some point during this
+process the intersection point of the other two lines must have been
+on $\ell$, at which point the three lines were concurrent.  This
+completes proof.  
 \end{proof}
 
 \begin{lem}\lemlabel{algorithm}
@@ -323,6 +338,74 @@ arbitrarily, we conclude that $f^2_\alpha(n)\le \ceil{n/2}$.
 Lemmata \ref{lem:a}, \ref{lem:b} and \ref{lem:c} immediately imply
 \thmref{twod-result}.
 
+\section{Proof of \thmref{dd-result}}
+
+In this section, we prove \thmref{dd-result}.  Most of the proof is
+identical to the proof of \thmref{twod-result}.  In particular, the
+following bounds come from exactly the same arguments used in the
+proofs of \lemref{a}, \lemref{b} and \lemref{c}.
+
+\begin{lem}
+$f^\alpha_d$ satisfies the following:
+\[\begin{array}{lcll}
+  f^d_\alpha(n) & = & 1 & \mbox{if $\alpha < \pi$} \\
+  f^d_\alpha(n) & \ge & \ceil{n/(d+1)} & \mbox{if $\alpha \ge \pi$} \\
+  f^d_\alpha(n) & \le & \ceil{n/2} & \mbox{if $\alpha < 2\pi$} \\
+\end{array}\]
+\end{lem}
+
+The next two lemmata complete the proof of \thmref{dd-result}
+
+\begin{lem}
+$f^d_\alpha(n) \le \ceil{n/(d+1)}$ for $\alpha < blah(d)$.
+\end{lem}
+
+\begin{proof} 
+We use a generalization of the point set used in the
+proof of \lemref{b}.  Let $S$ be a regular $d$-simplex whose center is
+at the origin and consider the $d+1$ rays originating at the origin
+and each containing a different vertex of $S$.  On each of these rays,
+place $\ceil{n/(d+1)}$ or $\floor{n/(d+1)}$ points, as appropriate, to
+produce a point set $S$ of size $n$.  As in the proof of \lemref{b},
+for any point $p\in\mathbb{R}^2$, there is a $blah(d)$-wedge that
+contains $p$ and whose interior intersects only one of the rays (the
+axis of this wedge is parallel to the ray that intersects its
+interior).  This $blah(d)$-wedge contains an $\alpha$-wedge that
+intersects only one of the rays and therefore contains at most
+$\ceil{n/(d+1)}$ points of $S$.  Since this argument holds for any
+$p\in\mathbb{R}^d$, we conclude that $f^d_\alpha(n)\le
+\ceil{n/(d+1)}$.  
+\end{proof}
+
+\begin{lem}
+$f^d_\alpha(n) \ge \ceil{n/2}$ for $\alpha \ge blah(d)$.
+\end{lem}
+
+\begin{proof}
+Let $S$ be any set of $n$ points in $\mathbb{R}^d$.  We will show that
+there are $d+1$ halving hyperplanes of $S$ that are coincident and
+parallel to the sides of some regular $d$-simplex.  Start with any
+$d+1$ halving hyperplanes of $S$ that are parallel to the sides of
+some regular $d$-simplex.  These $d+1$ hyperplanes bound some regular
+$d$ simplex $S$. Let one of the hyperplanes $h$ be distinguished and
+oriented so that the common intersection point of the remaining $d$
+hyperplanes is to the right of $h$.  Again, we can continuously rotate
+this construction while maintaining the invariant that the sides are
+halving hyperplanes parallel of $S$ and they are parallel to the sides
+of a regular $d$-simplex.  Again, if we rotate this construction so
+that all its defining hyperplanes are inverted we go from a situation
+in which the intersection point of the remaining $d$ of the remaining
+$d$ hyperplanes was to the right of $h$ to a situation in which the
+intersection of the remaining $d$ hyperplanes is to the left of $h$.
+We conclude that at some point during the rotation all $d$
+hyperplanes must have had a point $p$ in common.
+
+Take the point $p$ as our centerpoint.  We claim that
+$D_\alpha^d(p,S)\ge \ceil{n/2}$.  This comes from the fact that a
+$2\pi-blah(d)$
+\end{proof}
+
+
 \section{Conclusions}
 
 We have completely determined the function $f^2_\alpha$ and given a
@@ -346,36 +429,14 @@ of finding a point $p\in\mathbb{R}^2$ that maximizes $D_\alpha(p,S)$?
 For $\alpha=\pi$, i.e., halfplane depth, Chan has recently given an
 $O(n\log n)$ time algorithm \cite{c04}.
 
-\item The function $f^d_\alpha$ for $d>2$ is still unknown.  
+\item Given a set $S$ of $n$ points in $\mathbb{R}^d$, for $d\ge 3$,
+what is the complexity of finding a point $p\in \mathbb{R}^d$ such
+that $p\ge f_\alpha^d(n)$?  This problem is still open even for the
+case $\alpha=\pi$, though some progress has been made for the case
+$d=X$ \cite{X}.
 
-The same arguments used here (plus the Centerpoint Theorem) show that
-$f^d_\alpha(n) = 1$ for $\alpha < \pi$ and $f^d_\alpha(n)\ge
-\ceil{n/(d+1)}$ for $\alpha\ge \pi$.  
-
-Furthermore, if we take any $d$ orthogonal halving hyperplanes of an
-$n$ point set and let $p$ denote the common intersection point of
-these hyperplanes, then it is not hard to see that $D_\alpha(p)\ge
-\ceil{n/2}$ for $\alpha \ge 3\pi / 2$.  Note that this result is not
-tight (in terms of $\alpha$) even for $d=2$.
-
-We conjecture that, for any $d$, there exists $d+1$ concurrent halving
-hyperplanes that are parallel to the sides of a regular $d$-simplex.  (This
-should be easy to prove:  Maybe a good exercise in understanding the
-Borsuk-Ulam Theorem.)  This would imply that, for all $d$,
-$f^d_\alpha(n) \ge n/2$ for $\alpha\ge 4\pi/3$.
-
-This leads to an even stronger conjecture, namely:
-\[
-   f^d_\alpha(n) = \left\{\begin{array}{ll}
-                        1 & \mbox{if $\alpha < \pi$} \\
-                        \ceil{n/(d+1)} & \mbox{if $\pi\le \alpha < 4\pi/3$} \\
-                        \ceil{n/2} & \mbox{if $4\pi/3\le \alpha < 2\pi$} \\
-                        n & \mbox{if $\alpha = 2\pi$\enspace .} 
-                       \end{array}\right.
-\]
-
-\item In this paper we have only considered $\alpha$-wedges mainly
-because, for $d=2$, these are more or less the only interesting
+\item In this paper we have only considered $\alpha$-wedges.  This is
+mainly because, for $d=2$, these are more or less the only interesting
 scale-invariant objects.  However, in higher dimensions, one can
 define many scale-invariant shapes.  In general, for any shape $F$,
 one can study the properties of $F$-depth:

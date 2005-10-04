@@ -10,9 +10,9 @@
 \date{}
 \input{pat.tex}
 
-\newcommand{\blau}{XXXXX}
-\newcommand{\bleu}{XXXXX}
-
+\newcommand{\blau}[1]{\tan(\arctan(#1)+\pi/3)}
+\newcommand{\bleu}[1]{\tan(\arctan(#1)-\pi/3)}
+\newcommand{\blah}[1]{2\arccos(1/#1)}
 
 \begin{document}
 \maketitle
@@ -88,15 +88,20 @@ We then generalize the bounds of \thmref{twod-result} to point sets in
 $\mathbb{R}^d$ and obtain the following theorem:
 
 \begin{thm}\thmlabel{dd-result}
+Let $\theta_d = 2\pi - \blah{d}$.  Then
 \[
    f^d_\alpha(n) = \left\{\begin{array}{ll}
                         1 & \mbox{if $\alpha < \pi$} \\
-                        \ceil{n/(d+1)} & \mbox{if $\pi\le \alpha < 4\pi/3$} \\
-                        \ceil{n/2} & \mbox{if $4\pi/3\le \alpha < 2\pi$} \\
+                        \ceil{n/(d+1)} & \mbox{if $\pi\le \alpha < \theta_d$} \\
+                        \ceil{n/2} & \mbox{if $\theta_d\le \alpha < 2\pi$} \\
                         n & \mbox{if $\alpha = 2\pi$\enspace .} 
                        \end{array}\right.
 \]
 \end{thm} 
+The constant $\theta_d$ in \thmref{dd-result} appears in the following
+way.  It is the angle $\alpha$ of the smallest $\alpha$-wedge whose
+apex is a the center of a regular $d$-simplex and that contains $d$ of
+the $d+1$ vertices of this simplex.
 
 \section{Proof of \thmref{twod-result}}
 
@@ -214,8 +219,8 @@ $y=h_k(x)$ is called the \emph{$k$-level} of $S^*$ or, for
 $k=\ceil{n/2}$, the \emph{median level}.
 The dual of our problem is to find a value $x$ such that the three points
 $(x,h(x))$, $(g_1(x),h(g_1(x)))$ and $(g_2(x),h(g_2(x)))$ are collinear.
-Here $g_1(x)=\blau$ and
-$g_2(x)=\bleu$ which captures the condition that each pair of halving
+Here $g_1(x)=\blau{x}$ and
+$g_2(x)=\bleu{x}$ which captures the condition that each pair of halving
 lines form an angle of $\pi/3$.  [Informally, the continuity argument in
 the proof of \lemref{construction} is equivalent to the observation
 that, if the sequence of points $\langle(-\infty,h(-\infty)),
@@ -354,23 +359,33 @@ $f^\alpha_d$ satisfies the following:
 \end{array}\]
 \end{lem}
 
-The following technical lemma accounts for the appearance of $2\pi/3$
-int the bounds we obtain.
+The following technical lemma accounts for the appearance of $\theta_d$
+in the bounds we obtain.
 
-\begin{lem}
+\begin{lem}\lemlabel{cone-angle}
 Let $T$ be a regular $d$-simplex whose center is at the origin.  Then,
-for any $d$ vertices of $T$, there is a $(2\pi/3)$-wedge whose apex is
+for any $d$ vertices of $T$, there is a $(2\pi-\theta_d)$-wedge whose apex is
 at the origin and has these $d$ vertices of $S$ on its boundary.
 \end{lem}
 
-\begin{proof}
-Just do a bit of computation.
+\begin{proof} 
+Wlog we can consider the regular $d$-simplex whose vertices are
+$e_1,\ldots,e_d, (1-\sqrt{d+1}/d)(e_1+\cdots+e_d)$ where $e_i$ is the
+$i$th coordinate unit vector in $\mathbb{R}^d$.  The center of this
+simplex is the point $c=\sqrt{d+1}/(d^2+d)(e_1+\cdots+ e_d)$.
+Consider the $(2\pi-\theta_d)$-wedge whose apex is at $c$ and whose axis
+contains the point $e_1+\cdots+e_d$.  The angle between the axis and
+$e_i$, for any $1\le i\le d$ is easily determined to be
+$2\pi-\theta_d$ using the famous formula $\arccos (u\cdot
+v/\|u\|\|v\|)$ for the angle between two vectors $u$ and $v$.   Thus,
+the $d$-vertices $e_1,\ldots e_d$ are on the boundary of this
+$(2\pi-\theta_d)$-wedge, as required.  
 \end{proof}
 
 Next we prove two lemmata that complete our understanding of $f_\alpha^d$.
 
 \begin{lem}\lemlabel{dd-b}
-$f^d_\alpha(n) \le \ceil{n/(d+1)}$ for $\alpha < 4\pi/3$.
+$f^d_\alpha(n) \le \ceil{n/(d+1)}$ for $\alpha < \theta_d$.
 \end{lem}
 
 \begin{proof} 
@@ -381,24 +396,24 @@ containing a different vertex of $T$.  On each of these rays, place
 $\ceil{n/(d+1)}$ or $\floor{n/(d+1)}$ points, as appropriate, to
 produce a point set $S$ of size $n$.  We claim that, as in the proof
 of \lemref{b}, for any point $p\in\mathbb{R}^2$, there is a
-$\blahc{d}$-wedge that contains $p$ and whose interior intersects only
+$\theta_d$-wedge that contains $p$ and whose interior intersects only
 one of the rays.
 
-If the point $p$ is the origin, then consider any $d$ vertices of $T$
-and observe that \lemref{simplex-angle} implies that there is a
-$(4\pi/3)$-wedge that contains $d$ vertices of $S$
-on its boundary and therefore contains at most one vertex of $T$ in
-its interior.  Since $p$ is at the origin this means that this
-$(4\pi/3)$-wedge contains only one of the rays in its interior. 
-
-
-
-$p\in\mathbb{R}^d$, we conclude that $f^d_\alpha(n)\le
-\ceil{n/(d+1)}$.  
+Let $C_1,\ldots,C_{d+1}$ be the closed cones obtained by taking the
+affine hull of each subset of $d$ vertices of $T$.  Notice that these
+cones cover $\mathbb{R}^d$ and that each cone contains $d$ of the
+$d+1$ rays that contain $S$.  Furthermore, if the cone $C_i$ contains
+the point $-p$ then, by \lemref{cone-angle}, there is a
+$(2\pi-\theta_d)$-wedge
+whose apex is at $p$ and that contains $C_i$.  Thus the interior of
+the complementary $\theta_d$-wedge does not intersect $C_i$ and hence
+intersects only one of the $d+1$ rays that contain $S$. This
+$\theta_d$-wedge contains an $\alpha$-wedge that contains $p$ and
+contains at most $\ceil{n/(d+1)}$ points of $S$, as required.
 \end{proof}
 
 \begin{lem}\lemlabel{dd-c}
- $f^d_\alpha(n) \ge \ceil{n/2}$ for $\alpha \ge \blah{d}$.
+ $f^d_\alpha(n) \ge \ceil{n/2}$ for $\alpha \ge \theta_d$.
 \end{lem}
 
 \begin{proof}
@@ -421,34 +436,12 @@ during the rotation all $d+1$ hyperplanes must have had a point $p$ in
 common, as required.
 
 Take the point $p$ as our centerpoint.  We claim that
-$D_\alpha^d(p,S)\ge \ceil{n/2}$.  To see this, imagine translating
-each of the $d+1$ hyperplanes that define $p$ by one unit away from
-$p$ so that they define a $d$-simplex $T$ that contains $p$.  By
-definition of $\blah{d}$, any $\blah{d}$-wedge $w$ whose apex is at
-$p$ contains at most one vertex of $T$ its interior.  Thus, there is
-at least one facet $f$ of $T$ whose $d$ defining vertices are not 
-in the interior of $w$.
-
-Opposite this vertex
-is a facet $f$ of $T$ that contains the remaining $d$ vertices of $T$.
+$D_\alpha^d(p,S)\ge \ceil{n/2}$. To see this, observe that \lemref{any
+$(2\pi-\theta_d)$-wedge contains at most 
 
 
-Thus the
-complementary $\blahc{d}$-wedge contains the remaining $d$ points.
-
-
-
-
-
-any
-$\alpha$-wedge whose apex is at $p$ and whose axis is parallel to some
-vector $v$. By \lemref{angles}, one of the $d+1$ halving hyperplanes
-$h$ forms an angle of at least $\blahc{d}/2$ with $v$.  Therefore,
-this $\alpha$-wedge completely contains $h$ which implies that the
-$\alpha$-wedge completely contains one of the halfspace bounded by
-$h$.  Thus, this $\alpha$-wedge contains at least $\ceil{n/2}$ points
-of $S$.  Since this is true for all $\alpha$-wedges with an apex at
-$p$ we conclude that $D_\alpha(p,S)\ge\ceil{n/2}$, as required.
+our $d+1$
+hyperplanes  
 \end{proof}
 
 

@@ -395,9 +395,9 @@ contains the point $e_1+\cdots+e_d$.  The angle between $r$ and
 $e_i$, for any $1\le i\le d$ is easily determined to be
 $\arccos(1/d)$ using the famous formula 
 \[
-   \theta = \arccos \left(\frac{u\cdot v}{\|u\|\|v\|}\right) 
+   \angle uv = \arccos \left(\frac{u\cdot v}{\|u\|\|v\|}\right) 
 \]
-for the angle $\theta$ between two vectors $u$ and $v$.   Thus,
+for the angle two vectors $u$ and $v$.   Thus,
 the $d$-vertices $e_1,\ldots e_d$ are contained in the
 $2\arccos(1/d)$-wedge whose axis is $r$, as required.
 \end{proof}
@@ -436,7 +436,12 @@ $2(\pi-\arccos(1/d))$-wedge contains an $\alpha$-wedge that contains $p$
 and contains at most $\ceil{n/(d+1)}$ points of $S$, as required.
 \end{proof}
 
-Next we consider lower bounds.
+Let $h_1,\ldots,h_k$ be a set of 
+Next we consider lower bounds.  The following lemma, which is a
+generalization of a 3-dimensional result of Fekete and Meijer
+\cite{fm00}
+is used to find centerpoints.
+
 
 \begin{lem}\lemlabel{weak-dd}
 If $\alpha \ge \pi+2\arccos(1/\sqrt{d})$ then $f_\alpha^d(n)\ge \ceil{n/2}$.
@@ -544,6 +549,28 @@ required.
 
 Next we give an improvement on the value of $\alpha$ required to
 achieve $f_\alpha^3(n)\ge\ceil{n/2}$.
+
+\begin{lem} 
+If $\alpha\ge 3\pi/2$ ($\alpha\ge 270\degrees$) then $f_\alpha^3(n)\ge
+\ceil{n/2}$.
+\end{lem}
+
+\begin{proof}
+Fekete and Meijer \cite{fm00} show that, for every set $S$ of $n$
+points in $\mathbb{R}^3$, there exists 3 mutually orthogonal
+halving planes of $S$ that partition $\mathbb{R}^3$ into 8 octants such that the
+number of points in opposite octants is equal.  If we take $p$ to be
+the common intersection point of these 3 halving planes and let $w$ be
+any $\alpha$-wedge that contains $p$ then we find that, if some octant
+$Q$ is not entirely contained in $w$ then the octant $-Q$ is entirely
+contained in $p$.  (This is because for any $q\in Q$ and $r\in-Q$,
+$\angle qOr\ge \pi/2$.) Thus, for every point of $S$ not in $w$ there
+is a point of $S$ that is in $w$, so $D_\alpha(p,S)\ge \ceil{n/2}$, as
+required. 
+\end{proof}
+
+
+\comment{
  
 \begin{lem}
 If $\alpha > \pi+2\arccos(\sqrt{3/7}))$ ($\alpha>278.22\degrees$) then $f^3_\alpha(n) \le \ceil{n/2}$.
@@ -590,6 +617,7 @@ at least one of the normals.  Thus, this $\alpha$-wedge contains the
 corresponding halving plane and at least $\ceil{n/2}$ points of $S$,
 as required.
 \end{proof}
+}
 
 \comment{
 \noindent\textbf{Remark:} The proof of the above lemma uses the
@@ -599,11 +627,6 @@ were able to show the existence of 6 concurrent halving planes whose
 inner and outer normals formed the vertices of an icosahedron, the
 bound on alpha would be $\alpha$
 }
-
-
-
-
-
 
 The following theorem summarizes the above results.
 
@@ -616,9 +639,9 @@ The function $f_\alpha^3$ satisfies
 \ceil{2n/5}\ge  f^3_\alpha(n) & \ge & \ceil{n/4} & 
     \mbox{if $218.95\degrees \le \alpha \le 233.18\degrees$ } \\
 \ceil{n/2}\ge  f^3_\alpha(n) & \ge & \ceil{n/4} & 
-    \mbox{if $233.19\degrees \le \alpha \le 278.21\degrees$ } \\
+    \mbox{if $233.19\degrees \le \alpha \le 270.00\degrees$ } \\
   f^3_\alpha(n) & = & \ceil{n/2} & 
-    \mbox{if $278.22\degrees\le \alpha < 360\degrees$} \\
+    \mbox{if $270.00\degrees\le \alpha < 360.00\degrees$} \\
 \end{array}\]
 \end{thm}
 
@@ -708,15 +731,30 @@ $d$ & Upper bound of $\ceil{n/(d+1)}$ & Lower bound of $\ceil{n/2}$ \\
 
 We have completely determined the function $f^2_\alpha$ and given a
 linear-time algorithm for finding a point $p$ such that
-$D_\alpha(p.S)\ge f^2_\alpha(|S|)$.  Our main new algorithmic result
-is a linear-time algorithm for finding 3 concurrent halving lines,
-each pair of which forms an angle of $\pi/3$.  These triples of
-halving lines were used by Fekete and Meijer to show that the cost of
-a minimum Steiner star of an $n$ point set is at most $2/\sqrt{3}$
-times the cost of the maximum matching of the same set.  Our algorithm
-gives an $O(n)$ time construction of a Steiner star matching this
-bound.
+$D_\alpha(p,S)\ge f^2_\alpha(|S|)$.  
 
+Our main new algorithmic result is a linear-time algorithm for finding
+3 concurrent halving lines, each pair of which forms an angle of
+$\pi/3$.  These triples of halving lines were used by Fekete and
+Meijer \cite{fm00}
+to show that the cost of a minimum Steiner star of an $n$ point
+set in $\mathbb{R}^2$ is at most $2/\sqrt{3}$ times the cost of the
+maximum matching of the same set.  Our algorithm gives an $O(n)$ time
+construction of a Steiner star matching this bound.  
+
+Fekete and Meijer also prove that, in $\mathbb{R}^3$, the ratio
+between the minimum Steiner star and the maximum matching is at most
+$\sqrt{2}$ by showing the existence of 3 orthogonal halving planes
+with the property that the number of points in opposite orthants is
+equal.  They prove this by taking an arbitrary halving plane $\Pi$,
+projecting the points onto $\Pi$, and finding two orthogonal halving
+lines in $\Pi$ such that opposite quadrants have the same number of
+projected points above and below $\Pi$. The existence of these two
+halving lines is guaranteed by a simple continuity argument.   A
+(simpler) variant of the algorithm from \lemref{construction} can be
+used to find these two orthogonal halving lines and hence find three
+orthogonal halving planes in $O(n)$ time.  Again, this gives an $O(n)$
+time algorithm to construct the Steiner star achieving this bound.
 
 
 We conclude with a list of open problems:
@@ -730,11 +768,34 @@ $O(n\log n)$ time algorithm \cite{c04}.
 \item Our understanding of the function $f^d_\alpha$ is still
 incomplete for $d\ge 3$.
 
+\item In $\mathbb{R}^2$, we are able to find 3 concurrent halving
+lines whose sides are parallel to the edges of an equilateral
+triangle.  The same technique can be used in $\mathbb{R}^d$, if $d$ is
+even, to show that there always exists $d+1$ concurrent halving
+hyperplanes whose sides are parallel to the edges of a regular
+$d$-simplex. (The proof involves continuously rotating the
+$d$-simplex until each of its vertices has been reflected through the
+origin; this works in even dimensions because reflection through the
+origin can be implemented as a sequence of rotations.)
+A different proof can be used to prove the same result for
+$\mathbb{R}^3$.  Does this result hold in $\mathbb{R}^d$ for all
+values of $d$?
+
+\item In $\mathbb{R}^2$ any pair of orthgonal halving lines partitions
+the plane into four quadrants such that the number of points in
+opposite quadrants is equal. In $\mathbb{R}^3$, Fekete and Meijer
+\cite{fm00} showed the existence of 3 orthogonal halving planes with the same
+property.  This raises the following question: Given a set $S$ of $n$
+points in $\mathbb{R}^d$ is it the case that we can always find an
+arrangement of $d$ mutually orthogonal halving hyperplanes of $S$ such
+that cells with opposite sign vectors in the arrangement contain the
+same number of points of $S$?
+
 \item Given a set $S$ of $n$ points in $\mathbb{R}^d$, for $d\ge 3$,
 what is the complexity of finding a point $p\in \mathbb{R}^d$ such
 that $p\ge f_\alpha^d(n)$?  This problem is still open even for the
 case $\alpha=\pi$, though some progress has been made for the case
-$d=3$ \cite{X}.
+$d=3$ \cite{X,X,X}.
 
 \item In this paper we have only considered $\alpha$-wedges.  This is
 mainly because, for $d=2$, these are more or less the only interesting

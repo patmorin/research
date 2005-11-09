@@ -421,24 +421,35 @@ in conjunction with our approximation scheme for convex functions.
 
 \subsubsection{A Randomized Approximation}
 
-Here we present an approach that combines both of these techniques and
-adds two twists: (1)~we obtain a polyhedral metric as the sum of
-several Manhattan metrics and (2)~our polyhedron is random.  The first
-twist allows us to apply approximate data structures for
-one-dimensional convex functions while the second allows us to achieve
-approximation guarantees using a number of vertices that increases
-only linearly with $d$. 
+Here we describe a technique based on Kleinberg's method of projecting
+onto random lines \cite{k97}.  Consider the following experiment: Pick
+a random point $v$ on the surface of the unit sphere
+$\mathbb{S}^{d-1}$ in $\mathbb{R}^d$ and consider the line $\ell$
+through the origin and $v$. For two points $p,q\in\mathbb{R}^d$,
+project $p$ and $q$ orthogonally onto $\ell$ to obtain points $p_\ell$
+and $q_\ell$, respectively. Consider the random variable
+$|p_\ell-q_\ell|$ that measures the distance between the two projected
+points.  Then $\E[|p_\ell-q_\ell|]=c_d|pq|$, where
+$c_d=\Theta(1/\sqrt{d})$ is a constant whose value is derived in
+\appref{luc}.  
 
 Let $f(p)$ denote the Fermat-Weber weight of $p$ under the Euclidean
-distance function.  Choose $k$ independent random orientations of the
-coordinate axes.  Let $f_i(p)$ denote the Fermat-Weber weight of $p$
-under the Manhattan distance function after rotating the axes
-according to the $i$th random orientation.  Then $f_i(p)$ may take on
-any value in the range $[f(p),\sqrt df(p)]$.  In particular, $f_i(p)$
-has an expected value \[ \E[f_i(p)]=c_df(p) \enspace , \] where
-$c_d=\Theta(\sqrt{d})$ is a constant, dependent only on $d$, whose
-value is derived in \appref{luc}.  Consider the function \[ g(p) =
-\frac{1}{kc_d}\times\sum_{i=1}^k f_i(p) \] that approximates the
+distance function.  Choose $k$ random lines $\ell_1,\ldots,\ell_k$ as
+described above and
+let $f_i(p)$ denote the Fermat-Weber weight of the 1-dimensional point
+$p_{\ell_i}$ in the 1-dimensional set $S_{\ell_i}$.  That is,
+\[
+     f_i(p) = \sum_{q\in S} |p_{\ell_i}-q_{\ell_i}| \enspace .
+\]
+Then $f_i(p)$ is a random variable that 
+may take on any
+value in the range $[0,c_df(p)]$.  In particular, $f_i(p)$
+has an expected value 
+\[ \E[f_i(p)]=c_df(p) \enspace . \] 
+
+Next consider the normalized average function 
+\[ g(p) = \frac{1}{kc_d}\times\sum_{i=1}^k f_i(p) \] 
+that approximates the
 Fermat-Weber weight under Euclidean distance.
 
 \begin{lem}
@@ -448,7 +459,7 @@ $\Pr\{|g(p)-f(p)| \ge \eps f(p)\} = \exp(-\Omega(\eps^2k))$
 \begin{proof}
 The value of $g(p)$ is a random variable whose expected value is
 $f(p)$ and it is the sum of $k$ independent random variables, all of
-which are in the range $[f(p),\sqrt d f(p)]$.  Applying Hoeffding's
+which are in the range $[0,f(p)/c_d]$.  Applying Hoeffding's
 inequality\footnote{Hoeffding's Inequality \cite{h63}: Let
 $S_n=\sum_{i=1}^n X_i$ where $X_1,\ldots,X_n$ are
 bounded independent bounded random variables such that $X_i\in[a_i,b_i]$ with probability 1.  Then, for any $t>0$,
@@ -484,25 +495,22 @@ Queries in the data structure take $O(kd((1/\eps)+\log\log n))$ time.
 Next we show how to derandomize the data structure of the previous
 section to obtain a data structure that guarantees an
 $\eps$-approximation to $f(p)$ for \emph{every} point
-$p\in\mathbb{R}^d$.  Kleinberg \cite{k97} considers the following
-experiment:  Pick a random point $r$ on the surface of the unit sphere
-$\mathbb{S}^{d-1}$ in $\mathbb{R}^d$ and consider the line $\ell$ through the
-origin and $r$. For two points $p,q\in\mathbb{R}^d$, project $p$ and
-$q$ orthogonally onto $\ell$ to obtain points $p_\ell$ and $q_\ell$,
-respectively. Consider the random variable $|p_\ell-q_\ell|$ that
-measures the distance between the two projected points.  Then
-$\E[|p_\ell-q_\ell|d/c_d]=|pq|$ (see \appref{luc}).  
+$p\in\mathbb{R}^d$.  
+
 
 We can use this observation to obtain a deterministic construction by
 replacing the randomly chosen point $r\in \mathbb{S}^{d-1}$ by the average over
 $k$ points evenly distributed on $\mathbb{S}^{d-1}$.  In particular, we can
-take a set of $k=\Theta(1/\delta^{d-1})$ points on $\mathbb{S}^{d-1}$ \cite{c00}
-to obtain a set of lines $\ell_1,\ldots,\ell_k$ such that
+take a set of $k=\Theta(1/\delta^{d-1})$ points on $\mathbb{S}^{d-1}$ 
+to obtain a set of lines $\ell_1,\ldots,\ell_k$ and a set of points
+$w_1,\ldots,w_k$ such that
 \[
-      (1-\delta)|pq|\le \frac{c_d}{dk} \sum_{i=1}^k |p_{\ell_i}-q_{\ell_i}| 
+      (1-\delta)|pq|\le \frac{c_d}{dk} \sum_{i=1}^k w_i|p_{\ell_i}-q_{\ell_i}| 
       \le (1+\delta)|pq| \enspace ,
 \]
-for every $p,q\in\mathbb{R}^d$.  
+for every $p,q\in\mathbb{R}^d$.  A description of how to choose these
+lines and weights 
+is in \appref{pat}.
 
 Thus, we can maintain an $\delta$-approximation to the Fermat-Weber
 function $f$ by maintaining $k$ 1-dimensional data structures.  To
@@ -586,10 +594,10 @@ several different orientations of the coordinate system.
 
 The value of $c_d$ is given by
 \[
-  c_d = \E \left[\sum_{i=1}^d|X_i| \right] \enspace ,
+  c_d = \E \left[|X_1| \right] \enspace ,
 \]
 where $(X_1,\ldots,X_d)$ is a point taken from the uniform
-distribution on the surface of the unit ball in $\mathbb{R}^d$.
+distribution on the unit sphere $\mathbb{S}^{d-1}$ in $\mathbb{R}^d$.
 We observe that $(X_1^2,\ldots,X_d^2)$ is distributed as 
 \[
 \left(\frac{N_1^2}{N^2},\ldots,\frac{N_d^2}{N^2}\right) \enspace ,
@@ -606,11 +614,11 @@ random variables, respectively.  Thus, $N_1^2/N$ is distributed as a
 $\mathrm{beta}(\frac{1}{2},\frac{d-1}{2})$ random variable,
 $\beta(\frac{1}{2},\frac{d-1}{2})$.  We have:
 \begin{eqnarray*}
-\E\left[\sum_{i=1}^d |X_i|\right]
- & = & d\,\E\left[\sqrt{\beta\left(\frac{1}{2},\frac{d-1}{2}\right)}\right] \\
- & = & d\int_0^1\frac{x^{\frac{1}{2}-1}(1-x)^{\frac{d-1}{2}-1}}
+\E\left[|X_1|\right]
+ & = & \E\left[\sqrt{\beta\left(\frac{1}{2},\frac{d-1}{2}\right)}\right] \\
+ & = & \int_0^1\frac{x^{\frac{1}{2}-1}(1-x)^{\frac{d-1}{2}-1}}
                     {B(\frac{1}{2},\frac{d-1}{2})}\cdot\sqrt{x} \quad dx\\
- & = & d\cdot\frac{B(1,\frac{d-1}{2})}{B(\frac{1}{2},\frac{d-1}{2})}\\
+ & = & \frac{B(1,\frac{d-1}{2})}{B(\frac{1}{2},\frac{d-1}{2})}\\
 \comment{ & = & d\cdot 
        \frac{\Gamma(\frac{d-1}{2})}
             {\Gamma(\frac{d+1}{2})} \cdot
@@ -621,34 +629,114 @@ $\beta(\frac{1}{2},\frac{d-1}{2})$.  We have:
  & = & \frac{2\Gamma(\frac{d}{2}+1)}
             {\Gamma(\frac{1}{2})\cdot\Gamma(\frac{d+1}{2})} \\
 }
- & = & \frac{2}{B(\frac{1}{2},\frac{d+1}{2})} \enspace , 
+ & = & \frac{2}{dB(\frac{1}{2},\frac{d+1}{2})} \enspace , 
 \end{eqnarray*}
 where $B(a,b)$ is the beta function.
 
 From Mitrinovic \cite[p.~286]{m70}, we note:
 \begin{eqnarray}
-\frac{2}{B(\frac{1}{2},\frac{d+1}{2})} & \ge &
-  \sqrt{\frac{d}{2}+\frac{1}{4}+\frac{1}{16d+32}}\cdot 
+\frac{2}{dB(\frac{1}{2},\frac{d+1}{2})} & \ge &
+  \frac{1}{d}\sqrt{\frac{d}{2}+\frac{1}{4}+\frac{1}{16d+32}}\cdot 
      \frac{1}{\Gamma(\frac{1}{2})} \\
- & = & 2\sqrt{\frac{d}{2}+\frac{1}{4}+\frac{1}{16d+32}}\cdot
+ & = & \frac{2}{d}\sqrt{\frac{d}{2}+\frac{1}{4}+\frac{1}{16d+32}}\cdot
       \frac{1}{\sqrt{\pi}} \\
- & \ge & \sqrt{\frac{2d+1}{\pi}} \enspace .
+ & \ge & \frac{1}{d}\sqrt{\frac{2d+1}{\pi}} \enspace .
 \end{eqnarray}
 
 Furthermore,
 \begin{eqnarray*}
-\E\left[\sum_{i=1}^d|X_i|\right] & = & d\,\E[|X_1|] \\
-  & \le & \frac{d+1}{\sqrt{\pi}\cdot\sqrt{\frac{d}{2}+
+\E\left[|X_1|\right] 
+  & \le & \frac{1}{d}\frac{d+1}{\sqrt{\pi}\cdot\sqrt{\frac{d}{2}+
                        \frac{3}{4}+\frac{1}{16d+48}}} \\
-  & \le & \frac{2(d+1)}{\sqrt{\pi}\cdot\sqrt{2d+3}} \\ 
-  & \le & \sqrt\frac{2(d+1)}{\pi} \enspace . 
+  & \le & \frac{1}{d}\frac{2(d+1)}{\sqrt{\pi}\cdot\sqrt{2d+3}} \\ 
+  & \le & \frac{1}{d}\sqrt\frac{2(d+1)}{\pi} \enspace . 
 \end{eqnarray*}
 
 In summary,
 \[
-\sqrt\frac{2d+1}{\pi} \le c_d = \frac{2\Gamma(\frac{d}{2}+1)}
+\frac{1}{d}\sqrt\frac{2d+1}{\pi} \le c_d = \frac{1}{d}\frac{2\Gamma(\frac{d}{2}+1)}
                             {\sqrt{\pi}\cdot\Gamma(\frac{d+1}{2})}
- \le \sqrt{\frac{2(d+1)}{\pi}} \enspace .
+ \le \frac{1}{d}\sqrt{\frac{2(d+1)}{\pi}} \enspace .
 \]
+
+\section{Choosing the Lines and Weights}
+\applabel{pat}
+\newcommand{\ccap}{\mathrm{cap}}
+
+From the previous appendix, we have
+\[
+     c_d = \int_{\mathbb{S}^{d-1}} v_1 dv \enspace .
+\]
+Let $\ccap(\theta)$ denote the volume of intersection of the halfspace
+$h_\theta=\{x : x_1\ge\cos(\theta)\}$ with $\mathbb{S}^{d-1}$, as a fraction of the total
+volume of $\mathbb{S}^{d-1}$.  Then, for any $m\ge 2$,
+\[
+\sum_{i=1}^m \cos\left(\frac{\pi i}{m}\right)
+   \left(\ccap\left(\frac{\pi i}{m}\right)
+       -\ccap\left(\frac{\pi (i-1)}{m}\right)\right) \le 
+\int_{\mathbb{S}^{d-1}} v_1 dv = c_d 
+\]
+and
+\[
+  c_d= \int_{\mathbb{S}^{d-1}} v_1 dv\le 
+\sum_{i=1}^m \cos\left(\frac{\pi (i-1)}{m}\right)
+   \left(\ccap\left(\frac{\pi i}{m}\right)
+       -\ccap\left(\frac{\pi (i-1)}{m}\right)\right) 
+\enspace .
+\]
+
+The theory of $\eps$-approximation (see, for example
+Ref.~\cite[Chapter~4]{c00}) states that, the unit sphere in
+$\mathbb{R}^d$ can be covered with a set $S$ of $k=O(dr^2\log dr)$
+points such that the number of points contained in any spherical  cap
+$C$ of angular radius $\theta$ obeys
+\[
+   \left|\frac{|C\cap S|}{k} - \ccap(\theta)\right| \le \frac{1}{r}
+    \enspace .
+\]
+
+
+Now, consider $v_1'=\frac{1}{k}\sum_{v\in S} v_1$.  Then we have
+\begin{eqnarray*}
+ & & \sum_{i=1}^m \cos\left(\frac{\pi i}{m}\right)
+   \left(\frac{|h_{\pi i/m}\cap S|}{k} -
+   \frac{|h_{\pi (i+1)/m}\cap S|}{k}\right) \\
+ & \le & \sum_{i=1}^m \cos\left(\frac{\pi i}{m}\right)
+   \left(\ccap\left(\frac{\pi i}{m}\right) -
+   \ccap\left(\frac{\pi (i+1)}{m}\right) + \frac{2}{r}\right) \\
+ & \le & c_d + \frac{2m}{r} + \ldots
+\end{eqnarray*}
+and 
+\[
+ v_1'\le \sum_{i=1}^m \cos\left(\frac{\pi i}{m}\right)
+   \left(|h_{\pi i/m}\cap S| -
+   |h_{\pi (i+1)/m}\cap S|\right) 
+\]
+
+
+\comment{
+Lukovszky \cite{tamasthesis} gives a proof that, for any $\eps>0$, and
+any $d>1$, there exists a centrally symmetric $d$-polytope,
+$P_{d,\eps}$, all of whose vertices on the unit sphere
+$\mathbb{S}^{d-1}$ and having $O((1/\eps)^d)$ facets, all of which
+have angular diameter at most $\eps$.  That is, for any pair of points
+$p$ and $q$ in some facet $f$ of the polytope $\angle pOq\le \eps$.
+
+Observe that, for any ray $r$ originating at the origin, the
+intersection of $r$ with the boundary of $P_{d,\eps}$ is of distance
+at most $\eps$ from the intersection of $r$ with
+$\mathbb{S}^{d-1}$.\marginpar{Why?}  In our setting this means that,
+if we can define a distance function where is the unit ball is
+$P_{d,\eps}$ then this distance function is an $\eps$-approximation to
+Euclidean distance.  Indeed, we will show how to choose the lines
+$\ell_1,\ldots,\ell_k$ and the weights $w_1,\ldots,w_k$ in such a way
+that the set of points $p$ that satisfy
+\[
+ \frac{c_d}{dk} \sum_{i=1}^k w_i|p_{\ell_i}-q_{\ell_i}| \le 1
+\]
+is exactly the the polyhedron $P_{d,\eps}$.  For the lines
+$\ell_1,\ldots,\ell_k$, we take one line perpendicular to each pair of
+antipodal faces in $P_{d,\eps}$.
+}
 
 \end{document}

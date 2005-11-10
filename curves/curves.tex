@@ -34,7 +34,7 @@ n)$ time.  We also give an information-theoretic lower-bound, that
 shows it is impossible to obtain structures of size $O(1/\eps)$ for
 approximating these types of convex functions.  Finally, we show that
 these structures have applications to efficiently solving problems in
-clustering and facility.  
+clustering and facility location.  
 \end{abstract}
 
 \section{Introduction}
@@ -46,7 +46,7 @@ $(1-\eps)x\le y \le x$.\footnote{This definition is a bit more
 one-sided than the usual definition, which allows any $y$ such that
 $|x-y|\le \eps x$.  We use this definition because it leads to simpler
 calculations later on, and the results extend immediately to the (less
-restricted) standard definition.}  We say that a function $g$ is an
+restrictive) standard definition.}  We say that a function $g$ is an
 $\eps$-approximation to a function $f$ if $g(x)$ is an
 $\eps$-approximation to $f(x)$ for all $x$ in the domain of $f$.
 
@@ -62,7 +62,7 @@ t\}$ and $f'$ is the first derivative of $f$.  Once we have computed
 the function $g$, we can store the pieces of $g$ in an array sorted by
 $x$ values so that we can evaluate $g(x)$ for any query value $x$ in
 $O(\log_2\log_E n)$ time.  Since we are interested in the joint
-complexity as a function of $0<\eps < 1/2$ and $n \ge 10$, it is worth
+complexity as a function of $\eps$ and $n$, it is worth
 noting that $\log_E x = \Theta ( (1/\eps) \log x)$ (as can be seen by
 taking the limit $\lim_{\eps\rightarrow 0+}\eps/\log(1/(1-\eps))$
 using one application of L'H\^opital's Rule). Thus, $\log_E
@@ -70,20 +70,20 @@ n=\Theta((1/\eps)\log n)$ and $\log\log_E n = \Theta (\log (1/\eps) +
 \log \log n)$.
 
 As an application of these results, we consider functions defined by
-sums of Euclidean distances in $d$ dimensions and show that that they
-can be approximated using the above results.  To achieve this, we use
-a random rotation technique similar to the method of random
-projections \cite{i01}.  We show that the sum of Euclidean distances
-from a point to a set of $n$ points can be closely approximated by
-many sums of Manhattan distances from the point to the set.  This
-technique is very simple and of independent interest.
+sums of Euclidean distances in $d$ dimensions and show that they can
+be approximated using the above results.  To achieve this, we use the
+technique of random projections \cite{i01,k97}.  We show that the sum
+of Euclidean distances from a point to a set of $n$ points can be
+closely approximated by many sums of Manhattan distances from the
+point to the set, both in a probabilistic and a worst-case sense.
+This technique is very simple and of independent interest.
 
 The remainder of the paper is organized as follows.  \secref{approx}
 presents our result on approximating convex functions using few linear
 pieces.  \secref{ds} discusses how these results can be interpreted in
 terms of data structures for approximating convex functions.
 \secref{lower-bound} gives lower bounds on the space complexity of
-approximating convex function.  \secref{applications} describes
+approximating convex functions.  \secref{applications} describes
 applications of this work to facility location and clustering
 problems.
 
@@ -150,6 +150,12 @@ function $g(x)$ with $O(\log_E n)$ pieces that is an
 $\eps$-approximation to $f(x)$ at all values where $|f^*(x)|\ge 1$.
 \end{thm}
 
+For some special classes of convex functions (for example, the
+\emph{extent} of a line arrangement \cite{ah01}) it is possible to
+find $\eps$-approximations whose size is only a function $\eps$, and
+is independent of $n$.  As we will see in \secref{lower-bound}, this is
+not the case for the general class of convex functions we define here.
+
 \section{Data Structures}\seclabel{ds}
 
 In this section, we consider the consequences of \thmref{approx} in
@@ -194,7 +200,7 @@ parameter $\delta$, $0<\delta\le 1$ to the \textsc{Insert} and
 \textsc{Delete} procedures that specifies the amount by which the
 slope is to be increased or decreased, respectively.}
 
-The function $f$ has some number $m$ of breakpoints, where the slope
+The function $f$ has some number $m\le n$ of breakpoints, where the slope
 of $f$ changes.  We store these breakpoints in a balanced search tree
 $T$, sorted by $x$-coordinate.  With each breakpoint $x$, we also
 maintain the value $\Delta(x)$ by which the slope of $f$ increases at
@@ -241,6 +247,20 @@ operations \textsc{Insert}, \textsc{Delete} in $O((1/\eps) \log n)$
 time and \textsc{Query} in $O(\log (1/\eps) + \log \log n)$ time,
 where $n$ is the maximum slope of the function $f$ being maintained.
 \end{thm}
+
+\noindent\textbf{Remark:} In some cases, it may be desirable to
+maintain functions that have arbitrarily small or large changes in
+their slopes.  That is, the operations \textsc{Insert} dn
+\textsc{Delete} come with an extra parameter $\delta$ that specifies
+by how much to increase or decrease the slope.  In this case, we can
+still use a similar approach, but the update time bound becomes
+$O((1/\eps)\log n\log m)$, where $m$ is the number of locations at
+which the slope changes.  This running time comes from the fact that,
+when a relatively large value of $\delta$ is used, the locations of
+the $x_i$'s may change by a lot, and each of these $O((1/\eps)\log n)$
+values requires a search in a tree of size $m$.
+
+
 
 \section{A Lower Bound on Storage}\seclabel{lower-bound}
 
@@ -325,13 +345,13 @@ convex functions to the problem of approximating sums of distances in
 $d$ dimensions.  Let $S$ be a set of $n$ points in $d$ dimensions.
 The \emph{Fermat-Weber weight} of a point $q\in\Real^d$ is
 \[
-   \fw(p) = \sum_{p\in S} \|pq\| \enspace ,
+   \fw(q) = \sum_{p\in S} \|pq\| \enspace ,
 \]
 where $\|pq\|$ denotes the distance between points $p$ and $q$. Of
 course, different definitions of distance (e.g., Euclidean distance,
 Manhattan distance) yield different Fermat-Weber weights.
 
-\subsection{The 1-dimensional case}
+\subsection{The 1-dimensional Case}
 
 One setting in which distance is certainly well defined is in one
 dimension.  In this case,
@@ -367,10 +387,12 @@ implies that the Fermat-Weber weight of points in one dimension can
 actually be $\eps$-approximated by a piecewise-linear function with
 $O(1/\eps)$ pieces, independent of $n$.  However, it is not clear how 
 easily this approach
-can be made dynamic to handle insertion and deletions of points.
+can be made dynamic to handle insertion and deletions of points. 
+The data structure of the previous section is also (arguably)
+considerably simpler.
 \end{rem}
 
-\subsection{The Manhattan case}
+\subsection{The Manhattan Case}
 
 The Manhattan distance between two points $p$ and $q$ in $\Real^d$ is
 \[
@@ -381,7 +403,7 @@ observe that Manhattan distance is the sum of $d$ one-dimensional
 distances, so the Fermat-Weber weight under the Manhattan distance can
 be approximated using $d$ one-dimensional data structures.
 
-\subsection{The Euclidean case}
+\subsection{The Euclidean Case}
 
 The Euclidean distance between two points $p$ and $q$ in $\Real^d$ is
 \[
@@ -484,7 +506,7 @@ data structure of size $O((1/\eps)k\log n)$ that can be constructed in
 time $O(kn)$ and that $(\eps+\delta)$-approximates the Fermat-Weber
 weight of any point $p\in\mathbb{R}^d$ with probability at least
 $1-e^{-\Omega(\delta^2k)}$.  Queries in the data structure take
-$O((1/\eps)k+k\log\log n))$ time.
+$O(k\log(1/\eps)+k\log\log n))$ time.
 
 
 \subsubsection{A Deterministic Approximation}
@@ -509,10 +531,10 @@ for every $p,q\in\mathbb{R}^d$.
 Thus, we can maintain a $\delta$-approximation to the Fermat-Weber
 function $f$ by maintaining $k$ 1-dimensional data structures.  To
 summarize, we obtain a data structure of size
-$O((1/\eps)((d^3/\delta^{4})\log(d/\delta))\log n)$ that can be constructed in
+$O(((d^3/\delta^{4})\log(d/\delta))(1/\eps)\log n)$ that can be constructed in
 $O(n((d^3/\delta^4)\log(d/\delta))$ time and that can return an
 $(\eps+\delta)$-approximation to $f(p)$ for any $p\in\mathbb{R}^d$ in
-$O(((d^3/\delta^{4})\log (d/\delta))(1/\eps + \log\log n)$ time.
+$O(((d^3/\delta^{4})\log (d/\delta))(\log(1/\eps) + \log\log n))$ time.
 
 \subsection{Clustering and Facility Location}
 
@@ -523,37 +545,40 @@ $(1-\eps)$-approximate the Fermat-Weber weight of any point in $O(\log
 n)$ time.  These results have a leading constant of the form
 $\Omega((1/\eps)^d)$.
 
-The same authors give applications of their data structures to a number
-of facility-location and clustering problems, including evaluation of
-the Medoid and AverageDistance clustering measures, the Fermat-Weber
-problem, the constrained Fermat-Weber problem, and the constrained
-obnoxious facility-location problem.  All of these applications also
-work with the data structure of \secref{ds}, many with improved
-running times.  A summary of these results is given in
-\tabref{applications}.  Note that, because these results require a
-reliable $\eps$-approximation to $f(p)$ for many points in
-$\mathbb{R}^d$ they must use the deterministic data structure of
-\secref{ds-deterministic}.
+The same authors give applications of their data structures to a
+number of facility-location and clustering problems, including
+evaluation of the Medoid and AverageDistance clustering measures, the
+Fermat-Weber problem, the constrained Fermat-Weber problem, and the
+constrained obnoxious facility-location problem.  All of these
+applications also work with the data structure of \secref{ds}, many
+with improved running times.  
 
-
-
+A summary of these results is given in \tabref{applications}, which
+shows running times assuming $\eps$ and $d$ are fixed constants,
+independent of $n$.  The results in the right-hand column are obtained
+simply by using the methods described by Bose \etal\ in combination
+with the deterministic data structure of \secref{ds-deterministic}.
+It is worth noting that the leading constant in the algorithms
+obtained this way is only 
+$O((d^3/\eps^4)\log (d/\eps))$, while the leading constant in the
+algorithm by Bose \etal\ is $\Omega((1/\eps)^d)$.
 
 \begin{table}
 \begin{minipage}{\textwidth}
 \begin{center}\begin{tabular}{l|cccc}
-Problem      & Exact solution & Previous $\eps$-approx. & Ref. & New $\eps$-approx. \\ \hline
-Average distance  & $O(n^2)$ & $O(n)^a$ $O(n\log n)$ & 
-    \cite{i99,bmm02} & $O(n\log\log n)$ \\
-Medoid (1-Median) & $O(n^2)$ & $O(n)^a$ $O(n\log n)$ & 
-    \cite{i99,bmm02} & $O(n\log\log n)$ \\
-Discrete Fermat-Weber & $O(n^2)$ & $O(n)^a$ $O(n\log n)$ & 
-    \cite{i99,bmm02} & $O(n\log\log n)$ \\
-Fermat-Weber & -- & $O(n)^b$ $O(n\log n)$ & 
-    \cite{i99,bmm02} & $O(n)$ \\
-Constrained Fermat-Weber & $O(n^2)$ & $O(n)^b$ $O(n\log n)$ & 
-    \cite{i99,bmm02} & $O(n)$ \\
-Constrained OFL & $O(n^2)$ & $O(n)^a$ $O(n\log n)$ & 
-    \cite{i99,k97,bmm02} & $O(n\log\log n)$ 
+Problem      & Previous $\eps$-approx. & Ref. & New $\eps$-approx. \\ \hline
+Average distance  & $O(n)^a$ $O(n\log n)$ & 
+    \cite{bmm02,i99} & $O(n\log\log n)$ \\
+Medoid (1-Median)  & $O(n)^a$ $O(n\log n)$ & 
+    \cite{bmm02,i99} & $O(n\log\log n)$ \\
+Discrete Fermat-Weber  & $O(n)^a$ $O(n\log n)$ & 
+    \cite{bmm02,i99} & $O(n\log\log n)$ \\
+Fermat-Weber  & $O(n)^b$ $O(n\log n)$ & 
+    \cite{bmm02,i99} & $O(n)$ \\
+Constrained Fermat-Weber  & $O(n)^b$ $O(n\log n)$ & 
+    \cite{bmm02,i99} & $O(n)$ \\
+Constrained OFL  & $O(n)^a$ $O(n\log n)$ & 
+    \cite{bmm02,i99,k97} & $O(n\log\log n)$ 
 \end{tabular}\end{center}
 \footnotetext[1]{Refers to a randomized algorithm that
   outputs a  $(1-\eps)$-approximation with constant probability.}
@@ -585,9 +610,10 @@ several different orientations of the coordinate system.
 
 
 \appendix
-\section{The value of $\mathbf{c_d}$}\applabel{luc}
+\section{The value of $\mathbf{c_d}$}
+\applabel{luc}
 
-The value of $c_d$ is given by
+The value of $c_d$ that appears in \secref{applications} is given by
 \[
   c_d = \E \left[|x_1| \right] \enspace ,
 \]
@@ -609,7 +635,7 @@ random variables, respectively.  Thus, $N_1^2/N$ is distributed as a
 $\mathrm{beta}(\frac{1}{2},\frac{d-1}{2})$ random variable,
 $\beta(\frac{1}{2},\frac{d-1}{2})$.  We have:
 \begin{eqnarray*}
-\E\left[|X_1|\right]
+\E\left[|x_1|\right]
  & = & \E\left[\sqrt{\beta\left(\frac{1}{2},\frac{d-1}{2}\right)}\right] \\
  & = & \int_0^1\frac{x^{\frac{1}{2}-1}(1-x)^{\frac{d-1}{2}-1}}
                     {B(\frac{1}{2},\frac{d-1}{2})}\cdot\sqrt{x} \quad dx\\
@@ -640,7 +666,7 @@ From Mitrinovic \cite[p.~286]{m70}, we note:
 
 Furthermore,
 \begin{eqnarray*}
-\E\left[|X_1|\right] 
+\E\left[|x_1|\right] 
   & \le & \frac{1}{d}\frac{d+1}{\sqrt{\pi}\cdot\sqrt{\frac{d}{2}+
                        \frac{3}{4}+\frac{1}{16d+48}}} \\
   & \le & \frac{1}{d}\frac{2(d+1)}{\sqrt{\pi}\cdot\sqrt{2d+3}} \\ 
@@ -705,7 +731,9 @@ and by increasing the size of $S$ by a constant factor we may assume
 that $S$ is symmetric ($x\in S$ iff $-x\in S$).
 Let $S$ be such a set of points and let us consider the average
 $x$-coordinate of an element in $S$.\footnote{The $x$-coordinate $x_1$
-in this argument is simply a placeholder for the vector $p-q$.}
+in this argument is simply a placeholder for the projection of $p-q$
+onto $x$. That is, we are assuming without loss of generality that
+$p-q=(1,0,0,\ldots,0)$, so that $(p-q)\cdot x=x_1$.}
 \begin{eqnarray*}
 \frac{1}{|S|}\cdot \sum_{x\in S} |x_1|
   \comment{ & = & \frac{2}{|S|}\cdot\sum_{i=1}^m

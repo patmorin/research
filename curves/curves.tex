@@ -435,17 +435,17 @@ $c_d=\Theta(1/\sqrt{d})$ is a constant whose value is derived in
 
 Let $f(p)$ denote the Fermat-Weber weight of $p$ under the Euclidean
 distance function.  Choose $k$ random lines $\ell_1,\ldots,\ell_k$ as
-described above and
-let $f_i(p)$ denote the Fermat-Weber weight of the 1-dimensional point
-$p_{\ell_i}$ in the 1-dimensional set $S_{\ell_i}$.  That is,
+described above and let $f_i(p)$ denote the Fermat-Weber weight of the
+1-dimensional point $p_{\ell_i}$ in the 1-dimensional set
+$S_{\ell_i}$.  That is,
 \[
      f_i(p) = \sum_{q\in S} |p_{\ell_i}-q_{\ell_i}| \enspace .
 \]
-Then $f_i(p)$ is a random variable that 
-may take on any
-value in the range $[0,c_df(p)]$.  In particular, $f_i(p)$
-has an expected value 
-\[ \E[f_i(p)]=c_df(p) \enspace . \] 
+Then $f_i(p)$ is a random variable that may take on any value in the
+range $[0,c_df(p)]$.  In particular, $f_i(p)$ has an expected value 
+\[
+   \E[f_i(p)]=c_df(p) \enspace . 
+\] 
 
 Next consider the normalized average function 
 \[ g(p) = \frac{1}{kc_d}\times\sum_{i=1}^k f_i(p) \] 
@@ -453,7 +453,7 @@ that approximates the
 Fermat-Weber weight under Euclidean distance.
 
 \begin{lem}
-$\Pr\{|g(p)-f(p)| \ge \eps f(p)\} = \exp(-\Omega(\eps^2k))$
+$\Pr\{|g(p)-f(p)| \ge \delta f(p)\} = \exp(-\Omega(\delta^2k))$
 \end{lem}
 
 \begin{proof}
@@ -476,17 +476,15 @@ $
 result.
 \end{proof}
 
-In summary, $g(p)$ is an $\eps$-approximation of $f(p)$ with
-probability $1-e^{-\Omega(\eps^2k)}$.  Furthermore, $g(p)$ is the sum
-of $k$ Fermat-Weber weights of points under the Manhattan distance
-function.  Each of these Manhattan distance functions is itself a sum
-of $d$ Fermat-Weber weights in 1 dimension.  These 1-dimensional
-Fermat-Weber weights can then be approximated using the results of
-\secref{ds}.  This gives a data structure of size $O((1/\eps)kd\log
-n)$ that can be constructed in time $O(kdn)$ and that
-$\eps$-approximates the Fermat-Weber weight of any point
-$p\in\mathbb{R}^d$ with probability at least $1-e^{-\Omega(\eps^2k)}$.
-Queries in the data structure take $O(kd((1/\eps)+\log\log n))$ time.
+In summary, $g(p)$ is a $\delta$-approximation of $f(p)$ with
+probability $1-e^{-\Omega(\delta^2k)}$.  Furthermore, $g(p)$ is the
+sum of $k$ 1-dimensional Fermat-Weber weights which can be
+$\eps$-approximated using the results of \secref{ds}.  This gives a
+data structure of size $O((1/\eps)k\log n)$ that can be constructed in
+time $O(kn)$ and that $(\eps+\delta)$-approximates the Fermat-Weber
+weight of any point $p\in\mathbb{R}^d$ with probability at least
+$1-e^{-\Omega(\delta^2k)}$.  Queries in the data structure take
+$O((1/\eps)k+k\log\log n))$ time.
 
 
 \subsubsection{A Deterministic Approximation}
@@ -496,49 +494,46 @@ Next we show how to derandomize the data structure of the previous
 section to obtain a data structure that guarantees an
 $\eps$-approximation to $f(p)$ for \emph{every} point
 $p\in\mathbb{R}^d$.  
-
-
-We can use this observation to obtain a deterministic construction by
-replacing the randomly chosen point $r\in \mathbb{S}^{d-1}$ by the average over
-$k$ points evenly distributed on $\mathbb{S}^{d-1}$.  In particular, we can
-take a set of $k=\Theta(1/\delta^{d-1})$ points on $\mathbb{S}^{d-1}$ 
-to obtain a set of lines $\ell_1,\ldots,\ell_k$ and a set of points
-$w_1,\ldots,w_k$ such that
+We do this by replacing the random points used in the previous
+construction with 
+$k$ points evenly distributed on $\mathbb{S}^{d-1}$.  In particular,
+in \appref{pat} we show how to find
+$k=O((d^3/\eps^4)\log (d/\eps))$ points on $\mathbb{S}^{d-1}$ 
+to obtain a set of lines $\ell_1,\ldots,\ell_k$ such that
 \[
-      (1-\delta)|pq|\le \frac{c_d}{dk} \sum_{i=1}^k w_i|p_{\ell_i}-q_{\ell_i}| 
-      \le (1+\delta)|pq| \enspace ,
+      (1-\delta)|pq|\le \frac{1}{kc_d} \sum_{i=1}^k |p_{\ell_i}-q_{\ell_i}| 
+      \le (1+\delta)|pq| 
 \]
-for every $p,q\in\mathbb{R}^d$.  A description of how to choose these
-lines and weights 
-is in \appref{pat}.
+for every $p,q\in\mathbb{R}^d$.
 
-Thus, we can maintain an $\delta$-approximation to the Fermat-Weber
+Thus, we can maintain a $\delta$-approximation to the Fermat-Weber
 function $f$ by maintaining $k$ 1-dimensional data structures.  To
 summarize, we obtain a data structure of size
-$O((1/\delta^{d-1}\eps)\log n)$ that can be constructed in
-$O(n/\delta^{d-1}\eps)$ time and that can return an
+$O((1/\eps)((d^3/\delta^{4})\log(d/\delta))\log n)$ that can be constructed in
+$O(n((d^3/\delta^4)\log(d/\delta))$ time and that can return an
 $(\eps+\delta)$-approximation to $f(p)$ for any $p\in\mathbb{R}^d$ in
-$O((1/\delta^{d-1})(1/\eps + \log\log n)$ time.
+$O(((d^3/\delta^{4})\log (d/\delta))(1/\eps + \log\log n)$ time.
 
 \subsection{Clustering and Facility Location}
 
 Bose \etal\ \cite{bmm02} describe data structures for approximating
-sums of distances.  They show how to build a data structure in
-$O(n\log n)$ time that can $(1-\eps)$-approximate the Fermat-Weber
-weight of any point in $O(\log n)$ time. 
+sums of distances.  They show that, for fixed $d$ and $\eps$, how to
+build a data structure in $O(n\log n)$ time that can
+$(1-\eps)$-approximate the Fermat-Weber weight of any point in $O(\log
+n)$ time.  These results have a leading constant of the form
+$\Omega((1/\eps)^d)$.
 
-The same authors also give applications of this data structure to a
-number of facility-location and clustering problems, including
-evaluation of the Medoid and AverageDistance clustering measures, the
-Fermat-Weber problem, the constrained Fermat-Weber problem, and the
-constrained obnoxious facility-location problem.  All of these
-applications also work with the data structure of \secref{ds}, many
-with improved running times.  A summary of these results is given in
+The same authors give applications of their data structures to a number
+of facility-location and clustering problems, including evaluation of
+the Medoid and AverageDistance clustering measures, the Fermat-Weber
+problem, the constrained Fermat-Weber problem, and the constrained
+obnoxious facility-location problem.  All of these applications also
+work with the data structure of \secref{ds}, many with improved
+running times.  A summary of these results is given in
 \tabref{applications}.  Note that, because these results require a
 reliable $\eps$-approximation to $f(p)$ for many points in
 $\mathbb{R}^d$ they must use the deterministic data structure of
-\secref{ds-deterministic} and hence have an exponential dependence on
-$d$.
+\secref{ds-deterministic}.
 
 
 
@@ -594,11 +589,11 @@ several different orientations of the coordinate system.
 
 The value of $c_d$ is given by
 \[
-  c_d = \E \left[|X_1| \right] \enspace ,
+  c_d = \E \left[|x_1| \right] \enspace ,
 \]
-where $(X_1,\ldots,X_d)$ is a point taken from the uniform
+where $(x_1,\ldots,x_d)$ is a point taken from the uniform
 distribution on the unit sphere $\mathbb{S}^{d-1}$ in $\mathbb{R}^d$.
-We observe that $(X_1^2,\ldots,X_d^2)$ is distributed as 
+We observe that $(x_1^2,\ldots,x_d^2)$ is distributed as 
 \[
 \left(\frac{N_1^2}{N^2},\ldots,\frac{N_d^2}{N^2}\right) \enspace ,
 \]
@@ -687,7 +682,7 @@ inequalities for $c_d$,
                      \area\left(\ccap\left(\frac{(i-1)\pi}{2m}\right)\right)
                   \right) \\
    & \le & \frac{2}{\area(\Sd)}\cdot
-                  \sum_{i=1}^m \cos\left(\frac{i\pi}{2m}+\frac{1}{m}\right)
+                  \sum_{i=1}^m \left(\cos\left(\frac{i\pi}{2m}\right)+\frac{2}{m}\right)
                   \left(\area\left(\ccap\left(\frac{i\pi}{2m}\right)\right)-
                      \area\left(\ccap\left(\frac{(i-1)\pi}{2m}\right)\right)
                   \right) \\
@@ -695,13 +690,13 @@ inequalities for $c_d$,
                   \sum_{i=1}^m \cos\left(\frac{i\pi}{2m}\right)
                   \left(\area\left(\ccap\left(\frac{i\pi}{2m}\right)\right)-
                      \area\left(\ccap\left(\frac{(i-1)\pi}{2m}\right)\right)
-                  \right) + \frac{1}{m} \\
-   & \le & c_d + \frac{1}{m}  \enspace .
+                  \right) + \frac{2}{m} \\
+   & \le & c_d + \frac{2}{m}  \enspace .
 \end{eqnarray*}
 
 Using the theory of $\eps$-approximations \cite[Chapter~4]{c00}, it is
-possible to compute a set $S$ of $k=O(dr^2\log dr)$ points on $\Sd$ such
-that, for any spherical cap $C$
+possible, for any $r\ge 1$ to find a set $S$ of $k=O(dr^2\log dr)$
+points on $\Sd$ such that, for \emph{any} spherical cap $C$
 \[
     \left|\frac{\area(C)}{\area(\Sd)} - \frac{|C\cap S|}{|S|} \right| 
               \le \frac{1}{r}  \enspace 
@@ -709,14 +704,15 @@ that, for any spherical cap $C$
 and by increasing the size of $S$ by a constant factor we may assume
 that $S$ is symmetric ($x\in S$ iff $-x\in S$).
 Let $S$ be such a set of points and let us consider the average
-$x$-coordinate of an element in $S$.
+$x$-coordinate of an element in $S$.\footnote{The $x$-coordinate $x_1$
+in this argument is simply a placeholder for the vector $p-q$.}
 \begin{eqnarray*}
 \frac{1}{|S|}\cdot \sum_{x\in S} |x_1|
-  & = & \frac{2}{|S|}\cdot\sum_{i=1}^m
+  \comment{ & = & \frac{2}{|S|}\cdot\sum_{i=1}^m
           \sum\left\{x_1: x\in
               S\cap\ccap\left(\frac{i\pi}{m}\right) 
                 \setminus\ccap\left(\frac{(i-1)\pi}{m}\right)
-          \right\} \\
+          \right\} \\ }
   & \le & \frac{2}{|S|}\cdot
          \sum_{i=1}^m\cos\left(\frac{(i-1)\pi}{m}\right)
            \left(
@@ -735,17 +731,17 @@ $x$-coordinate of an element in $S$.
            \left(
              \area\left(\ccap\left(\frac{i\pi}{m}\right)\right) -
              \area\left(\ccap\left(\frac{(i-1)\pi}{m}\right)\right)
-           \right) + \frac{2m}{r} \\
-  & \le & c_d + \frac{1}{m} + \frac{2m}{r} \\
-  & \le & c_d + \frac{2}{m} 
+           \right) + \frac{4m}{r} \\
+  & \le & c_d + \frac{2}{m} + \frac{4m}{r} \\
+  & \le & c_d + \frac{3}{m} 
 \end{eqnarray*}
-where the last inequality follows by taking $r=2m^2$, in which case
-$|S|=O(dm^4\log dm)$.  Taking $m=2/c_d\eps$ and using a symmetric
+where the last inequality follows by taking $r=4m^2$, in which case
+$|S|=O(dm^4\log dm)$.  Taking $m=3/\delta c_d$ and using a symmetric
 argument to the one above to obtain a lower bound, we obtain
 \[
-  1-\eps \le \frac{1}{c_d|S|}\cdot\sum_{x\in S}|x_1| \le 1 + \eps
+  1-\delta \le \frac{1}{c_d|S|}\cdot\sum_{x\in S}|x_1| \le 1 + \delta
 \]
-with $|S|=O((d^3/\eps^4)\log(d/\eps))$.  
+with $|S|=O((d^3/\delta^4)\log(d/\delta))$.  
 
 
 

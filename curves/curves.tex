@@ -1,5 +1,5 @@
 \documentclass[charterfonts,lotsofwhite]{patmorin}
-\usepackage{graphicx,ipe}
+\usepackage{graphicx}
 \usepackage{amsfonts}
 \usepackage{amsthm}
 
@@ -98,7 +98,7 @@ trivial observation is the basis of our data structure for
 approximating convex functions.
 
 \begin{figure}
-\centeripe{trivial}
+\begin{center}\includegraphics{trivial}\end{center}
 \caption{The function $g$ is an approximation of $h$ and
 of $h_2$.}\figlabel{trivial}
 \end{figure}
@@ -662,81 +662,93 @@ In summary,
 \section{Choosing the Lines and Weights}
 \applabel{pat}
 \newcommand{\ccap}{\mathrm{cap}}
+\newcommand{\Sd}{\mathbb{S}^{d-1}}
+\newcommand{\area}{\mathrm{vol}}
 
-From the previous appendix, we have
-\[
-     c_d = \int_{\mathbb{S}^{d-1}} v_1 dv \enspace .
-\]
-Let $\ccap(\theta)$ denote the volume of intersection of the halfspace
-$h_\theta=\{x : x_1\ge\cos(\theta)\}$ with $\mathbb{S}^{d-1}$, as a fraction of the total
-volume of $\mathbb{S}^{d-1}$.  Then, for any $m\ge 2$,
-\[
-\sum_{i=1}^m \cos\left(\frac{\pi i}{m}\right)
-   \left(\ccap\left(\frac{\pi i}{m}\right)
-       -\ccap\left(\frac{\pi (i-1)}{m}\right)\right) \le 
-\int_{\mathbb{S}^{d-1}} v_1 dv = c_d 
-\]
-and
-\[
-  c_d= \int_{\mathbb{S}^{d-1}} v_1 dv\le 
-\sum_{i=1}^m \cos\left(\frac{\pi (i-1)}{m}\right)
-   \left(\ccap\left(\frac{\pi i}{m}\right)
-       -\ccap\left(\frac{\pi (i-1)}{m}\right)\right) 
-\enspace .
-\]
-
-The theory of $\eps$-approximation (see, for example
-Ref.~\cite[Chapter~4]{c00}) states that, the unit sphere in
-$\mathbb{R}^d$ can be covered with a set $S$ of $k=O(dr^2\log dr)$
-points such that the number of points contained in any spherical  cap
-$C$ of angular radius $\theta$ obeys
-\[
-   \left|\frac{|C\cap S|}{k} - \ccap(\theta)\right| \le \frac{1}{r}
-    \enspace .
-\]
-
-
-Now, consider $v_1'=\frac{1}{k}\sum_{v\in S} v_1$.  Then we have
+From the previous appendix, we know that $c_d$ is the expected
+absolute value of the $x$-coordinate of a point $v$ chosen uniformly
+at random from $\Sd$.  Let $\ccap(\theta)$ denote the spherical cap of
+angular radius $\theta$ obtained by intersecting $\Sd$ with the
+halfspace $x_1\ge\cos(\theta)$ and let $\area(C)$ denote the surface
+area (volume) of the spherical cap $C$.  Then, we have the following
+inequalities for $c_d$,
 \begin{eqnarray*}
- & & \sum_{i=1}^m \cos\left(\frac{\pi i}{m}\right)
-   \left(\frac{|h_{\pi i/m}\cap S|}{k} -
-   \frac{|h_{\pi (i+1)/m}\cap S|}{k}\right) \\
- & \le & \sum_{i=1}^m \cos\left(\frac{\pi i}{m}\right)
-   \left(\ccap\left(\frac{\pi i}{m}\right) -
-   \ccap\left(\frac{\pi (i+1)}{m}\right) + \frac{2}{r}\right) \\
- & \le & c_d + \frac{2m}{r} + \ldots
+   c_d & = & \E[|x_1|] \\ 
+   & = & 2\sum_{i=1}^m \Pr\left\{x\in 
+             \ccap\left(\frac{i\pi}{m}\right) \setminus
+                  \ccap\left(\frac{(i-1)\pi}{m}\right)\right\}\cdot
+              \E\left[x_1\mid x\in
+              \ccap\left(\frac{i\pi}{m}\right) \setminus
+                  \ccap\left(\frac{(i-1)\pi}{m}\right)
+              \right] \\
+   & \le & \frac{2}{\area(\Sd)}\cdot
+                  \sum_{i=1}^m \cos\left(\frac{(i-1)\pi}{2m}\right)
+                  \left(\area\left(\ccap\left(\frac{i\pi}{2m}\right)\right)-
+                     \area\left(\ccap\left(\frac{(i-1)\pi}{2m}\right)\right)
+                  \right) \\
+   & \le & \frac{2}{\area(\Sd)}\cdot
+                  \sum_{i=1}^m \cos\left(\frac{i\pi}{2m}+\frac{1}{m}\right)
+                  \left(\area\left(\ccap\left(\frac{i\pi}{2m}\right)\right)-
+                     \area\left(\ccap\left(\frac{(i-1)\pi}{2m}\right)\right)
+                  \right) \\
+   & = & \frac{2}{\area(\Sd)}\cdot
+                  \sum_{i=1}^m \cos\left(\frac{i\pi}{2m}\right)
+                  \left(\area\left(\ccap\left(\frac{i\pi}{2m}\right)\right)-
+                     \area\left(\ccap\left(\frac{(i-1)\pi}{2m}\right)\right)
+                  \right) + \frac{1}{m} \\
+   & \le & c_d + \frac{1}{m}  \enspace .
 \end{eqnarray*}
-and 
+
+Using the theory of $\eps$-approximations \cite[Chapter~4]{c00}, it is
+possible to compute a set $S$ of $k=O(dr^2\log dr)$ points on $\Sd$ such
+that, for any spherical cap $C$
 \[
- v_1'\le \sum_{i=1}^m \cos\left(\frac{\pi i}{m}\right)
-   \left(|h_{\pi i/m}\cap S| -
-   |h_{\pi (i+1)/m}\cap S|\right) 
+    \left|\frac{\area(C)}{\area(\Sd)} - \frac{|C\cap S|}{|S|} \right| 
+              \le \frac{1}{r}  \enspace 
 \]
-
-
-\comment{
-Lukovszky \cite{tamasthesis} gives a proof that, for any $\eps>0$, and
-any $d>1$, there exists a centrally symmetric $d$-polytope,
-$P_{d,\eps}$, all of whose vertices on the unit sphere
-$\mathbb{S}^{d-1}$ and having $O((1/\eps)^d)$ facets, all of which
-have angular diameter at most $\eps$.  That is, for any pair of points
-$p$ and $q$ in some facet $f$ of the polytope $\angle pOq\le \eps$.
-
-Observe that, for any ray $r$ originating at the origin, the
-intersection of $r$ with the boundary of $P_{d,\eps}$ is of distance
-at most $\eps$ from the intersection of $r$ with
-$\mathbb{S}^{d-1}$.\marginpar{Why?}  In our setting this means that,
-if we can define a distance function where is the unit ball is
-$P_{d,\eps}$ then this distance function is an $\eps$-approximation to
-Euclidean distance.  Indeed, we will show how to choose the lines
-$\ell_1,\ldots,\ell_k$ and the weights $w_1,\ldots,w_k$ in such a way
-that the set of points $p$ that satisfy
+and by increasing the size of $S$ by a constant factor we may assume
+that $S$ is symmetric ($x\in S$ iff $-x\in S$).
+Let $S$ be such a set of points and let us consider the average
+$x$-coordinate of an element in $S$.
+\begin{eqnarray*}
+\frac{1}{|S|}\cdot \sum_{x\in S} |x_1|
+  & = & \frac{2}{|S|}\cdot\sum_{i=1}^m
+          \sum\left\{x_1: x\in
+              S\cap\ccap\left(\frac{i\pi}{m}\right) 
+                \setminus\ccap\left(\frac{(i-1)\pi}{m}\right)
+          \right\} \\
+  & \le & \frac{2}{|S|}\cdot
+         \sum_{i=1}^m\cos\left(\frac{(i-1)\pi}{m}\right)
+           \left(
+             \left|\ccap\left(\frac{i\pi}{m}\right)\cap S\right| -
+             \left|\ccap\left(\frac{(i-1)\pi}{m}\right)\cap S\right|
+           \right) \\
+  & \le & \frac{2}{\area(\Sd)}\cdot
+         \sum_{i=1}^m\cos\left(\frac{(i-1)\pi}{m}\right)
+           \left(
+             \area\left(\ccap\left(\frac{i\pi}{m}\right)\right) -
+             \area\left(\ccap\left(\frac{(i-1)\pi}{m}\right)\right) +
+             \frac{2\area(\Sd)}{r}
+           \right) \\
+  & \le & \frac{2}{\area(\Sd)}\cdot
+         \sum_{i=1}^m\cos\left(\frac{(i-1)\pi}{m}\right)
+           \left(
+             \area\left(\ccap\left(\frac{i\pi}{m}\right)\right) -
+             \area\left(\ccap\left(\frac{(i-1)\pi}{m}\right)\right)
+           \right) + \frac{2m}{r} \\
+  & \le & c_d + \frac{1}{m} + \frac{2m}{r} \\
+  & \le & c_d + \frac{2}{m} 
+\end{eqnarray*}
+where the last inequality follows by taking $r=2m^2$, in which case
+$|S|=O(dm^4\log dm)$.  Taking $m=2/c_d\eps$ and using a symmetric
+argument to the one above to obtain a lower bound, we obtain
 \[
- \frac{c_d}{dk} \sum_{i=1}^k w_i|p_{\ell_i}-q_{\ell_i}| \le 1
+  1-\eps \le \frac{1}{c_d|S|}\cdot\sum_{x\in S}|x_1| \le 1 + \eps
 \]
-is exactly the the polyhedron $P_{d,\eps}$.  For the lines
-$\ell_1,\ldots,\ell_k$, we take one line perpendicular to each pair of
-antipodal faces in $P_{d,\eps}$.
-}
+with $|S|=O((d^3/\eps^4)\log(d/\eps))$.  
+
+
+
+
 
 \end{document}

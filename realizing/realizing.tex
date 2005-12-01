@@ -1,4 +1,4 @@
-\documentclass[11pt,a4paper]{article}
+\documentclass[11pt]{patmorin}
 \usepackage{fullpage}
 \usepackage{amsfonts}
 \usepackage{amsthm}
@@ -12,8 +12,8 @@
 %\newcommand{\defeq}{\stackrel{\mathrm{def}}{=}}
 \newcommand{\defeq}{=}
 
-\title{Realizing Partitions Respecting Full
-and Partial Order Information}
+\title{\MakeUppercase{Realizing Partitions Respecting Full 
+	and Partial Order Information}}
 \author{
 	Erik D. Demaine \and
 	Jeff Erickson \and
@@ -93,15 +93,15 @@ The motivation for studying these types of problems comes from the
 study of the perception of musical rhythm.  Mathematically, a rhythm
 is a partition  of $[0,n)$ into $k$ open intervals called
 \emph{off-sets} and $k$ integer points called \emph{on-sets} (see
-References~\cite{t02,t03a,t03b,dfgrt04,t04}).  Musically, we interpret
+References~\cite{dfgrt04,t02,t03a,t03b,t04}).  Musically, we interpret
 the on-sets as points in time (modulo $n$) when a percussion
 instrument is to be struck.  Experimental evidence shows that humans
-often do not distinguish between rhythms with the same \emph{rhythmic
-contour}, i.e.  the sequence that specifies whether one off-set is
-longer than, shorter than or equal to the previous off-set (see
-References~\cite{d78,ftrkp04,l96,kcgv00}).  It then becomes a natural
-question to ask whether and how a given rhythmic contour can be
-realized.
+often do not distinguish between different rhythms with the same
+\emph{rhythmic contour}, i.e.  the sequence that specifies whether one
+off-set is longer than, shorter than or equal to the previous off-set
+(see References~\cite{d78,ftrkp04,kcgv00,l96}).  It then becomes a
+natural question to ask whether and how a given rhythmic contour can
+be realized.
 
 In this paper, we give polynomial (in $k$ and $\log n$) time
 algorithms for all three versions of the problem under study.  In
@@ -151,10 +151,11 @@ where (1)~$\ell_i = \ell_j$ if $i$ and $j$ belong to the same class and
 (2)~$\ell_i < \ell_j$ if $i\in C_{i'}$, $j\in C_{j'}$ and $i'< j'$.
 
 Refer to \figref{graphical}.  Now our problem is to find
-$v_1,\ldots,v_{m}\in\N$ such that $v_i < v_{i+1}$, for all $1\le i <
-m$ and $\sum_{i=1}^m{v_i|C_i|} = n$.  Then by assigning $l_i=v_{i'}$
+$v_1,\ldots,v_{m}\in\N$ such that $v_{i'} < v_{i'+1}$, for all $1\le
+i' <
+m$ and $\sum_{i'=1}^m{v_{i'}|C_{i'}|} = n$.  Then by assigning $l_i=v_{i'}$
 for all $i\in C_{i'}$ we obtain a solution to the original problem.
-The restriction $v_i < v_{i+1}$ is slightly inconvenient and we
+The restriction $v_{i'} < v_{i'+1}$ is slightly inconvenient and we
 can remove it with a rewording of the problem.  Let $t_1 = k$,
  and let $t_i=t_{i-1}-|C_{i-1}|$ for $1\le i\le m$.  Then
 it suffices to find $w_1,\ldots,w_m\in\N$ such that
@@ -186,7 +187,8 @@ Let
         w_1,\ldots,w_i\in \mathbb{N} \right\} 
 \enspace .
 \]
-Our algorithm uses dynamic programming to compute $S_i$ for
+Our problem is to determine whether $n\in S_m$.
+To solve this problem we use dynamic programming to compute each $S_i$ for
 $i=1,\ldots,m$.  However, since the set $S_i$ has infinite size, we
 require a compact representation for it.  To obtain a nice
 representation, we observe that, because $t_1=k$, if $S_i$ contains
@@ -225,18 +227,18 @@ $D_{i}(y)$ for all $y$ in
     q_{0}=\{q_{0,1}, q_{0,2},q_{0,3},\ldots,q_{0,r}\}
 \]
 in $O(r)$ time.  The same algorithm can be used for the sets $q_{1},
-q_{2}, \ldots, q_{k/r}$ to give a total running time of
+q_{2}, \ldots, q_{k/r-1}$ to give a total running time of
 $O(r)\times k/r= O(k)$.
 The main observation we use is that
 \begin{equation}
-    f(j) \defeq D_{i}(q_{0,j}) = \min\{D_{i-1}(q_{0,(j-x)\bmod k})+x\ell_i :
+    f(j) \defeq D_{i}(q_{0,j}) = \min\{D_{i-1}(q_{0,(j-x)\bmod k})+xt_i :
 x\in \N_k\} \enspace .
 \end{equation}
 
 That is, the univariate function $f(j)$ is the lower
 envelope of $k$ half-lines, where the $x$th half-line is given by the
-equation $y=(D_{i-1}(q_{0,x}) + (j-x)\ell_i)\bmod k$, $j\ge 1$.  Since
-the slope, $\ell_i$, of all $k$ half-lines is identical and positive and
+equation $y=(D_{i-1}(q_{0,x}) + (j-x)t_i)\bmod k$, $j\ge 1$.  Since
+the slope, $t_i$, of all $k$ half-lines is identical and positive and
 their left endpoints are sorted (by $j$) the lower envelope can easily
 be computed in $O(r)$ time by scanning from left to right and keeping
 track of the current minimum line.  This completes the proof.
@@ -246,15 +248,15 @@ Note that the algorithm implied by \lemref{firstalg} is actually very
 simple, and is given by the following pseudocode
 
 \begin{algorithmic}[1]
-\STATE{$r\gets\gcd(k,\ell_i)$}
+\STATE{$r\gets\gcd(k,t_i)$}
 \FOR{$c = 0,\ldots,k/r-1$}
   \STATE{$m \gets \infty$}
   \FOR{$j = 1,\ldots,r$}
-    \STATE{$m \gets \min\{m, D_{i-1}((c-j\ell_i)\bmod k)+j\ell_i\}$}
+    \STATE{$m \gets \min\{m, D_{i-1}((c-jt_i)\bmod k)+jt_i\}$}
   \ENDFOR
   \FOR{$j = 0,\ldots, r-1$}
-    \STATE{$D_i((c+j\ell_i)\bmod k)\gets m$}
-    \STATE{$m \gets\min\{m, D_{i-1}((c+j\ell_i)\bmod k) \} + \ell_i$}
+    \STATE{$D_i((c+jt_i)\bmod k)\gets m$}
+    \STATE{$m \gets\min\{m, D_{i-1}((c+jt_i)\bmod k) \} + t_i$}
   \ENDFOR
 \ENDFOR
 \end{algorithmic}
@@ -319,8 +321,8 @@ We say that $w_1,\ldots,w_m$ are \emph{admissible} if they satisfy
 \eqref{admissible}.
 
 Given $w_1,\ldots,w_m$ satisfying \eqref{sum-n} and
-\eqref{admissible}, we can compute the value of $l_i\in C_{i'}$ as 
-$l_i =\sum_{j=1}^{i'} w_js_j$.  That is, the value $w_j$ represents the
+\eqref{admissible}, we can compute the value of $\ell_i\in C_{i'}$ as 
+$\ell_i =\sum_{j=1}^{i'} w_js_j$.  That is, the value $w_j$ represents the
 difference in the values in $C_{j-1}$ and $C_j$, this difference being
 an increase if $s_j=+1$ and a decrease if $s_j=-1$.
 
@@ -502,13 +504,14 @@ and
 Then, rearranging the above equations we get the equivalent statements
 \begin{equation}
 \sum_{j=2}^m w_js_jt_j = n - w_1t_1 = n-w_1k  \eqlabel{sum-n-2}
+\enspace ,
 \end{equation}
-and
 \begin{equation}
    \sum_{j=2}^i w_js_j \ge 0
        \enspace\mbox{for all $i\in\{3,\ldots,m-1\}$}
-       \enspace .  
+       \enspace  , 
 \end{equation}
+and
 \begin{equation}
    \sum_{j=2}^i w_js_j \ge 1
        \enspace\mbox{for all $i\in\{2,m\}$}
@@ -559,9 +562,9 @@ Another problem, whose solution would be useful in performing
 perceptual tests on rhythms, is that of selecting uniformly at random
 from all partitions of $[0,n)$ that satisfy some sequential, cyclic or
 total information constraints.  Such an algorithm would be useful for
-testing hypotheses of the form:  ``All rhythms of length $n$ and
+testing hypotheses of the form:  ``Most rhythms of length $n$ and
 having $k$ onsets that satisfy some set of constraints sound alike to
-most listeners.''
+many listeners.''
 
 The sequential and cyclic information problems we study are motivated
 by the 3-level ($+-0$) contour representation studied by Dowling
@@ -598,7 +601,7 @@ Perouz~Taslakian,
 Remco~Veltcamp,
 and David~Wood,
 for providing a
-stimulating work environment.
+stimulating working environment.
 
 \bibliographystyle{plain}
 \bibliography{realizing}

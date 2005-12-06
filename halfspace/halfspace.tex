@@ -1,0 +1,73 @@
+\documentclass[lotsofwhite]{patmorin}
+
+\input{pat.tex}
+
+\newcommand{\eps}{\varepsilon}
+
+\title{\MakeUppercase{``Output-Sensitive'' Halfspace Range Counting}
+           \\ \MakeUppercase{in 2 and 3 Dimensions}}
+\author{Pat Morin}
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+The problem of preprocessing a set of $n$ points in $\mathbb{R}^2$
+(respectively, $\mathbb{R}^3$) to quickly report the number of points
+in a query halfplane (respectively, halfspace) is considered.
+Algorithms are presented whose running time depends on the number of
+points in the query halfplane (halfspace) and which are better than
+existing algorithms when this quantity is small.  More precisely, a
+data structure of $O(n\log n)$ size that answers queries in time
+$O(n^{\eps}k^{1-1/d})$ for a query that contains $k$ points is
+described.
+\end{abstract}
+
+\section{Introduction}
+
+Let $S$ be a set of $n$ points in $\mathbb{R}^d$.  A (static) data
+structure for \emph{halfspace counting queries} preprocesses $S$ so
+that, for any query halfspace $h$, the cardinality of $h\cap S$ can be
+computed in quickly. Halfspace range counting has a long history
+\cite{aeXX} and the state of the art consists of data structures whose
+size is $O(n\log^c n)$ that can answer queries in time
+$O(n^{1-1/d}\log^c n)$, for some constant $c\ge 0$ \cite{X}.  
+
+A special case of halfspace counting queries called \emph{halfspace
+emptiness queries} occurs when the goal is simply to test if $h\cap
+S=\emptyset$.  This special-case turn out to be considerably easier
+than the general problem.  For $d=2,3$, there exist data structures of
+size $O(n)$ that can answer halfspace emptiness queries in $O(\log n)$
+time \cite{preparata-shamos,dobkin-kirkpatrick,dhks}. For $d\ge 4$,
+there exist data structures of size $O(n)$ that can answer halfspace
+emptiness queries in time $O(n^{1-1/\floor{d/2}}\log^c n)$
+\cite{matousek-shallow}.
+
+What stands out about these two types of results is the large gap
+between counting and emptiness.  This is particularly evident for the
+cases $d=2$ and $d=3$ where counting queries take $\Omega(n^{1/2})$
+and $\Omega(n^{2/3})$ time, respectively, while emptiness queries take
+only $O(\log n)$ time.  In this paper we attempt to find a tradeoff
+between counting and emptiness queries, by studying \emph{halfspace
+iceberg queries}:  Given a query halfspace $h$ and query integer $k$,
+determine whether $|h\cap S|\ge k$. Note that, when $k=1$, halfspace
+iceberg queries correspond to  halfspace emptiness queries.
+Furthermore, by performing exponential search \cite{tarjan} on the
+value of $k$ any data structure for answering halfspace iceberg
+queries can answer halfspace counting queries.
+
+We describe a data structure of size $O(n\log n)$ that answers
+halfspace iceberg queries in time $O(n^\eps k^{1-1/d})$ for $d=2,3$
+and in time $O(n^{X}k^{1-1/d})$ for $d\ge 4$.  Furthermore, when the
+answer to the query is affirmative, the data structure can output the
+cardinality of $h\cap S$. Thus, by performing exponential search on
+$k$ we obtain data structures for halfspace counting queries that are
+sensitive to the value of the output.  Our data structures use the
+machinery of \emph{partition trees} \cite{many-matouseks,welzl}.  In
+particular, we obtain our results through a judicious use of
+Matou\v{s}ek's \emph{shallow cutting lemma} \cite{matousek-shallow},
+which was originally used in data structures for \emph{halfspace
+reporting queries} but has since been applied to several other
+problems \cite{ramos,chan1,chan2}.
+
+\end{document}

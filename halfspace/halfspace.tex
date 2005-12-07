@@ -12,15 +12,12 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-The problem of preprocessing a set of $n$ points in $\mathbb{R}^2$
-(respectively, $\mathbb{R}^3$) to quickly report the number of points
-in a query halfplane (respectively, halfspace) is considered.
+The problem of preprocessing a set of $n$ points in $\mathbb{R}^d$
+to quickly report the number of points
+in a query halfspace is considered.
 Algorithms are presented whose running time depends on the number of
-points in the query halfplane (halfspace) and which are better than
-existing algorithms when this quantity is small.  More precisely, a
-data structure of $O(n\log n)$ size that answers queries in time
-$O(n^{\eps}k^{1-1/d})$ for a query that contains $k$ points is
-described.
+points in the query halfspace and which are better than
+existing algorithms when this quantity is small.  
 \end{abstract}
 
 \section{Introduction}
@@ -48,26 +45,145 @@ between counting and emptiness.  This is particularly evident for the
 cases $d=2$ and $d=3$ where counting queries take $\Omega(n^{1/2})$
 and $\Omega(n^{2/3})$ time, respectively, while emptiness queries take
 only $O(\log n)$ time.  In this paper we attempt to find a tradeoff
-between counting and emptiness queries, by studying \emph{halfspace
-iceberg queries}:  Given a query halfspace $h$ and query integer $k$,
-determine whether $|h\cap S|\ge k$. Note that, when $k=1$, halfspace
-iceberg queries correspond to  halfspace emptiness queries.
-Furthermore, by performing exponential search \cite{tarjan} on the
-value of $k$ any data structure for answering halfspace iceberg
-queries can answer halfspace counting queries.
+between counting and emptiness queries by studying data structures for
+\emph{$k$-shallow halfspace counting queries}:  Preprocess a set $S$
+and an integer $k$ so that, given a query halfspace $h$, one can test
+whether $|h\cap S|\le k$ and, if so, report $|h\cap S|$. 
+ 
+We describe a data structure of size $O(n)$ that answers shallow
+halfspace counting queries in time $O(n^\eps k^{1-1/d})$ for $d=2,3$
+and in time $O(n^{X}k^{1-1/d})$ for $d\ge 4$.  By creating a
+collection of $O(\log n)$ shallow halfspace emptiness query data
+structures with $k=2^0,2^1,\ldots,2^{\ceil{\log n}}$ one can use
+exponential search on the value of $k$ to obtain a halfspace counting
+query data structure that is sensitive to the value of the output.
+Not surprisingly, our data structures use the machinery of
+\emph{partition trees} \cite{many-matouseks,welzl}.  In particular, we
+obtain our results through a judicious use of Matou\v{s}ek's partition
+theorem for shallow hyperplanes \cite{matousek-shallow}, which was
+originally used in data structures for \emph{halfspace reporting
+queries} but has since been applied to several other problems
+\cite{ramos,chan1,chan2}.
 
-We describe a data structure of size $O(n\log n)$ that answers
-halfspace iceberg queries in time $O(n^\eps k^{1-1/d})$ for $d=2,3$
-and in time $O(n^{X}k^{1-1/d})$ for $d\ge 4$.  Furthermore, when the
-answer to the query is affirmative, the data structure can output the
-cardinality of $h\cap S$. Thus, by performing exponential search on
-$k$ we obtain data structures for halfspace counting queries that are
-sensitive to the value of the output.  Our data structures use the
-machinery of \emph{partition trees} \cite{many-matouseks,welzl}.  In
-particular, we obtain our results through a judicious use of
-Matou\v{s}ek's \emph{shallow cutting lemma} \cite{matousek-shallow},
-which was originally used in data structures for \emph{halfspace
-reporting queries} but has since been applied to several other
-problems \cite{ramos,chan1,chan2}.
+\section{The Data Structure}
+
+
+Let $S$ be a set of $n$ points in $\mathbb{R}^d$.  We say that a
+hyperplane $h$ is \emph{$k$-shallow for $S$} if one of the two closed
+halfspaces bounded by $h$ contains at most $k$ points of $S$.   A
+\emph{simplicial partition} $\Pi$ of $S$ is a collection of pairs
+$(\Delta_i,S_i)$ where the $S_i$'s form a partition of $S$ and each
+$\Delta_i$ is a $d$-simplex that contains all the points in $S_i$.
+Our data structure is partition tree based on Matou\v{s}ek's Partition
+Theorem for Shallow Hyperplanes:
+
+\begin{thm}[Matou\v{s}ek 1992]\thmlabel{shallow-partition}
+Let $S$ be an $n$ point set in $\mathbb{R}^d$, $d\ge 2$, and let $r$
+be a parameter, $1<r<n$.  Then there exists a simplicical partition
+$\Pi=\{(\Delta_i,S_i):1\le i\le m\}$ for $P$ with the following
+properties:
+\begin{enumerate}
+\item $\ceil{n/r}\le |S_i|\le 2\ceil{n/r}$ for all $1\le i\le m$ and 
+
+\item any $(n/r)$-shallow hyperplane for $S$ intersects at most
+$cr^{1-1/\floor{d/2}}$ (for $d\ge 4$) or $c\log r$ (for
+$d=2,3$) simplices in $\{\Delta_1,\ldots,\Delta_m\}$.
+\end{enumerate}
+Such a simplicial partition can be computed in time $O(n^{1+\delta})$.
+For $r\le n^\alpha$ (with a suitable constant $\alpha > 0$), it can be
+computed in $O(n\log r)$ time.
+\end{thm}
+
+We are now ready to prove our main theorem:
+
+\begin{thm}\thmlabel{main}
+Let $S$ be a set of $n$ points in $\mathbb{R}^d$ and let $k$ be a
+constant with $0\le k\le n$.  For any constant $\eps>0$, there exists
+a data structure of size $O(n)$ that can be constructed in $O(n\log
+n)$ time and answers $k$-shallow halfspace
+counting queries for $S$ in $O(n^\eps k^{1-1/d})$ (for $d=2,3$)
+or $O(n^X k^{1-1/d})$ (for $d\ge 4$) time.
+\end{thm}
+
+\begin{proof}
+
+Let $r\ge 4$ be a constant whose choice will be discussed later.  We
+construct a \emph{partition tree} \cite{X} as follows.  If $n\le kr$
+then we construct a standard partition tree in $O(n\log n)$ time that
+can answer halfspace counting queries in
+$O(n^{1-1/d+\delta})=O(k^{1-1/d+\delta})$ time, for some (arbitrarily
+small) constant $\delta>0$.  Otherwise, we construct the simplicial
+partition of $S$ described in \thmref{shallow-partition}.  We store
+the simplices $\Delta_1,\ldots,\Delta_m$ of this partition as well as
+the sizes $|S_1|,\ldots,|S_m|$ at the root of our tree and store each
+of the $S_i$ recursively as children of the root in the same type of
+data structure. Clearly this data structure has size $O(n)$ since it
+is a tree with $O(n/k)$ nodes, each leaf of which has size $O(k)$ and
+whose internal nodes have size $O(r)=O(1)$.  The construction
+algorithm runs in $O(n\log n)$ time since the work done at each of the
+$O(\log n)$ levels is $O(n\log r)=O(n)$. 
+
+Queries in this tree proceed almost in the standard fashion. Let $h$
+be our query halfspace and let $\partial h$ denote $h$'s bounding
+hyperplane.  Beginning at the root of the tree, we first determine how
+many of the simplices stored at the root at intersected by $\partial
+h$.  If this number exceeds $cr^{1-1/\floor{d/2}}$ (for $d\ge 4$) or $c\log r$
+(for $d=2,3$) then we conclude that $\partial h$ is not $k$-shallow
+and therefore $|h\cap S|>k$.  If this is the case, our query can
+terminate immediately with the answer ``false.''  Otherwise, the
+query algorithm recurses on each of the children corresponding to the
+simplices that intersect $\partial h$.  The algorithm then computes
+the sum of the outputs of all recursive calls plus the sum of the
+sizes of the subsets $S_i$ that are contained in simplices $\Delta_i$
+completely contained in $h$.  If this sum exceeds $k$, the algorithm
+again outputs ``false,'' otherwise it outputs the value of this sum.
+
+The correctness of the above algorithm is clear. To analyze its
+running time, we observe that the running time recurrence is bounded
+by
+\[
+   T(n) \le \left\{ \begin{array}{ll}
+     O(1) + (cr^{1-1/\floor{d/2}})T(2\ceil{n/r}) & \mbox{if $n > kr$} \\
+     k^{1-1/d+\eps} & \mbox{otherwise} 
+   \end{array}\right.
+\]
+(for $d\ge 4$) or
+\[
+   T(n) \le \left\{ \begin{array}{ll}
+     O(1) + (c\log r)T(2\ceil{n/r}) & \mbox{if $n > kr$} \\
+     k^{1-1/d+\eps} & \mbox{otherwise} 
+   \end{array}\right.
+\]
+(for $d=2,3$).  Choosing $r$ sufficiently large gives a query time of
+$O(n^Xk^{1-1/d})$ in the former case and $O(n^\eps k^{1-1/d})$ in the
+latter case, as required.
+\end{proof}
+
+\thmref{main} also has implications for (standard) halfspace counting
+queries. Given only the set $S$, we can create a collection of $O(\log
+n)$ shallow halfspace emptiness query data structures
+$D_0,\ldots,D_{\ceil{\log n}}$ with values of
+$k=2^0,2^1,\ldots,2^{\ceil{\log n}}$, respectively.  Then, given a
+query halfspace we can query $D_1,D_2,\ldots$ in succession until the
+first data structure returns an answer other than ``false.''  At this
+point we have the solution to our halfspace counting query.  Since the
+running time of each query in the sequence increases by a constant
+factor the running time of the entire sequence of queries is dominated
+by the last query. This leads to the following corrollary of
+\thmref{main}.
+
+\begin{cor}
+There exists a data structure of size $O(n\log n)$ that can be
+constructed in $O(n\log^2 n)$ time and can answer
+halfspace counting queries in $O(n^Xk^{1-1/d})$ (for $d\ge 4$) or
+$O(n^\eps k^{1-1/d})$ (for $d=2,3$) time.
+\end{cor}
+
+
+one can use exponential search on the
+value of $k$ to obtain a halfspace counting query data structure that
+is sensitive to the value of the output.
+
+
 
 \end{document}

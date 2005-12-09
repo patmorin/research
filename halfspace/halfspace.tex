@@ -3,6 +3,7 @@
 \input{pat.tex}
 
 \newcommand{\eps}{\varepsilon}
+\newcommand{\X}{1-1/\floor{d/2}+\delta}
 
 \title{\MakeUppercase{``Output-Sensitive'' Halfspace Range Counting}
            \\ \MakeUppercase{in 2 and 3 Dimensions}}
@@ -12,12 +13,11 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-The problem of preprocessing a set of $n$ points in $\mathbb{R}^d$
-to quickly report the number of points
-in a query halfspace is considered.
-Algorithms are presented whose running time depends on the number of
-points in the query halfspace and which are better than
-existing algorithms when this quantity is small.  
+The problem of preprocessing a set of $n$ points in $\mathbb{R}^d$ to
+quickly report the number of points in a query halfspace is
+considered.  Algorithms are presented whose running time depends on
+the number of points in the query halfspace and which are better than
+existing algorithms when this quantity is small. 
 \end{abstract}
 
 \section{Introduction}
@@ -26,9 +26,9 @@ Let $S$ be a set of $n$ points in $\mathbb{R}^d$.  A (static) data
 structure for \emph{halfspace counting queries} preprocesses $S$ so
 that, for any query halfspace $h$, the cardinality of $h\cap S$ can be
 computed in quickly. Halfspace range counting has a long history
-\cite{aeXX} and the state of the art consists of data structures whose
-size is $O(n\log^c n)$ that can answer queries in time
-$O(n^{1-1/d}\log^c n)$, for some constant $c\ge 0$ \cite{X}.  
+\cite{aeXX} and the state of the art consists of data structures
+having size $O(n)$, that can be constructed in $O(n\log n)$ time, and
+that can answer queries in time $O(n^{1-1/d}(\log n)^{O(1)})$ \cite{X}.  
 
 A special case of halfspace counting queries called \emph{halfspace
 emptiness queries} occurs when the goal is simply to test if $h\cap
@@ -37,7 +37,7 @@ than the general problem.  For $d=2,3$, there exist data structures of
 size $O(n)$ that can answer halfspace emptiness queries in $O(\log n)$
 time \cite{preparata-shamos,dobkin-kirkpatrick,dhks}. For $d\ge 4$,
 there exist data structures of size $O(n)$ that can answer halfspace
-emptiness queries in time $O(n^{1-1/\floor{d/2}}\log^c n)$
+emptiness queries in time $O(n^{1-1/\floor{d/2}}(\log n)^{O(1)})$
 \cite{matousek-shallow}.
 
 What stands out about these two types of results is the large gap
@@ -50,20 +50,24 @@ between counting and emptiness queries by studying data structures for
 and an integer $k$ so that, given a query halfspace $h$, one can test
 whether $|h\cap S|\le k$ and, if so, report $|h\cap S|$. 
  
-We describe a data structure of size $O(n)$ that answers shallow
-halfspace counting queries in time $O(n^\eps k^{1-1/d})$ for $d=2,3$
-and in time $O(n^{X}k^{1-1/d})$ for $d\ge 4$.  By creating a
-collection of $O(\log n)$ shallow halfspace emptiness query data
-structures with $k=2^0,2^1,\ldots,2^{\ceil{\log n}}$ one can use
-exponential search on the value of $k$ to obtain a halfspace counting
-query data structure that is sensitive to the value of the output.
+We describe a data structure of size $O(n)$ that, for any constant
+dimension $d\ge 2$ answers shallow halfspace counting queries in time
+$O(k^{1-1/d}n^{\X})$.  For the special case $d=2$, we describe a
+different data structure that answers queries in time $O(k^{1-1/d}\log
+n + log^3 n)$. 
+
 Not surprisingly, our data structures use the machinery of
 \emph{partition trees} \cite{many-matouseks,welzl}.  In particular, we
-obtain our results through a judicious use of Matou\v{s}ek's partition
+obtain our results by several applications of Matou\v{s}ek's partition
 theorem for shallow hyperplanes \cite{matousek-shallow}, which was
 originally used in data structures for \emph{halfspace reporting
-queries} but has since been applied to several other problems
-\cite{ramos,chan1,chan2}.
+queries}.   However, our 2-dimensional data structure returns to an
+old idea of Welzl \cite{welzl-partition-trees}, namely spanning trees
+of low stabbing number.  In proving our result we show that, for any
+set set $S$ of $n$ points in $\mathbb{R}^d$, there exists a spanning
+tree $T$ of size $S$ such that no $k$-shallow hyperplane for $S$
+intersects $O(k^{1-1/d} + \log^2 n)$ edges of $T$.
+
 
 \section{The Data Structure}
 
@@ -97,14 +101,15 @@ computed in $O(n\log r)$ time.
 We are now ready to prove our main theorem:
 
 \begin{thm}\thmlabel{main}
-Let $S$ be a set of $n$ points in $\mathbb{R}^d$ and let $k$ be a
-constant with $0\le k\le n$.  For any constant $\eps>0$, there exists
-a data structure of size $O(n)$ that can be constructed in $O(n\log
-n)$ time and answers $k$-shallow halfspace
-counting queries for $S$ in $O(n^\eps k^{1-1/d})$ (for $d=2,3$)
-or $O(n^X k^{1-1/d})$ (for $d\ge 4$) time.
+Let $S$ be a set of $n$ points in $\mathbb{R}^d$, $d\ge 2$, and let
+$k$ be a parameter with $0\le k\le n$. There exists a data structure
+of size $O(n)$ that can be constructed in $O(n\log n)$ time and
+answers $k$-shallow halfspace counting queries for $S$ in
+$O(k^{1-1/d}n^{\X})$.
 \end{thm}
-
+\noindent
+\textbf{Note to self:} Check that this recurrence doesn't actually have
+a better solution.
 \begin{proof}
 
 Let $r\ge 4$ be a constant whose choice will be discussed later.  We
@@ -143,20 +148,20 @@ running time, we observe that the running time recurrence is bounded
 by
 \[
    T(n) \le \left\{ \begin{array}{ll}
-     O(1) + (cr^{1-1/\floor{d/2}})T(2\ceil{n/r}) & \mbox{if $n > kr$} \\
+     O(r) + (cr^{1-1/\floor{d/2}})T(2\ceil{n/r}) & \mbox{if $n > kr$} \\
      k^{1-1/d+\eps} & \mbox{otherwise} 
    \end{array}\right.
 \]
-(for $d\ge 4$) or
+for $d\ge 4$ and by
 \[
    T(n) \le \left\{ \begin{array}{ll}
-     O(1) + (c\log r)T(2\ceil{n/r}) & \mbox{if $n > kr$} \\
+     O(r) + (c\log r)T(2\ceil{n/r}) & \mbox{if $n > kr$} \\
      k^{1-1/d+\eps} & \mbox{otherwise} 
    \end{array}\right.
 \]
-(for $d=2,3$).  Choosing $r$ sufficiently large gives a query time of
-$O(n^Xk^{1-1/d})$ in the former case and $O(n^\eps k^{1-1/d})$ in the
-latter case, as required.
+for $d=2,3$.  
+In either case, choosing $r$ sufficiently large gives a query time of
+$O(n^{\X}k^{1-1/d})$, as required.
 \end{proof}
 
 \thmref{main} also has implications for (standard) halfspace counting
@@ -175,15 +180,13 @@ by the last query. This leads to the following corrollary of
 \begin{cor}
 There exists a data structure of size $O(n\log n)$ that can be
 constructed in $O(n\log^2 n)$ time and can answer
-halfspace counting queries in $O(n^Xk^{1-1/d})$ (for $d\ge 4$) or
-$O(n^\eps k^{1-1/d})$ (for $d=2,3$) time.
+halfspace counting queries in $O(k^{1-1/d}n^{\X})$ time.
 \end{cor}
 
+\section{A More Efficient Algorithm for $d=2$}
 
-one can use exponential search on the
-value of $k$ to obtain a halfspace counting query data structure that
-is sensitive to the value of the output.
-
-
+In this section, we present a more efficient solution for the special
+case $d=2$.  Our solution is based on the construction of spanning
+trees of low stabbing number.
 
 \end{document}

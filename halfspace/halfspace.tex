@@ -105,7 +105,7 @@ Let $S$ be a set of $n$ points in $\mathbb{R}^d$, $d\ge 2$, and let
 $k$ be a parameter with $0\le k\le n$. There exists a data structure
 of size $O(n)$ that can be constructed in $O(n\log n)$ time and
 answers $k$-shallow halfspace counting queries for $S$ in
-$O(k^{1-1/d}n^{\X})$.
+$O(k^{1-1/d}(n/k)^{\X})$.
 \end{thm}
 \noindent
 \textbf{Note to self:} Check that this recurrence doesn't actually have
@@ -122,26 +122,27 @@ partition of $S$ described in \thmref{shallow-partition}.  We store
 the simplices $\Delta_1,\ldots,\Delta_m$ of this partition as well as
 the sizes $|S_1|,\ldots,|S_m|$ at the root of our tree and store each
 of the $S_i$ recursively as children of the root in the same type of
-data structure. This data structure has size $O(n)$ since it
-is a tree with $O(n/k)$ nodes, each leaf of which has size $O(k)$ and
-whose internal nodes have size $O(r)=O(1)$.  The construction
-algorithm runs in $O(n\log n)$ time since the work done at each of the
-$O(\log n)$ levels is $O(n\log r)=O(n)$. 
+data structure. This data structure has size $O(n)$ since it is a tree
+with $O(n/k)$ nodes, each leaf of which has size $O(k)$ and whose
+internal nodes have size $O(r)=O(1)$.  The construction algorithm runs
+in $O(n\log n)$ time since the work done at each of the $O(\log n)$
+levels is $O(n\log r)=O(n)$.
 
 Queries in this tree proceed almost in the standard fashion. Let $h$
 be our query halfspace and let $\partial h$ denote $h$'s bounding
 hyperplane.  Beginning at the root of the tree, we first determine how
 many of the simplices stored at the root at intersected by $\partial
-h$.  If this number exceeds $cr^{1-1/\floor{d/2}}$ (for $d\ge 4$) or $c\log r$
-(for $d=2,3$) then we conclude that $\partial h$ is not $k$-shallow
-and therefore $|h\cap S|>k$.  If this is the case, our query can
-terminate immediately with the answer ``false.''  Otherwise, the
-query algorithm recurses on each of the children corresponding to the
-simplices that intersect $\partial h$.  The algorithm then computes
-the sum of the outputs of all recursive calls plus the sum of the
-sizes of the subsets $S_i$ that are contained in simplices $\Delta_i$
-completely contained in $h$.  If this sum exceeds $k$, the algorithm
-again outputs ``false,'' otherwise it outputs the value of this sum.
+h$.  If this number exceeds $cr^{1-1/\floor{d/2}}$ (for $d\ge 4$) or
+$c\log r$ (for $d=2,3$) then we conclude that $\partial h$ is not
+$k$-shallow and therefore $|h\cap S|>k$.  If this is the case, our
+query can terminate immediately with the answer ``false.''  Otherwise,
+the query algorithm recurses on each of the children corresponding to
+the simplices that intersect $\partial h$.  The algorithm then
+computes the sum of the outputs of all recursive calls plus the sum of
+the sizes of the subsets $S_i$ that are contained in simplices
+$\Delta_i$ completely contained in $h$.  If this sum exceeds $k$, the
+algorithm again outputs ``false,'' otherwise it outputs the value of
+this sum.
 
 The correctness of the above algorithm is clear. To analyze its
 running time, we observe that the running time recurrence is bounded
@@ -161,7 +162,7 @@ for $d\ge 4$ and by
 \]
 for $d=2,3$.  
 In either case, choosing $r$ sufficiently large gives a query time of
-$O(n^{\X}k^{1-1/d})$, as required.
+$O(k^{1-1/d}(n/k)^{\X})$, as required.
 \end{proof}
 
 \thmref{main} also has implications for (standard) halfspace counting
@@ -183,10 +184,100 @@ constructed in $O(n\log^2 n)$ time and can answer
 halfspace counting queries in $O(k^{1-1/d}n^{\X})$ time.
 \end{cor}
 
-\section{A More Efficient Algorithm for $d=2$}
+\section{Spanning trees of Low Shallow Stabbing Number}
 
-In this section, we present a more efficient solution for the special
-case $d=2$.  Our solution is based on the construction of spanning
-trees of low stabbing number.
+\begin{lem}
+Let $S$ be a set of $n$ points and let $H$ be a set of $m$ lines that
+are $k$-shallow for $S$ ($k\le n$) in $\mathbb{R}^2$.  Then, there
+exists a pair of points $x,y\in S$ such that the segment $xy$
+intersects at most
+\[
+   O\left(\frac{m\log n}{n} + \frac{m}{(n-k)^{1/2}}\right)
+\]
+lines in $H$.
+\end{lem}
+
+\begin{proof}
+By applying \thmref{partition} with $r=n/k$, we obtain a partition of
+$\mathbb{R}^2$ into at most $n/k$ triangles such that every line in
+$H$ intersects at most $c\log r$ triangles and each triangle contains
+at least $k$ points.  The total number of intersections between lines in
+$H$ and triangles in the partition is $cm\log r$.  Therefore, some
+triangle must intersect at most
+\[
+    \frac{cm\log n}{n/k} = \frac{kcm\log n}{n} 
+\]
+lines in $H$, as required.
+\end{proof}
+
+
+\comment{A (more general but less tight) version of the following lemma
+originally appeared in the paper by Welzl \cite[Lemma~4.1]{welzl}.
+
+\begin{lem}\lemlabel{pair}
+Let $S$ be a set of $n$ points and $H$ be a set of $m$ hyperplanes
+in $\mathbb{R}^d$. Then there exists a pair of points $x,y\in S$ such
+that the segment $xy$ is intersected by $O(m/n^{1-1/d})$
+hyperplanes in $L$.
+\end{lem}
+
+\begin{proof}
+By the Cutting Lemma \cite[Lemma~X.X]{matousek-cutting-lemma} there
+exists a partition of $\mathbb{R}^d$ into $n-1$ simplices such that
+each simplex intersects $O(m/n^{1-1/d})$ of the lines in $L$.  Since
+there are more points in $S$ than simplices in the partition, one of
+the simplices must contain 2 points in $x,y\in S$.  The points $x$ and
+$y$ satisfy the conditions of the lemma.
+\end{proof}
+
+
+\begin{thm}
+Let $S$ be a set of $n$ points in $\mathbb{R}^2$.  There exists a
+spanning tree $T$ of $S$ such that, for all $1\le k\le n/2$ any
+$k$-shallow line for $S$ intersects at most $O(k^{1/2})$ edges of $T$.
+\end{thm}
+
+\begin{proof}
+
+Let $Q$ be the set of all $O(n^2)$ combinatorially distinct lines with
+respect to $S$.  We define the set $S_0=S$ and the multiset $Q_0$
+whose elements are the lines in $Q$ and the multiplicity of a line $l$
+of depth $k$ in $S$ is $e^{c_1(\sqrt{n}-\sqrt{k})}$.
+
+We construct the tree as follows: For $i=1,\ldots,n-1$ we find a pair
+of points $x_i,y_i\in S_{i-1}$ such that the segment $x_iy_i$
+intersects at most $c|Q_{i-1}|/|S_{i-1}|^{1/2}$ of the lines in
+$Q_{i-1}$. (\lemref{pair} guarantees the existence of this pair.)  The
+pair $(x_i,y_i)$ becomes an edge of the tree.  The set
+$S_i=S_{i-1}\setminus\{y_i\}$.  We obtain $Q_i$ from $Q_{i-1}$ by
+doubling the multiplicity of each line $l$ that intersects $x_iy_i$.
+
+It remains to show that the resulting tree has the desired property.
+We begin by giving an upper bound on $|Q_{n-1}|$. For $i=0,\ldots,n$,
+let $k_i=|Q_i|$.  Then, $k_0\le n^{O(1)}2^{n^{1/2}}$ and $k_i$, $i\ge
+1$ satisfies the recurrence
+\[
+     k_i \le k_{i-1}(1+c/(n-i+1)^{1/2}) \enspace ,
+\]
+so $k_{n-1}$ obeys
+\begin{eqnarray*}
+     k_{n-1} 
+      & \le & k_0\times\prod_{j=1}^{n-2}\left(1+c/j^{1/2}\right) \\ 
+      & \le & k_0\times\prod_{j=1}^{n-2}\exp\left(c/j^{1/2}\right) \\
+      &  =  & k_0\times\exp\left(\sum_{j=1}^{n-2} c/j^{1/2}\right) \\
+      & \le & k_0\times\exp\left(2cn^{1/2}\right) \\
+      & \le & n^{O(1)}\times\exp\left(c_1n^{1/2}\right)
+                  \times\exp\left(2cn^{1/2}\right) \\
+      & \le & n^{O(1)}\times\exp\left(3cn^{1/2}\right) \enspace ,
+\end{eqnarray*}
+provided that $c_1< c$.  On the other hand, consider some line $\ell\in
+Q$ with depth $k$ in $S$.  Suppose $\ell$ crosses $m$ edges of $T$.  Then the cardinality of $\ell$ in $Q_{n-1}$ is 
+\[
+   |Q_{n-1}\cap \ell| = \exp\left(c_1\left(n^{1/2}-k^{1/2}\right)\right)
+     \times 2^{m}
+\]
+}
+
+\end{proof}
 
 \end{document}

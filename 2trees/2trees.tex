@@ -1,25 +1,331 @@
 \documentclass[lotsofwhite,charterfonts]{patmorin}
 \usepackage{amsthm,amsfonts}
 
-\title{\MakeUppercase{My Paper}%
+\input{pat}
+
+\newcommand{\rep}[1]{^{\langle#1\rangle}}
+
+\newcommand{\degreesum}{Condition~(a)}
+\newcommand{\maxdegree}{Condition~(b)}
+\newcommand{\twotwos}{Condition~(c)}
+\newcommand{\onebig}{Condition~(d)}
+\newcommand{\fourds}{Condition~(e)}
+
+
+\title{\MakeUppercase{Degree Sequences of 2-Trees}%
 	\thanks{This research was partly funded by NSERC.}}
 
-\author{Pat Morin%
-	\thanks{School of Computer Science, Carleton University, 
-		1125 Colonel By Drive, Ottawa, CANADA K1S 5B6.}}
+\author{
+	Greg Aloupis \and
+	Prosenjit Bose \and
+	David Bremner \and
+	Mirela Damian-Lordache \and
+	Erik Demaine \and 
+	Martin Demaine \and
+	Dania El-Khechen \and
+	Vida Dujmovi\'{c} \and
+	Robin Flatland \and
+	Francisco Gomez-Martin \and
+	John Iacono \and
+	Danny Kri\c{z}anc \and
+	Stefan Langerman \and
+	Erin Leigh McLeish \and
+	Henk Meijer \and
+	Pat Morin \and
+	Sumeeta Ramaswami \and
+	David Rappaport \and
+	Diane Souvaine \and
+	Perouz Taslakian \and
+	Godfried Toussaint \and
+	Dmitri Tymoczko \and
+	David Wood \and
+	Stefanie Wuhrer \and
+}
 
 \date{}
 
 \begin{document}
 \maketitle
 \begin{abstract}
-This is a paper about nothing very useful.
+A complete characterization of the degree sequences of 2-trees is
+given.  This characterization yields a linear-time algorithm for
+recognizing and realizing degree sequences of 2-trees.
 \end{abstract}
 
 \section{Introduction}
 
+The \emph{degree sequence} of a graph $G=(V,E)$ is the sequence
+obtained by listing the degrees of the vertices of $G$ in
+non-decreasing order.  If $D=\langle d_1,\ldots,d_n\rangle$ is the
+degree sequence of $G$ then we say that $G$ is a \emph{realization} of
+$G$ or that $G$ \emph{realizes} $D$.  
+
+In this paper we consider degree sequences of a particular class of
+graphs.  \emph{2-trees} are defined inductively as follows:  The
+complete graph $K_2$ on 2 vertices is a 2-tree and any 2-tree $T$ on
+$n$ vertices can be obtained from some 2-tree $T'$ on $n-1$ vertices
+by adding a new vertex $u$ adjacent to two vertices $v$ and $w$ that
+share an edge in $T'$.  We call this process \emph{attaching} the
+vertex $u$ to the edge $\{v,w\}$.
+
+Since the average degree of a vertex in a 2-tree is less than 4, it is
+helpful to have a notation for elements of a sequence that occur
+often.  We denote by $a\rep{b}$ the (sub)sequence $a,a,\ldots,a$ of
+length $b$. We prove the following result:
+
+\begin{thm}\thmlabel{main}
+The following two statements are equivalent:
+\begin{enumerate}
+\item $D=\langle d_1,\ldots,d_n\rangle$ is a non-decreasing sequence of
+      natural numbers such that
+\begin{enumerate}
+\item $\sum_{i=1}^n d_i = 4n-6$,
+\item $\max\{d_i : 1\le i\le n\} \le n-1$,
+\item $d_1=d_2=2$,
+\item $D\not\in \{ 2\rep{p},4\rep{n-p-1}, 2p-2 : \mbox{$n < 2p-1$ or
+$n > 3p-3$} \}$, and 
+\item $D\not\in \{\langle 2\rep{n-4},d,d,d,d\rangle : d\ge 5\}$.
+\end{enumerate}
+\item $D$ is the degree sequence of a 2-tree.  
+\end{enumerate}
+Furthermore, for each $D=\langle d_1,\ldots,d_n\rangle$ satisfying
+Conditions~(a)--(e) and each $d_i \ge 3$ there exists a 2-tree that
+realizes $D$ 
+in which a vertex of degree $d_i$ is adjacent to a
+vertex of degree $2$.  
+\end{thm}
+
+We denote by $\mathcal{D}$ the set of all sequences satisfying the
+conditions outlined in the first part of \thmref{main}.  The remainder
+of this paper is organized as follows:  In \secref{if} we show that
+the every sequence $D\in \mathcal{D}$ is the degree sequence of a
+2-tree.  In \secref{onlyif} we show that every sequence $D\not\in
+\mathcal{D}$ is not the degree sequence of any 2-tree.
+
+\section{The Elements of $\mathcal{D}$ are the Degree Sequences of
+	2-Trees}\seclabel{if}
+
+The proof of the ``if'' direction of \thmref{main} is by induction on
+$n$, the length of the sequence.  However, during the process of
+applying induction we come across several different kinds of base
+cases.
+
+\subsection{The Base Cases}
+
+\begin{lem}\lemlabel{basecase-a}
+The sequences $\langle 2,2\rangle$ and $\langle 2,2,2\rangle$ are the
+degree sequences of 2-trees.
+\end{lem}
+
+\begin{proof}
+These follow immmediately from the definition of 2-trees.
+\end{proof}
+
+
+\begin{lem}\lemlabel{basecase-b}
+Suppose $D\in \mathcal{D}\cap \{\langle 2\rep{n-2},x,y\rangle:
+x,y\ge 3\}$. 
+Then there exists a 2-tree that realizes $D$ in which every vertex of
+degree greater than $2$ is adjacent to a vertex of degree 2.
+\end{lem}
+
+\begin{proof}
+From \degreesum\ we know that $2(n-2)+x+y=4n-6$ or, equivalently,
+$x+y=2n-2$.  But, by \maxdegree\ this implies that $x=y=n-1$.  Thus,
+we can create a 2-tree realizing $D$ by starting with an edge and
+attaching $n-2$ vertices to it.
+\end{proof}
+
+\begin{lem}\lemlabel{basecase-c}
+Suppose $D\in \mathcal{D}\cap \{\langle 2\rep{n-3},x,y,z\rangle:
+x,y,z\ge 3\}$. 
+Then there exists a 2-tree that realizes $D$ in which every vertex of
+degree greater than $2$ is adjacent to a vertex of degree 2.
+\end{lem}
+
+\begin{proof}
+We create a 2-tree by starting with the graph $K_3$ (which, according
+to \lemref{basecase-a} is a
+2-tree) and attaching the following numbers of vertices to its edges:
+\[
+    e_1=\frac{1}{2}(x+y-z-2) \enspace , \enspace
+    e_2=\frac{1}{2}(x-y+z-2) \enspace , \enspace 
+    e_3=\frac{1}{2}(-x+y+z-2) \enspace .
+\]
+It is straightforward to verify that the resulting 2-tree has three
+vertices of degree $x$, $y$, and $z$, respectively, and that all other
+vertices have degree 2.  All that remains to verify that is that
+$e_1$, $e_2$ and $e_3$ are non-negative integers.  These number are
+certainly integers because, by \degreesum, $x+y+z$ is even.  
+
+Next we show that $e_1$ is non-negative.  Observe that, by \degreesum,
+$2(n-3)+x+y+z = 4n-6$ or, equivalently, $x+y+z=2n$.  By \maxdegree,
+this implies that $x+y \ge n+1$ and that $x+y-z \ge 2$.  Thus,
+$x+y-z-2 \ge 0$ and $e_1$ is non-negative, as required.  
+Exactly the same argument shows that $e_2$ and $e_3$ are also
+non-negative.
+\end{proof}
+
+\begin{lem}\lemlabel{basecase-d}
+Suppose $D\in \mathcal{D}\cap \{\langle 2\rep{n-5},d,d,d,x,d+x-2 \rangle:
+\mbox{$d,x\ge 3$}\}$.
+Then there exists a 2-tree that realizes $D$ in which every vertex of
+degree greater than $2$ is adjacent to a vertex of degree 2.
+\end{lem}
+
+\begin{proof}
+To do.
+\end{proof}
+
+
+\begin{lem}\lemlabel{basecase-e}
+Suppose $D\in \mathcal{D}\cap \{\langle 2\rep{p},d\rep{n-p}\rangle:
+\mbox{$d\ge 3$ and $n-p \ge 5$}\}$.
+Then there exists a 2-tree that realizes $D$ in which every vertex of
+degree greater than $2$ is adjacent to a vertex of degree 2.
+\end{lem}
+
+\begin{proof}
+To do (possibly use David's reduction instead).
+\end{proof}
+
+
+\begin{lem}\lemlabel{basecase-f}
+Suppose $D\in \mathcal{D}\cap \{\langle 2\rep{p},4\rep{n-p-1},2p-2\rangle:
+2p-1\le n\le 3p-3\}$.
+Then there exists a 2-tree that realizes $D$ in which every vertex of
+degree greater than $2$ is adjacent to a vertex of degree 2.
+\end{lem}\marginpar{necessary?}
+
+\begin{proof}
+To do.
+\end{proof}
+
+\begin{lem}\lemlabel{basecase-g}
+Suppose $D\in \mathcal{D}\cap \{\langle 2\rep{p},4\rep{n-p-2},x,n-2\rangle:
+\mbox{$d\ge 3$}\}$.
+Then there exists a 2-tree that realizes $D$ in which every vertex of
+degree greater than $2$ is adjacent to a vertex of degree 2.
+\end{lem}
+
+\begin{proof}
+To do.
+\end{proof}
+
+\subsection{The Induction}
+
+With the base cases out of the way, we are ready for an inductive
+proof of the ``if'' direction of \thmref{main}.
+
+\begin{lem}\lemlabel{if}
+If $D=\langle d_1,\ldots,d_n\rangle \in \mathcal{D}$ and $d_i\ge 3$
+then there exists a 2-tree that realizes $D$ in which a vertex of
+degree $d_i$ is adjacent to a vertex of degree 2.  
+\end{lem}
+
+\begin{proof}
+We are given $D$ and a particular value $d_i$. If $D$ meets the
+conditions of Lemmata~\ref{lem:basecase-a}, \ref{lem:basecase-b},
+\ref{lem:basecase-c}, \ref{lem:basecase-d}, \ref{lem:basecase-e},
+\ref{lem:basecase-f}, or \ref{lem:basecase-g} then we are done.
+Otherwise, select a value $d_j$, $d_j\neq d_i$, $d_j\ge 3$.  We know
+such a value exists because neither \lemref{basecase-a},
+\lemref{basecase-b}, \lemref{basecase-c}, nor \lemref{basecase-e} is
+applicable to $D$. The precise rule for selecting $d_j$ is described
+in the proof of \clmref{main}, below.  Without loss of generality,
+assume $d_i < d_j$ (otherwise reverse the roles of $d_i$ and $d_j$)
+and let $x=d_i$.
+Create a new sequence 
+\[  
+   D'=\langle d_{x-2+1},\ldots,d_{i}-x+2,\ldots,d_{j}-x+2,\ldots,d_n \rangle
+\] 
+and, if necessary, reorder the elements of $D'$ into non-decreasing
+order.  The proof of the following claim is left until later:
+
+\begin{clm}\clmlabel{main}
+$D'\in \mathcal{D}$.
+\end{clm}
+
+Now, apply the inductive hypothesis on the sequence $D'$ with the
+special value $d_j-x+2$ to obtain a 2-tree $T'$ in which a vertex $v$
+of degree $d_j-x+2$ is adjacent to a vertex $w$ of degree 2.  Attach
+$x-2$ vertices to the edge $\{v,w\}$ to obtain a 2-tree that realizes
+$D$ and in which vertices of degree $d_i$ and $d_j$ are each adjacent
+to $x-2\ge 1$ vertices of degree $2$.  This completes the proof.
+\end{proof}
+
+
+\begin{proof}[Proof of \clmref{main}]
+This is the long one.
+\end{proof}
+
+
+\section{Degree Sequences of 2-Trees are in $\mathcal{D}$}\seclabel{onlyif}
+
+\begin{lem}\lemlabel{onlyif-a}
+Any sequence $D$ that does not satisfy Conditions~(a)-(c) of
+\thmref{main} is not the degree sequence of any 2-tree.
+\end{lem}
+
+\begin{proof}
+This follows immediately from the definition of 2-trees and the
+well-known fact that every two tree has at least 2 vertices of degree
+2 \cite{X}.
+\end{proof}
+
+\begin{lem}\lemlabel{onlyif-b}
+Any sequence $D\in\{\langle 2\rep{n-4},d,d,d,d\rangle : d\ge 5\}$ is not 
+the degree sequence of any 2-tree.
+\end{lem}
+
+\begin{proof}
+To do (uses a bit of algebra).
+\end{proof}
+
+
+\begin{lem}\lemlabel{onlyif-c}
+Any sequence $D\in\{2\rep{p},4\rep{n-p-1}, 2p-2 : \mbox{$n < 2p-1$ or
+$n > 3p-3$} \}$ is not the degree sequence of any 2-tree.
+\end{lem}
+
+\begin{proof}
+To do (uses a charging argument based on the fact that the subgraph
+induced by degree 4 vertices is a binary tree - this is closely
+related to the fact that every degree 4 is adjacent to the vertex of
+degree $2p-2$).
+\end{proof}
+
+\begin{lem}\lemlabel{onlyif}
+Any sequence $D\not\in \mathcal{D}$ is the not the degree sequence of
+any 2-tree.
+\end{lem}
+
+\begin{proof}
+This follows immediately from \lemref{onlyif-a}, \lemref{onlyif-b} and
+\lemref{onlyif-c}.
+\end{proof}
 
 \section{Conclusions}
+
+Together, \lemref{if} and \lemref{onlyif} prove both directions of
+\thmref{main}.
+
+\begin{itemize}
+\item Sketch $O(n)$ time realization algorithm.
+\item Mention open problems.
+\end{itemize}
+
+\section{Acknowledgements}
+
+This research was initiated at the The 21st Bellairs Winter Workshop
+on Computational Geometry, January 27--February 3, 2006.  The authors
+are grateful to Godfried~Toussaint for organizing the workshop and to
+the other workshop participants, namely
+---,
+---,
+---, and
+---,
+for providing a stimulating working environment.
 
 
 \bibliographystyle{plain}

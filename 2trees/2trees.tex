@@ -1,10 +1,10 @@
 \documentclass[lotsofwhite,charterfonts]{patmorin}
 \usepackage{amsthm,amsfonts}
-
 \input{pat}
 
 \newcommand{\rep}[1]{^{\langle#1\rangle}}
 
+\newcommand{\toomuchdetail}[1]{#1}
 \newcommand{\degreesum}{Condition~(a)}
 \newcommand{\maxdegree}{Condition~(b)}
 \newcommand{\twotwos}{Condition~(c)}
@@ -58,7 +58,7 @@ The \emph{degree sequence} of a graph $G=(V,E)$ is the sequence
 obtained by listing the degrees of the vertices of $G$ in
 non-decreasing order.  If $D=\langle d_1,\ldots,d_n\rangle$ is the
 degree sequence of $G$ then we say that $G$ is a \emph{realization} of
-$G$ or that $G$ \emph{realizes} $D$.  
+$D$ or that $G$ \emph{realizes} $D$.  
 
 In this paper we consider degree sequences of a particular class of
 graphs.  \emph{2-trees} are defined inductively as follows:  The
@@ -212,7 +212,7 @@ To do.
 \subsection{The Induction}
 
 With the base cases out of the way, we are ready for an inductive
-proof of the ``if'' direction of \thmref{main}.
+proof of the first half of \thmref{main}.
 
 \begin{lem}\lemlabel{if}
 If $D=\langle d_1,\ldots,d_n\rangle \in \mathcal{D}$ and $d_i\ge 3$
@@ -221,6 +221,7 @@ degree $d_i$ is adjacent to a vertex of degree 2.
 \end{lem}
 
 \begin{proof}
+
 We are given $D$ and a particular value $d_i$. If $D$ meets the
 conditions of Lemmata~\ref{lem:basecase-a}, \ref{lem:basecase-b},
 \ref{lem:basecase-c}, \ref{lem:basecase-d}, \ref{lem:basecase-e},
@@ -228,11 +229,12 @@ conditions of Lemmata~\ref{lem:basecase-a}, \ref{lem:basecase-b},
 Otherwise, select a value $d_j$, $d_j\neq d_i$, $d_j\ge 3$.  We know
 such a value exists because neither \lemref{basecase-a},
 \lemref{basecase-b}, \lemref{basecase-c}, nor \lemref{basecase-e} is
-applicable to $D$. The precise rule for selecting $d_j$ is described
-in the proof of \clmref{main}, below.  Without loss of generality,
-assume $d_i < d_j$ (otherwise reverse the roles of $d_i$ and $d_j$)
-and let $x=d_i$.
-Create a new sequence 
+applicable to $D$.  The value $d_j$ is selected as follows:  Let
+$a=\min\{d_k : d_k\ge 3\}$ and let $c=d_n$.  If
+$d_i=a$ or $a+c-2 \ge n$ then we select $d_j=d_n$ otherwise we select
+$d_j=a$.  Without loss of generality, assume $d_i < d_j$ (otherwise
+reverse the roles of $d_i$ and $d_j$) and let $x=d_i$.  Create a new
+sequence 
 \[  
    D'=\langle d_{x-2+1},\ldots,d_{i}-x+2,\ldots,d_{j}-x+2,\ldots,d_n \rangle
 \] 
@@ -253,7 +255,110 @@ to $x-2\ge 1$ vertices of degree $2$.  This completes the proof.
 
 
 \begin{proof}[Proof of \clmref{main}]
-This is the long one.
+
+We must show that $D'$ satisfies Conditions~(a)-(e) of \thmref{main}.
+Let $p$ be the number of times 2 appears in $D$.  We begin by
+considering \fourds\ and \onebig\ since these can be shown independent
+of the choice of $d_j$.
+
+\noindent\fourds:
+If $D'\in \{\langle 2\rep{n'-4},d,d,d,d\rangle : d\ge 5\}$ then
+$D\in\{\langle 2\rep{n'+x-6},d,d,d,x,d+x-2\rangle : d,x\ge 3\}$ which
+is not possible since then \lemref{basecase-f} would apply to $D$.
+
+\noindent\onebig:
+Suppose $D'$ is of the form $\langle 2\rep{p'},4\rep{n'-p'-1},
+2p'-2\rangle$.   Now, the sequence $D$ must be 
+\begin{equation} 
+    D=\langle 2\rep{p},4\rep{n-p-2},x,2p-x+2\rangle \enspace , 
+		\eqlabel{seq-a}
+\end{equation}
+possibly with $x=4$.
+
+If $n'< 2p'-1$ then
+\[
+      n' = n-x+2 < 2p'-1  
+         \toomuchdetail{= 2(p-x+3) - 1}
+         = 2p-2x + 5 \enspace , 
+\]
+so $n < 2p-x+3$ but this is no possible since then $D$ does not 
+satisfy
+\maxdegree.
+
+On the other hand, if $n'>3p' - 3$ then
+\[
+      n' = n-x+2 > 3p' - 3 
+         \toomuchdetail{= 3(p-x+3) - 3}
+         = 3p - 3x + 6
+\]
+so $n > 3p - 2x + 4$.  So what?
+
+
+Next we show that $D'$ satisfies Conditions~(a)-(c).  There are two
+cases to consider, depending on the choice of $d_j$.
+
+\noindent\textbf{Case 1:} $d_j=d_n$ and $a+c-2\ge n$.  
+
+Dispense with the case $a=3$.  In this case $a+c-2=c+1\ge n$ implies $c\ge
+n-1$ (is an easy case?). \marginpar{*}
+
+\noindent\degreesum\ and \twotwos:  To show that these conditions hold
+for $D'$, it suffices to show that $p'=p-x+3\ge 2$, i.e., that $p\ge
+x-1$.  Since the number 3 does not occur in $D$ and $D$ satisified
+Condition~1, we have 
+\[
+             2p+4(n-p-2)+x+c \le 4n-6 \enspace ,
+\]
+which simplifies to $p\ge (x+c)/2-1\ge x-1$, as required.
+
+\noindent\maxdegree:  Let $b=\max\{d:d\in D'\}$.  The sequence $D'$
+has length $n'=n-x+2$ and we must show that $b\le n'-1$.  If
+$b=d_n-x+2$ then the assumption that $D$ satisifies \maxdegree\
+implies $b\le n'-1$.  Thus, assume $b\neq d_{n}-x+2$ so that the values
+$x$, $b$ and $c$ each occur in $D$, i.e., $d_i=x$, $d_j=c$ and $d_k=b$
+with $i$, $j$ and $k$ distinct.
+
+Let $t=n-p-3$.  Then, from \degreesum\ on $D$ we have
+\[
+     2p + ta + x + b + c  \le 4n-6 \enspace , 
+\]
+which, since $n=p+t+3$, is equivalent to 
+\[
+     t(a-2) + x + b + c  \le 2n \enspace .
+\]
+Adding $1-x-n$ to both sides gives
+\[
+     t(a-2) + b + c - n + 1\le n - x + 1 = n' - 1\enspace .
+\]
+Since $a+c-n \ge 2$, $t\ge 0$ and $a\ge 4$ we have
+\begin{eqnarray*}
+     n'-1 & \ge & t(a-2) + b + c - n + 1 \\
+          & \ge & t(a-3) + b + 3 \\
+          & \ge & b+3 \ge b
+\end{eqnarray*}
+as required.
+
+\noindent\textbf{Case 2:} $d_i=x=a$ and $a+c-2 \le n-1$.
+
+\noindent\degreesum\ and \twotwos:  To show that these conditions hold for $D'$
+it is sufficient to show that $p'=p-a+3 \ge 2$, i.e., that $p\ge a-1$.
+Notice that, if $a=3$ then \twotwos\ on $D$ already implies $p\ge
+a-1$.  Thus, assume $a\ge 4$.  The, from \degreesum\ we have
+\[
+      2p + a + 4(n-p-2) + d_j \le 4n-6 \enspace ,
+\]
+which simplifies to $p\ge (a+d_j)/2 -1 \ge a-1$, as required.
+
+\noindent\maxdegree: To show that \maxdegree\ holds for $D'$, observe that
+$\max\{d:d\in D'\}\le c$ and the conditions of Case~2 ensure that
+$c \le n-a+1= n'-1$.
+
+\noindent\onebig:
+
+\noindent\fourds:
+If $D'\in \{\langle 2\rep{n'-4},d,d,d,d\rangle : d\ge 5\}$ then
+$D\in\{\langle 2\rep{n'+x-6},d,d,d,x,d+x-2\rangle : d,x\ge 3\}$ which
+is not possible since then \lemref{basecase-f} would apply to $D$.
 \end{proof}
 
 

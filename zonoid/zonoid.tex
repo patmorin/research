@@ -32,18 +32,18 @@ distribution assumptions are needed. Liu et al.\
 notions of depth such as the half space, the convex hull peeling, the
 Oja, the simplicial, the majority, and the likelihood depths. However,
 many computational problems associated with such data depth functions
-are non-trivial to compute efficiently.  Thus the study of these
+are non-trivial to solve efficiently.  Thus the study of these
 functions and related algorithms is essential for these functions to
 become more useful in statistics. Computational geometry
 \cite{preparata_book} has been of great help in this regard, and there
-are many algorithms in the computational geometry literature giving
+are many results in the computational geometry literature giving
 efficient algorithms for data depth problems
 \cite{regression_depth_and_center_points, aloupis_mcs_thesis,
 algorithms_for_bivariate_medians_and_a_fermat_torricelli_problem_for_lines,
 an_optimized_randomized_algorithm_for_maximum_tukey_depth,
 on_khulls_and_related_problems,
 zonoid_data_depth_theory_and_computation,
-algorithms_for_bivariate_zonoid_depth,
+%algorithms_for_bivariate_zonoid_depth,
 computing_the_centerpoint_of_a_finite_planar_set_of_points_in_linear_time,
 on_a_triangle_counting_problem, langerman_phd_thesis,
 the_complexity_of_hyperplane_depth_in_the_plane,
@@ -97,31 +97,33 @@ properties of zonoids, see Dyckerhoff et al.\
 \cite{zonoid_data_depth_theory_and_computation} and Mosler
 \cite{mosler_book}. 
 
-\subsection{Problems related to depth measures}
+\comment{\subsection{Problems related to depth measures}
 \label{subsection_problems_related_to_depth_measures}
 
 In this section, we present some standard computational problems
-related to depth measures. 
+related to depth measures as they apply to zonoid depth.
 
 \begin{description}
 \item [Computing a depth contour]: Given a set $S$ of $n$ points in
 $\mathbb{R}^2$ and an integer $1 \le k \le n$, construct a polygon
-containing exactly the points in the plane having depth at least $k$.
+containing exactly the points in the plane having zonoid depth at least $k$.
 
 \item [Computing a depth map]: Given a set $S$ of $n$ points in
-$\mathbb{R}^2$, construct all depth contours of depth $1 \le k \le n$.
+$\mathbb{R}^2$, construct zonoid depth contours $Z_k(S)$ for all $1 \le
+k \le n$.
 
 \item [Testing if a contour contains a point]: Given a set $S$ of $n$
 points in $\mathbb{R}^2$, an integer $1 \le k \le n$ and a query point
-$p$, test whether $p$ lies inside the depth contour of depth $k$.
+$p$, test whether $p\in Z_k(S)$.
 
 \item [Computing the depth of a point]: Given a set $S$ of $n$ points
 in $\mathbb{R}^2$ and a query point $p$, compute the largest integer
-$k$ for which $p$ lies inside the depth contour of depth $k$.
+$k$ for which $p\in Z_k(S)$.
 
 \item [Computing a point of maximum depth]: Given a set of $n$ points
 $S$ in $\mathbb{R}^2$, compute the depth contour of maximum depth.
 \end{description}
+}
 
 \subsection{Summary of results and related work}
 \label{subsection_summary_of_results}
@@ -139,12 +141,13 @@ compute a zonoid depth contour,
 \item a linear time algorithm to test whether a zonoid depth contour
 contains a point, and 
 
-\item a linear time algorithm to compute the zonoid depth of a point,
+\item a linear expected time algorithm to compute the zonoid depth of
+     a point.
 
 \end{enumerate}
 
-Algorithms 2, 3 and 4 are optimal. Algorithm 1 would require an
-improvement to the improved bounds on the maximum number of $k$-sets
+Algorithms 2, 3 and 4 are optimal. Improving Algorithm 1 would require an
+improvement to current bounds on the maximum number of $k$-sets
 of a planar point set.
 
 Dyckerhoff et al.\ \cite{zonoid_data_depth_theory_and_computation}
@@ -158,8 +161,8 @@ algorithm is unclear.
 We achieve our results by applying an observation relating $k$-zonoids
 and $k$-sets.  This observation has also been used by Bern and
 Eppstein \cite{bern-eppstein-01} in the context of support vector
-machines in machine learning.  (They refer to zonoids as reduced
-convex hulls.) In particular, Bern and Eppstein show that, given two
+machines in machine learning.  (They refer to zonoids as \emph{reduced
+convex hulls}.) In particular, Bern and Eppstein show that, given two
 sets $S_1$ and $S_2$ in $\mathbb{R}^d$, computing the smallest value
 $k$ such that $Z_k(S_1)\cap Z_k(S_2)$ is non-empty can be solved using
 a number of arithmetic operations that is linear in $n$ and polynomial
@@ -190,11 +193,26 @@ $k$-levels.
 
 \subsection{Correspondence between zonoids and $k$-sets}\label{subsection_correspondence_between_zonoids_and_ksets}
 
-A point set is said to be in \emph{general position} if no two points of the set lie on a vertical line and no three points of the set are collinear. Here, and throughout the article, point sets are always assumed to be in general positions.
+A point set is said to be in \emph{general position} if no two points
+of the set lie on a vertical line and no three points of the set are
+collinear. Here, and throughout the article, point sets are always
+assumed to be in general position.
 
-Given a set $S$ of $n$ points in general position and an integer $0 \le k \le n-2$, a set $S^{\prime} \subseteq S$ is called a $k$-set if $S^{\prime}$ has $k$ points in it and these can be separated from the remaining $n-k$ points of $S$ with a straight line. The notion of $k$-sets was introduced by Erd\"{o}s et al.\ \cite{dissection_graphs_of_planar_point_sets} and it is a long standing open problem to determine the maximum number of $k$-sets in a set of $n$ points. Currently, the best bound of $O(nk^{\frac{1}{3}})$ is due to Dey \cite{improved_bounds_on_planar_ksets_and_klevels}.
+Given a set $S$ of $n$ points in general position and an integer $0
+\le k \le n-2$, a set $S^{\prime} \subseteq S$ is called a $k$-set if
+$S^{\prime}$ has $k$ points in it and these can be separated from the
+remaining $n-k$ points of $S$ with a straight line. The notion of
+$k$-sets was introduced by Erd\"{o}s et al.\
+\cite{dissection_graphs_of_planar_point_sets} and it is a long
+standing open problem to determine the maximum number of $k$-sets in a
+set of $n$ points. Currently, the best bound of $O(nk^{\frac{1}{3}})$
+is due to Dey \cite{improved_bounds_on_planar_ksets_and_klevels}.
 
-Consider a set $S$ of $n$ points. If we construct all possible $1$-sets on $S$, we obtain the vertices of $CH(S)$, represented by the thick points in Figure \ref{fig_1_set}. By joining all such $1$-set points, we get the zonoid of depth $1$ or $1$-zonoid or $Z_1(S)$, and $Z_1(S) = CH(S)$.
+Consider a set $S$ of $n$ points. If we construct all possible
+$1$-sets on $S$, we obtain the vertices of $CH(S)$, represented by the
+thick points in Figure \ref{fig_1_set}. By joining all such $1$-set
+points, we get the zonoid of depth $1$ or $1$-zonoid or $Z_1(S)$, and
+$Z_1(S) = CH(S)$.
 
 \begin{figure}[h!]
  \begin{center}
@@ -203,7 +221,15 @@ Consider a set $S$ of $n$ points. If we construct all possible $1$-sets on $S$, 
  \end{center}
 \end{figure}
 
-Now, on the same set $S$, construct all possible $2$-sets. In each $2$-set, take the mean (represented by the \textbf{X} on the dotted line segment joining 2 points in each $2$-set) of the pair of points. The following lemma shows that by joining all such means from all $2$-sets of $S$, we obtain a $2$-zonoid of $S$ or $Z_2(S)$ as in Figure \ref{fig_2_set}. In a similar fashion, zonoids up to depth $n$ can be constructed. Since $Z_n(S)$ is the mean of the points in $S$, it is a unique point and is the center of gravity of the points in $S$.
+Now, on the same set $S$, construct all possible $2$-sets. In each
+$2$-set, take the mean (represented, in Figure~\ref{fig_1_set}, by the
+\textbf{X} on the dotted line segment joining 2 points in each
+$2$-set) of the pair of points.  The following lemma shows that by
+joining all such means from all $2$-sets of $S$, we obtain a
+$2$-zonoid of $S$ or $Z_2(S)$ as in Figure \ref{fig_2_set}. In a
+similar fashion, zonoids up to depth $n$ can be constructed. Since
+$Z_n(S)$ is the mean of the points in $S$, it is a unique point and is
+the center of gravity of the points in $S$.
 
 \begin{figure}[ht]
  \begin{center}
@@ -213,15 +239,36 @@ Now, on the same set $S$, construct all possible $2$-sets. In each $2$-set, take
 \end{figure}
 
 \begin{lemma}\label{lemma_bijection}
-Given a set $S$ of $n$ points in $\mathbb{R}^2$ and an integer $1 \le k \le n$, there is a bijection between the vertices of $Z_k(S)$ and the $k$-sets of $S$.
+Given a set $S$ of $n$ points in $\mathbb{R}^2$ and an integer $1 \le
+k \le n$, there is a bijection between the vertices of $Z_k(S)$ and
+the $k$-sets of $S$.
 \end{lemma}
 
 \begin{proof}
-We show that the relationship between $k$-zonoid vertices and $k$-sets is both one-to-one and onto.
+\comment{
+Consider the following mapping that takes $k$-sets onto zonoid
+vertices.  Let $S'$ be a $k$-set on the right handside of some
+oriented line $\ell$, so that $\ell$ separates $S'$ from $S\setminus
+S'$. We map $S'$ onto the point $p_{S'}=\sum_{x\in S'}x/k$.  Observe
+that $p_S$ is indeed a vertex of $Z_k(S)$ because it is an extreme
+point of $Z_k$ in the direction $d$ perpendicular to $\ell$.  We must
+prove that this mapping is one-to-one and onto.
 
-\textbf{One-to-one:} Consider a $k$-set in a set $S$ of $n$ points. Allot $\lambda_i = \frac{1}{k}$ to each point in this $k$-set. This is in accordance to the definition of a $k$-zonoid in Section \ref{subsection_definition_of_zonoid_depth_and_regions}. Then $\sum_{i=1}^{n}\lambda_ip_i$ is the mean of the points in the $k$-set as well as an extreme point of $Z_k(S)$ in the direction perpendicular to the line that separates this $k$-set. There can be only one $k$-set that is extreme in any given direction, and the neighboring $k$-sets differ by at least one point. Therefore, different $k$-sets correspond to different $k$-zonoid vertices.
+\textbf{One-to-one:} Consider a $k$-set in a set $S$ of $n$ points.
+Allot $\lambda_i = \frac{1}{k}$ to each point in this $k$-set. This is
+in accordance to the definition of a $k$-zonoid in Section
+\ref{subsection_definition_of_zonoid_depth_and_regions}. Then
+$\sum_{i=1}^{n}\lambda_ip_i$ is the mean of the points in the $k$-set
+as well as an extreme point of $Z_k(S)$ in the direction perpendicular
+to the line that separates this $k$-set. There can be only one $k$-set
+that is extreme in any given direction, and the neighboring $k$-sets
+differ by at least one point. Therefore, different $k$-sets correspond
+to different $k$-zonoid vertices.
 
-\textbf{Onto:} A $k$-zonoid vertex is extreme in some direction and is the mean of the points in the $k$-set separated by a line perpendicular to that direction. 
+\textbf{Onto:} A $k$-zonoid vertex is extreme in some direction and is
+the mean of the points in the $k$-set separated by a line
+perpendicular to that direction.  
+} FIXME.
 \end{proof}
 
 \subsection{Review of duality}\label{subsection_review_of_duality}
@@ -234,9 +281,9 @@ Such transforms are called \emph{duality transforms} and the image of
 an object under a duality transform is called the \emph{dual} of the
 object. 
 
-Let $p = (p_x, p_y)$ denote a point in the plane. The dual of $p$,
-denoted by $p^*$, is the line denoted by $p^* = \{(x,y) : y = p_xx -
-p_y\}$. The dual of the line $l = \{(x,y) : y = ax + b\}$ is the point
+Let $p = (p_1, p_2)$ denote a point in the plane. The dual of $p$,
+denoted by $p^*$, is the line denoted by $p^* = \{(x,y) : y = p_1x -
+p_2\}$. The dual of the line $l = \{(x,y) : y = ax + b\}$ is the point
 $l^* = (a,-b)$.  The duality transform is not valid for vertical
 lines. This is not a problem because, in most cases, vertical lines
 can be handled separately, or the plane containing the lines can be
@@ -247,21 +294,33 @@ plane to the \emph{dual} plane. This transform has the following
 properties:
 
 \begin{itemize}
-\item It is \emph{incidence preserving}: $p \in l \hspace{2mm} \mbox{if and only if} \hspace{2mm} l^* \in p$.
+\item It is \emph{incidence preserving}: $p \in l$ if and only if $l^*
+\in p^*$.
+
 \item It is \emph{order preserving}: $p$ lies above $l$ if and only if $l^*$ lies above $p^*$.
 \end{itemize}
 
-A set of lines is said to be in general position if no three lines
-pass through a common point.  It follows from the above properties
-that a point set in general position is dual to a line set in general
-position. For a more detailed explanation on duality, see de Berg et
-al.\ \cite{cg_text}.
+A set of lines is said to be in general position if no three of the
+lines pass through a common point and two of the lines are parallel.
+It follows from the above properties that a point set in general
+position is dual to a line set in general position. For a more
+detailed explanation on duality, see de Berg et al.\ \cite{cg_text}.
 
 \subsection{Correspondence between zonoids and $k$-level}\label{subsection_correspondence_between_zonoids_and_klevel}
 
-We define the $k$-level as follows: Let $L$ be a set of $n$ lines in $\mathbb{R}^2$ that are dual to a set of $n$ points $P$ in general position in $\mathbb{R}^2$. This general position assumption is safe since the number of $k$-sets is maximized for point sets in general positions \cite{improved_bounds_on_planar_ksets_and_klevels}. Denote the line arrangement of $L$ by $A(L)$. For $1 \le k \le n$, the $k$-level in $A(L)$ is the closure of all points on the given lines, which have exactly $k$ lines strictly on and above them. 
+We define the $k$-level as follows: Let $L$ be a set of $n$ lines in
+$\mathbb{R}^2$ that are dual to a set of $n$ points $S$ in general
+position in $\mathbb{R}^2$. This general position assumption is safe
+since the number of $k$-sets is maximized for point sets in general
+positions \cite{improved_bounds_on_planar_ksets_and_klevels}. Denote
+the line arrangement of $L$ by $A(L)$. For $1 \le k \le n$, the
+$k$-level in $A(L)$ is the closure of all points on the given lines,
+which have exactly $k$ lines strictly on and above them. 
 
-The set of vertices of $A(L)$ with exactly $k$ lines on and above them is denoted as $S_k$. Each vertex $v \in S_k$ is mapped to a dual line $v^*$ that supports a $k$-set edge $e_{pq}$ passing through two points $p, q$ in $P$ and has exactly $k-2$ points above it.
+Each vertex $v$ in the $k$-level of $A(L)$ corresponds to a line $v^*$
+in the primal plane that supports a $k$-set of $S$.  That is, $v^*$
+contains two points $p, q\in S$ and has exactly $k-2$ points of $S$
+above it.
 
 \begin{figure}[h]
  \begin{center} 
@@ -270,15 +329,47 @@ The set of vertices of $A(L)$ with exactly $k$ lines on and above them is denote
  \end{center}
 \end{figure}
 
-We describe the $k$-zonoid in both the primal and the dual settings and show the relationship between them. The left part of Figure \ref{fig_primal_dual} represents the primal and the right part, the dual. The upper (lower) convex hull of points in the primal corresponds to the upper (lower) envelope of the lines in the dual. In the primal, we construct a $k$-zonoid, for some $k$. In the dual, this is the shaded region. The upper and lower boundaries of the shaded region are also convex, because the corresponding boundaries of the $k$-zonoid in the primal are convex. 
+We describe the $k$-zonoid in both the primal and the dual settings
+and show the relationship between them. The left part of Figure
+\ref{fig_primal_dual} represents the primal and the right part, the
+dual. The upper (lower) convex hull of points in the primal
+corresponds to the upper (lower) envelope of the dual lines in the
+dual. In the primal, we construct a $k$-zonoid, for some $k$. In the
+dual, this is the shaded region. The upper and lower boundaries of the
+shaded region are also convex, because the corresponding boundaries of
+the $k$-zonoid in the primal are convex. 
 
-We constructed the $k$-zonoid in the primal by finding all possible $k$-sets, taking the mean of $k$ points in each $k$-set and then joining these mean points of all $k$-sets. In the dual, we first construct the $k$-level (respectively the $(n-k)$-level) and then, for each vertex which has $k$ lines on and above it, we draw an upwards (respectively downwards) vertical ray through it, and compute the mean of the $k$ lines that intersect this vertical ray. Such mean points are then joined to get the boundaries of the shaded region in Figure \ref{fig_primal_dual}. It maybe observed here that for each vertex on the upper (respectively lower) boundary of the dual of the $k$-zonoid, there is a vertex directly below (respectively above) it on the $k$-level (respectively the $(n-k)$-level). 
+We constructed the $k$-zonoid in the primal by finding all possible
+$k$-sets, taking the mean of $k$ points in each $k$-set and then
+joining these mean points of all $k$-sets. In the dual, we first
+construct the $k$-level (respectively the $(n-k)$-level) and then, for
+each vertex which has $k$ lines on and above it, we draw an upwards
+(respectively downwards) vertical ray through it, and compute the mean
+of the $k$ lines that intersect this vertical ray. Such mean points
+are then joined to get the boundaries of the shaded region in Figure
+\ref{fig_primal_dual}. It maybe observed here that for each vertex on
+the upper (respectively lower) boundary of the dual of the $k$-zonoid,
+there is a vertex directly below (respectively above) it on the
+$k$-level (respectively the $(n-k)$-level). 
 
 \subsection{Some implications of the above observations}\label{subsection_some_implications_of_the_above_observations}
 
-Although the number of $k$-sets and the number of vertices of the $k$-level are different, they are within a constant fraction of each other \cite{edelsbrunner_book}. Dey \cite{improved_bounds_on_planar_ksets_and_klevels} proves an $O(nk^{\frac{1}{3}})$ upper bound on the complexity of planar $k$-levels, which is also an upper bound for the number of planar $k$-sets. Since we showed that there is a bijection between the $k$-sets of a point set $S$ and the vertices of $Z_k(S)$ in Lemma \ref{lemma_bijection}, $O(nk^{\frac{1}{3}})$ is an upper bound on the number of vertices of a $k$-zonoid in $\mathbb{R}^2$.
+Although the number of $k$-sets and the number of vertices of the
+$k$-level are different, they are within a constant fraction of each
+other \cite{edelsbrunner_book}. Dey
+\cite{improved_bounds_on_planar_ksets_and_klevels} proves an
+$O(nk^{\frac{1}{3}})$ upper bound on the complexity of planar
+$k$-levels, which is also an upper bound for the number of planar
+$k$-sets. Since we showed that there is a bijection between the
+$k$-sets of a point set $S$ and the vertices of $Z_k(S)$ in Lemma
+\ref{lemma_bijection}, $O(nk^{\frac{1}{3}})$ is an upper bound on the
+number of vertices of a $k$-zonoid in $\mathbb{R}^2$.
 
-Sharir et al.\ \cite{an_improved_bound_for_ksets_in_three_dimensions} show that the number of $k$-sets in a set of $n$ points in $\mathbb{R}^3$ is $O(nk^{\frac{3}{2}})$. Because of this fact and Lemma \ref{lemma_bijection}, the maximum complexity of a zonoid in $\mathbb{R}^3$ is also $O(nk^{\frac{3}{2}})$.
+Sharir et al.\ \cite{an_improved_bound_for_ksets_in_three_dimensions}
+show that the number of $k$-sets in a set of $n$ points in
+$\mathbb{R}^3$ is $O(nk^{\frac{3}{2}})$. Because of this fact and
+Lemma \ref{lemma_bijection}, the maximum complexity of a zonoid in
+$\mathbb{R}^3$ is also $O(nk^{\frac{3}{2}})$.
 
 \section{Algorithms for zonoids in 2 dimensions}\label{section_algorithms_for_zonoids_in_2_dimensions}
 
@@ -289,7 +380,12 @@ require some sophisticated techniques from computational geometry.
 
 \subsection{Computing a depth contour}\label{subsection_computing_a_depth_countour}
 
-Chan \cite{remarks_on_klevel_algorithms_in_the_plane} describes an algorithm for computing the $k$-level in a set of $n$ lines that runs in $O(n \log n + nk^{\frac{1}{3}})$ expected time. Using this algorithm, the $k$-level and the $(n-k)$-level can be constructed in $O(n \log n + nk^{\frac{1}{3}})$ expected time. This algorithm is easily augmented to output the $k$-zonoid. 
+Chan \cite{remarks_on_klevel_algorithms_in_the_plane} describes an
+algorithm for computing the $k$-level in a set of $n$ lines that runs
+in $O(n \log n + nk^{\frac{1}{3}})$ expected time. Using this
+algorithm, the $k$-level and the $(n-k)$-level can be constructed in
+$O(n \log n + nk^{\frac{1}{3}})$ expected time. This algorithm is
+easily augmented to output the $k$-zonoid. 
 
 \begin{theorem}\label{theorem_build_k_zonoid}
 Given a set $S$ of $n$ points in $\mathbb{R}^2$ and an integer $1 \le k \le n$, the $k$-zonoid (i.e. the zonoid depth contour of depth $k$) of $S$ can be computed in $O(n \log n + nk^{\frac{1}{3}})$ expected time.
@@ -330,18 +426,18 @@ through $p_1$, then the line $p_1^*$ also moves upwards in the dual,
 parallel to itself. When $p_1$ hits the $k$-zonoid boundary, $p_1^*$
 also hits the boundary of the dual of the $k$-zonoid. Since this
 boundary is convex, line $p_1^*$ becomes tangent to it. This leads us
-to the following idea: in the primal, draw a vertical line through the
-point $p_1$. It intersects the $k$-zonoid at 2 points (if the point
-$p_1$ is outside \emph{and} to the right or to the left of the
-$k$-zonoid, then it is trivially outside and neglected). Finding these
-intersection points is equivalent to finding the points at which the
-vertical translation of line $p_1^*$ becomes tangent to the boundaries
-of the dual of the $k$-zonoid. Once they are found, it can be easily
-said whether $p_1$ is inside or outside the $k$-zonoid by comparing
-the $y$-coordinates of the intersection points with that of  $p_1$.
-Hereafter, we concentrate on finding that vertex on the upper boundary
-of the dual of the $k$-zonoid at which $p_1^*$ is tangent. Such a
-vertex on the lower boundary can be found in a symmetric manner. 
+to the following idea: In the primal, draw a vertical line through the
+point $p_1$. It intersects the $k$-zonoid at 2 points (if the line
+completely misses the $k$-zonoid then $p_1$ is outside the
+$k$-zonoid). Finding these intersection points is equivalent to
+finding the points at which the vertical translation of line $p_1^*$
+becomes tangent to the boundaries of the dual of the $k$-zonoid. Once
+they are found, it can be easily said whether $p_1$ is inside or
+outside the $k$-zonoid by comparing the $y$-coordinates of the
+intersection points with that of  $p_1$.  Hereafter, we concentrate on
+finding that vertex on the upper boundary of the dual of the
+$k$-zonoid at which $p_1^*$ is tangent. Such a vertex on the lower
+boundary can be found in a symmetric manner. 
 
 The algorithm that we use is inspired by the planar ham-sandwich
 algorithm of Lo et al.\ \cite{algorithms_for_ham_sandwich_cuts}. In
@@ -378,7 +474,7 @@ algorithm and its analysis.
    \includegraphics[width=1.8in]{figs/fig5c} \\
    (a) & (b) & (c)
    \end{tabular}\end{center}
-   \caption{\label{fig_vertical_strip_abc}$p_1^*$ is tangent to the
+   \caption{\label{fig_vertical_strip_abc} The vertical translation of $p_1^*$ is tangent to the
 upper boundary of the dual of the $k$-zonoid to (a)~the \emph{right}
 of $V$, (b)~the left of $V$ and (c)~inside of $V$.}
  \end{center}

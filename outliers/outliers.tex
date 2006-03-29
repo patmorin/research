@@ -1,0 +1,231 @@
+\documentclass[lotsofwhite]{patmorin}
+
+\input{pat}
+
+\title{\MakeUppercase{Removing Outliers to Minimize Area and Perimeter}}
+\author{Rossen Atanassov \and
+	Pat Morin \and
+	Stefanie Wuhrer}
+\date{}
+
+\newcommand{\ch}{\mathrm{CH}}
+
+\newcommand{\ntypes}{C_c}
+\newcommand{\timepertype}{c^2 n\log n}
+\newcommand{\runtime}{\ntypes \timepertype}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We consider the problem of removing $c$ points from a set $S$ of $n$
+points so that the resulting point set has the smallest possible
+convex hull.  Our main result is an $O(\runtime)$ time algorithm
+that solves this problem when ``smallest'' is taken to mean least area
+or least perimeter. Here $C_r = {2r\choose r}/(r+1)$ is
+the $r$th \emph{Catalan number}.  
+\end{abstract}
+
+\section{Introduction}
+
+Motivated by the problem of removing outliers in a data set, This
+paper considers the following problem: Let $S$ be a set of $n$ points
+in $\mathbb{R}^2$ with convex hull denoted by $\ch(S)$.  We consider
+the problem of selecting a subset $S'\subset S$, $|S'|=c$ such that
+the area, or perimeter, of $\ch(S\setminus S')$ is minimum.  We call
+these problems the \emph{area-based}, respectively,
+\emph{perimeter-based}, \emph{outlier removal problems}.  We are
+particularly interested in the case when $c$ (the number of outliers)
+is small.
+
+\paragraph{Previous Work.} The outlier removal problems stated above
+and similar problems are fairly well-studied problems in computational
+geometry.  However, most work thus far has focused on the case when
+$c$ is large. More specifically, most research has been on the problem
+of finding a $k$ point subset (a $k$-cluster) $X\subseteq S$, $|X|=k$,
+such that $\ch(X)$ has minimum area or perimeter. These are the same
+problems studied in this paper except that $k=n-c$ and the research
+has focused on designing efficient algorithms for small values of $k$.  
+
+The problem of finding a subset of $S$ of size $k$ that has the least
+perimeter convex hull was first considered over 20 years ago by Dobkin
+\etal\ \cite{ddg83} who gave an $O(k^2n\log n + k^5 n)$ time
+algorithm.  This algorithm can be improved to run in $O(k^2 n\log n +
+k^4 n)$ time using techniques of Aggarwal \etal\ \cite{aiks89}.  Both
+algorithms are based on the fact that the $k$ points that define the
+solution are a subset of the $k'$ points that define some cell in the
+order $k'$ \voronoi\ diagram, where $k'=\ceil{\pi (k-1)}$.  This
+allows the problem to be solved by considering $O(k'n)$ subproblems
+each of size $k'$.
+
+The problem of finding a subset of $S$ of size $k$ that has the
+minimum area convex hull has been considered by Eppstein \etal\
+\cite{eorw92} and later by Eppstein \cite{e93} who give $O(kn^{3})$
+and $O((k^3+\log n) n^2)$ time algorithms for this problem,
+respectively.  The second algorithm (by Eppstein) uses the first
+algorithm along with the fact that the $k$ points that define the
+solution are ``close to'' one of the $n\choose 2$ line segments
+defined by pairs of points in $S$.  This allows the problem to be
+solved by considering $O(n^2)$ subproblems each of size $O(k)$.
+
+\paragraph{New Results.}
+
+For fixed values of $k$, the results above give $O(n\log n)$ and
+$O(n^2)$ time algorithms for finding the $k$ point subset of $S$ with
+minimum perimeter, respectively, area, convex hull.  However, when $k$
+is close to $n$ the above algorithms require $\Omega(n^3)$ time.  In
+this paper we consider the case when $k=n-c$ and show that
+perimeter-based and area-based outlier removal problems can be solved
+in $O(\runtime)$ time.  Here, $C_r={2r \choose r}/(r+1)$ is the famous
+$r$th Catalan number.  Thus, for any fixed $c$, both problems can be
+solved in $O(n\log n)$ time.
+
+The remainder of the paper is organized as follows: \ldots
+
+\section{Preliminaries}
+
+The \emph{convex layers} of $S_0,\ldots,S_k$ of $S$ are defined as
+follows: $S_0$ is the subset of $S$ on the boundary of $\ch(S)$.
+$S_i$, for $i\ge 1$ is the subset of $S$ on the boundary of
+$\ch(S\setminus\bigcup_{j=0}^{i-1} S_j)$.  The convex layers of $S$
+can be computed in $O(n\log n)$ time in several different ways
+\cite{X,Y,Z} or, more simply, the first $c$ convex layers can be
+computed in $O(cn\log n)$ time by repeated applications of any
+$O(n\log n)$ time convex hull algorithm.  For the remainder of this
+paper we will use the notation $p_{i,j}$ to denote the $(j\bmod
+|S_i|)$th point of $S_i$.
+
+Consider a point $p_{0,j}\in S_0$.  If we remove $p_{0,j}$ from $S$
+then the boundary of $\ch(S\setminus\{q\})$ can be obtained either by
+computing two tangents joining $p$ and $r$ to $S_1$ (when the triangle
+$pqr$ has points of $S$ in its interior) or by joining $p$ and $r$
+(when the triangle $pqr$ is empty of points from $S$.  If $S_1$ is
+stored in an array then computing the necessary tangents and deciding
+which of the two cases applies can be done in $O(\log n)$ time
+\cite{X}.
+
+\section{The Algorithm}
+
+In this section we present our algorithms for solving the
+perimeter-based and area-based outlier removal algorithms. Our
+solution to both problems is to enumerate all the $C_c$ combinatorial
+types of solutions of size $c$.  For each such type, we then use a
+dynamic programming algorithm to find the optimal solution of that
+type in $O(c^2 n\log n)$ time.  Before we present the general
+algorithm, it will be helpful to discuss the special cases $c=1$ and
+$c=2$ to illustrate the general principle.
+
+\subsection{Removing 1 Outlier}
+
+The case $c=1$ asks us to remove 1 point of $S$ so that the convex
+hull of the resulting set is minimum.  This can be solved as follows:
+We compute the two convex layers $S_0$ and $S_1$ in $O(n\log n)$ time.
+We then determine, for each point $p_{0,j}\in S_0$ the difference in
+area between $\ch(S)$ and $\ch(S\setminus\{p_{0,j}\})$.  To do this we
+compute the new vertices $p_{1,k},\ldots,p_{1,\ell}$ of $S_1$ that
+appear on the boundary of $\ch(S\setminus\{p_{0,j}\})$ when we delete
+$q$.  We then compute the area of
+$\ch(\{p_{0,j-1},p_{0,j+1}\}\cup\{p_{1,k},\ldots,p_{1,\ell}\})$ and
+subtract this value from the area of the triangle
+$p_{0,j-1}p_{0,j}p_{0,j+1}$.   This
+process takes $O(t_j+\log n)$ time, where
+$t_j=|\{p_{1,k},\ldots,p_{1,\ell}\}|$.
+
+To analyze the overall running time of this algorithm we observe that
+any point $p_{1,k}\in S_1$ appears in at most two triangles
+$p_{0,j-1},p_{0,j},p_{0,j+1}$ and 
+$p_{0,j},p_{0,j+1},p_{0,j+2}$.  Stated another way, 
+\[  
+     \sum_{j=0}^{|S_0|-1} t_j \le 2|S_1|\le 2n \enspace .
+\]
+Thus, the overall running time of this algorithm is 
+\[
+     T(n) = \sum_{j=0}^{|S+0|-1} O(t_j+\log n) = O(n\log n) \enspace ,
+\]
+as claimed.
+
+\subsection{Removing 2 Outliers}
+
+Next we consider the case $c=2$.  In this case, the optimal solution
+$S'$ is of one of three following forms:
+
+\begin{enumerate}
+\item $S'$ contains two consecutive points of $S_0$.
+\item $S'$ contains two non-consecutive points of $S_0$.
+\item $S'$ contains one point of $S_0$ and one point of $S_1$.
+\end{enumerate}
+
+The solutions of Type~1 can be found in much the same way as the
+algorithm for the case $c=1$.  For each $j\in\{0,\ldots,|S_0|\}$ we
+compute the difference in area between $\ch(S)$ and
+$\ch(S\setminus\{p_{0,j},p_{0,j+1}\}$.  The analysis remains exactly
+the same as before except that, now, each point of $S_1$ can appear in
+at most $3$ subproblems.  Thus, the best solution of Type~1 can be
+found in $O(n\log n)$ time.
+
+
+The solutions of Type~3 can also be found in a similar way.  For each
+$p_{0,j}\in S_0$ we remove $p_{0,j}$ to expose a sequence
+$p_{1,k},\ldots,p_{1,\ell}$ of $S_1$ and compute the area of
+$\ch(S\setminus\{p_{0,j}\})$.  We then remove each of
+$p_{1,k},\ldots,p_{1,\ell}$ in turn (exposing a chain of points from
+$S_2$) and compute the area of the resulting convex hull.  To analyze
+the cost of all these, we observe that each point $p_{1,j}\in S_1$
+appears in at most 2 subproblems because there are at most 2 points in
+$S_0$ whose removal causes $p_{1,j}$ to appear on the convex hull.
+Similarly, for each point $p_{2,j}\in S_2$ there are at most 2 points
+of $S_1$ whose removal causes $p_{2,j}$ to appear on the convex hull.
+Thus, each point in $S_1$ appears in at most 2 subproblems and each
+point in $S_2$ appears in at most $4$ subproblems.  The overall
+running time of this algorithm is therefore bounded by
+\[
+    O\left(n\log n + |S_0|\log n + 2|S_1|\log n + 4|S_2|\right) = O(n\log n) \enspace ,
+\]
+as required.
+
+Finally, we consider solutions of Type~2.  To find these we compute,
+for each $p_{0,j}\in S_0$ the difference $x_j$ between the area of
+$\ch(S\setminus\{p_{0,j}\})$ and $\ch(S)$ using the technique
+described for the case $c=1$.  In this way, we reduce the problem to
+finding two indices $0\le j_1,j_2< |S_0|$ with $j_1<j_2-1$ such that
+$x_{j_1}+x_{j_2}$ is maximum.  We do this 
+by computing the following quantity 
+\[
+     S_j = \max\{x_{j_1}+x_{j_2} : 
+       \mbox{$j\le j_1,j_2\le |S_0|$ and $j_1 < j_2-1$}\} \enspace ,
+\]
+which can be computed in $O(|S_0|)$ time using the recurrence
+\[
+    S_j = \max{S_{j+1}, x_{j} + \max\{x_{j+2}},\ldots,x_{|S_0|-1}
+\]
+
+
+\subsection{Removing $\mathbf{c}$ Outliers}
+
+\section{Conclusions}
+
+The running times of our algorithms depend exponentially on the value
+of $c$.  Is it possible to find algorithm that are polynomial in $c$
+but that still run in $O(n\log n)$ time for fixed values of $c$?
+
+The outlier removal problems we study in this paper are two special
+cases of the following \emph{general outlier removal} problem.  Given
+any function $f$ that maps subsets of $\mathbb{R}^2$ onto $\mathbb{R}$
+we want to find, for a given set $S$ of $n$ points in $\mathbb{R}^2$ a
+subset $S'\subset S$ of size $c$ such that $f(S\setminus S')$ is
+minimum.  Functions $f$ of particular interest include:
+\begin{enumerate}
+\item $f(X)$ is the radius of the smallest disk contain $X$,
+\item $f(X)$ is the diameter of $X$ ($f(X)=\max\{\|ab\|:a,b\in X\}$), and
+\item $f(X)$ is the variance of $X$ ($f(X)=\sum_{a\in X} \| am \|^2$
+where $m=\sum_{a\in X} a/|X|$.
+\end{enumerate}
+For the first two functions, it is easy to obtain $O(3^c n)$ and
+$O(2^cn\log n)$ time algorithms, respectively, using the fact that the
+smallest enclosing disk and the diameter are defined by at most 3,
+respectively, 2, points of $S$.  Are there are algorithms for these
+problems whose running time depends only polynomially on $c$?
+
+
+\end{document}

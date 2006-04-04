@@ -1,4 +1,5 @@
 \documentclass[lotsofwhite]{patmorin}
+\usepackage{algorithmic}
 
 \input{pat}
 
@@ -157,12 +158,12 @@ $S'$ is of one of three following forms:
 \end{enumerate}
 
 The solutions of Type~1 can be found in much the same way as the
-algorithm for the case $c=1$.  For each $j\in\{0,\ldots,|S_0|\}$ we
+algorithm for the case $c=1$.  For each $j\in\{0,\ldots,|S_0|-1\}$ we
 compute the difference in area between $\ch(S)$ and
-$\ch(S\setminus\{p_{0,j},p_{0,j+1}\}$.  The analysis remains exactly
+$\ch(S\setminus\{p_{0,j},p_{0,j+1}\})$.  The analysis remains exactly
 the same as before except that, now, each point of $S_1$ can appear in
-at most $3$ subproblems.  Thus, the best solution of Type~1 can be
-found in $O(n\log n)$ time.
+at most $3$ subproblems, instead of only 2.  Thus, all solutions of
+Type~1 can be evaluated in $O(n\log n)$ time.
 
 
 The solutions of Type~3 can also be found in a similar way.  For each
@@ -188,20 +189,90 @@ Finally, we consider solutions of Type~2.  To find these we compute,
 for each $p_{0,j}\in S_0$ the difference $x_j$ between the area of
 $\ch(S\setminus\{p_{0,j}\})$ and $\ch(S)$ using the technique
 described for the case $c=1$.  In this way, we reduce the problem to
-finding two indices $0\le j_1,j_2< |S_0|$ with $j_1<j_2-1$ such that
+that of finding two indices $0\le j_1,j_2< |S_0|$ with $j_1\le j_2-2$ such that
 $x_{j_1}+x_{j_2}$ is maximum.  We do this 
 by computing the following quantity 
 \[
      S_j = \max\{x_{j_1}+x_{j_2} : 
-       \mbox{$j\le j_1,j_2\le |S_0|$ and $j_1 < j_2-1$}\} \enspace ,
+       \mbox{$0\le j_1,j_2\le j$ and $j_1 < j_2-1$}\} \enspace ,
 \]
 which can be computed in $O(|S_0|)$ time using the recurrence
 \[
-    S_j = \max{S_{j+1}, x_{j} + \max\{x_{j+2}},\ldots,x_{|S_0|-1}
+    S_j = \max\{S_{j-1}, x_{j} + \max\{x_{0},\ldots,x_{j-2}\}\}
+                \enspace .
 \]
 
+Since the best solution of each of the three types can be found in
+$O(n\log n)$ time we can find the overall best solution in $O(n\log
+n)$ time by keeping the best of the three.
 
 \subsection{Removing $\mathbf{c}$ Outliers}
+
+The solution for the case $c=2$ illustrates all of the ideas used by
+our algorithm.  We begin by enumerating the combinatorial types of
+solutions and then compute the best solution of each type.  The
+algorithm for computing the best solution of each type is a
+divide-and-conquer algorithm whose merge step is accomplished by
+solving a dynamic programming problem (as in the Type~2 solutions
+described above).
+
+\subsubsection{The Types of Solutions}
+
+Here we give a mapping between the different types of solutions and
+labelled binary trees. We represent the type of a solution as a binary
+tree in which each node is labelled with a positive integer.  The sum
+of all labels must be equal to $c$.  The nodes on the rightmost path
+of this tree give the sizes of consecutive groups of nodes that are
+removed from $S_0$.  
+
+\subsubsection{Computing the Solution of a Specific Type}
+
+Here we show how, given the exact combinatorial type of the solution
+to compute the optimal solution of that type.
+
+\noindent$\textsc{FindValue}(T,i,a,b)$
+\begin{algorithmic}
+\FOR{each node $j$ on the rightmost path of $T$}
+   \FOR{$\ell=a,\ldots,b-\mathrm{value}(j)$}
+      \STATE{delete $p_{i,\ell},\ldots,p_{i,\ell+\mathrm{value}(j)}$ 
+          from $S_i$, exposing $p_{i+1,a'},\ldots,p_{i+1,b'}$ of
+             $S_{i+1}$}
+      \STATE{$X_{j,k}=\textsc{FindValue}(\mathrm{left}(j),)$}
+   \ENDFOR
+\ENDFOR
+\end{algorithmic}
+
+
+
+\subsubsection{Combining the Solutions}
+
+Here we show how to combine the solutions by using dynamic programming
+to solve the following problem:
+
+Given positive integers $c_1,\ldots,c_d$ and a $d\times m$ positive
+real-valued matrix $X$
+we want to find indices $1\le i_1,\ldots,i_d \le m-c_d$ such that 
+\[ 
+    i_j + c_j \le i_{j+1} 
+\] 
+for all $1\le j < d$ and such that
+\[
+      h(i_1,\ldots,i_d)=\sum_{j=1}^d X_{j,i_j}
+\]
+is maximum.  We solve this by filling out the table:
+\[
+     D_{j,\ell} = \max\{h(i_1,\ldots,i_j): 
+      \mbox{$1\le i_1$, $i_j\le \ell$, and $i_{j'}+c_{j'}\le i_{j'+1}$
+             for all $1\le j'< j$}  \} \enspace .
+\]
+for $j=1,\ldots,d$ and $\ell=1,\ldots,m-c_d$.  We can do this in
+$O(cn)$ time because the table entries satisfy the recurrence
+\[
+     D_{j,\ell} = \max\{D_{j,\ell-1},D_{j-1,\ell-c_{j-1}}+X_j \}
+\]
+where we use the convention that $D_{j,\ell} = 0$ if $j\le 0$ or
+$\ell\le 0$.
+
 
 \section{Conclusions}
 

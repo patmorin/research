@@ -1,24 +1,50 @@
-\documentclass[charterfonts,lotsofwhite]{patmorin}
-%\documentclass[12pt]{article}
-%\usepackage{fullpage}
-\usepackage{amssymb,epsfig,amsthm,cite}
+\documentclass{elsart}
+\usepackage{amsfonts,epsfig,cite}
 \usepackage{graphicx}
+\journal{CGTA}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
+\newtheorem{thma}{Subdivision Lemma}
+\newenvironment{proof}{{\bf Proof:} \rm}{\hfill $\Box$ \medskip\\}
+
 \newcommand{\comment}[1]{}
 \newcommand{\depth}{\mathrm{depth}}
 
-\begin{document}
 
-\title{\MakeUppercase{Algorithms for bivariate zonoid depth}}
-\author{Harish Gopala and Pat Morin\\ School of Computer Science\\ Carleton University\\ 1125 Colonel By Drive\\ Ottawa, Ontario, K1S 5B6, Canada.\\ \em {\{hgopala,morin\}@scs.carleton.ca}}
+\comment{
+\author{Harish Gopala and Pat Morin%
+	\thanks{School of Computer Science,
+		Carleton University, 
+		1125 Colonel By Drive, 
+		Ottawa, CANADA K1S 5B6.
+   		\email{\{hgopala,morin\}@scs.carleton.ca}
+	}
+}
+}
+
 \date{}
-\maketitle
+\begin{document}
+\begin{frontmatter}
+\title{Algorithms for bivariate zonoid depth}
+\author{Harish Gopala and Pat Morin}
+\address{School of Computer Science, Carleton University \\
+	1125 Colonel By Drive, Ottawa, CANADA K1S~5B6}
+
+\thanks[funding]{This research was partly funded by a grant from the
+Natural Sciences and Engineering Research Council of Canada and by an
+Ontario Graduate Scholarship.}
 
 \begin{abstract}
-Zonoid depth is a new notion of data depth proposed by Dyckerhoff et al.\ \cite{zonoid_data_depth_theory_and_computation}. We give efficient algorithms for solving several computational zonoid depth problems for 2-dimensional (bivariate) data. These include algorithms for computing a zonoid depth map, computing a zonoid depth contour, and computing the zonoid depth of a point.
+Zonoid depth is a definition of data depth proposed by Dyckerhoff et
+al.\ \cite{zonoid_data_depth_theory_and_computation}. 
+Efficient algorithms for solving several computational problems
+related to zonoid depth
+in 2-dimensional (bivariate) data sets are studied. These include algorithms
+for computing a zonoid depth map, computing a zonoid depth contour,
+and computing the zonoid depth of a point.
 \end{abstract}
+\end{frontmatter}
 
 \section{Introduction}\label{section_introduction}
 
@@ -69,30 +95,30 @@ of a book by Mosler \cite{mosler_book}.
 \label{subsection_definition_of_zonoid_depth_and_regions}
 
 Given a set of points $S = \{p_1, p_2,\ldots, p_n\}$ in
-$\mathbb{R}^2$, the convex hull of points in $S$ is defined as 
+$\mathbb{R}^d$, the convex hull of points in $S$ is defined as 
 \[
    CH(S) = \left\{\sum_{i=1}^{n} \lambda_ip_i \mid 0 \le \lambda_i \le 1,
              \sum_{i=1}^{n}{\lambda_i} = 1\right\} \enspace . 
 \] 
-However 
+The \emph{$k$-zonoid} (the zonoid of depth $k$) is defined as
 \[
    Z_k(S) = \left\{\sum_{i=1}^{n}\lambda_ip_i \mid 0 \le \lambda_i \le
              \frac{1}{k}, \sum_{i=1}^{n}{\lambda_i} = 1\right\}
 \] 
-is called the zonoid of depth $k$ or the $k$-zonoid. Here, and
-throughout this article, $1 \le k \le n$ is an integer.\footnote{In
-the zonoid depth literature, the value $k$ may be any real number
-between 1 and $n$.   Although the algorithms in this paper are stated
-for $k$ being an integer, they extend easily to the case of
-real-valued $k$.}  The \emph{zonoid depth} of a point $p$ with respect
-to a set $S$ is defined as the maximum $k$ for which $p$ lies inside
+Here, and throughout this article, $1 \le k \le n$ is an
+integer\footnote{In the zonoid depth literature, the value $k$ may be
+any real number between $1$ and $n$. Although the algorithms in this
+paper are stated for $k$ being an integer, they extend easily to the
+case of real-valued $k$.} and we focus on the special case $d=2$. The
+\emph{zonoid depth} of a point $p$ with respect to a set $S$ is
+defined as the maximum value $k$ for which $p$ is contained in
 $Z_k(S)$.  
 
 Since a zonoid is defined by a finite set of linear constraints, it
 forms a convex polygon.  Furthermore, for $k_1 > k_2$, the
 $k_1$-zonoid is a subset of the $k_2$-zonoid, hence
 $Z_1(S),\ldots,Z_n(S)$ form a sequence of nested convex polygons.  The
-$n$-zonoid $Z_n(S)$ is a single point, the mean of $S$. For other
+$n$-zonoid $Z_n(S)$ contains a single point, the mean of $S$. For other
 properties of zonoids, see Dyckerhoff et al.\
 \cite{zonoid_data_depth_theory_and_computation} and Mosler
 \cite{mosler_book}. 
@@ -133,16 +159,17 @@ depth:
 
 \begin{enumerate}
 
-\item an $O(n \log n + nk^{\frac{1}{3}})$ expected time algorithm to
-compute a zonoid depth contour,
+\item\emph{Computing a contour:} an $O(n \log n + nk^{\frac{1}{3}})$
+expected time algorithm to compute the polygon $Z_k(S)$,
 
-\item an $O(n^2)$ algorithm to compute zonoid depth map,
+\item\emph{Computing a depth map:} an $O(n^2)$ algorithm to compute
+$Z_1(S),\ldots,Z_n(S)$,
 
-\item a linear time algorithm to test whether a zonoid depth contour
-contains a point, and 
+\item\emph{Testing the depth:} an $O(n)$ time algorithm to test whether a
+point $p$ is contained in $Z_k(S)$,
 
-\item a linear expected time algorithm to compute the zonoid depth of
-     a point.
+\item\emph{Computing the depth:} an $O(n)$ expected time algorithm to
+compute the zonoid depth of a point $p$.
 
 \end{enumerate}
 
@@ -199,22 +226,24 @@ collinear. Here, and throughout the article, point sets are always
 assumed to be in general position.
 
 Given a set $S$ of $n$ points in general position and an integer $0
-\le k \le n-2$, a set $S^{\prime} \subseteq S$ is called a $k$-set if
-$S^{\prime}$ has $k$ points in it and these can be separated from the
-remaining $n-k$ points of $S$ with a straight line. The notion of
-$k$-sets was introduced by Erd\"{o}s et al.\
-\cite{dissection_graphs_of_planar_point_sets} and it is a long
-standing open problem to determine the maximum number of $k$-sets in a
-set of $n$ points. Currently, the best bound of $O(nk^{\frac{1}{3}})$
-is due to Dey \cite{improved_bounds_on_planar_ksets_and_klevels}.
+\le k \le n-2$, a set $S^{\prime} \subseteq S$ is called a $k$-set of
+$S$ if $|S^{\prime}|=k$ and there exists a closed halfplane
+$h$ such that $h\cap S=S^{\prime}$. I.e., $S^{\prime}$ has $k$ points
+in it and these can be separated from the remaining $n-k$ points of
+$S$ with a straight line. The notion of $k$-sets was introduced by
+Erd\"{o}s et al.\ \cite{dissection_graphs_of_planar_point_sets} and it
+is a long standing open problem to determine the maximum number of
+$k$-sets in a set of $n$ points. Currently, the best bound of
+$O(nk^{\frac{1}{3}})$ is due to Dey
+\cite{improved_bounds_on_planar_ksets_and_klevels}.
 
 Consider a set $S$ of $n$ points. If we construct all possible
 $1$-sets on $S$, we obtain the vertices of $CH(S)$, represented by the
-thick points in Figure \ref{fig_1_set}. By joining all such $1$-set
-points, we get the zonoid of depth $1$ or $1$-zonoid or $Z_1(S)$, and
-$Z_1(S) = CH(S)$.
+thick points in Figure \ref{fig_1_set}. By taking the convex hull of
+all such $1$-set points, we get the zonoid of depth $1$ or $1$-zonoid
+or $Z_1(S)$, and $Z_1(S) = CH(S)$, as the definition implies.
 
-\begin{figure}[h!]
+\begin{figure}
  \begin{center}
    \psfig{file=figs/fig1.eps}
    \caption{\label{fig_1_set}$1$-sets on $S$ and the $1$-zonoid}
@@ -222,16 +251,16 @@ $Z_1(S) = CH(S)$.
 \end{figure}
 
 Now, on the same set $S$, construct all possible $2$-sets. In each
-$2$-set, take the mean (represented, in Figure~\ref{fig_1_set}, by the
+$2$-set, take the mean (represented, in Figure~\ref{fig_2_set}, by the
 \textbf{X} on the dotted line segment joining 2 points in each
 $2$-set) of the pair of points.  The following lemma shows that by
-joining all such means from all $2$-sets of $S$, we obtain a
-$2$-zonoid of $S$ or $Z_2(S)$ as in Figure \ref{fig_2_set}. In a
-similar fashion, zonoids up to depth $n$ can be constructed. Since
-$Z_n(S)$ is the mean of the points in $S$, it is a unique point and is
-the center of gravity of the points in $S$.
+taking the convex hull of the means from all $2$-sets of $S$, we
+obtain the $2$-zonoid of $S$, i.e., $Z_2(S)$ as in Figure
+\ref{fig_2_set}.  In a similar fashion, zonoids up to depth $n$ can be
+constructed.  Since $Z_n(S)$ is the mean of the points in $S$, it is a
+unique point and is the center of gravity of the points in $S$.
 
-\begin{figure}[ht]
+\begin{figure}
  \begin{center}
    \psfig{file=figs/fig2.eps}
    \caption{\label{fig_2_set}$2$-sets on $S$ and the $2$-zonoid}
@@ -245,50 +274,36 @@ the $k$-sets of $S$.
 \end{lemma}
 
 \begin{proof}
-\comment{
-Consider the following mapping that takes $k$-sets onto zonoid
-vertices.  Let $S'$ be a $k$-set on the right handside of some
-oriented line $\ell$, so that $\ell$ separates $S'$ from $S\setminus
-S'$. We map $S'$ onto the point $p_{S'}=\sum_{x\in S'}x/k$.  Observe
-that $p_S$ is indeed a vertex of $Z_k(S)$ because it is an extreme
-point of $Z_k$ in the direction $d$ perpendicular to $\ell$.  We must
-prove that this mapping is one-to-one and onto.
+Consider the mapping $f$ that takes a $k$-set $S'\subseteq S$ onto a
+vertex of $Z_k(S)$ using the equation $f(S')=\frac{1}{k}\sum_{p\in S'}
+p$.  We will show that $f$ is a bijection between the $k$-sets of $S$ and
+the vertices of $Z_k(S)$.
 
-\textbf{One-to-one:} Consider a $k$-set in a set $S$ of $n$ points.
-Allot $\lambda_i = \frac{1}{k}$ to each point in this $k$-set. This is
-in accordance to the definition of a $k$-zonoid in Section
-\ref{subsection_definition_of_zonoid_depth_and_regions}. Then
-$\sum_{i=1}^{n}\lambda_ip_i$ is the mean of the points in the $k$-set
-as well as an extreme point of $Z_k(S)$ in the direction perpendicular
-to the line that separates this $k$-set. There can be only one $k$-set
-that is extreme in any given direction, and the neighboring $k$-sets
-differ by at least one point. Therefore, different $k$-sets correspond
-to different $k$-zonoid vertices.
+To see that $f$ is one-to-one, consider two $k$-sets $S_1$ and $S_2$.
+We need to show that the points $p_1=\frac{1}{k}\sum_{p\in S_1}p$ and
+$p_2=\frac{1}{k}\sum_{p\in S_2}p$ are distinct.  The set $S_1$ is the
+intersection of $S$ with a halfplane $h$ bounded by a line $\ell$
+having inner normal $d$.  The numbers $S_1\cdot d=\{p\cdot d:p\in
+S'\}$ are the $k$ largest values in the set $S\cdot d=\{p\cdot
+d:p\in S\}$.  It follows
+that $p_1\cdot d
+> p_2\cdot d$, so $p_1\neq p_2$, as required.
 
-\textbf{Onto:} A $k$-zonoid vertex is extreme in some direction and is
-the mean of the points in the $k$-set separated by a line
-perpendicular to that direction.  
-} FIXME.
+To see that $f$ is onto, we observe that any vertex $v$ of $Z_k(S)$ is
+extreme in some direction $d$.  In fact, $v=\frac{1}{k}\sum_{x\in S'}
+x$, where $S'$ is a subset of the extreme-most $k$ points of $S$ in
+direction $d$.  But then $S'$ is a $k$-set of $S$ since it can be
+separated from $S$ by a line $\ell$ perpendicular to $d$.
 \end{proof}
 
-\subsection{Review of duality}\label{subsection_review_of_duality}
 
-A point in the plane has $2$ parameters: its $x$-coordinate and its
-$y$-coordinate. A non-vertical line in the plane also has $2$
-parameters: its slope and its $y$-intercept. Therefore, we can map a
-set of points to a set of lines and vice versa in a one-to-one manner.
-Such transforms are called \emph{duality transforms} and the image of
-an object under a duality transform is called the \emph{dual} of the
-object. 
+
+\subsection{Review of duality}\label{subsection_review_of_duality}
 
 Let $p = (p_1, p_2)$ denote a point in the plane. The dual of $p$,
 denoted by $p^*$, is the line denoted by $p^* = \{(x,y) : y = p_1x -
 p_2\}$. The dual of the line $l = \{(x,y) : y = ax + b\}$ is the point
-$l^* = (a,-b)$.  The duality transform is not valid for vertical
-lines. This is not a problem because, in most cases, vertical lines
-can be handled separately, or the plane containing the lines can be
-rotated so that there are no vertical lines. 
-
+$l^* = (a,-b)$.  
 We say that the duality transform maps objects from the \emph{primal}
 plane to the \emph{dual} plane. This transform has the following
 properties:
@@ -302,30 +317,27 @@ properties:
 
 A set of lines is said to be in general position if no three of the
 lines pass through a common point and two of the lines are parallel.
-It follows from the above properties that a point set in general
-position is dual to a line set in general position. For a more
-detailed explanation on duality, see de Berg et al.\ \cite{cg_text}.
+It follows from the above properties that a set of points in general
+position is dual to a set of lines in general position. For a more
+detailed explanation of duality see, e.g., Edelsbrunner's book
+\cite{edelsbrunner_book}.
 
 \subsection{Correspondence between zonoids and $k$-level}\label{subsection_correspondence_between_zonoids_and_klevel}
 
-We define the $k$-level as follows: Let $L$ be a set of $n$ lines in
-$\mathbb{R}^2$ that are dual to a set of $n$ points $S$ in general
-position in $\mathbb{R}^2$. This general position assumption is safe
-since the number of $k$-sets is maximized for point sets in general
-positions \cite{improved_bounds_on_planar_ksets_and_klevels}. Denote
-the line arrangement of $L$ by $A(L)$. For $1 \le k \le n$, the
-$k$-level in $A(L)$ is the closure of all points on the given lines,
-which have exactly $k$ lines strictly on and above them. 
+The $k$-level of a set $L$ if $n$ lines is defined as the the set of
+all points that lie on exactly one line of $L$ and strictly below
+$k-1$ lines of $L$. If the lines in $L$ are dual to a set $P$ of
+points then each  point $p$ on the $k$-level of $L$ is the dual of a
+line $p^*$ that contains one point of $P$ and has exactly $k-1$ points
+of $P$ above it.  That is, $p^*$ has a $k$-set of $P$ on or above it.
+Similarly, a point on the $(n-k)$-level of $L$ is the dual of a line
+with a $k$-set of $P$ on or below it.
 
-Each vertex $v$ in the $k$-level of $A(L)$ corresponds to a line $v^*$
-in the primal plane that supports a $k$-set of $S$.  That is, $v^*$
-contains two points $p, q\in S$ and has exactly $k-2$ points of $S$
-above it.
-
-\begin{figure}[h]
+\begin{figure}
  \begin{center} 
    \psfig{file=figs/fig4.eps}
-   \caption{\label{fig_primal_dual}$k$-zonoid in primal and dual}
+   \caption{A $k$-zonoid in primal and dual}
+   \label{fig_primal_dual}
  \end{center}
 \end{figure}
 
@@ -339,46 +351,49 @@ dual, this is the shaded region. The upper and lower boundaries of the
 shaded region are also convex, because the corresponding boundaries of
 the $k$-zonoid in the primal are convex. 
 
-We constructed the $k$-zonoid in the primal by finding all possible
-$k$-sets, taking the mean of $k$ points in each $k$-set and then
-joining these mean points of all $k$-sets. In the dual, we first
-construct the $k$-level (respectively the $(n-k)$-level) and then, for
-each vertex which has $k$ lines on and above it, we draw an upwards
-(respectively downwards) vertical ray through it, and compute the mean
-of the $k$ lines that intersect this vertical ray. Such mean points
-are then joined to get the boundaries of the shaded region in Figure
-\ref{fig_primal_dual}. It maybe observed here that for each vertex on
-the upper (respectively lower) boundary of the dual of the $k$-zonoid,
-there is a vertex directly below (respectively above) it on the
-$k$-level (respectively the $(n-k)$-level). 
-
-\subsection{Some implications of the above observations}\label{subsection_some_implications_of_the_above_observations}
+The $k$-zonoid in the primal can be constructed (inefficiently) by
+finding all possible $k$-sets, taking the mean of $k$ points in each
+$k$-set and taking the convex hull of the resulting point set. In the
+dual, this corresponds to constructing the $k$-level (respectively the
+$(n-k)$-level) and then, for each vertex that has $k$ lines on and
+above it, we draw an upwards (respectively downwards) vertical ray
+through it and compute the mean of the $k$ lines that intersect this
+vertical ray. These ``mean segments'' are then joined to get the
+boundary of the shaded region in Figure \ref{fig_primal_dual}. It may
+be observed here that for each vertex on the upper (respectively
+lower) boundary of the dual of the $k$-zonoid, there is a vertex
+directly below (respectively above) it on the $k$-level (respectively
+the $(n-k)$-level). 
 
 Although the number of $k$-sets and the number of vertices of the
-$k$-level are different, they are within a constant fraction of each
-other \cite{edelsbrunner_book}. Dey
+$k$-level are different, their sizes are within a constant factor of
+each other \cite{edelsbrunner_book}. Dey
 \cite{improved_bounds_on_planar_ksets_and_klevels} proves an
 $O(nk^{\frac{1}{3}})$ upper bound on the complexity of planar
 $k$-levels, which is also an upper bound for the number of planar
 $k$-sets. Since we showed that there is a bijection between the
 $k$-sets of a point set $S$ and the vertices of $Z_k(S)$ in Lemma
-\ref{lemma_bijection}, $O(nk^{\frac{1}{3}})$ is an upper bound on the
-number of vertices of a $k$-zonoid in $\mathbb{R}^2$.
+\ref{lemma_bijection}, Dey's result implies an $O(nk^{\frac{1}{3}})$
+upper bound on the number of vertices of a $k$-zonoid in
+$\mathbb{R}^2$.
 
 Sharir et al.\ \cite{an_improved_bound_for_ksets_in_three_dimensions}
 show that the number of $k$-sets in a set of $n$ points in
-$\mathbb{R}^3$ is $O(nk^{\frac{3}{2}})$. Because of this fact and
-Lemma \ref{lemma_bijection}, the maximum complexity of a zonoid in
-$\mathbb{R}^3$ is also $O(nk^{\frac{3}{2}})$.
+$\mathbb{R}^3$ is $O(nk^{\frac{3}{2}})$. This implies that, in
+$\mathbb{R}^3$ the $k$-zonoid of an $n$ point set has size
+$O(nk^{\frac{3}{2}})$.
 
-\section{Algorithms for zonoids in 2 dimensions}\label{section_algorithms_for_zonoids_in_2_dimensions}
+
+
+\section{Algorithms for zonoids in 2 dimensions}
+\label{section_algorithms_for_zonoids_in_2_dimensions}
 
 In this section we present algorithms for zonoid depth. The first few
 algorithms follow easily from existing results on $k$-sets and
-arrangements. The later algorithms are somewhat more involved and
-require some sophisticated techniques from computational geometry.
+arrangements. The later algorithms are somewhat more involved.
 
-\subsection{Computing a depth contour}\label{subsection_computing_a_depth_countour}
+\subsection{Computing a depth contour}
+\label{subsection_computing_a_depth_countour}
 
 Chan \cite{remarks_on_klevel_algorithms_in_the_plane} describes an
 algorithm for computing the $k$-level in a set of $n$ lines that runs
@@ -388,8 +403,11 @@ $O(n \log n + nk^{\frac{1}{3}})$ expected time. This algorithm is
 easily augmented to output the $k$-zonoid. 
 
 \begin{theorem}\label{theorem_build_k_zonoid}
-Given a set $S$ of $n$ points in $\mathbb{R}^2$ and an integer $1 \le k \le n$, the $k$-zonoid (i.e. the zonoid depth contour of depth $k$) of $S$ can be computed in $O(n \log n + nk^{\frac{1}{3}})$ expected time.
+Given a set $S$ of $n$ points in $\mathbb{R}^2$ and an integer $1 \le
+k \le n$, the $k$-zonoid $Z_k(S)$ can be computed in $O(n \log n +
+nk^{\frac{1}{3}})$ expected time.
 \end{theorem}
+
 
 \subsection{Computing a depth map}\label{subsection_computing_a_depth_map}
 
@@ -402,42 +420,49 @@ of the dual lines \cite{edelsbrunner_book}.
 
 \begin{theorem}\label{theorem_build_1_to_n_zonoids}
 Given a set $S$ of $n$ points in $\mathbb{R}^2$,
-$Z_1(S),\ldots,Z_n(S)$ (i.e. the depth map) can be computed in $O(n^2)$ time.
+$Z_1(S),\ldots,Z_n(S)$ (i.e. the depth map) can be computed in
+$O(n^2)$ time.
 \end{theorem}
 
-Once we have computed the $Z_1(S),\ldots,Z_n(S)$, we can preprocess them for point location using Kirkpatrick's planar point location algorithm \cite{optimal_search_in_planar_subdivisions} so that we can determine the zonoid depth of any point in $O(\log n)$ time. 
+Once we have computed the $Z_1(S),\ldots,Z_n(S)$, we can preprocess
+them for point location using Kirkpatrick's planar point location
+algorithm \cite{optimal_search_in_planar_subdivisions} so that we can
+determine the zonoid depth of any point in $O(\log n)$ time. 
 
 \begin{theorem}\label{theorem_point_location}
-Given a set $S$ of $n$ points in $\mathbb{R}^2$ and a query point $p$,
-after $O(n^2)$ preprocessing and requiring $O(n^2)$ space, the zonoid
+Given a set $S$ of $n$ points in $\mathbb{R}^2$,
+after preprocessing requiring $O(n^2)$ time and space the zonoid
 depth of any query point $p$ can be computed in $O(\log n)$ time.
 \end{theorem}
 
-\subsection{Testing if a zonoid contains a point}\label{subsection_testing_if_a_zonoid_contains_a_point}
+\subsection{Testing if a zonoid contains a point}
+\label{subsection_testing_if_a_zonoid_contains_a_point}
 
 In this section, we study the following decision problem: Given a set
 $S$ of $n$ points in general position, a query point $p$ and an
-integer $1 \le k \le n$, report whether $p$ lies inside or outside
+integer $1 \le k \le n$, determine whether $p$ is contained in
 $Z_k(S)$. 
 
 Consider again Figure \ref{fig_primal_dual}. In the primal, if the
 point $p_1$ were to be moved upwards along a vertical line passing
 through $p_1$, then the line $p_1^*$ also moves upwards in the dual,
 parallel to itself. When $p_1$ hits the $k$-zonoid boundary, $p_1^*$
-also hits the boundary of the dual of the $k$-zonoid. Since this
-boundary is convex, line $p_1^*$ becomes tangent to it. This leads us
-to the following idea: In the primal, draw a vertical line through the
-point $p_1$. It intersects the $k$-zonoid at 2 points (if the line
-completely misses the $k$-zonoid then $p_1$ is outside the
-$k$-zonoid). Finding these intersection points is equivalent to
-finding the points at which the vertical translation of line $p_1^*$
-becomes tangent to the boundaries of the dual of the $k$-zonoid. Once
-they are found, it can be easily said whether $p_1$ is inside or
-outside the $k$-zonoid by comparing the $y$-coordinates of the
-intersection points with that of  $p_1$.  Hereafter, we concentrate on
-finding that vertex on the upper boundary of the dual of the
-$k$-zonoid at which $p_1^*$ is tangent. Such a vertex on the lower
-boundary can be found in a symmetric manner. 
+becomes tangent to the boundary of the dual of the $k$-zonoid. This
+leads to the following idea: In the primal, first determine the
+vertices of the zonoid with smallest and largest $x$-coordinate.  If
+the point $p_1$ is not in the vertical strip between these two points
+then $p_1$ is not the in the zonoid.
+
+Otherwise, draw a vertical line through the point $p_1$. This line
+intersects the boundary of the $k$-zonoid in 2 points.  Finding these
+intersection points is equivalent to finding the points at which the
+vertical translation of line $p_1^*$ becomes tangent to the boundaries
+of the dual of the $k$-zonoid. Once they are found, it can be easily
+said whether $p_1$ is inside or outside the $k$-zonoid by comparing
+the $y$-coordinates of the intersection points with that of  $p_1$.
+Hereafter, we concentrate on finding that vertex on the upper boundary
+of the dual of the $k$-zonoid at which $p_1^*$ is tangent. Such a
+vertex on the lower boundary can be found in a symmetric manner. 
 
 The algorithm that we use is inspired by the planar ham-sandwich
 algorithm of Lo et al.\ \cite{algorithms_for_ham_sandwich_cuts}. In
@@ -445,13 +470,12 @@ their algorithm, Lo et al.\ are searching for a particular vertex on
 the median level of the arrangement of lines in the dual. In the
 primal, this vertex corresponds to a line passing through 2 points and
 bisecting this set. In our problem, we are searching for a particular
-vertex on the $k$-level that supports the point on the upper boundary
-of the dual of the $k$-zonoid at which $p_1^*$ is tangent.
-Nonetheless, both problems involve searching for a vertex on a
-$k$-level, therefore, we adopt their procedure.
+vertex on the $k$-level that defines the point on the upper boundary
+of the dual of the $k$-zonoid at which a vertical translation of
+$p_1^*$ is tangent.
 
 In the following, we describe and analyze our algorithm in detail even
-though the algorithm and its analysis are essentially identical to the
+though the algorithm and its analysis are more or less the same as the
 algorithm of Lo et al.  This is because we will be modifying this
 algorithm in
 Section~\ref{subsection_computing_the_zonoid_depth_of_a_point} to
@@ -459,14 +483,14 @@ solve the same problem for weighted points.  Describing and analyzing
 the modified algorithm requires an understanding of the original
 algorithm and its analysis.
 
-\begin{figure}[h!]
+\begin{figure}
  \begin{center} 
    \psfig{file=figs/fig5.eps}
    \caption{\label{fig_vertical_strip}Vertical strip $V$ showing the $k$-level and corresponding upper boundary of the dual of the $k$-zonoid}
  \end{center}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}
  \begin{center}
    \begin{center}\begin{tabular}{ccc} 
    \includegraphics[width=1.8in]{figs/fig5a} &
@@ -483,93 +507,129 @@ of $V$, (b)~the left of $V$ and (c)~inside of $V$.}
 
 Consider an open vertical strip $V$ in the dual, as in Figure
 \ref{fig_vertical_strip}, showing the $k$-level and the corresponding
-convex upper boundary of the dual of the $k$-zonoid. To determine
-whether or not the line $p_1^*$ is tangent to some boundary vertex
-inside $V$, we do the following: we count the first $k$ lines from the
-top intersected by the left vertical line of $V$, and compute their
-mean. This actually involves finding the mean of the slopes and
-intercepts of these lines (which are the $x$- and $y$-coordinates of
-the points corresponding to these lines in the primal). This gives us
-the line containing the segment of the upper boundary of the dual of
-the $k$-zonoid intersected by the left vertical line of $V$. We do
-similarly for the right vertical line of $V$. Now we compare the
-slopes $s_1$ and $s_2$ of the left and right intersected segments
-respectively with slope $s_p$ of line $p_1^*$. If $s_1, s_2 \le s_p$
-as in Figure \ref{fig_vertical_strip_abc}.a, then $p_1^*$ is a tangent
-to the upper boundary \emph{to the right} of strip $V$. Similarly, if
-$s_1, s_2 \ge s_p$ as in Figure \ref{fig_vertical_strip_abc}.b, then
-$p_1^*$ is a tangent to the upper boundary \emph{to the left} of strip
-$V$. But if $s_1 < s_p < s_2$ as in Figure
-\ref{fig_vertical_strip_abc}.c, then $p_1^*$ is a tangent to the boundary
-inside strip $V$. The running time of this check is $O(n)$, because we
-count $k$ lines on the left and right vertical line and compute their
-means. The slope comparison is, of course, done in constant time.
-Hence we have the following lemma. 
+convex upper boundary of the dual of the $k$-zonoid.  Our algorithm
+requires a method to determine whether a vertical translation of $p_1^*$
+becomes tangent to the upper boundary of the dual $k$-zonoid  (1)~to
+the left of the strip $V$, (2)~in
+the strip $V$, or (3)~to the right of
+the strip $V$.  To determine this, we compute the slope $s_\ell$ of
+the dual $k$-zonoid edge that intersects the left boundary of $V$ and
+the slope $s_r$ of the dual $k$-zonoid edge edge that intersects the
+right boundary of $V$.  Both these computations can be done in $O(n)$
+time using an $O(n)$ time selection algorithm to select the
+intersection of the $k$-level with each of these two vertical lines
+bounding $V$.  If $s$ is
+the slope of $p^*$ then either
+\begin{enumerate}
+\item $s \le s_\ell < s_r$ in which case a vertical translation of
+$p_1^*$ is tangent to the dual $k$-zonoid at some point to the left of
+$V$, 
+\item $s_\ell < s < s_r$ in which case a vertical translation of
+$p_1^*$ is tangent to the dual $k$-zonoid at some point in 
+$V$, or
+\item $s_\ell < s_r \le s$ in which case a vertical translation of
+$p_1^*$ is tangent to the dual $k$-zonoid at some point to the right
+of $V$.
+\end{enumerate}
 
-\begin{lemma}\label{lemma_vertical_strip}
-Given a set $S$ of $n$ points in $\mathbb{R}^2$, a query point $p$ and
-an integer $1 \le k \le n$, all in the primal, if $V$ is an open
-vertical strip in the dual, we can determine whether or not this strip contains the boundary vertex of the dual of the $k$-zonoid at which the line $p^*$ is tangent, in $O(n)$ time.
-\end{lemma}
+The above method is used in conjunction with the following lemma
+(that appears in Ref.~\cite{algorithms_for_ham_sandwich_cuts}) for
+subdividing an arrangement into vertical strips:
 
-Lo et al.\ \cite{algorithms_for_ham_sandwich_cuts} describe the following lemma: 
-\newtheorem*{thma}{Subdivision Lemma}
 \begin{thma}
-Let $H$ be a set of $n$ lines in the plane in general position, let $\alpha < 1$ be a prescribed positive constant and let $V$ be an interval on the $x$-axis. In $O(n)$ time, $V$ can be subdivided into subintervals $V_1, V_2, \ldots, V_C (C = C(\alpha)$ is a function that depends only on $\alpha$), such that each $V_i$ contains at most $\alpha N$ of the \[N = {n \choose 2}\] vertices of arrangement of $H$. 
+Let $L$ be a set of $n$ lines in the plane in general position, let
+$\alpha < 1$ be a prescribed positive constant and let $V$ be a
+vertical strip. In $O(n)$ time, $V$ can be partitioned into vertical
+strips $V_1, V_2, \ldots, V_C$ (where $C = C(\alpha)\le 2/\alpha$ is a function
+that depends only on $\alpha$), such that each $V_i$ contains at most
+$\alpha N$ of the $N = {n \choose 2}$ vertices of arrangement of
+$L$. 
 \end{thma}
 
-It is mentioned that $C(\alpha) \le \frac{2}{\alpha}$. In our problem, we apply the Subdivision Lemma in the dual. Let our strip $V$ now be big enough so as to contain all intersections of $n$ lines in the dual. We want to subdivide this strip into substrips so that each substrip contains at most $\frac{1}{20}{n\choose 2}$ of the total number of intersections in $V$. The reason for this choice will become clear shortly. So we set $\alpha = \frac{1}{20}$ and get at most 40 subintervals $V_1, V_2, \ldots, V_{40}$, because $C(\alpha) \le \frac{2}{\alpha} = 40$. 
+In our problem, we apply the Subdivision Lemma in the dual. Let our
+strip $V=\mathbb{R}^2$.  We want to subdivide $V$ into substrips so
+that each substrip contains at most ${n\choose 2}/20$ of the
+total number of intersections in $V$. The reason for this choice will
+become clear shortly. So we set $\alpha = {1}/{20}$ and get at
+most $C(1/20)\le 40$ strips $V_1, V_2, \ldots, V_{40}$.
 
-We now have 40 subintervals or open vertical strips and we can
-determine, according to Lemma \ref{lemma_vertical_strip}, in $O(n)$
-time which $V_i$ contains the upper boundary vertex at which line
-$p_1^*$ is a tangent. 
+We now have 40 open vertical strips and we can determine in $O(n)$
+time, using the method described above, a strip that $V_i$ contains
+the upper boundary vertex at which a line parallel to $p_1^*$ is
+tangent. 
 
-\begin{figure}[h!]
+\begin{figure}
  \begin{center}
    \psfig{file=figs/fig6.eps}
    \caption{\label{fig_trapezoid}Figure showing how we build the trapezoid $ABB^{\prime}A^{\prime}$}
  \end{center}
 \end{figure}
 
-In $V_i$, we build a trapezoid $T = ABB^{\prime}A^{\prime}$, as shown in Figure \ref{fig_trapezoid}. The points $A$ on the left vertical line and $B$ on the right vertical line lie just below the $k - \lfloor\frac{n}{6}\rfloor$ level of the lines in the dual and the points $A^{\prime}$ and $B^{\prime}$ lie just below the $k + \lfloor\frac{n}{6}\rfloor$ level of the lines in the dual (if $k - \lfloor\frac{n}{6}\rfloor \le 0$, then $A$ and $B$ are chosen below all lines, and similarly for the top side).
+In $V_i$, we build a trapezoid $T = ABB^{\prime}A^{\prime}$, as shown
+in Figure \ref{fig_trapezoid}. The points $A$ on the left vertical
+line and $B$ on the right vertical line lie just below the $k -
+\lfloor\frac{n}{6}\rfloor$ level of the lines in the dual and the
+points $A^{\prime}$ and $B^{\prime}$ lie just below the $k +
+\lfloor\frac{n}{6}\rfloor$ level of the lines in the dual (if $k -
+\lfloor\frac{n}{6}\rfloor \le 0$, then $A$ and $B$ are chosen below
+all lines, and similarly for the top side).
 
 \begin{lemma}\label{lemma_trapezoid}
-Let $S$ be a set of $n$ points and $p$ be a query point in $\mathbb{R}^2$ in the primal, and let $1 \le k \le n$ be an integer. Subdivide the dual into subintervals $V_1, V_2, \ldots, V_C (C = C(\alpha)$ is a function that depends only on $\alpha$), such that each $V_i$ contains at most $\alpha N, \alpha<1$ of the $N = {n \choose 2}$ vertices of the arrangement in the dual. Find the vertical strip $V$ that contains that vertex of the boundary of the dual of the $k$-zonoid at which $p^*$ becomes a tangent. Construct a trapezoid $T$ in $V$ bounded from the sides by the two vertical walls of $V$, from the top by the line segment joining two points each just below the $k+\lfloor\frac{n}{6}\rfloor$ level and one on each vertical boundary of $V$, and from the bottom by the line segment joining two points each just below the $k-\lfloor\frac{n}{6}\rfloor$ level and one on each vertical boundaries of $V$. The top and bottom sides of $T$ are intersected by at most $\frac{n}{3}$ lines each.
+The top and bottom sides of the trapezoid $T$ intersects at most 
+$n/3$ dual lines each.
 \end{lemma}
 
 \begin{proof}
-Let $u$ be the number of lines intersecting the side $AB$ of $T$ \emph{upwards}, i.e., these lines have $A$ above and $B$ below them. Let $d$ be the number of lines intersecting $AB$ of $T$ \emph{downwards}. Since $A$ and $B$ are each on the $k-\lfloor\frac{n}{6}\rfloor$ level, we have $u = d$. But every \emph{upwards} line intersects every \emph{downwards} line in the strip $V_i$, hence $V_i$ contains at least $ud$ intersections. But we created each strip $V_i$ such that it has at most $\frac{1}{20}{n\choose 2}$ intersections. Therefore, 
+Let $u$ be the number of lines intersecting the side $AB$ of $T$
+\emph{upwards}, i.e., these lines have $A$ above and $B$ below them.
+Let $d$ be the number of lines intersecting $AB$ of $T$
+\emph{downwards}. Since $A$ and $B$ are each on the
+$k-\lfloor\frac{n}{6}\rfloor$ level, we have $u = d$. But every
+\emph{upwards} line intersects every \emph{downwards} line in the
+strip $V_i$, hence $V_i$ contains at least $ud=u^2$ intersections.
 
-\begin{eqnarray*}
-            ud & \le & \frac{1}{20} {n \choose 2} \\
-\Rightarrow ud & \le & \frac{1}{20} \frac{n!}{(n-2)!2!} \\
-\Rightarrow ud & \le & \frac{1}{20} \frac{n(n-1)(n-2)!}{(n-2)!2!} \\
-\Rightarrow ud & \le & \frac{1}{20} \frac{n(n-1)}{2} \\
-\Rightarrow ud & \le & \frac{n^2}{40} \\
-\mbox{But} \hspace{2mm}  ud &  =  & u^2 \hspace{2mm}(\because u = d) \\
-\mbox{So}  \hspace{2mm} u^2 & \le & \frac{n^2}{40} \\
-\Rightarrow u   & \le & \frac{n}{\sqrt{40}} \\
-\Rightarrow u   & \le & \frac{n}{6.325} \hspace{2mm}(\because \sqrt{40} \approx 6.325) \\
-\Rightarrow u   & \le & \frac{n}{6} \\
-\Rightarrow d   & \le & \frac{n}{6} \\
-\Rightarrow u+d & \le & \frac{n}{3} 
-\end{eqnarray*}
-
-But $u+d$ is the number of lines intersecting side $AB$ of trapezoid $T$. A similar argument holds for side $A^{\prime}B^{\prime}$ as well.
+Each
+strip $V_i$ was created so that it has at most
+$\frac{1}{20}{n\choose 2}$ intersections. Therefore, 
+            $u^2 \le {n \choose 2}/20$, which implies that
+$u \le n/\sqrt{40} \le n/6$.
+Thus, $u+d\le n/3$ is the number of lines intersecting side $AB$ of
+trapezoid $T$. A symmetric argument shows that the number of lines
+intersecting 
+$A^{\prime}B^{\prime}$ is also at most $n/3$.
 \end{proof}
 
-The 2 vertical sides of the trapezoid $T$ are also intersected by at most $\frac{n}{3}$ lines each, because of our choice of the levels of the points $A, B, B^{\prime}$ and $A^{\prime}$. So each side of $T$ is intersected by $\le \frac{n}{3}$ lines (which is exactly why we chose $\alpha = \frac{1}{20}$ in the Subdivision Lemma), hence we have at most $\frac{4n}{3}$ intersections altogether. Each line that intersects the trapezoid contributes 2 to this sum, so we have at most $\frac{2n}{3}$ lines that intersect the trapezoid, which means $\frac{n}{3}$ lines pass outside the trapezoid.
+The 2 vertical sides of the trapezoid $T$ are also intersected by at
+most $\frac{n}{3}$ lines each, because of our choice of the levels of
+the points $A, B, B^{\prime}$ and $A^{\prime}$. So each side of $T$ is
+intersected by $\le \frac{n}{3}$ lines, hence we have at most
+$\frac{4n}{3}$ intersections altogether. Each line that intersects the
+trapezoid contributes 2 to this sum, so we have at most $\frac{2n}{3}$
+lines that intersect the trapezoid, which means $\frac{n}{3}$ lines
+pass outside the trapezoid.
 
 \begin{lemma}\label{lemma_trapezoid_containment}
-Let $S$ be a set of $n$ points and $p$ be a query point in $\mathbb{R}^2$ in the primal, and let $1 \le k \le n$ be an integer. Subdivide the dual into subintervals $V_1, V_2, \ldots, V_C (C = C(\alpha)$ is a function that depends only on $\alpha$), such that each $V_i$ contains at most $\alpha N, \alpha<1$ of the $N = {n \choose 2}$ vertices of the arrangement in the dual. Find the vertical strip $V$ that contains that vertex of the boundary of the dual of the $k$-zonoid at which $p^*$ becomes a tangent. Construct a trapezoid $T$ in $V$ bounded from the sides by the two vertical walls of $V$, from the top by the line segment joining two points each just below the $k+\lfloor\frac{n}{6}\rfloor$ level and one on each vertical boundary of $V$, and from the bottom by the line segment joining two points each just below the $k-\lfloor\frac{n}{6}\rfloor$ level and one on each vertical boundaries of $V$. Within $V$, the $k$-level is completely contained within $T$. 
+Within the vertical strip $V$, the $k$-level is completely contained
+in $T$. 
 \end{lemma}
 
 \begin{proof}
-Suppose that the $k$-level breaks below the side $AB$ of $T$. Then some point $C$ on this side has level greater than $k$. But since both $A$ and $B$ have level $k - \lfloor\frac{n}{6}\rfloor$, both the segments $AC$ and $BC$ have to be intersected by more than $\frac{n}{6}$ lines. But this contradicts Lemma \ref{lemma_trapezoid}, which says that $AB$ is intersected by $\le \frac{n}{3}$ lines. 
+Suppose that the $k$-level goes below the bottom side $AB$ of $T$. Then
+some point $C$ on this side has level greater than $k$. Since both
+$A$ and $B$ have level $k - \lfloor\frac{n}{6}\rfloor$, each of the
+segments $AC$ and $BC$ have to be intersected by more than
+$\frac{n}{6}$ lines. But this contradicts Lemma \ref{lemma_trapezoid}.
+Similarly, the $k$-level can not be above the top side $A'B'$ of $T$
+and must therefore be contained in $T$.
 \end{proof}
 
-Based on Lemmata \ref{lemma_trapezoid} and \ref{lemma_trapezoid_containment}, the $\frac{n}{3}$ lines that pass outside trapezoid $T$ can be safely discarded since the intersection of the $k$-level with the strip $V_i$ is completely contained in $T$. However, when we discard the lines that lie above $T$, we remember their mean, since this will be needed to compute slopes in recursive calls to the algorithm.
+Based on Lemmata \ref{lemma_trapezoid} and
+\ref{lemma_trapezoid_containment}, the $\frac{n}{3}$ lines that pass
+outside trapezoid $T$ can be safely discarded since the intersection
+of the $k$-level with the strip $V_i$ is completely contained in $T$.
+However, when we discard the lines that lie above $T$, we remember
+their mean, since this will be needed to compute slopes in recursive
+calls to the algorithm.
 
 \comment{
 It may be observed that until recently in our discussion, we were trying to find the vertex on the boundary of the dual of the $k$-zonoid at which line $p_1^*$ becomes a tangent. But above we show that it is the $k$-level that lies completely inside the trapezoid $T$ and the vertex point is being searched for on the $k$-level, not on the boundary of the dual of the $k$-zonoid. This is because, 
@@ -597,35 +657,32 @@ an integer $1 \le k \le n$, we can determine in $O(n)$ time whether or not $p$ l
 \label{subsection_computing_the_zonoid_depth_of_a_point}
 
 Theorem~\ref{theorem_decision_problem} offers a means of solving the
-\emph{decision problem}: Is $p\in Z_k(S)$.  In this section we solve
-the optimization problem:  What is the zonoid depth of $p$, i.e., the
-maximum value $k$ such that $p\in Z_k(S)$.  To do this, we use a
-general technique due to Chan
+\emph{decision problem}: Is $p\in Z_k(S)$?  In this section we solve
+the optimization problem:  What is the zonoid depth of $p$? I.e., the
+what is the maximum value $k$ such that $p\in Z_k(S)$.  To do this, we
+use a general technique due to Chan
 \cite{geometric_applications_of_a_randomized_optimization_technique}
 for converting decision algorithms into optimization algorithms.  Let
 $\depth(p,S)$ denote the zonoid depth of $p$ with respect to $S$.
 Roughly stated, Chan's algorithm requires
 \begin{enumerate}
 
-\item (Decision Algorithm) a decision algorithm to decide whether $\depth(p,S)$ is at least
-$k$ and
+\item (Decision Algorithm) a decision algorithm to decide whether
+$\depth(p,S)$ is at least $k$ and
 
-\item (Decomposition into Subproblems) a method to expressing $\depth(p,S)$ as
-$\max\{\depth(p,S_i):1\le i\le r\}$ where $r$ is a constant and each
-$|S_i|\le \alpha|S|$ for some constant $\alpha < 1$.
-
+\item (Decomposition into Subproblems) an algorithm to express
+$\depth(p,S)$ as $\max\{\depth(p,S_i):1\le i\le r\}$ where $r$ is a
+constant and each $|S_i|\le \alpha|S|$ for some constant $\alpha < 1$.
 \end{enumerate}
 
 If these conditions are met, then Chan's technique
-\cite{geometric_applications_of_a_randomized_optimization_technique}
 allows us to solve the optimization problem
 efficiently.\footnote{There is a more precise statement of Chan's very
 powerful optimization technique, but our application of the technique
 does not fit the usual requirements of this statement, so we omit it
 here.  The interested reader is referred to Chan's original paper
 \cite{geometric_applications_of_a_randomized_optimization_technique}}
-Initially, it seems that
-Theorem~\ref{theorem_decision_problem}
+Initially, it seems that Theorem~\ref{theorem_decision_problem}
 satisfies Requirement~1 above.  However, to satisfy Requirement~2 we
 need to define a slightly more general problem on weighted zonoids.
 This, in turn, means that we need a slightly more general algorithm to
@@ -664,7 +721,7 @@ time.
 Theorem~\ref{theorem_decision_problem}.  In this modification, the
 algorithm works on the \emph{weighted $k$-level}.  (The weight of a
 point $p$ is the sum of the weights of all lines that pass through or
-above $p$. The weighted $k$-level is the upper envelope of all points
+above $p$. The weighted $k$-level is the lower envelope of all points
 having weight at least $k$.)  The modified algorithm is almost
 identical to the previous algorithm except that, where the previous
 algorithm uses a linear-time selection algorithm to compute the
@@ -741,7 +798,7 @@ $depth(p,S_i) \le depth(p,S)$ for each $1 \le i \le 4$, \item[b.]
 $depth(p,S) = \max\{depth(p,S_i) \mid 1 \le i \le 4\}$ \end{itemize}
 \end{lemma}
 
-\begin{figure}[h!]
+\begin{figure}
  \begin{center}
    \psfig{file=figs/fig7.eps, width=3in, height=2.5in}
    \caption{\label{fig_for_proof}Partitioning the $Z_k(S)$ zonoid into triangles}
@@ -759,7 +816,7 @@ that have $k-1$ points in common. Indeed, there are two
 infinitesimally close lines $l_a$ and $l_b$ such that $l_a$ defines
 the $k$-set for $a$ and $l_b$ defines the $k$-set for $b$. Since $l_a$
 and $l_b$ are infinitesimally close, they intersect at most three of
-the quadrants $Q_1, \ldots, Q_4$. Wlog suppose they miss $Q_4$. Then
+the open quadrants $Q_1, \ldots, Q_4$. Wlog suppose they miss $Q_4$. Then
 it is not hard to see that $Z_k(S_1,w)$ has $a$ and $b$ as vertices.
 Furthermore, $Z_k(S_1)$ contains $Z_n(S)$ and is convex, so it
 contains $p$. Therefore $depth(p,S_1) \ge k = depth(p,S)$ as required.
@@ -780,11 +837,11 @@ decision problems we solve at the $i$th level of recursion is $r^i$
 and these decision problems each have total weight $n$ distributed
 among $m_i=\alpha^i n$ points.  Here, $r=\ell\ln4+1$,
 $\alpha=(3/4)^\ell$ and $\ell$ is an integer parameter that is under
-our control.  Therefore, the total cost of the algorithm is bounded by
-the summation
+our control.  Therefore, the total expected cost of the algorithm is
+bounded by the summation
 \[
    T_n = \sum_{i=1}^\infty O\left(r^im_i\log (n/m_i)\right)
-   = n\sum_{i=1}^\infty O\left(r^i\alpha^i \log(1/\alpha^i)\right) \enspace ,
+   = n\sum_{i=1}^\infty O\left(r^i\alpha^i \log(1/\alpha^i)\right)
    = n\sum_{i=1}^\infty O\left(r^i\alpha^i i\right) \enspace ,
 \]
 which solves to $O(n)$ provided that $r\alpha < 1$.  The condition
@@ -794,7 +851,7 @@ value of $\ell$.  This completes the proof of our final theorem:
 \begin{theorem}\label{theorem_final}
 Given a set $S$ of $n$ points in $\mathbb{R}^2$ and a query point $p$,
 we can find the largest integer $k$ for which $p$ lies inside $Z_k(S)$
-(i.e., the zonoid depth of $p$) in $O(n)$ time. 
+(i.e., the zonoid depth of $p$) in $O(n)$ expected time. 
 \end{theorem}
 
 \section{Conclusions and open problems}\label{section_conclusions_and_open_problems}
@@ -816,9 +873,10 @@ and, besides the work by Dyckerhoff et al.\
 \cite{zonoid_data_depth_theory_and_computation} and Bern and Eppstein
 \cite{bern-eppstein-01}, no work has been done regarding zonoid depth
 problems in dimensions 3 and higher.  In particular, for small
+(constant)
 dimensions it is a challenge to find algorithms for computing zonoid
-depth that do not rely on high-dimensional linear programming
-algorithms.
+depth that do not rely on linear programming in high (a function of
+$n$) dimensions.
 
 \bibliographystyle{plain}
 \bibliography{refs}

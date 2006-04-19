@@ -840,41 +840,76 @@ This follows immediately from \lemref{onlyif-a}, \lemref{onlyif-b} and
 
 Together, \lemref{if} and \lemref{onlyif} prove \thmref{main}.
 \thmref{main} provides an easy $O(n)$ time algorithm for recognizing
-the degree sequences of 2-trees simply by verifying the
+the degree sequences of 2-trees simply by verifying
 Conditions~(a)--(e).  When a sequence is realizable as a 2-tree $T$,
 the proof of \lemref{if} leads to a linear-time algorithm for
 constructing $T$ that we sketch here.
 
-First, observe that we can represent the sequence $D$ using
-\emph{run-length encoding}.  That is, we use a list of pairs
-$(\Delta_i,r_i):1\le i\le k$ which denotes that the element $\Delta_i$
-occurs $r_i$ times in the sequence and keep this list sorted by the
-$\Delta_i$ values. (Here $k$ is the number of distinct values in $D$.)
-The inductive proof in \lemref{if} results in algorithm that runs in
-$O(n)$ steps.  Each step does three things:
+First, observe that the elements of $D$ are all integers in
+$\{2,\ldots,n-1\}$ and can therefore be sorted in $O(n)$ time
+\cite{clrXX}.  After this sorting, we can represent the sequence $D$
+using \emph{run-length encoding}.  That is, we use a list of pairs
+$(\Delta_i,r_i):1\le i\le k$ where the pair $(\Delta_j,r_j)$ denotes
+that the element $\Delta_j$ occurs $r_j$ times in $D$.  We keep this
+list sorted by the $\Delta_j$ values at all times during the
+algorithm. (Here $k$ is the number of distinct values in $D$.) Along
+with this encoding we keep two counters.  The counter $n=\sum_{i=1}^k
+r_i$ is the total degree of the sequence and the counter
+$n_o=\sum_{i\in\{j:r_j\bmod 2 =1\}} r_i$ counts the total number
+of odd values in $D$.
+
+The inductive proof in \lemref{if} results in a recursive algorithm that
+makes $O(n)$ recursive calls.  Each invocation takes as input the
+sequence $D$ and a pointer to the node in the linked list containing the
+pair $(\Delta_i,r_i)$ with $\Delta_i=\ell$.  An invocation does three things:
 \begin{enumerate}
 \item checking if the sequence $D$ conforms to any of the base cases
-in Lemmata~\ref{lem:basecase-a}--\ref{lem:basecase-f},
-\item checking the values of $a=\min\{d_i: d_i\ge 3\}$ and
-$c=\max\{d_i:d_i\in D\}$, and 
-\item removing leading 2's and reducing the values of 
-$d_i$ and $d_j$ before recursing.
+in Lemmata~\ref{lem:basecase-a}--\ref{lem:basecase-13},
+\item determining whether $D$ is flat, typical or atypical,
+\item selecting a value $k\in D$, and
+\item removing some number of 2's and 4's from $D$ and reducing the values of 
+       at most two other elements in $D$ before recursing.
 \end{enumerate}
 
 Note that all the base cases in
-Lemmata~\ref{lem:basecase-a}--\ref{lem:basecase-f} have run-length
+Lemmata~\ref{lem:basecase-a}--\ref{lem:basecase-11} have run-length
 encodings of constant size, thus they can be checked in $O(1)$ time.
-Furthermore, all the constructions in the base cases are easily
-achieved in $O(n)$ time.  Checking the values of $a$ and $c$ is easily
-done in $O(1)$ time, since these are the values $\Delta_2$ and
-$\Delta_k$.  Removing leading 2's can be done in $O(1)$ time by
-reducing the value of $r_1$.  Reducing the values of $d_i$ and $d_j$
-depends on how much they are reduced and these values forward
-in the run-length encoding.  However, this can easily be implemented
-in $O(d_i)$ time and causes the sum of the sequence to decrease by
-$2d_i-4$.  Since the initial sum of the sequence is $4n-6$ this means
-that the total time spent on reducing values during all steps is
-$O(n)$.  Thus, the entire algorithm runs in $O(n)$ time.
+The base case of \lemref{basecase-12} does not necessarily have a
+run-length encoding of constant-size, but can be checked in constant
+time by checking if $\Delta_k = n-1$.  \lemref{basecase-13} also does
+not necessarily have a run-length encoding of constant size but it can
+be verified that, if the conditions of \lemref{basecase-13} hold then
+they hold with $z$ being selected from among the three largest values
+in $D$.  Thus, the conditions of \lemref{basecase-13} checked in
+constant time by considering (at most) $\Delta_k$, $\Delta_{k-1}$,
+$\Delta_{k-2}$, and $r_1(=n_2)$.  Thus, in constant time we can check
+if any of the base cases described in
+\ref{lem:basecase-a}--\ref{lem:basecase-13} apply to the sequence $D$.
+Furthermore, each of the constructions in the base cases are explicit
+and each can easily be accomplished in $O(n)$ time.  
+
+Determining whether $D$ is flat can be done in $O(1)$ time since a
+flat sequence has a run-length encoding with only two elements.
+Determining whether $D$ is atypical can be done by counting the number
+of $4$'s in $D$ (which is given by $r_2$ or $r_3$) and by checking if
+$D$ contains exactly two odd numbers, one of which is $3$.  This can
+also be done in $O(1)$ time by checking the values of $\Delta_2$ and
+$n_o$.
+
+Selecting the value $k\in D$ is easily accomplished in $O(1)$ time
+since a careful inspection of how $k$ is selected will reveal that it
+is either $\Delta_2$ or $\Delta_3$.
+
+Finally, removing 2's and 4's from the sequence can be done in $O(1)$
+time by reducing the values of $r_1$, $r_2$ and/or $r_3$ as
+appropriate.  Reducing the values of $k$ and $\ell$ depends on how
+much they are reduced and causes these values to move forward in the
+run-length encoding. (Recall that our list must remain sorted
+according to the $\Delta_i$ values.) However, this can easily be
+implemented in $O(k)$ time and causes the sum of the sequence to
+decrease by $2k-4$.  Since the initial sum of the sequence is $4n-6$
+this means that the total time spent on reducing values during all
+steps is $O(n)$.  Thus, the entire algorithm runs in $O(n)$ time.
 
 An obvious direction for future work is to find a characterization of
 the degree sequences of $k$-trees for any $k\ge 3$.  Another related

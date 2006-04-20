@@ -5,8 +5,8 @@
 
 \title{\MakeUppercase{Removing Outliers to Minimize Area and Perimeter}}
 \author{Rossen Atanassov \and
-	Pat Morin \and
-	Stefanie Wuhrer}
+    Pat Morin \and
+    Stefanie Wuhrer}
 \date{}
 
 \newcommand{\ch}{\mathrm{CH}}
@@ -25,12 +25,12 @@ points so that the resulting point set has the smallest possible
 convex hull.  Our main result is an $O(\runtime)$ time algorithm
 that solves this problem when ``smallest'' is taken to mean least area
 or least perimeter. Here $C_r = {2r\choose r}/(r+1)$ is
-the $r$th \emph{Catalan number}.  
+the $r$th \emph{Catalan number}.
 \end{abstract}
 
 \section{Introduction}
 
-Motivated by the problem of removing outliers in a data set, This
+Motivated by the problem of removing outliers in a data set, this
 paper considers the following problem: Let $S$ be a set of $n$ points
 in $\mathbb{R}^2$ with convex hull denoted by $\ch(S)$.  We consider
 the problem of selecting a subset $S'\subset S$, $|S'|=c$ such that
@@ -47,7 +47,7 @@ $c$ is large. More specifically, most research has been on the problem
 of finding a $k$ point subset (a $k$-cluster) $X\subseteq S$, $|X|=k$,
 such that $\ch(X)$ has minimum area or perimeter. These are the same
 problems studied in this paper except that $k=n-c$ and the research
-has focused on designing efficient algorithms for small values of $k$.  
+has focused on designing efficient algorithms for small values of $k$.
 
 The problem of finding a subset of $S$ of size $k$ that has the least
 perimeter convex hull was first considered over 20 years ago by Dobkin
@@ -135,12 +135,12 @@ $t_j=|\{p_{1,k},\ldots,p_{1,\ell}\}|$.
 
 To analyze the overall running time of this algorithm we observe that
 any point $p_{1,k}\in S_1$ appears in at most two triangles
-$p_{0,j-1},p_{0,j},p_{0,j+1}$ and 
-$p_{0,j},p_{0,j+1},p_{0,j+2}$.  Stated another way, 
-\[  
+$p_{0,j-1},p_{0,j},p_{0,j+1}$ and
+$p_{0,j},p_{0,j+1},p_{0,j+2}$.  Stated another way,
+\[
      \sum_{j=0}^{|S_0|-1} t_j \le 2|S_1|\le 2n \enspace .
 \]
-Thus, the overall running time of this algorithm is 
+Thus, the overall running time of this algorithm is
 \[
      T(n) = \sum_{j=0}^{|S+0|-1} O(t_j+\log n) = O(n\log n) \enspace ,
 \]
@@ -190,10 +190,10 @@ for each $p_{0,j}\in S_0$ the difference $x_j$ between the area of
 $\ch(S\setminus\{p_{0,j}\})$ and $\ch(S)$ using the technique
 described for the case $c=1$.  In this way, we reduce the problem to
 that of finding two indices $0\le j_1,j_2< |S_0|$ with $j_1\le j_2-2$ such that
-$x_{j_1}+x_{j_2}$ is maximum.  We do this 
-by computing the following quantity 
+$x_{j_1}+x_{j_2}$ is maximum.  We do this
+by computing the following quantity
 \[
-     S_j = \max\{x_{j_1}+x_{j_2} : 
+     S_j = \max\{x_{j_1}+x_{j_2} :
        \mbox{$0\le j_1,j_2\le j$ and $j_1 < j_2-1$}\} \enspace ,
 \]
 which can be computed in $O(|S_0|)$ time using the recurrence
@@ -218,30 +218,67 @@ described above).
 
 \subsubsection{The Types of Solutions}
 
-Here we give a mapping between the different types of solutions and
-labelled binary trees. We represent the type of a solution as a binary
-tree in which each node is labelled with a positive integer.  The sum
-of all labels must be equal to $c$.  The nodes on the rightmost path
-of this tree give the sizes of consecutive groups of nodes that are
-removed from $S_0$.  
+Here we give a mapping between the different types of solutions and labeled binary trees. We
+represent the type of a solution as a binary tree in which each node is labeled with a
+positive integer.  The sum of all labels must be equal to $c$.  The nodes on the rightmost
+path of this tree give the sizes of consecutive groups of nodes that are removed from $S_0$.
+Denote the $m \leq c$ consecutive groups of nodes that are removed from $S_i$ in arbitrary
+order by $G_i^1, \dots, G_i^m$. For each consecutive group $G_0^j$ of nodes that is removed
+from $S_0$, let $p_{1,k}, \ldots, p_{1,l}$ denote the vertices on $S_1$ that appear on the
+boundary of $CH(S \setminus G_0^j)$. In the binary tree, the rightmost path of the left
+subtree of the node representing $G_0^j$ contains nodes representing the sizes of consecutive
+groups of nodes that are removed from the chain $p_{1,k}, \ldots, p_{1,l}$ of $S_1$. This
+process is repeated recursively: For each consecutive group $G_i^j$ of nodes that are removed
+from $S_i$, let $p_{i+1,k}, \ldots, p_{i+1,l}$ denote the vertices on $S_{i+1}$ that appear on
+the boundary of $CH(S \setminus G_i^j)$. In the binary tree, the rightmost path of the left
+subtree of the node representing $G_i^j$ contains nodes representing the sizes of consecutive
+groups of nodes that are removed from the chain $p_{i+1,k}, \ldots, p_{i+1,l}$ of $S_{i+1}$.
+An illustration of this labeling scheme is given in Figure \ref{} (I can do a figure here).
+
+Note that the mapping between different types of solutions and labeled binary search trees is
+not bijective, because for one type of solutions, there are many labeled binary search trees
+that represent that solution. The reason is that the ordering along the rightmost path of the
+tree (and recursively, the orderings along the rightmost paths of all subtrees) is not
+uniquely defined.
 
 \subsubsection{Computing the Solution of a Specific Type}
 
-Here we show how, given the exact combinatorial type of the solution
-to compute the optimal solution of that type.
+Here we show how, given the exact combinatorial type of the solution the optimal solution of
+that type is computed. The recursive algorithm described here takes as an input a tree
+representation of the optimal solution discussed in the previous subsection. We start by
+considering the root of the solution tree $T$ denoted by $G_0^0$ and a point $p_{0,0} \in
+S_0$. Let $k_0$ denote the number of points on layer $S_0$ and $g_0^0$ be the size of
+$G_0^0$. In this first step of the algorithm we remove $g_0^0$ number of points from layer
+$S_0$ i.e. the points $p_{0,0}, p_{0,1}, \dots ,p_{0,g_0^0}$. Once these points have been
+removed the subchain $p_{1,k}, \ldots, p_{1,l}$ is exposed (see SOMEIMAGE). Next, a recursive
+step is applied to the subchain with an input the subtree rooted at the left child of the
+current node $G_0^0$. The recurrence is terminated once a leaf node $G_i^0$ is reached, where
+the difference of the area between $\ch(S)$ and $\ch(S \setminus G_i^0)$ is computed. The same
+process is then repeated starting at points $p_{0,1}, p_{0,2}, \dots , p_{0,k_0}$, thus
+considering all combinatorial solutions at layer $S_0$ for a node of the three with a size of
+$g_0^0$.  When all solutions are computed the same algorithm called with the right subtree
+rooted at node $G_0^1$ until all solutions are found. Once the algorithm terminates the
+optimal solution of the given combinatorial type is computed and stored into two 2D matrices $X$ 
+and $Y$. Matrix $X$ is used to hold all solutions of the left subtrees of $T$ and matrix $Y$
+for the right subtrees respectively. Pseudo code of the algorithm is presented next.
 
-\noindent$\textsc{FindValue}(T,i,a,b)$
+\noindent$\textsc{FindOptimalSolution}(Tree, Level, StartIndex, EndIndex)$
 \begin{algorithmic}
-\FOR{each node $j$ on the rightmost path of $T$}
-   \FOR{$\ell=a,\ldots,b-\mathrm{value}(j)$}
-      \STATE{delete $p_{i,\ell},\ldots,p_{i,\ell+\mathrm{value}(j)}$ 
-          from $S_i$, exposing $p_{i+1,a'},\ldots,p_{i+1,b'}$ of
-             $S_{i+1}$}
-      \STATE{$X_{j,k}=\textsc{FindValue}(\mathrm{left}(j),)$}
+\FOR{i = StartIndex to EndIndex}
+   \STATE{Delete the chain $p_{Level,i}, \dots, p_{Level,i+g_0^0}$}
+   \IF{$G_0^0$ is not a leaf}
+     \STATE Let $k$ be the start index of the chain exposed at level $S_{Level+1}$ after the deletion.
+     \STATE Let $l$ be the end index of the same same chain.
+     \STATE $X_{i,Level} = Area(\ch(S))$ - $FindOptimalSolution(G_1^0, Level+1, k, l-(g_1^0 - 1)$
+   \ELSE
+     \STATE // Denote $g_i^j(k)$ the chain starting at point $p_{i,k}$ containing $g_i^j$ number of points.
+     \STATE $X_{i,Level} = Area(\ch(S))$ - $Area(\ch(S \setminus g_0^0(i)))$
+   \ENDIF
    \ENDFOR
-\ENDFOR
+   \IF{$T$ has a right subtree $G_0^1$}
+     \STATE $Y_{StartIndex,Level} = FindOptimalSolution(G_0^1, Level, StartIndex, EndIndex)$
+   \ENDIF
 \end{algorithmic}
-
 
 
 \subsubsection{Combining the Solutions}
@@ -251,17 +288,17 @@ to solve the following problem:
 
 Given positive integers $c_1,\ldots,c_d$ and a $d\times m$ positive
 real-valued matrix $X$
-we want to find indices $1\le i_1,\ldots,i_d \le m-c_d$ such that 
-\[ 
-    i_j + c_j \le i_{j+1} 
-\] 
+we want to find indices $1\le i_1,\ldots,i_d \le m-c_d$ such that
+\[
+    i_j + c_j \le i_{j+1}
+\]
 for all $1\le j < d$ and such that
 \[
       h(i_1,\ldots,i_d)=\sum_{j=1}^d X_{j,i_j}
 \]
 is maximum.  We solve this by filling out the table:
 \[
-     D_{j,\ell} = \max\{h(i_1,\ldots,i_j): 
+     D_{j,\ell} = \max\{h(i_1,\ldots,i_j):
       \mbox{$1\le i_1$, $i_j\le \ell$, and $i_{j'}+c_{j'}\le i_{j'+1}$
              for all $1\le j'< j$}  \} \enspace .
 \]

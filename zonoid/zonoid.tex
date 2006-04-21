@@ -1,5 +1,5 @@
 \documentclass{elsart}
-\usepackage{amsfonts,epsfig,cite}
+\usepackage{amsfonts,cite}
 \usepackage{graphicx}
 \journal{CGTA}
 
@@ -48,22 +48,23 @@ and computing the zonoid depth of a point.
 
 \section{Introduction}\label{section_introduction}
 
-Data depth is a way of measuring how deep or central a given point $x$
-in $\mathbb{R}^d$ is with respect to a given data cloud $\{x_1, x_2,
-\ldots, x_n\}$. This concept provides a center-outward ordering of
-points in Euclidean space of any dimension and leads to a new
-non-parametric multivariate statistical analysis in which no
-distribution assumptions are needed. Liu et al.\
-\cite{multivariate_analysis_by_data_depth} describe many different
-notions of depth such as the half space, the convex hull peeling, the
-Oja, the simplicial, the majority, and the likelihood depths. However,
-many computational problems associated with such data depth functions
-are non-trivial to solve efficiently.  Thus the study of these
-functions and related algorithms is essential for these functions to
-become more useful in statistics. Computational geometry
-\cite{preparata_book} has been of great help in this regard, and there
-are many results in the computational geometry literature giving
-efficient algorithms for data depth problems
+\emph{Statistical data depth} (or simply, \emph{depth}) is a means of
+measuring how deep, or central, a given point $p$ in $\mathbb{R}^d$ is
+with respect to a given data cloud $\{p_1, \ldots, p_n\}$. This
+concept provides a center-outward ordering of points in Euclidean
+space of any dimension and leads to a new non-parametric multivariate
+statistical analysis in which no distribution assumptions are needed.
+
+Liu et al.\ \cite{multivariate_analysis_by_data_depth} describe many
+different notions of depth such as the half space, the convex hull
+peeling, the Oja, the simplicial, the majority, and the likelihood
+depths. Many computational problems associated with such data depth
+functions are non-trivial to solve efficiently.  The design of
+efficient algorithms for these problems is essential for these depth
+measures to become more useful statistical analysis tools.
+Computational geometry \cite{preparata_book} has been of great help in
+this respect, and there are many results in the computational geometry
+literature giving efficient algorithms for data depth problems
 \cite{regression_depth_and_center_points, aloupis_mcs_thesis,
 algorithms_for_bivariate_medians_and_a_fermat_torricelli_problem_for_lines,
 an_optimized_randomized_algorithm_for_maximum_tukey_depth,
@@ -162,7 +163,7 @@ depth:
 \item\emph{Computing a contour:} an $O(n \log n + nk^{\frac{1}{3}})$
 expected time algorithm to compute the polygon $Z_k(S)$,
 
-\item\emph{Computing a depth map:} an $O(n^2)$ algorithm to compute
+\item\emph{Computing a depth map:} an $O(n^2)$ time algorithm to compute
 $Z_1(S),\ldots,Z_n(S)$,
 
 \item\emph{Testing the depth:} an $O(n)$ time algorithm to test whether a
@@ -185,7 +186,8 @@ make use of the fact that most of the constraints on the $\lambda_i$'s
 are independent of $S$. However, the worst-case running time of their
 algorithm is unclear. 
 
-We achieve our results by applying an observation relating $k$-zonoids
+The results in this paper are obtained by exploiting an observation 
+relating $k$-zonoids
 and $k$-sets.  This observation has also been used by Bern and
 Eppstein \cite{bern-eppstein-01} in the context of support vector
 machines in machine learning.  (They refer to zonoids as \emph{reduced
@@ -239,33 +241,33 @@ $O(nk^{\frac{1}{3}})$ is due to Dey
 
 Consider a set $S$ of $n$ points. If we construct all possible
 $1$-sets on $S$, we obtain the vertices of $CH(S)$, represented by the
-thick points in Figure \ref{fig_1_set}. By taking the convex hull of
+thick points in Figure \ref{fig_1_set}.a. By taking the convex hull of
 all such $1$-set points, we get the zonoid of depth $1$ or $1$-zonoid
 or $Z_1(S)$, and $Z_1(S) = CH(S)$, as the definition implies.
 
 \begin{figure}
  \begin{center}
-   \psfig{file=figs/fig1.eps}
-   \caption{\label{fig_1_set}$1$-sets on $S$ and the $1$-zonoid}
+   \begin{tabular}{cc}
+   \includegraphics[height=2in]{fig1}
+    & 
+   \includegraphics[height=2in]{fig2} \\
+   (a) & (b)
+   \end{tabular}
+   \caption{A point set $S$ and (a)~$1$-sets on $S$ and the $1$-zonoid
+      and (b)~$2$-sets on $S$ and the $2$-zonoid.}
+   \label{fig_1_set}
  \end{center}
 \end{figure}
 
 Now, on the same set $S$, construct all possible $2$-sets. In each
-$2$-set, take the mean (represented, in Figure~\ref{fig_2_set}, by the
+$2$-set, take the mean (represented, in Figure~\ref{fig_1_set}.b, by the
 \textbf{X} on the dotted line segment joining 2 points in each
 $2$-set) of the pair of points.  The following lemma shows that by
 taking the convex hull of the means from all $2$-sets of $S$, we
-obtain the $2$-zonoid of $S$, i.e., $Z_2(S)$ as in Figure
-\ref{fig_2_set}.  In a similar fashion, zonoids up to depth $n$ can be
+obtain the $2$-zonoid of $S$, i.e., $Z_2(S)$ as in
+Figure~\ref{fig_1_set}.b.  In a similar fashion, zonoids up to depth $n$ can be
 constructed.  Since $Z_n(S)$ is the mean of the points in $S$, it is a
 unique point and is the center of gravity of the points in $S$.
-
-\begin{figure}
- \begin{center}
-   \psfig{file=figs/fig2.eps}
-   \caption{\label{fig_2_set}$2$-sets on $S$ and the $2$-zonoid}
- \end{center}
-\end{figure}
 
 \begin{lemma}\label{lemma_bijection}
 Given a set $S$ of $n$ points in $\mathbb{R}^2$ and an integer $1 \le
@@ -301,7 +303,7 @@ separated from $S$ by a line $\ell$ perpendicular to $d$.
 \subsection{Review of duality}\label{subsection_review_of_duality}
 
 Let $p = (p_1, p_2)$ denote a point in the plane. The dual of $p$,
-denoted by $p^*$, is the line denoted by $p^* = \{(x,y) : y = p_1x -
+denoted by $p^*$, is the line $p^* = \{(x,y) : y = p_1x -
 p_2\}$. The dual of the line $l = \{(x,y) : y = ax + b\}$ is the point
 $l^* = (a,-b)$.  
 We say that the duality transform maps objects from the \emph{primal}
@@ -322,7 +324,7 @@ position is dual to a set of lines in general position. For a more
 detailed explanation of duality see, e.g., Edelsbrunner's book
 \cite{edelsbrunner_book}.
 
-\subsection{Correspondence between zonoids and $k$-level}\label{subsection_correspondence_between_zonoids_and_klevel}
+\subsection{Correspondence between zonoids and levels}\label{subsection_correspondence_between_zonoids_and_klevel}
 
 The $k$-level of a set $L$ if $n$ lines is defined as the the set of
 all points that lie on exactly one line of $L$ and strictly below
@@ -335,7 +337,7 @@ with a $k$-set of $P$ on or below it.
 
 \begin{figure}
  \begin{center} 
-   \psfig{file=figs/fig4.eps}
+   \includegraphics[height=2in]{fig4}
    \caption{A $k$-zonoid in primal and dual}
    \label{fig_primal_dual}
  \end{center}
@@ -352,7 +354,7 @@ shaded region are also convex, because the corresponding boundaries of
 the $k$-zonoid in the primal are convex. 
 
 The $k$-zonoid in the primal can be constructed (inefficiently) by
-finding all possible $k$-sets, taking the mean of $k$ points in each
+finding all possible $k$-sets, taking the mean of the $k$ points in each
 $k$-set and taking the convex hull of the resulting point set. In the
 dual, this corresponds to constructing the $k$-level (respectively the
 $(n-k)$-level) and then, for each vertex that has $k$ lines on and
@@ -366,8 +368,8 @@ directly below (respectively above) it on the $k$-level (respectively
 the $(n-k)$-level). 
 
 Although the number of $k$-sets and the number of vertices of the
-$k$-level are different, their sizes are within a constant factor of
-each other \cite{edelsbrunner_book}. Dey
+$k$-level are different, their worst-case complexities are within a
+constant factor of each other \cite{edelsbrunner_book}. Dey
 \cite{improved_bounds_on_planar_ksets_and_klevels} proves an
 $O(nk^{\frac{1}{3}})$ upper bound on the complexity of planar
 $k$-levels, which is also an upper bound for the number of planar
@@ -383,14 +385,12 @@ $\mathbb{R}^3$ is $O(nk^{\frac{3}{2}})$. This implies that, in
 $\mathbb{R}^3$ the $k$-zonoid of an $n$ point set has size
 $O(nk^{\frac{3}{2}})$.
 
-
-
 \section{Algorithms for zonoids in 2 dimensions}
 \label{section_algorithms_for_zonoids_in_2_dimensions}
 
-In this section we present algorithms for zonoid depth. The first few
-algorithms follow easily from existing results on $k$-sets and
-arrangements. The later algorithms are somewhat more involved.
+In this section we present algorithms for bivariate zonoid depth. The
+first few algorithms follow easily from existing results on $k$-sets
+and arrangements. The later algorithms are somewhat more involved.
 
 \subsection{Computing a depth contour}
 \label{subsection_computing_a_depth_countour}
@@ -445,13 +445,13 @@ $Z_k(S)$.
 
 Consider again Figure \ref{fig_primal_dual}. In the primal, if the
 point $p_1$ were to be moved upwards along a vertical line passing
-through $p_1$, then the line $p_1^*$ also moves upwards in the dual,
-parallel to itself. When $p_1$ hits the $k$-zonoid boundary, $p_1^*$
-becomes tangent to the boundary of the dual of the $k$-zonoid. This
-leads to the following idea: In the primal, first determine the
-vertices of the zonoid with smallest and largest $x$-coordinate.  If
-the point $p_1$ is not in the vertical strip between these two points
-then $p_1$ is not the in the zonoid.
+through $p_1$, then the line $p_1^*$ also moves upwards in the dual.
+When $p_1$ hits the $k$-zonoid boundary, $p_1^*$ becomes tangent to
+the boundary of the dual of the $k$-zonoid. This leads to the
+following idea: In the primal, first determine the vertices of the
+zonoid with smallest and largest $x$-coordinate.  If the point $p_1$
+is not in the vertical strip between these two points then $p_1$ is
+not the in the zonoid.
 
 Otherwise, draw a vertical line through the point $p_1$. This line
 intersects the boundary of the $k$-zonoid in 2 points.  Finding these
@@ -479,13 +479,13 @@ though the algorithm and its analysis are more or less the same as the
 algorithm of Lo et al.  This is because we will be modifying this
 algorithm in
 Section~\ref{subsection_computing_the_zonoid_depth_of_a_point} to
-solve the same problem for weighted points.  Describing and analyzing
-the modified algorithm requires an understanding of the original
-algorithm and its analysis.
+solve a weighted version of problem.  Describing and analyzing the
+modified algorithm requires an understanding of the original algorithm
+and its analysis.
 
 \begin{figure}
  \begin{center} 
-   \psfig{file=figs/fig5.eps}
+   \includegraphics{fig5}
    \caption{\label{fig_vertical_strip}Vertical strip $V$ showing the $k$-level and corresponding upper boundary of the dual of the $k$-zonoid}
  \end{center}
 \end{figure}
@@ -493,14 +493,14 @@ algorithm and its analysis.
 \begin{figure}
  \begin{center}
    \begin{center}\begin{tabular}{ccc} 
-   \includegraphics[width=1.8in]{figs/fig5a} &
-   \includegraphics[width=1.8in]{figs/fig5b} &
-   \includegraphics[width=1.8in]{figs/fig5c} \\
-   (a) & (b) & (c)
+   \includegraphics[width=1.8in]{fig5b} &
+   \includegraphics[width=1.8in]{fig5c} & 
+   \includegraphics[width=1.8in]{fig5a} \\
+   (1) & (2) & (3)
    \end{tabular}\end{center}
    \caption{\label{fig_vertical_strip_abc} The vertical translation of $p_1^*$ is tangent to the
-upper boundary of the dual of the $k$-zonoid to (a)~the \emph{right}
-of $V$, (b)~the left of $V$ and (c)~inside of $V$.}
+upper boundary of the dual of the $k$-zonoid (1)~to the left
+of $V$, (2)~inside of $V$ and (3)~to the right of $V$.} 
  \end{center}
 \end{figure}
 
@@ -517,7 +517,7 @@ the dual $k$-zonoid edge that intersects the left boundary of $V$ and
 the slope $s_r$ of the dual $k$-zonoid edge edge that intersects the
 right boundary of $V$.  Both these computations can be done in $O(n)$
 time using an $O(n)$ time selection algorithm to select the
-intersection of the $k$-level with each of these two vertical lines
+intersection of the $k$-level with each of the two vertical lines
 bounding $V$.  If $s$ is
 the slope of $p^*$ then either
 \begin{enumerate}
@@ -542,7 +542,8 @@ $\alpha < 1$ be a prescribed positive constant and let $V$ be a
 vertical strip. In $O(n)$ time, $V$ can be partitioned into vertical
 strips $V_1, V_2, \ldots, V_C$ (where $C = C(\alpha)\le 2/\alpha$ is a function
 that depends only on $\alpha$), such that each $V_i$ contains at most
-$\alpha N$ of the $N = {n \choose 2}$ vertices of arrangement of
+$\alpha N$ of the $N = {n \choose 2}$ intersection points between
+pairs of lines in
 $L$. 
 \end{thma}
 
@@ -560,7 +561,7 @@ tangent.
 
 \begin{figure}
  \begin{center}
-   \psfig{file=figs/fig6.eps}
+   \includegraphics{fig6}
    \caption{\label{fig_trapezoid}Figure showing how we build the trapezoid $ABB^{\prime}A^{\prime}$}
  \end{center}
 \end{figure}
@@ -675,7 +676,7 @@ $\depth(p,S)$ as $\max\{\depth(p,S_i):1\le i\le r\}$ where $r$ is a
 constant and each $|S_i|\le \alpha|S|$ for some constant $\alpha < 1$.
 \end{enumerate}
 
-If these conditions are met, then Chan's technique
+If these requirements are met, then Chan's technique
 allows us to solve the optimization problem
 efficiently.\footnote{There is a more precise statement of Chan's very
 powerful optimization technique, but our application of the technique
@@ -697,14 +698,15 @@ position and let each point $p_i$ have an associated positive integer
 weight $w(p_i)=w_i$.  Let $n=\sum_{i=1}^m w_i$.  The \emph{$w$-weighted
 $k$-zonoid of $S$} is defined as
 
-\[ Z_k(S,w) = \left\{\sum_{i=1}^{m}\lambda_iw_ip_i \mid 0 \le \lambda_i \le \frac{1}{k},\, \sum_{i=1}^{n} \lambda_i = 1 \right\} \]
+\[ Z_k(S,w) = \left\{\sum_{i=1}^{m}\lambda_iw_ip_i \mid 0 \le
+\lambda_i \le \frac{1}{k},\, \sum_{i=1}^{n} w_i\lambda_i = 1 \right\} \]
 
 Note that the original definition of zonoid depth is a special case of
 this definition in which $n=m$ and $w_i=1$ for all $1\le i\le m$.
 Also observe that, since the $w_i$ are positive integers, any problem
-on weighted zonoids can be converted into an equivalent unweighted
-zonoid problem by simply replacing each point $p_i$ by $w_i$
-infinitesmally close points. Thus, for example,
+on weighted zonoids can be converted into a similar unweighted zonoid
+problem by replacing each point $p_i$ by $w_i$ infinitesmally close
+points. Thus, for example, an algorithm similar to that of
 Theorem~\ref{theorem_decision_problem} could be applied to compute the
 intersection of any line with a weighted zonoid in $O(n)$ time.
 However, this observation is insufficient for our purposes, and we
@@ -766,14 +768,14 @@ decomposition into subproblems required to apply Chan's technique.
 Assume $S$, $w$ and $p$ are the inputs to our problem.  That is, we
 want to compute the $w$-weighted zonoid depth of $p$ with respect to
 $S$.   We can decompose this problem into 4 subproblems $S_1$, $S_2$,
-$S_3$, and $S_4$ as follows: In $O(m)$ time, we select two lines that partition the
-set $S$ into 4 quadrants $Q_1$, $Q_2$, $Q_3$, and $Q_4$ that
-each contain roughly $m/4$ points, using Megiddo's 
-algorithm \cite{partitioning_with_two_lines_in_the_plane}. Subproblem
-$S_1$ contains 3 consecutive quadrants, say $Q_1, Q_2, Q_3$, and a
-single point which is the weighted average of all the points in
-$Q_4$ and whose weight is the sum of the weights of all points in
-$Q_4$.  That is we create a new point $p_\ell$ with, 
+$S_3$, and $S_4$ as follows: In $O(m)$ time, we select two lines that
+partition the set $S$ into 4 quadrants $Q_1$, $Q_2$, $Q_3$, and $Q_4$
+that each contain roughly $m/4$ points, using Megiddo's algorithm
+\cite{partitioning_with_two_lines_in_the_plane}. Subproblem $S_1$
+contains 3 consecutive quadrants, say $Q_1, Q_2, Q_3$, and a single
+point which is the weighted average of all the points in $Q_4$ and
+whose weight is the sum of the weights of all points in $Q_4$.  That
+is we create a new point $p_\ell$ with, 
 \[
      w_\ell = \sum_{p_i\in Q_4} w_i
 \]
@@ -783,9 +785,9 @@ and
 \]
 Thus, $S_1$ contains $\frac{3m}{4}+1$ points. We define the sets
 $S_2$, $S_3$, and $S_4$ in a similar manner.  We define $depth(p,S_i)$
-as the weighted zonoid depth of point $p$ in problem $S_i$. It follows
+as the weighted zonoid depth of point $p$ in subproblem $S_i$. It follows
 immediately from the definition of weighted zonoids that 
-this decomposition produces strictly smaller zonoids, i.e.
+this decomposition produces smaller zonoids, i.e.
 $Z_k(S_i,w) \subseteq Z_k(S,w)$ and does not change the center, i.e.,
 $Z_n(S_i)=Z_n(S)$.  The following lemma shows that this
 decomposition satisfies the second requirement of Chan's optimization
@@ -800,7 +802,7 @@ $depth(p,S) = \max\{depth(p,S_i) \mid 1 \le i \le 4\}$ \end{itemize}
 
 \begin{figure}
  \begin{center}
-   \psfig{file=figs/fig7.eps, width=3in, height=2.5in}
+   \includegraphics{fig7}
    \caption{\label{fig_for_proof}Partitioning the $Z_k(S)$ zonoid into triangles}
  \end{center}
 \end{figure}
@@ -818,7 +820,7 @@ the $k$-set for $a$ and $l_b$ defines the $k$-set for $b$. Since $l_a$
 and $l_b$ are infinitesimally close, they intersect at most three of
 the open quadrants $Q_1, \ldots, Q_4$. Wlog suppose they miss $Q_4$. Then
 it is not hard to see that $Z_k(S_1,w)$ has $a$ and $b$ as vertices.
-Furthermore, $Z_k(S_1)$ contains $Z_n(S)$ and is convex, so it
+Furthermore, $Z_k(S_1,w)$ contains $Z_n(S)$ and is convex, so it
 contains $p$. Therefore $depth(p,S_1) \ge k = depth(p,S)$ as required.
 \end{proof}
 
@@ -840,9 +842,9 @@ $\alpha=(3/4)^\ell$ and $\ell$ is an integer parameter that is under
 our control.  Therefore, the total expected cost of the algorithm is
 bounded by the summation
 \[
-   T_n = \sum_{i=1}^\infty O\left(r^im_i\log (n/m_i)\right)
-   = n\sum_{i=1}^\infty O\left(r^i\alpha^i \log(1/\alpha^i)\right)
-   = n\sum_{i=1}^\infty O\left(r^i\alpha^i i\right) \enspace ,
+   T_n = \sum_{i=0}^\infty O\left(r^im_i\log (n/m_i)\right)
+   = n\sum_{i=0}^\infty O\left(r^i\alpha^i \log(1/\alpha^i)\right)
+   = n\sum_{i=0}^\infty O\left(r^i\alpha^i i\right) \enspace ,
 \]
 which solves to $O(n)$ provided that $r\alpha < 1$.  The condition
 $r\alpha < 1$ is easily ensured by choosing a sufficiently large
@@ -863,8 +865,9 @@ In particular,  we have given
 \begin{enumerate}
 \item an $O(n\log n+nk^{\frac{1}{3}})$ algorithm to compute $Z_k(S)$, i.e. the zonoid depth contour of depth $k$,	
 \item an $O(n^2)$ algorithm to compute $Z_1(S),\ldots,Z_n(S)$, i.e. the zonoid depth map,
-\item a linear time algorithm to test whether a zonoid $Z_k(S)$ contains a point, and
-\item a linear time algorithm to compute the zonoid depth of a point.
+\item a linear time algorithm to test whether a zonoid $Z_k(S)$
+contains a point $p$, and
+\item a linear time algorithm to compute the zonoid depth of a point $p$.
 \end{enumerate}
 Results 2, 3 and 4 are optimal. An improvement on Algorithm 1 would require a breakthrough on the (30 year old) planar $k$-set problem. 
 

@@ -12,8 +12,8 @@
 
 \newcommand{\ch}{\mathrm{CH}}
 
-\newcommand{\ntypes}{C_c}
-\newcommand{\timepertype}{c^2 n\log n}
+\newcommand{\ntypes}{cC(2c)}
+\newcommand{\timepertype}{(3c)^c n\log n}
 \newcommand{\runtime}{\ntypes \timepertype}
 
 \begin{document}
@@ -25,7 +25,7 @@ We consider the problem of removing $c$ points from a set $S$ of $n$
 points so that the resulting point set has the smallest possible
 convex hull.  Our main result is an $O(\runtime)$ time algorithm
 that solves this problem when ``smallest'' is taken to mean least area
-or least perimeter. Here $C_r = {2r\choose r}/(r+1)$ is
+or least perimeter. Here $C(r) = {2r\choose r}/(r+1)$ is
 the $r$th \emph{Catalan number}.
 \end{abstract}
 
@@ -73,11 +73,18 @@ solution are ``close to'' one of the $n\choose 2$ line segments
 defined by pairs of points in $S$.  This allows the problem to be
 solved by considering $O(n^2)$ subproblems each of size $O(k)$.
 
-Note that finding a subset $X\subset S$ of size $k$ whose convex hull has
-minimum area generalizes the problem of determining if $S$ contains $k$
-collinear points.  For the case $k=3$, this problem is one of the original
-\textsc{3-Sum}-hard problems \cite{X} and is conjectured to have an
-$\Omega(n^2)$ lower-bound in most models of computation.
+Note that finding a subset $X\subset S$ of size $k$ whose convex hull
+has minimum area generalizes the problem of determining if $S$
+contains $k$ collinear points.  For the case $k=3$, this problem is
+one of the original \textsc{3-Sum}-hard problems \cite{X} and is
+conjectured to have an $\Omega(n^2)$ lower-bound in most models of
+computation. However, for large values of $k$, the problem seems to
+become easier, and Guibas \etal\ \cite{go} have an algorithm that
+reports all lines containing at least $k$ points of $S$ in
+$O(n^2/k\log(n/k))$ time.  Notice that, for $k=\Omega(n)$, this gives
+an $O(n)$ time algorithm, which offers hope that the outlier removal
+problem should have a fast solution for sufficiently small values of
+$c$.
 
 \paragraph{New Results.}
 
@@ -106,23 +113,26 @@ $O(n\log n)$ time convex hull algorithm.  For the remainder of this
 paper we will use the notation $p_{i,j}$ to denote the $(j\bmod
 |S_i|)$th point of $S_i$.
 
-Consider a point $p_{0,j}\in S_0$.  If we remove $p_{0,j}$ from $S$
-then the boundary of $\ch(S\setminus\{p_{0,j}\})$ can be obtained
-either by computing two tangents joining $p_{0,j-1}$ and $p_{0,j+1}$
-to $S_1$ (when the triangle $\triangle p_{0,j-1}p_{0,j}p_{0,j+1}$ has
-points of $S$ in its interior) or by joining $p_{0,j-1}$ and
-$p_{0,j+1}$ (when the triangle $\triangle p_{0,j-1}p_{0,j}p_{0,j+1}$
-is empty of points from $S$.  If $S_1$ is stored in an array then
-computing the necessary tangents and deciding which of the two cases
-applies can be done in $O(\log n)$ time \cite{X}.  Once we have done
-this, we can update the area (or perimeter) of
-$\ch(S\setminus\{p_{0,j}\})$ in $O(t_j)$ time, where $t_j$ is the
-number of points of $S_1$ on the boundary of
-$\ch(S\setminus\{p_{0,j}\})$. 
+Consider a point $p_{0,j}\in S_0$ and refer to \figref{point-removal}.
+If we remove $p_{0,j}$ from $S$ then a (possibly empty) sequence
+$p_{1,\ell},\ldots,p_{1,k}$ of $S_1$ appears on the boundary of
+$\ch(S\setminus\{p_{0,j}\})$.  This sequence can be obtained either by
+computing two tangents joining $p_{0,j-1}$ and $p_{0,j+1}$ to $S_1$.
+If $S_1$ is stored in an array then computing the necessary tangents
+and listing $p_{1,\ell},\ldots,p_{1,k}$ can be done in $O(\log n+t_j)$
+time, where $t_j=k-l+1$ is the length of the sequence \cite{X}.
+
+Once we have removed a point $p_{0,j}$ from $S_0$, if we know the area
+(or perimeter) of $\ch(S)$ we can compute the area (or perimeter) of
+$\ch(S\setminus\{p_{0,j}\})$ in $O(t_j)$ time.  We do this by
+computing the area of the triangle $\triangle
+p_{0,j-1}p_{0,j}p_{0,j+1}$ and subtracting from it the area of
+$\ch(\{p_{0,j-1},p_{0,j+1}\}\cup\{p_{1,\ell},\ldots,p_{1,k}\})$.
+
 
 \section{The Algorithm}
 
-In this section we present our algorithms for solving the
+In this section we present our algorithm for solving the
 perimeter-based and area-based outlier removal problems. Our solution
 to both problems is to enumerate all the combinatorial types of
 solutions of size $c$.  For each such solution type, we then use a
@@ -174,12 +184,12 @@ The solutions of Type~1 can be found in much the same way as the
 algorithm for the case $c=1$.  For each $j\in\{0,\ldots,|S_0|-1\}$ we
 compute the difference in area between $\ch(S)$ and
 $\ch(S\setminus\{p_{0,j},p_{0,j+1}\})$.  The analysis remains exactly
-the same as before except that, now, each point of $S_1$ can appear at
-most $3$ times, instead of only 2.  Thus, all solutions of Type~1 can
-be evaluated in $O(n\log n)$ time.
+the same as before except that, now, each point of $S_1$ can appear in
+at most $3$ area computatons, instead of only 2.  Thus, all solutions
+of Type~1 can be evaluated in $O(n\log n)$ time.
 
-The solutions of Type~3 can also be found in a similar way.  For each
-$p_{0,j}\in S_0$ we remove $p_{0,j}$ to expose a sequence
+The solutions of Type~3 can also be found in a similar manner.  For
+each point $p_{0,j}\in S_0$ we remove $p_{0,j}$ to expose a sequence
 $p_{1,k},\ldots,p_{1,\ell}$ of $S_1$ and compute the area of
 $\ch(S\setminus\{p_{0,j}\})$.  We then remove each of
 $p_{1,k},\ldots,p_{1,\ell}$ in turn (exposing a chain of points from
@@ -206,7 +216,7 @@ such that $x_{j_1}+x_{j_2}$ is maximum.  We do this by computing the
 following quantity
 \[
      S_j = \max\{x_{j_1}+x_{j_2} :
-       \mbox{$0\le j_1,j_2\le j$ and $j_1 < j_2-1$}\} \enspace ,
+       \mbox{$0\le j_1,j_2\le j$ and $j_2 \ge j_1+2$}\} \enspace ,
 \]
 that can be computed in $O(|S_0|)$ time using the recurrence
 \[
@@ -237,30 +247,74 @@ points on $S_0$ by one.
 \subsubsection{The Types of Solutions}
 
 Here we give a mapping between the different types of solutions and
-labeled binary trees. We represent the type of a solution as a binary
-tree in which each node is labeled with a positive integer and the
-sums of all node labels is $c$.  We call such labelled binary trees
-\emph{solution trees}. 
+labeled rooted ordered binary trees. We represent the type of a
+solution as a rooted ordered binary tree in which each node is labeled
+with a positive integer and the sum of all node labels is $c$.  We
+call such trees \emph{solution trees}.  The following lemma tells us
+that, for small values of $c$, there are not too many solution trees:
+ 
+\begin{lem}\lemlabel{catalan}
+The number of solution trees is at most $(1+o(1))C(2c)$, where
+$C(r)=(2r)!/((r+1)!r!)$ is the $r$th Catalan number.
+\end{lem}
 
-The nodes on the rightmost path of a solution tree give the sizes of
-consecutive groups of nodes that are removed from $S_0$, where each
-group is seperated by at least one element of $S_0$.  Denote the
-$m \leq c$ consecutive groups of nodes that are removed from $S_i$ in
-arbitrary order by $G_i^1, \dots, G_i^m$. For each consecutive group
-$G_0^j$ of nodes that is removed from $S_0$, let $p_{1,k}, \ldots,
-p_{1,l}$ denote the vertices on $S_1$ that appear on the boundary of
-$CH(S \setminus G_0^j)$. In the binary tree, the rightmost path of the
-left subtree of the node representing $G_0^j$ contains nodes
-representing the sizes of consecutive groups of nodes that are removed
-from the chain $p_{1,k}, \ldots, p_{1,l}$ of $S_1$. This process is
-repeated recursively: For each consecutive group $G_i^j$ of nodes that
-are removed from $S_i$, let $p_{i+1,k}, \ldots, p_{i+1,l}$ denote the
-vertices on $S_{i+1}$ that appear on the boundary of $CH(S \setminus
-G_i^j)$. In the binary tree, the rightmost path of the left subtree of
-the node representing $G_i^j$ contains nodes representing the sizes of
-consecutive groups of nodes that are removed from the chain
-$p_{i+1,k}, \ldots, p_{i+1,l}$ of $S_{i+1}$.  An illustration of this
-labeling scheme is given in \figref{XXX} (I can do a figure here).
+\begin{proof} Given a solution tree $T$, we convert it to an
+unlabelled rooted binary tree as follows: First, for each node $N$ of
+$T$ whose label is $\ell$, we color $N$ black, leave $N$'s left child
+unchanged and replace $N$'s right child with a (right) path of
+$\ell-1$ \emph{white} nodes, the last node of which has $N$'s original
+right child as its right child.  Note that, this gives us a binary
+tree with exactly $c$ nodes in which no white node has a left child.
+Next, for each black node we add a leaf, if necessary, to guarantee
+that each black node has a left child.  This gives us an unlabelled
+rooted ordered binary tree $T'$ with at most $2c$ nodes.
+
+Observe that, from $T'$ we can recover $T$ and its labels since we
+recognize white nodes by the fact that they have no left child. Thus,
+the number of solution trees is at most equal to the number of
+unlabelled rooted ordered binary trees with at most $2c$ nodes.  The
+number of such trees is 
+\[
+  \sum_{i=1}^{2c} C(i) = (1+o(1))C(2c)
+\]
+\cite{knuth-graham-patashnik},
+as required.
+\end{proof}
+
+
+The solution tree is interpreted as follows (refer to
+\figref{solution-tree}): Any solution removes some elements of $S_0$
+and the elements removed come in $d$ groups $G_0^1,\ldots,G_0^d$ of
+consecutive elements with each group separated by at least one element
+of $S_0$.  The sizes of these groups are given by the labels of the
+nodes on the rightmost path in $T$, in the order in which they occur.
+That is, the $j$th node, $N_0^j$ on the right most path of $T$ has the
+label $|G_0^j|$. 
+
+For some group $G_0^j$, let $p_{1,k}, \ldots, p_{1,\ell}$ denote the
+points of $S_1$ that appear on the boundary of $\ch(S\setminus
+G_0^j)$.  Any solution removes some subset $p_{1,k},\ldots,
+p_{1,\ell}$ of elements from $S_1$.  Again, this subset can be
+partitioned into groups of consecutive elements with any two groups
+separated by at least one element of $S_1$.  In the solution tree $T$,
+the sizes of these groups are given, in the order in which they occur,
+by the labels of the rightmost path in the subtree of $T$ rooted at
+the left child of $N_0^j$.
+
+This process is repeated recursively: For each consecutive group
+$G_i^j$ of nodes that are removed from $S_i$, let $p_{i+1,k}, \ldots,
+p_{i+1,\ell}$ denote the vertices on $S_{i+1}$ that appear on the
+boundary of $CH(S \setminus G_i^j)$. In the solution tree $T$, the
+rightmost path of the left subtree of the node representing $G_i^j$
+contains nodes representing the sizes of consecutive groups of nodes
+that are removed from the chain $p_{i+1,k}, \ldots, p_{i+1,l}$ of
+$S_{i+1}$.
+
+
+In this way, any solution to the outlier removal problem that does not
+remove both $p_{0,0}$ and $p_{0,-1}$ can be mapped to a solution tree.
+The following lemma shows that there are there not many different
+types of solutions:
 
 \comment{Note that the mapping between different types of solutions
 and labeled binary search trees is not bijective, because for one type
@@ -269,15 +323,6 @@ represent that solution. The reason is that the ordering along the
 rightmost path of the tree (and recursively, the orderings along the
 rightmost paths of all subtrees) is not uniquely defined.  }
 
-
-\begin{lem}
-The number of ordered binary trees with positive integer labels whose
-sum does not exceed $c$ is at most $X(c)$.
-\end{lem}
-
-\begin{proof}
-X.
-\end{proof}
 
 \subsubsection{Computing the Solution of a Specific Type}
 
@@ -301,14 +346,22 @@ algorithm accomplishes its task by recursively solving $O(d(k-j+1))$
 subproblems on the left children of these $d$ nodes and then combining
 these solutions using dynamic programming.  The following pseudocode
 gives a detailed description of the algorithm's operation with the
-exception of the dynamic programming component, which is discussed in
-the next subsection.
+exception of the dynamic programming component, whose description and
+analysis is discussed in the next subsection.  Note that the algorithm
+below only computes the maximum amount of area (perimeter) that can be
+removed from $\ch(S)$ by a solution of type $T$.  To obtain the points
+in the solution the algorithm can be augmented using the standard
+trick of remembering, whenever the algorithm takes the maximum of two
+values, which of the two values produced the maximum.  The details of
+this are standard and ommitted here.
 
 \newcommand{\lbl}{\mathrm{label}}
 \newcommand{\lft}{\mathrm{left}}
 \newcommand{\rt}{\mathrm{root}}
 \newcommand{\RETURN}[1]{\STATE{\textbf{return} #1}}
 
+
+\noindent\begin{minipage}{\textwidth}
 \noindent$\textsc{FindOptimalOfType}(T,i,j,k)$
 \begin{algorithmic}[1]
 \IF{$T$ is empty}
@@ -328,29 +381,20 @@ the next subsection.
     \STATE{reinsert $S_{i,\ell},\ldots,S_{i,\ell+c_g-1}$ into $S_{i}$}
   \ENDFOR
 \ENDFOR
-\RETURN{$\textsc{CombineSolutions}(X,d,k-g)$}
+\RETURN{$\textsc{CombineSolutions}(X,d,k-g,c_1,\ldots,c_d)$}
 \end{algorithmic}
+\end{minipage}
 
 The call to $\textsc{CombineSolutions}$ in the last line of the
 algorithm is a dynamic programming subroutine described in the next
 section that runs in $O(d(k-g))$ time.  At the topmost level, the
-algorithm is used as follows:
-
-\noindent$\textsc{FindOptimalOfType}(T,c)$
-\begin{algorithmic}[1]
-\STATE{$m\gets 0$}
-\FOR{$j=0$ to $c$}
-  \STATE{$m\gets \max\{m,\textsc{FindOptimalOfType}(T,0,j, j-1)\}$}
-\ENDFOR
-\RETURN{$m$}
-\end{algorithmic}
+algorithm is called as $\textsc{FindOptimalOfType}(T,0,0,|S_0|-1)\}$
 
 To analyze the cost of \textsc{FindOptimalOfType} it suffices to
 determine, for each point $p_{i,j}$, the maximum number of times
-$p_{i,j}$ is deleted (in line 8) by the algorithm.  Observe that, for
-points $p_{0,j}\in S$, each point is deleted exactly $cg_0$, times,
-where $g_0$ is the sum of labels of nodes on the rightmost path of
-$T$. 
+$p_{i,j}$ is deleted (in line 8) by the algorithm.  For points
+$p_{0,j}\in S$, each point is deleted exactly $g_0$, times, where
+$g_0$ is the sum of labels of nodes on the rightmost path of $T$. 
 
 More generally, let $g_i$ denote the sum of labels of all nodes $N$ of
 $T$ for which the path from the root of $T$ to $N$ make exactly $i$
@@ -364,49 +408,78 @@ one of the three vertices of $\Delta_{i,j}$ must be deleted from the
 current point set.  Thus, if we define $m_i$ as the maximum number of
 times a point of $S_i$ is deleted by \textsc{FindOptimalOfType} then
 we have the relationships:
-\[ m_0 \le cg_0 \] 
+\[ m_0 \le g_0 \] 
 and 
 \[ m_i \le 3 m_{i-1} g_i \enspace .\]
 Using the fact that $g_i \le c$ and no point of $S_{i}$ for $i> c$ is
 ever considered by the algorithm, we obtain the (extremly loose) upper
-bound $m_i < (3c)^{c+1}$.
+bound $m_i \le (3c)^{c}$.  This completes the proof of the following
+result:
+
+\begin{lem}\lemlabel{recursion}
+The algorithm \textsc{FindOptimalOfType} finds the optimal solution
+whose solution tree is $T$ in $O((3c)^c n\log n)$ time.
+\end{lem}
 
 
 \subsubsection{Combining the Solutions}
 
-Here we show how to combine the solutions by using dynamic programming
-to solve the following problem:
-
-Given positive integers $c_1,\ldots,c_d$ and a $d\times m$ positive
-real-valued matrix $X$
-we want to find indices $1\le i_1,\ldots,i_d \le m-c_d$ such that
+One aspect of the algorithm that we have not yet described is how the
+subroutine \textsc{CombineSolutions} works.  This subroutine is given
+positive integers $c_1,\ldots,c_d$ and a $d\times m$ positive
+real-valued matrix $X$ and must find indices $1\le i_1,\ldots,i_d \le
+m-c_d$ such that
 \[
-    i_j + c_j \le i_{j+1}
+     i_{j+1} \ge i_j + c_j + 2
 \]
-for all $1\le j < d$ and such that
+for all $1\le j < d$ and such that the sum
 \[
       h(i_1,\ldots,i_d)=\sum_{j=1}^d X_{j,i_j}
 \]
-is maximum.  We solve this by filling out the table:
+is maximum.  (The indices $i_1,\ldots,i_d$ correspond to the indices of the
+first element of each group on the chain $p_{i,j},\ldots,p_{i,k}$
+considered by the algorithm.)
+We solve this by filling out the $d\times m$ dynamic
+programming table:
 \[
      D_{j,\ell} = \max\{h(i_1,\ldots,i_j):
-      \mbox{$1\le i_1$, $i_j\le \ell$, and $i_{j'}+c_{j'}\le i_{j'+1}$
+      \mbox{$1\le i_1$, $i_j\le \ell$, and $i_{j'+1} \ge i_{j'}+c_{j'}+2$
              for all $1\le j'< j$}  \} \enspace .
 \]
 for $j=1,\ldots,d$ and $\ell=1,\ldots,m-c_d$.  We can do this in
 $O(cn)$ time because the table entries satisfy the recurrence
 \[
-     D_{j,\ell} = \max\{D_{j,\ell-1},D_{j-1,\ell-c_{j-1}}+X_j \}
+     D_{j,\ell} = \max\{D_{j,\ell-1},D_{j-1,\ell-c_{j-1}-2}+X_j \}
 \]
-where we use the convention that $D_{j,\ell} = 0$ if $j\le 0$ or
-$\ell\le 0$.
+where we use the convention that $D_{j,\ell} = 0$ if $j=0$ and
+$D_{j,\ell}=-\infty$ if $\ell<0$.  This gives the last lemma required
+by the algorithm:
+
+\begin{lem}\lemlabel{combine}
+The function \textsc{CombineSolutions} can be implemented in
+$O(d\times m)$ time.
+\end{lem}
 
 
 \section{Conclusions}
 
-The running times of our algorithms depend exponentially on the value
-of $c$.  Is it possible to find algorithm that are polynomial in $c$
-but that still run in $O(n\log n)$ time for fixed values of $c$?
+Together, \lemref{catalan}, \lemref{recursion} and \lemref{combine}
+given an algorithm for the outlier removal problem whose running time
+is
+\[
+    c \times (1+o(1))C(c) \times O((3c)^cn\log n) \enspace .
+\]
+This completes the proof of:
+\begin{thm}
+There exists an algorithm for the (perimeter-based or area-based)
+outlier removal problem that runs in $O(n\log n)$ time for any
+constant value of $c$.
+\end{thm}
+
+We conclude with a few open problems.
+As we see above, the running time of our algorithm is superpolynomial
+in $c$. Does there exist an algorithm that is polynomial in $c$ but
+that still runs in $O(n\log n)$ time for any fixed valu of $c$?
 
 The outlier removal problems we study in this paper are two special
 cases of the following \emph{general outlier removal} problem.  Given

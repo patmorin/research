@@ -14,7 +14,7 @@
 
 \newcommand{\ntypes}{cC(2c)}
 \newcommand{\timepertype}{(3c)^c n\log n}
-\newcommand{\runtime}{\ntypes \timepertype}
+\newcommand{\runtime}{{2c\choose c}(3c)^c n\log n}
 
 \begin{document}
 
@@ -25,8 +25,7 @@ We consider the problem of removing $c$ points from a set $S$ of $n$
 points so that the resulting point set has the smallest possible
 convex hull.  Our main result is an $O(\runtime)$ time algorithm
 that solves this problem when ``smallest'' is taken to mean least area
-or least perimeter. Here $C(r) = {2r\choose r}/(r+1)$ is
-the $r$th \emph{Catalan number}.
+or least perimeter.
 \end{abstract}
 
 \section{Introduction}
@@ -75,13 +74,14 @@ solved by considering $O(n^2)$ subproblems each of size $O(k)$.
 
 Note that finding a subset $X\subset S$ of size $k$ whose convex hull
 has minimum area generalizes the problem of determining if $S$
-contains $k$ collinear points.  For the case $k=3$, this problem is
+contains $k$ collinear points, in which case $S$ has a subset of size
+$k$ whose convex hull has area 0.  For the case $k=3$, this problem is
 one of the original \textsc{3-Sum}-hard problems \cite{X} and is
 conjectured to have an $\Omega(n^2)$ lower-bound in most models of
 computation. However, for large values of $k$, the problem seems to
 become easier, and Guibas \etal\ \cite{go} have an algorithm that
 reports all lines containing at least $k$ points of $S$ in
-$O(n^2/k\log(n/k))$ time.  Notice that, for $k=\Omega(n)$, this gives
+$O((n^2/k)\log(n/k))$ time.  Notice that, for $k=\Omega(n)$, this gives
 an $O(n)$ time algorithm, which offers hope that the outlier removal
 problem should have a fast solution for sufficiently small values of
 $c$.
@@ -94,13 +94,19 @@ minimum perimeter, respectively, area, convex hull.  However, when $k$
 is close to $n$ the above algorithms require $\Omega(n^3)$ time.  In
 this paper we consider the case when $k=n-c$ and show that
 perimeter-based and area-based outlier removal problems can be solved
-in $O(\runtime)$ time.  Here, $C_r={2r \choose r}/(r+1)$ is the famous
-$r$th Catalan number.  Thus, for any fixed $c$, both problems can be
+in $O(\runtime)$ time.  Thus, for any fixed $c$, both problems can be
 solved in $O(n\log n)$ time.
 
-The remainder of the paper is organized as follows: \ldots
+The remainder of the paper is organized as follows: \secref{preliminaries} 
+defines the notation used throughout this paper. \secref{algorithm} outlines 
+the algorithm that allows to remove $c$ outliers from the a set of points in 
+the plane while minimizing the area of the remaining point set. This algorithm 
+is the main contribution of this paper. Finally \secref{conclusions} concludes 
+and gives ideas for future work.
+ 
 
-\section{Preliminaries}
+\section{Preliminaries} 
+\seclabel{preliminaries}
 
 The \emph{convex layers} $S_0,\ldots,S_k$ of $S$ are defined as
 follows: $S_0$ is the subset of $S$ on the boundary of $\ch(S)$.
@@ -111,7 +117,9 @@ can be computed in $O(n\log n)$ time in several different ways
 computed in $O(cn\log n)$ time by repeated applications of any
 $O(n\log n)$ time convex hull algorithm.  For the remainder of this
 paper we will use the notation $p_{i,j}$ to denote the $(j\bmod
-|S_i|)$th point of $S_i$.
+|S_i|)$th point of $S_i$, and use the convention that
+$p_{i,0},\ldots,p_{i,|S_i|-1}$ occur in counterclockwise order on the
+boundary of $\ch(S_i)$.
 
 Consider a point $p_{0,j}\in S_0$ and refer to \figref{point-removal}.
 If we remove $p_{0,j}$ from $S$ then a (possibly empty) sequence
@@ -131,6 +139,7 @@ $\ch(\{p_{0,j-1},p_{0,j+1}\}\cup\{p_{1,\ell},\ldots,p_{1,k}\})$.
 
 
 \section{The Algorithm}
+\seclabel{algorithm}
 
 In this section we present our algorithm for solving the
 perimeter-based and area-based outlier removal problems. Our solution
@@ -313,8 +322,8 @@ $S_{i+1}$.
 
 In this way, any solution to the outlier removal problem that does not
 remove both $p_{0,0}$ and $p_{0,-1}$ can be mapped to a solution tree.
-The following lemma shows that there are there not many different
-types of solutions:
+\lemref{catalan} shows that there are there not many different
+types of solutions.
 
 \comment{Note that the mapping between different types of solutions
 and labeled binary search trees is not bijective, because for one type
@@ -427,8 +436,8 @@ whose solution tree is $T$ in $O((3c)^c n\log n)$ time.
 One aspect of the algorithm that we have not yet described is how the
 subroutine \textsc{CombineSolutions} works.  This subroutine is given
 positive integers $c_1,\ldots,c_d$ and a $d\times m$ positive
-real-valued matrix $X$ and must find indices $1\le i_1,\ldots,i_d \le
-m-c_d$ such that
+real-valued matrix $X$, where $m = \sum_{i=0}^{c} m_i$, and must find 
+indices $1\le i_1,\ldots,i_d \le m-c_d$ such that
 \[
      i_{j+1} \ge i_j + c_j + 2
 \]
@@ -462,24 +471,26 @@ $O(d\times m)$ time.
 
 
 \section{Conclusions}
+\seclabel{conclusions}
 
 Together, \lemref{catalan}, \lemref{recursion} and \lemref{combine}
 given an algorithm for the outlier removal problem whose running time
 is
 \[
-    c \times (1+o(1))C(c) \times O((3c)^cn\log n) \enspace .
+    c \times (1+o(1))C(c) \times O((3c)^cn\log n) =
+O\left(\runtime\right)\enspace .
 \]
-This completes the proof of:
+Stretching the use of asymptotic notation, this completes the proof of:
 \begin{thm}
 There exists an algorithm for the (perimeter-based or area-based)
 outlier removal problem that runs in $O(n\log n)$ time for any
 constant value of $c$.
 \end{thm}
 
-We conclude with a few open problems.
-As we see above, the running time of our algorithm is superpolynomial
-in $c$. Does there exist an algorithm that is polynomial in $c$ but
-that still runs in $O(n\log n)$ time for any fixed valu of $c$?
+We finish with a few open problems.  As we see above, the running time
+of our algorithm is superpolynomial in $c$. Does there exist an
+algorithm that is polynomial in $c$ but that still runs in $O(n\log
+n)$ time for any fixed value of $c$?
 
 The outlier removal problems we study in this paper are two special
 cases of the following \emph{general outlier removal} problem.  Given
@@ -499,5 +510,7 @@ smallest enclosing disk and the diameter are defined by at most 3,
 respectively, 2, points of $S$.  Are there are algorithms for these
 problems whose running time depends only polynomially on $c$?
 
+\bibliographystyle{plain}
+\bibliography{outliers}
 
 \end{document}

@@ -1,4 +1,4 @@
-\newcommand{\vc}[2]{#2}
+\newcommand{\vc}[2]{#1}
 \vc{
   \documentclass[lotsofwhite]{patmorin}
 }{
@@ -56,7 +56,7 @@ or least perimeter.
 Motivated by the problem of removing outliers in a data set, this
 paper considers the following problem: Let $S$ be a set of $n$ points
 in $\mathbb{R}^2$ with convex hull denoted by $\ch(S)$.  We consider
-the problem of selecting a subset $S'\subset S$, $|S'|=c$ such that
+the problem of selecting a subset $S'\subseteq S$, $|S'|=c$ such that
 the area, or perimeter, of $\ch(S\setminus S')$ is minimum.  We call
 these problems the \emph{area-based}, respectively,
 \emph{perimeter-based}, \emph{outlier removal problems}.  We are
@@ -93,15 +93,15 @@ and $O((k^3+\log n) n^2)$ time algorithms for this problem,
 respectively.  The second algorithm (by Eppstein) uses the first
 algorithm along with the fact that the $k$ points that define the
 solution are among the $2k-4$ vertical nearest neighbours of one of
-the $n\choose 2$ line segments defined by pairs of points in $S$.
+the $n\choose 2$ line segments determined by pairs of points in $S$.
 This allows the problem to be solved by considering $O(n^2)$
 subproblems each of size $O(k)$.
 
 \vc{
-Note that finding a subset $X\subset S$ of size $k$ whose convex hull
+Note that finding a subset $X\subseteq S$ of size $k$ whose convex hull
 has minimum area generalizes the problem of determining if $S$
-contains $k$ collinear points, in which case $S$ has a subset of size
-$k$ whose convex hull has area 0.  For the case $k=3$, this problem is
+contains $k$ collinear points (in which case $S$ has a subset of size
+$k$ whose convex hull has area 0).  For the case $k=3$, this problem is
 one of the original \textsc{3-Sum}-hard problems \cite{go95} and is
 conjectured to have an $\Omega(n^2)$ lower-bound in many models of
 computation. However, for large values of $k$, the problem seems to
@@ -135,14 +135,17 @@ problem on the point multiset $S=S_A \uplus S_B$ where $S_A=\{(x,x^2):
 x\in A\}$, $S_B=\{(x,x^2):x\in B\}$ and $\uplus$ denotes multiset
 union. The sets $A$ and $B$ are equal if and only if for every $p\in
 S$, $\ch(S)=\ch(S\setminus\{p\})$.  Thus (in a very weak sense) the
-running time of our algorithm is optimal.
-}{}
+running time of our algorithm is optimal, at least in terms of its
+dependence on $n$.
+}{Due to space constraints, many details and all proofs have been
+ommitted from this abstract.  Full details can be found in the
+accompanying technical report \cite{amw06}.}
 
 The remainder of the paper is organized as follows:
 \secref{preliminaries} defines the notation and some previous results
 that are used in subsequent sections. \secref{algorithm} describes the
-outlier removal algorithm. Finally \secref{conclusions} concludes and
-suggests directions for future research.
+outlier removal algorithm. \secref{conclusions} concludes and suggests
+directions for future research.
  
 
 \section{Preliminaries} 
@@ -162,20 +165,22 @@ the boundary of $\ch(S_i)$.
 
 Once the convex layers $S_0,\ldots,S_c$ have been computed, we can
 find, in $O(c^2 n)$ time, for each point $p_{i,j}$ on layer $i$ and
-for each layer $i'> i$ and $i'\le c$ the two points $p_{i',\ell}$ and
-$p_{i',k}$ such that the line through $p_{i,j}$ and $p_{i',\ell}$
-(respectively $p_{i,j}$ and $p_{i',k}$) is tangent to $S_{i'}$.  This
-is accomplished by a simple walk around $S_i$, updating tangents
-$p_{i',\ell}$ and $p_{i',k}$ as we proceed.
+for each layer $i'> i$ and $i'\le c$ the two points $p_{i',k}$ and
+$p_{i',\ell}$ such that the line through $p_{i,j}$ and $p_{i',k}$
+(respectively $p_{i,j}$ and $p_{i',\ell}$) is tangent to $S_{i'}$.
+This is accomplished by a simple walk around $S_i$, updating tangents
+$p_{i',k}$ and $p_{i',\ell}$ as we proceed.
 
 Consider a point $p_{0,j}\in S_0$ and refer to \figref{point-removal}.
 If we remove $p_{0,j}$ from $S$ then a (possibly empty) sequence
-$p_{1,\ell},\ldots,p_{1,k}$ of $S_1$ appears on the boundary of
-$\ch(S\setminus\{p_{0,j}\})$.  This sequence can be obtained from the
-preprocessing described above by using the two tangents joining
-$p_{0,j-1}$ and $p_{0,j+1}$ to $S_1$.  Finding the two tangent points
-takes $O(1)$ time and traversing the sequence takes $O(t_j)$ time,
-where $t_j=k-\ell+1$.
+$p_{1,k},\ldots,p_{1,\ell}$ of $S_1$ appears on the boundary of
+$\ch(S\setminus\{p_{0,j}\})$.  When this happens we say that
+$p_{1,k},\ldots,p_{1,\ell}$ is \emph{exposed}.  This exposed sequence
+can be obtained from the preprocessing described above by using two
+tangents $p_{1,k}$ and $p_{1,\ell}$ joining $p_{0,j-1}$ and
+$p_{0,j+1}$ to $S_1$.  Finding the two tangent points takes $O(1)$
+time and traversing the sequence takes $O(t_j)$ time, where
+$t_j=\ell-k+1$.
 
 \begin{figure}
 \begin{center}\includegraphics{point-removal}\end{center}
@@ -189,9 +194,9 @@ Once we have removed a point $p_{0,j}$ from $S_0$, if we know the area
 $\ch(S\setminus\{p_{0,j}\})$ in $O(t_j)$ time.  We do this by
 computing the area of the triangle $\triangle
 p_{0,j-1}p_{0,j}p_{0,j+1}$ and subtracting from it the area of
-$\ch(\{p_{0,j-1},p_{0,j+1}\}\cup\{p_{1,\ell},\ldots,p_{1,k}\})$.  This
+$\ch(\{p_{0,j-1},p_{0,j+1}\}\cup\{p_{1,k},\ldots,p_{1,\ell}\})$.  This
 gives us the difference in area (perimeter) between $\ch(S)$ and
-$\ch(S\setminus\{p_0,j\})$.
+$\ch(S\setminus\{p_{0,j}\})$.
 
 
 \section{The Algorithm}
@@ -222,8 +227,8 @@ area.
 
 To analyze the overall running time of this algorithm we observe that
 any point $p_{1,k}\in S_1$ appears in at most two triangles
-$p_{0,j-1},p_{0,j},p_{0,j+1}$ and
-$p_{0,j},p_{0,j+1},p_{0,j+2}$.  Stated another way,
+$\triangle p_{0,j-1},p_{0,j},p_{0,j+1}$ and
+$\triangle p_{0,j},p_{0,j+1},p_{0,j+2}$.  Stated another way,
 \[
      \sum_{j=0}^{|S_0|-1} t_j \le 2|S_1|\le 2n \enspace .
 \]
@@ -274,7 +279,7 @@ Thus, each point in $S_1$ appears in at most 2 subproblems and each
 point in $S_2$ appears in at most $4$ area computations.  The overall
 running time of this algorithm is therefore bounded by
 \[
-    O\left(n\log n + |S_0|\log n + 2|S_1|\log n + 4|S_2|\right) = O(n\log n) \enspace ,
+    O\left(n\log n + |S_0| + 2|S_1| + 4|S_2|\right) = O(n\log n) \enspace ,
 \]
 as required.
 
@@ -310,19 +315,19 @@ solving a dynamic programming problem (as in the Type~2 solutions
 described above).
 
 For ease of exposition (to avoid treating $S_0$ as a special case), we
-will give an algorithm to find the optimal solution that that does not
-include both $S_{0,-1}$ and $S_{0,0}$.  To find the true optimal
-solution we can run this algorithm at most $c$ times, shifting the
-numerical labelling of the points on $S_0$ by one each time.
+describe an algorithm to find the optimal solution with the
+restriction that it does not include both $p_{0,-1}$ and $p_{0,0}$.
+To find the true optimal solution we can run this algorithm at most
+$c$ times, shifting the numerical labelling of the points on $S_0$ by
+one each time.
 
 \subsubsection{The Types of Solutions}
 
-Here we give a mapping between the different types of solutions and
-labeled rooted ordered binary trees. We represent the type of a
-solution as a rooted ordered binary tree in which each node is labeled
-with a positive integer and the sum of all node labels is $c$.  We
-call such trees \emph{solution trees}.  The following lemma tells us
-that, for small values of $c$, there are not too many solution trees:
+We represent the type of a solution as a rooted ordered binary tree in
+which each node is labeled with a positive integer and the sum of all
+node labels is $c$.  We call such trees \emph{solution trees}.  The
+following lemma tells us that, for small values of $c$, there are not
+too many solution trees:
  
 \begin{lem}\lemlabel{catalan}
 The number of solution trees is at most $(1+o(1))C(2c)$, where
@@ -335,7 +340,7 @@ unlabelled rooted binary tree as follows: First, for each node $N$ of
 $T$ whose label is $\ell$, we color $N$ black, leave $N$'s left child
 unchanged and replace $N$'s right child with a (right) path of
 $\ell-1$ \emph{white} nodes, the last node of which has $N$'s original
-right child as its right child.  Note that, this gives us a binary
+right child as its right child.  Note that this gives us a binary
 tree with exactly $c$ nodes in which no white node has a left child.
 Next, for each black node we add a leaf, if necessary, to guarantee
 that each black node has a left child.  This gives us an unlabelled
@@ -387,16 +392,17 @@ the sizes of these groups are given, in the order in which they occur,
 by the labels of the rightmost path in the subtree of $T$ rooted at
 the left child of $N_0^j$.
 
-This process is repeated recursively: For each consecutive group
-$G_i^j$ of nodes that are removed from $S_i$, let $p_{i+1,k}, \ldots,
-p_{i+1,\ell}$ denote the vertices on $S_{i+1}$ that appear on the
-boundary of $CH(S \setminus G_i^j)$. In the solution tree $T$, the
-rightmost path of the left subtree of the node representing $G_i^j$
-contains nodes representing the sizes of consecutive groups of nodes
-that are removed from the chain $p_{i+1,k}, \ldots, p_{i+1,l}$ of
-$S_{i+1}$.
-In this way, any solution to the outlier removal problem that does not
-remove both $p_{0,0}$ and $p_{0,-1}$ can be mapped to a solution tree.
+This process is repeated recursively: Let
+$S_{<i}=\bigcup_{j=0}^{i-1}S_i$ and let $S_{<i}'=S_{<i}\cap S'$.  For
+each consecutive group $G_i^j$ of nodes that are removed from $S_i$,
+let $p_{i+1,k}, \ldots, p_{i+1,\ell}$ denote the vertices on $S_{i+1}$
+that appear on the boundary of $CH(S \setminus (S_{<i}'\cup G_i^j))$.
+In the solution tree $T$, the rightmost path of the left subtree of
+the node representing $G_i^j$ contains nodes representing the sizes of
+consecutive groups of nodes that are removed from the chain
+$p_{i+1,k}, \ldots, p_{i+1,l}$ of $S_{i+1}$.  In this way, any
+solution $S'$ to the outlier removal problem that does not remove both
+$p_{0,0}$ and $p_{0,-1}$ maps to a unique solution tree.
 
 \comment{Note that the mapping between different types of solutions
 and labeled binary search trees is not bijective, because for one type
@@ -408,14 +414,12 @@ rightmost paths of all subtrees) is not uniquely defined.  }
 
 \subsubsection{Computing the Solution of a Specific Type}
 
-Here we show how, given the exact combinatorial type of the solution,
-the optimal solution of that type is computed. More precisely, the
-algorithm takes as input a solution tree $T$ as described in the
-previous subsection and outputs the optimal solution whose solution
-tree is $T$.
+In this section we describe an algorithm that takes as input a
+solution tree $T$ as outputs the value of the optimal solution $S'$
+whose solution tree is $T$.
 
-The algorithm is recursive and operates on a subchain
-$p_{i,j},\ldots,p_{i,k}$ of $S_i$ along with a solution tree $T$.  The
+The algorithm we describe is recursive and operates on a subchain
+$p_{i,j},\ldots,p_{i,k}$ of $S_i$ along with a solution (sub)tree $T$.  The
 algorithm requires that some subset of $\bigcup_{j=0}^{i-1}S_i$ has
 already been removed from $S$ so that $p_{i,j},\ldots,p_{i,k}$ are on
 the boundary of the convex hull of the current point set.  The
@@ -432,8 +436,8 @@ gives a detailed description of the algorithm's operation with the
 exception of the dynamic programming component, whose description and
 analysis is discussed in the next subsection.  Note that the algorithm
 below only computes the maximum amount of area (perimeter) that can be
-removed from $\ch(S)$ by a solution whose solution tree is $T$.  To
-obtain the points in the solution the algorithm can be augmented using
+removed from $\ch(S)$ by a solution $S'$ whose solution tree is $T$.  To
+obtain the points in $S'$ the algorithm can be augmented using
 the standard trick of remembering, whenever the algorithm takes the
 maximum of two values, which of the two values produced the maximum.
 The details of this are standard and ommitted here.}{}
@@ -517,9 +521,7 @@ Using the fact that $g_i \le c$, we obtain the (extremely loose) upper
 bound $m_i \le (3c)^{i+1}$.  Finally, we note the points of $S_c$
 (which are never deleted) appear in at most $3m_{c-1}$ subproblems.
 Putting all this together we obtain:
-}{
-Due to space constraints we omit the analysis of
-\textsc{FindOptimalOfType} that proves:}
+}{}
 
 \begin{lem}\lemlabel{recursion}
 The algorithm \textsc{FindOptimalOfType} finds the optimal solution
@@ -546,13 +548,13 @@ is the number of nodes in the rightmost path of $T$, $m=k-j+1$, and
 the indices
 $i_1,\ldots,i_d$ correspond to the indices of the
 first element of each group on the chain $p_{i,j},\ldots,p_{i,k}$
-considered by the algorithm.)
+considered by the algorithm.
 We solve this problem by filling out the $d\times m$ dynamic
 programming table:
 \[
      D_{j,\ell} = \max\{h(i_1,\ldots,i_j):
-      \mbox{$1\le i_1$, $i_j\le \ell$, and $i_{j'+1} \ge i_{j'}+c_{j'}+1$
-             for all $1\le j'< j$}  \} \enspace .
+      \mbox{$1\le i_1,\ldots,i_j\le \ell$, and $i_{j'+1} \ge i_{j'}+c_{j'}+1$
+             for all $1\le j'< j$}  \} 
 \]
 for $j=1,\ldots,d$ and $\ell=1,\ldots,m-c_j+1$.  We can do this in
 $O(cn)$ time because the table entries satisfy the recurrence
@@ -607,10 +609,10 @@ The outlier removal problems we study in this paper are two special
 cases of the following \emph{general outlier removal} problem.  Given
 any function $f$ that maps subsets of $\mathbb{R}^2$ onto $\mathbb{R}$
 we want to find, for a given set $S$ of $n$ points in $\mathbb{R}^2$ a
-subset $S'\subset S$ of size $c$ such that $f(S\setminus S')$ is
+subset $S'\subseteq S$, $|S'|=c$, such that $f(S\setminus S')$ is
 minimum.  Functions $f$ of particular interest include:
 \vc{\begin{enumerate}
-\item $f(X)$ is the radius of the smallest disk contain $X$,
+\item $f(X)$ is the radius of the smallest closed disk contain $X$,
 \item $f(X)$ is the diameter of $X$ ($f(X)=\max\{\|ab\|:a,b\in X\}$), and
 \item $f(X)$ is the variance of $X$ ($f(X)=\sum_{a\in X} \| am \|^2$
 where $m=\sum_{a\in X} a/|X|$.
@@ -620,7 +622,7 @@ diameter of $S\setminus S'$ or the variance of $S\setminus S'$.}
 For the first two functions, it is easy to obtain $O(3^c n)$ and
 $O(2^cn\log n)$ time algorithms, respectively, using the fact that the
 smallest enclosing disk and the diameter are defined by at most 3,
-respectively, 2, points of $S$.  Are there are algorithms for these
+respectively, 2, points of $S$.  Are there algorithms for these
 problems whose running time depends only polynomially on $c$?
 
 \bibliographystyle{plain}

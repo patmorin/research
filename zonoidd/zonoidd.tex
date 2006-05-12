@@ -44,11 +44,11 @@ $p\in\CH(S)$ with respect to $S$ is defined as
 and is a real number in the interval $[1,n]$.
 
 Gopala and Morin \cite{gm06} consider algorithms for bivariate ($d=2$)
-zonoid depth and give $O(n)$ time algorithms for computing, for a
-point $p\in \mathbb{R}^2$, the zonoid depth of $p$ with respect to
-$S$.  The current paper extends their results by giving an algorithm
-to compute the zonoid depth of any point $p\in\CH(S)$ in $O(n)$ time,
-for any constant dimension $d$.
+zonoid depth and give an $O(n)$ expected time algorithm for computing,
+$\depth(p,S)$ when $p$ and $S$ are in $\mathbb{R}^2$.  The current
+paper extends their results by giving an $O(n)$ time algorithm to compute
+$\depth(p,S)$ when $p$ and $S$ are in $\mathbb{R}^d$ for any constant
+dimension $d$.
 
 \section{Chan's Generalized Optimization Technique}
 
@@ -115,7 +115,7 @@ $\dual$ given by
 \] 
 when $x$ is a point in $\mathbb{R}^d$ and
 \[
-     \dual(S) = \{\dual(x) : x\in S\}
+     \dual(X) = \{\dual(x) : x\in X\}
 \]
 when $S$ is a subset of $\mathbb{R}^d$.  The function $\dual$ takes
 the points $p_1,\ldots,p_n$ onto hyperplanes $h_1,\ldots,h_n$,
@@ -135,17 +135,17 @@ That is,
      \dual(Z_k(S)) = \{ h\in\mathbb{H^d} : h\cap(R_A(S)\cup R_B(S)) = \emptyset \} \enspace ,
 \]
 where
-\[
+\begin{equation}
    R_A(S) = \left\{x\in\mathbb{R}^d: x_d \ge 
 \left(\frac{1}{k}\sum_{i=1}^{\floor{k}} x\drop H_i^x\right) +
           (x\drop H_{\ceil{k}}^x)(k-\floor{k}) \right\}  \eqlabel{ra}
-\] 
+\end{equation} 
 and
-\[
+\begin{equation}
    R_B(S) = \left\{x\in\mathbb{R}^d: x_d \le 
 \left(\frac{1}{k}\sum_{i=1}^{\floor{k}} x\drop H_{-i}^x\right) +
           (x\drop H_{-\ceil{k}}^x)(k-\floor{k}) \right\} \enspace .
-\] 
+\end{equation}
 The two sets $R_A(S)$ and $R_B(S)$ are convex, unbounded from above,
 respectively, below, and piecewise linear.  Indeed, the linear pieces
 of $R_A(S)$ (respectively $R_B(S)$) are in one to one correspondence
@@ -165,25 +165,68 @@ axis) and then check if this intersection contains the origin.
 
 Under duality, the above strategy is equivalent to finding the lowest
 point on $R_A$ and the highest point on $R_B$ and checking that each
-of these points is above, respectively, below, the hyperplane $x_d=0$.
+of these points is above, respectively, below, the hyperplane
+$\{x:x_d=0\}$.
 In the remainder, we focus on determining the lowest point in $R_A$.
 Finding the highest point in $R_B$ is done in a symmetric manner.  
 
 To apply \thmref{chan} we need to consider a slightly more general
 problem.  For a set $S$ of points in $\mathbb{R}^d$ and a function
 $v:S\rightarrow\mathbb{Z}^+$ define $S^v$ as the multiset obtained by
-replacing each element $p\in S$ with $v(p)$ copies of itself. 
+duplicating each element $p\in S$ $v(p)$ times.  This
+\emph{$v$-weighted} set $S$ allows us to naturally define subproblems.
+For a subset $C\subseteq S$, define $v(C)=\sum_{p\in C}v(p)$ and
+define $\mu(C)=\sum_{p\in C} p\times v(p)/v(C)$.  The
+\emph{contraction} of $(S,v)$ by $C$ is obtained by replacing the
+points of $C$ by their weighted average, $\mu(C)$.  More precisely,
+the contraction of $(S,v)$ by $C$ is the pair $(S',v')$ where
+\[
+    S' = (S\setminus C)
+	\cup \mu(C)
+\]
+and 
+\[
+    v'(p) = \left\{\begin{array}{ll}
+                   v(p) & \mbox{if $p\in S\setminus C$} \\
+                   v(C) & \mbox{if $p=\mu(C)$}
+    \end{array}\right.
+\]
 
-\begin{lem}
+The following lemma explains the relationship between the zonoids of
+$S^v$ and the zonoids of $S'^{v'}$.
+
+\begin{lem}\lemlabel{contraction}
+If $(S',v')$ is a contraction of $(S,v)$ by $C$ then $Z_k(S'^{v'})
+\subseteq Z_k(S^v)$.
+\end{lem}
+
+We now have all the tools required to apply \thmref{chan} to solve our
+decision problem.
+\begin{proof}
+Let $x$ be any point in $Z_k(S'^{v'})$.  Then
+\begin{eqnarray*}
+    x &=& \sum_{p\in S'^{v'}} p\lambda_p \\
+      &=& \sum_{p\in (S\setminus C)^v} p\lambda_p 
+          + \lambda_{\mu(C)}v(C)\mu(C) \\
+      &=& \sum_{p\in (S\setminus C)^v} p\lambda_p 
+          + \lambda_{\mu(C)}\sum_{p\in C} p\times v(p) \\
+      &=& \sum_{p\in (S\setminus C)^v} p\lambda_p  
+          + \sum_{p\in C^v}p\lambda_{\mu(C)} \\
+      &\in& Z_k(S^{v})
+\end{eqnarray*}
+as required.
+\end{proof}
+
+\begin{thm}\thmlabel{decision}
 Given a set $S$ of $n$ points in $\mathbb{R}^d$ and a 
 function $v:S\rightarrow\mathbb{Z}^+$ that is computable in constant
 time, the point $x\in R_A(S^v)$ such
 that $x_d$ is minimum can be found in $O(n)$ expected
 time.
-\end{lem}
+\end{thm}
 
 \begin{proof}
-Let $f$ be a function that maps pairs $(S,v)$ onto a set of
+Let $f$ be a function that maps the pair $(S,v)$ onto a set of
 halfspaces whose intersection is $R_A(S^v)$.  We need to show that the
 function $f$ satisfies the Conditions~(0)--(2) of \thmref{chan}.
 
@@ -193,27 +236,52 @@ programming algorithm to find a point $x$ that satisfies all
 constraints and such that $x_d$ is minimum.
 
 To satisfy Condition 1, we observe that, testing if $x\in R_A(S^v)$
-simply involves checking $x$ satisfies \eqref{ra}.  This can be done
+simply involves checking if $x$ satisfies \eqref{ra}.  This can be done
 using an $O(n)$ time weighted selection algorithm to compute the
-$\ceil{k}$th hyperplane in $\phi(S^v)$ intersected by a downward
+$\ceil{k}$th hyperplane in $\dual(S^v)$ intersected by a downward
 vertical ray originating at $(x_1,\ldots,x_{d-1},\infty)$.  This gives
 the hyperplanes $H_1^x,\ldots,H_{\ceil{k}}^x$ that allow \eqref{ra} to
 be verified directly.
 
-For a
-subset $C\subseteq S$, define $v(C)=\sum_{p\in C}v(p)$ and define the
-\emph{contraction} of $(S,v)$ by $C$ as the pair $(S',v')$ where
-\[
-    S' = (S\setminus C)
-	\cup \left\{\sum_{p\in C} \frac{p\times v(p)}{v(C)}\right\}
-\]
-and 
-\[
-    v'(p) = \left\{\begin{array}{ll}
-                   v(p) & \mbox{if $p\in S\setminus C$} \\
-                   v(C) & \mbox{otherwise} 
-    \end{array}\right.
-\]
+To satisfy Condition~2 we make use of \emph{cuttings} \cite{X}.  In
+particular, we use the fact that, in $O(n)$ time, it is possible to
+partition $\mathbb{R}^d$ into $O(1)$ simplices
+$\Delta_1,\ldots,\Delta_r$ such that the interior of each simplex is
+intersected by at most $n/2$ of the hyperplanes in $\dual(S)$.  For
+each simplex $\Delta_i$ we create a subproblem $(S_i,v_i)$ as follows:
+Let $C\subseteq S$ contain every point $p\in S$ such that $\dual(p)$
+is above the interior of $\Delta_i$.  We first construct the pair
+$(S_i',v_i)$ by contracting $(S,v)$ by $C$.  Next, we obtain $S_i$ by
+removing from $S_i'$ every point $p$ such that $\dual(p)$ is below the
+interior of $\Delta_i$.  The subproblems $(S_i,v_i)$ for $1\le i\le r$
+that we obtain in this manner are each of size at most $n/2+2$.
+
+It follows from \lemref{contraction} and the definition of $Z_k(S)$
+that $Z_k(S_i^{v_i})\subseteq Z_k(S^v)$.  In the dual, this means that
+$R_A(S_i^{v_i})\supseteq R_A(S^v)$.  To satisfy Condition~2 we must
+show that $\bigcap_{i=1}^r R_A(S_i^{v_i}) = R_A(S^v)$.  To see this,
+consider any point $x$ on the boundary of $R_A(S^v)$.  It is
+sufficient to show that $x$ is also on the boundary of at least one
+region $R_A(S_i^{v_i})$ for $1\le i\le r$.  The point $x$ is defined
+by $\ceil{k}$ hyperplanes $h_1,\ldots,h_\ceil{k}\in\dual(S)$ that pass
+above the point $x\drop h_{\ceil{k}}$.  Consider all the simplices in
+$\Delta_1,\ldots,\Delta_r$ whose interiors intersect a vertical line
+through $x$.  Because each such simplex intersects at most $n/2$
+hyperplanes in $\dual(S)$, one of these simplices $\Delta_i$ must
+have an interior that either: 
+\begin{enumerate} 
+\item intersects all of $h_1,\ldots,h_k$ or
+\item intersects none of $h_1,\ldots,h_k$
+
+\end{enumerate}
+
+
+The point $x$ is given
+defined by \eqref{ra} and is obtained as the average of $\ceil{k}$ points
+
+
+
+
 \end{proof}
 
 

@@ -9,12 +9,95 @@
 \newtheorem{prop}{Proposition}
 \newcommand{\cn}{\mathsf{cr}}
 \newcommand{\dn}{\mathsf{dn}}
+\newcommand{\wdn}{\mathsf{wdn}}
+\newcommand{\killtext}[1]{}
 
 
 \begin{document}
 
+\begin{thm}[Klaus's Warm-Up Exercise]
+For any $s,d\in\mathbb{N}$ there exists a binary tree that can not be
+drawn using edges with at most $d$ edge lengths and at most $s$ slopes.
+\end{thm}
+
+\begin{proof}
+Consider a complete binary tree $T$ of height $k$ and suppose it is
+drawn using $s$ slopes and $d$ edge lengths.  Then any root to leaf
+path in $T$ consists of a sequence of vectors of which there are 
+at most $\ell=2sd$ types.  Furthermore, the final location of a leaf
+depends only on the number of each type of vector used and not on the
+order in which they appear.  Thus, there are only 
+\[
+           {k+\ell-1 \choose \ell} \le k^\ell
+\]
+possible locations for the leaves of $T$.  However, $T$
+has $2^k$ leaves.  Thus, for any $k$ such that $2^k> k^\ell$ there
+must be at least two leaves of $T$ at the same location.
+\end{proof}
 
 
+\begin{lem}\label{lem:random-walk}
+Let $T$ be a complete rooted binary tree of depth $k$ and let each
+edge of $T$ be labelled with a vector of length $t$ having exactly
+$t-1$ zero entries and exactly $1$ entry in $\{+1,-1\}$.  Call the
+\emph{value} of a vertex $v$ the sum of all vectors on the path from
+the root of $T$ to $v$.  Then there exists a set of $\Omega(c_t^k)$
+root to leaf paths in $T$ such that the vertices on these paths have
+only $O(k^{1-\epsilon_t})$ different values, where $c_t > 1$ and
+$\epsilon_t > 0$ depend only on $t$.
+\end{lem}
+
+\begin{proof}
+This should be true because it is a very-weak generalization of the
+random walk theorem which states that almost all random walks of
+length $n$ on the line never travel distance greater than $\sqrt{n}$
+from the origin.
+\end{proof}
+
+\begin{thm}
+There exists outerplanar graphs $G$ with $\wdn(G) > 2$.
+\end{thm}
+
+\begin{proof}
+Let $G$ be the ``complete'' outerplanar graph of depth $k$.  Suppose
+that $G$ is drawn using 2 edge lengths, say $a$ and $b$.  Then the
+triangles of $G$ come in 4 types: (1)~isoscelese triangles with 2
+sides of length $a$ and one side of length $b$, (2)~isoscelese
+triangles with 2 sides of length $b$ and one side of length $a$,
+(3)~equilateral triangles of side length $a$ and (4)~equilateral
+triangles of side length $b$.  For each type of triangle, select a
+point in its interior and call that point the \emph{center} of the
+triangle.
+
+Consider the point $p$ that is the center of the root triangle of $G$.
+For any other center $q$ there is a unique path from $p$ to $q$ that
+consists of a sequence of centers where each consecutive pair of
+centers come from two triangles that share an edge.  This path can be
+viewed as a sequence of at most $k$ vectors.  These vectors have at
+most $4^2=16$ different lengths.  Furthermore, two consecutive vectors
+differ in direction by one of at most 16 (32?) different angles.  Call
+these angles $\alpha_1,\ldots,\alpha_{16}$.  Thus, the direction of
+any particular vector can be written as $\sum_{i=1}^{16} k_i\alpha_i$
+where each $k_i$ is an integer.  By Lemma~\ref{lem:random-walk}, there
+exists a set of $\Omega(c_{16}^k)$ centers, each of which is the sum
+of $k$ vectors, at most $\ell=O(k^{1-\epsilon_{16}})$ of which are
+distinct.  Therefore, there are at most
+\[
+     {k+\ell-1 \choose \ell} \le k^{O(k^{1-\epsilon_{16}})}    
+\]
+Therefore there must be at least
+$\Omega(c_{16}^k)/k^{O(k^{1-\epsilon_{16}})}$ centers that are at the
+same location.  As there are only 4 different types of triangles and
+$k^{O(k^{1-\epsilon_{16}})}$ different orientations of the triangles we
+conclude that, for sufficiently large $k$, there must be at least 2
+triangles of the same type and orientation.  Thus, the three vertices
+of these two triangles of $G$ are assigned the same locations.
+\end{proof}
+
+\killtext{
+\begin{thm}
+There exist outerplanar graphs $G$
+\end{thm}
 
 \begin{thm}
 For any outerplanar graph $G$, $\dn(G)\le 3$.
@@ -112,8 +195,10 @@ embedded on the segment $pr$.
 
 It is easy to observe that there are outerplanar graphs with distance
 number greater than 1.  Consider for example the graph comprised of
-one degree-6 vertex adjacent to each vertex of a path of length 6. For
-edge-maximal outerplanar graphs, in fact for all weak planar
+one degree-6 vertex adjacent to each vertex of a path of length 6. 
+}
+
+For edge-maximal outerplanar graphs, in fact for all weak planar
 triangulations,\footnote{A planar graph is a \emph{weak triangulation}
 if it has an embedding where the edges on the unbounded face form a
 cycle and the edges of the bounded faces form 3-cycles.} we can decide

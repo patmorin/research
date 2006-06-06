@@ -26,7 +26,7 @@
 
 \begin{document}
 \title{\MakeUppercase{Geodesic Ham-Sandwich Cuts}%
-  \thanks{Partially supported by  NSERC, NSF, DURSI 2001SGR00224, Acció Integrada
+  \thanks{Partially supported by  NSERC, NSF, DURSI~2005SGR00692, Acció Integrada
 UPC-McGill (DURSI2004) and MCYT BFM2003-0368.}}
 \author{Prosenjit Bose%
 	\thanks{School of Computer Science, Carleton University,
@@ -43,7 +43,7 @@ UPC-McGill (DURSI2004) and MCYT BFM2003-0368.}}
 		Brooklyn Polytechnic University,
 		\email{jiacono@poly.edu}}
    \and Stefan Langerman%
-	\thanks{Charg\'e de recherches du FNRS, 
+	\thanks{Chercheur Qualifi\'e de recherches du FNRS, 
 		D\'epartement d'Informatique,
 		Universit\'e Libre de Bruxelles,
 		\email{stefan.langerman@ulb.ac.be}}
@@ -57,13 +57,12 @@ UPC-McGill (DURSI2004) and MCYT BFM2003-0368.}}
 \begin{abstract} Let $P$ be a simple polygon with $m$ vertices, $k$ of
 which are reflex, and which contains $r$ red points and $b$ blue
 points in its interior.  Let $n=m+r+b$. A \emph{ham-sandwich geodesic}
-is a shortest path in $P$ between any two points on the boundary of
-$P$ that simultaneously bisects the red points and the blue points.
-We present an $O(n \log k)$-time algorithm for finding a ham-sandwich
+is a shortest path in $P$ between two points on the boundary of $P$
+that simultaneously bisects the red points and the blue points.  We
+present an $O(n \log k)$-time algorithm for finding a ham-sandwich
 geodesic.  We also show that this algorithm is optimal in the
 algebraic computation tree model when parameterizing the running time
-with respect to $n$ and $k$. 
-\end{abstract}
+with respect to $n$ and $k$.  \end{abstract}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -74,7 +73,7 @@ and $b$, respectively.  We call the elements of $R$ the \emph{red
 points} and the elements of $B$ the \emph{blue points}.  The
 (2-dimensional) \emph{ham-sandwich theorem} (for point sets) states
 that there always exists a line $L$ such that each of the two open
-halfplanes defined by $L$ contains at most $r/2$ red points and at
+halfplanes bounded by $L$ contains at most $r/2$ red points and at
 most $b/2$ blue points.\footnote{The full ham-sandwich theorem is much
 more geneneral:  Let $S_1,\ldots,S_d$ be bounded measurable subsets of
 $\mathbb{R}^d$.  The \emph{ham-sandwich theorem} states that there
@@ -87,15 +86,14 @@ separable (there exists a line that separates $R$ from $B$) then a
 ham-sandwich cut can be found in $O(n)$ time.  Edelsbrunner and
 Waupotitisch \cite{ew86} modified Meggido's method and obtained an
 $O(n\log n)$ time algorithm for the general case.  Lo and Steiger
-\cite{ls90} gave a randomized algorithm with $O(n)$ expected running
-time.  Since this algorithm is easily derandomized using
-$\epsilon$-nets \cite{lms94} this result finally settled the problem of
-finding planar ham-sandwich cuts. 
+\cite{ls90} finally settled the problem by giving an $O(n)$ time
+algorithm for computing a ham-sandwich cut of two arbitrary point sets
+in the plane.
 
 The problem of computing ham-sandwich cuts in $d$ dimensions, $d\ge
 3$, has been considered by Lo \etal\ \cite{lms94}.  Several
 generalizations of planar ham-sandwich cuts have also been proposed
-\cite{anru98,bks00,iuy98a,iuy98b}. Particularly relevant to the
+\cite{anru98,bks00,bl05,iuy98a,iuy98b}. Particularly relevant to the
 current paper is the algorithm of D{\'\i}az and O'Rourke for computing
 a ham-sandwich cut of two simple polygons \cite{do90}. 
 
@@ -211,13 +209,14 @@ this step runs in $O(n\log k)$ time.
 where $p$ and $q$ are constrained to lie on two convex chains.  Using
 a further prune-and-search step, we reduce this problem, in $O(n\log
 k)$ time, to the problem of computing a ham-sandwich geodesic in a
-6-sided polygon with two vertical sides and 2 reflex vertices.  The
-points $p$ and $q$ are constrained to lie on the two vertical sides.
+polygon having at most 6 vertices, with two vertical sides and 2
+reflex vertices.  The points $p$ and $q$ are constrained to lie on the
+two vertical sides.
 
 \item We define a point-geodesic duality that allows us to apply the
 linear-time planar ham-sandwich algorithm of Lo and Steiger
-\cite{ls90} to find a ham-sandwich geodesic of this 6-gon in $O(n)$
-time.  
+\cite{ls90} to find a ham-sandwich geodesic in this constant-sized
+polygon in $O(n)$ time.
 \end{enumerate}
 
 The correctness of this algorithm depends on the following result:
@@ -241,8 +240,8 @@ geodesic $pq$ goes from having at least $r/2$ red points to its right
 (when $p=x$ and $q=z$).  Since the motion is continuous there must
 therefore be some point at which the geodesic $pq$ has at most $r/2$
 red points to its right and at most $r/2$ red points to its left.
-This geodesic is a ham-sandwich geodesic with $w\in\chain{w}{x}$ and
-$y\in\chain{y}{z}$, as required.
+This geodesic is a ham-sandwich geodesic with $p\in\chain{w}{x}$ and
+$q\in\chain{y}{z}$, as required.
 \end{proof}
 
 In the next 5 subsections we explain the 5 steps of our algorithm in
@@ -256,24 +255,25 @@ report, in $O(n)$ time, the subset of $S$ to the right of $pq$.  To do
 this, we partition $P$ into convex pieces $P_1,\ldots,P_\ell$,
 $\ell=O(n)$, to obtain a convex partition.  With each piece $P_i$ we
 store a list $L_i$ of the points in $S$ contained in $P_i$.  The
-geodesic $pq$ defines three types of pieces: (1)~The pieces completely
-to the left of $pq$, (2)~the pieces completely to the right of $pq$
-and (3)~the pieces that intersect $pq$.  Note that each type~3 piece
-intersects $pq$ only in a single line segment (otherwise $pq$ would
-not be a shortest path).  Therefore, by walking in the convex
-subdivision along the path $pq$, we can classify each $P_i$ as type~1,
-2, or 3.  Furthermore, for each type~3 piece $P_i$ we can compute
-which points of $L_i$ are to the right of $pq$ simply by testing them,
-one at a time, against the segment $pq\cap P_i$.  Thus we can count
-the number of points to the right of $pq$ in $O(n)$ time.
+geodesic $pq$ can be computed in $O(n)$ time \cite{lp84} and it defines three
+types of pieces: (1)~The pieces completely to the left of $pq$,
+(2)~the pieces completely to the right of $pq$ and (3)~the pieces that
+intersect $pq$.  Note that each type~3 piece intersects $pq$ only in a
+single line segment (otherwise $pq$ would not be a shortest path).
+Therefore, by walking in the convex subdivision along the path $pq$,
+we can classify each $P_i$ as type~1, 2, or 3.  Furthermore, for each
+type~3 piece $P_i$ we can compute which points of $L_i$ are to the
+right of $pq$ simply by testing them, one at a time, against the
+supporting line of the segment $pq\cap P_i$.  Thus we can count the
+number of points to the right of $pq$ in $O(n)$ time.
 
 What remains is to show how we partition $P$ into the convex pieces
 and to determine which piece each element of $S$ falls into.  First we
-observe that if $k>\sqrt{n}$ then $n\log k=\Omega(n\log n)$.  In this
+observe that if $k>n^{1/3}$ then $n\log k=\Omega(n\log n)$.  In this
 case, we can triangulate $P$ in $O(n)$ time and use planar point
 location to determine which triangle contains each point of $S$ in
 $O(n\log n)=O(n\log k)$ time.  Therefore, we may assume that $k\le
-\sqrt{n}$.
+n^{1/3}$.
 
 To partition $P$ we shoot upwards and/or downwards vertical rays from
 each reflex vertex into the interior of $P$. These rays partition $P$
@@ -291,25 +291,26 @@ which piece $P_i$ contains that point.
 For each piece $P_i$, we compute the perpendicular bisector of $P_i$
 with every other piece $P_j$, i.e., the perpendicular bisector of the
 segment joining the two closest points on $P_i$ and $P_j$.  Each such
-bisector can be computed in $O(\log n)$ time using the binary search
-procedure of Overmars and van~Leeuwen \cite{ov81}.  Clearly a point
-$p\in P$ is contained in $P_i$ if and only if $p$ is on the same side
-of each of these $O(k)$ lines as $P_i$.  Thus, determining if $p$ is
-contained in $P_i$ involves determining if $P$ is in a convex polygon
-with $O(k)$ vertices.
+bisector can be computed in $O(\log n)$ time using Edelsbrunner's
+binary search procedure \cite{e85}. Clearly a point $p\in P$ is
+contained in $P_i$ if and only if $p$ is on the same side of each of
+these $O(k)$ lines as $P_i$.  Thus, determining if $p$ is contained in
+$P_i$ involves determining if $P$ is in a convex polygon with $O(k)$
+vertices.  The total time to compute all these $O(k)$ polysons is
+$O(k^2\log n)$. 
 
 By doing this for each $P_i$, we obtain $O(k)$ disjoint convex
 polygons each of size $O(k)$.  We can, in $O(k^2\log k)$ time
 preprocess this set of polygons for point location so that we can
 answer point location queries in $O(\log k)$ time per query.  Thus the
 total preprocessing time is 
-\[ O(n+k^2\log k + n\log k)= O(n\log k) \]
-for $k\le \sqrt{n}$.
+\[ O(n+k^2\log n+k^2\log k + n\log k)= O(n\log k) \]
+for $k\le n^{1/3}$.
 
 To summarize, we partition $P$ into $O(k)$ convex pieces.  From these
 pieces we derive a planar subdivision of size $O(k^2)$ such that,
 locating a point in this subdivision is sufficient to determine which
-$P_i$ the point lies in.  We then locate each point of $S$ in this
+piece the point lies in.  We then locate each point of $S$ in this
 arrangement in $O(\log k)$ time per point, for a total running time of
 $O(n\log k)$.  Once this is done, we can determine the subset of $S$
 on the right side of a query geodesic in $O(n)$ time by walking in the
@@ -348,18 +349,18 @@ order.  Thus, we are concerned with finding the point $q'$.
 To find this median point $q'$ we begin by computing the shortest path
 tree from $p$ to every vertex of $P$ in $O(n)$ time using the
 \emph{funnel algorithm} of Chazelle \cite{c82} and Lee and Preparata
-\cite{lp94}.  We then \emph{augment} this tree by extending each edge
+\cite{lp84}.  We then \emph{augment} this tree by extending each edge
 that joins a parent vertex to a child vertex in the direction of the
 child until it hits the boundary of $P$ (see
 \figref{augmented}). The result is a partition of $P$ into
-triangles that we call the \emph{augmented shortest path partition}.
+triangles that we call the \emph{augmented shortest-path partition}.
 We then preprocess the augmented shortest-path partition in $O(n)$
 time using Kirkpatrick's algorithm \cite{k83} so that point location
 queries can be answered in $O(\log n)$ time.
 
 \begin{figure}[htbp]
 \begin{center}\includegraphics[width=3in]{augmented}\end{center}
-\caption{The augmented shortest path tree rooted at $p$. Edges added
+\caption{The augmented shortest path partition for a point $p$. Edges added
 during the augmenting step are dotted.}
 \figlabel{augmented}
 \end{figure}
@@ -407,7 +408,9 @@ $O(n)$ time, we can compute the number, $b'$, of points in $B$ to the
 right of $g_a$.  The element $q'$ that we are looking for is the
 element whose rank in $B''$ is $b/2-b'$.  But, since
 $|B''|=O(n^{3/4})$ we can easily find the element $q'$ in
-$O(n+b^{3/4}\log b) = O(n)$ time by sorting the elements of $B''$. 
+$O(n+b^{3/4}\log n+b^{3/4}\log b) = O(n)$ time by locating the
+elements of $B''$ in the augmented shortest path partition and then
+sorting them. 
 
 To summarize, we take a random sample $B'$ of $B$ of size $b^{3/4}$
 and sort this sample by the ``to the right of relationship.''  From
@@ -490,13 +493,12 @@ exactly $b'$ blue points to their right.
 \subsubsection{Skinny Funnels}
 
 To treat the case of a skinny funnel, we apply prune and search to the
-sets $R$ and $B$.  Note that a skinny funnel consists of two
+sets $R$ and $B$. Note that a skinny funnel consists of two
 \emph{ends} $E_1$ and $E_2$ each of which is a polygon whose boundary
 is made up of two reflex chains and one convex chain.  These ends each
 have \emph{heads} $h_1$ and $h_2$, respectively, that are the common
-vertices in the two reflex chains.  (See \figref{funnel}.b.)
-All the geodesics we are interested in must pass through the heads of
-both ends. 
+vertices in the two reflex chains.  (See \figref{funnel}.b.) All the
+geodesics we are interested in pass through the heads of both ends. 
 
 Suppose, without loss of generality, that $|B|\ge |R|$.  To execute a
 pruning step we first choose a random point $p'$ from $B$. Suppose,
@@ -529,7 +531,7 @@ The above pruning step runs in $O(k+r+b)$ time and reduces $r+b$ by a
 positive constant fraction with positive constant probability.  It
 follows that the expected time to reduce $r+b$ to a small constant is
 $O(k\log n + n) = O(n\log k)$, at which point the ham-sandwich cut can
-be computed in $O(k)$ time using a brute force method.
+be computed in $O(k)$ time using a brute-force algorithm.
 
 \subsubsection{Fat Funnels}
 
@@ -600,7 +602,7 @@ our algorithm for skinny funnels.
 point $p_{i+1}$ was generated by the $(i+1)$st edge of the upper chain.
 Extend this edge to the right until it hits some edge of the funnel.
 If it does not hit chain $\chain{y}{z}$ then we know there exists a
-ham-sandwich geodesic contained in the funnel that joins
+ham-sandwich geodesic contained in the skinny funnel that joins
 $\chain{p_{i}}{p_{i+1}}$ to $\chain{y}{z}$ and we can find it in $O(n\log
 k)$ time using our algorithm for skinny funnels.  
 
@@ -618,7 +620,7 @@ $\chain{p_i}{p_{i+1}}$ to $\chain{q_i}{q_{i+1}}$ and we can find it in $O(
 n\log k)$ time using our algorithm for skinny funnels.
 
 \item $q_{i+1}$ is above $q'$ and $q_i$ is below $q'$
-(\figref{simplify}.b.1).  Then we compute the geodesic $p'q'$
+(\figref{simplify}.b.2).  Then we compute the geodesic $p'q'$
 having exactly $b'$ blue points below it (which will have its other
 endpoint $p'$ in $\chain{p_{i}}{p_{i+1}}$).  If $p'q'$ has at least
 $r'$ red points below it then there exists a ham-sandwhich geodesic in
@@ -629,7 +631,7 @@ joins $\chain{p_i}{p'}$ to $\chain{q_i}{q'}$.  But this funnel has
 only one two edges on its upper chain, as required.
 
 \item $q_{i+1}$ and $q_{i}$ are both below $q'$
-(\figref{simplify}.b.1).  In this case, the funnel joining
+(\figref{simplify}.b.3).  In this case, the funnel joining
 $\chain{p_i}{p_{i+1}}$ and $\chain{q_i}{q_{i+1}}$ has at most one reflex
 vertex in its upper chain, as required.
 \end{enumerate}
@@ -691,7 +693,7 @@ dualization, the geodesic $g$ dualizes to the point
 $\dual{g}=(g_x,g_y)$.
 
 \begin{figure*}[htbp]
-\begin{center}\includegraphics[scale=0.6]{dual}\end{center}
+\begin{center}\includegraphics{dual}\end{center}
 \caption{A 6-gon containing three points (left) and the dual of these
 three points (right).}
 \figlabel{dual}
@@ -710,7 +712,7 @@ arc by attaching two rays whose slope is 1 ($45^\circ$).
 
 \Figref{dual} shows an example 6-gon containing three points
 (left) and the dual of these three points (right).  The dashed lines
-in the left figure show the duals of the polygon's two reflex
+in the right figure show the duals of the polygon's two reflex
 vertices.  This dualization has the following properties:
 \begin{enumerate}
 \item For a point $p$, $\dual{p}$ consists of at most five line
@@ -831,9 +833,9 @@ participants, namely,
    Tom Shermer,
    Sue Whitesides, 
 and
-   David Wood for helpful
+   David Wood for insightful
 discussions and for providing a stimulating working environment.  Jeff
-Erickson was particularly hepful with the lower bound argument in
+Erickson was particularly helpful with the lower bound argument in
 \secref{lower-bound}.
 
 \bibliographystyle{abbrv}

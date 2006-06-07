@@ -1,4 +1,4 @@
-\newcommand{\vc}[2]{#1}
+\newcommand{\vc}[2]{#2}
 \vc{
   \documentclass[lotsofwhite]{patmorin}
 }{
@@ -19,8 +19,8 @@
 
 \title{
 \vc{\MakeUppercase{Removing Outliers to Minimize Area and Perimeter}}
-{Removing Outliers to Minimize Area and Perimeter}\thanks{This
-work was partly funded by NSERC.}}
+{Removing Outliers to Minimize Area and Perimeter}%
+\thanks{School of Computer Science. Carleton University. This work was partly funded by NSERC.}}
 
 \author{Rossen Atanassov \and
 	Pat Morin \and
@@ -63,6 +63,7 @@ these problems the \emph{area-based}, respectively,
 particularly interested in the case when $c$ (the number of outliers)
 is small.
 
+\vspace{-3mm}
 \paragraph{Previous Work.} 
 
 The outlier removal problems stated above and similar problems are
@@ -113,16 +114,17 @@ problems should have fast solutions for sufficiently small values of
 $c$.
 }{}
 
+\vspace{-3mm}
 \paragraph{New Results.}
 
 For fixed values of $k$, the results above give $O(n\log n)$ and
-$O(n^2)$ time algorithms for finding the $k$ point subset of $S$ with
-minimum perimeter, respectively, area, convex hull.  However, when $k$
-is close to $n$ the above algorithms require $\Omega(n^3)$ time.  In
-the current paper we consider specifically the case when $k=n-c$ and
-show that perimeter-based and area-based outlier removal problems can
-be solved in $\Oruntime$ time.  Thus, for any fixed $c$, both
-problems can be solved in $O(n\log n)$ time.
+$O(n^2\log n)$ time algorithms for finding the $k$ point subset of $S$
+with minimum perimeter, respectively, area, convex hull.  However,
+when $k$ is close to $n$ the above algorithms require $\Omega(n^3)$
+time.  In the current paper we consider specifically the case when
+$k=n-c$ and show that perimeter-based and area-based outlier removal
+problems can be solved in $\Oruntime$ time.  Thus, for any fixed $c$,
+both problems can be solved in $O(n\log n)$ time.
 
 \vc{
 We observe that, in the algebraic decision tree model of computation,
@@ -142,10 +144,10 @@ ommitted from this abstract.  Full details can be found in the
 accompanying technical report \cite{amw06}.}
 
 The remainder of the paper is organized as follows:
-\secref{preliminaries} defines the notation and some previous results
-that are used in subsequent sections. \secref{algorithm} describes the
-outlier removal algorithm. \secref{conclusions} concludes and suggests
-directions for future research.
+\secref{preliminaries} presents definitions, notation, and previous
+results that are used in subsequent sections. \secref{algorithm}
+describes the outlier removal algorithm. \secref{conclusions}
+concludes and suggests directions for future research.
  
 
 \section{Preliminaries} 
@@ -226,7 +228,7 @@ We output the point $p_{0,j}$ that gives the largest difference in
 area.
 
 To analyze the overall running time of this algorithm we observe that
-any point $p_{1,k}\in S_1$ appears in at most two triangles
+any particular point $p_{1,k}\in S_1$ appears in at most two triangles
 $\triangle p_{0,j-1},p_{0,j},p_{0,j+1}$ and
 $\triangle p_{0,j},p_{0,j+1},p_{0,j+2}$.  Stated another way,
 \[
@@ -241,7 +243,7 @@ as claimed.
 \subsection{Removing 2 Outliers}
 
 Next we consider the case $c=2$.  In this case, the optimal solution
-$S'$ is of one of three following forms:
+$S'$ has one of three following forms:
 
 \begin{enumerate}
 
@@ -365,14 +367,14 @@ elements of $S_0$ and the elements removed come in $d$ groups
 $G_0^1,\ldots,G_0^d$ of consecutive elements with each group separated
 by at least one element of $S_0$.  The sizes of these groups are given
 by the labels of the nodes on the rightmost path in $T$, in the order
-in which they occur.  That is, the $j$th node, $N_0^j$ on the right
-most path of $T$ has the label $|G_0^j|$. 
+in which they occur.  That is, the $j$th node, $N_0^j$ on the
+rightmost path of $T$ has the label $|G_0^j|$. 
 
 \begin{figure}
 \begin{center}
 \begin{tabular}{ccc}
-\includegraphics{soltree-a} & 
-\includegraphics{soltree-b} &
+\includegraphics[scale=.9]{soltree-a} & 
+\includegraphics[scale=.9]{soltree-b} &
 \includegraphics{soltree-c} \\
 (a) & (b) & (c)
 \end{tabular}
@@ -464,8 +466,7 @@ The details of this are standard and ommitted here.}{}
     \STATE{reinsert $S_{i,\ell},\ldots,S_{i,\ell+c_d-1}$ into $S_{i}$}
   \ENDFOR
 \ENDFOR
-\vc{\RETURN{$\textsc{CombineSolutions}(X,d,k-j+1,c_1,\ldots,c_d)$}}
-{\RETURN{$\textsc{CombineSolutions}(X)$}}
+\RETURN{$\textsc{CombineSolutions}(X,d,k-j+1,c_1,\ldots,c_d)$}
 \end{algorithmic}
 \end{minipage}
 \vc{}{
@@ -488,11 +489,11 @@ $T$.}
 At the topmost level, the
 algorithm is called as $\textsc{FindOptimalOfType}(T,0,0,|S_0|-1)$.
 
-\vc{
 To analyze the cost of \textsc{FindOptimalOfType} it suffices to
 determine, for each point $p_{i,j}$, the maximum number of times
 $p_{i,j}$ is deleted (in line 8) by the algorithm.  All other work
-done by the algorithm can be bounded in terms of this quantity.  For
+done by the algorithm can be bounded in terms of this quantity.
+\vc{For
 points $p_{0,j}\in S_0$, each point is deleted exactly $g_0$, times,
 where $g_0$ is the sum of labels of nodes on the rightmost path of
 $T$. 
@@ -518,10 +519,13 @@ we have the relationships:
         \end{array}\right.
 \] 
 Using the fact that $g_i \le c$, we obtain the (extremely loose) upper
-bound $m_i \le (3c)^{i+1}$.  Finally, we note the points of $S_c$
+bound $m_i \le (3c)^{i+1}$.  
+}{
+Using Carath\'eodory's Theorem \cite{eckhoff93}, it is possible to show that a
+point in $S_i$ is deleted at most $(3c)^{i+1}$ times.}
+This implies that the points of $S_c$
 (which are never deleted) appear in at most $3m_{c-1}$ subproblems.
 Putting all this together we obtain:
-}{}
 
 \begin{lem}\lemlabel{recursion}
 The algorithm \textsc{FindOptimalOfType} finds the optimal solution
@@ -599,31 +603,11 @@ outlier removal problem that runs in $O(n\log n)$ time.
 \end{thm}
 }
 
-We close with a few open problems. We have made no attempt to optimize
-the dependence of our running time with respect to the value of $c$
-and, indeed, the running time of our algorithm is superpolynomial in
-$c$. Does there exist an algorithm that is polynomial in $c$ but that
-still runs in $O(n\log n)$ time for any fixed value of $c$?
-
-The outlier removal problems we study in this paper are two special
-cases of the following \emph{general outlier removal} problem.  Given
-any function $f$ that maps subsets of $\mathbb{R}^2$ onto $\mathbb{R}$
-we want to find, for a given set $S$ of $n$ points in $\mathbb{R}^2$ a
-subset $S'\subseteq S$, $|S'|=c$, such that $f(S\setminus S')$ is
-minimum.  Functions $f$ of particular interest include:
-\vc{\begin{enumerate}
-\item $f(X)$ is the radius of the smallest closed disk contain $X$,
-\item $f(X)$ is the diameter of $X$ ($f(X)=\max\{\|ab\|:a,b\in X\}$), and
-\item $f(X)$ is the variance of $X$ ($f(X)=\sum_{a\in X} \| am \|^2$
-where $m=\sum_{a\in X} a/|X|$.
-\end{enumerate}
-}{the radius of the smallest disk containing $S\setminus S'$, the
-diameter of $S\setminus S'$ or the variance of $S\setminus S'$.}
-For the first two functions, it is easy to obtain $O(3^c n)$ and
-$O(2^cn\log n)$ time algorithms, respectively, using the fact that the
-smallest enclosing disk and the diameter are defined by at most 3,
-respectively, 2, points of $S$.  Are there algorithms for these
-problems whose running time depends only polynomially on $c$?
+We have made no attempt to optimize the dependence of our running time
+with respect to the value of $c$ and, indeed, the running time of our
+algorithm is superpolynomial in $c$. Does there exist an algorithm
+that is polynomial in $c$ but that still runs in $O(n\log n)$ time for
+any fixed value of $c$?
 
 \bibliographystyle{plain}
 \bibliography{outliers}

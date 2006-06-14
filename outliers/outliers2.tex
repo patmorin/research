@@ -1,16 +1,5 @@
-\newcommand{\vc}[2]{#2}
-\vc{
-  \documentclass[lotsofwhite]{patmorin}
-}{
-  \documentclass{CCCG06}
-}
-
-% A macro for version control 
-% Usage: \vc{journal version}{conference version}
-%\newcommand{\vc}[2]{#1}
-
-\usepackage{graphicx,amsfonts}
-\vc{\usepackage{amsthm}}{}
+\documentclass[lotsofwhite]{patmorin}
+\usepackage{graphicx,amsthm,amsfonts}
 
 \usepackage[noend]{algorithmic}
 
@@ -18,13 +7,10 @@
 
 
 \title{
-\vc{\MakeUppercase{Removing Outliers to Minimize Area and Perimeter}}
-{Removing Outliers to Minimize Area and Perimeter}%
+\MakeUppercase{Removing Outliers}%
 \thanks{School of Computer Science. Carleton University. This work was partly funded by NSERC.}}
 
-\author{Rossen Atanassov \and
-	Pat Morin \and
-	Stefanie Wuhrer}
+\author{Carleton Open Problems Group}
 
 \date{}
 
@@ -45,36 +31,50 @@
 
 \begin{abstract}
 We consider the problem of removing $c$ points from a set $S$ of $n$
-points so that the resulting point set has the smallest possible
-convex hull.  Our main result is an $\Oruntime$ time algorithm
-that solves this problem when ``smallest'' is taken to mean least area
-or least perimeter.
+points so that the remaining point set is optimal in some sense.
+Definitions of optimality we consider include having minimum diameter,
+having minimum area (perimeter) bounding box, having minimum area
+(perimeter) convex hull.  For constant values of $c$, all our
+algorithms run in $O(n\log n)$ time.
 \end{abstract}
 
 \section{Introduction}
 
 Motivated by the problem of removing outliers in a data set, this
 paper considers the following problem: Let $S$ be a set of $n$ points
-in $\mathbb{R}^2$ with convex hull denoted by $\ch(S)$.  We consider
-the problem of selecting a subset $S'\subseteq S$, $|S'|=c$ such that
-the area, or perimeter, of $\ch(S\setminus S')$ is minimum.  We call
-these problems the \emph{area-based}, respectively,
-\emph{perimeter-based}, \emph{outlier removal problems}.  We are
-particularly interested in the case when $c$ (the number of outliers)
-is small.
+in $\mathbb{R}^2$ and let $f:2^{\mathbb{R}^2}\mapsto \mathbb{R}$ be a
+function mapping point sets onto real values.  We consider the problem
+of selecting a subset $S'\subseteq S$, $|S'|=c$ such that
+$f(S\setminus S')$ is minimum.  The objective functions $f$ that we
+consider are:
+\begin{enumerate}
+\item $f(X)$ is the diameter of $X$,
+\item $f(X)$ is the area/perimeter of the smallest axes-parallel
+rectangle containing $X$, and
+\item $f(X)$ is the area/perimeter of the convex hull of $X$.
+\end{enumerate}  
 
-\vspace{-3mm}
+We call these problems the \emph{$f$-based outlier removal problems}.
+We are particularly interested in the case when $c$ (the number of
+outliers) is small.
+
 \paragraph{Previous Work.} 
 
 The outlier removal problems stated above and similar problems are
 fairly well-studied problems in computational geometry.  However, most
 work thus far has focused on the case when $c$ is large. More
 specifically, most research has been on the problem of finding a $k$
-point subset (a $k$-cluster) $X\subseteq S$, $|X|=k$, such that
-$\ch(X)$ has minimum area or perimeter. These are the same problems
-studied in the current paper with $k=n-c$ except that our focus is on
-large values of $k$ (small $c$) and most existing research focuses on
-designing efficient algorithms for small values of $k$.
+point subset (a $k$-cluster) $X\subseteq S$, $|X|=k$, such that $f(X)$
+is minimum. These are the same problems studied in the current paper
+with $k=n-c$ except that our focus is on large values of $k$ (small
+$c$) and most existing research focuses on designing efficient
+algorithms for small values of $k$.
+
+The problem of finding a subset of $S$ of size $k$ with minimum
+diameter has been studied by Aggarwal \etal\ \cite{aiks89} who give an
+$O(k^{2.5}n\log k+n\log n)$ time algorithm.  The same authors give an
+$O(k^2n\log n)$ time algorithm to find the the subset of $S$ with the
+minimum perimeter enclosing axes-parallel rectangle.
 
 The problem of finding a subset of $S$ of size $k$ that has the least
 perimeter convex hull was first considered over 20 years ago by Dobkin
@@ -98,7 +98,6 @@ the $n\choose 2$ line segments determined by pairs of points in $S$.
 This allows the problem to be solved by considering $O(n^2)$
 subproblems each of size $O(k)$.
 
-\vc{
 Note that finding a subset $X\subseteq S$ of size $k$ whose convex hull
 has minimum area generalizes the problem of determining if $S$
 contains $k$ collinear points (in which case $S$ has a subset of size
@@ -112,42 +111,56 @@ $O((n^2/k)\log(n/k))$ time.  Notice that, for $k=\Omega(n)$, this
 gives an $O(n)$ time algorithm, which offers hope that outlier removal
 problems should have fast solutions for sufficiently small values of
 $c$.
-}{}
 
-\vspace{-3mm}
 \paragraph{New Results.}
 
-For fixed values of $k$, the results above give $O(n\log n)$ and
-$O(n^2\log n)$ time algorithms for finding the $k$ point subset of $S$
-with minimum perimeter, respectively, area, convex hull.  However,
-when $k$ is close to $n$ the above algorithms require $\Omega(n^3)$
-time.  In the current paper we consider specifically the case when
-$k=n-c$ and show that perimeter-based and area-based outlier removal
-problems can be solved in $\Oruntime$ time.  Thus, for any fixed $c$,
-both problems can be solved in $O(n\log n)$ time.
+For fixed values of $k$, the results described above give $O(n\log n)$
+or $O(n^2\log n)$ time algorithms for finding the $k$ point subset of
+$S$ that minimize $f$.  However, when $k$ is close to $n$ the above
+algorithms require $\Omega(n^3)$ time.  
 
-\vc{
-We observe that, in the algebraic decision tree model of computation,
-$\Omega(n\log n)$ is a lower bound for outlier removal problems even
-when $c=1$.  This is because the problem, \textsc{Set-Equality}, of
-determining whether two sets $A$ and $B$ of real numbers are equal has
-an $\Omega(n\log n)$ lower bound in the algebraic decision tree model.
-The \textsc{Set-Equality} problem can be mapped to an outlier removal
-problem on the point multiset $S=S_A \uplus S_B$ where $S_A=\{(x,x^2):
-x\in A\}$, $S_B=\{(x,x^2):x\in B\}$ and $\uplus$ denotes multiset
-union. The sets $A$ and $B$ are equal if and only if for every $p\in
-S$, $\ch(S)=\ch(S\setminus\{p\})$.  Thus (in a very weak sense) the
-running time of our algorithm is optimal, at least in terms of its
-dependence on $n$.
-}{Due to space constraints, many details and all proofs have been
-ommitted from this abstract.  Full details can be found in the
-accompanying technical report \cite{amw06}.}
+In the current paper we consider specifically the case when $k=n-c$.
+For Problem~1 we obtain an $O(n\log n + cn + c^7)$ time algorithm.
+For problem~2 we obtain an $O(n + c^3)$ time algorithm.  For Problem~3
+we obtain an $\Oruntime$ algorithm.  We show, by giving $\Omega(n\log
+n)$ lower bounds for both Problems~1 and 3 that, for fixed values of
+$c$, our algorithms are essentially optimal.
+
+
 
 The remainder of the paper is organized as follows:
 \secref{preliminaries} presents definitions, notation, and previous
 results that are used in subsequent sections. \secref{algorithm}
 describes the outlier removal algorithm. \secref{conclusions}
 concludes and suggests directions for future research.
+
+
+\section{Minimizing Diameter}
+
+\subsection{The Lower Bound}
+
+\begin{thm}
+In the algebraic decision tree model of computation, the problem of
+determining a single point $x\in S$ such that the diameter of
+$S\setminus\{x\}$ is minimized has an $\Omega(n\log n)$ lower bound.
+\end{thm}
+
+\begin{proof}
+Computing the diameter of a set $S$ of $n$ points in $\mathbb{R}^2$ has 
+an $\Omega(n\log n)$ lower bound in the algebraic decision tree model.  
+We simply
+observe that the point $x$ that defines the optimal solution is one of
+the two points that define the diameter of $S$. Thus, given $x$ we can
+compute the diameter of $S$ in $O(n)$ time by computing the distance
+from $x$ to every other point of $S$.  It must therefore take
+$\Omega(n\log n)$ time to determine $x$. 
+\end{proof}
+
+\subsection{The Algorithm}
+
+
+\section{Minimizing the Enclosing Rectangle}
+
  
 
 \section{Preliminaries} 
@@ -201,7 +214,32 @@ gives us the difference in area (perimeter) between $\ch(S)$ and
 $\ch(S\setminus\{p_{0,j}\})$.
 
 
-\section{The Algorithm}
+\section{Minimizing the Convex Hull}
+
+
+\subsection{The Lower Bound}
+
+
+\begin{thm}
+In the algebraic decision tree model of computation, the problem of
+determining a single point $x\in S$ such that the area or perimeter of
+$\ch(S\setminus\{x\})$ is minimized has an $\Omega(n\log n)$ lower
+bound.
+\end{thm}
+
+\begin{proof}
+The proof is by a reduction from the problem \textsc{Set-Equality}, of
+determining whether two sets $A$ and $B$ of real numbers are equal,
+which has an $\Omega(n\log n)$ lower bound in the algebraic decision
+tree model.
+The \textsc{Set-Equality} problem can be mapped to an outlier removal
+problem on the point multiset $S=S_A \uplus S_B$ where $S_A=\{(x,x^2):
+x\in A\}$, $S_B=\{(x,x^2):x\in B\}$ and $\uplus$ denotes multiset
+union. The sets $A$ and $B$ are equal if and only if for every $p\in
+S$, $\ch(S)=\ch(S\setminus\{p\})$.
+\end{proof}
+
+\subsection{The Algorithm}
 \seclabel{algorithm}
 
 In this section we present our algorithm for solving the
@@ -336,7 +374,6 @@ The number of solution trees is at most $O(C(2c))$, where
 $C(r)={2r\choose r}/(r+1)$ is the $r$th Catalan number.
 \end{lem}
 
-\vc{
 \begin{proof} Given a solution tree $T$, we convert it to an
 unlabelled rooted binary tree as follows: First, for each node $N$ of
 $T$ whose label is $\ell$, we color $N$ black, leave $N$'s left child
@@ -359,7 +396,6 @@ number of such trees is
 \cite{knuth-graham-patashnik},
 as required.
 \end{proof}
-}{}
 
 Solution trees are interpreted as follows (refer to
 \figref{solution-tree} for an example): Any solution removes some
@@ -429,7 +465,6 @@ algorithm finds an optimal solution of type $T$ such that the only
 points removed from the convex hull of the current point set are in
 $p_{i,j},\ldots,p_{i,k}$.
 
-\vc{
 Let $d$ denote the number of nodes on the rightmost path of $T$.  The
 algorithm accomplishes its task by recursively solving $O(d(k-j+1))$
 subproblems on the left children of these $d$ nodes and then combining
@@ -442,10 +477,8 @@ removed from $\ch(S)$ by a solution $S'$ whose solution tree is $T$.  To
 obtain the points in $S'$ the algorithm can be augmented using
 the standard trick of remembering, whenever the algorithm takes the
 maximum of two values, which of the two values produced the maximum.
-The details of this are standard and ommitted here.}{}
+The details of this are standard and ommitted here.
 
-\vc{}{\begin{figure*}
-      \begin{center}}
 \begin{minipage}{5.5in}
 \noindent$\textsc{FindOptimalOfType}(T,i,j,k)$
 \begin{algorithmic}[1]
@@ -469,31 +502,18 @@ The details of this are standard and ommitted here.}{}
 \RETURN{$\textsc{CombineSolutions}(X,d,k-j+1,c_1,\ldots,c_d)$}
 \end{algorithmic}
 \end{minipage}
-\vc{}{
-   \end{center}
-   \caption{Pseudocode for the \textsc{FindOptimalOfType} algorithm.}
-   \figlabel{findopt}
-   \end{figure*}}
 
-\vc{}{Let $d$ denote the number of nodes on the rightmost path of $T$.  The
-algorithm accomplishes its task by recursively solving $O(d(k-j+1))$
-subproblems on the left children of these $d$ nodes and then combining
-these solutions using dynamic programming. The pseudocode for the
-algorithm is given in \figref{findopt}.} 
 The call to $\textsc{CombineSolutions}$ in the last line of the
-algorithm is a dynamic programming subroutine \vc{described in the next
-section}{whose description we omit but} that runs in $O(d(k-g))$ time.
-\vc{}{The \textsc{CombineSolutions} subroutine computes the optimal
-locations of the groups of points represented by $N_1,\ldots,N_d$ in
-$T$.}
-At the topmost level, the
+algorithm is a dynamic programming subroutine described in the next
+section that runs in $O(d(k-g))$ time.  The \textsc{CombineSolutions}
+subroutine computes the optimal locations of the groups of points
+represented by $N_1,\ldots,N_d$ in $T$.  At the topmost level, the
 algorithm is called as $\textsc{FindOptimalOfType}(T,0,0,|S_0|-1)$.
 
 To analyze the cost of \textsc{FindOptimalOfType} it suffices to
 determine, for each point $p_{i,j}$, the maximum number of times
 $p_{i,j}$ is deleted (in line 8) by the algorithm.  All other work
 done by the algorithm can be bounded in terms of this quantity.
-\vc{For
 points $p_{0,j}\in S_0$, each point is deleted exactly $g_0$, times,
 where $g_0$ is the sum of labels of nodes on the rightmost path of
 $T$. 
@@ -520,9 +540,6 @@ we have the relationships:
 \] 
 Using the fact that $g_i \le c$, we obtain the (extremely loose) upper
 bound $m_i \le (3c)^{i+1}$.  
-}{
-Using Carath\'eodory's Theorem \cite{eckhoff93}, it is possible to show that a
-point in $S_i$ is deleted at most $(3c)^{i+1}$ times.}
 This implies that the points of $S_c$
 (which are never deleted) appear in at most $3m_{c-1}$ subproblems.
 Putting all this together we obtain:
@@ -532,7 +549,6 @@ The algorithm \textsc{FindOptimalOfType} finds the optimal solution
 whose solution tree is $T$ in $O((3c)^c n)$ time.
 \end{lem}
 
-\vc{
 \subsubsection{Combining the Solutions}
 
 One aspect of the algorithm that we have not yet described is how the
@@ -573,12 +589,10 @@ by the algorithm:
 The function \textsc{CombineSolutions} can be implemented in
 $O(dm)$ time.
 \end{lem}
-}{}
 
 \section{Conclusions}
 \seclabel{conclusions}
 
-\vc{
 Together with the $O(n\log n+c^2n)$ time preprocessing described in
 \secref{preliminaries}, \lemref{catalan}, \lemref{recursion} and
 \lemref{combine} give an algorithm for the outlier removal problem
@@ -593,15 +607,6 @@ For any constant $c$, there exists an algorithm for the
 (perimeter-based or area-based) outlier removal problem that runs in
 $O(n\log n)$.
 \end{thm}
-}{
-Taken together, the preceding discussion completes the proof of our
-main theorem:
-\begin{thm}
-For any constant $c$, there exists an algorithm for the 
-(perimeter-based or area-based)
-outlier removal problem that runs in $O(n\log n)$ time.
-\end{thm}
-}
 
 We have made no attempt to optimize the dependence of our running time
 with respect to the value of $c$ and, indeed, the running time of our

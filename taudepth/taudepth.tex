@@ -1,33 +1,75 @@
 \documentclass[lotsofwhite]{patmorin}
-\usepackage{amsfonts}
+\usepackage{amsfonts,graphicx}
 
 \input{pat.tex}
-
 
 \title{\MakeUppercase{Fast Algorithms for $\tau$-Depth}}
 \author{The Radcliffe Data Depth Workshop}
 \date{}
 
 \newcommand{\taudepth}{$\tau$-depth}
+\newcommand{\Taudepth}{The $\tau$-depth}
 \newcommand{\tdepth}{d_\tau}
+\newcommand{\tukdepth}{d_{\frac{1}{2}}}
 
 \begin{document}
 \maketitle
 \begin{abstract}
-An efficient algorithm for finding the $\tau$-deepest point
-in a planar point set.
+Efficient algorithms for finding the $\tau$-deepest point
+in a finite point set are presented.
 \end{abstract}
 
 \section{Introduction}
 
-Let $S$ be a set of $n$ points in $\R^2$.  We denote by $e_1$ the unit vector
-$(1,0)$.  For a non-zero vector $u$ and a point $p$ we denote by $H_u(p)$ the
-closed halfplane with $p$ on its boundary and having inner normal $u$.
-The \emph{\taudepth} of $p$ with respect to $S$ as
+We denote
+by $e_i$ the unit vector parallel to the $i$th coordinate axis in the
+positive direction.
+For a non-zero vector $u$ and a point $p$ we denote by $H_u(p)$ the
+closed halfspace with $p$ on its boundary and having inner normal $u$.
+For any measure $\mu:2^{\R^d}\mapsto\R$ and any $1/2\le\tau < 1$,
+the \emph{\taudepth} of $p\in\R^d$ with respect to $\mu$ is defined as 
+\begin{equation}
+    \tdepth(p,\mu) = \min\{ \tau \times \mu(H_u(p)\cap H_{e_1}(p)) 
+           + (1-\tau)\times \mu(H_u(p)\cap H_{-e_1}(p)): \|u\|=1\} \enspace .
+    \eqlabel{taudepth}
+\end{equation}
+For the special case $\tau=1/2$, \eqref{taudepth} simplifies to
 \[
-    \tdepth(p,S) = \min\{ \tau|H_u\cap H_{e_1}\cap S| 
-           + (1-\tau)|H_u\cap H_{-e_1}\cap S|: \|u\|=1\} \enspace .
+    \tukdepth(p,S) = \frac{1}{2}\min\{ \mu(H_u(p)) : \|u\|=1\} \enspace .
+    \eqlabel{tukdepth}
 \]
+and multiplying by 2 yields the well-known \emph{halfspace depth}.
+Often, we are concerned with the depth of a finite set
+$S\subseteq\mathbb{R}^d$ of points.  In such cases we use the measure
+$\mu(X)=|X\cap S|$.
+
+\Taudepth\ is a generalization of halfspace depth in which mass to the
+right of $p$ is assigned more weight than mass to the left of $p$.
+However, \taudepth\ is not simply a weighted version of Tukey depth as
+the weight of a mass varies depending on the first coordinate of the
+point $p$ being considered.  Indeed, while the halfspace depth
+contours are convex, the same is not true, in general, of the
+\taudepth\ contours (see \figref{example}).
+
+\begin{figure}
+\begin{center} \includegraphics[scale=2]{example} \end{center}
+\caption{The \taudepth\ contours of a set of 5 points, for $\tau=3/4$. The
+white region has depth $1/4$, the gray region has depth $1/2$, and the
+black region has depth $3/4$.}
+\figlabel{example}
+\end{figure}
+
+\section{The Algorithm}
+
+In order to leverage the existing work that has been done on efficient
+algorithms for halfspace depth, we study the relationship between
+halfspace depth and \taudepth.  For any real number $x$, define the
+derived measure $\mu_x$ as
+\[
+           \mu_x(X) = \tau\times \mu(X\cap H_{e_1}(xe_1)) 
+               + (1-\tau)\times \mu(X\cap H_{-e_1}(xe_1)) \enspace .
+\]
+The following lemma
 
 
 

@@ -1,0 +1,53 @@
+\documentclass[12pt]{article}
+\usepackage[noend]{algorithmic}
+\usepackage{amsfonts}
+
+\newcommand{\LP}{\mathrm{LP}}
+\newcommand{\DT}{\mathrm{DT}}
+\newcommand{\R}{\mathbb{R}}
+
+\begin{document}
+
+\noindent$\textsc{DelaunayDepth}(S)$
+\begin{algorithmic}[1]
+\STATE{find extreme points of $S$ and put them into a queue $Q$}
+\STATE{set $d(q)\gets 0$ for each $q\in Q$}
+\STATE{$P\gets S\setminus Q$}
+\WHILE{$Q$ is not empty}
+  \STATE{extract the next element $q$ from $Q$}
+  \FOR{each $p\in P$}
+     \IF{$pq$ is a Delaunay edge}
+        \STATE{$d(p)\gets d(q)+1$}
+        \STATE{move $p$ from $P$ into $Q$}
+     \ENDIF
+  \ENDFOR
+\ENDWHILE
+\end{algorithmic}
+
+\paragraph{Running time:} $O(n\LP(n,d) + n^2\DT(n,d))$ where $h$ is the
+number of extreme points, $\LP(a,b)$ is the time to solve an LP with $a$
+constraints in $b$ dimensions, and $\DT(a,b)$ is the time to test whether a
+pair of points in a set of $b$ points in $\mathbb{R}^d$ are Delaunay
+neighbours.
+
+This latter test reduces to an LP in $d+1$ dimensions as follows:  Lift $S$ into $\mathbb{R}^{d+1}$ using the map:
+\[  f(x_1,\ldots,x_d) = \left(x_1,\ldots,x_d,\sum_{i=1}^d x_i^2\right) \]
+Then two points $p,q\in S$ are Delaunay neighbours if $p'=f(p)$ and $q'=f(q)$ are adjacent in the lower convex hull of $f(S)$.  This can be expressed as the problem of finding $n=(n_1,\ldots,n_{d+1})$ such that
+\begin{equation}
+n\perp p'q' \Leftrightarrow n\cdot p' = n\cdot q' \label{eq:ortho}
+\end{equation}
+and for every $r'\in f(S)$
+\begin{equation}
+ n\cdot r' \ge n\cdot p' \label{eq:inhullp}
+\end{equation}
+\begin{equation}
+ n\cdot r' \ge n\cdot q' \label{eq:inhullq}
+\end{equation}
+so $\DT(n,d)=O(\LP(n,d+1))$ (actually, the dimension of the resulting LP is
+$d$, because of (\ref{eq:ortho}).
+
+Can we restate this linear program so that the constraints are only functions
+of $f(S)$ and the only thing that changes between subsequent queries is the
+objective function?
+
+\end{document}

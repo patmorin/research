@@ -10,7 +10,14 @@
 \MakeUppercase{Removing Outliers}%
 \thanks{School of Computer Science. Carleton University. This work was partly funded by NSERC.}}
 
-\author{Carleton Open Problems Group}
+\author{Rossen Atanassov \and
+	Prosenjit Bose \and
+	Anil Maheshwari \and
+	Pat Morin \and
+	Michel Paquette \and
+	Michiel Smid \and
+	Stefanie Wuhrer
+}
 
 \date{}
 
@@ -22,7 +29,7 @@
 
 \newcommand{\ntypes}{C(2c)}
 \newcommand{\timepertype}{(3c)^c n}
-\newcommand{\runtime}{n\left({4c\choose 2c}(3c)^c + \log n\right)}
+\newcommand{\runtime}{n\log n + \left({4c\choose 2c}(3c)^cn\right)}
 \newcommand{\Oruntime}{O\left(\runtime\right)}
 
 \begin{document}
@@ -37,10 +44,6 @@ having minimum area (perimeter) bounding box, having minimum area
 (perimeter) convex hull.  For constant values of $c$, all our
 algorithms run in $O(n\log n)$ time.
 \end{abstract}
-
-\newpage
-\tableofcontents
-\newpage
 
 \section{Introduction}
 
@@ -58,57 +61,99 @@ rectangle containing $X$, and
 \item $f(X)$ is the area/perimeter of the convex hull of $X$.
 \end{enumerate}  
 
-We call these problems the \emph{$f$-based outlier removal problems}.
+We call these problems the \emph{$f$-based $c$ outlier removal problems}.
 We are particularly interested in the case when $c$ (the number of
 outliers) is small.
 
 \subsection{Previous Work.} 
 
 The outlier removal problems stated above and similar problems are
-fairly well-studied problems in computational geometry.  However, most
-work thus far has focused on the case when $c$ is large. More
-specifically, most research has been on the problem of finding a $k$
-point subset (a $k$-cluster) $X\subseteq S$, $|X|=k$, such that $f(X)$
-is minimum. These are the same problems studied in the current paper
-with $k=n-c$ except that our focus is on large values of $k$ (small
-$c$) and most existing research focuses on designing efficient
+fairly well-studied problems in the field of computational geometry.
+However, most work thus far has focused on the case when $c$ is large.
+More specifically, most research has been on the problem of finding a
+$k$ point subset (a $k$-cluster) $X\subseteq S$, $|X|=k$, such that
+$f(X)$ is minimum. These are the same problems studied in the current
+paper with $k=n-c$ except that our focus is on large values of $k$
+(small $c$) and most existing research focuses on designing efficient
 algorithms for small values of $k$.
 
 \paragraph{Minimum Diameter.} The problem of finding a subset of $S$ of size
 $k$ with minimum diameter has been studied by Aggarwal \etal\
 \cite{aiks89} who give an $O(k^{2.5}n\log k+n\log n)$ time algorithm.
+Using a different approach, Eppstein and Erickson \cite{ee94} improve
+the running time to $O(n\log n + k^2 n\log^2 k)$.
 
-\paragraph{Minimum Perimeter Enclosing Rectangle.} The same authors
-\cite{aiks89} give an $O(k^2n\log n)$ time algorithm to find the
-subset of $S$ with the minimum perimeter enclosing axes-parallel
-rectangle.
+\paragraph{Minimum-Perimeter/Area Enclosing Rectangle.} Aggarwal
+\etal\ \cite{aiks89} also give an $O(k^2n\log n)$ time algorithm to
+find the subset of $S$ with the minimum-perimeter enclosing
+axes-parallel rectangle.  Eppstein and Erickson \cite{ee94} improve
+the running time to $O(n\log n + k^2 n)$ using $O(kn)$ space. Datta
+\etal\ improve the space bound to $O(n)$. Segal and Kedem \cite{sk98}
+present an algorithm for this problem that runs in $O(n+k(n-k)^2)$
+time using $O(n)$ space, provided $\frac{n}{2}<k\le n$. Their
+algorithm can also find the minimum area rectangle.
 
-\paragraph{Minimum Perimeter Convex Hull.} The problem of finding a
+\paragraph{Minimum-Perimeter Convex Hull.} The problem of finding a
 subset of $S$ of size $k$ that has the least perimeter convex hull was
 first considered over 20 years ago by Dobkin \etal\ \cite{ddg83} who
 gave an $O(k^2n\log n + k^5 n)$ time algorithm.  This algorithm can be
 improved to run in $O(k^2 n\log n + k^4 n)$ time using techniques of
-Aggarwal \etal\ \cite{aiks89}.  
+Aggarwal \etal\ \cite{aiks89}.  Eppstein and Erickson \cite{ee94} hold
+the record with a running time of $O(n\log n + k^3 n)$.
 
-All the algorithms mentioned above are based on the fact that the $k$
+\comment{
+The algorithms mentioned above are all based on the fact that the $k$
 points that define the solution are a subset of the $k'$ points that
-define some cell in the order-$k'$ \voronoi\ diagram \cite{obsXX},
-where $k'=\ceil{\pi (k-1)}$.  This allows the problem to be solved,
-once the order-$k$ \voronoi\ diagram is computed, by considering
-$O(k'n)=O(kn)$ subproblems each of size $k'=O(k)$.
+define some cell in the order-$k'$ \voronoi\ diagram \cite{obs92},
+where $k'=O(k)$ depends on the particular function $f$. This allows
+these problem to be solved, once the order-$k$ \voronoi\ diagram is
+computed, by considering $O(k'n)$ subproblems each of size
+$k'$.}
 
 \paragraph{Minimum-Area Convex Hull.}  The problem of finding a subset
 of $S$ of size $k$ that has the minimum area convex hull was
 considered by Eppstein \etal\ \cite{eorw92} and later by Eppstein
-\cite{e93} who give $O(kn^{3})$ and $O((k^3+\log n) n^2)$ time
-algorithms for this problem, respectively.  The second algorithm (by
+\cite{e93} who give $O(kn^{3})$ and $O(n^2\log n + k^3n^2)$ time
+algorithms for this problem, respectively. \comment{The second algorithm (by
 Eppstein) uses the first algorithm along with the fact that the $k$
 points that define the solution are among the $2k-4$ vertical nearest
 neighbours of one of the $n\choose 2$ line segments determined by
 pairs of points in $S$.  This allows the problem to be solved by
-considering $O(n^2)$ subproblems each of size $O(k)$.
+considering $O(n^2)$ subproblems each of size $O(k)$.}
 
 \comment{
+An algorithm running in $O(k^2n\log n)$ time using $O(kn)$ space
+to find an axes-parallel rectangle of
+minimum perimeter that encloses $k$ points of $S$ is presented in
+\cite{aiks89}. Eppstein and Erickson \cite{ee94} show that this problem can be solved in $O(n\log n+ k^2n)$ time using $O(kn)$ space, 
+and the space complexity is further improved to $O(n)$ in Datta \etal\
+\cite{dlss95}.  Segal and Kedem
+\cite{sk98} present an algorithm for this problem which runs in
+$O(n+k(n-k)^2)$ time using $O(n)$ space, provided $\frac{n}{2}<k\le
+n$. Their algorithm can also find the minimum area rectangle.
+
+The problem of finding a subset of $S$ of size $k$ that has the least
+perimeter convex hull was first considered over 20 years ago by Dobkin
+\etal\ \cite{ddg83} who gave an $O(k^2n\log n + k^5 n)$ time
+algorithm.  This algorithm can be improved to run in $O(k^2 n\log n +
+k^4 n)$ time using techniques of Aggarwal \etal\ \cite{aiks89}.  Both
+algorithms are based on the fact that the $k$ points that define the
+solution are a subset of the $k'$ points that define some cell in the
+order $k'$ \voronoi\ diagram, where $k'=\ceil{\pi (k-1)}$.  This
+allows the problem to be solved by considering $O(k'n)=O(kn)$ subproblems
+each of size $k'=O(k)$.
+
+The problem of finding a subset of $S$ of size $k$ that has the
+minimum area convex hull was considered by Eppstein \etal\
+\cite{eorw92} and later by Eppstein \cite{e93} who give $O(kn^{3})$
+and $O((k^3+\log n) n^2)$ time algorithms for this problem,
+respectively.  The second algorithm (by Eppstein) uses the first
+algorithm along with the fact that the $k$ points that define the
+solution are among the $2k-4$ vertical nearest neighbours of one of
+the $n\choose 2$ line segments determined by pairs of points in $S$.
+This allows the problem to be solved by considering $O(n^2)$
+subproblems each of size $O(k)$.
+
 Note that finding a subset $X\subseteq S$ of size $k$ whose convex hull
 has minimum area generalizes the problem of determining if $S$
 contains $k$ collinear points (in which case $S$ has a subset of size
@@ -124,158 +169,265 @@ problems should have fast solutions for sufficiently small values of
 $c$.
 }
 
-\paragraph{New Results.}
+\subsection{New Results.}
 
 For fixed values of $k$, the results described above give $O(n\log n)$
 or $O(n^2\log n)$ time algorithms for finding the $k$ point subset of
-$S$ that minimize $f$.  However, when $k$ is close to $n$ the above
-algorithms require $\Omega(n^3)$ time.  
+$S$ that minimize $f$.  However, when $k$ is close to $n$ even the
+fastest of the algorithms cited above require $\Omega(n^3)$ time.  
 
 In the current paper we consider specifically the case when $k=n-c$.
-For Problem~1 we obtain an $O(n\log n + cn + c^7)$ time algorithm.
-For problem~2 we obtain an $O(n + c^3)$ time algorithm.  For Problem~3
-we obtain an $\Oruntime$ algorithm.  We show, by giving $\Omega(n\log
-n)$ lower bounds for both Problems~1 and 3 that, for fixed values of
-$c$, our algorithms are essentially optimal.
+For Problem~1 (diameter) we obtain an $O(n\log n + cn + c^6\log^2 c)$
+time algorithm.  For problem~2 (minimum area/perimeter bounding
+rectangle) we obtain an $O(n + c^3)$ time algorithm.  For Problem~3
+(minimum area/perimeter convex hull) we obtain an $\Oruntime$ time
+algorithm.  We show, by giving $\Omega(n\log n)$ lower bounds for both
+Problems~1 and 3 that, for constant values of $c$, our algorithms are
+optimal.
 
-
-
-The remainder of the paper is organized as follows:
-\secref{preliminaries} presents definitions, notation, and previous
-results that are used in subsequent sections. \secref{algorithm}
-describes the outlier removal algorithm. \secref{conclusions}
-concludes and suggests directions for future research.
-
+The remainder of the paper is organized as follows: \secref{diameter}
+presents an algorithm for the diameter-based $c$ outlier removal
+problem.  \secref{box} present algorithms for the (bounding box)
+area/perimeter-based $c$ outlier removal problems.  \secref{hull}
+presents algorithms for (convex hull) area/perimemeter-based $c$
+outlier removal problems.  An abstract of the results in \secref{hull}
+has appeared in the proceedings of the 18th Canadian Conference on
+Computational Geometry \cite{amw06}.
 
 \section{Minimizing Diameter}
+\seclabel{diameter}
 
-In this section we consider the problem of finding a subset
-$S'\subseteq S$, $|S'|=c$ such that the diameter of $S\setminus S'$ is
-minimum over all choices of $S'$.  We begin by showing that this
-problem has an $\Omega(n\log n)$ lower bound even for the case $c=1$.
+The \emph{diameter} of a set $X$ is defined as $\max\{\|pq\|:p,q\in
+X\}$.  In this section we consider the \emph{diameter-based $c$ outlier
+removal problem} of finding a subset $S'\subseteq S$, $|S'|=c$ such
+that the diameter of $S\setminus S'$ is minimum over all choices of
+$S'$.  We begin by showing that this problem has an $\Omega(n\log n)$
+lower bound even for the case $c=1$.
 
 \subsection{The Lower Bound}
 
 \begin{thm}
-In the algebraic decision tree model of computation, the problem of
-determining a single point $x\in S$ such that the diameter of
-$S\setminus\{x\}$ is minimized has an $\Omega(n\log n)$ lower bound.
+In the algebraic decision tree model of computation the diameter-based
+1 outlier removal problem has 
+an $\Omega(n\log n)$ lower bound.
 \end{thm}
 
 \begin{proof}
-Computing the diameter of a set $S$ of $n$ points in $\mathbb{R}^2$ has 
-an $\Omega(n\log n)$ lower bound in the algebraic decision tree model.  
-We simply
-observe that the point $x$ that defines the optimal solution is one of
-the two points that define the diameter of $S$. Thus, given $x$ we can
-compute the diameter of $S$ in $O(n)$ time by computing the distance
-from $x$ to every other point of $S$.  It must therefore take
-$\Omega(n\log n)$ time to determine $x$. 
+Computing the diameter of a set $S$ of $n$ points in $\mathbb{R}^2$
+has an $\Omega(n\log n)$ lower bound in the algebraic decision tree
+model \cite{ps85}.  We simply observe that the point $x$ that defines
+the optimal solution is one of the two points that define the diameter
+of $S$. Thus, given $x$ we can compute the diameter of $S$ in $O(n)$
+time by computing the distance from $x$ to every other point of $S$.
+It must therefore take $\Omega(n\log n)$ time to determine $x$. 
 \end{proof}
+
 
 \subsection{The Algorithm}
 
-We first consider a more general problem in $\mathbb{R}^{n \times n}$ and then use the derived algorithm to find a set $\tilde{S}$ of $c^2$ points with the property that the $c$ points that can be removed to optimize the function $f$ form a subset of $\tilde{S}$.
+Next we give an algorithm for the diameter-based $c$ outlier removal
+problem.  We do this by first considering a more general problem in
+$\mathbb{R}^{n \times n}$ and then use the derived algorithm to find a
+set $\tilde{S}$ of $O(c^2)$ points with the property that optimal set
+$S'$ for $S$ is also the optimal set for $\tilde{S}$. 
 
-Let $A$ denote a symmetric matrix of real numbers in $\mathbb{R}^{n \times n}$, let $R_i$ denote the $i$-th row of $A$, let $C_i$ denote the $i$-th column of $A$, and let $a_{i,j}$ denote the element in $R_i$ and in $C_j$. We consider the problem of selecting a set $T$ of $c$ indices, such that removing $R_t$ and $C_t$ for every $t \in T$ from $A$ yields a modified matrix $A'$ with the property that the maximum entry of $A'$ is minimized. The following algorithm selects a set $\tilde{T}$ of $(c+1)^2$ indices. We will later prove that $\tilde{T}$ is a superset of $T$. 
+Let $A$ denote an $n\times n$ symmetric matrix of real numbers, with
+$A_{i,*}$ denoting the $i$th row of $A$ and $A_{*,j}$ denoting the
+$j$th column of $A$.  For a set $I$ of row and column indices we
+denote by $A\setminus I$ the submatrix of $A$ obtained by deleting
+$A_{i,*}$ and $A_{*,i}$ for every $i\in I$ from $A$.
 
-The algorithm $\textsc{DeepSet}(A,c)$ selects a set $\tilde{T}$ of $(c+1)^2$ indices. Marking an index $i$ means adding $i$ to $\tilde{T}$ and deleting an index $i$ means removing $R_i$ and $C_i$ from $A$. Algorithm $\textsc{DeepSet}(A,c)$ finds the maximum entry $a_{i,j}$ of $A$ and marks indices $i$ and $j$. Next, the $c+1$ largest entries in $R_i$ and $C_j$ are found and marked. Finally, $i$ and $j$ are deleted. The algorithm repeats these steps $c+1$ times. Algorithm $\textsc{DeepSet}(A,c)$ is given in pseudo code below.
+We consider the problem of selecting a set $T$ of $c$ indices, such
+that the largest value in $A\setminus T$ is minimum over all choices
+of $T$.  We begin by showing that the algorithm \textsc{DeepSet}
+described below selects a set $\tilde{T}$ of $(c+1)^2$ indices that
+are a superset of some optimal set $T$.
 
-\begin{minipage}{5.5in}
+In the following, \emph{marking} an index $i$ means adding $i$ to
+$\tilde{T}$ and \emph{deleting} an index $i$ removing row $i$ and
+column $i$ from $A$.  Algorithm $\textsc{DeepSet}(A,c)$ finds the
+maximum entry $A_{i,j}$ of $A$, marks the indices of the $c+1$ largest
+entries in $A_{i,*}$ and $A_{*,j}$, and finally deletes $i$ and $j$.
+The algorithm repeats this process $c+1$ times.  Algorithm
+$\textsc{DeepSet}(A,c)$ is given in pseudo code below.
+
+\noindent
+\begin{minipage}{\textwidth}
 \noindent$\textsc{DeepSet}(A,c)$
 \begin{algorithmic}[1]
 \FOR{$g=1$ to $c+1$}
-  \STATE{$a_{i,j}\gets$ maximum entry of $A$}
-  \STATE{$\tilde{T}\gets \tilde{T} \cup \{i\}$}
-  \STATE{$\tilde{T}\gets \tilde{T} \cup \{j\}$}
-  \FOR{$h=1$ to $c+1$}
-    \STATE{$a_{i,k}\gets$ $h$-th largest entry in $R_i$}
-    \STATE{$\tilde{T}\gets \tilde{T} \cup \{k\}$}
-    \STATE{$a_{k,j}\gets$ $h$-th largest entry in $C_j$}
-    \STATE{$\tilde{T}\gets \tilde{T} \cup \{k\}$}
-  \ENDFOR
-  \STATE{$A\gets A \setminus R_i$}
-  \STATE{$A\gets A \setminus C_i$}
-  \STATE{$A\gets A \setminus R_j$}
-  \STATE{$A\gets A \setminus C_j$}
+  \STATE{$A_{i,j}\gets$ maximum entry of $A$}
+  \STATE{$x\gets$ $(c+1)$-st largest entry in $A_{i,*}$}
+  \STATE{$\tilde{T}\gets 
+     \tilde{T} \cup \{ k : A_{i,k} \ge x \}$ 
+          \COMMENT{* mark $c+1$ largest entries in row $i$ *}}
+  \STATE{$x\gets$ $(c+1)$-st largest entry in $A_{j,*}$}
+  \STATE{$\tilde{T}\gets 
+     \tilde{T} \cup \{ k : A_{k,j} \ge x \}$
+          \COMMENT{* mark $c+1$ largest entries in column $j$ *}}
+  \STATE{$A\gets A \setminus \{i,j\}$ \COMMENT{* delete $i$ and $j$ *}}
 \ENDFOR
 \RETURN{$\tilde{T}$}
 \end{algorithmic}
 \end{minipage}
+\vspace{\parskip}
 
-\begin{thm}
-Algorithm $\textsc{DeepSet}$ returns a superset of some $T$.
-\label{diameter_thm}
-\end{thm}
+\begin{lem}\lemlabel{diameter_thm}
+Let $T$ be a set of $c$ indices such that the largest value in
+$A\setminus T$ is minimum over all choices of $T$.  Then
+Algorithm $\textsc{DeepSet}(A,c)$ returns a superset
+$\tilde{T}\supseteq T$.
+\end{lem}
 
 \begin{proof}
-We first impose an order on the elements of $T$, such that the maximum element of $A \setminus (R_{t_1} \cup R_{t_2} \cup \ldots \cup R_{t_{i-1}} \cup C_{t_1} \cup C_{t_2} \cup \ldots \cup C_{t_{i-1}})$ is in $R_{t_i}$ and symmetrically in $C_{t_i}$ of $A$. This ordering can always be achieved, since the optimal solution must remove the maximum element in each step. Let $T_i = \{t_1,t_2,\ldots,t_i\}$. Furthermore, let $\tilde{T}_i$ denote the set of indices contained in $\tilde{T}$ after the execution of the $i$-th outermost for-loop in the algorithm $\textsc{DeepSet}$.
+We first impose an order on the elements of $T=\{t_1,\ldots,t_c\}$,
+such that the maximum element of $A \setminus \{t_1,\ldots,t_{i-1}\}$
+is in $A_{t_{i},*}$ (and symmetrically in
+$A_{*,t_{i}}$).  This ordering can always be achieved otherwise $T$ is
+not optimal.  Let $T_i = \{t_1,\ldots,t_i\}$ and let $\tilde{T}_i$
+denote the set of indices contained in $\tilde{T}$ after the execution
+of the $i$-th iteration of the algorithm $\textsc{DeepSet}$.  Let
+$D_i$ denote the set of $2i$ indices that have been deleted after the
+$i$th iteration of the algorithm \textsc{DeepSet}.  For convenience we
+use the convention $T_0=\tilde{T}_0=D_0=\emptyset$.  The following
+claim is easily established by induction on $i$:
 
-We prove the theorem by induction on $i$. Let $a_{k,l}$ be the maximum element of $A$. The set $\tilde{T}_1 \supseteq T_1$, since $\{k, l\} \in \tilde{T}_1$ and since either $\{k\} \in T_1$ or $\{l\} \in T_1$ to ensure the removal of $a_{k,l}$.
+\begin{clm}\clmlabel{deepset-max}
+The maximum value in $A\setminus D_i$ is less than or equal to the
+maximum value in $A\setminus T_i$.
+\end{clm}
 
-For the inductive step, we show that $\tilde{T}_i \supseteq T_i$ if $\tilde{T}_{i-1} \supseteq T_{i-1}$.
-Let $a_{k,l}$ be the maximum element of $A \setminus (R_{t_1} \cup R_{t_2} \cup \ldots \cup R_{t_{i-1}} \cup C_{t_1} \cup C_{t_2} \cup \ldots \cup C_{t_{i-1}})$. Three cases are possible. 
+Next we prove, by induction on $i$, that $\tilde{T}_{i}\supseteq T_i$.
+The base case, $i=0$, is trivial.  For the inductive step, we show
+that $\tilde{T}_i \supseteq T_i$ if $\tilde{T}_{i-1} \supseteq
+T_{i-1}$.  Let $A_{k,\ell}$ be the maximum element of $A \setminus
+T_{i-1}$.  Recall that, by the ordering we have chosen for $T$, this
+implies that $T_i=T_{i-1}\cup\{t_i\}$ where $t_i\in\{k,\ell\}$.  We
+will show that both $k$ and $\ell$ are in $\tilde{T}_i$. Three cases
+are possible: 
+
 \begin{enumerate}
-\item $k \not \in \tilde{T}_{i-1}$ and $l \not \in \tilde{T}_{i-1}$. Hence, $a_{k,l}$ is an element of $A \setminus \{R_j \cup C_j : \forall j \in \tilde{T}_{i-1}\}$. Since $\tilde{T}_{i-1} \supseteq T_{i-1}$, $a_{k,l}$ is the maximum element during the $i$-th loop of algorithm $\textsc{DeepSet}$. Hence, both $k$ and $l$ are marked and deleted in the $i$-th loop, i.e. $\{k, l\} \in \tilde{T}_i$. Since only either $k$ or $l$ are added to $T_{i-1}$ to form $T_i$, $\tilde{T}_i \supseteq T_i$. 
-\item $k \in \tilde{T}_{i-1}$ and $l \in \tilde{T}_{i-1}$. Since only either $k$ or $l$ are added to $T_{i-1}$ to form $T_i$, $\tilde{T}_i \supseteq T_i$. 
-\item Without loss of generality $k \in \tilde{T}_{i-1}$ and $l \not \in \tilde{T}_{i-1}$. Two cases are possible.
+
+\item $k \not \in \tilde{T}_{i-1}$ and $\ell \not \in
+\tilde{T}_{i-1}$.  Since the marked elements are a superset of the
+deleted elements, $A_{k,\ell}$ is an element of $A \setminus D_{i-1}$.
+Therefore, by \clmref{deepset-max}, $A_{k,\ell}$ is the largest
+element in $A\setminus D_{i-1}$.  Thus, $k$ and $\ell$ are marked (and
+deleted) during the $i$th iteration of \textsc{DeepSet} so
+$\{k,\ell\}\subseteq\tilde{T}_i$. 
+
+\item $k \in \tilde{T}_{i-1}$ and $\ell \in \tilde{T}_{i-1}$.  Then
+$\{k,\ell\}\subseteq \tilde{T}_{i-1}\subseteq \tilde{T}_i$.
+
+\item Without loss of generality $k \in \tilde{T}_{i-1}$ and $\ell \not
+\in \tilde{T}_{i-1}$. Two cases are possible.
+
 \begin{enumerate}
-\item $R_k$ and $C_k$ got marked and deleted from $A$ during the execution of the algorithm $\textsc{DeepSet}$. Hence, the $c+1$ largest entries in $R_k$, or equivalently in $C_k$, were marked and added to $\tilde{T}$. Hence, $\tilde{T}_{i-1}$ contains every element in row $R_k$ that could ever become the maximum element of $A$ during the removal of $c$ rows and symmetric columns. Therefore, $l \in \tilde{T}_{i-1}$, which contradicts the initial assumption of case 3.
-\item The index $k$ got only marked, but not deleted during the execution of the innermost for-loop of algorithm $\textsc{DeepSet}$ and neither $R_k$ nor $C_k$ got deleted from $A$. Therefore, $a_{k,l}$ is the maximum element of $A \setminus (R_j \cup C_j) \forall j \in \tilde{T}_{i-1}$. With the same argument used case 1 we can therefore conclude that $\tilde{T}_i \supseteq T_i$. 
+
+\item $k$ was marked and deleted during the first $i-1$ iterations of
+algorithm $\textsc{DeepSet}$. Hence, the indices of the $c+1$ largest
+entries in $A_{k,*}$ are in $\tilde{T}_{i-1}$ and none of these
+indices is $k$.  On the other hand, $T_{i-1}$ contains only $i-1 <
+c+1$ indices and none of these is $k$.  Thus, it must be that
+$A\setminus T_{i-1}$ contains a value larger than $A_{k,\ell}$, but this
+contradicts the ordering of $T$.
+
+\item The index $k$ was marked, but not deleted, during the first
+$i-1$ iterations of algorithm $\textsc{DeepSet}$.  Thus, the same
+argument used in Case~1 above implies that $\{k,\ell\}\subseteq
+\tilde{T}_i$.
+
 \end{enumerate}
 \end{enumerate}
 \end{proof} 
 
-We can use the algorithm $\textsc{DeepSet}$ to find a superset of the $c$ outliers we wish to remove to minimize the diameter of the point set. For each of the $n$ elements of the point set $S$, we symmetrically create a column and a row in an $n\times n$ matrix $A$. Each matrix entry describes the distance between the two points associated with the column and row of the entry. Note that $A$ is a symmetric matrix of positive real numbers with zero values along the diagonal. Therefore, we can run algorithm $\textsc{DeepSet}$ on $A$ to obtain a superset of the indices of points that need to be removed to minimize the diameter of $S$.
+Carefully inspecting the proof of \lemref{diameter_thm} shows that it
+actually implies the following slightly stronger statement (because
+$\tilde{T}_{c+1}$ contains the indices of the largest element in
+$A\setminus T_c$).
+
+\begin{lem}
+Let $\tilde{A}$ be the submatrix of $A$ induced the row and column
+indices in the set $\tilde{T}$ produced by Algorithm \textsc{DeepSet}.
+Then the value of the optimal solution for $\tilde{A}$ is equal to the
+the value of the optimal solution for $A$.
+\end{lem}
+
+We can use the algorithm $\textsc{DeepSet}$ to reduce a problem of
+size $n$ to one of size $O(c^2)$.  The set $S$ implicitly defines an
+$n\times n$ \emph{distance matrix} $A$ where $A_{i,j}$ is the distance
+from the $i$th point in $S$ to the $j$th point in $S$.  Note that $A$
+is a symmetric matrix of non-negative real numbers with zero values
+along the diagonal.  Therefore, we can run algorithm
+$\textsc{DeepSet}$ on $A$ to obtain a superset of the indices of
+points that need to be removed to minimize the diameter of $S$.
 
 \begin{thm}
-In $O(n\log n + cn + c^7 \log c)$ time, we can find a set $S' \subset S$ of cardinality $c$, such that the diameter of $S\setminus S'$ is minimum.
+There exists an $O(n\log n + cn + c^6\log^2 c)$ time algorithm to
+solve the diameter-based $c$ outlier removal problem.
 \end{thm}
 
+
 \begin{proof}
-First, we transform the point set $S$ into a matrix $A$ as outlined above. To execute algorithm $\textsc{DeepSet}$, we find the diameter of the point set in time $O(n\log n)$. Note that the diameter of $S$ corresponds to the maximum entry of $A$. To find the diameter, we first compute the convex hull of $S$ using the dynamic convex hull algorithm \cite{bj02}. This algorithm allows the computation of the convex hull of $S$ in $O(n \log n)$ time and updates to the convex hull are supported in $O(\log n)$ amortized time. Once the convex hull of $S$ is known, the rotating calipers algorithm proposed by Shamos \cite{s78} allows to find the diameter of $S$ in $O(n)$ time. Denote the two points forming the diameter of $S$ by $p$ and $q$. We mark $p$ and $q$. Next, we mark the $c+1$ furthest points from $p$ (respectively $q$) in $S$. Let $r$ denote the $c+1$st furthest point from $p$ (respectively $q$). In $O(n)$ time, we find $r$ and all of the points in $S$ with larger distance to $p$ (respectively $q$) than $r$. Note that this corresponds to lines $\textsc{5}$ to $\textsc{9}$ in the algorithm $\textsc{DeepSet}$. Finally, $p$ and $q$ are deleted from $S$ and the convex hull is updated in $O\log n)$ amortized time \cite{bj02}.
+To execute algorithm $\textsc{DeepSet}$ on the matrix $A$ implicity
+defined by $S$, we first preprocess $S$, in $O(n\log n)$ time, using
+the deletion-only convex hull structure of Hershberger and Suri
+\cite{hs92}, which allows the deletion of a point in $O(\log n)$ time
+and makes it possible to find the diameter in $O(n)$ time \cite{s78}.
 
-We repeat finding the diameter of the point set, marking $O(c)$ points, deleting the points forming the diameter from $S$, and updating the convex hull of $S$ for $c+1$ steps to execute algorithm $\textsc{DeepSet}$. Computing and maintaining the convex hull of $S$ throughout the algorithm takes $O(n\log n +c\log n) = O(n\log n)$ time, finding the $c+1$ diameters of the updated point set $S$ takes $O(cn)$ time, and updating the point set $\tilde{T}$ takes $O(c n)$ time. Hence, the total time requirement of algorithm $\textsc{DeepSet}$ is $O(n\log n + cn)$.
+Denote the two points forming the diameter of $S$ by $p$ and $q$.
+After the preprocessing described above, $p$ and $q$ can be found, and
+deleted, in $O(n)$ time.  Next, using an $O(n)$ time selection
+algorithm we mark the $c+1$ furthest points from $p$ and $q$.
+Repeating this $c+1$ times we obtain, in $O(cn)$ time a set
+$\tilde{S}$ of $O(c^2)$ marked points such that the optimal solution
+$S'$ for $S$ is also the optimal solution for $\tilde{S}$.
 
-Once algorithm $\textsc{DeepSet}$ was executed, we know a superset of the outlier set of size $O(c^2)$, see Theorem \ref{diameter_thm}. It remains to find the $c$ outliers in the set $\tilde{T}$ of $O(c^2)$ outliers. To solve this problem, we use the existing algorithm by Aggarwal \etal\ \cite{aiks89} that finds a subset of size $k$ of a set of $n$ points that has minimum diameter. The algorithm by Aggarwal \etal\ takes $O(k^{2.5}n \log k + n\log n)$ time. We wish to find a point set of size $(c+1)^2-c = O(c^2)$ that has minimum diameter. Hence, $n=k=O(c^2)$. Therefore, the algorithm by Aggarwal \etal\ can be used to find the $c$ outliers in $\tilde{T}$ in time $O(c^7 \log c + c^2 \log c)$.
-
-This yields the total time $O(n\log n + cn + c^7 \log c)$ to find the set $S'$.
+Once we have computed $\tilde{S}$ we apply the algorithm of Eppstein
+and Erickson \cite{ee94} to find the set $S'$ in $O(c^2 (c^2)^2\log^2
+(c^2)) = O(c^6\log^2 c)$ time.  These three steps (preprocessing,
+finding $\tilde{S}$ and finding $S'$) take a total time of $O(n\log n
++ cn + c^6 \log^2 c)$, as promised.
 \end{proof}
 
 \section{Minimizing the Enclosing Rectangle}
 \seclabel{minimizing-rectangle}
-In this section we propose a fairly simple algorithm for the following
-problem:  given a set $S$ of $n$-points in the plane, find an
-axes-parallel rectangle $R$ of minimum perimeter that has exactly
-$c$-points of $S$ in its exterior, where $1\le c \le n$.  Our
-algorithm first computes a set of $O(c)$ candidate points and then
-uses the algorithm of \cite{aiks89} to compute the desired rectangle.
-The main steps of our algorithm are as follows:
+\seclabel{box}
 
-\begin{minipage}{5.5in}
-\noindent$\textsc{FindOptimalRectangle}(S)$
+In this section we propose a simple algorithm for the following
+\emph{(bounding box) area/perimeter-based $c$ outlier removal problem}:
+given a set $S$ of $n$ points in the plane, find an axes-parallel
+rectangle $R$ of minimum area/perimeter that has exactly $c$-points of
+$S$ in its exterior.  Our algorithm first computes a set of $O(c)$
+candidate points and then uses the algorithm of Segal and Kedem
+\cite{sk98} to compute the desired rectangle.  The main steps of our
+algorithm are as follows:
+
+\noindent
+\begin{minipage}{\textwidth}
+$\textsc{FindOptimalRectangle}(S)$
 \begin{algorithmic}[1]
 \STATE{Find a subset $K\subseteq S$ consisting of 
 $c$ leftmost, $c$ rightmost, $c$ topmost and $c$ bottommost points in
 $S$.}
-\STATE{Computing the smallest axes-parallel bounding box $B$ for points in $S\setminus K$, 
+\STATE{Compute the smallest axes-parallel bounding box $B$ for points in $S\setminus K$, 
 and then delete all these points.}
 \STATE{Insert $c$ points at the bottom-left corner of $B$.  Also
 insert $c$-points at the top-right corner of $B$.  Let the set of
 newly inserted points be $I$.}
-\STATE{Compute the minimum perimeter axes-parallel rectangle $R$ that 
+\STATE{Compute the minimum area/perimeter axes-parallel rectangle $R$ that 
 encloses exactly $c+|K|$ points out of $2c+|K|$ points in the set $K\cup I$
 using the algorithm in
-\cite{aiks89}.}
+\cite{sk98}.}
 \end{algorithmic}
 \end{minipage}
 
-\begin{obs}\label{bounding-box-obs}
+\begin{lem}\label{bounding-box-obs}\lemlabel{box}
  The bounding box $B$ is in the interior of the rectangle $R$ reported
  by $\textsc{FindOptimalRectangle}$.
-\end{obs}
+\end{lem}
 \begin{proof}
-Proof by contradiction. 
+The proof is by contradiction. 
 Assume that the box $B$ is not completely in
 the interior of $R$. Then at least one of the points in the set $I$ is in the
 exterior of $R$. Let $p$ be one such point. Imagine the coordinate
@@ -287,62 +439,58 @@ Hence there are more than $c$ points in the exterior of $R$, a contradiction.
 \end{proof}
 
 \begin{thm}
-The minimum perimeter axes-parallel rectangle of a set of $n$ points
-in the plane that leaves $c$ points in its exterior can be computed in
-$O(n+c^3\log c)$ time.
+There exists an $O(n+c^3)$ time algorithm to solve the 
+The (bounding box) area/perimeter-based $c$ outlier removal problem.
 \end{thm}
+
 \begin{proof}
-Correctness follows from the above observation. As for the complexity
+Correctness follows from \lemref{box}. As for the complexity
 analysis, Steps 1--3 take $O(n)$ time. Since $|K|\le 4c$, Step 4
-requires $O(c^3\log c)$ time \cite{aiks89}. Hence the overall
-time complexity of our algorithm is $O(n+c^3\log c)$.
+requires $O(c^3)$ time \cite{sk98}. Hence the overall
+time complexity of the algorithm is $O(n+c^3)$.
 \end{proof}
 
-\noindent Remark: 
-Observation \ref{bounding-box-obs} holds if we change the problem to
-computing minimum area rectangle instead of minimum perimeter
-rectangle.  Moreover, the {\sf Procedure Rectangle} in \cite{aiks89},
-also works for area, as, we make observation that, it computes all possible
-``anchored'' rectangles containing fixed number of points in its
-interior.
-
-The complexity of the perimeter problem can be further improved to
-$O(n+c^3)$ time using the results of Datta, Lenhof, Schwarz, and Smid,
-``Static and dynamic algorithms for k-point clustering problems'',
-Journal of Algorithms, 19:474--503, 1995.
-
-Prof. Michiel  might shed light on whether it works for area or not? 
-
- 
-
-
 \section{Minimizing the Convex Hull}
+\seclabel{hull}
+
+In this section we consider the following \emph{(convex hull)
+area/perimeter-based $c$ outlier removal problems}:  Given a set $S$
+of $n$ points, find a subset $S'\subseteq S$, $|S'|=c$ such that the
+area/perimeter of the convex hull of $S\setminus S'$ is minimum over
+all choices of $S'$.  Throughout this section, we use $\ch(X)$ to
+denote the convex hull of the point set $X$. We start by giving an
+$\Omega(n\log n)$ lower bound, even for the case when $c=1$.
 
 
 \subsection{The Lower Bound}
 
 
 \begin{thm}
-In the algebraic decision tree model of computation, the problem of
-determining a single point $x\in S$ such that the area or perimeter of
-$\ch(S\setminus\{x\})$ is minimized has an $\Omega(n\log n)$ lower
-bound.
+In the algebraic decision tree model of computation, the (convex hull)
+area/perimeter-based 1 outlier removal problem has an 
+$\Omega(n\log n)$ lower bound.
 \end{thm}
 
 \begin{proof}
 The proof is by a reduction from the problem \textsc{Set-Equality}, of
 determining whether two sets $A$ and $B$ of real numbers are equal,
 which has an $\Omega(n\log n)$ lower bound in the algebraic decision
-tree model.
-The \textsc{Set-Equality} problem can be mapped to an outlier removal
-problem on the point multiset $S=S_A \uplus S_B$ where $S_A=\{(x,x^2):
-x\in A\}$, $S_B=\{(x,x^2):x\in B\}$ and $\uplus$ denotes multiset
-union. The sets $A$ and $B$ are equal if and only if for every $p\in
-S$, $\ch(S)=\ch(S\setminus\{p\})$.
+tree model.  The \textsc{Set-Equality} problem can be mapped to an
+outlier removal problem on the point multiset $S=S_A \uplus S_B$ where
+$S_A=\{(x,x^2): x\in A\}$, $S_B=\{(x,x^2):x\in B\}$ and $\uplus$
+denotes multiset union. The sets $A$ and $B$ are equal if and only if
+for every $p\in S$, $\ch(S)=\ch(S\setminus\{p\})$. 
 \end{proof}
 
 \subsection{The Algorithm}
 \seclabel{algorithm}
+
+In this subsection we present an algorithm to solve the (convex hull)
+area/perimeter-based $c$ outlier removal problem.  Throughout this
+subsection we will simply discuss the area-based problem.  The bulk of
+the computational work in the algorithm is done by a dynamic
+programming subroutine that handles area or perimeter equally well.
+We start with some geometric preliminaries.
 
 \subsubsection{Preliminaries} 
 \seclabel{preliminaries}
@@ -631,8 +779,8 @@ the standard trick of remembering, whenever the algorithm takes the
 maximum of two values, which of the two values produced the maximum.
 The details of this are standard and ommitted here.
 
-\begin{minipage}{5.5in}
-\noindent$\textsc{FindOptimalOfType}(T,i,j,k)$
+\noindent\begin{minipage}{5.5in}
+$\textsc{FindOptimalOfType}(T,i,j,k)$
 \begin{algorithmic}[1]
 \IF{$T$ is empty}
   \RETURN{0}
@@ -734,7 +882,7 @@ $O(cn)$ time because the table entries satisfy the recurrence
      D_{j,\ell} = \max\{D_{j,\ell-1},D_{j-1,\ell-c_{j-1}-1}+X_{j,\ell} \}
 \]
 where we use the convention that $D_{j,\ell} = 0$ if $j=0$ and
-$D_{j,\ell}=-\infty$ if $\ell<0$.  This gives the last lemma required
+$D_{j,\ell}=-\infty$ if $\ell<0$.  This yields the last lemma required
 by the algorithm:
 
 \begin{lem}\lemlabel{combine}
@@ -742,29 +890,45 @@ The function \textsc{CombineSolutions} can be implemented in
 $O(dm)$ time.
 \end{lem}
 
+This (finally) completes the proof of:
+\begin{thm}
+There exists an algorithm for the
+(perimeter-based or area-based) outlier removal problem that runs in
+$\Oruntime$ time.
+\end{thm}
+
 \section{Conclusions}
 \seclabel{conclusions}
 
-Together with the $O(n\log n+c^2n)$ time preprocessing described in
-\secref{preliminaries}, \lemref{catalan}, \lemref{recursion} and
-\lemref{combine} give an algorithm for the outlier removal problem
-whose running time is
-\[
- T(n,c) =   O(n\log n + c^2 n) + c \times C(2c) \times O((3c)^cn) 
-      = \Oruntime \enspace .
-\]
-Stretching the use of asymptotic notation, this completes the proof of:
-\begin{thm}
-For any constant $c$, there exists an algorithm for the
-(perimeter-based or area-based) outlier removal problem that runs in
-$O(n\log n)$.
-\end{thm}
+We have given algorithms for removing $c$ outliers to optimize various
+criteria. For any constant value of $c$, all our algorithms run in
+$O(n\log n)$ time.  It is interesting to note that our simplest
+algorithms are for methods based on bounding boxes, which are not
+invariant to rotations of the input.  At the next level is the
+diameter-based method which is invariant to rotations of the input,
+but not invariant to non-uniform scaling.  The most complicated of our
+algorithms is the algorithm based on convex hull area, whose results
+are invariant to any affine transformations of the input.
 
-We have made no attempt to optimize the dependence of our running time
-with respect to the value of $c$ and, indeed, the running time of our
-algorithm is superpolynomial in $c$. Does there exist an algorithm
+We conclude with a few directions for further research:
+
+\begin{enumerate}
+
+\item Our algorithm for minimizing the diameter of $S\setminus S'$
+extends readily to point sets $S$ in $\mathbb{R}^3$.  Using an
+$O(n\log n)$ diameter-finding algorithm \cite{cs88,r01} and the
+fastest algorithms for \textsc{Vertex-Cover} \cite{ckj01} we obtain an
+algorithm with running time $O(cn\log n + c^4 1.27^{(c^2)})$.  Is
+there an algorithm whose running time depends only polynomially on
+$c$?
+
+\item The running time of our algorithm for minimizing the
+area/perimeter of the convex hull has a superpolynomial dependence on the
+value of $c$. Does there exist an algorithm
 that is polynomial in $c$ but that still runs in $O(n\log n)$ time for
 any fixed value of $c$?
+
+\end{enumerate}
 
 \bibliographystyle{plain}
 \bibliography{outliers}

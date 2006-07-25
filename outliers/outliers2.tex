@@ -69,13 +69,21 @@ outliers) is small.
 
 The outlier removal problems stated above and similar problems are
 fairly well-studied problems in the field of computational geometry.
-However, most work thus far has focused on the case when $c$ is large.
-More specifically, most research has been on the problem of finding a
-$k$ point subset (a $k$-cluster) $X\subseteq S$, $|X|=k$, such that
-$f(X)$ is minimum. These are the same problems studied in the current
-paper with $k=n-c$ except that our focus is on large values of $k$
-(small $c$) and most existing research focuses on designing efficient
-algorithms for small values of $k$.
+However, most work thus far has focused on the case when $c$ is
+large.\footnote{One notable exception to this statement is the work on
+linear programming with $c$ violations, which includes the problem of
+finding a subset $S'$ of $S$, $|S'|=c$ such that the radius of the
+smallest disk containing $S\setminus S'$ is minimum.  For this
+problem, Matou\v{s}ek gives an $O(n\log n + c^3 n^{\epsilon})$ time
+algorithm \cite{m95} and Chan \cite{c05} gives an $O(n\beta(n)\log n +
+k^2n^\epsilon)$ time algorithm, where $\epsilon >0$ is an arbitrarily
+small constant and $\beta(\cdot)$ is related to the inverse Ackermann
+function.} More specifically, most research has been on the problem of
+finding a $k$ point subset (a $k$-cluster) $X\subseteq S$, $|X|=k$,
+such that $f(X)$ is minimum. These are the same problems studied in
+the current paper with $k=n-c$ except that our focus is on large
+values of $k$ (small $c$) and most existing research focuses on
+designing efficient algorithms for small values of $k$.
 
 \paragraph{Minimum Diameter.} The problem of finding a subset of $S$ of size
 $k$ with minimum diameter has been studied by Aggarwal \etal\
@@ -87,13 +95,12 @@ the running time to $O(n\log n + k^2 n\log^2 k)$.
 \etal\ \cite{aiks89} also give an $O(k^2n\log n)$ time algorithm to
 find the subset of $S$ with the minimum-perimeter enclosing
 axes-parallel rectangle.  Eppstein and Erickson \cite{ee94} improve
-the running time to $O(n\log n + k^2 n)$ using $O(kn)$ space. Datta
-\etal\ improve the space bound to $O(n)$. Segal and Kedem \cite{sk98}
+the running time to $O(n\log n + k^2 n)$.  Segal and Kedem \cite{sk98}
 present an algorithm for this problem that runs in $O(n+k(n-k)^2)$
 time using $O(n)$ space, provided $\frac{n}{2}<k\le n$. Their
 algorithm can also find the minimum area rectangle.
 
-\paragraph{Minimum-Perimeter Convex Hull.} The problem of finding a
+\paragraph{Minimum-Perimeter/Area Convex Hull.} The problem of finding a
 subset of $S$ of size $k$ that has the least perimeter convex hull was
 first considered over 20 years ago by Dobkin \etal\ \cite{ddg83} who
 gave an $O(k^2n\log n + k^5 n)$ time algorithm.  This algorithm can be
@@ -110,16 +117,16 @@ these problem to be solved, once the order-$k$ \voronoi\ diagram is
 computed, by considering $O(k'n)$ subproblems each of size
 $k'$.}
 
-\paragraph{Minimum-Area Convex Hull.}  The problem of finding a subset
-of $S$ of size $k$ that has the minimum area convex hull was
-considered by Eppstein \etal\ \cite{eorw92} and later by Eppstein
-\cite{e93} who give $O(kn^{3})$ and $O(n^2\log n + k^3n^2)$ time
-algorithms for this problem, respectively. \comment{The second algorithm (by
-Eppstein) uses the first algorithm along with the fact that the $k$
-points that define the solution are among the $2k-4$ vertical nearest
-neighbours of one of the $n\choose 2$ line segments determined by
-pairs of points in $S$.  This allows the problem to be solved by
-considering $O(n^2)$ subproblems each of size $O(k)$.}
+The problem of finding a subset of $S$ of size $k$ that has the
+minimum area convex hull was considered by Eppstein \etal\
+\cite{eorw92} and later by Eppstein \cite{e93} who give $O(kn^{3})$
+and $O(n^2\log n + k^3n^2)$ time algorithms for this problem,
+respectively. \comment{The second algorithm (by Eppstein) uses the
+first algorithm along with the fact that the $k$ points that define
+the solution are among the $2k-4$ vertical nearest neighbours of one
+of the $n\choose 2$ line segments determined by pairs of points in
+$S$.  This allows the problem to be solved by considering $O(n^2)$
+subproblems each of size $O(k)$.}
 
 \comment{
 An algorithm running in $O(k^2n\log n)$ time using $O(kn)$ space
@@ -227,16 +234,23 @@ It must therefore take $\Omega(n\log n)$ time to determine $x$.
 
 Next we give an algorithm for the diameter-based $c$ outlier removal
 problem.  We do this by first considering a more general problem in
-$\mathbb{R}^{n \times n}$ and then use the derived algorithm to find a
-set $\tilde{S}$ of $O(c^2)$ points with the property that optimal set
-$S'$ for $S$ is also the optimal set for $\tilde{S}$. 
+$\mathbb{R}^{n \times n}$ and then use the resulting algorithm to find
+a set $\tilde{S}$ of $O(c^2)$ points with the property that any
+optimal set $S'$ for $S$ is also an optimal set for $\tilde{S}$. 
 
-Let $A$ denote an $n\times n$ symmetric matrix of real numbers, with
-$A_{i,*}$ denoting the $i$th row of $A$ and $A_{*,j}$ denoting the
-$j$th column of $A$.  For a set $I$ of row and column indices we
-denote by $A\setminus I$ the submatrix of $A$ obtained by deleting
-$A_{i,*}$ and $A_{*,i}$ for every $i\in I$ from $A$.
+Let $A$ denote an $n\times n$ symmetric matrix of non-negative real
+numbers such that 
+\begin{enumerate}
+\item $A_{i,i} = 0$ for all $1\le i\le n$.
 
+\item For all $1\le i<j\le n$, 
+     $A_{i,j} = A_{k,\ell}$ if and only if $k=i$ and 
+     $\ell=j$ or $k=j$ and $i=\ell$.
+\end{enumerate}
+For a set $I$
+of row and column indices we denote by $A\setminus I$ the submatrix of
+$A$ obtained by deleting $A_{i,*}$ and $A_{*,i}$ for every $i\in I$
+from $A$.
 We consider the problem of selecting a set $T$ of $c$ indices, such
 that the largest value in $A\setminus T$ is minimum over all choices
 of $T$.  We begin by showing that the algorithm \textsc{DeepSet}
@@ -244,12 +258,13 @@ described below selects a set $\tilde{T}$ of $(c+1)^2$ indices that
 are a superset of some optimal set $T$.
 
 In the following, \emph{marking} an index $i$ means adding $i$ to
-$\tilde{T}$ and \emph{deleting} an index $i$ removing row $i$ and
-column $i$ from $A$.  Algorithm $\textsc{DeepSet}(A,c)$ finds the
-maximum entry $A_{i,j}$ of $A$, marks the indices of the $c+1$ largest
-entries in $A_{i,*}$ and $A_{*,j}$, and finally deletes $i$ and $j$.
-The algorithm repeats this process $c+1$ times.  Algorithm
-$\textsc{DeepSet}(A,c)$ is given in pseudo code below.
+$\tilde{T}$ and \emph{deleting} an index $i$ means removing row $i$
+and column $i$ from $A$.  In words, Algorithm $\textsc{DeepSet}(A,c)$
+finds the maximum entry $A_{i,j}$ of $A$, marks the indices of the
+$c+1$ largest entries in $A_{i,*}$ and $A_{*,j}$, and finally deletes
+$i$ and $j$.  The algorithm repeats this process $c+1$ times.  In
+pseudocode, Algorithm $\textsc{DeepSet}(A,c)$ is given 
+below:
 
 \noindent
 \begin{minipage}{\textwidth}
@@ -339,6 +354,7 @@ argument used in Case~1 above implies that $\{k,\ell\}\subseteq
 
 \end{enumerate}
 \end{enumerate}
+This completes the proof.
 \end{proof} 
 
 Carefully inspecting the proof of \lemref{diameter_thm} shows that it
@@ -347,7 +363,7 @@ $\tilde{T}_{c+1}$ contains the indices of the largest element in
 $A\setminus T_c$).
 
 \begin{lem}
-Let $\tilde{A}$ be the submatrix of $A$ induced the row and column
+Let $\tilde{A}$ be the submatrix of $A$ induced by the row and column
 indices in the set $\tilde{T}$ produced by Algorithm \textsc{DeepSet}.
 Then the value of the optimal solution for $\tilde{A}$ is equal to the
 the value of the optimal solution for $A$.
@@ -358,14 +374,17 @@ size $n$ to one of size $O(c^2)$.  The set $S$ implicitly defines an
 $n\times n$ \emph{distance matrix} $A$ where $A_{i,j}$ is the distance
 from the $i$th point in $S$ to the $j$th point in $S$.  Note that $A$
 is a symmetric matrix of non-negative real numbers with zero values
-along the diagonal.  Therefore, we can run algorithm
-$\textsc{DeepSet}$ on $A$ to obtain a superset of the indices of
-points that need to be removed to minimize the diameter of $S$.
+along the diagonal.  To ensure that $A$ also has the second property
+we require we perform comparisons between the element of $A$
+lexicographically using the key $(A_{i,j}, i, j)$ for the element
+$A_{i,j}$.  In this way we can run algorithm $\textsc{DeepSet}$ on $A$
+to obtain a superset of the indices of points that need to be removed
+to minimize the diameter of $S$.
 
-\begin{thm}
+\begin{lem}
 There exists an $O(n\log n + cn + c^6\log^2 c)$ time algorithm to
 solve the diameter-based $c$ outlier removal problem.
-\end{thm}
+\end{lem}
 
 
 \begin{proof}
@@ -390,6 +409,14 @@ finding $\tilde{S}$ and finding $S'$) take a total time of $O(n\log n
 + cn + c^6 \log^2 c)$, as promised.
 \end{proof}
 
+\paragraph{Remark.} The \textsc{DeepSet} algorithm can be extended to
+handle slightly more general problems for which the matrix $A$ is not
+necessarily symmetric.  The only modification needed for this
+extension that the indices of the $c+1$ largest entries in $A_{i,*}$
+and in $A_{*,i}$ as well as $A_{j,*}$ and $A_{*,j}$ should be marked.
+This modification at most doubles the size of the resulting set
+$\tilde{T}$ of marked indices.
+
 \section{Minimizing the Enclosing Rectangle}
 \seclabel{minimizing-rectangle}
 \seclabel{box}
@@ -397,7 +424,7 @@ finding $\tilde{S}$ and finding $S'$) take a total time of $O(n\log n
 In this section we propose a simple algorithm for the following
 \emph{(bounding box) area/perimeter-based $c$ outlier removal problem}:
 given a set $S$ of $n$ points in the plane, find an axes-parallel
-rectangle $R$ of minimum area/perimeter that has exactly $c$-points of
+rectangle $R$ of minimum area/perimeter that has exactly $c$ points of
 $S$ in its exterior.  Our algorithm first computes a set of $O(c)$
 candidate points and then uses the algorithm of Segal and Kedem
 \cite{sk98} to compute the desired rectangle.  The main steps of our
@@ -440,7 +467,7 @@ Hence there are more than $c$ points in the exterior of $R$, a contradiction.
 
 \begin{thm}
 There exists an $O(n+c^3)$ time algorithm to solve the 
-The (bounding box) area/perimeter-based $c$ outlier removal problem.
+(bounding box) area/perimeter-based $c$ outlier removal problem.
 \end{thm}
 
 \begin{proof}

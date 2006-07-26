@@ -1,0 +1,228 @@
+\documentclass[charterfonts,lotsofwhite]{patmorin}
+\usepackage[noend]{algorithmic}
+
+\input{pat}
+\newcommand{\td}{\mathrm{depth}}
+\newcommand{\lp}{\mathrm{LP}}
+
+\title{\MakeUppercase{Output-Sensitive Algorithms for Tukey Depth}}
+\author{David Bremner \and
+	John Iacono \and
+	Stefan Langerman \and
+	Pat Morin}
+\date{}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The \emph{Tukey depth} of a point $p$ with respect to a set $S$ of
+points is the minimum number of elements of $S$ contained in any
+closed halfspace that contains $p$.  Algorithms for computing the
+Tukey depth of a point in various dimensions are considered.  The
+running times of these algorithms depends on the value of the output,
+possibly making them suited to situations such as outlier removal when
+the value of the output is small.
+\end{abstract}
+
+\section{Introduction}
+
+Let $S$ be a set of $n$ points in $\R^d$.
+The \emph{Tukey depth}, or \emph{halfspace depth} of a point $p\in\R^d$ with
+respect to $S$ can be defined in several equivalent ways \cite{t73}:
+\begin{eqnarray}
+\td(p,S) & = & \min\{ |h\cap S| :
+	             \mbox{$h$ is a halfspace containing $p$} \} \\ 
+                     \eqlabel{tuk-orig}
+            & = & \min\{ |h\cap S| :
+                      \mbox{$h$ is a halfspace with $p$ on its boundary} \} \\ 
+                       \eqlabel{tuk-boundary}
+            & = & \min\{ |S'| :
+                      \mbox{$p$ is outside the convex hull of 
+                           $S\setminus S'$} \}
+                      \eqlabel{tuk-hull}
+\end{eqnarray}
+
+\Eqref{tuk-boundary} immediately yields an $O(n^{d})$ time algorithm
+to compute $\td(p,S)$.
+
+In this paper we consider algorithms for computing the Tukey depth of
+a point $p$ with respect to a set $S$, whose running time is dependent
+on $k$, the value of the output. In particular, we present:
+
+\begin{enumerate}
+\item A simple $O(n + k\log k)$ time algorithm for points in $\R^2$
+(\secref{2d}).  The most complicated data structure used in this
+algorithms is a binary heap.
+
+\item An $O(n + (n-k)\log(n-k))$ time algorithm to find the largest
+clique in an interval graph or circular-arc graph, where $k$ is the
+size of the clique found (\secref{max-clique}).  This problem is
+a generaliation of the 2-dimensional Tukey depth problem.
+
+\item An $O(n\log n + k^2\log n)$ time algorithm for points in $\R^3$
+and an $O(n + k^{11/4}n^{1/4})$ time algorithm for points in $\R^4$
+(\secref{3-4-d}).  These algorithms rely on results of Chan on linear
+programming with violated constraints \cite{X} which in turn rely on
+sophisticated range searching data structures \cite{X} and/or dynamic
+convex hull data structures \cite{X}.
+
+\item A simple $O((d+1)^k \lp(n,d))$ time algorithm for points in
+$\R^d$, where $\lp(n,d)$ denotes the time required to solve a linear
+program having $n$ constraints and $d$ variables (\secref{d-d}).
+Not surprisingly, this algorithm is also based on linear programming
+with violated constraints and is obtained by presenting a solution to
+the NP-hard \textsc{Maximum-Feasible-Subsystem}.
+\end{enumerate}
+
+
+\section{An Algorithm for Points in $\R^2$}
+\seclabel{2d}
+
+In this section we give a simple $O(n + k\log k)$ time algorithm to
+compute the Tukey depth of a point $p\in\R^2$ with respect to
+a set $S$ of $n$ points in $\R^2$.  The algorithm begins by
+partitioning $\R^2$ into 4 quadrants $Q_0,\ldots,Q_3$ around $p$.
+The algorithm then simultaneously begins computing the 4 quantities
+$\td_0(p,S),\ldots,\td_3(p,S)$ where 
+\begin{equation}
+     \td_i(p,S) = \min\{|h\cap S| : \mbox{$h$ is a halfspace containing
+$Q_i$} \} \enspace . \eqlabel{four-min}
+\end{equation}
+Clearly, $\td(p,S) = \min\{\td_i(p,S): 0\le i \le 3 \}$ since any
+halfspace containing $p$ contains at least one of the four quadrants.
+In the remainder of this section we will describe how to compute
+$k_i=\td_i(p,S)$ in $O(n + k_i\log k_i)$ time.  Since the
+computation can stop once $\td_i(p,S)$ has been computed for
+the index $i$ that minimizes \eqref{four-min}, this yields an $O(n +
+k\log k)$ time algorithm, where $k=\td(p,S)$.
+
+Let $S_i=S\cap Q_i$. To compute $\td_i(p,S)$ we create two binary
+heaps $H_{i-1}$ and $H_{i+1}$ that store the elements of $S_{i-1}$,
+respectively $S_{i+1}$, in counterclockwise, respectively, clockwise,
+order around $p$. Creating these two heaps takes $O(n)$ time using the
+standard bottom-up algorithm to construct a binary heap \cite{clrXX}.
+Next we extract elements one at a time from each of $H_{i-1}$ and
+$H_{i+1}$ until either (a)~one of the heaps is empty or (b)~we extract
+two elements $q$ from $H_{i-1}$ and $r$ from $H_{i+1}$ such that the
+angle $\angle spq > \pi$.  Suppose we have extracted $\ell$ elements
+each from $H_{i-1}$ and $H_{i+1}$ when this occurs.  Then it is easy
+to verify that 
+\[  
+  |S_i| + \ell - 1 \le \td_i(p,S) \le |S_i| + 2\ell \enspace .
+\]
+
+Next, we continue to extract as many elements as possible from each of
+$H_{i-1}$ and $H_{i+1}$ up to a maximum of $\ell$ elements each. The
+total time required to extract these at most $4\ell$ from the two
+heaps is $O(\ell\log n)$.  By sorting and scanning all the elements
+extracted from the heap plus the elements of $S_i$ we can then
+compute $\td_i(p,S)$ in an additional
+\[
+     O((|S_i|+\ell)\log n) = O(k_i\log n)
+\] 
+time.  This yields an a total running time of 
+\[  
+   O(n + k_i\log n) = O(n + k_i\log k_i) \enspace ,
+\]
+as required.  This completes the proof of:
+
+\begin{thm}\thmlabel{2-d}
+The Tukey depth of a point $p$ with respect to a set $S$ of $n$ points
+in $\R^2$ can be computed in $O(n + k\log k)$ time, where
+$k$ is the value of the output.
+\end{thm}
+
+\section{Algorithms for \textsc{Max-Clique} in Circular-Arc Graphs}
+\seclabel{max-clique}
+
+The problem of computing Tukey depth in $\R^2$ can be viewed as a
+problem on a set of circular arcs.  By \eqref{tuk-boundary}, computing
+the Tukey depth of $p$ is equivalent to finding a unit normal vector
+$v$ such the halfspace with $p$ on its boundary and having inner
+normal $v$ contains the fewest number of points of $S$ as possible.
+Note that the space of unit normals in $\R^2$ is a circle and that
+each point $q\in S$ defines a circular arc such that all choices of
+$v$ in this circular arc yield a halfspace that does not contain $q$.
+Thus, the Tukey depth problem reduces to the problem of finding a
+vector $v$ that is contained in the largest number of circular arcs
+The partitioning into 4 quadrants used in the proof of \thmref{2-d}
+works because all the circular arcs are actually half circles.  In
+this section we extend the results of the previous section to the case
+of arbitrary circular arcs.
+
+Let $C$ be a set of $n$ circular arcs of the unit circle $\Sp^1$.  We
+describe an $O(n+(n-k)\log (n-k))$ time algorithm to find a point $v$
+that is contained in the largest number of elements of $C$\ldots
+
+
+\section{Algorithms for Points in $\R^3$ and $\R^4$}
+\seclabel{3-4-d}
+
+\section{An Algorithm for Points in $\R^d$}
+\seclabel{d-d}
+
+Finally, we consider the general case of point sets in $\R^d$.  We
+formulate our solution by considering the third definition of Tukey
+depth, i.e., Equation~\eqref{tuk-hull}. That is, we wish to remove the
+smallest possible set $S'\subseteq S$ such that $p$ is outside the
+convex hull of $S\setminus S'$.  We begin by considering the problem
+of determining if $p$ is outside the convex hull of $S$, i.e., if
+$\td(p,S)=0$.
+
+Without loss of generality assume $p$ is the origin. Then testing if
+$p$ is outside the convex hull of $S$ can be formulated as the problem
+of finding coefficients $a_1,\ldots,a_d$ such that $\sum_{i=1}^da_i
+q_i > 0$ for all $q\in S$.  \notice{is it easy to make this a
+non-strict inequality?} Note that this is a set of $n$ linear
+inequalities in $d$ variables. Any of the standard algorithms for
+linear programming will either report that this set of inequalities is
+feasible and give a vector $(a_1,\ldots,a_d)$ satisfying all
+constraints or will report a set of $d+1$ constraints that not
+feasible. These $d+1$ constraints correspond to $d+1$ points of $S$
+whose convex hull (a simplex) contains $p$.  Denote by
+$\textsc{Carath\'eodoryWitness}(p,S)$ a routine that takes as input
+$p$ and $S$ and either returns a set of at most $d+1$ points in $S$
+whose convex hull contains $p$ or, in the case where $p$ is outside
+the convex hull of $S$, the empty set.  The following algorithm
+determines whether $\td(p,S)\le k$:
+
+\noindent$\textsc{TukeyDepthDecision}(p,S,k)$
+\begin{algorithmic}
+\STATE{\COMMENT{ return true if $\td(p,S)\le k$ and false otherwise }}
+\STATE{$\Delta\gets \textsc{Carath\'eodoryWitness}(p,S)$}
+\IF{$\Delta=\emptyset$} 
+   \STATE{\textbf{return} true} 
+\ENDIF
+\IF{$k= 0$}
+   \STATE{\textbf{return} false}
+\ENDIF
+\FOR{each $q\in \Delta$}
+   \IF{$\textsc{TukeyDepthDecision}(p,S\setminus\{q\},k-1)=\mathrm{true}$}
+     \STATE{\textbf{return} true}
+   \ENDIF
+\ENDFOR
+\STATE{\textbf{return} false}
+\end{algorithmic}
+
+Correctness of the above algorithm follows easily by induction on
+$\td(p,S)$.  The running time of hte algorithm is given by the
+recurrence
+\[
+  T(n,d,k) \le \lp(n,d) + (d+1) T(n-1,d,k-1)
+\]
+which resolves easily to $O((d+1)^k\lp(n,d))$ where $\lp(n,d)$ is the
+time to solve a linear program with $n$ constraints and $d$ variables.
+Running the above decision algorithm repeatedly with $k=0,1,\ldots$
+completes the proof of:
+
+\begin{thm}\thmlabel{d-d}
+The Tukey depth of a roint $p$ with respect to a set $S$ of $n$ points
+in $\R^d$ can be computed in $O((d+1)^k\lp(n,d))$ time, where
+$k$ is the value of the output and $\lp(n,d)$ is the time to solve a
+linear program with $n$ constraints and $d$ variables.
+\end{thm}
+
+
+
+\end{document}
+

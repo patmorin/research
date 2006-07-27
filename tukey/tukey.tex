@@ -19,9 +19,9 @@ The \emph{Tukey depth} of a point $p$ with respect to a set $S$ of
 points is the minimum number of elements of $S$ contained in any
 closed halfspace that contains $p$.  Algorithms for computing the
 Tukey depth of a point in various dimensions are considered.  The
-running times of these algorithms depends on the value of the output,
-possibly making them suited to situations such as outlier removal when
-the value of the output is small.
+running times of these algorithms depend on the value of the output,
+making them suited to situations such as outlier removal when the
+value of the output is typically small.
 \end{abstract}
 
 \section{Introduction}
@@ -42,9 +42,6 @@ respect to $S$ can be defined in several equivalent ways \cite{t73}:
                       \eqlabel{tuk-hull}
 \end{eqnarray}
 
-\Eqref{tuk-boundary} immediately yields an $O(n^{d})$ time algorithm
-to compute $\td(p,S)$.
-
 In this paper we consider algorithms for computing the Tukey depth of
 a point $p$ with respect to a set $S$, whose running time is dependent
 on $k$, the value of the output. In particular, we present:
@@ -55,24 +52,33 @@ on $k$, the value of the output. In particular, we present:
 algorithms is a binary heap.
 
 \item An $O(n + (n-k)\log(n-k))$ time algorithm to find the largest
-clique in an interval graph or circular-arc graph, where $k$ is the
-size of the clique found (\secref{max-clique}).  This problem is
-a generaliation of the 2-dimensional Tukey depth problem.
+clique in a circular-arc graph, where $k$ is the size of the clique
+found (\secref{max-clique}).  This problem is a generaliation of the
+Tukey depth problem in $\R^2$.
 
 \item An $O(n\log n + k^2\log n)$ time algorithm for points in $\R^3$
-and an $O(n + k^{11/4}n^{1/4})$ time algorithm for points in $\R^4$
-(\secref{3-4-d}).  These algorithms rely on results of Chan on linear
-programming with violated constraints \cite{X} which in turn rely on
-sophisticated range searching data structures \cite{X} and/or dynamic
-convex hull data structures \cite{X}.
+and an $O(n + k^{11/4}n^{1/4}\log^{O(1)})$ time algorithm for points
+in $\R^4$ (\secref{3-4-d}).  These algorithms rely on results of Chan
+on linear programming with violated constraints \cite{X} which in turn
+rely on sophisticated range searching data structures \cite{X} and/or
+dynamic convex hull data structures \cite{X}.
 
-\item A simple $O((d+1)^k \lp(n,d))$ time algorithm for points in
+\item A simple $O(d^k \lp(n,d-1))$ time algorithm for points in
 $\R^d$, where $\lp(n,d)$ denotes the time required to solve a linear
 program having $n$ constraints and $d$ variables (\secref{d-d}).
 Not surprisingly, this algorithm is also based on linear programming
 with violated constraints and is obtained by presenting a solution to
 the NP-hard \textsc{Maximum-Feasible-Subsystem}.
 \end{enumerate}
+
+For the remainder of this paper we use the following notations: For
+points $p,q\in\mathbb{R}^d$, $p_i$ denotes the $i$th coordinate of
+$p$, $\|p\|=(\sum_{i=1}^d p_i^2)^{1/2}$, and $p\cdot
+q=\sum_{i=1}^d p_iq_i$.  The unit sphere in $\R^{d+1}$ is denoted by
+$\Sp^d =\{ p\in\R^{d+1} : \|p\|=1\}$. The top side of this sphere is
+denoted by $\Sp^d_+ =\{ p\in\Sp^{d} : p_{d+1} > 0 \}$ and the bottom
+side is denoted by $\Sp^d_- =\{ p\in\Sp^{d} : p_{d+1} < 0 \}$.
+
 
 
 \section{An Algorithm for Points in $\R^2$}
@@ -132,42 +138,150 @@ in $\R^2$ can be computed in $O(n + k\log k)$ time, where
 $k$ is the value of the output.
 \end{thm}
 
-\section{Algorithms for \textsc{Max-Clique} in Circular-Arc Graphs}
+\section{An Algorithm for \textsc{Max-Clique} in Circular-Arc Graphs}
 \seclabel{max-clique}
 
 The problem of computing Tukey depth in $\R^2$ can be viewed as a
 problem on a set of circular arcs.  By \eqref{tuk-boundary}, computing
 the Tukey depth of $p$ is equivalent to finding a unit normal vector
-$v$ such the halfspace with $p$ on its boundary and having inner
-normal $v$ contains the fewest number of points of $S$ as possible.
-Note that the space of unit normals in $\R^2$ is a circle and that
-each point $q\in S$ defines a circular arc such that all choices of
-$v$ in this circular arc yield a halfspace that does not contain $q$.
-Thus, the Tukey depth problem reduces to the problem of finding a
-vector $v$ that is contained in the largest number of circular arcs
-The partitioning into 4 quadrants used in the proof of \thmref{2-d}
-works because all the circular arcs are actually half circles.  In
-this section we extend the results of the previous section to the case
-of arbitrary circular arcs.
+$v$ such that the halfspace with $p$ on its boundary and having inner
+normal $v$ contains as few points of $S$ as possible.
+Note that the set of unit normals in $\R^2$ is the unit circle $\Sp^1$
+and that each point $q\in S$ defines a circular arc such that all
+choices of $v$ in this circular arc yield a halfspace that does not
+contain $q$.  Thus, the Tukey depth problem reduces to the problem of
+finding a vector $v$ that is contained in the largest number of
+circular arcs. The partitioning into 4 quadrants used in for the
+algorithm of \thmref{2-d} works because all the circular arcs are
+actually half circles.  In this section we extend the results of the
+previous section to the case of arbitrary circular arcs.
 
 Let $C$ be a set of $n$ circular arcs of the unit circle $\Sp^1$.  We
-describe an $O(n+(n-k)\log (n-k))$ time algorithm to find a point $v$
-that is contained in the largest number of elements of $C$\ldots
+describe an $O(n+(n-k)\log (n-k))$ time algorithm to find a point
+$v\in\Sp^1$ that is contained in the largest number of elements of
+$C$.
 
 
 \section{Algorithms for Points in $\R^3$ and $\R^4$}
 \seclabel{3-4-d}
 
+\notice{general position and no zero}
+The previous section showed how the problem of computing the Tukey
+depth of a point in $\R^2$ is equivalent to the problem of finding a
+point contained in the largest number of halfcircles on the unit
+circle $\Sp^1$.  A similar statement is true in $\R^d$:  Each point
+$q\in S$ defines an open halfsphere $q^*=\{ v\in\Sp^{d-1} : v\cdot q <
+0\}$.  That is, all vectors in $q^*$ are the inner normals of planes
+that contain $p$ but do not contain $q$.  Thus, the problem of
+determining the Tukey depth of $p$ reduces to the problem of finding
+the point contained in the largest number of halfspheres in $S^*=\{q^*
+: q\in S\}$.
+
+We simply observe that this problem can be solved by solving two
+problems in $\R^{d-1}$.  Each open halfsphere $q^*\in S^*$ is the
+intersection of an open halfspace $q^\#$ with $\Sp^{d-1}$.  Consider
+the intersection of $q^\#$ with the hyperplane
+$H_+=\{(x_1,\ldots,x_d):x_d=1\}$.  By central projection, there is a
+1-1 correspondence between points in $\Sp^{d-1}_+$ and $H_+$ and this
+projection has the property that $r\in\Sp^{d-1}_+$ is in $q^*$ if and
+only if the projection of $r$ is in $q^\#\cap H_+$.  Thus, finding the
+point in $\Sp^{d-1}_+$ contained in the largest number of halfspheres
+is equivalent to finding a point in $H_+$ contained in the largest
+number of halfspaces.  A similar statement holds regarding
+$\Sp^{d-1}_-$ using the hyperplane $H_-=\{(x_1,\ldots,x_d):x_d=1\}$.
+
+The above discussion shows that computing the Tukey depth of a point
+in $\R^d$ reduces to two instances of the problem
+\textsc{MaximumFeasibleSubsystem} in $\R^{d-1}$: Given set $K$ of $n$
+halfspaces in $\mathbb{R}^{d-1}$, find the subset $K'$ of $K$ of
+minimum cardinality such that $\cap (K\setminus K')$ is non-empty.
+The current best results for \textsc{MaximumFeasibleSubsystem} in
+small dimensions are due to Chan \cite{c04}.  Using two instances of
+his algorithm for \textsc{MaximumFeasibleSubsystem} in $\R^2$,
+respectively, $\R^3$, and running them in parallel gives:
+
+\begin{thm}
+The Tukey depth of a point $p$ with respect to a set $S$ of $n$ points
+in $\R^3$ can be computed in $O(n\log n + k^2\log n)$ time, where
+$k$ is the value of the output.
+\end{thm}
+
+
+\begin{thm}
+The Tukey depth of a point $p$ with respect to a set $S$ of $n$ points
+in $\R^4$ can be computed in $O(n\log n + k^{11/4}n^{1/4}\log^{O(1)}
+n)$ time, where $k$ is the value of the output.
+\end{thm}
+
 \section{An Algorithm for Points in $\R^d$}
 \seclabel{d-d}
 
-Finally, we consider the general case of point sets in $\R^d$.  We
-formulate our solution by considering the third definition of Tukey
-depth, i.e., Equation~\eqref{tuk-hull}. That is, we wish to remove the
-smallest possible set $S'\subseteq S$ such that $p$ is outside the
-convex hull of $S\setminus S'$.  We begin by considering the problem
-of determining if $p$ is outside the convex hull of $S$, i.e., if
-$\td(p,S)=0$.
+Finally, we consider the general case of point sets in $\R^d$.  
+In the previous section we showed that computing the Tukey depth of
+a point $p$ with respect to a point set $S$ of $n$ points in $\R^d$
+can be reduced to two instances of \textsc{MaximumFeasibleSubsystem}
+in $\R^{d-1}$.  Here we give a fixed-parameter tractable \cite{dfXX}
+algorithm for \textsc{MaximumFeasibleSubsystem}.  The algorithm uses
+linear programming as a subroutine in the following way.  Given a
+collection $K$ of halfspaces in $\R^{d-1}$, an algorithm for linear
+programming can be used to either
+\begin{enumerate}
+\item Determine a point $p\in\cap K$ if such a point exists or,
+\item report a subset $B\subseteq K$, $|B|\le d$, such that $\cap B=\emptyset$.
+\end{enumerate}
+Let $\textsc{IIS}(K)$ denote a routine that outputs, in the latter
+case, the set
+$B$ or outputs, in the former case, the empty set.
+Then the following algorithm solves the
+\textsc{MaximumFeasibleSubsystem} decision problem:
+
+\noindent$\textsc{MFS}(K,k)$
+\begin{algorithmic}[1]
+\STATE{\COMMENT{$\star$ determine if there exists $K'\subseteq K$, $|K'|\le
+k$, such that $\cap(K\setminus K')\neq\emptyset$ $\star$} }
+\STATE{$B\gets\textsc{IIS}(K)$}
+\IF{$B=\emptyset$}
+   \STATE{\textbf{return} true}
+\ENDIF
+\IF{$k=0$}
+   \STATE{\textbf{return} false}
+\ENDIF
+\FOR{each $h\in K'$}
+   \IF{$\textsc{MFS}(K\setminus\{h\},k-1)=\mathrm{true}$}
+      \STATE{\textbf{return} true}
+   \ENDIF
+\ENDFOR
+\STATE{\textbf{return} false}
+\end{algorithmic}
+
+Correctness of the above algorithm is easily established by induction
+on the value of $k$.  The running time of the algorithm is given by
+the recurrence
+\[
+    T(n,k) \le \lp(n,d-1)+ dT(n-1,k-1) \enspace ,
+\]
+where $\lp(n,d)$ denotes the running time of an algorithm for solving
+a linear programming with $n$ constraints and $d$ variables.  This
+recurrence readily resolves to $O(d^k\lp(n,d-1))$.  Running this
+algorithm with the values $k=1,2,\ldots$ completes the
+proof of:
+
+\begin{thm}\thmlabel{d-d}
+The Tukey depth of a roint $p$ with respect to a set $S$ of $n$ points
+in $\R^d$ can be computed in $O(d^k\lp(n,d-1))$ time, where $k$ is
+the value of the output and $\lp(n,d)$ is the time to solve a linear
+program with $n$ constraints and $d$ variables.
+\end{thm}
+
+
+
+\comment{As in
+the previous section, we formulate our solution by considering the
+third definition of Tukey depth, i.e., Equation~\eqref{tuk-hull}. That
+is, we wish to remove the smallest possible set $S'\subseteq S$ such
+that $p$ is outside the convex hull of $S\setminus S'$.  We begin by
+considering the problem of determining if $p$ is outside the convex
+hull of $S$, i.e., if $\td(p,S)=0$.
 
 Without loss of generality assume $p$ is the origin. Then testing if
 $p$ is outside the convex hull of $S$ can be formulated as the problem
@@ -205,7 +319,7 @@ determines whether $\td(p,S)\le k$:
 \end{algorithmic}
 
 Correctness of the above algorithm follows easily by induction on
-$\td(p,S)$.  The running time of hte algorithm is given by the
+$\td(p,S)$.  The running time of the algorithm is given by the
 recurrence
 \[
   T(n,d,k) \le \lp(n,d) + (d+1) T(n-1,d,k-1)
@@ -221,7 +335,7 @@ in $\R^d$ can be computed in $O((d+1)^k\lp(n,d))$ time, where
 $k$ is the value of the output and $\lp(n,d)$ is the time to solve a
 linear program with $n$ constraints and $d$ variables.
 \end{thm}
-
+}
 
 
 \end{document}

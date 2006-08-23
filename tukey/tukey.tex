@@ -168,22 +168,90 @@ $[a,b]$ to denote the circular arc that begins at $a$ and proceeds
 counterclockwise to $b$.  The following observations imply that all
 the points of very high depth are clustered close together.
 
-\begin{obs}
-Let $q\in[p_i,p_{i+1}]$ be a point contained in $n-k$ arcs of $C$.
+\begin{obs}\lemlabel{close}
+Let $q\in[p_i,p_{i+1}]$ be a point contained in $k$ arcs of $C$.
 Then, for any $0\le r\le n$, every point $q'\in[p_{i-r},p_{i+r}]$ is
-contained at least $n-k-r$ arcs of $C$.
+contained at least $k-r$ arcs of $C$.
 \end{obs}
 
-\begin{obs}
-Let $q\in[p_i,p_{i+1}]$ be a point contained in $n-k$ arcs of $C$.
-Then, for any $k \le r\le n$, every point $q'\notin[p_{i-r},p_{i+r}]$ 
+\begin{obs}\lemlabel{far}
+Let $q\in[p_i,p_{i+1}]$ be a point contained in $k$ arcs of $C$.
+Then, for any $n-k \le r\le n$, every point $q'\notin[p_{i-r},p_{i+r}]$ 
 is contained in at most $n+k-r$ arcs of $C$.
 \end{obs}
 
-To help isolate the point contained in the largest number of circular
-arcs we take a sample $s_0,\ldots,s_t\subseteq \{p_1,\ldots,p_{2n}\}$
-such that any interval $[s_i,s_{i+1}]$ between two consecutive sample
-points contains at most $n^\alpha$ points of $\{p_1,\ldots,p_{2n}\}$
+Conceptually, the algorithm is reasonably simple.  Suppose we are given
+the value $k$.  Then we first take a regular sample
+$s_0,\ldots,s_t\subseteq \{p_1,\ldots,p_{2n}\}$ so that any interval
+$[s_i,s_{i+1}]$ between two consecutive sample points contains at most
+$n/t$ points of $\{p_1,\ldots,p_{2n}\}$.  We then compute, for each
+sample point $s_i$ the number of arcs from $C$ that contain $s_i$.  By
+\lemref{close}, if there exists any point $p_i\in \Sp^1$ contained in
+$k$ arcs of $C$ then the sample point $s_j$ nearest to $p_i$ is a
+\emph{high depth sample} that is contained in at least $k-n/t$ arcs
+of $C$.  Furthermore, by \lemref{far}, there are at most
+$t+1$\notice{check this!}
+high depth sample points.  Thus, we know that there are not many high
+depth sample points and that the point $p$ contained in the largest
+number of elements of $C$ appears between two consecutive high-depth
+sample points.  Indeed, there is an arc $[s_{i},s_{i+2(t+1)}]$ that
+contains the point $p$ that we are trying to find.  This arc is easily
+identified and it contains at most
+\[
+(2t+2) \times n/t = O(n)
+\]
+points $p_1,\ldots,p_{2n}$ which can be identified in $O(n)$ time.
+Using the standard ``sort and scan'' algorithm on this set of
+endpoints allows us to find the point $p$ in an additional 
+\[
+   O((k+n/t)\log (k+n/t)) = O(n+k\log k)
+\]
+for any choice of $t\ge \log n$.
+
+In the implementation of the above algorithm, several issues
+arise:
+
+\begin{enumerate}
+\item The value of $k$ is not known in advance.  However, we do not
+need the exactly value of $k$ and the value of $k$ can be estimated to
+within an additive error of $n/t$ by computing, for each sample point
+$s_i$, the number of arcs of $C$ that contain $s_i$ (see Issue~3,
+below).
+
+\item We can not obtain a perfectly regular sample $s_0,\ldots,s_t$ of
+$p_1,\ldots,p_{2n}$ in $O(n)$ time.  However, we do not require a
+perfectly regular sample.  By taking a random sample of size $ct\log
+t$ for an appropriate constant $c$ we obtain a set of samples
+$s_0,\ldots,s_{ct\log t}$ such that, with high probability, no arc
+$[s_{i},s_{i+1}]$ contains more $n/t$ sample points \cite{X}.
+
+\item We can not compute, in $O(n)$ time, for each sample point $s_i$,
+the number of arcs of $C$ that contain $s_i$.  However, random
+sampling helps again here.  Let $d(s_i)$ denote the number of elements
+of $C$ that contain $s_i$. By taking a random sample $C'\subseteq C$,
+$|C'|=r$ we can determine, with high probability, for each $s_i$ a
+number $d_i$ such that 
+\[
+        (1-\epsilon) d(s_i) - n/r\le d_i \le (1+\epsilon)d(s_i) + n/r \enspace .
+\] 
+Using brute force, this computation takes $O(rt\log t)$ time.  By
+preprocessing the sample $C'$ this can be sped up to $O(r\log r+t\log
+r\log r)$ \cite{X}.
+\end{enumerate}
+
+By taking $r=t=\sqrt{n}$ in the above, and ommitting standard details,
+we obtain an algorithm that is correct with high probability and finds
+the point $p$ contained in the largest number of arcs in $C$ in
+$O(n+k\log k)$ time.
+
+\begin{thm}
+Given a set $C$ of $n$ circular of $\Sp^1$.  Then, for any constant
+$c$ there exists a randomized
+algorithm that runs in $O(n+k\log
+k)$ expected time and with probability at least $1-O(n^{-c})$ finds
+a point $p\in\Sp^1$ contained in the largest number of arcs of $C$.
+\end{thm}
+
 
 \section{Algorithms for Points in $\R^3$ and $\R^4$}
 \seclabel{3-4-d}

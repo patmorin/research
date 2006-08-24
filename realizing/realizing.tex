@@ -11,6 +11,7 @@
 \newcommand{\N}{\mathbb{N}}
 %\newcommand{\defeq}{\stackrel{\mathrm{def}}{=}}
 \newcommand{\defeq}{=}
+\newcommand{\R}{\mathbb{R}}
 
 \title{\MakeUppercase{Realizing Partitions Respecting Full 
 	and Partial Order Information}}
@@ -29,10 +30,8 @@
 \newcommand{\op}{\diamond}
 \newcommand{\opij}{\op_{ij}}
 
-\pagestyle{empty}
 \begin{document}
 \maketitle
-\thispagestyle{empty}
 
 \begin{abstract} 
 For $n\in\N$, we consider the problem of partitioning the interval
@@ -117,7 +116,7 @@ $\textsc{Subset-Sum}$ with multiplicity, where there are special
 constraints on the allowable multiplicities.  The efficiency and
 correctness of our algorithms for solving these problems rely
 primarily on properties of modular arithmetic. Throughout this paper,
-we use some standard number-theoretical notations: $\Z_k\defeq
+we use some number-theoretical notations: $\Z_k\defeq
 \{0,\ldots,k-1\}$, $\N_k\defeq\Z_k\setminus\{0\}$,
 $\Z\defeq\Z_\infty$, $\N\defeq\N_\infty$, and $\Z_k^+$ is the group
 whose elements are $\Z_k$ and whose operator is addition modulo $k$.
@@ -153,7 +152,7 @@ where (1)~$\ell_i = \ell_j$ if $i$ and $j$ belong to the same class and
 Refer to \figref{graphical}.  Now our problem is to find
 $v_1,\ldots,v_{m}\in\N$ such that $v_{i'} < v_{i'+1}$, for all $1\le
 i' <
-m$ and $\sum_{i'=1}^m{v_{i'}|C_{i'}|} = n$.  Then by assigning $l_i=v_{i'}$
+m$ and $\sum_{i'=1}^m{v_{i'}|C_{i'}|} = n$.  Then by assigning $\ell_i=v_{i'}$
 for all $i\in C_{i'}$ we obtain a solution to the original problem.
 The restriction $v_{i'} < v_{i'+1}$ is slightly inconvenient and we
 can remove it with a rewording of the problem.  Let $t_1 = k$,
@@ -168,8 +167,8 @@ represents the increase from $v_{i-1}$ to $v_i$.
 
 \begin{figure}
 \begin{center}\includegraphics{graphical}\end{center}
-\caption{The relationship between $v_1,\ldots,v_k$ and
-$w_1,\ldots,w_k$. The area under the
+\caption{The relationship between $v_1,\ldots,v_m$ and
+$w_1,\ldots,w_m$. The area under the
 curve is $n$.} \figlabel{graphical}
 \end{figure}
 
@@ -206,7 +205,7 @@ Given $D_{i-1}$, $D_i$ can be computed in $O(k)$ time.
 \begin{proof}
 We show that a careful reordering of the elements of $\Z_k$ allows us
 to compute $D_i$ by a sequence of $k/r$ lower envelope computations
-each taking time $O(r)$; here, $r=k/\gcd(k,\ell_i)$ is the length of
+each taking time $O(r)$; here, $r=k/\gcd(k,t_i)$ is the length of
 the \emph{orbit} of $\ell_i$ in the group $\mathbb{Z}_k^+$.  The
 example of 
 the lower envelope in
@@ -228,20 +227,26 @@ $D_{i}(y)$ for all $y$ in
 \]
 in $O(r)$ time.  The same algorithm can be used for the sets $q_{1},
 q_{2}, \ldots, q_{k/r-1}$ to give a total running time of
-$O(r)\times k/r= O(k)$.
+$O(r)\cdot k/r= O(k)$.
 The main observation we use is that
 \begin{equation}
     f(j) \defeq D_{i}(q_{0,j}) = \min\{D_{i-1}(q_{0,(j-x)\bmod k})+xt_i :
 x\in \N_k\} \enspace .
 \end{equation}
 
-That is, the univariate function $f(j)$ is the lower
-envelope of $k$ half-lines, where the $x$th half-line is given by the
-equation $y=(D_{i-1}(q_{0,x}) + (j-x)t_i)\bmod k$, $j\ge 1$.  Since
-the slope, $t_i$, of all $k$ half-lines is identical and positive and
-their left endpoints are sorted (by $j$) the lower envelope can easily
-be computed in $O(r)$ time by scanning from left to right and keeping
-track of the current minimum line.  This completes the proof.
+That is, the univariate function $f(j)$ is the lower envelope of $r$
+\emph{half-lines}, where the $x$th half-line is given by
+\[
+   h_x = \{(j,y)\in \Z_k\times \Z :
+          \mbox{$y=(D_{i-1}(q_{0,x}) + (j-x)t_i)\bmod k$ 
+               and $j\ge 1$}\} \enspace . 
+\]
+
+Since the slope, $t_i$, of all $k$ half-lines is identical and
+positive and their left endpoints are sorted (by $j$) the lower
+envelope can easily be computed in $O(r)$ time by scanning from left
+to right and keeping track of the current minimum line.  This
+completes the proof.  
 \end{proof}
 
 Note that the algorithm implied by \lemref{firstalg} is actually very
@@ -299,9 +304,9 @@ only that $\ell_i > \ell_{i+1}$, $\ell_i < \ell_{i+1}$ or
 $\ell_i=\ell_{i+1}$.  Our approach is similar to that of the full
 information case.  By scanning for $\op_{i,i+1}$ for $i=1,\ldots,k-1$
 we determine a set of $m\le k$ equivalences classes $C_1,\ldots,C_m$
-over $1,\ldots,k$ such that (1)~$l_i=l_j$ if $i$ and $j$ belong to the
+over $1,\ldots,k$ such that (1)~$\ell_i=\ell_j$ if $i$ and $j$ belong to the
 same class and (2)~if $i\in C_{i'}$ and $j\in C_{i'+1}$ then either
-$l_i<l_j$ or $l_i > l_j$, as indicated by $\op$. 
+$\ell_i<\ell_j$ or $\ell_i > l_j$, as indicated by $\op$. 
 
 Let $t_1=k$, and let $t_i = t_{i-1}-|C_{i-1}|$ for $i>1$.  Let
 $s_1=+1$ and, for $i>1$, let $s_i=+1$ if the elements in $C_{i}$
@@ -555,7 +560,7 @@ than $2$.
 
 The most general version of this class of problems is as follows:
 Given any subset of the order matrix $\op$, find a sequence
-$l_1,\ldots,l_k\in\N$ that respects all relations in this matrix and
+$\ell_1,\ldots,\ell_k\in\N$ that respects all relations in this matrix and
 whose sum is $n$. This remains an open problem.
 
 Another problem, whose solution would be useful in performing
@@ -569,10 +574,10 @@ many listeners.''
 The sequential and cyclic information problems we study are motivated
 by the 3-level ($+-0$) contour representation studied by Dowling
 \cite{d78}.  This representation has been generalized to multi-level
-contours \cite{l96,kcgv00} where we are given, for each $l_i$, a range
-relative to $l_{i-1}$.  For example, we may be told that $l_{i}\in
-[l_{i-1} + 50, l_{i-1}+100]$.  The problem is then to find
-$l_1,\ldots,l_k$ that satisfy all these constraints and whose sum is
+contours \cite{l96,kcgv00} where we are given, for each $\ell_i$, a range
+relative to $\ell_{i-1}$.  For example, we may be told that $\ell_{i}\in
+[\ell_{i-1} + 50, \ell_{i-1}+100]$.  The problem is then to find
+$\ell_1,\ldots,\ell_k$ that satisfy all these constraints and whose sum is
 $n$.
 
 \section*{Acknowledgements}

@@ -9,16 +9,21 @@
 
 \input{pat}
 
-%\title{An Optimal Algorithm for $d$-Variate Zonoid Depth}
-\title{\MakeUppercase{An Optimal Algorithm
+%\title{An Optimal Randomized Algorithm for $d$-Variate Zonoid Depth}
+\title{\MakeUppercase{An Optimal Randomized Algorithm
 	for} $d$\MakeUppercase{-Variate Zonoid Depth}}
-\author{Pat Morin}
+\author{Pat Morin \\ 
+	School of Computer Science \\
+	Carleton University \\
+	\texttt{morin@scs.carleton.ca}}
 \date{}
 
 \begin{document}
 \maketitle
 \begin{abstract}
-Algorithms for Zonoid depth in $d$ dimensions are considered.
+A randomized linear expected-time algorithm for computing the 
+zonoid depth of a point with respect to a fixed dimensional point set is
+presented.
 \end{abstract}
 
 \section{Introduction}
@@ -26,7 +31,7 @@ Algorithms for Zonoid depth in $d$ dimensions are considered.
 Let $S$ be a set of $n$ points in $\R^d$.
 For a real number $k\ge 1$, the \emph{$k$-zonoid} of $S$ is defined as 
 \[
-      Z_k(S) = \left\{\sum_{p\in S}p\lambda_p 
+      Z_k(S) = \left\{\sum_{p\in S}\lambda_p p
 	: \mbox{$0\le \lambda_p \le 1/k$ for all $p\in S$  
 	   and $\sum_{p\in S}\lambda_p = 1$}  \right\} \enspace .
 \] 
@@ -46,7 +51,29 @@ zonoid depth and give an $O(n)$ expected time algorithm for computing,
 $\depth(p,S)$ when $p$ and $S$ are in $\R^2$.  The current
 paper extends their results by giving an $O(n)$ time algorithm to compute
 $\depth(p,S)$ when $p$ and $S$ are in $\R^d$ for any constant
-dimension $d$.  
+dimension $d$. 
+
+In the following, all points, vectors, and hyperplanes are assumed to
+live in $\R^d$ and $\Hy^d$ denotes the set of all hyperplanes in
+$\R^d$.  The notation $x_i$ denotes the $i$th coordinate of the point
+$x$.  We use the $\cdot$ notation to denote the inner-product of two
+points/vectors $x\cdot y=\sum_{i=1}^d x_iy_i$.
+
+For a set $S$ of $n$ points and a non-zero vector $r$,
+$S_1^r,\ldots,S_n^r$ is the sequence of elements of $S$ ordered by
+decreasing projections onto $r$, i.e., $S_i^r\cdot r \ge
+S_{i+1}^r\cdot r$ for all $1\le r\le n-1$.
+
+For a point $x$
+and a hyperplane $h$, let $x\drop h$ denote the $d$th coordinate of
+the vertical projection of $x$ onto $h$.  For a set $H$ of $n$
+hyperplanes, let $H_i^x$ be the $i$th hyperplane in $H$ encountered by
+a downward vertical ray originating at $(x_1,\ldots,x_{d-1},\infty)$.
+For ease of notation we use the shorthand $H_{-i}^x=H_{|H|-i+1}^x$.
+For $i>n$ we use the convention that $H_{i}^x$
+(respectively $H_{-i}^x$) is the ``horizontal hyperplane at infinity''
+$\{x:x_d=-\infty\}$ (respectively,
+$\{x:x_d=+\infty\}$). 
 
 \section{Chan's Generalized Optimization Technique}
 
@@ -60,13 +87,15 @@ Let $\mathcal{H}$ denote the set of all halfspaces in $\R^d$,
 let $\mathcal{P}$ denote the set of all possible inputs to some problem, 
 let $f:\mathcal{P}\mapsto 2^{\mathcal{H}}$ be any function mapping 
 problem inputs to sets of halfspaces in $\R^d$,
-and let $w:\R^d\mapsto \R$ be
-any linear objective function.  Suppose that $f$ and $w$ satisfy:
+let $g:\R^d\mapsto \R$ be
+any linear objective function, 
+and let $D(n)=\Omega(n^{\epsilon})$, for some $\epsilon>0$, be a non-decreasing function of
+$n$.  Suppose that $f$ and $w$ satisfy:
 \begin{enumerate}
 \setcounter{enumi}{-1}
 \item Given inputs $P_1,\ldots,P_d\in\mathcal{P}$ each of constant
 size, a point $p\in\cap (f(P_1)\cup\cdots\cup f(P_d))$ maximizing
-$w(p)$ can be found in constant time.
+$g(p)$ can be found in constant time.
 
 \item Given a point $p\in\R^d$ and an input $P\in\mathcal{P}$
 of size $n$, there exists a $D(n)$ time algorithm to determine whether
@@ -90,64 +119,66 @@ $P\in\mathcal{P}$ that generate an infinite number of constraints,
 i.e., $|f(P)|=\infty$.
 
 
-\section{Dual Zonoids}
+\section{Properties of Primal and Dual Zonoids}
 
 The $k$-zonoid $Z_k(S)$ is a convex polytope.  The extreme-most vertex
-of $Z_k(S)$ in direction $w$ can be obtained as follows
-\cite{gmXX,beXX}:  Let $w$ be a non-zero vector and denote 
-by $S_1^w,\ldots,S_n^w$ the points of $S$
-ordered by their projection onto a line in direction $w$.  That is,
-$S_i\cdot w \ge S_{i+1}\cdot w$ for all $1\le i\le n-1$.  Then the
-extreme-most vertex of $Z_k(S)$ in direction $w$ is given by 
-\[  
-\argmax\{p\cdot w: p\in Z_k(S)\} =
-        \left(\sum_{i=1}^{\floor{k}} S_i^w\times\frac{1}{k}\right) +
-          S_{\ceil{k}}^w\times(k-\floor{k})
-\]
-\cite{beXX,gmXX}.
+of $Z_k(S)$ in direction $x$ can be obtained as a convex combination of the
+$\ceil{k}$ extreme-most points of $S$ in direction $x$.  More
+precisely,
+\begin{equation} 
+\argmax\{p\cdot x: p\in Z_k(S)\} =
+        \left(\sum_{i=1}^{\floor{k}} \frac{1}{k}S_i^x\right) +
+          (1-\floor{k}/k)S_{\ceil{k}}^x  
+          \eqlabel{extreme}
+\end{equation}
+\cite{beXX,gmXX}.  Intuitively, we assign the maximum allowable
+coefficient ($1/k$) to each of the $\floor{k}$ extreme-most vertices
+and the ``leftover'' is assigned to the next vertex.
+
+We wish to arrive at a situation in which we can apply \thmref{chan}
+and this is best done by working in the dual.
 Consider the point-hyperplane duality function
 $\dual$ given by 
 \[
     \dual(x)=\{y\in\R^d : y_d = x_1y_1 +\cdots +x_{d-1}y_{d-1} - x_d \}
-%   \dual(a_1,\ldots,a_d) = 
-%      \{(b_1,\ldots,b_d) : a_db_d = a_1b_1+\cdots a_{d-1}b_{d-1}  \}
 \] 
 when $x$ is a point in $\R^d$ and
 \[
      \dual(X) = \{\dual(x) : x\in X\}
 \]
-when $S$ is a subset of $\R^d$.  For a point $x$
-and a hyperplane $h$, let $x\drop h$ denote the $d$th coordinate of
-the vertical projection of $x$ onto $h$.  For a set $H$ of
-hyperplanes, let $H_i^x$ be the $i$th hyperplane in $H$ encountered by
-a downward vertical ray originating at $(x_1,\ldots,x_{d-1},\infty)$.
-For ease of notation we use the shorthand $H_{-i}^x=H_{|H|-i+1}^x$.
+when $S$ is a subset of $\R^d$.  See Edelsbrunner's book \cite{eXX}
+for properties of this duality. 
 
 Let $H=\dual(S)$.  Then,
 under this duality, the \emph{dual $k$-zonoid} $\dual(Z_k(S))$ is the set 
 of all hyperplanes in $\R^d$
-that do not intersect either of two convex sets $R_A(S)$ and $R_B(S)$.
+that do not intersect either of two convex sets $A_k(S)$ and $B_k(S)$.
 That is,
 \[
-     \dual(Z_k(S)) = \{ h\in\mathbb{H^d} : h\cap(R_A(S)\cup R_B(S)) = \emptyset \} \enspace ,
+     \dual(Z_k(S)) = \{ h\in\Hy^d : h\cap(A_k(S)\cup B_k(S)) = \emptyset \} \enspace ,
 \]
 where
 \begin{equation}
-   R_A(S) = \left\{x\in\R^d: x_d \ge 
-\left(\frac{1}{k}\sum_{i=1}^{\floor{k}} x\drop H_i^x\right) +
-          (x\drop H_{\ceil{k}}^x)(k-\floor{k}) \right\}  \eqlabel{ra}
+   A_k(S) = \left\{x\in\R^d: x_d \ge 
+\left(\sum_{i=1}^{\floor{k}} \frac{1}{k}(x\drop H_i^x)\right) +
+          (1-\floor{k}/k)(x\drop H_{\ceil{k}}^x) \right\}  \eqlabel{ra}
 \end{equation} 
 and
 \begin{equation}
-   R_B(S) = \left\{x\in\R^d: x_d \le 
-\left(\frac{1}{k}\sum_{i=1}^{\floor{k}} x\drop H_{-i}^x\right) +
-          (x\drop H_{-\ceil{k}}^x)(k-\floor{k}) \right\} \enspace .
+   B_k(S) = \left\{x\in\R^d: x_d \le 
+\left(\sum_{i=1}^{\floor{k}} \frac{1}{k}(x\drop H_{-i}^x)\right) +
+          (1-\floor{k}/k)(x\drop H_{-\ceil{k}}^x) \right\} \enspace .
 \end{equation}
-The two sets $R_A(S)$ and $R_B(S)$ are convex, unbounded from above,
+The definitions of $A_k(S)$ and $B_k(S)$ follow from \eqref{extreme}
+and the duality $\dual(\cdot)$.
+The two sets $A_k(S)$ and $B_k(S)$ are convex, unbounded from above,
 respectively, below, and piecewise linear.  Indeed, the linear pieces
-of $R_A(S)$ (respectively $R_B(S)$) are in one to one correspondence
+of $A_k(S)$ (respectively $B_k(S)$) are in one to one correspondence
 with the linear pieces of the $\ceil{k}$-level (respectively
-the $(n-\floor{k}+1)$-level) of the hyperplanes in $H$.
+the $(n-\floor{k}+1)$-level) of the hyperplanes in $H$.  Thus,
+$A_k(S)$ and $B_k(s)$ are convex polytopes that are implicitly defined
+by the hyperplanes in $H$ and it is these implicit ``linear programs''
+that will ultimately allow us to apply \thmref{chan}.
 
 
 \section{The Decision Algorithm}
@@ -155,148 +186,229 @@ the $(n-\floor{k}+1)$-level) of the hyperplanes in $H$.
 Next we consider the following decision problem:  Given a point set
 $S$ and an integer $k$, is the origin contained in $Z_k(S)$?  By
 translation, a solution to this problem allows us to test if an
-arbitrary point $p\in\R^d$ is contained in $Z_k(S)$. One
-approach to solving this problem is to compute the intersection of
-$Z_k(S)$ with a vertical line through the origin (the $d$th coordinate
-axis) and then check if this intersection contains the origin. 
+arbitrary point $p\in\R^d$ is contained in $Z_k(S)$. One approach to
+solving this problem is to compute the intersection of $Z_k(S)$ with
+the vertical line $\{x\in\R^d:x_0=x_1=\cdots=x_{d-1}=0\}$ through the origin
+and then check if this intersection contains the origin \cite{gm04}. 
 
-Under duality, the above strategy is equivalent to finding the lowest
-point on $R_A(S)$ and the highest point on $R_B(S)$ and checking that each
-of these points is above, respectively, below, the hyperplane
-$\{x\in\R^d:x_d=0\}$.  In the remainder, we focus on determining the
-lowest point in $R_A(S)$.  Finding the highest point in $R_B(S)$ is done in
-a symmetric manner.  However, before we can proceed, we need to define
-a slightly more general problem on weighted zonoids as well as the
-corresponding notion of dual weighted zonoids.
+Under the duality $\dual$, the above strategy is equivalent to finding
+the lowest point on $A_k(S)$ and the highest point on $B_k(S)$ and
+checking that each of these points is above, respectively, below, the
+hyperplane $\{x\in\R^d:x_d=0\}$.  In the remainder, we focus on
+determining the lowest point in $A_k(S)$.  Finding the highest point
+in $B_k(S)$ is done in a symmetric manner.  However, before we can
+proceed, we need to define a slightly more general problem involving
+weights.
 
-Let $S$ be a set of $n$ points in $\R^d$ and let
-$v:S\mapsto\mathbb{N}$ be a function assigning positive integer
-weights to the elements of $S$.   We denote by $S^v$, the multiset in
-which each element $p\in S$ occurs $v(p)$ times.  The
-\emph{$v$-weighted zonoid} $Z_k(S,v)$ is simply the $k$-zonoid of the
-multiset $S^v$, i.e., $Z_k(S,v)=Z_k(S^v)$.  As with standard zonoids,
-the weighted zonoid $Z_k(S,v)$ dualizes to the set of all lines that
-do not intersect either of two convex regions $R_A(S,v)$ and
-$R_B(S,v)$, where $R_A(S,v)=R_A(S^v)$ and $R_B(S,v)=R_B(S^v)$.
+Let $S$ be a set of $n$ points in $\R^d$ and let $w:S\mapsto\N$ be a
+function assigning positive integer weights to the elements of $S$.
+We denote by $S^w$, the multiset in which each element $p\in S$ occurs
+$w(p)$ times.  The \emph{$w$-weighted zonoid} $Z_k(S,w)$ is simply the
+$k$-zonoid of the multiset $S^w$, i.e., $Z_k(S,w)=Z_k(S^w)$.  As with
+standard zonoids, the weighted zonoid $Z_k(S,w)$ dualizes to the set
+of all lines that do not intersect either of two convex regions
+$A_k(S,w)$ and $B_k(S,w)$, where $A_k(S,w)=A_k(S^w)$ and
+$B_k(S,w)=B_k(S^w)$.
 
-
-This definition of weighted zonoids
-allows us to naturally define subproblems.
-For a subset $C\subseteq S$, define the \emph{total weight}
+This definition of weighted zonoids allows us to naturally define
+subproblems.  For a subset $C\subseteq S$, define the \emph{total
+weight}
 \[
-       v(C)=\sum_{p\in C}v(p)
+       w(C)=\sum_{p\in C}w(p)
 \]
 and the \emph{weighted mean}
 \[ 
-       \mu(C)=\sum_{p\in C} p(v(p)/v(C)) \enspace .
+       \mu(C)=\frac{1}{w(C)}\sum_{p\in C} p\times w(p) \enspace .
 \]
 The \emph{contraction} of
-$(S,v)$ by $C$ is obtained by replacing the points of $C$ by their
+$(S,w)$ by $C$ is obtained by replacing the points of $C$ by their
 weighted average, $\mu(C)$.  More precisely, the contraction of
-$(S,v)$ by $C$ is the pair $(T,w)$ where 
-\[ T = (S\setminus C) \cup \{ \mu(C) \} \] 
+$(S,w)$ by $C$ is the pair $(R,v)$ where 
+\[ R = (S\setminus C) \cup \{ \mu(C) \} \] 
 and 
-\[ w(p) = \left\{\begin{array}{ll} 
-        v(p) & \mbox{if $p\in S\setminus C$} \\ 
-        v(C) & \mbox{if $p=\mu(C)$} \end{array}\right.
+\[ v(p) = \left\{\begin{array}{ll} 
+        w(p) & \mbox{if $p\in S\setminus C$} \\ 
+        w(C) & \mbox{if $p=\mu(C)$} \end{array}\right.
 \]
 
 The following lemma shows that contraction results in strictly smaller
 zonoids:
 
 \begin{lem}\lemlabel{contraction}
-If $(T,w)$ is a contraction of $(S,v)$ by $C$ then $Z_k(S',v')
-\subseteq Z_k(S,v)$.
+If $(R,v)$ is a contraction of $(S,w)$ by $C$ then $Z_k(R,v)
+\subseteq Z_k(S,w)$.
 \end{lem}
 
 \begin{proof}
-Let $x$ be any point in $Z_k(T,w)$.  Then, by the definition of
+Let $x$ be any point in $Z_k(R,v)$.  Then, by the definition of
 zonoids:
 \begin{eqnarray*}
-    x &=& \sum_{p\in T^w} p\lambda_p \\
-      &=& \sum_{p\in (T\setminus \{\mu(C)\})^w} p\lambda_p\
-          + \left(\sum_{p\in \{\mu(C)\}^w}p\right)\lambda_{\mu(C)} \\
-      &=& \sum_{p\in (S\setminus C)^v} p\lambda_p
-          + \left(\sum_{p\in C^v} p\right)
-             \lambda_{\mu(C)}\\
-      &=& \sum_{p\in (S\setminus C)^v} p\lambda_p
-          + \sum_{p\in C^v} p
-             \lambda_{\mu(C)}\\
-      &\in& Z_k(S,v)
+    x &=& \sum_{p\in R^v} \lambda_pp \\
+      &=& \left( \sum_{p\in (R\setminus \{\mu(C)\})^v} \lambda_pp \right)
+          + \left( \sum_{p\in \{\mu(C)\}^v}\lambda_{\mu(C)}p \right) \\
+      &=& \left(\sum_{p\in (S\setminus C)^w} \lambda_pp \right)
+          + \left(\sum_{p\in C^w}\lambda_{\mu(C)} p\right) \\
+      &\in& Z_k(S,w)
 \end{eqnarray*}
 as required.
 \end{proof}
-
-
 
 We now have all the tools required to apply \thmref{chan} to solve our
 decision problem.
 
 \begin{thm}\thmlabel{decision}
 Given a set $S$ of $n$ points in $\R^d$ and a 
-function $v:S\mapsto\mathbb{Z}^+$ that is computable in constant
-time, the point $x\in R_A(S,v)$ such
+function $w:S\mapsto\N$ that is computable in constant
+time, the point $x\in A_k(S,w)$ such
 that $x_d$ is minimum can be found in $O(n)$ expected
 time.
 \end{thm}
 
 \begin{proof}
-Let $f$ be a function that maps the pair $(S,v)$ onto a set of
-halfspaces whose intersection is $R_A(S,v)$.  We need to show that the
-function $f$ satisfies the Conditions~0--2 of \thmref{chan}.
+Let $f$ be the function that maps the pair $(S,w)$ onto a set of
+halfspaces whose intersection is $A_k(S,w)$ and let the objective
+function $g(p)=p_d$.  We need to show that the function $f$ satisfies
+the Conditions~0--2 of \thmref{chan}.
 
-To satisfy Condition 0 we can enumerate all the linear constraints
-generated by each of the $d$ subproblems and use any linear
-programming algorithm to find a point $x$ that satisfies all
-constraints and such that $x_d$ is minimum.  There are only $d$
+To satisfy Condition 0 of \thmref{chan} we can enumerate all the
+linear constraints generated by each of the $d$ subproblems and use
+any linear programming algorithm to find a point $x$ that satisfies
+all constraints and such that $x_d$ is minimum.  There are only $d$
 subproblems, each of constant size, so this step takes constant time,
 as required.
 
-To satisfy Condition 1, we observe that, testing if $x\in R_A(S,v)$
+To satisfy Condition 1 of \thmref{chan}
+we observe that testing if $x\in A_k(S,w)$
 simply involves checking if $x$ satisfies \eqref{ra}.  Let
 $H=\dual(S)$.  This check can be accomplished by using a $D(n)=O(n)$
 time weighted selection algorithm \cite{X} to compute the smallest
 index $t$ and the hyperplanes $H_{1}^x,\ldots,H_{t}^x$ such that
-$\sum_{i=1}^tv(\dual(H_{i}^x)) \ge k$.  Once this is done we need only
+$\sum_{i=1}^tw(\dual(H_{i}^x)) \ge k$.  Once this is done we need only
 check \eqref{ra} which, in the weighted setting, becomes 
 \[
-     x \ge \left(\sum_{i=1}^{t-1} (x\drop
-H_i^x)\times\frac{1}{k}\times v(\dual(H_i^x))\right) 
-   + (x\drop H_t^x) \times \left(k-\sum_{i=1}^{t-1} v(\dual(H_{i}^x)) \right)
+     x \ge \left(\sum_{i=1}^{t-1} \frac{1}{k}(x\drop
+H_i^x)\times w(\dual(H_i^x))\right) 
+   + \frac{1}{k}(x\drop H_t^x) \times \left(k-\sum_{i=1}^{t-1} v(\dual(H_{i}^x)) \right)
 \enspace .
-\]\notice{Deal with overly large values of $k$ here} 
+\]
 
-To satisfy Condition~2 we make use of \emph{cuttings} \cite{X}.  In
+To satisfy Condition~2 of \thmref{chan}
+we make use of \emph{cuttings} \cite{X}.  In
 particular, we use the fact that, in $O(n)$ time, it is possible to
-partition $\R^d$ into $O(1)$ simplices
+partition $\R^d$ into $r=O(1)$ simplices
 $\Delta_1,\ldots,\Delta_r$ such that the interior of each simplex is
 intersected by at most $n/2$ of the hyperplanes in $\dual(S)$.  For
-each simplex $\Delta_i$ we create a subproblem $(S_i,v_i)$ as follows:
+each simplex $\Delta_i$ we create a subproblem $(S_i,w_i)$ as follows:
 Let $C_i\subseteq S$ contain every point $p\in S$ such that $\dual(p)$
 is above the interior of $\Delta_i$.  We first construct the pair
-$(T_i,v_i)$ by contracting $(S,v)$ by $C_i$.  Next, we obtain $S_i$ by
+$(T_i,w_i)$ by contracting $(S,w)$ by $C_i$.  Next, we obtain $S_i$ by
 removing from $T_i$ every point $p$ such that $\dual(p)$ is below the
 interior of $\Delta_i$.  The subproblems $(S_i,v_i)$ for $1\le i\le r$
 that we obtain in this manner are each of size at most $n/2+2$.
 
-It follows from \lemref{contraction} and the definition of $Z_k(S,v)$
-that $Z_k(S_i,{v_i})\subseteq Z_k(S,v)$.  In the dual, this means that
-$R_A(S_i,{v_i})\supseteq R_A(S,v)$.  To satisfy Condition~2 we must
-show that $\bigcap_{i=1}^r R_A(S_i^{v_i}) = R_A(S^v)$.  To see this,
-consider any point $x$ on the boundary of $R_A(S,v)$.  It is
+It follows from \lemref{contraction} (the contraction step) 
+and the definition of $Z_k(S,w)$ (the deletion step)
+that $Z_k(S_i,{w_i})\subseteq Z_k(S,w)$.  In the dual, this means that
+$A_k(S_i,{w_i})\supseteq A_k(S,w)$.  To satisfy Condition~2 of
+\thmref{chan} we must
+show that $\bigcap_{i=1}^r A_k(S_i^{w_i}) = A_k(S^w)$.  To do this,
+consider any point $x$ on the boundary of $A_k(S,w)$.  It is
 sufficient to show that $x$ is also on the boundary of at least one
-region $R_A(S_i,{v_i})$ for $1\le i\le r$.  The point $x$ is defined
-by $\ceil{k}$ hyperplanes $h_1,\ldots,h_{\ceil{k}}\in\dual(S)$ that pass
-above the point $x\drop h_{\ceil{k}}$.  Note that there is some
-simplex $\Delta_i$ that contains
-$x\drop h_{\ceil{k}}$.  This the index $i$ that such that
-$R_A(S_i,v_i)$ has $x$ on its boundary.
-
-This completes the proof.
+region $A_k(S_i,{w_i})$ for $1\le i\le r$.  The point $x$ is defined
+by $\ceil{k}$ hyperplanes $h_1,\ldots,h_{\ceil{k}}\in\dual(S^w)$ in
+the sense that 
+\[
+   x_d=\left(\sum_{i=1}^{\floor{k}} \frac{1}{k}(x\drop h_i)\right) 
+       + (1-\floor{k}/k)(x\drop h_{\ceil{k}}) \enspace .
+\]
+Let $q=x\drop h_{\ceil{k}}$.  There
+is some simplex $\Delta_i$ that contains $q$.  Observe that
+each of $h_1,\ldots,h_{\ceil{k}-1}$ is either completely above
+the interior of $\Delta_i$ or intersects $\Delta_i$.  Furthermore, 
+any hyperplane in
+$\dual(S)$ that is completely above $\Delta_i$ is one of
+$h_1,\ldots,h_{\ceil{k}-1}$.  Therefore, the subproblem $(S_i,w_i)$
+is obtained from $(S,w)$ by contracting
+$C_i\subseteq\{\dual(h_1),\ldots,\dual(h_{\ceil{k}-1})\}$ and then deleting 
+some subset of
+$S\setminus\{\dual(h_1),\ldots,\dual(h_{\ceil{k}-1})\}$.  Let
+$I=\dual(S_i^{w_i})$.  Then, every point $x$ in $A_k(S_i,w_i)$ must
+satisfy
+\begin{eqnarray*}
+  x_d & \ge & \left(\sum_{i=1}^{\floor{k}} \frac{1}{k}(x\drop I_i^x)\right) 
+       + (1-\floor{k}/k)(x\drop I_{\ceil{k}}^x) \\
+   & = & \left(\sum_{i=1}^{\floor{k}} \frac{1}{k}(x\drop h_i)\right) 
+       + (1-\floor{k}/k)(x\drop h_{\ceil{k}}) \enspace .
+\end{eqnarray*}
+Thus $x$ is on the boundary of $A_k(S_i,w_i)$, as required.  We have
+now satisfied all three conditions necessary to apply \thmref{chan},
+completing the proof.
 \end{proof}
 
-
 \section{The Optimization Algorithm}
+
+In the previous section we showed, given $p$, $S$ and $k$, how to
+answer the question:  Is $p\in Z_k(S)$?  In this section we consider
+the optimization problem, given $p$ and $S$: What is the maximum value
+of $k$ such that $p\in Z_k(S)$?  For this problem, we can apply
+\thmref{chan} again, this time on a problem in $\R^{d+1}$.
+
+Consider the point set
+\[
+    Z(S)=\{p\in\R^{d+1} : (p_1,\ldots,p_d)\in Z_{p_{d+1}}(S)  \} \enspace .
+\]
+As shown by Bern and Eppstein \cite{beXX} the set $Z(S)$ is a zonotope
+(the Minkowsky sum of line segments) and is therefore a convex
+polytope.  Dualizing $Z(S)$ as before gives two regions
+$A(S)$ and $B(S)$.
+We are interested in the hyperplane $h=\{x\in\R^{d+1}:x_d=0\}$.
+In particular, the value $k$ we are searching for is the minimum of
+$k_A$ and $k_B$ where
+\[
+   k_A = \min\{p_{d+1}: p\in h\cap A(S)\}
+\]
+and
+\[
+   k_B = \min\{p_{d+1}: p\in h\cap B(S)\}
+\]
+In words, we want the minimum value of $k$ such that the $A_k(S)$
+(respectively, $B_k(S)$)
+intersects the hyperplane $\{x\in\R^d: x_d=0\}$.
+
+\begin{thm}
+Given a set $S$ of $n$ points in $\R^d$ and a point $p\in\R^d$, the
+maximum value $k$ such that $p\in Z_k(S)$ can be found in $O(n)$
+expected time.
+\end{thm}
+
+\begin{proof}[Proof Sketch]
+The proof is another application of \thmref{chan} to find the values
+$k_A$ and $k_B$ described above.  We focus only on finding $k_A$, as
+finding $k_B$ is a symmetric problem.  The details are much the same
+as in \thmref{decision} so we only sketch them.  As before we
+generalize $A(S)$ and $B(S)$ to the weighted setting using multisets
+and let $f(S,w)$ be the function that maps $(S,w)$ on to the set of
+linear constraints that define $h\cap A(S^w)$.
+
+As before, $S$ satisfies Condition~0 of \thmref{chan} since, for
+constant size subproblems we can explictly generate the polytopes
+$Z(S_1,w_1),\ldots,Z(S_{d+1},w_{d+1})$ and find a point in the
+intersection maximizing the objective function $g(p)=p_{d+1}$. 
+
+The decision problem we must solve to satisfy Condition~1 of
+\thmref{chan} is the problem of testing whether a point $p\in
+\R^{d+1}$ is contained in $A(S)\cap h$.  But this is simply the
+question of whether $(p_1,\ldots,p_d)$ is $A_{p_{d+1}}(S)$, a problem
+for which we described an $O(n)$ time algorithm in the proof of
+\thmref{decision}.
+
+The partitioning into subproblems required to satisfy Condition~2 of
+\thmref{chan} can be done in exactly the same manner as described in
+the proof of \thmref{decision}.  To see that this partitioning works
+in the current case we need only observe that the paritioning makes no
+use of the value $k$ and the argument used to show its correctness
+holds for all values of $k$.  This completes the proof.
+\end{proof}
 
 \end{document}
 

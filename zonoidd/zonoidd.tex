@@ -1,8 +1,10 @@
 \documentclass[lotsofwhite]{patmorin}
-\usepackage{amsthm}
+\usepackage{amsthm,amsopn}
 
-\newcommand{\CH}{\mathit{CH}}
-\newcommand{\argmax}{\mathrm{argmax}}
+\newcommand{\CH}{\mathrm{conv}}
+%\newcommand{\argmax}{\mathrm{argmax}}
+%\newcommand{\argmax}{\operatorname{argmax}}
+\DeclareMathOperator*{\argmax}{argmax}
 \newcommand{\drop}{\!\!\downarrow\!\!}
 \newcommand{\dual}{\varphi}
 
@@ -52,36 +54,44 @@ To obtain an efficient algorithm they make use of the fact that most
 of the constraints on the $\lambda$'s are independent of $S$.  The
 worst-case running time of their algorithm is unclear.
 
-Bern and Eppstein \cite{be01} study zonoids (which they call
-\emph{reduced convex hulls} in the context of support vector machines
-in machine learning.  Among other things they show that, given two
-sets $S_1$ and $S_2$ in $\R^d$, computing the minimum value $k$ such
-that $Z_k(S_1)\cap Z_k(S_2)$ is non-empty can be done using a number
-of arithmetic operations that is linear in $n$ and polynomial in $d$,
-$L$ and $\log n$, where $L$ is the number of bits used to represent
-the coordinates of the input points.  Their algorithm uses Kachiyan's
-ellipsoid method for linear programming \cite{k79}.
+Bern and Eppstein \cite{be01} study zonoids (also called \emph{reduced
+convex hulls}) in the context of support vector machines used in
+machine learning.  Among other things they solve a more general
+problem than that of zonoid depth: Given two sets $S_1$ and $S_2$ in
+$\R^d$, compute the minimum value $k$ such that $Z_k(S_1)\cap
+Z_k(S_2)$ is non-empty.  Their algorithm has a running time of
+$O(n(Ld\log n)^{O(1)})$, where $L$ is the number of bits used to
+describe the points in $S_1$ and $S_2$.  Their algorithm uses
+Kachiyan's ellipsoid method for linear programming \cite{k79} to
+exploit the fact that, for a given direction $v$, it is easy (see
+\secref{dual}) to test if there is a hyperplane orthogonal to $v$ that
+separates $Z_k(S_1)$ and $Z_k(S_2)$.
 
 Gopala and Morin \cite{gm06} consider algorithms for bivariate ($d=2$)
 zonoid depth and give a randomized $O(n)$ expected time algorithm for
 computing $Z(p,S)$ when $p$ and $S$ are in $\R^2$.  Their algorithm is
 a combination of two techniques, namely a prune-and-search algorithm
-due to Lo \etal\ \cite{lms94} for searching the $k$-level of a
-line arrangement and an optimization method due to Chan \cite{c99} for
+due to Lo \etal\ \cite{lms94} for searching the $k$-level of a line
+arrangement and an optimization method due to Chan \cite{c99} for
 efficiently converting decision algorithms into optimization
 algorithms.   While the latter technique extends efficiently into
 arbitrary (constant) dimensions \cite{c04} the former technique,
-unfortunately, does not.
+unfortunately, does not.  Note that this algorithm is purely
+combinatorial in that it makes all decisions based on the results of
+evaluating a few different kinds of predicates involving a constant
+number of points. Other than evaluating these predicates, the running
+time does not depend on the input precision.
 
-The current paper extends the above results by giving an $O(n)$ time
-algorithm to compute the zonoid depth of a point $p$ with respect to a
-point set $S$ when $p$ and $S$ are in $\R^d$ for any constant
-dimension $d$.  The algorithm uses a recent method, due to Chan
-\cite{c04}, of solving linear programs with many constraints that are
-defined implicitly by a small number of objects.
+The current paper extends and bridges the above results by giving an
+$O(n)$ time algorithm to compute $Z(p,S)$ when $p$ and $S$ are in
+$\R^d$ for any constant dimension $d$.  The algorithm uses a recent
+method, due to Chan \cite{c04}, of solving linear programs with many
+constraints that are defined implicitly by a small number of objects.
+Again, the algorithm is combinatorial, and the input precision affects
+only some low-level predicates.
 
 Besides being the first linear-time algorithm for solving the zonoid
-depth problem in arbitrary dimensions, the current results are
+depth problem in constant dimensions, the current results are
 interesting for two other reasons:
 
 \begin{enumerate}
@@ -94,24 +104,24 @@ containing $p$} \} \enspace .
 \]
 Tukey depth and zonoid depth have an interesting feature in common;
 under duality, the combinatorial structure of the depth $k$ contour is
-determined $k$-level and $(n-k+1)$-level of a set of hyperplanes. The
-structure of $k$-levels has been extensively studied by combinatorial
-geometers \cite[Chapter~11]{mat02} although our understanding of their
-complexity is still not complete, even in 2 dimensions.
+determined by the $k$-level and the $(n-k+1)$-level of a set of
+hyperplanes. The structure of $k$-levels has been extensively studied
+by combinatorial geometers \cite[Chapter~11]{mat02} although our
+understanding of their complexity is still not complete, even in 2
+dimensions.
 
 The current result shows a divergence in the computational complexity
 of Tukey and zonoid depth.  In constant dimensions $d\ge 3$ the
 fastest algorithms for computing the Tukey depth of a point have
 running times of $\Omega(n^{d-1})$ \cite{c05}, whereas the current
 result shows that zonoid depth can be computed in $O(n)$ time in any
-constant dimension $d$.  
-
-When the dimension grows arbitarily large the situation is even worse.
-Computing $T(p,S)$ is NP-hard in general \cite{c94}, while the
-result of Bern and Eppstein \cite{be01} yields a polynomial time
-algorithm for computing $Z(p,S)$ in any dimension.  Thus, together
-these results show that zonoid depth is at least computationally more
-tractable than Tukey depth.
+constant dimension $d$.  When the dimension grows arbitarily large the
+situation is even worse.  Computing $T(p,S)$ is NP-hard in general
+\cite{c94}, while the result of Bern and Eppstein \cite{be01} yields a
+polynomial time algorithm for computing $Z(p,S)$ in any dimension.
+Thus, together these results show that zonoid depth is
+computationally more tractable than Tukey depth in both large and
+small dimensions.
 
 \item Our algorithm makes use of Chan's recent technique for solving
 implicit linear programs in small dimensions \cite{c04}.  Interestingly,
@@ -161,8 +171,10 @@ computing $Z(p,S)$.
 \section{Chan's Generalized Optimization Technique}
 \seclabel{chan}
 
-Chan \cite{c04} used the following theorem to provide an $O(n\log
-n)$ time algorithm for maximum Tukey depth.  In the following, and
+Chan \cite{c04} used the following theorem to provide an $O(n\log n)$
+time algorithm for maximum Tukey depth.\footnote{Actually,
+\thmref{chan} applies to LP-type problems \cite{sw92}. Here we only state it's
+specialization to linear programming problems.}  In the following, and
 throughout the remainder of the paper, we use the shorthand $\cap S$
 to denote $\bigcap_{s\in S}s$.
 
@@ -194,7 +206,7 @@ $\ceil{\alpha n}$, and such that $\cap f(P) =
 \end{enumerate}
 Then there exists a randomized $O(D(n))$ expected time algorithm to
 compute, for any input $P\in\mathcal{P}$ of size $n$ a point
-$p\in\cap f(P)$ that maximizes $w(p)$.
+$p\in\cap f(P)$ that maximizes $g(p)$.
 \end{thm}
 
 It is worth noting that the codomain of the function $f$ may contain
@@ -211,14 +223,14 @@ of $Z_k(S)$ in direction $x$ can be obtained as a convex combination of the
 $\ceil{k}$ extreme-most points of $S$ in direction $x$.  More
 precisely,
 \begin{equation} 
-\argmax\{p\cdot x: p\in Z_k(S)\} =
+\argmax_p\{p\cdot x: p\in Z_k(S)\} =
         \left(\sum_{i=1}^{\floor{k}} \frac{1}{k}S_i^x\right) +
-          (1-\floor{k}/k)S_{\ceil{k}}^x  
+          (1-\lfloor k\rfloor/k)S_{\ceil{k}}^x  
           \eqlabel{extreme}
 \end{equation}
 \cite{be01,gm06}.  Intuitively, we assign the maximum allowable
 coefficient ($1/k$) to each of the $\floor{k}$ extreme-most vertices
-and the ``leftover'' ($1-\floor{k}/k$) is assigned to the next vertex.
+and the ``leftover'' ($1-\lfloor k\rfloor/k$) is assigned to the next vertex.
 
 We wish to arrive at a situation in which we can apply \thmref{chan}
 and this is best done by working in the dual.
@@ -246,13 +258,13 @@ where
 \begin{equation}
    A_k(S) = \left\{x\in\R^d: x_d \ge 
 \left(\sum_{i=1}^{\floor{k}} \frac{1}{k}(x\drop H_i^x)\right) +
-          (1-\floor{k}/k)(x\drop H_{\ceil{k}}^x) \right\}  \eqlabel{ra}
+          (1-\lfloor k\rfloor/k)(x\drop H_{\ceil{k}}^x) \right\}  \eqlabel{ra}
 \end{equation} 
 and
 \begin{equation}
    B_k(S) = \left\{x\in\R^d: x_d \le 
 \left(\sum_{i=1}^{\floor{k}} \frac{1}{k}(x\drop H_{-i}^x)\right) +
-          (1-\floor{k}/k)(x\drop H_{-\ceil{k}}^x) \right\} \enspace .
+          (1-\lfloor k\rfloor/k)(x\drop H_{-\ceil{k}}^x) \right\} \enspace .
 \end{equation}
 The definitions of $A_k(S)$ and $B_k(S)$ follow from \eqref{extreme}
 and the duality $\dual$.
@@ -288,7 +300,7 @@ weights.
 
 Let $S$ be a set of $n$ points in $\R^d$ and let $w:S\mapsto\N$ be a
 function assigning positive integer weights to the elements of $S$.
-We denote by $S^w$, the multiset in which each element $p\in S$ occurs
+We denote by $S^w$ the multiset in which each element $p\in S$ occurs
 $w(p)$ times.  The \emph{$w$-weighted zonoid} $Z_k(S,w)$ is simply the
 $k$-zonoid of the multiset $S^w$, i.e., $Z_k(S,w)=Z_k(S^w)$.  As with
 standard zonoids, the weighted zonoid $Z_k(S,w)$ dualizes to the set
@@ -406,7 +418,7 @@ by $\ceil{k}$ hyperplanes $h_1,\ldots,h_{\ceil{k}}\in\dual(S^w)$ in
 the sense that 
 \[
    x_d=\left(\sum_{i=1}^{\floor{k}} \frac{1}{k}(x\drop h_i)\right) 
-       + (1-\floor{k}/k)(x\drop h_{\ceil{k}}) \enspace .
+       + (1-\lfloor k\rfloor/k)(x\drop h_{\ceil{k}}) \enspace .
 \]
 Let $q=x\drop h_{\ceil{k}}$.  There
 is some simplex $\Delta_i$ that contains $q$.  Observe that
@@ -423,9 +435,9 @@ $I=\dual(S_i^{w_i})$.  Then, every point $x$ in $A_k(S_i,w_i)$ must
 satisfy
 \begin{eqnarray*}
   x_d & \ge & \left(\sum_{i=1}^{\floor{k}} \frac{1}{k}(x\drop I_i^x)\right) 
-       + (1-\floor{k}/k)(x\drop I_{\ceil{k}}^x) \\
+       + (1-\lfloor k\rfloor/k)(x\drop I_{\ceil{k}}^x) \\
    & = & \left(\sum_{i=1}^{\floor{k}} \frac{1}{k}(x\drop h_i)\right) 
-       + (1-\floor{k}/k)(x\drop h_{\ceil{k}}) \enspace .
+       + (1-\lfloor k\rfloor/k)(x\drop h_{\ceil{k}}) \enspace .
 \end{eqnarray*}
 Thus $x$ is on the boundary of $A_k(S_i,w_i)$, as required.  We have
 now satisfied all three conditions necessary to apply \thmref{chan},
@@ -445,23 +457,22 @@ Consider the point set
 \[
     Z(S)=\{p\in\R^{d+1} : (p_1,\ldots,p_d)\in Z_{p_{d+1}}(S)  \} \enspace .
 \]
-As shown by Bern and Eppstein \cite{be01} the set $Z(S)$ is a zonotope
-(the Minkowsky sum of line segments) and is therefore a convex
-polytope.  Dualizing $Z(S)$ as before gives two regions
+The set $Z(S)$ is a convex polytope in $\R^{d+1}$.
+Dualizing $Z(S)$ as before gives two regions
 $A(S)$ and $B(S)$.
-We are interested in the hyperplane $h=\{x\in\R^{d+1}:x_d=0\}$.
+We are interested in the hyperplane $h_0=\{x\in\R^{d+1}:x_d=0\}$.
 In particular, the value $k$ we are searching for is the minimum of
 $k_A$ and $k_B$ where
 \[
-   k_A = \min\{p_{d+1}: p\in h\cap A(S)\}
+   k_A = \min\{p_{d+1}: p\in h_0\cap A(S)\}
 \]
 and
 \[
-   k_B = \min\{p_{d+1}: p\in h\cap B(S)\}
+   k_B = \min\{p_{d+1}: p\in h_0\cap B(S)\}
 \]
-In words, we want the minimum value of $k$ such that the $A_k(S)$
+In words, we want the minimum value of $k$ such that $A_k(S)$
 (respectively, $B_k(S)$)
-intersects the hyperplane $\{x\in\R^d: x_d=0\}$.
+intersects the hyperplane $h_0=\{x\in\R^d: x_d=0\}$.
 
 \begin{thm}
 Given a set $S$ of $n$ points in $\R^d$ and a point $p\in\R^d$, the
@@ -480,22 +491,23 @@ linear constraints that define $h\cap A(S^w)$.
 
 As before, $S$ satisfies Condition~0 of \thmref{chan} since, for
 constant size subproblems we can explictly generate the polytopes
-$Z(S_1,w_1),\ldots,Z(S_{d+1},w_{d+1})$ and find a point in the
-intersection maximizing the objective function $g(p)=p_{d+1}$. 
+$Z(S_1,w_1),\ldots,Z(S_{d+1},w_{d+1})$, compute their common
+intersection with $h_0$ and find a point in the intersection
+maximizing the objective function $g(p)=p_{d+1}$. 
 
 The decision problem we must solve to satisfy Condition~1 of
 \thmref{chan} is the problem of testing whether a point $p\in
-\R^{d+1}$ is contained in $A(S)\cap h$.  But this is simply the
-question of whether $(p_1,\ldots,p_d)$ is $A_{p_{d+1}}(S)$, a problem
-for which we described an $O(n)$ time algorithm in the proof of
-\thmref{decision}.
+\R^{d+1}$ is contained in $h_0\cap A(S)$.  But this is simply a matter
+of checking that $p\in h_0$ and that $(p_1,\ldots,p_d)$ is in
+$A_{p_{d+1}}(S)$, a problem for which we described an $O(n)$ time
+algorithm in the proof of \thmref{decision}.
 
 The partitioning into subproblems required to satisfy Condition~2 of
 \thmref{chan} can be done in exactly the same manner as described in
 the proof of \thmref{decision}.  To see that this partitioning works
 in the current case we need only observe that the paritioning makes no
 use of the value $k$ and the argument used to show its correctness
-holds for all values of $k$.  This completes the proof.
+holds for all values of $k$.  This completes the proof sketch.
 \end{proof}
 
 \bibliographystyle{plain}

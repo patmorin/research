@@ -1,0 +1,155 @@
+\documentclass[lotsofwhite]{patmorin}
+\usepackage{amsopn}
+
+\input{pat}
+\newcommand{\oja}{W}
+\DeclareMathOperator{\vol}{vol}
+
+\title{\MakeUppercase{Towards a Centerpoint Theorem for Oja Depth}}
+\author{The Caldes de Malavella Gang}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The \emph{Oja weight} of a point $p\in\R^d$ with respect to a set $S$
+of $n$ points in $\R^d$ is the sum of the volumes of all simplices
+whose vertices consist of $p$ and $d$ points of $S$.  An \emph{Oja
+center} of $S$ is a point $p$ whose Oja weight is minimum.
+The current paper presents bounds relating the Oja weight of the Oja 
+center to the volume of the convex hull of $S$.
+\end{abstract}
+
+
+\section{Introduction}
+
+Let $S$ be a set of $n$ points in $\R^d$.  The \emph{Oja weight} of
+$p\in\R^d$ with respect to $S$ is defined as
+\begin{equation}
+     \oja(p,S) = \sum_{p_1,\ldots,p_d\in S}\vol\{p,p_1,\ldots,p_d\}
+      \enspace , \eqnlabel{oja}
+\end{equation}
+where $\vol(X)$ denotes the volume of the convex hull of
+$X$.  An Oja center of $S$ is any
+point $p$ that minimizes $W(p,S)$.  We denote the weight of an Oja
+center of $S$ simply as $W(S)$.
+
+Oja weight is one of many depth measures used in the robust statistics
+literature \cite{X,X,X,X}.  Other measures include Tukey (halfspace)
+depth \cite{X}, zonoid depth \cite{X}, simplicial depth \cite{X},
+convex hull peeling depth \cite{X}, projection depth \cite{X}, and
+many others \cite{X}.
+
+Many of the depth measures described above come with corresponding
+\emph{centerpoint theorems} of the form ``For any set $S$ of $n$ points
+in $\R^d$ there exists a point $p\in\R^d$ whose depth with respect to $S$ is
+at most (or at least) $f(n)$.''  A point whose depth is at most (or at
+least) $f(n)$ is referred to as a \emph{centerpoint}.  For Tukey
+depth, Helly's theorem implies the existence of a point $p\in\R^d$ of
+depth at least $f_T(n)=\floor{n/(d+1)}$ and there are point sets in
+which no point has depth greater than $n/(d+1)$ \cite{X}.  For zonoid
+depth, there always exists a point (the mean) of depth $f_Z(n)=n$.
+For simplicial depth, a theorem of Furedi \cite{fXX} proves the
+existence of a point of depth at least $f_S(n)=blah$.
+
+A nice property of centerpoint theorems is that, in many applications,
+a centerpoint is a good enough approximation of a point that optimizes
+the depth measure.  For some depth measures, a centerpoint is
+considerably simpler to compute than the point of maximum depth. For
+example, in $\R^2$, a Tukey centerpoint can be found in $O(n)$ time
+\cite{mxXX} while an optimal $O(n\log n)$ time algorithm for computing
+the Tukey center has only recently been discovered \cite{c04}.
+
+Unfortunately, for Oja depth no centerpoint theorems are known.  In
+the current paper we make a first step towards remedying this
+situation by giving upper bounds on $W(S)$ in terms of the volume of
+the convex hull of $S$.  In particular we show that, for any set $S$
+of $n$ points in $\mathbb{R}^d$, $W(S)\le \vol(S)\times {n\choose
+d}/(d+1)$ and that there exist point sets $S$ for which $W(S)\ge
+\vol(S)\times(n/(d+1))^d$.  The remainder of the paper is dedicated
+to establishing these two results.
+
+\section{Lower Bounds}
+
+\begin{thm}
+For every $n$ a multiple of $d+1$,
+there exists a multiset $S$ of $n$ points in $\R^d$ such that
+$W(S)\ge\vol(S)\times (n/(d+1))^d$.
+\end{thm}
+
+\begin{proof}
+Let $S=\{(p_1)^{n/(d+1)},\ldots,(p_{d+1})^{n/(d+1)}\}$ where 
+$p_1,\ldots,p_{d+1}$ are the vertices of a regular simplex
+in $\R^d$.  That is, $S$ consists of $n/(d+1)$ copies of each of the
+vertices of a regular simplex.
+Since the Oja weight function $W_S(p)=W(p,S)$
+is convex, it follows from symmetry that the point $p\in\R^d$ that
+minimizes $W(p,S)$ is the center of this simplex.  Observe that, for
+any distinct $i_1,\ldots,i_d$ with $1\le i_j\le d+1$ for
+$j=1,\ldots,d$ that
+\[
+   \vol\{p,p_{i_1},\ldots,p_{i_d}\} = \vol(S)/(d+1) \enspace .
+\]
+There are ${d+1 \choose d}=d+1$ ways of choosing $i_1,\ldots,i_d$ and
+for each such choice there are $(n/(d+1))^d$ ways of choosing elements
+of $S$ that contribute to \eqnref{oja}. Thus,
+\[
+    W(p,S) \ge \vol(S)/(d+1)\times (d+1)\times (n/(d+1))^d
+     = \vol(S)\times (n/(d+1))^d \enspace ,
+\]
+as required. 
+\end{proof}
+
+\section{Upper Bounds}
+
+Next we give an upper bound on $W(S)$ for any point set $S$.  However,
+before we do this we prove a lemma about volumes of simplices within
+convex polyhedra. The following lemma is similar to a classical result
+of Winternitz \cite{X} that has been rediscovered many times
+\cite{X}.\footnote{Ehrhart's generalization of Winternitz' result
+states that, for any convex polyhedron $P$ and any halfplane $h$ that
+contains the center of gravity of $P$, $\vol(P\cap h) \ge
+\vol(P)\times (d/(d+1))^d$. \cite{eXX}}
+
+\begin{lem}\lemlabel{simplex}
+Let $P$ be a convex polyhedron in $\R^d$, let $g$ be the center of
+gravity of $P$, and let $p_1,\ldots,p_d$ be any $d$ points in $P$. Then
+\[
+   \vol\{g,p_1,\ldots,p_d\} \le \vol(P) / (d+1) \enspace .
+\] 
+\end{lem}
+
+\begin{proof}
+The proof is by induction on the number of facets of $P$.  The base
+case occurs when $P$ is a simplex (and therefore has $d+1$ facets).
+By affine invariance, it suffices to establish the result for a
+regular simplex, and this is easily done.
+
+For the inductive step, let $P$ be a polyhedron with $k > d+1$
+facets.   Let $g$ be the center of gravity of $P$ and let
+$p_1,\ldots,p_d\in P$ be a set of points that maximizes
+$\vol\{g,p_1,\ldots,p_d\}$.
+
+\end{proof}
+
+
+With \lemref{simplex} in hand our upper bound is now easy to prove.
+
+\begin{thm}
+For any set $S$ of $n$ points in $\R^d$, $W(S) \le \vol(S)\times {n \choose
+d}/(d+1)$.
+\end{thm}
+
+\begin{proof}
+Let $p$ be the center of gravity of the convex hull of $S$.  By
+\lemref{simplex},
+every choice of $d$ points from $S$ contributes at most
+$\vol(S)/(d+1)$ to $W(p,S)$, so
+\[
+    W(S) \le W(p,S) \le \vol(S)/(d+1)\times {n\choose d} \enspace ,
+\]
+as required.
+\end{proof}
+
+\end{document}

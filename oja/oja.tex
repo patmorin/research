@@ -28,10 +28,10 @@ center to the volume of the convex hull of $S$.
 Let $S$ be a set of $n$ points in $\R^d$.  The \emph{Oja weight} of
 $p\in\R^d$ with respect to $S$ is defined as
 \begin{equation}
-     \oja(p,S) = \sum_{p_1,\ldots,p_d\in S}\vol\{p,p_1,\ldots,p_d\}
+     \oja(p,S) = \sum_{p_1,\ldots,p_d\in S}\vol(\{p,p_1,\ldots,p_d\})
       \enspace , \eqnlabel{oja}
 \end{equation}
-where $\vol(X)$ denotes the volume of $\conv(X)$, where $\conv(X)$
+where $\vol(X)$ denotes the volume of $\conv(X)$ and $\conv(X)$
 denotes the convex hull of
 $X$.  An Oja center of $S$ is any
 point $p$ that minimizes $W(p,S)$.  We denote the weight of an Oja
@@ -88,10 +88,10 @@ vertices of a regular simplex.
 Since the Oja weight function $W_S(p)=W(p,S)$
 is convex, it follows from symmetry that the point $p\in\R^d$ that
 minimizes $W(p,S)$ is the center of this simplex.  Observe that, for
-any distinct $i_1,\ldots,i_d$ with $1\le i_j\le d+1$ for
+any distinct $i_1,\ldots,i_d$ with $1\le i_j\le d+1$ for all
 $j=1,\ldots,d$ that
 \[
-   \vol\{p,p_{i_1},\ldots,p_{i_d}\} = \vol(S)/(d+1) \enspace .
+   \vol(\{p,p_{i_1},\ldots,p_{i_d}\}) = \vol(S)/(d+1) \enspace .
 \]
 There are ${d+1 \choose d}=d+1$ ways of choosing $i_1,\ldots,i_d$ and
 for each such choice there are $(n/(d+1))^d$ ways of choosing elements
@@ -109,59 +109,99 @@ Next we give an upper bound on $W(S)$ for any point set $S$.  However,
 before we do this we prove a lemma about volumes of simplices within
 convex polyhedra. The following lemma is similar to a classical result
 of Winternitz \cite{X} that has been rediscovered many times
-\cite{X}.\footnote{Ehrhart's generalization of Winternitz' result
-states that, for any convex polyhedron $P$ and any halfplane $h$ that
-contains the center of gravity of $P$, $\vol(P\cap h) \ge
-\vol(P)\times (d/(d+1))^d$ \cite{eXX}.}
+\cite{X}.\footnote{Winternitz' original result was stated and proved
+only for $d=2$.  Ehrhart's $d$-dimensional generalization of
+Winternitz' result states that, for any polytope $P$ and any
+halfplane $h$ that contains the center of gravity of $P$, $\vol(P\cap
+h) \ge \vol(P)\times (d/(d+1))^d$ \cite{eXX}.}
 
 \begin{lem}\lemlabel{simplex}
-Let $P$ be a convex polyhedron in $\R^d$, let $g$ be the center of
+Let $P$ be a polytope in $\R^d$, let $g$ be the center of
 gravity of $P$, and let $p_1,\ldots,p_d$ be any $d$ points in $P$. Then
 \[
-   \vol\{g,p_1,\ldots,p_d\} \le \vol(P) / (d+1) \enspace .
+   \vol(\{g,p_1,\ldots,p_d\}) \le \vol(P) / (d+1) \enspace .
 \] 
 \end{lem}
 
 \begin{proof}
 The proof is by induction on the number of facets of $P$.  The base
 case occurs when $P$ is a simplex (and therefore has $d+1$ facets).
-By affine invariance, it suffices to establish the result for a
-regular simplex, and this is easily done.
+By an appropriate affine transformation, it suffices to establish the
+result for a regular simplex, and this is easily done.
 
 For the inductive step, let $P$ be a polytope with $k > d+1$ facets.
 Let $g$ be the center of gravity of $P$ and let $p_1,\ldots,p_d\in P$
-be a set of points that maximizes $\vol\{g,p_1,\ldots,p_d\}$. 
+be a set of points that maximizes $\vol(\{g,p_1,\ldots,p_d\})$.   Our
+strategy is to convert $P$ into a polytope $P'$, with
+$\vol(P')=\vol(P)$, on which we can apply the inductive hypothesis.
+To make this work, the polytope $P'$ has center of gravity $g'$,
+contains the points $p_1,\ldots,p_d$, and is constructed so that
+$\vol(\{g',p_1,\ldots,p_d\}) \ge \vol(\{g,p_1,\ldots,p_d\})$.  This is
+sufficient to prove the result since
+\[
+   \vol(\{g,p_1,\ldots,p_d\}) \le \vol(\{g',p_1,\ldots,p_d\}) \le 
+        \vol(P')/(d+1) = \vol(P)/(d+1) \enspace .
+\]
 
-Let $V$ be the vertex set of $P$.  For each point $v\in V$, define the
-function $f_v:\R^d\mapsto\R$ as $f_v(p)=\vol(\{p\}\cup
-(V\setminus\{v\}))$.  Notice that the function $f_v(p)$ is piecewise
-linear, and each linear piece corresponds to a connected set of
-choices for $p$ such that the combinatorial structure of $\conv(\{p\}\cup
-(V\setminus\{v\}))$ remains the same.
+Now we show how to construct $P'$.  Let $V$ be the vertex set of $P$.
+For each point $v\in V$, define the function $f_v:\R^d\mapsto\R$ as 
+\[ 
+   f_v(p)=\vol(\{p\}\cup (V\setminus\{v\})) \enspace .
+\]
 
+Let $C_v$ be the subset of points $p\in \R^d$ for which
+$\conv(\{p\}\cup (V\setminus\{v\}))$ is combinatorially equivalent to
+$\conv(V)$, i.e., the only difference between the two convex hulls is
+that in each face of $\conv(V)$ that contains $v$ the point $v$ is
+replaced with $p$ in $\conv(\{p\}\cup(V\setminus \{v\}))$.  The set
+$C_v$ is an open set that contains $v$.\notice{This last statement is
+incorrect, if $v$ is incident on a face having more than $d$ vertices
+then $C_v$ contains only a single point, $v$.}  Note that $f_v$
+restricted to the domain 
+$C_v$ is a linear function.  Therefore there exists a hyperplane
+$\pi_v$ such that $f_v(p)=f_v(v)$ for all $p\in \pi_v\cap C_v$. That
+is, keeping $p$ in $\pi_v\cap C_v$ maintains not only the
+combinatorial structure, but also the area of
+$\conv(\{p\}\cup(V\setminus\{v\}))$. 
 
-  The polytope $P$ is the common intersection of
-some set of halfspaces $H$.  Let $Q$ be the polytope obtained by
-taking the common intersection of 
+\begin{clm}\clmlabel{tangent}
+The plane $\pi_v$ is tangent to $P$ at $v$, i.e., $\pi_v\cap P=\{v\}$.
+\end{clm} 
 
+\begin{clm}\clmlabel{vertices}
+There exists points $p_1,\ldots,p_d\in P$ maximizing
+$\vol(g,p_1,\ldots,p_d)$ such that each of $p_1,\ldots,p_d$ is a vertex of
+$P$.
+\end{clm}
 
+Let $v$ be any vertex of $P$ that is not one of $p_1,\ldots,p_d$.  Let
+$n$ be the unit vector that is the inner normal of the halfspace
+having $p_1,\ldots,p_d$ on its boundary and that contains $g$.
+Observe that, because $P$ is not a simplex, $\pi_v\cap C_v$ is
+bounded.  Let $w$ be any vector that takes $v$ onto the boundary of
+$\pi_v\cap C_v$ and such that $w\cdot n \ge 0$.  If we let $p=v+w$
+then the polyhedron $P'=\conv(\{p\}\cup (V\setminus\{v\}))$ is a
+polyhedron on which we can apply the inductive hypothesis, having
+center of gravity $g'$ and such that: (a)~$p_1,\ldots,p_d\in P'$ that
+(b)~$\vol(P')=\vol(P)$, and (c)~$\vol(g',p_1,\ldots,p_d)\ge
+\vol(g,p_1,\ldots,p_d)$.  This completes the proof.
+\end{proof}
 
+All that remains is the proof of Claims~\ref{clm:tangent} and
+\ref{clm:vertices}.
 
+\begin{proof}[Proof of \clmref{tangent}]
+Easy, also ommitted because it is never used in the above ``proof''.
+\end{proof}
 
+\begin{proof}[Proof of \clmref{vertices}]
 Let
 $f:\R^d\mapsto \R$ be defined as $f(q)=\vol(g,p_1,\ldots,p_{d-1},q)$
 and observe that $f$ is a linear function so, subject to the
 constraint $q\in P$, $f(q)$ is maximized at a vertex of $P$.  Thus, we
-may assume that $p_d$ is a vertex of $P$ and, repeating the same line
-of reasoning for $p_1,\ldots,p_{d-1}$, we may assume that
+may assume that $p_d$ is a vertex of $P$ and, repeating the same
+argument for $p_1,\ldots,p_{d-1}$, we may assume that
 $p_1,\ldots,p_{d}$ are all vertices of $P$.
-
-Consider some vertex $v$ of $P$ that is not one of $p_1,\ldots,p_d$.
-At least two such vertices exist because $P$ contains at least 
-
-Let $h$ be the halfspace with $p_1,\ldots,p_d$ on its boundary and
-that contains $g$.  Let $n$ denote the inner normal of $h$.
-
 \end{proof}
 
 

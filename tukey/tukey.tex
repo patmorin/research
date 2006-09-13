@@ -1,13 +1,18 @@
 \documentclass[charterfonts,lotsofwhite]{patmorin}
 \usepackage[noend]{algorithmic}
+\usepackage{amsthm,amsopn}
+\usepackage{graphicx}
 
 \input{pat}
-\newcommand{\td}{\mathrm{depth}}
-\newcommand{\lp}{\mathrm{LP}}
+%\newcommand{\td}{\mathrm{depth}}
+%\newcommand{\lp}{\mathrm{LP}}
+\DeclareMathOperator{\td}{depth}
+\DeclareMathOperator{\lp}{LP}
 
 \title{\MakeUppercase{Output-Sensitive Algorithms for Tukey Depth and
         Related Problems}}
 \author{David Bremner \and
+        Dan Chen \and
 	John Iacono \and
 	Stefan Langerman \and
 	Pat Morin \and
@@ -22,8 +27,8 @@ finite set $S$ of points is the minimum number of elements of $S$
 contained in any closed halfspace that contains $p$.  Algorithms for
 computing the Tukey depth of a point in various dimensions are
 considered.  The running times of these algorithms depend on the value
-of the output, making them suited to situations such as outlier
-removal when the value of the output is typically small.
+of the output, making them suited to situations, such as outlier
+removal, where the value of the output is typically small.
 \end{abstract}
 
 \section{Introduction}
@@ -92,12 +97,12 @@ equator is denoted by $\Sp^d_0 =\{ p\in\Sp^{d} : p_{d+1} = 0 \}$ .
 In this section we give a simple $O(n + k\log k)$ time algorithm to
 compute the Tukey depth of a point $p\in\R^2$ with respect to
 a set $S$ of $n$ points in $\R^2$.  The algorithm begins by
-partitioning $\R^2$ into 4 quadrants $Q_0,\ldots,Q_3$ around $p$.
+partitioning $\R^2$ into 4 quadrants around $p$ that, in
+counterclockwise order, we denote by $Q_0,\ldots,Q_3$.
 The algorithm then simultaneously begins computing the 4 quantities
 $\td_0(p,S),\ldots,\td_3(p,S)$ where 
 \begin{equation}
-     \td_i(p,S) = \min\{|h\cap S| : \mbox{$h$ is a halfspace containing
-$Q_i$} \} \enspace . \eqlabel{four-min}
+     \td_i(p,S) = \min\{|h\cap S| : \mbox{$h$ is a halfspace containing $Q_i$} \} \enspace . \eqlabel{four-min}
 \end{equation}
 Clearly, $\td(p,S) = \min\{\td_i(p,S): 0\le i \le 3 \}$ since any
 halfspace containing $p$ contains at least one of the four quadrants.
@@ -108,9 +113,16 @@ the index $i$ that minimizes \eqref{four-min}, running the computation
 of $k_0,\ldots,k_3$ in parallel yields an $O(n +
 k\log k)$ time algorithm, where $k=\td(p,S)$.
 
+\begin{figure}
+\begin{center} \includegraphics{quadrants} \end{center}
+\caption{Computing the quantity $\td_1(p,S)$.}
+\figlabel{quadrants}
+\end{figure}
+
+
 Let $S_i=S\cap Q_i$. To compute $\td_i(p,S)$ we create two binary
 heaps $H_{i-1}$ and $H_{i+1}$ that store the elements of $S_{i-1}$,
-respectively $S_{i+1}$, in counterclockwise, respectively, clockwise,
+respectively $S_{i+1}$, in clockwise, respectively, counterclockwise,
 order around $p$.\footnote{Here and in the remainder of this section
 $S_i$ is treated implictly as $S_{i\bmod 4}$.} 
 Creating these two heaps takes $O(n)$ time using the
@@ -119,17 +131,17 @@ standard bottom-up algorithm to construct a binary heap
 Next we extract elements one at a time from each of $H_{i-1}$ and
 $H_{i+1}$ until either (a)~one of the heaps is empty or (b)~we extract
 two elements $q$ from $H_{i-1}$ and $r$ from $H_{i+1}$ such that the
-angle $\angle spq > \pi$.  Suppose we have extracted $\ell$ elements
+angle $\angle qpr > \pi$.  Suppose we have extracted $\ell$ elements
 each from $H_{i-1}$ and $H_{i+1}$ when this occurs.  Then it is easy
 to verify that 
 \[  
-  |S_i| + \ell - 1 \le \td_i(p,S) \le |S_i| + 2\ell \enspace .
+  |S_i| + \ell - 1 \le \td_i(p,S) \le |S_i| + 2\ell-1 \enspace .
 \]
 
 Next, we continue to extract as many elements as possible from each of
-$H_{i-1}$ and $H_{i+1}$ up to a maximum of an additional $\ell$
+$H_{i-1}$ and $H_{i+1}$ up to a maximum of an additional $\ell-1$
 elements each. The total time required to extract these at most
-$4\ell$ from the two heaps is $O(\ell\log n)$.  By sorting and
+$4\ell-2$ elements from the two heaps is $O(\ell\log n)$.  By sorting and
 scanning all the elements extracted from the heap plus the elements of
 $S_i$ we can then compute $\td_i(p,S)$ in an additional
 \[
@@ -176,31 +188,42 @@ proceeds counterclockwise to $b$.  Together, the following two
 observations imply that all the points of very high depth are
 clustered together.
 
-\begin{obs}\obslabel{close}
+\begin{lem}\lemlabel{close}
 Let $q\in[p_i,p_{i+1}]$ be a point contained in $k$ arcs of $C$.
-Then, for any $0\le r\le n$, every point $q'\in[p_{i-r},p_{i+r}]$ is
+Then, for any $0\le r\le n$, every point $q'\in[p_{i-r},p_{i+r+1}]$ is
 contained at least $k-r$ arcs of $C$.
-\end{obs}
+\end{lem}
 
-\begin{obs}\obslabel{far}
+\begin{proof}
+Without loss of generality, assume that $q'\in[q,p_i+r]$.  There are
+at most $r$ endpoints of arcs in $C$ contained in in the circular arc
+$[q,q']$ therefore there are at most $r$ arcs that contain $q$ but not
+$q'$.
+\end{proof}
+
+\begin{lem}\lemlabel{far}
 Let $q\in[p_i,p_{i+1}]$ be a point contained in $k$ arcs of $C$.
 Then, for any $n-k \le r\le n$, every point $q'\notin[p_{i-r},p_{i+r}]$ 
 is contained in at most $2n-k-r$ arcs of $C$.
-\end{obs}
+\end{lem}
+
+\begin{proof}
+The above statement isn't true.
+\end{proof}
 
 At a high level our algorithm is fairly simple.  Suppose we are given
-a value $k$ and only wish to find the point $p\in\Sp^1$
+a value $k$ and only wish to find a point $p\in\Sp^1$
 contained in $k$ arcs of $C$.
 
 We begin by taking a regular sample $s_1,\ldots,s_{2t}$ of
 $p_1,\ldots,p_{2n}$ so that any arc $[s_i,s_{i+1}]$ between two
 consecutive sample points contains at most $n/t$ points of
 $p_1,\ldots,p_{2n}$.  We then compute, for each sample point $s_i$ the
-number of arcs from $C$ that contain $s_i$.  By \obsref{close}, if
+number of arcs from $C$ that contain $s_i$.  By \lemref{close}, if
 there exists any point $p\in \Sp^1$ contained in $k$ arcs of $C$
 then the two sample points $s_j$ and $s_{j+1}$ on either side of $p$
 are \emph{high depth samples} that are each contained in at least
-$k-n/t$ arcs of $C$.  Furthermore, by \obsref{far}, the only high
+$k-n/t$ arcs of $C$.  Furthermore, by \lemref{far}, the only high
 depth samples are contained in the interval $[p_{i-r},p_{i+r}]$ for
 $r=2(n-k)+n/t$.  
 
@@ -211,7 +234,8 @@ $C$ by applying the standard ``sort-and-scan'' algorithm on the
 $O(n-k+\sqrt{n})$ endpoints of the arcs of $C$ that fall in the arc 
 $[p_a,p_b]$.  The running
 time of the ``sort-and-scan'' algorithm is $O(m\log m)$ where $m$ is
-the number of points which, in this case gives a running time of 
+the number of points to be scanned.  In this case $m=O(n-k+\sqrt{n})$
+for a running time of 
 \[
    O((n-k+\sqrt{n})\log(n-k+\sqrt n)) = O(n + (n-k)\log (n-k)) \enspace ,
 \]
@@ -241,8 +265,8 @@ than $\sqrt{n}$ endpoints of arcs of $C$ \cite{m98}.
 the number of arcs of $C$ that contain $s_i$.  However, random
 sampling helps again here.  Let $d(s_i)$ denote the number of elements
 of $C$ that contain $s_i$. By taking a random sample $C'\subseteq C$,
-$|C'|=\sqrt{n}$ we can determine, with high probability, for each $s_i$ a
-number $d_i$ such that
+$|C'|=\sqrt{n}$ we can determine for each $s_i$ a
+number $d_i$ such that, with high probability,
 \[
         d(s_i) - O(n^{4/5})\le d_i \le
            d(s_i) + O(n^{4/5}) \enspace .
@@ -261,7 +285,7 @@ yields:
 
 \begin{thm}
 Let
-$C$ be a set of $n$ circular of $\Sp^1$.  Then, for any constant
+$C$ be a set of $n$ circular arcs of $\Sp^1$.  Then, for any constant
 $c$ there exists a randomized algorithm that runs in $O(n+(n-k)\log
 (n-k))$ expected time and with probability at least $1-O(n^{-c})$
 finds a point $p\in\Sp^1$ contained in the largest number of arcs of
@@ -327,7 +351,7 @@ n)$ time, where $k$ is the value of the output.
 
 Finally, we consider the general case of point sets in $\R^d$.  
 In the previous section we showed that computing the Tukey depth of
-a point $p$ with respect to a point set $S$ of $n$ points in $\R^d$
+a point $p$ with respect to a set $S$ of $n$ points in $\R^d$
 can be reduced to two instances of \textsc{MaximumFeasibleSubsystem}
 in $\R^{d-1}$ and one Tukey depth computation in $\mathbb{R}^{d-1}$.  Here we give a fixed-parameter tractable \cite{df98}
 algorithm for \textsc{MaximumFeasibleSubsystem}.  The algorithm uses

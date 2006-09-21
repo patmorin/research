@@ -103,13 +103,15 @@ natural question to ask whether and how a given rhythmic contour can
 be realized.
 
 In this paper, we give polynomial (in $k$ and $\log n$) time
-algorithms for all three versions of the problem under study.  In
-particular, for the full information case we give an algorithm that
-runs in $O(k^2 + \log^cn)$ time, for the sequential information case
-we give an algorithm that runs in $O(k^4+\log^c n)$ time, and for the
-cyclic information case we give an algorithm that runs in
-$O(k^5+\log^c n)$ time.  The exponent $c$ is given by the time it
-takes to compute the residue $n\bmod k$ and is not more than $2$.
+algorithms for all three versions of the problem under study.  So that
+we may express concrete running times our model of computation is the
+unit-cost $k$-bit word RAM, in which arithmetic operations on integers
+of size $k^O(1)$ can be done in $O(1)$ time.  For the full information
+case we give an algorithm that runs in $O(k^2 + \log^cn)$ time, for
+the sequential information case we give an algorithm that runs in
+$O(k^4+\log^c n)$ time, and for the cyclic information case we give an
+algorithm that runs in $O(k^5+\log^c n)$ time.  The exponent $c$ is
+given by the time it takes to compute the residue $n\bmod k$.
 
 All versions of this problem reduce to special cases of
 $\textsc{Subset-Sum}$ with multiplicity, where there are special
@@ -216,7 +218,7 @@ the lower envelope in
 \includegraphics{envelope}
 \end{center}
 \caption{A possible lower envelope used for the set $q_{0}$, with $k=20$
-and $\ell_i=6$.   The empty circles show values in $D_{i-1}$ and
+and $t_i=6$.   The empty circles show values in $D_{i-1}$ and
 the filled disks show values in $D_i$.}\figlabel{envelope}
 \end{figure}
 
@@ -253,23 +255,31 @@ Note that the algorithm implied by \lemref{firstalg} is actually very
 simple, and is given by the following pseudocode
 
 \begin{algorithmic}[1]
-\STATE{$r\gets\gcd(k,t_i)$}
+\STATE{$r\gets k/\gcd(k,t_i)$}
 \FOR{$c = 0,\ldots,k/r-1$}
-  \STATE{$m \gets \infty$}
-  \FOR{$j = 1,\ldots,r$}
-    \STATE{$m \gets \min\{m, D_{i-1}((c-jt_i)\bmod k)+jt_i\}$}
+  \STATE{$\mu \gets \infty$}
+  \FOR{$x = 1,\ldots,r$}
+    \STATE{$\mu \gets \min\{\mu, D_{i-1}((c-xt_i)\bmod k)+xt_i\}$}
   \ENDFOR
   \FOR{$j = 0,\ldots, r-1$}
-    \STATE{$D_i((c+jt_i)\bmod k)\gets m$}
-    \STATE{$m \gets\min\{m, D_{i-1}((c+jt_i)\bmod k) \} + t_i$}
+    \STATE{$D_i((c+jt_i)\bmod k)\gets \mu$}
+    \STATE{$\mu \gets\min\{\mu, D_{i-1}((c+jt_i)\bmod k) \} + t_i$}
   \ENDFOR
 \ENDFOR
 \end{algorithmic}
 
-
-Once we have computed $D_{m}$, we can test if $n$ is in the set $S_m$ by
-checking if $D_m(n\bmod k) \le n$.  This completes the proof of our
-first result:
+Once we have computed $D_{m}$, we can test if $n$ is in the set $S_m$
+by checking if $D_m(n\bmod k) \le n$.  To summarize the running time
+of our algorithm, we compute $D_1,\ldots,D_m$, using $O(k)$ arithmetic
+operations for each, for a total of  total of $O(k^2)$ arithmetic
+operations.  Note that the values in table $D_i$ obtained by adding a
+value of at most $k^2$ to a value in table $D_{i-1}$.  Thus, the
+entries in $D_1,\ldots,D_m$ never exceed $k^{3}$ so all arithmetic
+operations can be done in constant time so that computing $D_m$ takes
+$O(k^2)$ time.  The algorithm finishes by computing $D_m(n\bmod k)$.
+The modulus operation performed in this computation can be done in
+$O(\log^c n)$ time for some constant $c$. This completes the proof of
+our first result:
 
 \begin{thm}
 The realization problem with full information can be solved in
@@ -303,11 +313,12 @@ information.  That is, for each $i\in\{1,\ldots,k-1\}$ we are told
 only that $\ell_i > \ell_{i+1}$, $\ell_i < \ell_{i+1}$ or
 $\ell_i=\ell_{i+1}$.  Our approach is similar to that of the full
 information case.  By scanning for $\op_{i,i+1}$ for $i=1,\ldots,k-1$
-we determine a set of $m\le k$ equivalences classes $C_1,\ldots,C_m$
+we determine a set of $m\le k$ equivalence classes $C_1,\ldots,C_m$
 over $1,\ldots,k$ such that (1)~$\ell_i=\ell_j$ if $i$ and $j$ belong to the
 same class and (2)~if $i\in C_{i'}$ and $j\in C_{i'+1}$ then either
-$\ell_i<\ell_j$ or $\ell_i > l_j$, as indicated by $\op$. 
+$\ell_i<\ell_j$ or $\ell_i > \ell_j$, as indicated by $\op$. 
 
+Refer to \figref{sequential}.
 Let $t_1=k$, and let $t_i = t_{i-1}-|C_{i-1}|$ for $i>1$.  Let
 $s_1=+1$ and, for $i>1$, let $s_i=+1$ if the elements in $C_{i}$
 should be greater than the elements in $C_{i-1}$ and let $s_{i}=-1$ if
@@ -324,6 +335,14 @@ and
 \end{equation}
 We say that $w_1,\ldots,w_m$ are \emph{admissible} if they satisfy
 \eqref{admissible}.
+
+
+\begin{figure}
+\begin{center}\includegraphics{sequential}\end{center}
+\caption{An illustration of the sequential information case with
+$s_1=s_2=s_3=s_5 = +1$ and $s_4=-1$.}
+\figlabel{sequential}
+\end{figure}
 
 Given $w_1,\ldots,w_m$ satisfying \eqref{sum-n} and
 \eqref{admissible}, we can compute the value of $\ell_i\in C_{i'}$ as 
@@ -434,7 +453,7 @@ As in the proof of \lemref{firstalg} we reduce the problem to a
 sequence of lower-envelope
 computations.   As before, we begin by
 splitting the elements of $\Z_k$ into the sets
-$q_{0},\ldots,q_{k/r}$ where $r=\gcd(k,t_i)$ and
+$q_{0},\ldots,q_{k/r-1}$ where $r=\gcd(k,t_i)$ and
 $q_{c,j}=(c+jt_i)\bmod k$.
 Using exactly the same scanning algorithm used in \lemref{firstalg} we
 can compute $D_i(q_{0,j},j)$ for all $1\le j\le H+(m-i)k$ in $O(H)$ time.
@@ -442,10 +461,13 @@ Again, this is because the univariate function
 \[ f(j) = D_i(q_{0,j},j) = \min\{ D_{i-1}(q_{0,j-x},j-x) + xt_i : 1\le
 x\le j\} 
 \]
-is the lower envelope of $H+(m-i)k$ parallel half-lines.
-By repeated applications of the above procedure we can compute
-$D_i(q_{0,j},j+c)$ for all $1\le j\le H$ and all
-$0\le c< r$ in $O(Hr)$ time.  Finally, by repeating that
+is the lower envelope of $H+(m-i)k$ parallel half-lines.  By repeated
+applications of the above procedure we can compute $D_i(q_{0,j},j+c)$
+for all $1\le j\le H$ and all $0\le c< r$ in $O(Hr)$
+time.\footnote{Graphically, we are computing the minimum area under a
+chain whose area is $q_{0,j} \pmod{n}$ and whose last segment is at
+height $j+c$.}
+Finally, by repeating that
 procedure $k/r$ times we compute entire table $D_i(y,h)$, for all
 $y\in Z_k$ and all $1\le h\le H$ in $O(Hk)$ time, as required. 
 
@@ -531,7 +553,8 @@ previous section.  This means that, if there exists a solution to our
 cyclic information problem in which the elements of class $C_1$ are
 assigned a value not exceeding any value assigned to any other class
 $C_i$, $i\neq 1$, then we can find this solution in $O(k^4+\log^c n)$
-time.  However, if there exists any solution then at least one of the
+time.\footnote{\figref{sequential} is an example of this.}
+However, if there exists any solution then at least one of the
 classes $C_i$ must be assigned a minimum value in this solution.
 Thus, by running the algorithm from the previous section $m$ times we
 can determine if there exists any solution.
@@ -554,9 +577,8 @@ relative lengths of consecutive subintervals is given, and cyclic
 information in which the relationships between consecutive
 subintervals and the first and last subinterval are given.  Our
 algorithms run in $O(k^2+\log^c n)$, $O(k^4+\log^c n)$ and
-$O(k^5+\log^cn)$ time, respectively. The exponent $c$ is given
-by the time it takes to compute the residue $n\bmod k$ and is not more
-than $2$.
+$O(k^5+\log^cn)$ time, respectively. The exponent $c$ is given by the
+time it takes to compute the residue $n\bmod k$.
 
 The most general version of this class of problems is as follows:
 Given any subset of the order matrix $\op$, find a sequence
@@ -569,7 +591,7 @@ from all partitions of $[0,n)$ that satisfy some sequential, cyclic or
 total information constraints.  Such an algorithm would be useful for
 testing hypotheses of the form:  ``Most rhythms of length $n$ and
 having $k$ onsets that satisfy some set of constraints sound alike to
-many listeners.''
+many listeners.'' 
 
 The sequential and cyclic information problems we study are motivated
 by the 3-level ($+-0$) contour representation studied by Dowling
@@ -579,6 +601,14 @@ relative to $\ell_{i-1}$.  For example, we may be told that $\ell_{i}\in
 [\ell_{i-1} + 50, \ell_{i-1}+100]$.  The problem is then to find
 $\ell_1,\ldots,\ell_k$ that satisfy all these constraints and whose sum is
 $n$.
+
+Finally, while the combinatorial problems studied in this paper are
+motivated by music theory this paper has only considered the
+combinatorial aspect.  Further work in this area should include
+experimental work to evaluate and classify existing rhythms based on
+their rhythmic contour and to perform listening experiments to verify how
+perceptually similar rhythms with the same rhythmic contour actually
+are.
 
 \section*{Acknowledgements}
 
@@ -606,7 +636,9 @@ Perouz~Taslakian,
 Remco~Veltcamp,
 and David~Wood,
 for providing a
-stimulating working environment.
+stimulating working environment.  The authors would also like to thank
+an anonymous referee for suggesting the follow-up experimental work
+described in the conclusions.
 
 \bibliographystyle{plain}
 \bibliography{realizing}

@@ -1,6 +1,6 @@
 \documentclass[charterfonts,lotsofwhite]{patmorin}
 \usepackage[noend]{algorithmic}
-\usepackage{amsthm,amsopn}
+\usepackage{amsmath,amsthm,amsopn}
 \usepackage{graphicx}
 
 \input{pat}
@@ -15,8 +15,7 @@
         Dan Chen \and
 	John Iacono \and
 	Stefan Langerman \and
-	Pat Morin \and
-	Others?}
+	Pat Morin}
 \date{}
 \begin{document}
 \maketitle
@@ -26,7 +25,7 @@ The \emph{Tukey depth} (Tukey 1975) of a point $p$ with respect to a
 finite set $S$ of points is the minimum number of elements of $S$
 contained in any closed halfspace that contains $p$.  Algorithms for
 computing the Tukey depth of a point in various dimensions are
-considered.  The running times of these algorithms depend on the value
+considered. The running times of these algorithms depend on the value
 of the output, making them suited to situations, such as outlier
 removal, where the value of the output is typically small.
 \end{abstract}
@@ -368,30 +367,41 @@ n)$ time, where $k$ is the value of the output.
 \section{An Algorithm for Points in $\R^d$}
 \seclabel{d-d}
 
-Finally, we consider the general case of point sets in $\R^d$.  
-In the previous section we showed that computing the Tukey depth of
-a point $p$ with respect to a set $S$ of $n$ points in $\R^d$
-can be reduced to two instances of \textsc{MaximumFeasibleSubsystem}
-in $\R^{d-1}$ and one Tukey depth computation in $\mathbb{R}^{d-1}$.  Here we give a fixed-parameter tractable \cite{df98}
-algorithm for \textsc{MaximumFeasibleSubsystem}.  The algorithm uses
-linear programming as a subroutine in the following way:  Given a
-collection $K$ of halfspaces in $\R^{d-1}$, an algorithm for linear
-programming can be used to either
+Finally, we consider the general case of point sets in $\R^d$.  In the
+previous section we showed that computing the Tukey depth of a point
+$p$ with respect to a set $S$ of $n$ points in $\R^d$ can be reduced
+to two instances of \textsc{MaximumFeasibleSubsystem} in $\R^{d-1}$
+and one Tukey depth computation in $\mathbb{R}^{d-1}$.  In this
+section we give a fixed-parameter tractable \cite{df98} algorithm for
+\textsc{MaximumFeasibleSubsystem}.  
+
+The algorithm uses linear programming as a subroutine in the following
+way:  Given a collection $K$ of halfspaces in $\R^{d-1}$, an algorithm
+for linear programming can be used to either
 \begin{enumerate}
 \item Determine a point $p\in\cap K$ if such a point exists or,
-\item report a subset $B\subseteq K$, $|B|\le d$, such that $\cap B=\emptyset$.
+\item report a subset $B\subseteq K$, $|B|\le d$, such that 
+	$\cap B=\emptyset$.
 \end{enumerate}
-Let $\textsc{IIS}(K)$ denote a routine that outputs, in the latter
-case, the set
-$B$ or outputs, in the former case, the empty set.
-Then the following algorithm solves the
+The set $B$ reported in the latter case is called a \emph{basic
+infeasible subsystem}.  Standard combinatorial algorithms for linear
+programming, including algorithms for linear programming in small
+dimensions \cite{c95,d84,m83,m84,s91,sw92} as well as the simplex
+method (c.f., \cite{chvatal80}), can easily be made to report a basic
+infeasible subsystem.  A method of finding basic infeasible subsystems
+from interior point linear-programming methods is described in
+\appref{bis}.
+
+Let $\textsc{BIS}(K)$ denote a routine that outputs a basic infeasible
+subsystem of $K$ if $K$ is infeasible, and that outputs the empty set
+otherwise.  The following algorithm solves the
 \textsc{MaximumFeasibleSubsystem} decision problem:
 
 \noindent$\textsc{MFS}(K,k)$
 \begin{algorithmic}[1]
 \STATE{\COMMENT{$\star$ determine if there exists $K'\subseteq K$, $|K'|\le
 k$, such that $\cap(K\setminus K')\neq\emptyset$ $\star$} }
-\STATE{$B\gets\textsc{IIS}(K)$}
+\STATE{$B\gets\textsc{BIS}(K)$}
 \IF{$B=\emptyset$}
    \STATE{\textbf{return} true}
 \ENDIF
@@ -434,6 +444,71 @@ program with $n$ constraints and $d$ variables.
 \bibliographystyle{plain}
 \bibliography{tukey}
 
+\appendix
+\section{Computing a Basic Infeasible Subsystem}
+\applabel{bis}
+
+
+For any matrix $M$, let $M_J$ denote the set of rows indexed by $J$.
+Given a system of linear inequalities $Mx \geq b$, $M \in \R^{m \times
+d}$, a \emph{basic infeasible subsystem} is a subset of $\{ 1 \dots
+m\}$ such that the system $M_I x \geq b_I$ is infeasible, and $|I|
+\leq d+1$.  We consider the standard first stage simplex problem (see
+e.g.~\cite{chvatal80}, p.~39). Let  $e$ denote the $m$-vector of all
+ones, $c$ the length $d+1$ binary vector with exactly one one in the
+last position and let $A=[M e]$. We can write the first stage LP for
+our system as
+
+\begin{align*}
+    \min c^Tx &= x_{d+1}\\\tag{P}\eqlabel{P}
+    \text{subject to}\\
+    Ax &\geq b
+\end{align*}
+  In the case of an
+infeasible system, the optimal value of this LP will be strictly
+positive. 
+The dual LP of \eqref{P} is
+\begin{align*}
+  \max b^T y\\\tag{D}
+  \eqlabel{D}
+  \text{subject to}\\
+  yA &= c\\
+  y & \geq 0
+\end{align*}
+In what follows, we generally follow the notation of \cite{megiddo91},
+except that we interchange the definitions of the primal and dual LPs.
+Define a \emph{basic partition} (or just \emph{basis}) $(\beta,\eta)$
+as a partition of the row indices of $A$ such that $A_\beta$ is
+nonsingular.  For each basic partition, we define a \emph{primal basic
+  solution}
+\begin{equation*}
+  x^*=A_\beta^{-1} b_\beta
+\end{equation*}
+and a \emph{dual basic solution}
+\begin{equation*}
+  y^*= c A^{-1}_\beta
+\end{equation*}
+We say that a basis is \emph{primal feasible} (resp.\ \emph{dual
+  feasible}) if $x^*$ is feasible for \eqref{P} (respectively $y^*$
+is feasible for \eqref{D}).  It is a standard result of linear
+programming duality that a basis which is both primal and dual feasible
+defines a pair $(x^*,y^*)$ of optimal solutions to the primal and dual
+LP's; such a partition is called an \emph{optimal basis partition}.
+
+In general LP algorithms (either directly in the case 
+of Simplex type algorithms, or via postprocessing using
+e.g.~\cite{megiddo91,vavasis96}) provide an optimal basis partition
+$(\beta,\eta)$.  Consider the relaxed LP
+\begin{align*}
+  \min c^T x \\\tag{R}
+  \eqlabel{R}
+  \text{subject to}\\
+  A_\beta x \leq b_\beta
+\end{align*}
+It is easy to verify that an optimal basis partition for \eqref{P}
+is also primal and dual feasible for \eqref{R}.  This implies that
+the system $M_\beta \geq b_\beta$ is infeasible, and provides a a
+basic infeasible system.
 
 \end{document}
 

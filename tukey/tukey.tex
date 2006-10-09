@@ -49,9 +49,20 @@ respect to $S$ can be defined in several equivalent ways \cite{t75}:
                       \eqlabel{tuk-hull}
 \end{eqnarray}
 
-In this paper we consider algorithms for computing the Tukey depth of
-a point $p$ with respect to a set $S$, whose running time is dependent
-on the value, $k$, of the output. In particular, we present:
+Algorithms for computing the point $p\in\R^d$ of maximum Tukey depth have a
+rich history \cite{m91,ls03,c04} that has recently culminated in
+Chan's $O(n\log n + n^{d-1})$ expected time algorithm.  A point of
+maximum Tukey depth serves as a $d$-dimensional generalization of the
+(1-dimensional) median and performs well as a robust estimate of the
+``center'' of $S$ \cite{rr98,rr96,s90}.
+
+In this paper we consider the simpler problem of computing the Tukey
+depth of a given point $p$ with respect to a set $S$.  Our algorithms
+have running times that are dependent on the value, $k$, of the
+output.  These algorithms are thus particularly well-suited to
+problems such as outlier-removal where the goal is to identify points
+of small depth since they run quickly when the depth of $p$ is small.  
+Specifically, we present the following results:
 
 \begin{enumerate}
 \item A simple $O(n + k\log k)$ time algorithm for points in $\R^2$
@@ -89,23 +100,27 @@ denoted by $\Sp^d_+ =\{ p\in\Sp^{d} : p_{d+1} > 0 \}$, the bottom
 side is denoted by $\Sp^d_- =\{ p\in\Sp^{d} : p_{d+1} < 0 \}$ and the
 equator is denoted by $\Sp^d_0 =\{ p\in\Sp^{d} : p_{d+1} = 0 \}$ .
 
-
-
 \section{An Algorithm for Points in $\R^2$}
 \seclabel{2d}
 
 In this section we give a simple $O(n + k\log k)$ time algorithm to
-compute the Tukey depth of a point $p\in\R^2$ with respect to
-a set $S$ of $n$ points in $\R^2$.  The algorithm begins by
-partitioning $\R^2$ into 4 quadrants around $p$ that, in
-counterclockwise order, we denote by $Q_0,\ldots,Q_3$.
+compute the Tukey depth of a point $p\in\R^2$ with respect to a set
+$S$ of $n$ points in $\R^2$.  We first note that an $O(n\log n)$ time
+\emph{sort-and-scan} algorithm is easily obtained by sorting the
+points of $S$ radially about $p$ and then scanning the resulting
+sorted list using two pointers \cite{m91}.  The main idea behind our
+algorithm to is to reduce the problem to a \emph{kernel} of size
+$O(k)$ on which we can apply this sort-and-scan algorithm.
+
+The algorithm begins by partitioning $\R^2$ into 4 quadrants around
+$p$ that, in counterclockwise order, we denote by $Q_0,\ldots,Q_3$.
 The algorithm then simultaneously begins computing the 4 quantities
 $\td_0(p,S),\ldots,\td_3(p,S)$ where 
 \begin{equation}
-     \td_i(p,S) = \min\{|h\cap S| : \mbox{$h$ is a halfspace containing $Q_i$} \} \enspace . \eqlabel{four-min}
+     \td_i(p,S) = \min\{|h\cap S| : \mbox{$h$ is a closed halfspace containing $Q_i$} \} \enspace . \eqlabel{four-min}
 \end{equation}
 Clearly, $\td(p,S) = \min\{\td_i(p,S): 0\le i \le 3 \}$ since any
-halfspace containing $p$ contains at least one of the four quadrants.
+closed halfspace containing $p$ contains at least one of the four quadrants.
 In the remainder of this section we will describe how to compute
 $k_i=\td_i(p,S)$ in $O(n + k_i\log k_i)$ time.  Since the
 computation can stop once $\td_i(p,S)$ has been computed for
@@ -142,7 +157,7 @@ Next, we continue to extract as many elements as possible from each of
 $H_{i-1}$ and $H_{i+1}$ up to a maximum of an additional $\ell-1$
 elements each. The total time required to extract these at most
 $4\ell-2$ elements from the two heaps is $O(\ell\log n)$.  By sorting and
-scanning all the elements extracted from the heap plus the elements of
+scanning all the elements extracted from the heaps plus the elements of
 $S_i$ we can then compute $\td_i(p,S)$ in an additional
 \[
      O((|S_i|+\ell)\log n) = O(k_i\log n)
@@ -168,18 +183,18 @@ the Tukey depth of $p$ is equivalent to finding a unit normal vector
 $v$ such that the halfspace with $p$ on its boundary and having inner
 normal $v$ contains as few points of $S$ as possible.  Note that the
 set of unit normals in $\R^2$ is homeomorphic to the unit circle
-$\Sp^1$ and that each point $q\in S$ defines a circular arc of $\Sp^1$
+$\Sp^1$ and that each point $q\in S$ defines an open circular arc of $\Sp^1$
 such that all choices of $v$ in this circular arc yield a halfspace
 that does not contain $q$.  Thus, the Tukey depth problem reduces to
 the problem of finding a vector $v$ that is contained in the largest
-number of circular arcs. The partitioning into 4 quadrants used in for
+number of circular arcs. The partitioning into 4 quadrants used in
 the algorithm of \thmref{2-d} works because all the circular arcs are
 actually half circles.
 
 An obvious generalization of the Tukey depth problem is that of, given
 a set of $n$ circular arcs of $\Sp^1$, finding a point $p\in\Sp^1$
 contained in the largest number of arcs.  This problem is easily
-solved in $O(n\log n)$ time by the ``sort and scan'' algorithm.
+solved in $O(n\log n)$ time by the sort-and-scan algorithm.
 Unfortunately, it is not possible to obtain an algorithm whose running
 time depends on the number $k$ of arcs containing $p$ or even on the
 number $(n-k)$ of arcs not containing $p$.  This is because the
@@ -204,11 +219,11 @@ points contained in many intervals are clustered together.
 \begin{lem}\lemlabel{close}
 Let $q\in[p_i,p_{i+1}]$ be a point contained in $k$ intervals of $I$.
 Then, for any $0\le r\le n$, every point $q'\in[p_{i-r},p_{i+r+1}]$ is
-contained at least $k-r$ intervals of $I$.
+contained in at least $k-r$ intervals of $I$.
 \end{lem}
 
 \begin{proof}
-Without loss of generality, assume that $q'\in[q,p_i+r+1]$.  There are
+Without loss of generality, assume that $q'\in[q,p_{i+r+1}]$.  There are
 at most $r$ endpoints of intervals in $I$ contained in the interval
 $[q,q']$.  Therefore there are at most $r$ intervals that contain $q$
 but not $q'$.
@@ -250,10 +265,10 @@ $r=2(n-k)+n/t$.
 If we choose $t=\sqrt{n}$ then $r=O(n-k+\sqrt{n})$.  Thus, by
 computing an interval $[p_a,p_b]$ that contains all high depth samples
 we can find the point $p$ contained in the largest number of
-intervals of $C$ by applying the standard ``sort-and-scan'' algorithm
+intervals of $C$ by applying the standard sort-and-scan algorithm
 on the $O(n-k+\sqrt{n})$ endpoints of the intervals of $C$ that fall
 in the interval $[p_a,p_b]$.  The running time of the
-``sort-and-scan'' algorithm is $O(m\log m)$ where $m$ is the number of
+sort-and-scan algorithm is $O(m\log m)$ where $m$ is the number of
 points to be scanned.  In this case $m=O(n-k+\sqrt{n})$ for a running
 time of 
 \[
@@ -299,15 +314,17 @@ time.
 
 None of the above issues have any significant effect on the running
 time of the overall algorithm, which is still dominated by the final
-``sort-and-scan'' step on a problem of size $O(n-k+\sqrt{n})$.  This
-yields:
+sort-and-scan step on a problem of size $O(n-k+\sqrt{n})$.  The
+correctness of the resulting output depends on the success of the
+random sampling steps described in points 2 and 3, above.  However,
+\lemref{far} implies that this final sort-and-scan step allows us
+to check the correctness of the output and restart the algorithm from
+scratch if necessary.  This yields:
 
 \begin{thm}
-Let $I$ be a set of $n$ real intervals.  Then, for any constant
-$c$ there exists a randomized algorithm that runs in $O(n+(n-k)\log
-(n-k))$ expected time and with probability at least $1-O(n^{-c})$
-finds a value $p\in\R$ contained in the largest number of arcs of
-$C$.
+There exists a randomized algorithm that, given a set $I$ of $n$ real
+intervals, finds a value $p\in\R$ contained in the largest number of
+intervals of $I$ and that runs in $O(n+(n-k)\log (n-k))$ expected time.
 \end{thm}
 
 
@@ -319,33 +336,39 @@ depth of a point in $\R^2$ is equivalent to the problem of finding a
 point contained in the largest number of halfcircles on the unit
 circle $\Sp^1$.  A similar statement is true in $\R^d$:  Each point
 $q\in S$ defines an open halfsphere $q^*=\{ v\in\Sp^{d-1} : v\cdot q <
-0\}$.  That is, all vectors in $q^*$ are the inner normals of hyperplanes
-that contain $p$ but do not contain $q$.  Thus, the problem of
-determining the Tukey depth of $p$ reduces to the problem of finding
-the point contained in the largest number of halfspheres in $S^*=\{q^*
-: q\in S\}$.
+0\}$.  That is, all vectors in $q^*$ are the inner normals of
+halfspaces that contain $p$ but do not contain $q$.  Thus, the problem
+of determining the Tukey depth of $p$ reduces to the problem of
+finding the point contained in the largest number of halfspheres in
+$S^*=\{q^* : q\in S\}$.
 
-We observe that this problem can be solved by solving three problems in
-$\R^{d-1}$.  Each open halfsphere $q^*\in S^*$ is the intersection of
-an open halfspace $q^\#$ with $\Sp^{d-1}$.  Consider the intersection
-of $q^\#$ with the hyperplane $H_+=\{(x_1,\ldots,x_d):x_d=1\}$.  By
-central projection, there is a 1-1 correspondence between points in
-$\Sp^{d-1}_+$ and $H_+$ and this projection has the property that
-$r\in\Sp^{d-1}_+$ is in $q^*$ if and only if the projection of $r$ is
-in $q^\#\cap H_+$.  Thus, finding the point in $\Sp^{d-1}_+$ contained
-in the largest number of halfspheres is equivalent to finding a point
-in $H_+$ contained in the largest number of halfspaces.  A similar
-statement holds regarding $\Sp^{d-1}_-$ using the hyperplane
-$H_-=\{(x_1,\ldots,x_d):x_d=-1\}$.  Finally, finding the point in
-$\Sp^{d-1}_0$ contained in the smallest number of halfspheres is a
-$(d-1)$-dimensional Tukey depth problem. 
+We observe that this problem can be solved by solving two
+\textsc{MaximumFeasibleSubsystem} problems in $\R^{d-1}$.  Each open
+halfsphere $q^*\in S^*$ is the intersection of an open halfspace
+$q^\#$ with $\Sp^{d-1}$.  Consider the intersection of $q^\#$ with the
+hyperplane $H_+=\{(x_1,\ldots,x_d):x_d=1\}$.  By central projection,
+there is a bijection between points in $\Sp^{d-1}_+$ and $H_+$ and
+this bijection has the property that $r\in\Sp^{d-1}_+$ is in $q^*$ if
+and only if the projection of $r$ is in $q^\#\cap H_+$.  Thus, finding
+the point in $\Sp^{d-1}_+$ contained in the largest number of
+halfspheres is equivalent to finding a point in $H_+$ contained in the
+largest number of halfspaces.  A similar statement holds regarding
+$\Sp^{d-1}_-$ using the hyperplane $H_-=\{(x_1,\ldots,x_d):x_d=-1\}$.
+Finally, we observe that we do not need to consider solutions on the
+equator $\Sp^{d-1}_0$ because our input consists of \emph{open}
+halfspheres.\footnote{A solution to the Tukey depth problem is
+obtained when we find a set $n-k$ open halfspheres that have a
+non-empty common intersection.  The intersection of a set of open
+halfspheres is either an empty set or a set with positive measure.
+Since $\Sp^{d-1}_0$ has measure 0 any solution to the Tukey depth
+problem contains points not in $\Sp^{d-1}_0$.}
 
 The above discussion shows that computing the Tukey depth of a point
-in $\R^d$ reduces to one Tukey depth problem in $\R^{d-1}$ and two
-instances of the problem \textsc{MaximumFeasibleSubsystem} in
-$\R^{d-1}$: Given set $K$ of $n$ halfspaces in $\mathbb{R}^{d-1}$,
-find the subset $K'$ of $K$ of minimum cardinality such that $\cap
-(K\setminus K')$ is non-empty.  The current best results for
+in $\R^d$ reduces to two instances of the problem
+\textsc{MaximumFeasibleSubsystem} problem in $\R^{d-1}$: Given a set
+$K$ of $n$ halfspaces in $\mathbb{R}^{d-1}$, find the subset $K'$ of
+$K$ of minimum cardinality such that $\cap (K\setminus K')$ is
+non-empty.  The current best results for
 \textsc{MaximumFeasibleSubsystem} in small dimensions are due to Chan
 \cite{c05}.  Using two instances of his algorithm for
 \textsc{MaximumFeasibleSubsystem} in $\R^2$, respectively, $\R^3$, and
@@ -370,10 +393,9 @@ n)$ time, where $k$ is the value of the output.
 Finally, we consider the general case of point sets in $\R^d$.  In the
 previous section we showed that computing the Tukey depth of a point
 $p$ with respect to a set $S$ of $n$ points in $\R^d$ can be reduced
-to two instances of \textsc{MaximumFeasibleSubsystem} in $\R^{d-1}$
-and one Tukey depth computation in $\mathbb{R}^{d-1}$.  In this
-section we give a fixed-parameter tractable \cite{df98} algorithm for
-\textsc{MaximumFeasibleSubsystem}.  
+to two instances of \textsc{MaximumFeasibleSubsystem} in $\R^{d-1}$.
+In this section we give a fixed-parameter tractable \cite{df98}
+algorithm for \textsc{MaximumFeasibleSubsystem}.  
 
 The algorithm uses linear programming as a subroutine in the following
 way:  Given a collection $K$ of halfspaces in $\R^{d-1}$, an algorithm
@@ -416,27 +438,22 @@ k$, such that $\cap(K\setminus K')\neq\emptyset$ $\star$} }
 \STATE{\textbf{return} false}
 \end{algorithmic}
 
-Correctness of the above algorithm is easily established by induction
-on the value of $k$.  The running time of the algorithm is given by
-the recurrence
+The correctness of the above algorithm is easily established by
+induction on the value of $k$.  The running time of the algorithm is
+given by the recurrence
 \[
     T(n,k) \le \lp(n,d-1)+ dT(n-1,k-1) \enspace ,
 \]
-where $\lp(n,d)$ denotes the running time of an algorithm for solving
-a linear programming with $n$ constraints and $d$ variables.  This
-recurrence readily resolves to $O(d^k\lp(n,d-1))$.  
-
-Using this as a subroutine for Tukey depth computation we obtain an
-algorithm whose running time is given by the recurrence
-\[
-    S(n,d,k) \le O(d^k\lp(n,d-1)) + S(n,d-1,k)
-\]
-which resolves to $O((d+1)^k\lp(n,d-1))$.  Running this algorithm for
-$k=0,1,2,\ldots$ completes the proof of:
+where $\lp(n,d)$ denotes the running time of an algorithm for finding
+a basic infeasible system in a linear program with $n$ constraints and
+$d$ variables.  This recurrence readily resolves to
+$O(d^k\lp(n,d-1))$.  
+Using this as a subroutine for Tukey depth computation we obtain our
+final result:
 
 \begin{thm}\thmlabel{d-d}
 The Tukey depth of a point $p$ with respect to a set $S$ of $n$ points
-in $\R^d$ can be computed in $O((d+1)^k\lp(n,d-1))$ time, where $k$ is
+in $\R^d$ can be computed in $O(d^k\lp(n,d-1))$ time, where $k$ is
 the value of the output and $\lp(n,d)$ is the time to solve a linear
 program with $n$ constraints and $d$ variables.
 \end{thm}
@@ -475,7 +492,8 @@ The dual LP of \eqref{P} is
   yA &= c\\
   y & \geq 0
 \end{align*}
-In what follows, we generally follow the notation of \cite{megiddo91},
+In what follows, we generally follow the notation used by Megiddo 
+\cite{megiddo91},
 except that we interchange the definitions of the primal and dual LPs.
 Define a \emph{basic partition} (or just \emph{basis}) $(\beta,\eta)$
 as a partition of the row indices of $A$ such that $A_\beta$ is

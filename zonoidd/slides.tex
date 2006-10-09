@@ -1,0 +1,130 @@
+\documentclass{beamer}
+\usepackage{amsopn}
+
+\DeclareMathOperator{\conv}{conv}
+\DeclareMathOperator{\average}{average}
+
+\usepackage{beamerthemesplit}
+\input{pat}
+
+\title{An Optimal Randomized Algorithm \\ for $d$-Variate Zonoid Depth}
+\author{Pat Morin}
+\date{\today}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\section[Outline]{}
+\frame{\tableofcontents}
+
+\section{Introduction}
+\subsection{Depth Functions}
+\frame
+{
+  \frametitle{Depth Functions}
+  \begin{itemize}
+  \item $S$: A set of $n$ points in $\R^d$
+  \item A \emph{depth function} assigns a real value $D(p,S)$ to 
+            each point in $\R^d$
+  \item Generalizes 1-dimensional \emph{order statistics} 
+  \item Produces robust multivariate statistics
+  \item Many depth functions have been defined, including Tukey depth,
+projection depth, Delaunay depth, Fermat-Weber depth, simplicial
+depth, convex-hull peeling depth,\ldots,
+  \item<1->zonoid depth
+  \end{itemize}
+}
+    
+\subsection{Zonoid Depth}
+\frame
+{
+   \frametitle{Zonoid Depth}
+   \begin{itemize}
+   \item<1-> Recall the definition of the \emph{convex hull}
+    \[ \conv(S) = \left\{\sum_{p\in S} p\lambda_p : 
+         \mbox{$0\le\lambda_p\le 1$ and $\sum_{p\in S}\lambda_p = 1$} 
+        \right\} 
+    \]
+   \item<2-> Change it slightly to get the \emph{$k$-zonoid}
+    \[ Z_k(S) = \left\{\sum_{p\in S} p\lambda_p : 
+         \mbox{$0\le\lambda_p\le 1/k$ and $\sum_{p\in S}\lambda_p = 1$} 
+        \right\} 
+    \]
+   \item<3-> Note that $Z_1(S)=\conv(S)$ and $Z_n(S)=\{\average(S)\}$ 
+   \item<4-> The \emph{zonoid depth} of $p$ is 
+     \[ Z(p,S)=\max\{k : p\in Z_k(S)\} \]
+   \end{itemize}
+}
+
+\frame
+{
+    \frametitle{Zonoid Depth}
+    \begin{center}
+     \includegraphics{zonoid-eg}
+    \end{center}
+}
+
+
+\subsection{Zonoid Depth Computation}
+\frame
+{
+  \frametitle{Zonoid Depth Computation}
+  \begin{itemize}
+  \item<1-> How quickly can we compute the zonoid depth of $p$?
+     \begin{itemize}  
+       \item<2-> Bern and Eppstein 2001:  $O(n(Ld\log n)^c)$ time where $L$
+            is the bit precision of the input  (uses ellipsoid method)
+       \item<3-> Gopala and Morin 2004: $O(n)$ expected time, but only
+            for $d=2$
+       \item<4-> Here: $O(n)$ expected time for any constant $d$ (but
+            with a superpolynomial dependence on $d$)
+     \end{itemize}
+     \item<5-> In this talk we focus mainly on the decision 
+          problem:  \\ ``Is $p\in Z_k(S)$?''
+  \end{itemize}
+}
+
+\section{The Algorithm}
+
+\subsection{Chan's Optimization Theorem}
+\frame
+{
+  \frametitle{Chan's Optimization Theorem (2004)}
+  Suppose:  
+  \begin{enumerate}
+   \item<1-> $\mathcal{P}$ is a computational problem
+   \item<2-> $f:\mathcal{P}\mapsto C$ maps problem instances onto closed 
+         convex subsets of $\R^d$
+   \item<3-> $w:\R^d\mapsto \R$ is a linear objective function
+   \item<4-> For any $p\in\R^d$ and any $P\in\mathcal{P}$ of size $n$ we
+         can test if $p\in f(P)$ in $D(n)$ time
+   \item<5-> For any $P\in\mathcal{P}$ of size $n$ we can find
+         $P_1,\ldots, P_r\in\mathcal{P}$ such that $|P_i|\le\alpha n$ 
+         and $f(P)=\bigcap_{i=1}^r f(P_i)$ \hfill{[$r=O(1)$ and $\alpha<1$]}
+  \end{enumerate}
+  Then:
+  \begin{itemize}
+    \item<6-> For any $P\in\mathcal{P}$ of size $n$ we can find the point
+    $q\in f(P)$ that maximizes $w(q)$
+  \end{itemize}
+} 
+
+\frame
+{
+   \frametitle{Conditions 4 and 5}
+   A figure illustrating conditions 4 and 5
+}
+
+\subsection{Geometric Duality}
+\frame
+{ \frametitle{Geometric Duality}
+  \begin{itemize}
+    \item Points become hyperplanes
+    \item Polytopes become sets of hyperplanes that avoid two polytopes
+  \end{itemize}
+}
+
+
+
+\end{document}

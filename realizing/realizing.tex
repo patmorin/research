@@ -1,7 +1,7 @@
-\documentclass[11pt]{patmorin}
-\usepackage{fullpage}
+\documentclass{elsart}
+\journal{JDA}
 \usepackage{amsfonts}
-\usepackage{amsthm}
+%\usepackage{amsthm}
 \usepackage{graphicx}
 \usepackage{algorithmic}
 \input{pat}
@@ -13,6 +13,7 @@
 \newcommand{\defeq}{=}
 \newcommand{\R}{\mathbb{R}}
 
+\comment{
 \title{\MakeUppercase{Realizing Partitions Respecting Full 
 	and Partial Order Information}}
 \author{
@@ -24,6 +25,7 @@
 	Mark Overmars \and
 	Sue Whitesides
 }
+}
 \date{}
 
 %\DeclareMathOperator{\op}{op}
@@ -31,7 +33,23 @@
 \newcommand{\opij}{\op_{ij}}
 
 \begin{document}
-\maketitle
+\begin{frontmatter}
+\title{Realizing Partitions Respecting Full 
+	and Partial Order Information}
+\author{Erik D. Demaine}
+\address{Massachusetts Institute of Technology}
+\author{Jeff Erickson}
+\address{University of Illinois at Urbana-Champaign}
+\author{Danny Kri\c{z}anc}
+\address{Wesleyan University}
+\author{Henk Meijer}
+\address{Queen's University}
+\author{Pat Morin}
+\address{Carleton University}
+\author{Mark Overmars}
+\address{University of Utrecht}
+\author{Sue Whitesides}
+\address{McGill University}
 
 \begin{abstract} 
 For $n\in\N$, we consider the problem of partitioning the interval
@@ -48,6 +66,7 @@ relationship $\op_{1k}$ between $\ell_1$ and $\ell_k$ is also given.
 We show that all three versions of the problem can be solved in time
 polynomial in $k$ and $\log n$.
 \end{abstract}
+\end{frontmatter}
 
 \noindent\textbf{Keywords:} Integer partitions, integer sequences,
 subset-sum, rhythm pattern, rhythm perception, modular arithmetic
@@ -68,9 +87,12 @@ between $\ell_1$ and $\ell_k$ is also given.
 
 For an example of the full information case observe that, for $n=12$,
 the comparison matrix in \figref{example} is satisfied by the
-sequences $\langle\ell_1,\ldots,\ell_4\rangle\in
+sequences 
+\[ \langle\ell_1,\ldots,\ell_4\rangle\in
 \{\langle1,1,8,2\rangle, \langle1,1,7,3\rangle, \langle1,1,6,4\rangle,
-\langle2,2,5,3\rangle\}$.  On the other hand, for $n=6$ no solution is
+\langle2,2,5,3\rangle\} \enspace .
+\]
+On the other hand, for $n=6$ no solution is
 possible since the smallest natural sequence satisfying the comparison
 matrix is $\langle1,1,3,2\rangle$ and $1+1+3+2=7$.
 
@@ -254,6 +276,7 @@ completes the proof.
 Note that the algorithm implied by \lemref{firstalg} is actually very
 simple, and is given by the following pseudocode
 
+\noindent\begin{minipage}{\textwidth}
 \begin{algorithmic}[1]
 \STATE{$r\gets k/\gcd(k,t_i)$}
 \FOR{$c = 0,\ldots,k/r-1$}
@@ -267,6 +290,7 @@ simple, and is given by the following pseudocode
   \ENDFOR
 \ENDFOR
 \end{algorithmic}
+\end{minipage}
 
 Once we have computed $D_{m}$, we can test if $n$ is in the set $S_m$
 by checking if $D_m(n\bmod k) \le n$.  To summarize the running time
@@ -370,8 +394,9 @@ Instead, we maintain a two-dimensional table
 \[
    D_i(y,h) = \min\left(\{\infty\}\cup \left\{
     \begin{array}{ll}
+          x: & \mbox{$x\equiv y\pmod{k}$ and} \\
           & \mbox{there exists admissible $w_1,\ldots,w_i$ s.t.} \\
-        \mbox{$x\equiv y\pmod{k}$} : & \mbox{$\sum_{j=1}^i w_js_jt_j = x$ and} \\
+          & \mbox{$\sum_{j=1}^i w_js_jt_j = x$ and} \\
           & \mbox{$\sum_{j=1}^i w_js_j = h$} \\
           
     \end{array}
@@ -480,8 +505,7 @@ the function $f$ is defined as
 The difficulty with this formulation is that $f(j)$ is the lower
 envelope of an infinite number of lines.  However, it follows immediately from \lemref{lowheight} that 
 \[
-  f(j) = D_{i}(q_{0,j},j) = \min\{D_{i-1}(q_{0,j+x},j+x) - xt_i :
-1\le x\le H-j+(m-i+1)k\} \enspace .
+  f(j) = \min\{D_{i-1}(q_{0,j+x},j+x) - xt_i : 1\le x\le H-j+(m-i+1)k\} \enspace .
 \]
 Thus, we can compute $D_i$ by taking the lower envelope of
 $H+(m-i+1)k$ parallel half-lines.  This completes the proof.

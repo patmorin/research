@@ -7,9 +7,11 @@
 \usepackage{beamerthemesplit}
 \input{pat}
 
-\title{An Optimal Randomized Algorithm \\ for $d$-Variate Zonoid Depth}
+\title{An Optimal Randomized Algorithm \\ 
+	for $d$-Variate Zonoid Depth}
 \author{Pat Morin}
-\date{\today}
+\institute{Carleton University}
+\date{October 12, 2006}
 
 \begin{document}
 
@@ -60,9 +62,20 @@ depth, convex-hull peeling depth,\ldots,
 \frame
 {
     \frametitle{Zonoid Depth}
-    \begin{center}
-     \includegraphics{zonoid-eg}
-    \end{center}
+     \only<1>{\centerline{\includegraphics{zonoid-eg-ps}} 
+	$S$} 
+     \only<2>{\centerline{\includegraphics{zonoid-eg-1}}
+	$S,Z_1(S)$}
+     \only<3>{\centerline{\includegraphics{zonoid-eg-2}}
+	$S,Z_1(S),Z_2(S)$}
+     \only<4>{\centerline{\includegraphics{zonoid-eg-3}}
+	$S,Z_1(S),Z_2(S),Z_3(S)$}
+     \only<5>{\centerline{\includegraphics{zonoid-eg-4}}
+	$S,Z_1(S),Z_2(S),Z_3(S),Z_4(S)$}
+     \only<6>{\centerline{\includegraphics{zonoid-eg-5}}
+	$S,Z_1(S),Z_2(S),Z_3(S),Z_4(S),Z_5(S)$}
+     \only<7>{\centerline{\includegraphics{zonoid-eg-6}}
+	$S,Z_1(S),Z_2(S),Z_3(S),Z_4(S),Z_5(S),Z_6(S)$}
 }
 
 
@@ -80,12 +93,53 @@ depth, convex-hull peeling depth,\ldots,
        \item<4-> Here: $O(n)$ expected time for any constant $d$ (but
             with a superpolynomial dependence on $d$)
      \end{itemize}
-     \item<5-> In this talk we focus mainly on the decision 
-          problem:  \\ ``Is $p\in Z_k(S)$?''
+     \item<5-> In this talk we focus mainly on the \emph{decision 
+          problem}:  \\ ``Is $p\in Z_k(S)$?''
   \end{itemize}
 }
 
+
 \section{The Algorithm}
+
+\subsection{Finding a Zonoid Vertex}
+
+\frame{
+   \frametitle{Finding a Zonoid Vertex}
+   To Find the extreme vertex of $Z_k(S)$ in direction $\overrightarrow{w}$:
+   \only<1>{\includegraphics{project-1}}
+   \only<2>{\includegraphics{project-2}}
+   \only<3>{\includegraphics{project-3}}
+   \only<4>{\includegraphics{project-4}}
+   \begin{enumerate}
+     \item<2->Project points of $S$ onto $\overrightarrow{w}$
+     \item<3->In $O(n)$ time, find the largest $k$ points in the projection 
+     \item<4->Take the average of these $k$ points ($\lambda_p=1/k$)
+   \end{enumerate}
+}
+
+\frame
+{
+   \frametitle{The Example Again}
+   \begin{center}
+    \includegraphics{zonoid-eg-6}
+   \end{center}
+}
+
+
+
+\frame
+{
+   \frametitle{Going from Optimization to Decision}
+ \begin{itemize}
+   \item<1->Finding the extreme vertex of $Z_k(S)$ in any direction
+	is easy
+   \item<2->Bern and Eppstein use this fact in combination with the 
+	ellipsoid method to test if 
+	$p\in Z_k(S)$ by trapping $p$.
+   \item<3-> We use this fact to apply a very powerful
+	geometric optimization technique\ldots
+  \end{itemize}
+}
 
 \subsection{Chan's Optimization Theorem}
 \frame
@@ -97,44 +151,93 @@ depth, convex-hull peeling depth,\ldots,
    \item<2-> $f:\mathcal{P}\mapsto C$ maps problem instances onto closed 
          convex subsets of $\R^d$
    \item<3-> $w:\R^d\mapsto \R$ is a linear objective function
-   \item<4-> For any $p\in\R^d$ and any $P\in\mathcal{P}$ of size $n$ we
+   \item<5-> For any $p\in\R^d$ and any $P\in\mathcal{P}$ of size $n$ we
          can test if $p\in f(P)$ in $D(n)$ time
-   \item<5-> For any $P\in\mathcal{P}$ of size $n$ we can find
+   \item<6-> For any $P\in\mathcal{P}$ of size $n$ we can find
          $P_1,\ldots, P_r\in\mathcal{P}$ such that $|P_i|\le\alpha n$ 
          and $f(P)=\bigcap_{i=1}^r f(P_i)$ \hfill{[$r=O(1)$ and $\alpha<1$]}
   \end{enumerate}
   Then:
   \begin{itemize}
-    \item<6-> For any $P\in\mathcal{P}$ of size $n$ we can find the point
-    $q\in f(P)$ that maximizes $w(q)$
+    \item<4-> For any $P\in\mathcal{P}$ of size $n$ we can find the point
+    $q\in f(P)$ that maximizes $w(q)$ in $O(D(n))$ time
   \end{itemize}
 } 
 
 \frame
 {
-   \frametitle{Chan's Theorem}
+   \frametitle{Chan's Technique}
 
+   \begin{center}
    \begin{tabular}{ccc}
-    $P$ & $\stackrel{f}{\Rightarrow}$ & \includegraphics[scale=.2]{chan-1} \\
+    $P$ & $\stackrel{f}{\Rightarrow}$ & \includegraphics[scale=.4]{chan-1} \\
     $\Downarrow$ \\
     $P_1$,$P_2$,$P_3$,$P_4$ & $\stackrel{f}{\Rightarrow}$ 
 	& \includegraphics[scale=.2]{chan-2} \\
    \end{tabular}
+   \end{center}
 }
 
 \subsection{Geometric Duality}
 \frame
 { \frametitle{Geometric Duality}
-  \begin{center}
-   \includegraphics{duality-1}
-   Points become hyperplanes
-  \end{center}
-  \begin{itemize}
-    \item Points become hyperplanes
-    \item Polytopes become sets of hyperplanes that avoid two polytopes
-  \end{itemize}
+   \only<1>{\centerline{\includegraphics{dual-7}}
+	Points become\ldots}
+   \only<2>{\centerline{\includegraphics{dual-8}}
+	Points become hyperplanes}
+    \only<3>{\centerline{\includegraphics{dual-9}} 
+	A polytope becomes\ldots}
+    \only<4>{\centerline{\includegraphics{dual-0}} 
+	A polytope becomes a set of hyperplanes}
 }
 
+\subsection{Dual Zonoids}
+\frame
+{
+   \frametitle{Dual Zonoids}
+   \begin{itemize}
+     \item<1-> We want to know if $p\in Z_k(S)$
+     \item<2->
+      \begin{center}
+	\includegraphics{dual-zonoid}
+      \end{center}
+     Equivalent to asking if $\mathrm{dual}(p)$ separates $A_k(S)$ and $B_k(S)$.
+     \item<3-> Assume $p=(0,0,\ldots,0)$ implies $\mathrm{dual}(p)$ is the flat
+		hyperplane through the origin
+     \item<4-> Find the lowest point in $A_k(S)$ and the highest point
+in $B_k(S)$ 
+   \end{itemize}
+}
 
+\subsection{Overview of Algorithm}
+\frame
+{
+     \frametitle{Review}
+     \begin{itemize}
+     \item<1-> To test if $p\in Z_k(S)$:
+     \begin{enumerate}
+      \item<2-> Translate input so that $p=(0,0,\ldots,0)$
+      \item<3-> Find the lowest point in $A_k(S)$
+      \item<4-> Find the highest point in $B_k(S)$
+      \item<5-> If either is on the wrong side of the hyperplane
+	$x_d=0$ then return false, else return true
+     \end{enumerate}
+     \item<6->{Our problem reduces to two optimization problems over
+	implicit polytopes \\}
+     \item<7->{We handle these problems using Chan's Optimization Theorem}
+    \end{itemize} 
+}
+
+\subsection{Applying Chan's Optimization Theorem}
+
+\frame{
+     \frametitle{Applying Chan's Method}
+     To find the lowest point in $A_k(S)$:
+     \begin{itemize}
+        \item<1-> Problem instance: $P=(S,k)$
+        \item<2-> Objective function: $w(x_1,\ldots,x_d)=-x_d$
+        \item<3-> Constraint function: $f(S,k) = A_k(S)$
+     \end{itemize}
+}
 
 \end{document}

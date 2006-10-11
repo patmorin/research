@@ -26,15 +26,14 @@
 {
   \frametitle{Depth Functions}
   \begin{itemize}
-  \item $S$: A set of $n$ points in $\R^d$
-  \item A \emph{depth function} assigns a real value $D(p,S)$ to 
-            each point in $\R^d$
-  \item Generalizes 1-dimensional \emph{order statistics} 
-  \item Produces robust multivariate statistics
-  \item Many depth functions have been defined, including Tukey depth,
+  \item<1-> $S$: A set of $n$ points in $\R^d$
+  \item<2-> A \emph{depth function} assigns a value $D(p,S)$ to each point in $\R^d$
+%  \item<3-> Generalizes 1-dimensional \emph{order statistics} 
+  \item<3-> Produces multivariate statistics
+  \item<4-> Many depth functions have been defined, including Tukey depth,
 projection depth, Delaunay depth, Fermat-Weber depth, simplicial
 depth, convex-hull peeling depth,\ldots,
-  \item<1->zonoid depth
+  \item<5->zonoid depth
   \end{itemize}
 }
     
@@ -78,22 +77,37 @@ depth, convex-hull peeling depth,\ldots,
 	$S,Z_1(S),Z_2(S),Z_3(S),Z_4(S),Z_5(S),Z_6(S)$}
 }
 
+\frame
+{
+   \frametitle{Applications of (Zonoid) Depth}
+   \begin{itemize}
+    \item<1-> Data analysis
+    \item<2-> Multivariate statistics
+    \item<3-> Outlier removal
+    \item<4-> Machine learning 
+    \item<5-> Support Vector Machines
+   \end{itemize}
+}
+
 
 \subsection{Zonoid Depth Computation}
 \frame
 {
   \frametitle{Zonoid Depth Computation}
   \begin{itemize}
-  \item<1-> How quickly can we compute the zonoid depth of $p$?
+  \item<1-> Given $p$, $S$, and $k$, compute the zonoid depth of $p$
+w.r.t. $S$
      \begin{itemize}  
-       \item<2-> Bern and Eppstein 2001:  $O(n(Ld\log n)^c)$ time where $L$
+       \item<2-> Polynomial: Solve a linear program in $\lambda_p$ 
+		variables
+       \item<3-> Bern and Eppstein 2001:  $O(n(Ld\log n)^c)$ time where $L$
             is the bit precision of the input  (uses ellipsoid method)
-       \item<3-> Gopala and Morin 2004: $O(n)$ expected time, but only
+       \item<4-> Gopala and Morin 2004: $O(n)$ expected time, but only
             for $d=2$
-       \item<4-> Here: $O(n)$ expected time for any constant $d$ (but
+       \item<5-> Here: $O(n)$ expected time for any constant $d$ (but
             with a superpolynomial dependence on $d$)
      \end{itemize}
-     \item<5-> In this talk we focus mainly on the \emph{decision 
+     \item<6-> In this talk we focus mainly on the \emph{decision 
           problem}:  \\ ``Is $p\in Z_k(S)$?''
   \end{itemize}
 }
@@ -151,8 +165,8 @@ depth, convex-hull peeling depth,\ldots,
    \item<2-> $f:\mathcal{P}\mapsto C$ maps problem instances onto closed 
          convex subsets of $\R^d$
    \item<3-> $w:\R^d\mapsto \R$ is a linear objective function
-   \item<5-> For any $p\in\R^d$ and any $P\in\mathcal{P}$ of size $n$ we
-         can test if $p\in f(P)$ in $D(n)$ time
+   \item<5-> For any $q\in\R^d$ and any $P\in\mathcal{P}$ of size $n$ we
+         can test if $q\in f(P)$ in $D(n)$ time
    \item<6-> For any $P\in\mathcal{P}$ of size $n$ we can find
          $P_1,\ldots, P_r\in\mathcal{P}$ such that $|P_i|\le\alpha n$ 
          and $f(P)=\bigcap_{i=1}^r f(P_i)$ \hfill{[$r=O(1)$ and $\alpha<1$]}
@@ -197,15 +211,17 @@ depth, convex-hull peeling depth,\ldots,
    \frametitle{Dual Zonoids}
    \begin{itemize}
      \item<1-> We want to know if $p\in Z_k(S)$
-     \item<2->
       \begin{center}
-	\includegraphics{dual-zonoid}
+	\only<1>{\includegraphics[scale=.8]{dual-zonoid-1}}
+	\only<2>{\includegraphics[scale=.8]{dual-zonoid-2}}
+	\only<3->{\includegraphics[scale=.8]{dual-zonoid-3}}
       \end{center}
-     Equivalent to asking if $\mathrm{dual}(p)$ separates $A_k(S)$ and $B_k(S)$.
-     \item<3-> Assume $p=(0,0,\ldots,0)$ implies $\mathrm{dual}(p)$ is the flat
-		hyperplane through the origin
+     \item<2-> Equivalent to asking if $\mathrm{dual}(p)$ separates 
+	$A_k(S)$ and $B_k(S)$.
+     \item<3-> Assuming $p=(0,0,\ldots,0)$ implies $\mathrm{dual}(p)$ 
+	is the flat hyperplane through the origin
      \item<4-> Find the lowest point in $A_k(S)$ and the highest point
-in $B_k(S)$ 
+	in $B_k(S)$ 
    \end{itemize}
 }
 
@@ -233,11 +249,82 @@ in $B_k(S)$
 \frame{
      \frametitle{Applying Chan's Method}
      To find the lowest point in $A_k(S)$:
-     \begin{itemize}
+     \begin{enumerate}
         \item<1-> Problem instance: $P=(S,k)$
-        \item<2-> Objective function: $w(x_1,\ldots,x_d)=-x_d$
-        \item<3-> Constraint function: $f(S,k) = A_k(S)$
-     \end{itemize}
+        \item<2-> Constraint function: $f(S,k) = A_k(S)$
+        \item<3-> Objective function: $w(x_1,\ldots,x_d)=-x_d$
+     \end{enumerate}
 }
 
+\frame
+{
+     \frametitle{Testing if $q\in f(P)$}
+
+     \begin{enumerate}
+	\setcounter{enumi}{3}
+     \item To test if $q\in A_k(S)$:
+     \begin{center}
+	\only<1>{\includegraphics[scale=.9]{decision-0}}
+	\only<2>{\includegraphics[scale=.9]{decision-1}}
+	\only<3>{\includegraphics[scale=.9]{decision-2}}
+	\only<4>{\includegraphics[scale=.9]{decision-3}}
+	\only<5->{\includegraphics[scale=.9]{decision-4}}
+     \end{center}
+     \end{enumerate}
+     \begin{itemize}
+     \item<6->{Testing if $q\in A_k(S)$ can be done in
+	$D(n)=O(n)$ time}
+     \end{itemize}
+} 
+
+
+\frame{
+   \frametitle{Partitioning into Subproblems}
+   
+   \begin{enumerate}
+   \setcounter{enumi}{4}
+   \item To partition $P=(S,k,p)$ into subproblems we use \emph{cuttings}
+   \end{enumerate}
+   \begin{itemize}
+   \item\only<2-> A cutting partitions $\mathbb{R}^d$ into $O(1)$ simplices
+	$\Delta_1,\ldots,\Delta_r$ such that no simplex intersects
+        more than $\ceil{n/2}$ lines of $\mathrm{dual}(S)$.
+   \begin{center}
+	\only<2>{\includegraphics{cutting-4}}
+	\only<3>{\includegraphics{cutting-3}}
+	\only<4>{\includegraphics{cutting-2}}
+   \end{center}
+   \item<3-> We get subproblem $P_i$ by combining all the lines above 
+	$\Delta_i$ into a single \emph{multiline} and removing all 
+	the lines below $\Delta_i$ 
+   \end{itemize}
+}
+
+\frame
+{
+   \frametitle{Correctness of Cutting}
+   \begin{itemize}
+     \item X
+   \end{itemize}
+
+}
+
+\frame
+{
+   \frametitle{Summary}
+   \begin{itemize}
+
+     \item We show an $O(n)$ time expected-time algorithm for
+computing the zonoid depth of a point $p$ with respect to a set $S$ in
+$\mathbb{R}^d$, for any constant $d$.
+
+     \item \textbf{Open Problem:} A deterministic algorithm
+     \item \textbf{Open Problem:} A linear-in-$n$, polynomial in $d$
+         algorithm (with no dependence on $L$)
+   \end{itemize}
+}
+
+
+
 \end{document}
+

@@ -10,12 +10,13 @@
 \DeclareMathOperator{\lp}{LP}
 
 \title{\MakeUppercase{Output-Sensitive Algorithms for Tukey Depth and
-        Related Problems}}
-\author{David Bremner \and
-        Dan Chen \and
-	John Iacono \and
-	Stefan Langerman \and
-	Pat Morin}
+        Related Problems}\thanks{This research was partly funded by
+	the NSERC Canada.}}
+\author{David Bremner \\ University of New Brunswick \and
+        Dan Chen \\ University of New Brunswick \and
+	John Iacono \\ Polytechnic University \and
+	Stefan Langerman \\ Universit\'e Libre de Bruxelles \and
+	Pat Morin \\ Carleton University}
 \date{}
 \begin{document}
 \maketitle
@@ -389,6 +390,7 @@ n)$ time, where $k$ is the value of the output.
 
 \section{An Algorithm for Points in $\R^d$}
 \seclabel{d-d}
+\seclabel{fpt}
 
 Finally, we consider the general case of point sets in $\R^d$.  In the
 previous section we showed that computing the Tukey depth of a point
@@ -458,24 +460,30 @@ the value of the output and $\lp(n,d)$ is the time to solve a linear
 program with $n$ constraints and $d$ variables.
 \end{thm}
 
+\section*{Ackowledgement}
+
+Dan Chen, David Bremner, and Pat Morin are grateful to Diane~Souvaine
+and the Radcliffe Institute for hosting the \emph{Workshop on
+Computational Aspects of Statistical Data Depth Analysis}, July 7--10,
+2006.  In particular the work in \secref{fpt} is the result of
+discussions that began at the workshop.
+
 \bibliographystyle{plain}
-\bibliography{tukey}
+\bibliography{tukey,bis}
 
 \appendix
 \section{Computing a Basic Infeasible Subsystem}
 \applabel{bis}
 
-
 For any matrix $M$, let $M_J$ denote the set of rows indexed by $J$.
 Given a system of linear inequalities $Mx \geq b$, $M \in \R^{m \times
-d}$, a \emph{basic infeasible subsystem} is a subset of $\{ 1 \dots
+  d}$, a \emph{basic infeasible subsystem} is a subset of $\{ 1 \dots
 m\}$ such that the system $M_I x \geq b_I$ is infeasible, and $|I|
-\leq d+1$.  We consider the standard first stage simplex problem (see
-e.g.~\cite{chvatal80}, p.~39). Let  $e$ denote the $m$-vector of all
-ones, $c$ the length $d+1$ binary vector with exactly one one in the
-last position and let $A=[M e]$. We can write the first stage LP for
-our system as
-
+\leq d+1$. 
+ We consider the standard first stage simplex
+problem (see e.g.~\cite{chvatal80}, p.~39). Let  $e$ denote the
+$m$-vector of all ones, $c$ the length $d+1$ binary vector with
+exactly one one in the last position and let $A=[M e]$. We can write the first stage LP for our system as
 \begin{align*}
     \min c^Tx &= x_{d+1}\\\tag{P}\eqlabel{P}
     \text{subject to}\\
@@ -492,8 +500,7 @@ The dual LP of \eqref{P} is
   yA &= c\\
   y & \geq 0
 \end{align*}
-In what follows, we generally follow the notation used by Megiddo 
-\cite{megiddo91},
+In what follows, we generally follow the notation of \cite{megiddo91},
 except that we interchange the definitions of the primal and dual LPs.
 Define a \emph{basic partition} (or just \emph{basis}) $(\beta,\eta)$
 as a partition of the row indices of $A$ such that $A_\beta$ is
@@ -511,22 +518,28 @@ We say that a basis is \emph{primal feasible} (resp.\ \emph{dual
 is feasible for \eqref{D}).  It is a standard result of linear
 programming duality that a basis which is both primal and dual feasible
 defines a pair $(x^*,y^*)$ of optimal solutions to the primal and dual
-LP's; such a partition is called an \emph{optimal basis partition}.
+LP's; such a partition is called an \emph{optimal basis partition}
 
-In general LP algorithms (either directly in the case 
-of Simplex type algorithms, or via postprocessing using
-e.g.~\cite{megiddo91,vavasis96}) provide an optimal basis partition
-$(\beta,\eta)$.  Consider the relaxed LP
+In general LP algorithms (either directly in the case of Simplex type
+algorithms, or via postprocessing using
+e.g.~\cite{megiddo91,vavasis96,BelingMegiddo98}) provide an optimal
+basis partition $(\beta,\eta)$.  Consider the relaxed LP
 \begin{align*}
   \min c^T x \\\tag{R}
   \eqlabel{R}
   \text{subject to}\\
-  A_\beta x \leq b_\beta
+  A_\beta x \geq b_\beta
 \end{align*}
 It is easy to verify that an optimal basis partition for \eqref{P}
 is also primal and dual feasible for \eqref{R}.  This implies that
-the system $M_\beta \geq b_\beta$ is infeasible, and provides a a
-basic infeasible system.
+the system $M_\beta x \geq b_\beta$ is infeasible, and provides a
+basic infeasible system.  Using interior point algorithms
+(see~\cite{gonzaga87,renegar88,vaidya90,Roos89,RoosVial92}), a
+solution to the first stage LP can be found $O(m^3L)$ time, where $L$
+is the number of bits in the input.  Using the algorithm of Beling and
+Megiddo~\cite{BelingMegiddo98}, an optimal basis partition can be
+computed in $O(m^{1.594}d)$ time (where the bound is based on the best
+known methods for fast matrix multiplication).
 
 \end{document}
 

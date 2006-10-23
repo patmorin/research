@@ -4,6 +4,8 @@
 
 %\renewcommand{\baselinestretch}{1.3}
 %\input{pat.txt}
+\newcommand{\comment}[1]{}
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
 
 \newcommand{\Findmin}{\mbox{$\mathit{find}$\textnormal{-}}\allowbreak{}\mbox{$\mathit{minimum}$}}
 \newcommand{\Findmax}{\mbox{$\mathit{find}$\textnormal{-}}\allowbreak{}\mbox{$\mathit{maximum}$}}
@@ -269,8 +271,11 @@ we prove a similar result for iterator-based priority queues.
 Finally, in \secref{discussion} we mention some other applications of
 the compaction technique and conclude with a few final remarks.
 
-\section{Elementary dictionaries}%
-\seclabel{elementary-dictionaries}
+\section{Abstract Data Types Considered}
+\seclabel{adts}
+
+\subsection{Ordered Dicationaries}
+\noindent\textbf{**Snipped from \secref{elementary-dictionaries}}
 
 An \emph{ordered dictionary} is an abstract data type that stores a
 set or multiset of elements drawn from an ordered universe
@@ -314,25 +319,221 @@ for constructing and destructing elements and sets, and methods for
 examining the cardinality of sets, but these are algorithmically less
 interesting and therefore omitted in our discussion.
 
-Now our task is to transform a given ordered dictionary to one that is
-more space-efficient.  Our approach is to store the chunks in an
-ordered dictionary being under transformation (skiplist, 2-3 tree,
-red-black tree, etc).  To avoid confusion, we will refer the data
-structure we are describing as ``the dictionary'' and the data
-structure we are using as ``the data structure.''  Similarly, we will
-use the terms chunks and elements to refer to groups of elements and
-individual elements, respectively.
+\noindent\textbf{**Snip}
 
-Let $a$ and $b$ be positive integers such that $2a \le b$.  As for
-degree-balanced search trees, we let each chunk store between $a$ and
-$b$ elements, both ends included. We call such a construction $(a,b)$
-\emph{compaction scheme}. For the sake of concreteness, we use
-$(b,2b)$ compaction scheme throughout the paper, but note that some
-other parameter values may be relevant in practical applications.  We
-maintain an invariant that there is at most one chunk that can be
-smaller than $b$, and this is only the case when the total number of
-elements is less than $b$. Otherwise, chunks contain between $b$ and
-$2b$ elements.  The components used by this compaction scheme are
+
+This is where the definitions of ordered dictionary, unordered
+dictionary, elementary dictionary, dictionary, and priority queue will
+go?
+
+\section{Elementary dictionaries}%
+\seclabel{elementary-dictionaries}
+
+Now our task is to transform a given ordered dictionary to one that is
+more space-efficient.  Our approach is to partition the data into
+chunks and store these chunks in the ordered dictionary being under
+transformation (skiplist, 2-3 tree, red-black tree, etc).  To avoid
+confusion, we will refer the data structure we are describing as ``the
+dictionary'' and the data structure we are using as ``the data
+structure.''  Similarly, we will use the terms chunks and elements to
+refer to groups of elements and individual elements, respectively.  
+
+We study two different schemes based on this idea.  Both schemes have
+the following in common:  Each chunk has a header containing a
+constant amount of data, the elements of each chunk are stored in an
+array, the elements stored wi
+We call the objects containing a pointer to the beginning of a chunk,
+the \emph{head} of that chunk.  A head $f$ contains two pointers
+$\Pred(f)$ and $\Succ(f)$ that point to other heads, a pointer to an
+array $\Elem(f)$ that contains anywhere between $b$ and $2b$ elements,
+and an integer $\Size(f)$ that tells the number of elements in
+$\Elem(f)$.  The $\Pred$ and $\Succ$ fields are used to link all heads
+together into a doubly-linked list.  The elements of $\Elem(f)$ are
+always sorted in increasing order, and the elements of $\Elem(f)$ are
+all less than the elements of $\Elem(g)$ if $f$ appears before $g$ in
+the doubly-linked list.  In this way, the list of heads gives the
+elements of the dictionary in sorted order.  Additionally, two special
+pointers are maintained that point to the first and the last head,
+respectively.  The data structure, denoted $\mathcal{S}$, stores
+\emph{handles} to the heads.  Each head contains an iterator pointing
+back to the corresponding node inside the data structure.  If the
+iterators of the data structure were normal pointers, the extra
+indirection could be avoided and the data structure could store the
+heads directly.
+
+thin each chunk are kept in sorted order,
+and the chunks themselves are stored in a doubly-linked list.  At all
+times we maintain the invariant that every element in chunk $A$ is
+less than or equal to every element in chunk $B$ if $A$ appears before
+$B$ in this list.  Thus, a traversal of this \emph{chunk list} is
+sufficient to output all elements in sorted order.
+
+In addition to being linked into a list, the chunks themselves are
+stored in the the dictionary.  Notice that, because of the above
+invariant, any two chunks can be compared in $O(1)$ time.  To test,
+for example, if chunk $A$ is less than chunk $B$ we simply check if
+the last element of $A$ is less than the first element of $B$.  It is
+this comparison function that we use to store the chunks in the
+dictionary.  Similarly, we can compare a chunk to an item $x$.  To
+test if $x$ is less than $A$ we test if $x$ is less than the first
+element of $A$.  To test if $x$ is greater than $A$ we test if $x$ is
+greater than the last element of $A$.  If $x$ is neither greater than
+nor less than $A$ then $x$ is equal to $A$.  
+
+\noindent\textbf{Say something about multisets here.}
+
+With this representation, it is easy to see how \Member{},
+\Predecessor{}, and \Successor{} can each be implemented by performing
+at most one search in the dictionary followed by one (linear or
+binary) search in a chunk.  The functions \Findmin{} and \Findmax{}
+are even easier;  we simply return the first element of the first
+chunk or the last element of the last chunk, respectively.  Where our
+two implementations differ is in how they implement the \Insert{} and
+\Extract{} functions.
+
+\subsection{Fixed-Sized Chunks}
+
+The simplest realization of the above ideas is to store the chunks as
+fixed-size arrays, each of size $b+1$.  With the exception of at most
+one chunk, each chunk will store either $b-1$, $b$, or $b+1$ data
+elements.  All that remains is to describe how we perform insertion
+and extraction in the data structure.
+
+To insert $x$ into the data structure we first search for $x$ in the
+data structure.  The result of this is some chunk $A$ that is either
+the first chunk, the last chunk, or a chunk in which $x$ is greater
+than the first element and less than the last element.  Next, by
+traversing the chunk list we examine up to $b$ consecutive chunks
+including $A$.
+
+If any of these chunks contains $b-1$ or $b$ elements then we can, in
+$O(b^2)$ time, reassign the elements to chunks so as to place $x$ into
+some chunk and restore our global invariant.  Otherwise, all $b$
+chunks contain $b+1$ elements.  In this case we create a new chunk and
+reassign these $b(b+1)$ elements across the $b+1$ chunks so that each
+chunk contains exactly $b$ elements.  Finally, we place $x$ in the
+appropriate chunk and insert the newly created chunk into the
+dictionary.
+
+Extraction is similar to insertion. To extract $x$, we first search for
+the chunk $A$ containing $x$. Then, in the $b$ consecutive chunks
+including $A$ either: (1)~there is some chunk containing $b$ or $b+1$
+elements, in which case we remove $x$ and redistribute elements so as
+to maintain the global invariant, or (2)~all $b$ chunks contain
+exactly $b-1$ elements in which case we delete one chunk from the
+dictionary and redistribute the $b(b-1)-1$ elements among the $b-1$
+chunks so that each chunk stored $b$ elements, except one, which
+contains $b-1$ elements.
+
+It is clear that both the insertion and deletion procedures require
+one search in the dictionary, $O(b^2)$ work, and at most one insertion
+or deletion, respectively, in the dictionary.  Indeed a slightly more
+careful amortized analysis shows that a sequence of $n$
+\Insert/\Extract\ operations requires only $O(n/b)$ insertions or
+extractions from the dictionary.  careful analysis shows that
+
+\begin{theorem}
+\label{theorem:elementary-a}
+Given an ordered dictionary that requires $S(n)$, $I(n)$, and $D(n)$
+time to search, insert, and delete (respectively) an element from a
+set of $n$ elements and that has a memory overhead of $cn$ for a
+positive constant $c$, we can construct an equivalent data structure
+that requires 
+\begin{enumerate}
+\item $S'(n)=O(S(n/b)+\lg b)$, $I'(n)=O(S(n/b)+I(n/b)+b^2)$,
+and $D'(n)=O(S(n/b)+D(n/b)+b^2)$ worst-case time to search, insert,
+and delete (respectively), 
+\item requires $S''(n)=O(S(n/b)+\lg b)$,
+$I''(n)=O(S(n/b)+\frac{1}{b}I(n/b)+b^2)$, and
+$D'(n)=O(S(n/b)+\frac{1}{b}D(n/b)+b^2)$ amortized time to search,
+insert, and delete (respectively), and 
+\item that has a memory overhead of
+$O(n/b)$.
+\end{enumerate}
+\end{theorem}
+
+One issue that several researchers have been concerned with is that of
+\emph{fragmentation} \cite{X}, i.e., how many distinct memory
+locations are required for a data structure.  Using the above scheme,
+in combination with simple techniques for maintaining a pool of
+buffers for the chunks \cite{X}, the entire dictionary described above
+can be made to live in one resizeable array that contains $n$ data
+elements and $O(n/b)$ additional information.  In some articles
+(namely those dealing with implicit data structures \cite{X,X,X,X}),
+an unbounded resizeable array is considered to be part of the model of
+computation. Alternatively, Brodnik \etal\ \cite{bXX} show how to
+implement resizeable arrays in a standard model of computation using
+$O(\sqrt{n})$ additional space for an array of size $n$. 
+\textbf{What about compactor zones?}
+
+\subsection{Variable-Sized Chunks}
+
+One drawback of the scheme described in the previous subsection is the
+$O(b^2)$ term in the running time for the \Insert\ and \Extract\
+operations.  In this subsection we describe an alternative that avoids
+this problem but requires more extensive use of memory management and,
+consequently, for which it is more complicated to avoid fragmentation.
+In this scheme, all but one chunk contains somewhere between $b/2$ and
+$2b$ elements, inclusive.\footnote{Throughout this section we assume
+$b$ is even so that $b/2$ is an integer.}  However, unlike the
+previous scheme, each chunk is allocated to the precise size required
+to store the number of elements it currently contains.
+
+Since chunks will be reallocated frequently and are addressed by the
+nodes of the dictionary, each chunk also has an associated
+\emph{handle}.  This is a memory location that stores a pointer to the
+chunk and the header of each chunk stores a pointer to this handle.
+The dictionary, rather than maintain a direct pointer to the chunk,
+maintains a pointer to the handle.  In this way, when a chunk is
+reallocated it only need update its handle.  From this point on,
+updating of handles is implicit when we say that a chunk is resized.
+
+An insertion of the element $x$ in the data structure proceeds as
+follows: The chunk $A$ that should contain $x$ is located.  If $A$
+contains fewer than $2b$ elements then $A$ is resized to make room for
+$x$ and $x$ is added to $A$.  Otherwise, if $A$ already contains $2b$
+elements then $A$ is split into two chunks, each containing $b$
+elements, one of the new chunks is inserted into the dictionary, and
+$x$ is added to the appropriate chunk.
+
+The extraction procedure is similar to the insertion procedure.  If
+the chunk $A$ containing $x$ contains more than $b/2$ elements then
+$A$ is resized and $x$ is removed.  Otherwise, we check one of the
+neighbouring chunks, $B$, of $A$. If $B$ contains more than $b/2$
+elements then an element is removed from $B$ and used to replace $x$
+in $A$ and then $B$ is resized. Otherwise, both $A$ and $B$ have size
+$b/2$, in which case we merge them into a single chunk containing $b$
+elements and delete one of the chunks from the data structure.
+
+Again, it is clear that both \Insert\ and \Extract\ can be done using
+at most one search, $O(b)$ time to operate on the at most 2 chunks
+involved, and at most one insertion and extraction.  Again, a simple
+amortization argument shows that a sequence of $n$ \Insert\ and
+\Extract\ operations results in only $O(n/b)$ insertion and
+extractions in the data structure.
+
+\begin{theorem}
+\label{theorem:elementary-b}
+Given an ordered dictionary that requires $S(n)$, $I(n)$, and $D(n)$
+time to search, insert, and delete (respectively) an element from a
+set of $n$ elements and that has a memory overhead of $cn$ for a
+positive constant $c$, we can construct an equivalent data structure
+that requires 
+\begin{enumerate}
+\item $S'(n)=O(S(n/b)+\lg b)$, $I'(n)=O(S(n/b)+I(n/b)+b)$,
+and $D'(n)=O(S(n/b)+D(n/b)+b^2)$ worst-case time to search, insert,
+and delete (respectively), 
+\item requires $S''(n)=O(S(n/b)+\lg b)$,
+$I''(n)=O(S(n/b)+\frac{1}{b}I(n/b)+b)$, and
+$D'(n)=O(S(n/b)+\frac{1}{b}D(n/b)+b)$ amortized time to search,
+insert, and delete (respectively), and 
+\item that has a memory overhead of
+$O(n/b)$.
+\end{enumerate}
+\end{theorem}
+
+\comment{
+\comment{The components used by this compaction scheme are
 illustrated in Figure~\ref{fig:array}.
 
 \begin{figure}
@@ -341,19 +542,8 @@ illustrated in Figure~\ref{fig:array}.
 \end{center}
 \caption{A chunk storing seven integers in an array.\label{fig:array}}
 \end{figure}
+}
 
-For the purpose of an elementary dictionary, elements in each
-chunk are stored in sorted order in an array (i.e.~in a contiguous
-region of memory). In particular, we assume that space for such arrays
-can be allocated and deallocated in constant time. The first element
-of each array is the representative of that chunk. The basic
-operations to be supported for chunks include \Merge{}, \Split{},
-\Insert{}, and \Extract{}. For arrays these operations are
-straightforward. For example, \Merge{} taking to arrays $A$ and $B$
-allocated a new array $C$ of appropriate size, moves the elements in
-$A$ and $B$ to $C$ is sorted order, and deallocates $A$ and $B$. The
-other operations are similar. The main point to observe is that each of
-these operations takes $O(b)$ time.
 
 We call the objects containing a pointer to the beginning of a chunk,
 the \emph{head} of that chunk.  A head $f$ contains two pointers
@@ -436,52 +626,46 @@ $I'(n)=O(I(n/b)+b)$, and $D'(n)=O(D(n/b)+b)$ time to
 search, insert, and delete (respectively) and that has a memory
 overhead of $O(n/b)$.
 \end{theorem}
+}
+
 
 Knowing that element-based operations on an ordered dictionary take at
-least logarithmic time, it would be tempting to choose $b = \lg n$. The
-problem with this choice is that $n$, the number of elements stored, is
-varying whereas $b$ must be kept fixed. To avoid this problem, we use
-Frederickson's partitioning scheme
-\cite{Fre83} and partition the data structure into $O(\lg\lg n)$
-separate \emph{portions}
-of exponentially increasing sizes $2^{2^{1}}$, $2^{2^{2}}$,
-$2^{2^{3}}$, and so on, except that the last portion can be smaller.
-Inside each portion we can use a fixed chunk size
- $2^i$ in the $i$th portion. Insertions are
-done in the last portion, searches visit all structures but the
-overall cost is dominated by the cost incurred by the last portion
-[all $O(\lg\lg n)$ searches still take $O(\lg n)$ time if the data
-structure supports searches in $O(\lg n)$ time], and deletions
-are performed by borrowing an element from the last portion. 
+least logarithmic time, it would be tempting to choose $b = \lg n$.
+The problem with this choice is that $n$, the number of elements
+stored, is varying whereas $b$ must be kept fixed. To avoid this
+problem, we use Frederickson's partitioning scheme \cite{Fre83} and
+partition the data structure into $O(\lg\lg n)$ separate
+\emph{portions} of exponentially increasing sizes $2^{2^{1}}$,
+$2^{2^{2}}$, $2^{2^{3}}$, and so on, except that the last portion can
+be smaller.  Inside each portion we can use a fixed chunk size
+$b_i=2^i$ in the $i$th portion. Insertions are done in the last
+portion, searches visit all structures but the overall cost is
+dominated by the cost incurred by the last portion [all $O(\lg\lg n)$
+searches still take $O(\lg n)$ time if the data structure supports
+searches in $O(\lg n)$ time], and deletions are performed by borrowing
+an element from the last portion. 
 
-One problem with the foregoing construction is that it can lead to
-memory fragmentation. Our result is in big contrast with the
-corresponding result proved by Munro \cite{Mun86} showing that with $b
-+ O(n/b)$ additional pointers, counters, and flags, the elements can
-be kept in a contiguous segment of memory requiring at most $n + b^2$
-locations. One way of avoiding fragmentation is to keep the chunks of
-the same size in a separate resizable array. The heads can be used for
-linking chunks of the same size together. When a chunk becomes larger
-or smaller, it can removed from its list and its space can be freed by
-moving the last chunk of the same size to its place. This way all the
-chunk operations \Merge{}, \Split{}, \Insert{}, and \Extract{} can
-still be executed in $O(b)$ time. Now the associated memory overhead
-is proportional to the overheads incurred by the resizable arrays.
-There are $2\lg n$ resizable arrays of some of which can be
-empty. Assume that the $i$th array stores $n_i$ elements. If the
-space-efficient resizable arrays described in \cite{BCDMS99,KM01} are
-used, the memory overhead for data locations is proportional to
-$\sum_{i=1}^{2\lg n} \sqrt{n_i}$, which is $O(\sqrt{n})$, because
-$\sum_{i=1}^{2\lg n} n_i = n$ and the square root function is convex
-in interval $[0, \infty)$.  There can still, however, be some
-fragmentation between the resizable arrays.
+\begin{theorem}
+\label{theorem:elementary-c}
+Given an ordered dictionary that requires $S(n)$, $I(n)$, and $D(n)$
+time to search, insert, and delete (respectively) an element from a
+set of $n$ elements and that has a memory overhead of $cn$ for a
+positive constant $c$, we can construct an equivalent data structure
+that requires 
+\begin{enumerate}
+\item $S'(n)=O(S(n/\lg n)+\lg\lg n)$, $I'(n)=O(S(n/\lg n)+I(n/\lg n)+\lg n)$,
+and $D'(n)=O(S(n/\lg n)+D(n/\lg n)+\lg n)$ worst-case time to search, insert,
+and delete (respectively), 
+\item requires $S''(n)=O(S(n/\lg n)+\lg\lg n)$,
+$I''(n)=O(S(n/\lg n)+\frac{1}{\lg n}I(n/\lg n)+\lg n)$, and
+$D'(n)=O(S(n/\lg n)+\frac{1}{\lg n}D(n/\lg n)+\lg n)$ amortized time to search,
+insert, and delete (respectively), and 
+\item that has a memory overhead of
+$O(n/\lg n)$.
+\end{enumerate}
+\end{theorem}
 
-This together with Frederickson's partitioning scheme gives us the following
-theorem. We assume that the functions $S(n)$, $I(n)$, and $E(n)$ are
-non-decreasing and smooth, i.e.~that for non-negative integers $m$ and
-$n$, $m \le n \le 2m$, $S(m) \le S(n) \le O(1)\times S(m)$, and
-similarly for $I(n)$ and $E(n)$.
-
+\comment{
 \begin{theorem}
 \label{theorem:advanced}
 Given an ordered dictionary that requires
@@ -494,24 +678,40 @@ search, insert, and delete (respectively) and that requires at most $n
 + O(\sqrt{n})$ locations for elements and 
 $O(n/\lg n)$ words for pointers, counters, and flags.
 \end{theorem}
+}
 
-As an example, let us apply Theorem \ref{theorem:advanced} to any
+As an example, let us apply Theorem \ref{theorem:elementary-c} to any
 worst-case efficient balanced search tree, e.g. to a red-black
-tree. In order to obtain the $O(1)$ worst-case bounds for \Findmin{}
-and \Findmax{}, separate pointers to the portions storing the overall
-minimum and maximum must be maintained, and the updates must modify
-these pointers accordingly.  This together with Theorem
-\ref{theorem:advanced} gives us the following corollary.
+tree.
 
 \begin{corollary}
 \label{corollary:red-black}
 There exists an ordered dictionary that supports searches and updates
 in $O(\lg n)$ worst-case time, \Findmin{} and \Findmax{} in $O(1)$
-worst-case time, and requires at most $n + O(\sqrt{n})$ locations for
-elements and $O(n/\lg n)$ words for pointers, counters, and flags.
+worst-case time, and has a memory overhead of $O(n/\lg n)$.
 \end{corollary}
 
+\noindent\textbf{What about compactor zones?}
+
 \section{Iterator-based dictionaries}\seclabel{iterator-dictionaries}
+
+The data structural transformations described in the previous sections
+can be used to reduce the memory overhead of dictionary data
+structures.  However, they break down when the interface to those data
+structures allows access to elements using references, pointers, or
+fingers\ldots In this section we show two ways in which these data
+structures can be extended to allow this type of access.  The first
+method is preferable when the total number of iterators or references
+to elements in the data structure is small, while the second is
+preferable when there are many iterators.
+
+\subsection{Reference Arrays}
+
+In this section we present a method of maintaining iterators where the
+memory overhead is proportional to the total number of iterators.
+
+
+
 
 In this section we describe another space-reducing transformation for
 ordered dictionaries which similar to our previous construction. The

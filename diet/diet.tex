@@ -1,12 +1,17 @@
 \documentclass{DIKU-article}
-\usepackage{charter}
+%\usepackage{charter}
 \usepackage[dvips]{graphicx}
 
 %\renewcommand{\baselinestretch}{1.3}
 %\input{pat.txt}
+\newcommand{\thmref}[1]{Theorem~\ref{theorem:#1}}
 \newcommand{\comment}[1]{}
 \newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\Search}{\mbox{$\mathit{search}$}}
+\newcommand{\sequence}[1]{\left\langle#1\right\rangle}
 
+\newcommand{\set}[1]{\left\{#1\right\}}
+\newcommand{\Erase}{\mbox{$\mathit{erase}$}}
 \newcommand{\Findmin}{\mbox{$\mathit{find}$\textnormal{-}}\allowbreak{}\mbox{$\mathit{minimum}$}}
 \newcommand{\Findmax}{\mbox{$\mathit{find}$\textnormal{-}}\allowbreak{}\mbox{$\mathit{maximum}$}}
 \newcommand{\Member}{\mbox{$\mathit{find}$\textnormal{-}}\allowbreak{}\mbox{$\mathit{member}$}}
@@ -102,79 +107,89 @@ Data structures, lists, dictionaries, priority queues, space efficiency
 \end{keywords}
 
 \section{Introduction}
-\label{sec:intro}
+\seclabel{intro}
 
 In this paper we consider the space efficiency of data structures that
 can be used for maintaining a dynamic set or multiset of
 elements. Earlier research in this area has concentrated on the space
 efficiency of some specific data structures or on the development of
-implicit data structures. Our focus is on general data-structural
+implicit data structures. Our focus is on data-structural
 transformations that can be used to transform a data structure
 $\mathcal{D}$ into another data structure $\mathcal{D}'$ that has the
-same functionality as $\mathcal{D}$, has about the same efficiency as
+same---or augmented---functionality as $\mathcal{D}$, has about the same efficiency as
 $\mathcal{D}$, but uses significantly less space than $\mathcal{D}$.
-In particular, we consider a single compaction technique that can be
+In particular, we consider a compaction technique that can be
 applied with minor variations to several different data structures.
 
-One particular aspect of concrete implementations of abstract data
-types that has received much attention is the issue of memory
-overhead.  \emph{Memory overhead} is any storage used by the data
-structure beyond what is actually required to store the data elements.
+One particular aspect of concrete implementations of element containers
+that has received much attention is the issue of \emph{memory
+overhead}, which is the amount of storage used by a data
+structure beyond what is actually required to store the elements manipulated.
 The starting point for our research was the known implicit data
-structures where the goal is to minimize the memory overhead.  A
-classical example is the binary heap of Williams \cite{Wil64} which a
+structures where the goal is to reduce memory overhead to $O(1)$ words
+or $O(\lg n)$ bits, where $n$ denotes the number of elements stored.  A
+classical example is the binary heap of Williams \cite{Wil64} which is a
 priority queue supporting the methods \Findmin{}, \Insert{}, and
 \Extractmin{}. Another example is the searchable heap of Franceschini
-and Grossi \cite{FG03} which is an ordered dictionary supporting the
+and Grossi \cite{FG03} which is an ordered dictionary supporting
 methods \Member{}, \Predecessor{}, \Successor{}, \Insert{}, and
-\Extract{}. A searchable heap is a complicated data structure and
+\Erase{}. A searchable heap is a complicated data structure and
 because of the bit encoding techniques used it can only store a set,
-not a multiset. One should observe that implicit data structures are
+not a multiset.
+
+One should observe that implicit data structures are
 designed on the assumption that there is an infinite array available
 to be used for storing the elements. In other words, it is assumed
 that the whole memory is used for the data structure alone and no
-other processes are run simultaneously. To relax from this assumption,
+other processes are run simultaneously. To relax this assumption,
 a resizable array could be used instead.  It is known that any
 realization of a resizable array requires at least $\Omega(\sqrt{n})$
 space for pointers and/or elements \cite{BCDMS99}, and realizations
 exist that only require $O(\sqrt{n})$ extra space \cite{BCDMS99,KM01}.
+In \cite{BCDMS99}, it was shown that a space-efficient resizable array
+can perform well under a realistic model of dynamic memory
+allocation. In particular, the waste of memory due to internal
+fragmentation is $O(\sqrt{n})$ even though external
+fragmentation can be large \cite{LL85}.
 
 We call a data structure \emph{elementary} if it only allows
-element-based access (or key-based access). In particular, all
-implicit data structures are elementary.  An important facility often
+key-based access to elements. In particular, all
+implicit data structures are elementary.  An important requirement often
 imposed by modern libraries (e.g.~C\texttt{++} standard library
-\cite{ISO}) is to provide iterator-based access to elements. In
+\cite{ISO}) is to provide locator-based access to elements, as well as
+to provide iterators to iterate over a subset of elements. In
 general, for efficiency reasons it might be advantageous to allow
-application programs to maintain references, pointers, or iterators to
+application programs to maintain references, pointers, locators, or iterators to
 elements stored inside a data structure. For the sake of correctness,
-it is important to keep these references valid at all times. We call
-this issue \emph{referential integrity}. For general priority queues,
-iterator-based access is essential since without it general \Extract{}
-or fast \Decrease{} operations cannot be provided. For ordered
-dictionaries, a finger can be seen as a special iterator, so to
-support finger search iterator-based access must be possible.  In
-\cite{CLRS01}, \emph{handles} were proposed as a general solution to
-achieve referential integrity but, even if this technique works, it
-alone would increase the memory overhead of the data structure in
+it is important to keep these external references valid at all times. We call
+this issue \emph{referential integrity}. For non-elementary priority queues,
+locator-based access is essential since without it methods \Erase{}
+or \Decrease{} cannot be provided. For ordered
+dictionaries, a finger can be seen as a special locator, so to
+support finger search locator-based access must be possible.  In the
+widely-used textbook
+\cite{CLRS01}, \emph{handles} are proposed as a general solution to
+achieve referential integrity but this technique 
+alone increases the memory overhead of the data structure in
 question by $2n$ pointers.
 
-For the fundamental data types, like the ordered-dictionary and
-priority-queue data types studied in this paper, many implementations
-are available, each having its own advantages and disadvantages.  In
+For fundamental data structures, like ordered dictionaries and
+priority queues studied in this paper, many implementations
+are available, each having own advantages and disadvantages.  In
 earlier research, the issues considered include the repertoire of
-supported operations, complexity of implementation, constants involved
+methods supported, complexity of implementation, constants involved
 in running times, worst-case versus average-case versus amortized
 performance guarantees, memory overhead, and so on.  Many
 implementations are also special because they provide certain
 \emph{properties}, not provided by implicit data structures.  Examples
 of such properties include the working-set property \cite{i01,st85b},
 the queueish property \cite{il02}, the unified property
-\cite{i01,st85b}, the ability to \Insert{} and \Extract{} in constant
+\cite{i01,st85b}, the ability to \Insert{} and \Erase{} in constant
 time \cite{Fle96,hm82,LO88}, and the (static or dynamic) finger
 property \cite{as96,bt80,c95,gmpr77,hm82}.  These special properties
-are a large part of the reason that so many implementations of the
-fundamental data types exist.  Many algorithmic applications require
-data structures that have some of the special properties to ensure the
+are a large part of the reason that so many implementations of
+fundamental data structures exist.  Many algorithmic applications require
+data structures that have one or more of these special properties to ensure the
 bounds on their running times or storage requirements.  Thus, it is
 not always possible to substitute one implementation for another.
 
@@ -183,17 +198,18 @@ height-balanced search trees \cite{Bro79}, self-adjusting search trees
 \cite{And99,gr93,st85b}, and randomized search trees \cite{as96,p90},
 have been proposed that reduce the extra storage to two pointers per
 element. However, when an ordered dictionary has to support
-iterator-based access to elements, additional pointers (like parent
+locator-based access to elements, additional pointers (like parent
 pointers) are often needed. By using the child-sibling representation
 of binary trees (see, e.g.~\cite[Section 4.1]{Tar83}) and by
-compacting color bits in pointers (as proposed, for example, in
-\cite{BK06}), red-black trees supporting iterator-based access are
-obtained that only use about $2n$ words of memory in addition to the
+compacting the bits describing the type and colour of nodes in pointers (as proposed, for example, in
+\cite{BK06}), red-black trees supporting locator-based access are
+obtained that only use $2n + O(1)$ words of memory in addition to the
 $n$ elements stored.
 
-Contrast to binary heaps, many priority-queue implementations rely on
+In contrast with fully implicit binary heaps, 
+many priority-queue implementations rely on
 pointers. Actually, pointer-based implementations are often necessary
-to provide referential integrity, and to support general \Extract{} and
+to provide referential integrity, and to support \Erase{} and
 constant-time \Decrease{}. Of the known implementations, all need at
 least $2n$ extra words \cite{DW93,MP05}, $3n$ extra words
 \cite{EJK05}, or more \cite{DGST88,KST02}. In particular, observe that
@@ -204,172 +220,284 @@ supported in constant time. This claim is in a direct contradiction to
 the results presented in the present paper (cf.~Corollary
 \ref{corollary:queue}).
 
-Much research effort has gone into these attempts to reduce the memory
-overhead of existing data structures.  For example, in a recent
-paper, Blelloch \etal\ \cite{bmw03} describe a fairly intricate data
-structure of size $O(\lg n)$ called a \emph{hand} that sits on top of
-a degree-balanced search tree (e.g.~an $(a,b)$-tree \cite{hm82}) so
-that it supports efficient finger searches.  However, it has long been
-known that degree-balanced search trees easily support efficient
-finger searches if we augment each node with three pointers
-\cite{bt80}.  Thus, the main contribution of the hand is to eliminate
-these three pointers per node. It is an encumbrance to a hand that its
-construction takes logarithmic time since all iterator operations are
-normally assumed to take constant time.
+\noindent\textbf{The tone of the above paragraph is a bit strong for
+my taste.  I'd like to read \cite{MP05} before I pass judgement
+though.}
 
-In this paper we elaborate upon a technique that can be used to make
-\emph{any} pointer-based data structure that uses $cn$ words of extra
-storage, for a positive constant $c$, into an equivalent data
-structure that uses $(1 + \varepsilon) n$ words of extra storage, for
-any $\varepsilon>0$ and sufficiently large $n > n(\varepsilon)$.  By
-applying this simple technique, any application program can employ the
-data structure (and its properties) without worrying about the memory
-overhead. In some special cases, we can even make the amount of extra
-space needed as small as $O(n/\lg n)$.
+In this paper we elaborate upon a technique that can be used to make a
+pointer-based data structure that uses $cn$ words of extra storage,
+for a positive constant $c$, into an equivalent data structure that
+uses either $\epsilon n$ or $(1 + \varepsilon) n$ words of extra
+storage, for any $\varepsilon>0$ and sufficiently large $n >
+n(\varepsilon)$.  By applying this technique, any application program
+can employ the data structure (and its properties) without worrying
+about the memory overhead. In some special cases, we can even make the
+amount of extra space needed as small as $O(n/\lg n)$.
 
 The compaction technique used by us is simple, and similar to the idea
 used in degree-balanced search trees \cite{hm82} where each node
 contains at least $a$ elements and at most $b$ elements for
 appropriately chosen $a$ and $b$. That is, instead of operating on
 elements themselves, we operate on groups of elements which we call
-\emph{chunks}. Each chunk has a \emph{representative} and the
+\emph{chunks}. \comment{Each chunk has a \emph{representative} and the
 underlying data structure operates on these representatives. The
-elements in a chunk determine an \emph{interval} of values. When the
-compaction technique is applied for different data structures, there
+elements in a chunk determine an \emph{interval} of values.} When the
+compaction technique is applied to different data structures, there
 are minor variations in the scheme depending on how chunks are
 implemented (as a singly-linked list or an array), how elements are
 ordered within chunks (in sorted or in unsorted or in some other
-order), how the representative of a chuck is selected, and whether the
-induced intervals are pairwise disjoint or not.
+order), and how the chunks are related to each other.
 
-The technique itself is not new; it has explicitly been used, for
-example, in context of AVL-trees in \cite{Mun86} and in context of
-run-relaxed heaps in \cite{DGST88}. Unfortunately, in the latter paper
+The technique itself is not new; it has been explicitly used, for
+example, in the context of AVL-trees \cite{Mun86} and in the context
+of run-relaxed heaps \cite{DGST88}. Unfortunately, in the latter paper
 the technique is applied incorrectly because the issue of referential
 integrity is ignored.  Our purpose in this paper is to advocate the
 wide applicability and generality of the technique.  Also, the
 technique seems to be of practical value so our plan is to verify this
 experimentally.
 
+\noindent\textbf{Again, the tone is a bit strong here.  Did the
+authors care about referential integrity?}
+
 The remainder of the paper is organized as follows.  In
-\secref{elementary-dictionary}, we show how the compaction technique
+\secref{sec:def}, the data structures studied are defined to fix the
+notation used throughout the paper.  In
+\secref{elementary-dictionaries}, we show how the compaction technique
 can be used for reducing the memory overhead of any elementary ordered
 dictionary. More specifically, we extend an old result of Munro
 \cite{Mun86} by proving that any elementary dictionary can be
 converted into an equivalent data structure that requires at most
 $O(n/\lg n)$ extra space without affecting the asymptotic running
-times of algorithms for searching, inserting, and deleting.  In
-\secref{iterator-dictionaries}, we describe another application of the
-technique to be able to transform any linear-size iterator-based
-dictionary into a more space-efficient data structure. The resulting
-data structure has the same functionality as the original, requires at
-most $(1 + \varepsilon)n$ words of extra storage, and increases the
-running times of the algorithms used in its manipulation by an
-additive term of $O(1/\varepsilon)$, for any $\varepsilon > 0$ and
-sufficiently large $n > n(\varepsilon)$.  In \secref{iterator-queues}
-we prove a similar result for iterator-based priority queues.
-Finally, in \secref{discussion} we mention some other applications of
-the compaction technique and conclude with a few final remarks.
+times of algorithms for searching, inserting, and erasing.  In
+\secref{iterator-dictionaries}, we describe two more applications of
+the technique that are able to transform any linear-size ordered
+dictionary providing iterator support into a more space-efficient data
+structure. In \secref{iterator-queues} we prove similar results for
+priority queues.  Finally, in \secref{discussion} we mention some
+other applications of the compaction technique and conclude with a few
+final remarks.
 
-\section{Abstract Data Types Considered}
-\seclabel{adts}
+\section{Data structures studied}%
+\seclabel{sec:def}
 
-\subsection{Ordered Dicationaries}
-\noindent\textbf{**Snipped from \secref{elementary-dictionaries}}
+When defining the data structures considered, we have used the
+interfaces specified in the C\texttt{++} standard \cite{ISO} as a
+model, but we use our own conventions for the naming of the
+methods. The main reason for using a generic framework for method
+naming is brevity and our aim at using a unified notation independent
+of whether a container stores a set or a multiset.
 
-An \emph{ordered dictionary} is an abstract data type that stores a
-set or multiset of elements drawn from an ordered universe
-in sorted order.  In its elementary form, a realization should provide
-(a subset of) the following methods:
+\subsection*{Elementary ordered dictionary}
+
+An \emph{ordered dictionary} is a container that stores a set or
+multiset of elements drawn from an ordered universe and supports
+insertion and erasure of elements and search of elements with respect
+to a given element.  We define the methods in a generic form, in which
+they can take parameters, $\propto$ and $\mathit{r}$, specified at
+compile time and parameters, $\mathcal{S}$ and $x$, specified at run
+time. Parameter $\propto \in \set{\diamond,<,>,=}$ is a binary
+predicate used for specifying an interval of interest in
+$\mathcal{S}$. Binary predicate $\diamond$ is special since $x
+\diamond y$ is defined to be true for any two elements $x$ and $y$. We
+only allow $r$ to take two values $1$ and $-1$, meaning the first and
+the last element on an interval, respectively.
+
+In its elementary form, a realization of an ordered dictionary should
+provide the following methods:
 \begin{description}
-\item[\Member{}$(\mathcal{S}, x).$] Return a reference to an element in sequence
-$\mathcal{S}$ that is equivalent to (compares equal to) element $x$.  The
-function used in element comparisons is to be specified at the
-construction time of $\mathcal{S}$. If $\mathcal{S}$ does not contain any matching member,
-return a reference to a special \Null{} element.
 
-\item[\Predecessor{}$(\mathcal{S}, x).$] Return a reference to the element in
-sequence $\mathcal{S}$ which is greatest among all elements that are smaller than
-element $x$. If no such element exists, return a reference to a
-special \Null{} element.
+\item[$\Search\sequence{\propto,\mathit{r}}(\mathcal{S}, x).$] Return
+a reference to the $r$th element among all elements $v$ in container
+$\mathcal{S}$ for which predicate $v \propto x$ is true.  If no such
+element exists, return a reference to a special \Null{} element.
+%The
+%function used in element comparisons is to be specified at the
+%construction time of $\mathcal{S}$.
 
-\item[\Successor{}$(\mathcal{S}, x).$] Return a reference to the element in sequence
-$\mathcal{S}$ which is smallest among all elements that are greater than element
-$x$.  If no such element exists, return a reference to a special
-\Null{} element.
+\item[$\Insert{}(\mathcal{S}, x).$] Insert a copy of element $x$ into container $\mathcal{S}$.
 
-\item[\Insert{}$(\mathcal{S}, x).$] Insert a copy of element $x$ into sequence $\mathcal{S}$.
-
-\item[\Extract{}$(\mathcal{S}, x).$] Remove element $x$ from sequence $\mathcal{S}$. If no
-matching element exists, do nothing.
-
-\item[\Findmin$(\mathcal{S})$/\Findmax$(\mathcal{S}).$] Return a reference to an element
-that, of all elements in sequence $\mathcal{S}$, has the minimum/maximum value. 
-If $\mathcal{S}$ is empty, return a reference to a special
-\Null{} element.
-
+\item[$\Erase\sequence{\propto,\mathit{r}}(\mathcal{S}, x).$] Remove
+the $r$th element among all elements $v$ in container $\mathcal{S}$
+for which predicate $v \propto x$ is true.  If no such element exists,
+do nothing.
 \end{description}
-Invocations of \Member{}, \Predecessor{}, and \Successor{} are
-colloquially called \emph{searches}, and invocations of \Insert{} and
-\Extract{} \emph{updates}. The arguments for the methods can be
+Argument $x$ for these methods can be
 partially constructed; i.e.~if an element is a pair of a key and some
 satellite data, only the key needs to be specified before a search.
+
+The generic form of \Search{} is an archetype for 8 different methods
+depending on how the compile-time parameters are set. If $\mathcal{S}$
+stores a set, generic parameter $r$ would be superfluous.
+Colloquially, invocations of various forms of \Search{} are called
+\emph{searches}, and invocations of \Insert{} and
+\Erase{} \emph{updates}. 
+Conventional
+names for methods (for example, used in \cite{CLRS01})  
+$\Search\sequence{<,-1}$,
+$\Search\sequence{>,1}$,
+$\Search\sequence{\diamond,1}$, 
+$\Search\sequence{\diamond,-1}$,
+$\Erase\sequence{\diamond,1}$, and
+$\Erase\sequence{\diamond,-1}$
+would be 
+\Predecessor{}, 
+\Successor{}, 
+\Findmin{}, 
+\Findmax{},
+\Extractmin{}, and
+\Extractmax{},
+respectively.
+Sometimes $\Search\sequence{=,1}$ is called a \emph{member search}.
 In addition to the above-mentioned methods, there should be methods
-for constructing and destructing elements and sets, and methods for
+for constructing and destroying elements and sets, and methods for
 examining the cardinality of sets, but these are algorithmically less
 interesting and therefore omitted in our discussion.
 
-\noindent\textbf{**Snip}
+\subsection*{Semi-implicit ordered dictionaries}
 
+*** To be written ***
 
-This is where the definitions of ordered dictionary, unordered
-dictionary, elementary dictionary, dictionary, and priority queue will
-go?
+Just define formally what Munro's model of computation is. We need an
+infinite array for elements.
 
-\section{Elementary dictionaries}%
+\subsection*{Ordered dictionaries with iterator support}
+
+A \emph{locator} is a mechanism for maintaining the association
+between an element and its location in a data structure \cite[Section
+6.4]{GT98}. A locator follows its element even if the element changes
+its location inside the data structure. In terms of the C\texttt{++}
+programming language \cite{ISO}, a locator is an object that provides
+default constructor, copy constructor, unary operator * (prefix), and
+binary operators \texttt{==} and \texttt{!=}. That is, for
+locator $p$, *$p$ denotes the element stored at the specified
+location.  An \emph{iterator} is a generalization of a locator which
+captures the concepts \textit{location} and \textit{iteration} in a
+container of elements. In addition to the operations supported for a
+locator, a \emph{bidirectional iterator} provides
+unary operators \texttt{++} and \texttt{-}\texttt{-} (both prefix and
+postfix). That is,
+for iterator $p$, \texttt{++}$p$ returns an iterator pointing to the
+element following the current element according to some
+specific order. An error occurs if $p$ points to the past-the-end
+element of the corresponding container.
+
+For an ordered dictionary providing locator-based access to elements,
+the methods \Search{}, \Insert{}, and
+\Erase{} are overloaded as follows:
+\begin{description}
+\item[$\Search\sequence{\propto, r}(\mathcal{S}, p, x).$] 
+Start the search from the element pointed to by iterator $p$ and return
+an iterator to the $r$th element among all elements $v$ in container
+$\mathcal{S}$ for which predicate $v \propto x$ is true. If no such
+element exists,  return an iterator to the past-the-end element.
+
+\item[\Insert{}$(\mathcal{S}, p, x).$] Insert a copy of element $x$
+\emph{immediately before} the element pointed to by iterator $p$ in
+container $\mathcal{S}$, and return an iterator pointing to the newly inserted element.
+
+\item[\Erase{}$(\mathcal{S}, p).$] Remove the element pointed to by iterator $p$
+from container $\mathcal{S}$.
+\end{description}
+
+To iterate over a collection of elements, it is also possible to
+access some special locations:
+\begin{description}
+\item[\Begin{}$(\mathcal{S}).$] Return an iterator pointing to the first element
+in container $\mathcal{S}$.
+
+\item[\End{}$(\mathcal{S}).$] Return an iterator pointing to the past-the-end
+element for container $\mathcal{S}$.
+\end{description}
+Since \Begin$(\mathcal{S})$ points to the minimum element of $\mathcal{S}$ and
+\texttt{-}\texttt{-}\End$(\mathcal{S})$ to the maximum element (if any),
+methods \Findmin{} and \Findmax{} will be superfluous.
+
+\subsection*{Ordered dictionaries with random-access iterators}
+
+*** To be written ***
+
+Now I also know how to obtain these without any lost in the space
+efficiency. I will write a paragraph or two about these in the section
+about ``compaction of ordered dictionaries with iterator support''.
+
+\subsection*{Elementary priority queues}
+
+In its elementary form, a \emph{priority queue} stores a multiset of
+elements and supports operations \Findmin{}, \Insert{}, and
+\Extractmin{}.  We want to point out that we do not consider
+elementary priority queues since a fully implicit priority queue
+exists that can support \Findmin{} and \Insert{} in $O(1)$ worst-case
+time, and \Extractmin{} in $O(\lg n)$ worst-case time \cite{CMP88},
+$n$ being the number of elements stored. As mentioned in
+\secref{intro}, in a realistic model of computation, the amount of
+extra space used by such a data structure is only $O(\sqrt{n})$.  In
+\cite{CMP88}, it was shown that there even exists a fully implicit
+double-ended priority queue, i.e.~a priority queue that supports
+\Findmax{} and \Extractmax{} as well.
+
+\subsection*{Priority queues with locator support}
+
+In a general form, a \emph{priority queue} is an element container
+that provides methods \Findmin{} and locator-based \Erase{} as well as (a
+subset of) the following methods:
+\begin{description}
+\item[\Insert{}$(\mathcal{Q}, x).$] Insert a copy of element $x$ into
+container $\mathcal{Q}$ and return a locator pointing to the newly inserted
+element.
+
+\item[\Borrow{}$(\mathcal{Q}).$] Remove an \emph{arbitrary} element from
+container $\mathcal{Q}$ and return a locator pointing to that element. If $\mathcal{Q}$
+is empty, return a locator pointing to the past-the-end element.
+
+\item[\Decrease{}$(\mathcal{S}, p, x).$] Replace the element pointed to by
+locator $p$ with element $x$, which is assumed to be no greater than
+the original element pointed to by $p$.
+\end{description}
+Of these methods, \Borrow{} is non-standard, but according to our
+earlier research \cite{EJK04,EJK07} this is a valuable tool, for
+instance, in data-structural transformations. Our point to include it
+in the repertoire of priority-queue operations is to show that our
+compaction scheme can handle it quite easily. If the original priority
+queue provides it, the compact version will do the same at about equal
+efficiency.
+
+As ordered dictionaries, priority queues could also provide iterator
+support. However, in a priority queue there is no natural order of
+storing the elements. In a basic form, an iteration starting from
+\Begin{} and ending at \End{} is just guaranteed to visit all
+elements. Iterator operations could be realized in the same way as for
+ordered dictionaries, so in this paper we concentrate on priority
+queues that support the above-mentioned priority-queue
+operations.
+
+\section{Elementary ordered dictionaries}%
 \seclabel{elementary-dictionaries}
 
-Now our task is to transform a given ordered dictionary to one that is
-more space-efficient.  Our approach is to partition the data into
-chunks and store these chunks in the ordered dictionary being under
-transformation (skiplist, 2-3 tree, red-black tree, etc).  To avoid
-confusion, we will refer the data structure we are describing as ``the
-dictionary'' and the data structure we are using as ``the data
-structure.''  Similarly, we will use the terms chunks and elements to
-refer to groups of elements and individual elements, respectively.  
+
+In this section we describe transformations that can be applied to
+elementary ordered dictionaries to make them more space-efficient.
+Our approach is to partition the data into chunks and store these
+chunks in the ordered dictionary under transformation (skiplist,
+2-3 tree, red-black tree, etc).  To avoid confusion, we will refer the
+data structure we are describing as ``the dictionary'' and the data
+structure we are using as ``the data structure.''  Similarly, we will
+use the terms chunks and elements to refer to groups of elements and
+individual elements, respectively.  
 
 We study two different schemes based on this idea.  Both schemes have
 the following in common:  Each chunk has a header containing a
 constant amount of data, the elements of each chunk are stored in an
-array, the elements stored wi
-We call the objects containing a pointer to the beginning of a chunk,
-the \emph{head} of that chunk.  A head $f$ contains two pointers
-$\Pred(f)$ and $\Succ(f)$ that point to other heads, a pointer to an
-array $\Elem(f)$ that contains anywhere between $b$ and $2b$ elements,
-and an integer $\Size(f)$ that tells the number of elements in
-$\Elem(f)$.  The $\Pred$ and $\Succ$ fields are used to link all heads
-together into a doubly-linked list.  The elements of $\Elem(f)$ are
-always sorted in increasing order, and the elements of $\Elem(f)$ are
-all less than the elements of $\Elem(g)$ if $f$ appears before $g$ in
-the doubly-linked list.  In this way, the list of heads gives the
-elements of the dictionary in sorted order.  Additionally, two special
-pointers are maintained that point to the first and the last head,
-respectively.  The data structure, denoted $\mathcal{S}$, stores
-\emph{handles} to the heads.  Each head contains an iterator pointing
-back to the corresponding node inside the data structure.  If the
-iterators of the data structure were normal pointers, the extra
-indirection could be avoided and the data structure could store the
-heads directly.
-
-thin each chunk are kept in sorted order,
-and the chunks themselves are stored in a doubly-linked list.  At all
-times we maintain the invariant that every element in chunk $A$ is
-less than or equal to every element in chunk $B$ if $A$ appears before
-$B$ in this list.  Thus, a traversal of this \emph{chunk list} is
-sufficient to output all elements in sorted order.
+array, the elements stored within each chunk are kept in sorted order,
+and the chunks themselves are stored in a doubly-linked list (the
+pointers for which are stored in the header).  At all times we
+maintain the \emph{global invariant} that every element in chunk $A$
+is less than or equal to every element in chunk $B$ if $A$ appears
+before $B$ in this list.  Thus, a traversal of this \emph{chunk list}
+is sufficient to output all elements in sorted order.
 
 In addition to being linked into a list, the chunks themselves are
-stored in the the dictionary.  Notice that, because of the above
+stored in the data structure.  Notice that, because of the above
 invariant, any two chunks can be compared in $O(1)$ time.  To test,
 for example, if chunk $A$ is less than chunk $B$ we simply check if
 the last element of $A$ is less than the first element of $B$.  It is
@@ -382,22 +510,20 @@ nor less than $A$ then $x$ is equal to $A$.
 
 \noindent\textbf{Say something about multisets here.}
 
-With this representation, it is easy to see how \Member{},
-\Predecessor{}, and \Successor{} can each be implemented by performing
-at most one search in the dictionary followed by one (linear or
-binary) search in a chunk.  The functions \Findmin{} and \Findmax{}
-are even easier;  we simply return the first element of the first
-chunk or the last element of the last chunk, respectively.  Where our
-two implementations differ is in how they implement the \Insert{} and
-\Extract{} functions.
+With this representation, it is easy to see how \Search\ can be
+implemented by performing at most one search in the dictionary
+followed by one (linear or binary) search in a chunk.  The special
+searches  \Findmin{} and \Findmax{} are even easier;  we simply return
+the first element of the first chunk or the last element of the last
+chunk, respectively.  Where our two implementations differ is in how
+they implement the \Insert{} and \Erase{} operations.
 
 \subsection{Fixed-Sized Chunks}
 
 The simplest realization of the above ideas is to store the chunks as
 fixed-size arrays, each of size $b+1$.  With the exception of at most
 one chunk, each chunk will store either $b-1$, $b$, or $b+1$ data
-elements.  All that remains is to describe how we perform insertion
-and extraction in the data structure.
+elements.
 
 To insert $x$ into the data structure we first search for $x$ in the
 data structure.  The result of this is some chunk $A$ that is either
@@ -406,31 +532,31 @@ than the first element and less than the last element.  Next, by
 traversing the chunk list we examine up to $b$ consecutive chunks
 including $A$.
 
-If any of these chunks contains $b-1$ or $b$ elements then we can, in
-$O(b^2)$ time, reassign the elements to chunks so as to place $x$ into
-some chunk and restore our global invariant.  Otherwise, all $b$
-chunks contain $b+1$ elements.  In this case we create a new chunk and
-reassign these $b(b+1)$ elements across the $b+1$ chunks so that each
-chunk contains exactly $b$ elements.  Finally, we place $x$ in the
-appropriate chunk and insert the newly created chunk into the
-dictionary.
+If any of these $b$ consecutive chunks contains fewer than $b+1$
+elements then we can reassign the elements to chunks so as to place
+$x$ into some chunk and restore our global invariant.  Otherwise, each
+of the $b$ chunks contains $b+1$ elements.  In this case we create a
+new chunk and reassign these $b(b+1)$ elements across the $b+1$ chunks
+so that each chunk contains exactly $b$ elements.  Finally, we place
+$x$ in the appropriate chunk and insert the newly created chunk into
+the data structure.
 
-Extraction is similar to insertion. To extract $x$, we first search for
-the chunk $A$ containing $x$. Then, in the $b$ consecutive chunks
-including $A$ either: (1)~there is some chunk containing $b$ or $b+1$
-elements, in which case we remove $x$ and redistribute elements so as
-to maintain the global invariant, or (2)~all $b$ chunks contain
+Erasing an element is similar to insertion. To erase $x$, we first
+search for the chunk $A$ containing $x$. Then, in the $b$ consecutive
+chunks including $A$ either: (1)~there is some chunk containing $b$ or
+$b+1$ elements, in which case we remove $x$ and redistribute elements
+so as to maintain the global invariant, or (2)~all $b$ chunks contain
 exactly $b-1$ elements in which case we delete one chunk from the
-dictionary and redistribute the $b(b-1)-1$ elements among the $b-1$
-chunks so that each chunk stored $b$ elements, except one, which
-contains $b-1$ elements.
+data structure and redistribute the $b(b-1)-1$ elements among the $b-1$
+remaining chunks so that each chunk stores $b$ elements, except one,
+which contains $b-1$ elements.
 
 It is clear that both the insertion and deletion procedures require
-one search in the dictionary, $O(b^2)$ work, and at most one insertion
-or deletion, respectively, in the dictionary.  Indeed a slightly more
-careful amortized analysis shows that a sequence of $n$
-\Insert/\Extract\ operations requires only $O(n/b)$ insertions or
-extractions from the dictionary.  careful analysis shows that
+one search in the data structure, $O(b^2)$ work, and at most one
+insertion or deletion, respectively, in the data structure.  Indeed a
+slightly more careful amortized analysis shows that a sequence of $n$
+\Insert/\Erase\ operations on the dictionary requires only $O(n/b)$
+\Insert/\Erase\ operations on the data structure.  
 
 \begin{theorem}
 \label{theorem:elementary-a}
@@ -438,33 +564,28 @@ Given an ordered dictionary that requires $S(n)$, $I(n)$, and $D(n)$
 time to search, insert, and delete (respectively) an element from a
 set of $n$ elements and that has a memory overhead of $cn$ for a
 positive constant $c$, we can construct an equivalent data structure
-that requires 
+that requires
 \begin{enumerate}
 \item $S'(n)=O(S(n/b)+\lg b)$, $I'(n)=O(S(n/b)+I(n/b)+b^2)$,
 and $D'(n)=O(S(n/b)+D(n/b)+b^2)$ worst-case time to search, insert,
-and delete (respectively), 
-\item requires $S''(n)=O(S(n/b)+\lg b)$,
+and erase (respectively), 
+\item $S''(n)=O(S(n/b)+\lg b)$,
 $I''(n)=O(S(n/b)+\frac{1}{b}I(n/b)+b^2)$, and
 $D'(n)=O(S(n/b)+\frac{1}{b}D(n/b)+b^2)$ amortized time to search,
-insert, and delete (respectively), and 
-\item that has a memory overhead of
-$O(n/b)$.
+insert, and erase (respectively), and 
+\item a memory overhead of $O(n/b)$.
 \end{enumerate}
 \end{theorem}
 
 One issue that several researchers have been concerned with is that of
-\emph{fragmentation} \cite{X}, i.e., how many distinct memory
-locations are required for a data structure.  Using the above scheme,
-in combination with simple techniques for maintaining a pool of
-buffers for the chunks \cite{X}, the entire dictionary described above
-can be made to live in one resizeable array that contains $n$ data
-elements and $O(n/b)$ additional information.  In some articles
-(namely those dealing with implicit data structures \cite{X,X,X,X}),
-an unbounded resizeable array is considered to be part of the model of
-computation. Alternatively, Brodnik \etal\ \cite{bXX} show how to
-implement resizeable arrays in a standard model of computation using
-$O(\sqrt{n})$ additional space for an array of size $n$. 
-\textbf{What about compactor zones?}
+\emph{fragmentation}, i.e., how many distinct memory locations are
+required for a data structure.  Using the above scheme, in combination
+with simple techniques for maintaining a pool of buffers for the
+chunks, the entire dictionary described above can be made to live in
+one resizeable array that contains $n$ data elements and $O(n/b)$
+additional information.   In this case, the fragmentation is no worse
+than the fragmentation required in an implementation of a resizeable
+array.
 
 \subsection{Variable-Sized Chunks}
 
@@ -472,7 +593,7 @@ One drawback of the scheme described in the previous subsection is the
 $O(b^2)$ term in the running time for the \Insert\ and \Extract\
 operations.  In this subsection we describe an alternative that avoids
 this problem but requires more extensive use of memory management and,
-consequently, for which it is more complicated to avoid fragmentation.
+consequently, for which it is more difficult to avoid fragmentation.
 In this scheme, all but one chunk contains somewhere between $b/2$ and
 $2b$ elements, inclusive.\footnote{Throughout this section we assume
 $b$ is even so that $b/2$ is an integer.}  However, unlike the
@@ -480,13 +601,17 @@ previous scheme, each chunk is allocated to the precise size required
 to store the number of elements it currently contains.
 
 Since chunks will be reallocated frequently and are addressed by the
-nodes of the dictionary, each chunk also has an associated
+nodes of the data structure, each chunk also has an associated
 \emph{handle}.  This is a memory location that stores a pointer to the
 chunk and the header of each chunk stores a pointer to this handle.
-The dictionary, rather than maintain a direct pointer to the chunk,
-maintains a pointer to the handle.  In this way, when a chunk is
-reallocated it only need update its handle.  From this point on,
-updating of handles is implicit when we say that a chunk is resized.
+The data structure, rather than maintain direct pointers to the
+chunk, maintains pointers to the handle.  In this way, when a chunk
+is reallocated it only need update its handle.\footnote{This extra
+level of indirection adds some overhead to the running time.  It is
+unnecessary for dictionary implementations that store, or refer to,
+each data element only once, as is the case with most dictionary
+implementations.} From this point on, updating of handles is implicit
+when we say that a chunk is resized.
 
 An insertion of the element $x$ in the data structure proceeds as
 follows: The chunk $A$ that should contain $x$ is located.  If $A$
@@ -496,38 +621,39 @@ elements then $A$ is split into two chunks, each containing $b$
 elements, one of the new chunks is inserted into the dictionary, and
 $x$ is added to the appropriate chunk.
 
-The extraction procedure is similar to the insertion procedure.  If
-the chunk $A$ containing $x$ contains more than $b/2$ elements then
-$A$ is resized and $x$ is removed.  Otherwise, we check one of the
+The \Erase\ procedure is similar to the \Insert\ procedure.  If the
+chunk $A$ containing $x$ contains more than $b/2$ elements then $A$ is
+resized and $x$ is removed.  Otherwise, we check one of the
 neighbouring chunks, $B$, of $A$. If $B$ contains more than $b/2$
 elements then an element is removed from $B$ and used to replace $x$
-in $A$ and then $B$ is resized. Otherwise, both $A$ and $B$ have size
-$b/2$, in which case we merge them into a single chunk containing $b$
-elements and delete one of the chunks from the data structure.
+in $A$ and then $B$ is resized. Otherwise, each of $A$ and $B$
+contains exactly $b/2$ elements, in which case we merge them into a
+single chunk containing $b$ elements and delete one of the chunks from
+the data structure.
 
-Again, it is clear that both \Insert\ and \Extract\ can be done using
-at most one search, $O(b)$ time to operate on the at most 2 chunks
+Again, it is clear that both \Insert\ and \Erase\ can be done using at
+most one search, $O(b)$ time to operate on the at most 2 chunks
 involved, and at most one insertion and extraction.  Again, a simple
 amortization argument shows that a sequence of $n$ \Insert\ and
-\Extract\ operations results in only $O(n/b)$ insertion and
-extractions in the data structure.
+\Erase\ operations on the dictionary results in only $O(n/b)$ \Insert\
+and \Erase\ operations in the data structure.
 
 \begin{theorem}
 \label{theorem:elementary-b}
 Given an ordered dictionary that requires $S(n)$, $I(n)$, and $D(n)$
-time to search, insert, and delete (respectively) an element from a
+time to search, insert, and erase (respectively) an element from a
 set of $n$ elements and that has a memory overhead of $cn$ for a
 positive constant $c$, we can construct an equivalent data structure
 that requires 
 \begin{enumerate}
 \item $S'(n)=O(S(n/b)+\lg b)$, $I'(n)=O(S(n/b)+I(n/b)+b)$,
-and $D'(n)=O(S(n/b)+D(n/b)+b^2)$ worst-case time to search, insert,
-and delete (respectively), 
-\item requires $S''(n)=O(S(n/b)+\lg b)$,
+and $D'(n)=O(S(n/b)+D(n/b)+b)$ worst-case time to search, insert,
+and erase (respectively), 
+\item $S''(n)=O(S(n/b)+\lg b)$,
 $I''(n)=O(S(n/b)+\frac{1}{b}I(n/b)+b)$, and
 $D'(n)=O(S(n/b)+\frac{1}{b}D(n/b)+b)$ amortized time to search,
-insert, and delete (respectively), and 
-\item that has a memory overhead of
+insert, and erase (respectively), and 
+\item a memory overhead of
 $O(n/b)$.
 \end{enumerate}
 \end{theorem}
@@ -628,13 +754,12 @@ overhead of $O(n/b)$.
 \end{theorem}
 }
 
-
 Knowing that element-based operations on an ordered dictionary take at
-least logarithmic time, it would be tempting to choose $b = \lg n$.
-The problem with this choice is that $n$, the number of elements
-stored, is varying whereas $b$ must be kept fixed. To avoid this
-problem, we use Frederickson's partitioning scheme \cite{Fre83} and
-partition the data structure into $O(\lg\lg n)$ separate
+least logarithmic time in the worst case, it is tempting to choose $b
+= \lg n$.  The problem with this choice is that $n$, the number of
+elements stored, is varying whereas $b$ must be kept fixed. To avoid
+this problem, we use Frederickson's partitioning scheme \cite{Fre83}
+and partition the data structure into $O(\lg\lg n)$ separate
 \emph{portions} of exponentially increasing sizes $2^{2^{1}}$,
 $2^{2^{2}}$, $2^{2^{3}}$, and so on, except that the last portion can
 be smaller.  Inside each portion we can use a fixed chunk size
@@ -648,41 +773,26 @@ an element from the last portion.
 \begin{theorem}
 \label{theorem:elementary-c}
 Given an ordered dictionary that requires $S(n)$, $I(n)$, and $D(n)$
-time to search, insert, and delete (respectively) an element from a
+time to search, insert, and erase (respectively) an element from a
 set of $n$ elements and that has a memory overhead of $cn$ for a
 positive constant $c$, we can construct an equivalent data structure
 that requires 
 \begin{enumerate}
 \item $S'(n)=O(S(n/\lg n)+\lg\lg n)$, $I'(n)=O(S(n/\lg n)+I(n/\lg n)+\lg n)$,
 and $D'(n)=O(S(n/\lg n)+D(n/\lg n)+\lg n)$ worst-case time to search, insert,
-and delete (respectively), 
+and erase (respectively), 
 \item requires $S''(n)=O(S(n/\lg n)+\lg\lg n)$,
 $I''(n)=O(S(n/\lg n)+\frac{1}{\lg n}I(n/\lg n)+\lg n)$, and
 $D'(n)=O(S(n/\lg n)+\frac{1}{\lg n}D(n/\lg n)+\lg n)$ amortized time to search,
-insert, and delete (respectively), and 
+insert, and erase (respectively), and 
 \item that has a memory overhead of
 $O(n/\lg n)$.
 \end{enumerate}
 \end{theorem}
 
-\comment{
-\begin{theorem}
-\label{theorem:advanced}
-Given an ordered dictionary that requires
-$S(n)$, $I(n)$, and $D(n)$ time to search, insert, and delete
-(respectively) an element from a set of $n$ elements and that has a memory
-overhead of $cn$ for a positive constant $c$, we can construct an equivalent
-data structure that requires $S'(n) = O(S(n/\lg n)+\lg\lg n)$,
-$I'(n)=O(I(n/\lg n)+\lg n)$, and $D'(n)=O(D(n/\lg n)+\lg n)$ time to
-search, insert, and delete (respectively) and that requires at most $n
-+ O(\sqrt{n})$ locations for elements and 
-$O(n/\lg n)$ words for pointers, counters, and flags.
-\end{theorem}
-}
-
-As an example, let us apply Theorem \ref{theorem:elementary-c} to any
-worst-case efficient balanced search tree, e.g. to a red-black
-tree.
+As an example, we can apply Theorem \ref{theorem:elementary-c} to any
+worst-case efficient balanced search tree such as a red-black tree to
+obtain the following result:
 
 \begin{corollary}
 \label{corollary:red-black}
@@ -691,225 +801,137 @@ in $O(\lg n)$ worst-case time, \Findmin{} and \Findmax{} in $O(1)$
 worst-case time, and has a memory overhead of $O(n/\lg n)$.
 \end{corollary}
 
-\noindent\textbf{What about compactor zones?}
+\noindent\textbf{Discuss issues with fragmentation}
 
-\section{Iterator-based dictionaries}\seclabel{iterator-dictionaries}
+\section{Ordered dictionaries with iterator support}
+\seclabel{iterator-dictionaries}
 
 The data structural transformations described in the previous sections
 can be used to reduce the memory overhead of dictionary data
 structures.  However, they break down when the interface to those data
-structures allows access to elements using references, pointers, or
-fingers\ldots In this section we show two ways in which these data
-structures can be extended to allow this type of access.  The first
-method is preferable when the total number of iterators or references
-to elements in the data structure is small, while the second is
-preferable when there are many iterators.
+structures allows access to elements using iterators or even locators.
+The reason for this is that, as updates are performed, individual data
+elements migrate between chunks.  Thus, without some special mechanism
+the iterators for these elements will become invalid.
 
-\subsection{Reference Arrays}
+In this section we show two ways in which these data structures can be
+extended to allow iterator access.  The first method is preferable
+when the total number of iterators to elements in the data structure
+is small and when unused iterators are cleaned up. The second method
+is preferable when there are many iterators in use simultaneously. 
+
+\subsection{Element handles lists}
 
 In this section we present a method of maintaining iterators where the
-memory overhead is proportional to the total number of iterators.
+memory overhead at any given time is proportional to the total number
+of iterators in use at that time.  This method augments either of the
+two schemes described in the previous section in the following way:
+The header of each chunk is augmented so that it maintains a pointer
+to an ordered dictionary with iterator support that allows constant
+time insertion and deletion.\footnote{In practice, this is probably
+overkill and a sorted doubly-linked list would suffice, but this will
+increase the search time in \thmref{iterator-a} to $O(S(n/b)+d)$.}
+This dictionary, which we call the \emph{element handle list} for the
+chunk stores element handles. Each \emph{element handle} maintains a
+reference count, a pointer to the chunk that contains the element
+referenced, and the index within the chunk of the element referenced.
+The iterators themselves are pointers to element handles.
 
+When a new iterator for an element $x$ is created, the element handle
+list for the chunk containing $x$ is searched.  If there is already an
+element handle for $x$ then its reference count is incremented and a
+pointer to this handle is used as the iterator.  Otherwise, a new
+element handle for $x$ is created, added to the list, and initialized
+with a reference count of 1.  Since an element handle list stores at
+most $b$ element handles, this process takes $O(\log b)$ time.
 
+When an iterator for an element $x$ is destroyed, the reference count
+of the element handle is decremented. If the reference count drops to
+zero then the element handle is deleted from the list and the memory
+associated with it is freed.  This process takes $O(1)$ time.
 
+When the algorithms of the previous section operate on chunks by
+either growing them, splitting them, merging or moving elements
+between them, the element handles and element handle lists associated
+with them must be updated appropriately to reflect the changes.
+However, these changes only require changing the contents and/or
+pointers of the element handles and therefore, once they are updated,
+the iterators remain valid.  This updating of element handles is
+easily done without increasing the ($O(b)$) running time of each of
+the above operations.
 
-In this section we describe another space-reducing transformation for
-ordered dictionaries which similar to our previous construction. The
-primary goal of this new construction is to provide iterator-based access
-to elements.  The secondary goal is to avoid extensive element copying
-that is undesirable in a generic environment since the type of
-elements may be unknown beforehand (e.g.~when developing a generic
-data structure for a program library).
+It is clear that the iterators defined this way offer constant time
+access to the element which they locate.  They can be created in
+$O(\log b)$ time and destroyed in $O(1)$ time.  Furthermore, because
+the element handle lists support iteration and constant time insertion
+and deletion, iterators can be incremented and decremented in $O(1)$
+time.  If $k$ is the total number of elements in the dictionary
+referenced by iterators at any point in time then the overhead of the
+dictionary, at that point in time, is $O(n/b+k)$.  Note that the
+$O(k)$ term is in some sense necessary since, if a program using the
+dictionary maintains $k$ active iterators, then these must be stored
+somewhere within the program and thus there is already $\Omega(k)$
+space used within the program to keep track of these iterators.
+Applying this augmentation to the data structure of
+\thmref{elementary-b} we obtain the following result:
 
-A \emph{locator} is a mechanism for maintaining the association
-between an element and its location in a data structure \cite[Section
-6.4]{GT98}. A locator follows its element even if the element changes
-its location inside the data structure. In terms of the C\texttt{++}
-programming language \cite{ISO}, a locator is an object that provides
-default constructor, copy constructor, \Operator{}*,
-\Operator{}\texttt{==}, and \Operator{}\texttt{!=}. That is, for
-locator $p$, *$p$ denotes the element stored at the specified
-location.  An \emph{iterator} is a generalization of a locator which
-captures the concepts \textit{location} and \textit{iteration} in a
-sequence of elements. In addition to the operations supported for a
-locator, a \emph{bidirectional iterator} provides
-\Operator{}\texttt{++} and \Operator{}\texttt{-}\texttt{-}. That is,
-for iterator $p$, $p$\texttt{++} returns an iterator pointing to the
-element following the current element according to some
-specific order. An error occurs if $p$ points to the past-the-end
-element of the corresponding sequence.
+\begin{theorem}\label{theorem:iterator-a}
+Given an ordered dictionary with iterator support that requires 
+$S(n)$, $I(n)$, and $D(n)$
+time to search, insert, and erase (respectively) an element from a
+set of $n$ elements and that has a memory overhead of $cn$ for a
+positive constant $c$, we can construct an equivalent data structure
+that requires 
+\begin{enumerate}
+\item $S'(n)=O(S(n/b)+\lg b)$, $I'(n)=O(I(n/b)+b)$,
+and $D'(n)=O(D(n/b)+b)$ worst-case time to search, insert,
+and erase (respectively), 
+\item $S''(n)=O(S(n/b)+\lg b)$,
+$I''(n)=O(\frac{1}{b}I(n/b)+b)$, and
+$D'(n)=O(\frac{1}{b}D(n/b)+b)$ amortized time to search,
+insert, and erase (respectively), and 
+\item a memory overhead of
+$O(k+n/b)$ where $k$ is the number of elements of the $S$ currently 
+referenced by iterators.
+\end{enumerate}
+\end{theorem}
 
-For an ordered dictionary providing iterator-based access to elements,
-the methods \Member{}, \Predecessor{}, \Successor{}, \Insert{}, and
-\Extract{} are overloaded as follows:
-\begin{description}
-\item[\Member{}$(\mathcal{S}, p, x).$] Search for element $x$ from sequence $\mathcal{S}$
-starting from the element pointed to by iterator $p$.
-If $\mathcal{S}$ does not contain any
-matching member, return an iterator to the past-the-end element.
+\subsection{Storing chunks as linked lists}
 
-\item[\Predecessor{}$(\mathcal{S}, p, x)$/\Successor{}$(\mathcal{S}, p, x).$] Defined in a
-similar manner as \Member{}.
-
-\item[\Insert{}$(\mathcal{S}, p, x).$] Insert a copy of element $x$
-\emph{immediately before} the element pointed to by iterator $p$ in
-sequence $\mathcal{S}$, and return an iterator pointing to the newly inserted element.
-
-\item[\Extract{}$(\mathcal{S}, p).$] Remove the element pointed to by iterator $p$
-from sequence $\mathcal{S}$.
-\end{description}
-To iterate over a sequence, it is also possible to access some special
-locations:
-\begin{description}
-\item[\Begin{}$(\mathcal{S}).$] Return an iterator pointing to the first element
-in sequence $\mathcal{S}$.
-
-\item[\End{}$(\mathcal{S}).$] Return an iterator pointing to the past-the-end
-element for sequence $\mathcal{S}$.
-\end{description}
-Since \Begin$(\mathcal{S})$ points to the minimum element of $\mathcal{S}$ and
-\End$(\mathcal{S})$\texttt{-}\texttt{-} to the maximum element (if any),
-the methods \Findmin{} and \Findmax{} will be superfluous.
-
-\begin{figure}
-\begin{center}
-\input{list.pstex_t}
-\end{center}
-\caption{A chunk storing eight integers in a singly-linked list.\label{fig:heap}}
-\end{figure}
-
-For a positive integer $b$, we use a ($b$,$2b$)-compaction scheme to
-carry out the transformation. Instead of an array, each chunk stores
-its elements in a singly-linked list in sorted order (for an
-illustration, see Figure \ref{fig:list}).  The first element of each
-list is the representative of the corresponding chunk.  The chunks are
-pairwise disjoint when considered as intervals.  The heads of chunks
-are stored in an ordered dictionary $\mathcal{S}$ which is organized
-according to the representatives.  The heads of all the chunks are
-manipulated as in our previous construction.
-
-Iterators given to users are implemented as pointers to the list
-nodes. This makes all locator operations to be provided trivial.  Let
-us now consider how the bidirectional iterator operations are
-realized. To guarantee that each of these operations takes constant
-time, we have to assume that $b$ is a constant.
-
-\Begin{}$(\mathcal{S})$. Go to the first chunk and return an iterator
-pointing to its first element.
-
-\End{}$(\mathcal{S})$. Go to the last chunk and return an iterator
-pointing to the past-the-end element stored at that chunk.
-
-\Operator{}\texttt{++}$(p)$. If the element pointed to by $p$ is not
-the last element in its list, return an iterator to the next element
-in the list. Otherwise, visit the next chunk and return an iterator
-pointing to its first element.
-
-\Operator{}\texttt{-}\texttt{-}$(p)$. Access the predecessor of the
-element pointed to by $p$ by traversing the list, first going to the
-head and then visiting the list nodes until the current node is
-met again. Return an iterator pointing to the predecessor.
-
-Next let us consider how different dictionary operations can be
-realized.  For a data structure $\mathcal{D}$ of size $n$, we let
-$S^{\mathcal{D}}(n)$, $I^{\mathcal{D}}(n)$, and $E^{\mathcal{D}}(n)$
-denote the running time of searches, \Insert{}, and \Extract{},
-respectively.
-
-\Member{}$(\mathcal{S}, p, x)$.  Access the elements in the current
-chunk that come after the element pointed to by $p$ until a member
-matching $x$ or an element greater than $x$ or the head is met. If a
-matching member is found, return an iterator pointing to that element
-and stop. If a greater element is met, return an iterator pointing to
-the past-the-end element. Otherwise, use $\mathcal{S}$ to find the
-first matching element and, if no such element exists, the first
-element that is greater than $x$. Finally, scan the predecessor chunk
-to see whether that contains a matching member, and return an iterator
-pointing to the first matching member. If no such member is found,
-return an iterator pointing to the past-the-end element.  Clearly, the
-running time this operation is $S^{\mathcal{D}}(n/b) + O(b)$.
-
-\Predecessor{}$(\mathcal{S}, p, x)$/\Successor{}$(\mathcal{S}, p, x)$.
-These are realized in a similar manner as \Member$(\mathcal{S}, p,
-x)$.
-
-\Insert{}$(\mathcal{S}, p, x)$. If the element pointed to by $p$ is a
-representative, insert $x$ as the last element of the predecessor
-chunk. If no such chunk exists, invoke \Extract{} for $\mathcal{S}$
-to remove the representative of the present chunk from $\mathcal{S}$
-and insert $x$ into the present chunk. Let $C$ denote the chunk into
-which $x$ was inserted.
-  If the size of $C$ is equal to $2b$ and  $C$ was
-removed from $\mathcal{S}$, split $C$ into two pieces of equal size
-and invoke \Insert{} for $\mathcal{S}$ to get both chunks back to the
-data structure.
-  If the size of $C$ is no greater than $2b$
-and  $C$ was removed from $\mathcal{S}$, invoke \Insert{} for
-$\mathcal{S}$ to get the chunk back into the data structure with a new
-representative. 
-  If the size of $C$ is equal to $2b$ and $C$ was removed from
-$\mathcal{S}$, split $C$ into two halves and invoke \Insert{} for
-$\mathcal{S}$ to get the representative of the second half into the
-data structure.
-  Finally, if the size of $C$ is no greater than $2b$ and $C$ was not removed
-from $\mathcal{S}$, do nothing.
-{}From this description, one can immediately conclude that the
-running time of an insertion is 
-$2\times I^{\mathcal{D}}(n/b) + E^{\mathcal{D}}(n/b) + O(b)$.
-
-\Extract{}$(\mathcal{S}, p)$. Remove the element pointed to by $p$ by
-accessing the predecessor element via the head. 
-Let $C$ denote the current chunk.
-  If the size of $C$ is no smaller than $b$ and the representative of
-$C$ was not
-removed, do nothing and stop. 
-  If the size of $C$ is no smaller than $b$ and the representative of
-$C$ was removed, invoke \Extract{} and thereafter
-\Insert{} for $\mathcal{S}$ to get the chunk back to the data structure.
-  If the size of $C$ is smaller than $b$, merge $C$ with one of its
-neighbouring chunks. Let $J$ be the resulting chunk. If the neighbour
-selected was the predecessor chunk of $C$, invoke \Extract{} for
-$\mathcal{S}$ to remove the representative of $C$ from $\mathcal{S}$.
-If the neighbour was the successor chunk of $C$, invoke \Extract{} for
-$\mathcal{S}$ to remove the representative of the neighbour from
-$\mathcal{S}$. If the size of $J$ is
-no larger than $2b$, stop. Otherwise, split $J$ into two halves, and
-invoke \Insert{} for $\mathcal{S}$ to get both chunks back to the data structure.
-From this description, we can readily conclude that the running time
-of a deletion is 
-$2\times I^{\mathcal{D}}(n/b) + E^{\mathcal{D}}(n/b) + O(b)$.
-
-The dictionary data structure $\mathcal{S}$ stores handles to the heads
-and these store iterators back to the dictionary
-nodes. There are at most $\ceils{n/b}$ heads. Since the size of
-$\mathcal{S}$ is assumed to be linear, $\mathcal{S}$ requires $O(n/b)$
-words of memory. Since iterators are constant-sized objects and a head
-contains $O(1)$ pointers and counters, the size of a head is
-$O(1)$. That is, their total space usage is $O(n/b)$. Each
-node in a chunk list requires one pointer, a pointer to another list
-node or a pointer to a head, and a bit indicating the type of the
-pointer.   Hence, the memory overhead induced by the whole construction is
-$O(n/b)$ words plus one pointer per element and one bit per element.
-Because of word alignment the last two bits of a pointer are unused,
-so in normal circumstances an indicator bit and a pointer can be
-stored in one word. To sum up, the memory overhead is $n + O(n/b)$
-words. By making $b$ large enough, but still keeping it a constant, we
-get the following theorem.
+An alternative method of implementing ordered dictionaries with
+iterator-based access is to apply any of the schemes used in
+\secref{elementary-dictionaries} but, instead of using a sorted array
+for each chunk, to use a sorted singly-linked list.  In this case, an
+iterator for item $x$ is implemented simply as a pointer to the list
+node containing $x$ and the iterator operations are trivial to
+implement.  All the other operations remain the same except that a
+search within a chunk must now be a linear search as opposed to a
+binary search.  Using the data structure of \thmref{elementary-b} we
+obtain the following result:
 
 \begin{theorem}
-\label{theorem:dictionary}
-An ordered dictionary $\mathcal{D}$ that uses $O(n)$ words of extra
-storage can be transformed into an equivalent data structure
- that uses $(1+\varepsilon)n$ words of extra storage,
-for an arbitrary $\varepsilon > 0$ and sufficiently large $n >
-n(\varepsilon)$, and executes searches and updates in
-$S^{\mathcal{D}}(\varepsilon n) + O(1/\varepsilon)$ and $2\times
-I^{\mathcal{D}}(\varepsilon n) + E^{\mathcal{D}}(\varepsilon n) +
-O(1/\varepsilon)$ time, respectively.
+\label{theorem:iterator-b}
+Given an ordered dictionary with iterator support that requires 
+$S(n)$, $I(n)$, and $D(n)$
+time to search, insert, and erase (respectively) an element from a
+set of $n$ elements and that has a memory overhead of $cn$ for a
+positive constant $c$, we can construct an equivalent data structure
+that requires 
+\begin{enumerate}
+\item $S'(n)=O(S(n/b)+b)$, $I'(n)=O(I(n/b)+b)$,
+and $D'(n)=O(D(n/b)+b)$ worst-case time to search, insert,
+and erase (respectively), 
+\item $S''(n)=O(S(n/b)+b)$,
+$I''(n)=O(\frac{1}{b}I(n/b)+b)$, and
+$D'(n)=O(\frac{1}{b}D(n/b)+b)$ amortized time to search,
+insert, and erase (respectively), and 
+\item a memory overhead of
+$n$ pointers plus $O(n/b)$ additional storage.
+\end{enumerate}
 \end{theorem}
 
 As a concrete example of the usage of Theorem
-\ref{theorem:dictionary}, let us apply it to the ordered dictionary
+\ref{theorem:iterator-b}, let us apply it to the ordered dictionary
 presented in \cite{BLMTT03}. This gives us the following corollary.
 
 \begin{corollary}
@@ -922,107 +944,88 @@ extra storage, for any $\varepsilon > 0$ and sufficiently large
 $n > n(\varepsilon)$.
 \end{corollary}
 
-\section{Iterator-based priority queues}\seclabel{iterator-queues}
+\section{Priority queues with locator support}\seclabel{iterator-queues}
 
-Any ordered dictionary can used as a priority queue as well. However,
-two methods, \Insert{} and \Decrease{}, have turned out to be special
-since there exist priority queues that support all of them in constant
-time.  When our previous transformations are applied to such a
-priority queue, the resulting data structure is not necessarily
+Any ordered dictionary can be used as a priority queue as well.
+However, two methods, \Insert{} and \Decrease{}, have turned out to be
+special since there exist priority queues that support all of them in
+constant time.  When our previous transformations are applied to such
+a priority queue, the resulting data structure is not necessarily
 optimal with respect to these operations. Therefore, in this section
 we describe a transformation that is suitable for priority queues.
 
-We want to point out that we do not consider elementary priority
-queues since an implicit priority queue exists that can support
-\Findmin{} and \Insert{} in $O(1)$ worst-case time, and \Extractmin{} in
-$O(\lg n)$ worst-case time \cite{CMP88}, $n$ being the number of
-elements stored. As mentioned in \secref{sec:intro}, in a realistic
-model of computation, the amount of extra space used by such a data
-structure is only $O(\sqrt{n})$.%
-%In \cite{CMP88} it was shown that the
-%priority queue could even be made double-ended, i.e.~made to support
-%\Findmax{} and \Extractmax{} as well.
+We again use the idea of partitioning the elements into chunks.
+However, this time the chunks are not sorted but the minimum element
+within each chunk is stored as the first element of the chunk.  The
+minimum (first) element within each chunk is referred to as the
+\emph{representative} of the chunk.  Furthermore, the chunks are not
+linked into a list, and there is no special relationship between the
+elements of one chunk and the elements of another chunk. One special
+chunk, denoted by $B$ and called the \emph{buffer}, is treated
+differently.  All chunks except $B$ are stored in a priority queue
+where the key of a chunk is its representative.  As before, we refer
+to the data structure we are describing as ``the priority queue'' and
+the data structure we are transforming as the ``the data structure.''
 
-A \emph{priority queue} is an abstract data type that is supposed to
-provide the methods \Findmin{} and iterator-based \Extract{} as well
-the following methods:
-\begin{description}
-\item[\Insert{}$(\mathcal{Q}, x).$] Insert a copy of element $x$ into sequence $\mathcal{Q}$ and return an iterator pointing to the newly inserted
-element.
+Either of the two methods described in \secref{iterator-dictionaries}
+for adding locator support can be used.  That is, we can either store
+each chunk as an array and create, for each chunk, a locator handle
+list or we can store each chunk as a singly-linked list. In either
+case, locators for an element can be created in constant time if the
+element is the first or last element of its chunk. 
 
-\item[\Borrow{}$(\mathcal{Q}).$] Extract an \emph{arbitrary} element from
-sequence $\mathcal{Q}$ and return an iterator pointing to that element. If $\mathcal{Q}$
-is empty, return an iterator to the past-the-end element.
+Next we consider how the various priority-queue operations can be
+realized.
 
-\item[\Decrease{}$(\mathcal{S}, p, x).$] Replace the element pointed to by
-iterator $p$ with element $x$, which is assumed to be no greater than
-the original element pointed to by $p$.
-\end{description}
-Of these operations, \Borrow{} is non-standard, but according to our
-earlier research \cite{EJK04,EJK07} this operation is very useful, for
-instance, for data-structural transformations.
+\Findmin{}$(\mathcal{Q})$. The minimum is stored either in buffer $B$
+or the minimum representative in the data structure. A locator for
+the minimum of the two elements can be returned. Since both the
+relevant elements are the first elements in their respective chunks,
+this operation can be accomplished in $O(1)$ worst-case time.
 
-Again we use ($b$,$2b$) compaction scheme in our transformation, $b$
-being a positive integer. Now each chunk stores its elements in a
-singly-linked list in an arbitrary order, except that the minimum
-element which is the representative of that chunk is stored as the
-first element (cf.~Figure~\ref{fig:list}).  Moreover, the chunks can
-overlap when considered as intervals of values.  There is one special
-chunk, called a \emph{buffer} $B$, which may contain less than $b$
-elements. The other chunks contain between $b$ and $2b$ elements and
-are stored in a priority queue $\mathcal{Q}$, which only operates on
-the representatives. The chunks are chained in a doubly-linked list so
-that the elements present can be accessed in arbitrary order. 
-The heads of the chunks are maintained as in our previous constructions.
+\Insert{}$(\mathcal{Q}, x)$. Insert $x$ into buffer $B$. If $x$ is
+smaller than the current minimum of $B$, store it as the first
+element; otherwise, store it somewhere convenient. If the size of $B$
+is equal to $2b$, insert $B$ into the data structure and create a new
+empty buffer.  In addition to a single invocation of \Insert\ for the
+data structure, only a constant amount of work is done (under the
+assumption that chunks know their size).
 
-If $\mathcal{Q}$ supports
-iterators, iterator operations can be realized as for ordered
-dictionaries.  Next we consider how different priority-queue
-operations can be realized.
-
-\Findmin{}$(\mathcal{Q})$. The minimum is stored either in buffer $B$ or the
-minimum representative stored in $\mathcal{Q}$. An iterator, which is a pointer to a list
-node, pointing to the node storing the minimum of the two elements can
-be returned. Since both the relevant elements are the first elements
-is their respective lists, this operation can be accomplished in
-$O(1)$ worst-case time.
-
-\Insert{}$(\mathcal{Q}, x)$. Insert $x$ into buffer $B$. If $x$ is smaller than
-the current minimum of $B$, put it as the first element; otherwise, put it as
-the second element. If the size of $B$ is equal to $2b$, insert
-$B$ into $\mathcal{Q}$ and create a new empty buffer. In addition to a single
-invocation of \Insert for $\mathcal{Q}$, only a constant amount of
-work is done (under the assumption that chunks know their size).
-
-\Borrow{}$(\mathcal{Q})$. If $B$ is empty, extract one chunk from
-$\mathcal{Q}$ and make that a new buffer $B$. If after this $B$ is
-still empty, return an iterator to the past-the-end element and
-stop. Now take one element from $B$, the second element if $B$ has
-one, otherwise take the first element, and return an iterator pointing
-to that element. Again one invocation of \Borrow{} for $\mathcal{Q}$
-may be necessary, but otherwise only a constant amount of work is
-done.
+\Borrow{}$(\mathcal{Q})$. If $B$ is non-empty, extract a convenient
+element and return (an locator pointing to) it.  Otherwise, $B$ is
+empty, extract one chunk from the data structure and make that a new
+buffer $B$. If, after this, $B$ is still empty, return an locator to
+the past-the-end element and stop.  Otherwise, take a convenient
+element from $B$ and return (an locator pointing to) that element.
+Again one invocation of \Borrow{} for the data structure may be
+necessary, but otherwise only a constant amount of work is done.
 
 \Decrease{}$(\mathcal{Q}, p, x)$. Access the head of the chunk to
 which $p$ points. Thereafter, carry out the element replacement and
 make the replaced element the representative of the chunk if it is
 smaller than the previous representative. If the chunk is not buffer
-$B$ and if the representative of the chunk changes, invoke
-\Decrease{} for $Q$. In addition to one invocation of \Decrease{}, it
-may be necessary to traverse the
-whole list once to make the required changes. That is, the additional
-work done is proportional to $b$.
+$B$ and if the representative of the chunk changes, invoke \Decrease{}
+on the data structure. The work done in addition to one invocation of
+\Decrease{} depends on the method being used.  If arrays are being
+used to store chunks then the element handle contains a pointer to the
+head of the chunk so finding the head takes $O(1)$ time.  If the
+chunks are stored as lists, it may be necessary to traverse the entire
+list to find the head of the chunk and adjust the appropriate
+pointers, so the time is $O(b)$.
 
 \Extract{}$(\mathcal{Q}, p)$. Access the head of the chunk to which
 $p$ points. If the size of the chunk becomes smaller than $b$ or if
-the representative of the chunk is removed, remove the chunk from
-$Q$. Then merge the removed chunk with buffer $B$ to form a new
-buffer. If the size of $B$ is larger than $2b$, cut off a piece of
+the representative of the chunk is removed, remove the chunk from the
+data structure. Then merge the removed chunk with buffer $B$ to form a
+new buffer. If the size of $B$ is larger than $2b$, cut off a piece of
 size $2b$ from $B$, make the rest a buffer and insert the chunk cut
-off into $Q$. To sum up, one invocation of \Extract{} and \Insert{} for
-$Q$ may be necessary, but the other work done is proportional to $b$.
+off into the data structure. To sum up, one invocation of \Extract{}
+and \Insert{} for $Q$ may be necessary, but the other work done is
+proportional to $b$.
 
-The above discussion is summarized in the following theorem.  Let
+The above discussion is summarized in the following two theorems, that
+come from applying each of the two methods in
+\secref{iterator-dictionaries}, respectively.  Let
 $\mathcal{D}$ be a data structure and let $n$ denote the number of
 elements stored in $\mathcal{D}$ prior to each operation.  We use the
 notation that $\mathcal{D}$ executes \Findmin{}, \Insert{},
@@ -1033,10 +1036,30 @@ $B^{\mathcal{D}}(n)$,
 $D^{\mathcal{D}}(n)$, and
 $E^{\mathcal{D}}(n)$ time, respectively. To get the claimed result, we
 should just make $b$ large enough to get the amount of extra storage
-used down from $O(n)$ to $(1+\varepsilon)n$.
+used down from $O(n)$ to $\varepsilon n$.
 
 \begin{theorem}
-\label{theorem:queue}
+\label{theorem:queue-a}
+A priority queue $\mathcal{D}$ that uses $O(n)$ words of extra storage
+can be transformed into an
+equivalent data structure that, when referenced by at most $k$
+iterators,
+uses
+$O(k)+\varepsilon n$ words of extra storage, for an arbitrary
+$\varepsilon > 0$ and sufficiently large $n > n(\varepsilon)$, and performs 
+\Findmin{}, \Insert{},
+\Borrow{}, \Decrease{}, and \Extract{} in
+$F^{\mathcal{D}}(\varepsilon n) + O(1)$,
+$I^{\mathcal{D}}(\varepsilon n) + O(1)$,
+$B^{\mathcal{D}}(\varepsilon n) + O(1)$,
+$D^{\mathcal{D}}(\varepsilon n) + O(1/\varepsilon)$,
+$E^{\mathcal{D}}(\varepsilon n) + I^{\mathcal{D}}(\varepsilon n) + O(1/\varepsilon)$ time, respectively.
+\end{theorem}
+
+
+
+\begin{theorem}
+\label{theorem:queue-b}
 A priority queue $\mathcal{D}$ that uses $O(n)$ words of extra storage
 can be transformed into a equivalent data structure that
 uses
@@ -1051,7 +1074,11 @@ $D^{\mathcal{D}}(\varepsilon n) + O(1/\varepsilon)$,
 $E^{\mathcal{D}}(\varepsilon n) + I^{\mathcal{D}}(\varepsilon n) + O(1/\varepsilon)$ time, respectively.
 \end{theorem}
 
-To illustrate the power of Theorem \ref{theorem:queue}, let us apply
+\noindent\textbf{Is it possible to get amortized bounds like those we
+get for dictionaries, where only one out of every $b$ operations
+results in an operation on the underlying priority queue?}
+
+To illustrate the power of Theorem \ref{theorem:queue-b}, let us apply
 it to the priority queue described in \cite{EJK06}. As an outcome we
 get the following result:
 
@@ -1068,52 +1095,58 @@ storage, for any $\varepsilon > 0$ and sufficiently large $n > n(\varepsilon)$.
 \section{Discussion}\seclabel{discussion}
 
 We showed that many data structures of size $O(n)$ can be put on a
-diet, so that the memory overhead gets down to $O(n/\lg n)$ or to $(1
-+ \varepsilon)n$ words for any $\varepsilon >0$ and sufficiently large
-$n > n(\varepsilon)$. This diet does not change the running times of
-the operations on the data structures except by a small constant
-factor independent of $\varepsilon$ and/or an additive term of
-$O(1/\varepsilon)$.
+diet, so that the memory overhead is reduced to $O(n/\lg n)$,
+$\epsilon n$, or $(1 + \varepsilon)n$ words for any $\varepsilon >0$
+and sufficiently large $n > n(\varepsilon)$. This diet does not change
+the running times of the operations on the data structures except by a
+small constant factor independent of $\varepsilon$ and/or an additive
+term of $O(1/\varepsilon)$.
 
 We considered ordered dictionaries and single-ended priority queues,
 but the compaction technique can be used for slimming down other data
 structures as well. Other applications, where the technique is known
 to work, include positional sequences (doubly-linked lists), unordered
-dictionaries (e.g.~hashtable relying on chaining), and doubly-ended
-priority queues.  The details follow closely the guidelines given in
-this paper, so we leave the proof of the following theorems for an
-interested reader.
+dictionaries (e.g.~hash tables relying on linear hashing
+\cite{Lit80}), and double-ended priority queues.  The details follow
+closely the guidelines given in this paper, so we leave them
+to the interested reader.
 
+\textbf{I agree with the referee that we shouldn't put theorems in the
+conclusion unless we are willing to supply details.}
+
+\comment{
 \begin{theorem}
-A doubly-linked list, which provides bidirectional iterators and
-iterator-based updates, can be transformed into an equivalent
-positional sequence that uses $(1 + \varepsilon)n$ words of memory for
-any $\varepsilon > 0$ and sufficiently large $n > n(\varepsilon)$,
+A positional sequence, which provides locator-based updates and
+bidirectional iterators, can be transformed into an equivalent data
+structure that uses $(1 + \varepsilon)n$ words of memory, for any
+$\varepsilon > 0$ and sufficiently large $n > n(\varepsilon)$,
 excluding the space used by the $n$ elements stored. This
-transformation only slows down the running times of the supported
+transformation only slows down the running time of the supported
 operations by an additive term of $O(1/\varepsilon)$.
 \end{theorem}
 
 \begin{theorem}
-A hashtable relying on chaining, which provides bidirectional
-iterators and member searches and updates, can be transformed into an
-equivalent unordered dictionary that uses $(1 + \varepsilon)n$ words
-of extra storage, for any $\varepsilon > 0$ and sufficiently large $n
-> n(\varepsilon)$.  This transformation only slows down the running
-times of the supported operations by an additive term of
-$O(1/\varepsilon)$.
+An unordered dictionary, which relies on chaining and provides member
+searches and updates, can be transformed into an equivalent data
+structure that uses $(1 + \varepsilon)n$ words of extra storage, for
+any $\varepsilon > 0$ and sufficiently large $n > n(\varepsilon)$.
+This transformation slows down the running time of the supported
+operations by a \emph{multiplicative factor} of $O(1/\varepsilon)$,
+except that the slowdown is an additive term of $O(1/\varepsilon)$ for
+\Insert{} when a multiset is stored and for locator-based \Erase{}.
 \end{theorem}
 
 \begin{theorem}
 A doubly-ended priority queue, which uses $O(n)$ words of extra
-storage, provides bidirectional iterators and methods \Findmin{},
-\Findmax{}, \Insert{}, \Borrow{}, and \Extract{}, can be transformed
-into an equivalent double-ended priority queue that uses $(1 +
-\varepsilon)n$ words of extra storage, for any $\varepsilon > 0$ and
-sufficiently large $n > n(\varepsilon)$.  This transformation only
-slows down the running times of the supported operations by an
-additive term of $O(1/\varepsilon)$.
+storage and provides methods \Findmin{}, \Findmax{}, \Insert{},
+\Borrow{}, and \Erase{}, can be transformed into an equivalent data
+structure that uses $(1 + \varepsilon)n$ words of extra storage, for
+any $\varepsilon > 0$ and sufficiently large $n > n(\varepsilon)$.
+This transformation only slows down the running time of \Erase{} by an
+additive term of $O(1/\varepsilon)$ and that of the other operations
+by an additive term of $O(1)$.
 \end{theorem}
+}
 
 The practical value of the compaction technique is that users of data
 structures need not worry about the memory overhead associated with
@@ -1122,9 +1155,9 @@ simply apply the technique and the problem is solved.  The theoretical
 value of the compaction technique is that designers of data structures
 need no longer make unnecessarily complicated algorithms and
 representations for the sake of reducing the memory overhead.  They
-can get on with the problem by designing data structures that have
-fast running times and useful properties without worrying about
-memory overhead.
+can design data structures that have
+fast running times and useful properties, and put less emphasis on the
+memory overhead of the data structures.
 
 %\section*{Acknowledgement}
 %We thank Nicolai Esbensen for pointing out that the compaction technique

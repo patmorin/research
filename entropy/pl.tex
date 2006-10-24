@@ -1,0 +1,151 @@
+\documentclass[charterfonts,lotsofwhite]{patmorin}
+\input{pat}
+
+\newcommand{\defequals}{\stackrel{\mathrm{def}}{=}}
+
+\title{\MakeUppercase{Distribution-Sensitive Point-in-Polygon Testing}}
+\author{ULB Algorithms \and John Iacono \and Pat Morin}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+
+For a set $X$, itself containing sets, we denote the union of its
+elements by $\cup X=\bigcup_{x\in X} x$.
+
+\section{Collections of Intervals}
+
+Before considering point-in-polygon testing we consider a related
+one-dimensional problem on a set of intervals.  Our motivation for
+studying this problem is that it gives intuition into how to
+characterize the complexity of point-in-polygon testing under random
+distributions.
+
+
+Let $I=\{[a_i,b_i]: i=1,\ldots,n\}$ be a set of $n$ disjoint closed
+real intervals, with $b_i < a_{i+1}$ for all $1\le i\le n$.  Consider
+a probability distribution $D$.  In this section, all references to
+probablity, events, and expectation refer to $D$. We are interested in
+the expected query time of data structures for testing if a random
+number $p$, distributed according to $D$, is contained in $\cup I$.
+
+More precisely, we considemomentumr the following problem:  Given $I$
+and $D$, construct a comparison tree $T$ whose leaves are labeled with
+either $0$ or $1$ and such that, for any $p$ in the support of $D$,
+the leaf corresponding to $p$ is labelled with $1$ if and only if
+$p\in \cup I$.  Note that, for every comparison tree $T$, every
+$p\in\R$ corresponds to some leaf of $T$ and thus $D$ induces a
+distribution over the leaves of $T$.  The \emph{expected search time}
+for $T$ is the expected depth of a leaf in this distribution.  We call
+such a tree $T$ a \emph{membership tester} for $(I,D)$.
+
+To study optimal comparison trees we need to define a slightly
+different set of intervals than $I$.  Let $J$ be the set of intervals
+obtained after the following two operations:
+
+\begin{enumerate}
+
+\item Remove from $I$ all intervals $\ell$ such that $\Pr(\ell) = 0$.
+
+\item Repeat the following operation as many times as possible:  If
+$\Pr([b_i,a_{i+1}])=0$ then replace the two intervals $(a_i,b_i)$ and
+$(a_{i+1},b_{i+1})$ with the single interval $(a_i,b_{i+1})$
+momentum
+\end{enumerate}
+
+\begin{lem}\lemlabel{intervals}
+Let $\overline{J}$ be the set of maximal open intervals in
+$\R\setminus\cup J$ and let $S=J\cup \overline{J}$.  Then the
+expected search time of any membership tester for $(I,D)$ is at least
+\[
+    H(I,D) \defequals 
+	-\sum_{\ell\in S} \Pr(\ell)\log \Pr(\ell) \enspace .
+\]
+\end{lem}
+
+\begin{proof}
+Consider two distinct intervals $\ell,m\in S$ and suppose $p\in\ell$
+and $q\in m$.  Note that the search paths for $p$ and $q$ must finish
+in different leaves of $T$ since, otherwise, there is some point
+$r\in[p,q]$ that is incorrectly classified by $T$. (Either $r\in \cup
+I$ and the leaf for $r$ is labelled with a 0 or $r\not\in\cup I$ and
+the leaf for $r$ is labelled with 1.)  For every interval $\ell\in S$,
+select the leaf $\ell_T$ of minimum depth such that the search path
+for some point $p\in\ell$ finishes at $\ell_T$.  Using the
+standard encoding of paths in a binary search tree, this gives a code
+for the intervals of $S$ where the length of the codeword for $\ell$
+is the depth of $\ell_T$ in $T$. In this way we obtain
+\[
+   \E[\mathrm{search time}] 
+    = \sum_{r\in\mathrm{leaves}(T)} \Pr(r)\mathrm{depth}(r)
+   \ge \sum_{\ell\in S} \Pr(\ell)\mathrm{depth}(\ell_T)
+   \ge H(I,D)
+\]
+where the second inequality follows from Shannon's source coding
+theorem \cite{X}.
+\end{proof}
+
+Though not the focus of the current paper, it is worth noting that the
+lower bound in \lemref{intervals} can be matched to within an additive
+constant by storing the intervals of $J$ and $\overline{J}$ at the
+leaves of a biased binary search tree \cite{kXX,mXX}.  In particular,
+for every $I$ and $D$ there exists a membership tester for $(I,D)$
+whose expected search time is $H(I,D)+O(1)$.
+
+\section{Point In Convex Polygon Testing}
+
+Let $P$ be a convex $n$-gon whose boundary is denoted by $\partial P$
+and consider a probability measure $D$ over $\R^2$.  In this section
+we are interested in the problem of testing whether a query point $p$,
+drawn according to $D$, is contained in $P$.   
+
+In particular, we are interested in algorithms that can be described
+as linear decision trees.  A \emph{linear decision tree} is a decision
+tree whose internal nodes are labelled with lines and whose leaves are
+labelled with 0 and 1.  When a query point $p$ enters a node, it goes
+to the left child, the right child or stops at that node depending on
+whether $p$ is above, below, or on, respectively the nodes line.  We
+require that, for every $p$ in the support of $D$, the leaf reached in
+the search path for $p$ is labelled with a 1 if and only $p\in P$.
+The cost of a linear decision tree $T$ is the expected length of the
+search path for $p$ when $p$ is drawn according to distribution $D$.
+
+\begin{lem}
+Let $C=P_1\setminus P_2$ where $P_1$ and $P_2$ are closed compact
+subsets of $\R^2$ with $P_2\subseteq P_1$.  Let $C_1,\ldots,C_k$ be
+the connected components of $C\setminus\partial P$.  Then, any linear
+decision tree for $(P,D)$ has cost at least
+\[
+	\frac{1}{2}\times H(P,D,C) 
+		= -\frac{1}{2}\times \sum_{i=1}^k \Pr(C_i)\log \Pr(C_i)
+		\enspace .
+\]
+\end{lem}
+
+\begin{proof} 
+We first prove a lower bound for  a slightly different type of
+computation tree.  A \emph{chord decision tree} for $C$ is defined in
+exactly the same manner as a linear decision tree except that the
+internal nodes of the tree are labelled with line segments (chords)
+whose endpoints are on the bounary of $C$ and whose interiors do not
+intersect the interior of $C$.  A chord partitions $C$ into two parts
+and each of these corresponds to one of the children of $C$.
+
+As in the proof of \lemref{one-d} we can assign a code to
+$C_1,\ldots,C_k$ such that the length of the codeword for $C_i$ is the
+length of the shortest path from the root of $T$ to a leaf
+corresponding to some point in $C_i$.  Then we again obtain
+\[
+  \E[\mathrm{search time}] 
+	\ge \sum_{r\in\mathrm{leaves}(T)} \Pr(r)\mathrm{depth}(r) 
+	\ge -\sum_{i=1}^k \Pr(C_i)\log\Pr(C_i)
+\]
+
+\end{proof}
+
+\section{Conclusion}
+
+\end{document}

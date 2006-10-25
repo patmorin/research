@@ -1,7 +1,9 @@
 \documentclass[charterfonts,lotsofwhite]{patmorin}
+\usepackage{amsopn}
 \input{pat}
 
 \newcommand{\defequals}{\stackrel{\mathrm{def}}{=}}
+\DeclareMathOperator{\depth}{depth}
 
 \title{\MakeUppercase{Distribution-Sensitive Point-in-Polygon Testing}}
 \author{ULB Algorithms \and John Iacono \and Pat Morin}
@@ -16,6 +18,37 @@
 For a set $X$, itself containing sets, we denote the union of its
 elements by $\cup X=\bigcup_{x\in X} x$.
 
+A \emph{decision problem} $\mathcal{P}$ over a domain $\mathcal{D}$ is
+a function $\mathcal{P}:\mathcal{D}\mapsto \{0,1\}$.
+
+A \emph{decision tree} is a full binary tree\footnote{A full binary
+tree is a rooted ordered binary tree in which each non-leaf node has
+exactly two children.} in which each internal node $n$ is labelled
+with a predicate $P_n(\cdot)$ and for which each leaf $\ell$ is
+labelled with a boolean value $d(\ell)\in\{0,1\}$. The \emph{search
+path} of an input $p$ in a comparison tree $T$ starts at the root of
+$T$ and, at each internal node $n$, proceeds to the left child of $n$
+if $P_n(p)$ is false and proceeds to the right child of $n$ otherwise.
+We denote by $T(p)$ the label of the final (leaf) node in the search
+path for $p$.  We say that the decision tree $T$ solves a decision
+problem $\mathcal{P}$ over the domain $\mathcal{D}$ if, for every $p\in
+\mathcal{D}$, $\mathcal{P}(p)=T(p)$.
+
+When there is a probability measure $D$ over $\mathcal{D}$, we define
+the \emph{expected search time} of a decision tree $T$ as the expected
+length of the search path for $p$ when $p$ is drawn at random from
+$\mathcal{D}$ according to the distribution $D$.  Note that, for each
+leaf $\ell$ of $T$ there is a subset of $r(\ell)\subseteq \mathcal{D}$
+such that the search path for any $p\in r(\ell)$ ends at $\ell$.
+Thus, the expected search time of $T$ can be written as
+\[
+     \mu_D(T) = \sum_{\ell\in L(T)} \Pr(r(\ell))\times \depth(\ell)
+	\enspace ,
+\]
+where $L(T)$ denotes the leaves of $T$ and $\depth(\ell)$ denotes the
+length of the path from the root of $T$ to $\ell$.
+
+
 \section{Collections of Intervals}
 
 Before considering point-in-polygon testing we warm up by studying a
@@ -25,35 +58,25 @@ characterize the complexity of point-in-polygon testing under random
 distributions.
 
 Let $I=\{[a_i,b_i]: i=1,\ldots,n\}$ be a set of $n$ disjoint closed
-real intervals, with $b_i < a_{i+1}$ for all $1\le i\le n$.  Consider
-a probability distribution $D$.  In this section, all references to
-probablity, events, and expectation refer to $D$. We are interested in
-the expected query time of data structures for testing if a random
-number $p$, distributed according to $D$, is contained in $\cup I$.
+real intervals, with $b_i < a_{i+1}$ for all $1\le i\le n$.  We are
+interested in the problem of constructing a decision tree for $I$ that
+can answer the decision problem: Given $p\in\R$, is $p\in \cup I$?
+The type of decision trees we consider are \emph{comparison trees}.
+These are decision trees in which each internal node $v$ is labelled
+with a comparison of the form $P_v(x) = [x > n(v)]$ where $n(v)$ is
+some real number called the \emph{label} of $v$.\footnote{Here and
+throughout, we use Iverson's notation \cite{kXX} where, for a
+predicate $X$, $[X]$ evaluates to 1 if $X$ is true and 0 otherwise.}
+In particular, we are interested in the case when the query point $p$
+is drawn according to some probability distribution $D$.   Throughout
+the remainder of this section, all references to probabilities are
+implicitly with reference to $D$ and the query domain is the support
+of $D$.  We call such a decision tree a membership tester for $(I,D)$.
 
-More precisely, we are interested in algorithms that can be modelled
-as comparison decision trees.  A \emph{comparison decision tree} in
-which each internal node $n$ is labelled with a real number $v(n)$ and
-for which each leaf $\ell$ is labelled with $d(\ell)\in\{0,1\}$.  The
-\emph{search path} of a number $p$ in a comparison tree $T$ starts at
-the root of $T$ and, at each internal node $n$, proceeds to the left child
-if $p\le v(n)$
-
-
-
-More precisely, we consider the following problem:  Given $I$
-and $D$, construct a comparison tree $T$ whose leaves are labeled with
-either $0$ or $1$ and such that, for any $p$ in the support of $D$,
-the leaf corresponding to $p$ is labelled with $1$ if and only if
-$p\in \cup I$.  Note that, for every comparison tree $T$, every
-$p\in\R$ corresponds to some leaf of $T$ and thus $D$ induces a
-distribution over the leaves of $T$.  The \emph{expected search time}
-for $T$ is the expected depth of a leaf in this distribution.  We call
-such a tree $T$ a \emph{membership tester} for $(I,D)$.
-
-To study optimal comparison trees we need to define a slightly
-different set of intervals than $I$.  Let $J$ be the set of intervals
-obtained after the following two operations:
+To study the expected search time of comparison trees for this problem
+we need to define a slightly different set of intervals than $I$.  Let
+$J$ be the set of intervals obtained after the following two
+operations:
 
 \begin{enumerate}
 
@@ -62,36 +85,36 @@ obtained after the following two operations:
 \item Repeat the following operation as many times as possible:  If
 $\Pr([b_i,a_{i+1}])=0$ then replace the two intervals $(a_i,b_i)$ and
 $(a_{i+1},b_{i+1})$ with the single interval $(a_i,b_{i+1})$
-momentum
 \end{enumerate}
 
 \begin{lem}\lemlabel{intervals}
 Let $\overline{J}$ be the set of maximal open intervals in
 $\R\setminus\cup J$ and let $S=J\cup \overline{J}$.  Then the
-expected search time of any membership tester for $(I,D)$ is at least
+expected search time of any membership tester $T$ for $(I,D)$ is at least
 \[
-    H(I,D) \defequals 
-	-\sum_{\ell\in S} \Pr(\ell)\log \Pr(\ell) \enspace .
+    \mu_D(T) \ge H(I,D) \defequals 
+	-\sum_{x\in S} \Pr(x)\log \Pr(x) \enspace .
 \]
 \end{lem}
 
 \begin{proof}
-Consider two distinct intervals $\ell,m\in S$ and suppose $p\in\ell$
-and $q\in m$.  Note that the search paths for $p$ and $q$ must finish
-in different leaves of $T$ since, otherwise, there is some point
-$r\in[p,q]$ that is incorrectly classified by $T$. (Either $r\in \cup
-I$ and the leaf for $r$ is labelled with a 0 or $r\not\in\cup I$ and
-the leaf for $r$ is labelled with 1.)  For every interval $\ell\in S$,
-select the leaf $\ell_T$ of minimum depth such that the search path
-for some point $p\in\ell$ finishes at $\ell_T$.  Using the
-standard encoding of paths in a binary search tree, this gives a code
-for the intervals of $S$ where the length of the codeword for $\ell$
-is the depth of $\ell_T$ in $T$. In this way we obtain
+Consider two distinct intervals $i,j\in S$ and suppose $p\in i$ and
+$q\in j$.  Note that the search paths for $p$ and $q$ must finish in
+different leaves of $T$ since, otherwise, there is some point
+$r\in[p,q]$ that is incorrectly classified by $T$, i.e., such
+that $T(p)\neq [p\in\cup I]$.  Now, for every interval $i\in S$,
+select a point $p_i\in i$ such that the length of the search path for
+$p$ is minimum.   Using the standard encoding of paths in a binary
+search tree, this gives a code for the intervals of $S$ where the
+length of the codeword for $i$ is the depth of $p_i$ in $T$.  In this
+way we obtain
+
 \[
-   \E[\mathrm{search time}] 
-    = \sum_{r\in\mathrm{leaves}(T)} \Pr(r)\mathrm{depth}(r)
-   \ge \sum_{\ell\in S} \Pr(\ell)\mathrm{depth}(\ell_T)
+   \mu_D(T)
+    = \sum_{\ell\in L(T)} \Pr(\ell)\depth(\ell)
+   \ge \sum_{i \in S} \Pr(i)\depth(p_i)
    \ge H(I,D)
+   \enspace , 
 \]
 where the second inequality follows from Shannon's source coding
 theorem \cite{X}.
@@ -112,18 +135,13 @@ we are interested in the problem of testing whether a query point $p$,
 drawn according to $D$, is contained in $P$.   
 
 In particular, we are interested in algorithms that can be described
-as linear decision trees.  A \emph{linear decision tree} is a decision
-tree whose internal nodes are labelled with lines and whose leaves are
-labelled with 0 and 1.  The query path for a point $p$ in a linear
-decision tree is defined as follows: $p$ enters at the root of the
-decision tree and when a query point $p$ enters a node, it goes to the
-left child, the right child or stops at that node depending on whether
-$p$ is to the left, to the right, or on, respectively, the node's
-line.  We require that, for every $p$ in the support of $D$, the leaf
-reached in the search path for $p$ is labelled with a 1 if and only
-$p\in P$.  The cost of a linear decision tree $T$ is the expected
-length of the search path for $p$ when $p$ is drawn according to
-distribution $D$.
+as \emph{linear decision trees}.  These are decision trees such that
+each internal node $v$ contains a linear inequality $P_v(x,y)=[ax+by_c
+\ge 0]$.  Again, we require that, for every $p$ in the support of $D$,
+the leaf reached in the search path for $p$ is labelled with a 1 if
+and only $p\in P$.  The cost of a linear decision tree $T$ is the
+expected length of the search path for $p$ when $p$ is drawn according
+to distribution $D$.
 
 \begin{lem}
 Let $C=P_1\setminus P_2$ where $P_1$ and $P_2$ are closed compact

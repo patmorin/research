@@ -18,12 +18,11 @@ elements by $\cup X=\bigcup_{x\in X} x$.
 
 \section{Collections of Intervals}
 
-Before considering point-in-polygon testing we consider a related
-one-dimensional problem on a set of intervals.  Our motivation for
-studying this problem is that it gives intuition into how to
+Before considering point-in-polygon testing we warm up by studying a
+related one-dimensional problem on a set of intervals.  Our motivation
+for studying this problem is that it gives intuition into how to
 characterize the complexity of point-in-polygon testing under random
 distributions.
-
 
 Let $I=\{[a_i,b_i]: i=1,\ldots,n\}$ be a set of $n$ disjoint closed
 real intervals, with $b_i < a_{i+1}$ for all $1\le i\le n$.  Consider
@@ -32,7 +31,17 @@ probablity, events, and expectation refer to $D$. We are interested in
 the expected query time of data structures for testing if a random
 number $p$, distributed according to $D$, is contained in $\cup I$.
 
-More precisely, we considemomentumr the following problem:  Given $I$
+More precisely, we are interested in algorithms that can be modelled
+as comparison decision trees.  A \emph{comparison decision tree} in
+which each internal node $n$ is labelled with a real number $v(n)$ and
+for which each leaf $\ell$ is labelled with $d(\ell)\in\{0,1\}$.  The
+\emph{search path} of a number $p$ in a comparison tree $T$ starts at
+the root of $T$ and, at each internal node $n$, proceeds to the left child
+if $p\le v(n)$
+
+
+
+More precisely, we consider the following problem:  Given $I$
 and $D$, construct a comparison tree $T$ whose leaves are labeled with
 either $0$ or $1$ and such that, for any $p$ in the support of $D$,
 the leaf corresponding to $p$ is labelled with $1$ if and only if
@@ -105,13 +114,16 @@ drawn according to $D$, is contained in $P$.
 In particular, we are interested in algorithms that can be described
 as linear decision trees.  A \emph{linear decision tree} is a decision
 tree whose internal nodes are labelled with lines and whose leaves are
-labelled with 0 and 1.  When a query point $p$ enters a node, it goes
-to the left child, the right child or stops at that node depending on
-whether $p$ is above, below, or on, respectively the nodes line.  We
-require that, for every $p$ in the support of $D$, the leaf reached in
-the search path for $p$ is labelled with a 1 if and only $p\in P$.
-The cost of a linear decision tree $T$ is the expected length of the
-search path for $p$ when $p$ is drawn according to distribution $D$.
+labelled with 0 and 1.  The query path for a point $p$ in a linear
+decision tree is defined as follows: $p$ enters at the root of the
+decision tree and when a query point $p$ enters a node, it goes to the
+left child, the right child or stops at that node depending on whether
+$p$ is to the left, to the right, or on, respectively, the node's
+line.  We require that, for every $p$ in the support of $D$, the leaf
+reached in the search path for $p$ is labelled with a 1 if and only
+$p\in P$.  The cost of a linear decision tree $T$ is the expected
+length of the search path for $p$ when $p$ is drawn according to
+distribution $D$.
 
 \begin{lem}
 Let $C=P_1\setminus P_2$ where $P_1$ and $P_2$ are closed compact
@@ -119,8 +131,9 @@ subsets of $\R^2$ with $P_2\subseteq P_1$.  Let $C_1,\ldots,C_k$ be
 the connected components of $C\setminus\partial P$.  Then, any linear
 decision tree for $(P,D)$ has cost at least
 \[
-	\frac{1}{2}\times H(P,D,C) 
-		= -\frac{1}{2}\times \sum_{i=1}^k \Pr(C_i)\log \Pr(C_i)
+	\frac{1}{2}\times \Pr(C)\times H(P,D,C) 
+		= -\frac{1}{2}\times\Pr(C)\times 
+			\sum_{i=1}^k \Pr(C_i/C)\log \Pr(C_i/C)
 		\enspace .
 \]
 \end{lem}
@@ -130,10 +143,19 @@ We first prove a lower bound for  a slightly different type of
 computation tree.  A \emph{chord decision tree} for $C$ is defined in
 exactly the same manner as a linear decision tree except that the
 internal nodes of the tree are labelled with line segments (chords)
-whose endpoints are on the bounary of $C$ and whose interiors do not
-intersect the interior of $C$.  A chord partitions $C$ into two parts
-and each of these corresponds to one of the children of $C$.
+whose endpoints are on the bounary of $C$ and whose interiors are
+disjoint from the boundary of $C$.  A chord partitions $C$ into two
+parts and each of these corresponds to one of the children of $C$.
+The following claim relates chord decision trees to linear decision
+trees and follows easily from the fact that any line intersects $C$ in
+at most 2 connected components.
 
+\begin{clm}
+Given a linear decision tree for $(P,C)$ with expected cost $k$, there exists a
+chord decision tree for 
+\end{clm}
+
+Let $T_C$ be a chord tree for $C$.
 As in the proof of \lemref{one-d} we can assign a code to
 $C_1,\ldots,C_k$ such that the length of the codeword for $C_i$ is the
 length of the shortest path from the root of $T$ to a leaf

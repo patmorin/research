@@ -18,6 +18,11 @@
 For a set $X$, itself containing sets, we denote the union of its
 elements by $\cup X=\bigcup_{x\in X} x$.
 
+For a distribution $D$ and an event $X$, we denote by $D_{|X}$ the
+distribution $D$ conditioned on $X$.  That is, the distribution where 
+the probability of an even $Y$ is
+$\Pr(Y|X)=\Pr(Y\cap X)/\Pr(X)$.
+
 A \emph{decision problem} $\mathcal{P}$ over a domain $\mathcal{D}$ is
 a function $\mathcal{P}:\mathcal{D}\mapsto \{0,1\}$.
 
@@ -136,29 +141,36 @@ drawn according to $D$, is contained in $P$.
 
 In particular, we are interested in algorithms that can be described
 as \emph{linear decision trees}.  These are decision trees such that
-each internal node $v$ contains a linear inequality $P_v(x,y)=[ax+by_c
-\ge 0]$.  Again, we require that, for every $p$ in the support of $D$,
+each internal node $v$ contains a linear inequality $P_v(x,y)=[ax+by
+\ge c]$.  Again, we require that, for every $p$ in the support of $D$,
 the leaf reached in the search path for $p$ is labelled with a 1 if
-and only $p\in P$.  The cost of a linear decision tree $T$ is the
-expected length of the search path for $p$ when $p$ is drawn according
-to distribution $D$.
+and only if $p\in P$.  Geometrically, each internal node of $T$ is
+labelled with a directed line and the decision to go to the left or
+right child depends on whether p is to the left or right (or on) this
+line.  
 
-\begin{lem}
+\subsection{Nice Distributions}
+
+In this section we assume throughout that the support of $D$ is a
+convex set that includes $P$.  The following lemma is crucial in
+proving the optimality of our data structure:
+
+\begin{lem}\lemlabel{lower-bound-a}
 Let $C=P_1\setminus P_2$ where $P_1$ and $P_2$ are closed compact
 subsets of $\R^2$ with $P_2\subseteq P_1$.  Let $C_1,\ldots,C_k$ be
-the connected components of $C\setminus\partial P$.  Then, any linear
-decision tree for $(P,D)$ has cost at least
+the connected components of $C\setminus\partial P$.  Then for any
+linear decision tree $T$
 \[
-	\frac{1}{2}\times \Pr(C)\times H(P,D,C) 
-		= -\frac{1}{2}\times\Pr(C)\times 
-			\sum_{i=1}^k \Pr(C_i/C)\log \Pr(C_i/C)
+	\mu_{D_{|C}}(T) \ge \frac{1}{2}\times H(P,D_{|C},C) 
+		= -\frac{1}{2}
+			\times \sum_{i=1}^k \Pr(C_i|C)\log \Pr(C_i|C)
 		\enspace .
 \]
 \end{lem}
 
 \begin{proof} 
 We first prove a lower bound for  a slightly different type of
-computation tree.  A \emph{chord decision tree} for $C$ is defined in
+decision tree.  A \emph{chord decision tree} for $C$ is defined in
 exactly the same manner as a linear decision tree except that the
 internal nodes of the tree are labelled with line segments (chords)
 whose endpoints are on the bounary of $C$ and whose interiors are
@@ -168,23 +180,79 @@ The following claim relates chord decision trees to linear decision
 trees and follows easily from the fact that any line intersects $C$ in
 at most 2 connected components.
 
-\begin{clm}
-Given a linear decision tree for $(P,C)$ with expected cost $k$, there exists a
-chord decision tree for 
+\begin{clm}\clmlabel{two-approx}
+Given a linear decision tree $T$ for $(P,D_{|C})$ with expected cost $k$,
+there exists a chord decision tree $T_C$ for $(P,D_{|C})$ with expected cost
+at most $2k$. 
 \end{clm}
 
-Let $T_C$ be a chord tree for $C$.
-As in the proof of \lemref{one-d} we can assign a code to
-$C_1,\ldots,C_k$ such that the length of the codeword for $C_i$ is the
-length of the shortest path from the root of $T$ to a leaf
-corresponding to some point in $C_i$.  Then we again obtain
+Let $T$ be any linear decision tree and let $T_C$ be the chord
+decision tree guaranteed by \clmref{two-approx}.  As in the proof of
+\lemref{intervals}, the search paths for a point $p\in C_i$ and a
+point $q\in C_j$ with $i\neq j$ must finish at different leaves of the
+chord decision tree.  Thus, we can assign a code to $C_1,\ldots,C_k$
+such that the length of the codeword for $C_i$ is the length of the
+shortest path from the root of $T$ to a leaf corresponding to some
+point in $C_i$.  Then we again obtain
 \[
-  \E[\mathrm{search time}] 
-	\ge \sum_{r\in\mathrm{leaves}(T)} \Pr(r)\mathrm{depth}(r) 
-	\ge -\sum_{i=1}^k \Pr(C_i)\log\Pr(C_i)
+  \mu_{D_{|C}}(T_C)
+	= \sum_{\ell\in L(T_C)} \Pr(\ell|C)\depth(\ell) 
+	\ge -\sum_{i=1}^k \Pr(C_i|C)\log\Pr(C_i|C) \enspace .
+\]
+Then, from \clmref{two-approx}, $\mu_{D_{|C}}(T) \ge
+\frac{1}{2}\mu_{D_{|C}}(T_C)$, completing the proof.
+\end{proof}
+
+Next we describe a data structure that uses \lemref{lower-bound-a} to
+guide its construction. In particular, our data structure consists of
+a hierarchy of progressively finer approximations $A_0,A_1,\ldots,A_k$
+of $\partial P$ with $\R=A_0\supseteq A_{1}\supseteq\cdots\supseteq
+A_k$.  These approximations are designed so that:
+
+\begin{enumerate}
+
+\item for any query point $p$ we can, in $O(i)$ time, find the largest
+value $i$ such that $p\in A_i$ and simultaneously determine if $p\in
+P$, and 
+
+\item if we condition on $A_i$, the expected cost of any decision tree
+for $(P,D_{|A_i})$ is $\Omega(i)$.
+\end{enumerate}
+
+To see that this is sufficient, observe that the first point above
+shows that the query time of our data structure is 
+\[
+     \mu_D(T) = \sum_{i=0}^k O(i)(\Pr(A_i)-\Pr(A_{i+1})) =
+	\sum_{i=1}^k O(1)\Pr(A_i) \enspace .
 \]
 
-\end{proof}
+
+
+
+\comment{
+To see that we also have a matching lower bound, we use the
+\emph{little-birdie principle}.  That is, we give the algorithm extra
+information that it may (or may not) use to speed up its search.
+Suppose that we allow a stronger model in which an algorithm
+precomputes a collection $T_0,\ldots,T_m$ of linear decision trees.
+Now, suppose we draw the point $p$ according to $D$.  Let
+$i=\max\{j:p\in A_j\}$.  Now, we report to the algorithm some value
+$j$ chosen uniformly at random from $\{i,\ldots,k\}$.  Using this
+value $j$, the algorithm then selects one of the trees
+$T_0,\ldots,T_m$ that it uses to determine if $p\in P$.
+
+
+ and
+we tell the algorithm that $p\in A_i$ for some value $i$.  Point 2,
+above, says that, even given this information, the expected time to
+determine if $p\in P$ is $\Omega(i)$.
+
+while the query time of any data structure is at least
+\[
+     \sum_{i=1}^k \Omega(i)(\Pr(A_i)-\Pr(A_{i-1}))  \enspace .
+\]
+}
+
 
 \section{Conclusion}
 

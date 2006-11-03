@@ -7,7 +7,7 @@
 \newcommand{\boundary}{\partial}
 \DeclareMathOperator{\depth}{depth}
 
-\title{\MakeUppercase{Distribution-Sensitive Point-in-Polygon Testing}}
+\title{\MakeUppercase{Distribution-Sensitive Planar Point Location}}
 \author{ULB Algorithms \and John Iacono \and Pat Morin}
 \date{}
 
@@ -16,6 +16,72 @@
 
 \section{Introduction}
 
+The planar point location problem is one of the first problems to have
+been considered by the field of computational geometry. Given a planar
+straight line graph $G$, the planar point location problems asks us to
+construct a data structure so that, for any query point $p$, we can
+quickly determine which face of $G$ contains $p$.  The history of the
+planar point location problem parallels, in many ways, the study of
+binary search trees.
+
+After a few initial attempts \cite{dl76,lp77,p81}, asymptotically
+optimal (and quite different) linear-space $O(\log n)$ query time
+solutions to the planar point location problem were obtained by
+Kirkpatrick \cite{28}, Sarnak and Tarjan \cite{46}, Edelsbrunner
+\etal\ \cite{24} in the mid 1980s.  An elegant, and optimal,
+randomized solution was later given by Mulmuley \cite{34}.  Preparata
+\cite{p} gives a comprehensive survey of the results of this era.
+
+In the 1990s, several authors became interested in determining the
+exact constant achievable in the query time.  Goodrich \etal\
+\cite{26} gave an $O(n^2)$ size data structure that, for any query,
+required the evaluation of at most $2\log n$ point-line
+comparisons.\footnote{Here and throughout, logarithms are implicitly
+taken modulo 2 unless otherwise specified.} Later, Adamy and Seidel
+\cite{1} gave a linear space data structure that answers queries using
+$\log n + 2\sqrt{\log n} + O(\log\log n)$ point-line comparisons and
+showed that this result is optimal up to the third term.
+
+Still not done with the problem, several authors considered the point
+location problem under various assumptions about the query
+distribution.  All these solutions compare the expected query time to
+\emph{entropy bound};  if the query point $p$ is chosen randomly such
+that $p_i$ is the probability that $p$ is contained in face $i$ of
+$G$, then no algorithm that makes only binary decisions can answer
+queries using fewer than 
+\[
+    H = \sum_i p_i\log(1/p_i)
+\]
+decisions.
+
+At this point, the problem becomes more complicated and the results
+become more specific.  Arya \etal\ \cite{XXX} showed that, for planar
+graphs whose faces are convex polygons, and for distributions where
+$x$ and $y$ coordinates are drawn independently, a data structure
+exists in which the expected number of point-line comparisons is at
+most $4H+O(1)$ using linear space or at most $2H+O(1)$ using quadratic
+space.
+
+Iacono \cite{iXX} showed that, for triangulations, a simple variant of
+Kirkpatrick's original point location structure gives a linear space,
+$O(H+1)$ query time.  Another result by Arya \etal\ \cite{ammXX} gives
+a data structure for planar graphs whose faces have constant
+complexity (e.g., triangulations) that uses $H + O(H^{2/3}+1)$
+expected number of comparisons per query and $O(n\log n)$ space.   The
+same authors \cite{ammXX} gave a data structure that, for planar
+graphs whose faces have constant complexity, uses $O(n\log^* n)$ space
+and for which the expected number of comparisons is $H+O(H^{2/3}+1)$.
+
+The same three authors \cite{ammXX} also showed that a variant of
+Mulmuley's randomized algorithm gives, for planar graphs whose faces
+have constant complexity, a simple $O(H+1)$ query time, linear space
+data structure. 
+
+In this paper we consider, yet again, distribution-sensitive point
+location. However, we begin our investigation with one of the most
+basic versions of the problem:  Testing if a query point is contained
+in a convex polygon. The original, $O(\log n)$, time solution to this
+problem is folklore.
 
 \section{Preliminaries}
 
@@ -470,10 +536,9 @@ Now, applying \lemref{lower-bound} to each group $G_{i,j}$ we obtain
 	\sum_{v\in G_{i,j}}\Omega(\Pr(v)\log (1/\Pr(v)) \\
 & \ge & \Omega(H) -O(1)
 \end{eqnarray*}
-
-
 \end{proof}
 
+\section{Point Location}
 
 
 

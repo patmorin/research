@@ -25,29 +25,30 @@ distribution $D$ conditioned on $X$.  That is, the distribution where
 the probability of an even $Y$ is
 $\Pr(Y|X)=\Pr(Y\cap X)/\Pr(X)$.
 
-A \emph{decision problem} $\mathcal{P}$ over a domain $\mathcal{D}$ is
-a function $\mathcal{P}:\mathcal{D}\mapsto \{0,1\}$.
+A \emph{classification problem} over a domain $\mathcal{D}$ is a function
+$\mathcal{P}:\mathcal{D}\mapsto \{0,\ldots,k-1\}$.  The special case
+in which $k=2$ is called a \emph{decision problem}.
 
-A \emph{decision tree} is a full binary tree\footnote{A full binary
-tree is a rooted ordered binary tree in which each non-leaf node has
-exactly two children.} in which each internal node $n$ is labelled
-with a predicate $P_n(\cdot)$ and for which each leaf $\ell$ is
-labelled with a boolean value $d(\ell)\in\{0,1\}$. The \emph{search
-path} of an input $p$ in a comparison tree $T$ starts at the root of
-$T$ and, at each internal node $n$, proceeds to the left child of $n$
-if $P_n(p)$ is false and proceeds to the right child of $n$ otherwise.
-We denote by $T(p)$ the label of the final (leaf) node in the search
-path for $p$.  We say that the decision tree $T$ solves a decision
-problem $\mathcal{P}$ over the domain $\mathcal{D}$ if, for every $p\in
-\mathcal{D}$, $\mathcal{P}(p)=T(p)$.
+A \emph{classification tree} is a full binary tree\footnote{A full
+binary tree is a rooted ordered binary tree in which each non-leaf
+node has exactly two children.} in which each internal node $v$ is
+labelled with a predicate $P_v(\cdot)$ and for which each leaf $\ell$
+is labelled with a value $d(\ell)\in\{0,\ldots,k-1\}$. The
+\emph{search path} of an input $p$ in a comparison tree $T$ starts at
+the root of $T$ and, at each internal node $v$, proceeds to the left
+child of $v$ if $P_v(p)$ is false and proceeds to the right child of
+$v$ otherwise.  We denote by $T(p)$ the label of the final (leaf) node
+in the search path for $p$.  We say that the classification tree $T$
+\emph{solves} the classification problem $\mathcal{P}$ over the domain
+$\mathcal{D}$ if, for every $p\in \mathcal{D}$, $\mathcal{P}(p)=T(p)$.
 
 When there is a probability measure $D$ over $\mathcal{D}$, we define
-the \emph{expected search time} of a decision tree $T$ as the expected
-length of the search path for $p$ when $p$ is drawn at random from
-$\mathcal{D}$ according to the distribution $D$.  Note that, for each
-leaf $\ell$ of $T$ there is a subset of $r(\ell)\subseteq \mathcal{D}$
-such that the search path for any $p\in r(\ell)$ ends at $\ell$.
-Thus, the expected search time of $T$ can be written as
+the \emph{expected search time} of a classification tree $T$ as the
+expected length of the search path for $p$ when $p$ is drawn at random
+from $\mathcal{D}$ according to the distribution $D$.  Note that, for
+each leaf $\ell$ of $T$ there is a subset of $r(\ell)\subseteq
+\mathcal{D}$ such that the search path for any $p\in r(\ell)$ ends at
+$\ell$.  Thus, the expected search time of $T$ can be written as
 \[
      \mu_D(T) = \sum_{\ell\in L(T)} \Pr(r(\ell))\times \depth(\ell)
 	\enspace ,
@@ -55,6 +56,35 @@ Thus, the expected search time of $T$ can be written as
 where $L(T)$ denotes the leaves of $T$ and $\depth(\ell)$ denotes the
 length of the path from the root of $T$ to $\ell$.
 
+The folloing theorem, which is a restatement of (part of) Shannon's
+coding Theorem \cite{sXX}, is what all existing results use to
+establish their optimality:
+
+\begin{thm}\thmlabel{shannon}
+Let $\mathcal{P}:D\mapsto \{0,\ldots,k-1\}$ be a classification
+problem and let $p\in \mathcal{D}$ be selected from a distibution $D$ such
+that $\Pr\{\mathcal{P}(x)= i\}=p_i$, for $0\le i< k$.  Then, any
+classification tree $T$ that solves $\mathcal{P}$ has
+\begin{equation}
+     \mu_D(T) \ge \sum_{i=0}^{k-1} p_i\log(1/p_i) \enspace .
+	\eqlabel{shannon}
+\end{equation}
+\end{thm}
+
+\thmref{shannon} can provide very powerful lower bounds since it makes
+no assumptions about the predicates used in the nodes of the decision
+tree $T$.  However, it is useless for decision problems since the
+right hand side of \eqref{shannon} is never greater than 1 in this
+case.  For instance, in all existing results on distribution-sensitive
+planar point location, the set $\{0,\ldots,k-1\}$ are the set of faces
+in the subdivision.  However, for one of the simplest planar point
+location problems, namely testing whether a point is contained in a
+convex polygon, there are only two faces, so \thmref{shannon} can not
+give a lower bound greater than 1 regardless of the input distribution
+or the number of vertices of the polygon.  However, we know 
+that testing if a point is contained in a convex $n$-gon has an
+$\Omega(\log n)$ lower bound in fairly strong models of computation,
+including algebraic decision trees \cite{bo}.
 
 \section{Collections of Intervals}
 
@@ -80,6 +110,7 @@ the remainder of this section, all references to probabilities are
 implicitly with reference to $D$ and the query domain is the support
 of $D$.  We call such a decision tree a membership tester for $(I,D)$.
 
+\comment{
 To study the expected search time of comparison trees for this problem
 we need to define a slightly different set of intervals than $I$.  Let
 $J$ be the set of intervals obtained after the following two
@@ -93,14 +124,16 @@ operations:
 $\Pr([b_i,a_{i+1}])=0$ then replace the two intervals $(a_i,b_i)$ and
 $(a_{i+1},b_{i+1})$ with the single interval $(a_i,b_{i+1})$
 \end{enumerate}
+}
 
 \begin{lem}\lemlabel{intervals}
-Let $\overline{J}$ be the set of maximal open intervals in
-$\R\setminus\cup J$ and let $S=J\cup \overline{J}$.  Then the
-expected search time of any membership tester $T$ for $(I,D)$ is at least
+Let $\overline{I}$ be the set of maximal open intervals in
+$\R\setminus\cup I$ and let $S=I\cup \overline{I}$.  Then,
+for any decision tree that tests if a point $p$ drawn from $D$
+is in $I$,
 \[
     \mu_D(T) \ge H(I,D) \defequals 
-	-\sum_{x\in S} \Pr(x)\log \Pr(x) \enspace .
+	\sum_{x\in S} \Pr(x)\log(1/\Pr(x)) \enspace .
 \]
 \end{lem}
 
@@ -127,9 +160,24 @@ where the second inequality follows from Shannon's source coding
 theorem \cite{X}.
 \end{proof}
 
+Note that, to prove the above result, we required some assumptions
+about the predicates used at the nodes of $T$, namely that they are
+comparisons.  Without some such assumption a lower bound that holds
+for every set $I$ of intervals is impossible to prove.\footnote{For
+example, if the intervals are defined by $a_i=2(i-1)$ and
+$b_i=2(i-1)+1$ then the predicate $P(x)=[(x\ge 0)\wedge(x\le
+2n)\wedge((\floor{x}\bmod 2=0)\vee(x=\floor{x}))]$ determines if $x\in
+S$ in constant time.} This is in stark contrast to the very closely
+related classification problem: Given a partitioning of $R$ into a set
+$S$ of $n$ intervals, construct a classification tree whose output is
+$i$ if its input point is contained in the $i$th interval.  For the
+latter problem, \thmref{shannon} implies that any decision tree has an
+expected search time at least equal to the entropy of the distribution
+of the queries over the intervals. 
+
 Though not the focus of the current paper, it is worth noting that the
 lower bound in \lemref{intervals} can be matched to within an additive
-constant by storing the intervals of $J$ and $\overline{J}$ at the
+constant by storing the intervals of $I$ and $\overline{I}$ at the
 leaves of a biased binary search tree \cite{kXX,mXX}.  In particular,
 for every $I$ and $D$ there exists a membership tester for $(I,D)$
 whose expected search time is $H(I,D)+O(1)$.
@@ -137,9 +185,11 @@ whose expected search time is $H(I,D)+O(1)$.
 \section{Point In Convex Polygon Testing}
 
 Let $P$ be a convex $n$-gon whose boundary is denoted by $\partial P$
-and consider a probability measure $D$ over $\R^2$.  In this section
-we are interested in the problem of testing whether a query point $p$,
-drawn according to $D$, is contained in $P$.   
+and consider a probability measure $D$ over $\R^2$.  We use the
+convention that $P$ contains it boundary.  In this section we are
+interested preprocessing $P$ and $D$ so that we can quickly solve the
+decision problem of testing whether a query point $p$, drawn according
+to $D$, is contained in $P$. 
 
 In particular, we are interested in algorithms that can be described
 as \emph{linear decision trees}.  These are decision trees such that
@@ -151,12 +201,207 @@ labelled with a directed line and the decision to go to the left or
 right child depends on whether p is to the left or right (or on) this
 line.  
 
-\subsection{Nice Distributions}
+Our exposition is broken up into three sections.  We begin by
+describing a data structure (in fact, a decision tree) that solves
+this problem.  Next, we give an (easy) analysis of the expected search
+time of this data structure.  Finally, we give a (more difficult)
+proof that this expected search time is optimal.
 
-In this section we assume throughout that the support of $D$ is a
-convex set whose interior includes $P$.  The following lemma is
-crucial in proving the optimality of our data structure:
 
+\subsection{Triangle Trees}
+
+We begin by describing a data structure that works by creating a
+sequence of successively finer approximations $A_0,\ldots,A_k$ to
+$\boundary P$.  Each approximation $A_i$ consists of two convex
+polygons; an \emph{outer approximation} that contains $P$ and an
+\emph{inner approximation} that is contained in $P$.
+
+Each approximation $A_i$ is completely defined by a set $S_i$ of
+$O(2^i)$ points from $\boundary P$.  The inner approximation is simply
+the convex hull of $S_i$.  The outer approximation has an edge tangent
+to $P$ at each of the points of $S_i$.  More precisely, for each point
+$x\in S_i$ there is an edge $e$ of the outer approximation that
+contains $x$.  If $x$ is in the interior of an edge of $P$ then $e$ is
+contained in the same line that contains that edge. Otherwise ($x$ is
+a vertex of $P$) $e$ is supported by the line containing the edge
+incident to $x$ that precedes it in counterclockwise order.  We ensure
+that successive approximations have a containment relationship, i.e.,
+$A_i\supseteq A_{i+1}$, by choosing our boundary points so that
+$S_i\subseteq S_{i+1}$.
+
+\notice{say something about degenerate triangles.} Next we define the
+sets $S_0,\ldots,S_k$ that define our approximations.  The set $S_0$
+is empty, and we use the convention that the outer approximation in
+this case is the entire plane and the inner approximation is the empty
+set. The set $S_1$ consists of two points, $x$ and $y$ on $\boundary
+P$ such that $\Pr(h_1)\le 1/2$ and $\Pr(h_2)\le 1/2$, for each of the
+two open halfspaces $h_1$ and $h_2$ bounded by the line containing $x$
+and $y$.
+
+Next, we show how to obtain the set $S_i$ from the set $S_{i+1}$.  Let
+$p_0,\ldots,p_{m_i-1}$ be the points in $S_i$ as they occur in
+conterclockwise order around the boundary of $P$.  The approximation
+$A_i$ thus consists of $m$ open triangles
+$\Delta_0,\ldots,\Delta_{m-1}$ where $\Delta_j$ has one side joining
+$p_j$ and $p_{j+1}$ and a third vertex $t_j$ that lies at the
+intersection of two lines tangent to $P$ at $p_j$ and
+$p_{j+1}$.\footnote{Throughout this discussion, subscripts are
+implicitly taken modulo $k$.}  Refer to \figref{split}. For each
+triangle $\Delta_j$ that has positive area we add a new point to
+$S_{i+1}$  by partitioning $\Delta_j$ into two open triangles
+$\Delta_{j,0}$ and $\Delta_{j,1}$ by a line $\ell$ through $t_j$ and
+such that 
+\[  
+     \Pr(\Delta_{j,b}) \le \Pr(\Delta_{j})/2 \enspace ,
+\]
+for $b=0,1$.
+We then select a new point to add to $S_{i+1}$ at the intersection of
+$\ell$ and $\boundary P$ that occurs in $\Delta_j$.
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics{split-a} & \includegraphics{split-b}
+\end{tabular}
+\end{center}
+\caption{Splitting the triangle $\Delta_j$ into two triangles
+$\Delta_{j,0}$ and $\Delta_{j,1}$ with a line through $t_j$.}
+\figlabel{split}
+\end{figure}
+
+The entire process terminates at the first value of $k$ for which all
+triangles have 0 area.  The approximations $A_0,\ldots,A_k$ are stored
+as a binary tree $T$ that we call a \emph{triangle tree}.  Each node
+$v$ of $T$ at level $i$ in $T$ corresponds to an open triangle
+$\Delta(v)$ in approximation $A_{i}$ and the two children of $v$
+correspond to the two triangles into which $\Delta(v)$ is split.  The
+leaves of $T$ correspond to 0 area triangles that are actually line
+segments in $\boundary P$. 
+
+To use the tree $T$ to determine if a point $p$ is contained in $P$ we
+proceed top-down, starting at the root.  For a point $p$ contained in
+$\Delta(v)$ one of two things can happen: (1) $p$ is contained in one
+of the two open triangles $\Delta(v_r)$ or $\Delta(v_\ell)$ where
+$v_r$ and $v_\ell$ are the right and left child of $v$, respectively,
+in which which we recurse on the right or left child of $v$,
+respectively, or (2) otherwise we can determine in constant time if
+$p\in P$.
+
+\subsection{Analysis of the Triangle Tree}
+
+Let $T$ be the triangle tree for a convex $n$-gon $P$ and a
+distribution $D$.  For each internal node $v$ of $T$, define
+$\Pr(v)=\Pr(\Delta(v))-\Pr(\Delta(v_r))-\Pr(\Delta(v_\ell))$ where
+$v_\ell$ and $v_r$ are the two children of $v$ in $T$.  Notice that
+$\Pr(v)$ is the probability that a search terminates at node $v$.
+
+\begin{lem}\lemlabel{upper-bound}
+Using the triangle tree $T$, the expected number of linear inequalities
+required to check if $p\in P$ for a point $p$ drawn from $D$ is at
+most
+\[
+     \mu_D(T) = O(1)\times \sum_{v\in T}\Pr(v)\times\depth (v)
+      \le O(1)\times \sum_{v\in T}\Pr(v)\log(1/\Pr(v))
+\]
+\end{lem}
+
+\begin{proof}
+The first equality is simply by the definition of expectation.  The
+second inequality follows immediately from the fact that, for any node
+$v\in T$ whose parent is $u$, $\Pr(v)\le \Pr(\Delta(v))\le (1/2)\Pr(\Delta(u))$.
+\end{proof}
+
+
+\subsection{Optimality of the Triangle Tree}
+
+Next we will show that the performance bound given by
+\lemref{upper-bound} is optimal.  That is, that there is no linear
+decision tree whose expected search time (on distribution $D$) is
+asymptotically better than that of the triangle tree.
+The key ingredient in our argument is the following proof:
+
+\begin{lem}
+Let $V$ be a subset of the vertices of the triangle tree $T$ such that
+no vertex in $V$ is the descendent of any other vertex in $V$.  Let
+$R=\bigcup_{v\in V} \Delta(v)$ and let $D_{|R}$ denote the
+distribution $D$ conditioned on $R$.  Then, for any linear decision
+tree $T'$,
+\[
+    \mu_{D_{|R}}(T) 
+	\ge \sum_{v\in V}\Pr(\Delta(v)|R)\log(1/\Pr(\Delta(v)|R) \enspace .
+\]
+\end{lem}
+
+\begin{proof}
+Easy.
+\end{proof}
+
+The remainder of our argument only involves some careful manipulations
+of entropy and probabilities.  Let
+\[
+   H = \sum_{v\in V(T)} \Pr(v)\log (1/\Pr(v))
+\] 
+be the entropy of the distribution of search paths in $T$.
+Partition the internal nodes of $T$ in \emph{groups} $G_1,G_2,\ldots$
+where
+\[
+	G_i = \{v : 1/2^{i-1} > \Pr(\Delta(v)) \ge 1/2^i \} \enspace .
+\]
+Fix some constant $0< \epsilon< 1$ to be specified later and define a
+group $G_i$ as \emph{big} if $|G_i|\ge 2^{\epsilon i}$ and
+\emph{small} otherwise.
+
+\begin{lem}
+Every big group $G_i$ contains a subset $G_i'$ of size least
+$|G_i'|/\epsilon i$ such that, no vertex of $G_i'$ is the
+descendant of any other vertex in $G_{i}'$.
+\end{lem}
+
+\begin{proof}
+Easy.
+\end{proof}
+
+Let $I$ be the set of indices of all big groups and let $\overline{I}$
+be the set of indices of all small groups.
+
+\begin{eqnarray}
+
+
+\end{eqnarray*}
+
+
+
+
+First we show that small groups do not contribute much to $H$ and that
+most of the entropy comes from big groups:
+\begin{eqnarray*}
+   H & = & \sum_{j=1}^n p_j\log(1/p_j) \\
+   & = & \sum_{i\in I}\sum_{j\in G_i} p_j\log (1/p_j) +
+   	\sum_{i\in \overline{I}}\sum_{j\in G_i} p_j\log (1/p_j) \\
+    & \le & \sum_{i\in I}\sum_{j\in G_i} p_j\log (1/p_j) +
+	\sum_{i\in \overline{I}}\sum_{j\in G_i} p_j i \\
+    & \le & \sum_{i\in I}\sum_{j\in G_i} p_j\log (1/p_j) +
+	\sum_{i\in \overline{I}}(2^{\epsilon i}/2^i) i \\
+    & \le & \sum_{i\in I}\sum_{j\in G_i} p_j\log (1/p_j) +
+	\sum_{i\in \overline{I}}i/(2^{1-\epsilon})^i \\
+    & \le & \sum_{i\in I}\sum_{j\in G_i} p_j\log (1/p_j) +
+	\sum_{i=1}^\infty i/(2^{1-\epsilon})^i \\
+    & = & \sum_{i\in I}\sum_{j\in G_i} p_j\log (1/p_j) + O(1)
+\end{eqnarray*}
+
+Next, observe that if $G_i$ is big then
+\begin{equation}
+    \log\left(\sum_{j\in G_i} p_j \right)  
+     \ge \log\left(\sum_{j\in G_i} 1/2^{i} \right)  
+      \ge \log\left(2^{\epsilon i}/2^{i} \right)  
+	\ge (\epsilon -1)i 
+\end{equation}
+
+
+
+
+
+\comment{
 \begin{lem}\lemlabel{lower-bound-a}
 Let $C=P_1\setminus P_2$ where $P_1$ and $P_2$ are closed unbounded
 convex subsets of $\R^2$ with $P_2\subseteq P_1$.  Let
@@ -305,5 +550,6 @@ Next, observe that if $G_i$ is big then
 \end{lem}
 
 \section{Conclusion}
+}
 
 \end{document}

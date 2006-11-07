@@ -81,7 +81,7 @@
                                      {1.5ex \@plus .2ex}%
                                      {\normalfont\normalsize\bfseries}}
 \renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
-                                    {3.25ex \@plus1ex \@minus.2ex}%
+                                    {0ex \@plus1ex \@minus0ex}%
                                     {-1em}%
                                     {\normalfont\normalsize\bfseries}}
 \renewcommand\subparagraph{\@startsection{subparagraph}{5}{\parindent}%

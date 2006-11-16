@@ -16,7 +16,7 @@
 	\thanks{The research presented in this article took place
 while the fourth author was a visiting researcher at the Universit\'e Libre de
 Bruxelles, supported by a grant from FNRS.  The researchers are
-supported by NSERC and FNRS.}}
+partially supported by NSERC and FNRS.}}
 \author{S\'ebastien Collette 
   \and John Iacono 
   \and Stefan Langerman 
@@ -34,8 +34,7 @@ The data structure has an expected query time that is within a
 constant factor of optimal.
 \end{abstract}
 
-\noindent\textbf{Keywords:}
-Planar point location, Entropy
+\keywords{Planar point location, Entropy}
 
 \section{Introduction}
 \seclabel{intro}
@@ -54,8 +53,8 @@ binary search trees.
 After a few initial attempts \cite{dl76,lp77,p81}, asymptotically
 optimal (and quite different) linear-space $O(\log n)$ query time
 solutions to the planar point location problem were obtained by
-Kirkpatrick \cite{k83}, Sarnak and Tarjan \cite{st86}, and Edelsbrunner
-\etal\ \cite{egs86} in the mid 1980s.  An elegant, and optimal,
+Kirkpatrick \cite{k83}, Sarnak and Tarjan \cite{st86}, and
+Edelsbrunner \etal\ \cite{egs86} in the mid 1980s.  An elegant
 randomized solution was later given by Mulmuley \cite{m90}.  Preparata
 \cite{p90} gives a comprehensive survey of the results of this era.
 
@@ -111,7 +110,7 @@ linear space, $O(H+1)$ expected query time data structure.  A result
 by Arya \etal\ \cite{amm00} gives a data structure for triangulations
 that uses $H + O(H^{2/3}+1)$ expected number of comparisons per query
 and $O(n\log n)$ space.  The space requirement of this latter
-algorithm was later reduced, by the same authors, to $O(n\log^* n)$
+data structure was later reduced, by the same authors, to $O(n\log^* n)$
 \cite{amm01a}.  Finally, the same three authors \cite{amm01b} showed
 that a variant of Mulmuley's randomized algorithm gives, for
 triangulations, a simple $O(H+1)$ expected query time, linear space
@@ -189,7 +188,7 @@ special case in which $k=2$ is called a \emph{decision problem}.  A
 $d$-ary \emph{classification tree} is a full $d$-ary tree\footnote{A
 full $d$-ary tree is a rooted ordered tree in which each non-leaf node
 has exactly $d$ children.} in which each internal node $v$ is labelled
-with a function $P_v:\mathcal{P}\mapsto\{0,.\ldots,d-1\}$ and for
+with a function $P_v:\mathcal{D}\mapsto\{0,.\ldots,d-1\}$ and for
 which each leaf $\ell$ is labelled with a value
 $d(\ell)\in\{0,\ldots,k-1\}$. The \emph{search path} of an input $p$
 in a classification tree $T$ starts at the root of $T$ and, at each
@@ -220,7 +219,9 @@ two operations in constant time:
 intersection of two of $\Delta$'s supporting lines, compute a line $\ell$
 that contains $t$ and that partitions $\Delta$ into two open triangles
 $\Delta_0$ and $\Delta_1$ such that $\Pr(\Delta_0)\le\Pr(\Delta)/2$
-and $\Pr(\Delta_1)\le\Pr(\Delta)/2$.
+and $\Pr(\Delta_1)\le\Pr(\Delta)/2$.\footnote{Actually, in
+\secref{discussion} we show that this second requirement is not
+strictly necessary.}
 \end{enumerate}
 
 For a classification tree $T$ that solves a problem
@@ -238,13 +239,14 @@ expected search time of $T$ (under distribution $D$) can be written as
 where $L(T)$ denotes the leaves of $T$ and $\depth(\ell)$ denotes the
 length of the path from the root of $T$ to $\ell$.
 
-The folloing theorem, which is a restatement of (part of) Shannon's
-coding Theorem \cite{s48}, is what all existing results on
-distribution-sensitive planar point location use to establish their
-optimality:
+The following theorem, which is a restatement of (half of) Shannon's
+Fundamental Theorem for a Noiseless Channel \cite[Theorem 9]{s48}, is
+what all existing results on distribution-sensitive planar point
+location use to establish their optimality:
 
+\setcounter{thm}{8}
 \begin{thm}\thmlabel{shannon}
-Let $\mathcal{P}:D\mapsto \{0,\ldots,k-1\}$ be a classification
+Let $\mathcal{P}:\mathcal{D}\mapsto \{0,\ldots,k-1\}$ be a classification
 problem and let $p\in \mathcal{D}$ be selected from a distibution $D$ such
 that $\Pr\{\mathcal{P}(x)= i\}=p_i$, for $0\le i< k$.  Then, any
 $d$-ary classification tree $T$ that solves $\mathcal{P}$ has
@@ -253,7 +255,7 @@ $d$-ary classification tree $T$ that solves $\mathcal{P}$ has
 	\eqlabel{shannon}
 \end{equation}
 \end{thm}
-
+\setcounter{thm}{0}
 
 \section{Point In Convex Polygon Testing}
 \seclabel{polygons}
@@ -287,11 +289,11 @@ time is optimal.
 
 \subsection{Triangle Trees}
 
-Our data structure works by creating a sequence of successively
-finer approximations $A_0,\ldots,A_k$ to $\boundary P$.  Each
-approximation $A_i$ consists of two convex polygons; an \emph{outer
-approximation} that contains $P$ and an \emph{inner approximation}
-that is contained in $P$.
+At a high level, our data structure works by creating a sequence of
+successively finer approximations $A_0,\ldots,A_k$ to $\boundary P$.
+Each approximation $A_i$ consists of two convex polygons; an
+\emph{outer approximation} that contains $P$ and an \emph{inner
+approximation} that is contained in $P$.
 
 Each approximation $A_i$ is completely defined by a set $S_i$ of
 points on $\boundary P$.  The inner approximation is simply the convex
@@ -317,12 +319,13 @@ bounded by the line containing $x$ and $y$.
 We now show how, for $i\ge 2$, to obtain the set $S_{i+1}$ from the
 set $S_{i}$.  Let $p_0,\ldots,p_{m_i-1}$ be the points in $S_i$ as
 they occur in conterclockwise order around the boundary of $P$.  The
-approximation $A_i$ thus consists of $m$ open triangles
+approximation $A_i$ thus consists of $m_i$ open triangles
 $\Delta_0,\ldots,\Delta_{m_i-1}$ where $\Delta_j$ is the intersections
 of the following halfspaces:
 
 \begin{enumerate}
-\item the open halfspace to the right of the line through $p_j$ and $p_{j+1}$,
+\item the open halfspace to the right of the directed line through 
+	$p_j$ and $p_{j+1}$,
 \item the open halfspace bounded by the tangent to $P$ at $p_j$ and that
 contains $p_{j+1}$, and 
 \item the open halfspace bounded by the tangent to $P$ at $p_{j+1}$ and
@@ -334,15 +337,19 @@ $p_{j+1}$.\footnote{Throughout this discussion, subscripts are
 implicitly taken modulo $m_i$.}  Refer to \figref{split}. For each
 triangle $\Delta_j$ that is not completely contained in $P$
 we add a new point to
-$S_{i+1}$ as follows:  we split $\Delta_j$ into two open triangles
+$S_{i+1}$ as follows:  we subdivide $\Delta_j$ into two open triangles
 $\Delta_{j,0}$ and $\Delta_{j,1}$ by a line $\ell$ through $t_j$ and
 such that 
 \[  
      \Pr(\Delta_{j,b}) \le \Pr(\Delta_{j})/2 \enspace ,
 \]
-for $b=0,1$.
+for $b\in\{0,1\}$.
 We then select a new point to add to $S_{i+1}$ at the intersection of
-$\ell$ and $\boundary P$ that occurs in $\Delta_j$.
+$\ell$ and $\boundary P$ that occurs in $\Delta_j$.  Note that the
+next level of approximation $A_{i+1}$ now contains two triangles that
+are contained in $\Delta_j$.  We call these two triangles the
+\emph{children} of $\Delta_j$ and we say that this operation
+\emph{splits} $\Delta_j$ into these two triangles.
 
 \begin{figure}
 \begin{center}
@@ -357,7 +364,7 @@ $\Delta_{j,0}$ and $\Delta_{j,1}$ with a line through $t_j$.}
 
 The entire process terminates at the first value of $k$ for which
 $A_k$ is completely contained in $P$.  The approximations
-$A_0,\ldots,A_k$ are stored as a binary tree $T$ that we call a
+$A_0,\ldots,A_k$ are stored as a binary tree $T=T(P,D)$ that we call a
 \emph{triangle tree} for $P$ and $D$.  Each node $v$ of $T$ at level
 $i$ in $T$ corresponds to an open triangle $\Delta(v)$ in
 approximation $A_{i}$ and the two children of $v$ correspond to the
@@ -397,25 +404,26 @@ $O(n)$ time.
 Using the triangle tree, the expected number of linear inequalities
 required to check if $p\in P$ for a point $p$ drawn from $D$ is at
 most
-\[
-     \mu_D(T) = O(1)+O(1)\times \sum_{v\in T}\Pr(v)\times\depth (v)
-      \le O(1)+O(1)\times \sum_{v\in T}\Pr(v)\log(1/\Pr(v))
-\]
+\begin{eqnarray*}
+ \mu_D(T) 
+   & = & O(1)+O(1)\times \sum_{v\in T}\Pr(v)\times\depth (v) \\
+   &\le& O(1)+O(1)\times \sum_{v\in T}\Pr(v)\log(1/\Pr(v))
+\end{eqnarray*}
 \end{thm}
 
 \begin{proof}
-For each $1\le i\le n$, let $e_i$ be the $i$th edge of $P$,
-defined so that it does not include it first (clockwise) endpoint but
-does include its second (counterclockwise) endpoint.  Observe that if,
+For each $1\le i\le n$, let $e_i$ be the $i$th edge of $P$, defined so
+that it does not include its first (clockwise) endpoint but does
+include its second (counterclockwise) endpoint.  Observe that if,
 during some iteration of the algorithm for constructing $T$, we select
 a point $x\in e_i$ then $e_i$ moves to the boundary of the outer
-approximation and no point of $e_i$ will ever be selected again.
-This implies that $T$ has $O(n)$ nodes.
+approximation and no point of $e_i$ will ever be selected again.  This
+implies that $T$ has $O(n)$ nodes.
 
 To obtain an $O(n)$ time algorithm to construct $T$ we apply a trick
 used by Mehlhorn \cite{m75} in the construction of biased binary
 search trees.  Splitting a triangle $\Delta_j$ involves finding the
-line $\ell$ and computing the intersection of $\ell$ with the
+line $\ell$ and computing the intersection of $\ell$ with
 $\boundary P\cap \Delta_j$.  The former operation takes, by
 assumption, $O(1)$ time.  The latter operation, by using two
 exponential searches in parallel, can be done in $O(\log
@@ -460,17 +468,19 @@ R)\log(1/\Pr(\Xi(v)\mid R)) \enspace .
 
 We define new model of computation, show that a lower bound in this
 new model implies a lower bound in the linear decision tree model and
-then prove the lower bound for the new model.  Refer to \figref{s}.  Let $S_1= \boundary P
-\cup \bigcup_{v\in V} \Delta(v)$, let $S_0=S_1\cup\boundary S_1$ be
-the closure of $S_1$, and let $S$ be $S_0\setminus\{s\}$ for some vertex
-$s$ of some triangle $\Delta(v)$ with $v\in V$.\footnote{We remove the
-vertex $s$ so that $S_0$ is \emph{simply connected}.  That is, for any
-two points $p,q\in S_0$ any path from $p$ to $q$ can be continuously
-deformed into any other path from $p$ to $q$.} A \emph{chord} of $S$
-is a closed line segment with both endpoints on the boundary of $S$
-and whose interior is contained in $S$. Note that a chord may have
-length zero.  If $c$ is a chord of $S$ then $S\setminus c$ has at most
-3 connected components $S^c_1$, $S^c_2$, and $S^c_3$.
+then prove the lower bound for the new model.  Refer to \figref{s}.
+Let $X_1= \boundary P \cup \bigcup_{v\in V} \Delta(v)$, let
+$X_0=X_1\cup\boundary X_1$ be the closure of $X_1$, and let
+$X=X_0\setminus\{s\}$ for some vertex $s$ of some triangle $\Delta(v)$
+with $v\in V$.\footnote{The removal of $s$ ensures that $X$ is
+\emph{simply connected}.  That is, for any two points $p,q\in X$ any
+path, in $X$, from $p$ to $q$ can be continuously deformed into any
+other path, in $X$, from $p$ to $q$ while remaining in $X$ throughout
+the deformation.} A \emph{chord} of $X$ is a closed line segment with
+both endpoints on the boundary of $X$ and whose interior is contained
+in $X$. Note that a chord may have length zero.  If $c$ is a chord of
+$X$ then $X\setminus c$ has at most 3 connected components $X^c_1$,
+$X^c_2$, and $X^c_3$.
 
 \begin{figure}
 \begin{center}
@@ -478,21 +488,21 @@ length zero.  If $c$ is a chord of $S$ then $S\setminus c$ has at most
 \includegraphics{s1} &
 \includegraphics{s0} &
 \includegraphics{s} \\
-$S_1$ & $S_0$ & $S$ 
+$X_1$ & $X_0$ & $X$ 
 \end{tabular}
 \end{center}
-\caption{The point sets $S_1$, $S_0$ and $S$ used in the proof of
+\caption{The point sets $X_1$, $X_0$ and $X$ used in the proof of
 \lemref{lower-bound}.}
 \figlabel{s}
 \end{figure}
 
 A \emph{chord tree} is a $4$-ary decision tree that solves the problem
-of testing whether a point $p\in S$ is contained in $P$.  Each
+of testing whether a point $p\in X_0$ is contained in $P$.  Each
 internal node $v$ of a chord tree is labelled with a chord $c(v)$ of
-$S$ and the four children of $v$ correspond to the options,
-$p\in S^{c(v)}_1$, $p\in S^{c(v)}_2$, $p\in S^{c(v)}_3$, and $p\in c$.
-Observe that, because $S$ is bounded by two convex chains, any line
-intersects $S$ in at most 2 chords.  This immediately implies the
+$X$ and the four children of $v$ correspond to the options,
+$p\in X^{c(v)}_1$, $p\in X^{c(v)}_2$, $p\in X^{c(v)}_3$, and $p\in c$.
+Observe that, because $X$ is bounded by two convex chains, any line
+intersects $X$ in at most 2 chords.  This immediately implies the
 following relationship between chord trees and linear decision trees.
 \begin{clm}\clmlabel{relation}
 Let $T$ be any linear decision tree that solves the problem of testing
@@ -508,27 +518,26 @@ We claim that the search path for $p$ in $T'$ and the search path for
 $q$ in $T'$ must end at different leaves of $T'$.  Assume, for the
 sake of contradiction, that this is not the case and that both search
 paths terminate at the leaf $\ell$. We will show that in this case
-$T'$ does not solve the problem of testing if any point $p\in S$ is
+$T'$ does not solve the problem of testing if any point $p\in X$ is
 contained in $P$ and thus contradicts the assumption that $T'$ is a
 chord tree.  First observe that, because the search paths for $p$ and
 $q$ both end at $\ell$, there exists a closed curve $\rho$ in $S$ with
 one endpoint at $p$ and the other endpoint at $q$ and for which all
 points of $\rho$ have a search path that ends at $\ell$.  Indeed, the
-shortest path, in $S$, from $p$ to $q$ has this property.
+shortest path, in $X$, from $p$ to $q$ has this property.
 
 If either $p$ or $q$ is contained in $P$ then we immediately obtain
 the desired contradiction since $\rho$ must contain one of the
 vertices $r$ of (e.g.) $\Delta(u)$, a point that is not in $P$ (recall
-that $P$ does not contain $\boundary P$).
-Otherwise, both $p$ and $q$ are not in $P$.  Then the path $\rho$
-still contains one of the vertices $r$ of $\Delta(u)$.  Furthermore,
-none of the vertices on the search path in $T'$ for $p$ is associated
-with a chord that contains $r$ (otherwise $p$ and $q$ would not have
-the same search path in $T'$).  Therefore, there is a disk $D$,
-centered at $r$ and having positive radius, for which the search path
-in $T'$ for any point in $D\cap S$ terminates at $\ell$.  Again, we obtain a
-contradiction since $D\cap S$ contains points in the interior
-of $P$.
+that $P$ does not contain $\boundary P$).  Otherwise, both $p$ and $q$
+are not in $P$.  Then the path $\rho$ still contains one of the
+vertices $r$ of $\Delta(u)$.  Furthermore, none of the vertices on the
+search path in $T'$ for $p$ is associated with a chord that contains
+$r$ (otherwise $p$ and $q$ would not have the same search path in
+$T'$).  Therefore, there is a disk $D$, centered at $r$ and having
+positive radius, for which the search path in $T'$ for any point in
+$D\cap S$ terminates at $\ell$.  Again, we obtain a contradiction
+since $D\cap S$ contains points in the interior of $P$.
 
 We have established that, for any two points $p$ and $q$
 contained in different triangles $\Delta(u)$ and $\Delta(v)$ the
@@ -537,16 +546,17 @@ This implies that, by labelling the leaves of $T'$ appropriately, we
 obtain a $4$-ary classification tree that determines, for any
 $p\in \bigcup_{v\in V} \Delta(v)$ the node $v\in V$ such
 $\Delta(v)$ contains $p$.  Therefore, by \thmref{shannon},
-\[
-     \mu_{D_{|R}} (T') 
-	\ge \sum_{v\in V}\Pr(\Xi(v)\mid R)\log_4(1/\Pr(\Xi(v)\mid R)) \enspace ,
-\]
+\begin{eqnarray*}
+  \mu_{D_{|R}} (T') 
+   &\ge& \sum_{v\in V}\Pr(\Xi(v)\mid R)\log_4(1/\Pr(\Xi(v)\mid R)) \\
+   &=& \frac{1}{2}\sum_{v\in V}\Pr(\Xi(v)\mid R)\log(1/\Pr(\Xi(v)\mid R)) \enspace ,
+\end{eqnarray*}
 and the lemma follows from \clmref{relation}.
 \end{proof}
 
-The remainder of our argument involves constructing a lower-bound
-based on \lemref{lower-bound} that matches the upper bound in
-\thmref{upper-bound}.  Let 
+The remainder of our argument involves carefully constructing a
+lower-bound based on \lemref{lower-bound} that matches the upper bound
+in \thmref{upper-bound}.  Let 
 \[
    H = \sum_{v\in T} \Pr(v)\log (1/\Pr(v))
 \] 
@@ -559,7 +569,7 @@ expected search time in $o(H)$.
 We start our analysis by partitioning the internal nodes of $T$ in
 \emph{groups} $G_1,G_2,\ldots$ where
 \[
-	G_i = \{v\in T : 1/2^{i} \le \Pr(\Delta(v)) < 1/2^{i-1} \} \enspace .
+	G_i = \{v\in T : 1/2^{i} \le \Pr(v) < 1/2^{i-1} \} \enspace .
 \]
 In what follows, we fix some constant $0< \alpha < 1$ that will be
 specified later.  Our first
@@ -587,10 +597,12 @@ i}$ elements from $G_i$.  Then
          \sum_{i=1}^{\infty}\sum_{v\in G_i\setminus G_i'} 2i(1/2^{i}) \\
    & \le & \sum_{i=1}^{\infty}\sum_{v\in G_i'} \Pr(v)\log (1/\Pr(v)) +
          \sum_{i=1}^{\infty} 2i(1/2^{i-\alpha i}) \\
-   & \le & \sum_{i=1}^{\infty}\sum_{v\in G_i'} \Pr(v)\log (1/\Pr(v)) +
-         \sum_{i=1}^{\infty} 2i/(2^{1-\alpha})^{i} \\
-   & \le & \sum_{i=1}^{\infty}\sum_{v\in G_i'} \Pr(v)\log (1/\Pr(v)) + O(1)
+   & = & \sum_{i=1}^{\infty}\sum_{v\in G_i'} \Pr(v)\log (1/\Pr(v)) +
+         2\sum_{i=1}^{\infty} i/(2^{1-\alpha})^{i} \\
+   & = & \sum_{i=1}^{\infty}\sum_{v\in G_i'} \Pr(v)\log (1/\Pr(v)) + O(1)
+	\enspace ,
 \end{eqnarray*}
+since $2^{1-\alpha} > 1$.
 \end{proof}
 
 In order to use \lemref{lower-bound} we must partition the vertices of
@@ -634,23 +646,24 @@ $2^{\alpha i}$ remaining elements in group $G_{i,t_i}$.
 We now have all the tools we need to prove our lower bound.
 
 \begin{thm}\thmlabel{lower-bound}
-Any linear decision tree $T'$ that determines whether any query point 
+Any linear decision tree $T'$ that solves the problem of testing 
+if any query point 
 $p\in\R^2$ is contained in $P$ has
 \[
-   \mu_D(T') = \Omega(H) - O(1) \enspace .
+   \mu_D(T') \ge (1/24)H - O(1) \enspace .
 \]
 \end{thm}
 
 \begin{proof}
-Our proof is an application of the little-birdie principle.  Partition
-the nodes of $T$ into the sets $G_{i,j}$ as described in
-\lemref{partition}.  We work in a slightly stronger model of
-computation in which we are given the tree $T$ and the partitioning of
-the vertices of $T$ into the sets $G_{i,j}$ and which allows a whole
-collection of decision trees $T_{i,j}$, one for each group $G_{i,j}$.
-Now, when the point $p$ is selected according to $D$, a little birdie
-tells the computer which group $G_{i,j}$ contains the vertex $v$ such
-that $p\in\Xi(v)$.  The computer then uses the information
+Our proof is an application of the little-birdie principle.    We work in a slightly stronger model of
+computation in which we are given a triangle tree $T=T(P,D)$ and the partitioning of
+the vertices of $T$ into the sets $G_{i,j}$ described in
+\lemref{partition}.  In this model, an algorithm consists of a whole
+collection of linear decision trees $T_{i,j}$; one for each group $G_{i,j}$.
+Now, when the point $p$ is selected according to $D$, a \emph{little
+birdie}
+tells the algorithm which group $G_{i,j}$ contains the vertex $v$ such
+that $p\in\Xi(v)$.  The algorithm then uses the information
 provided by the little birdie to select the decision tree $T_{i,j}$
 and uses $T_{i,j}$ to determine if $p\in P$.  The cost of this is the
 cost of searching in $T_{i,j}$.  Thus, the expected cost of a search
@@ -692,10 +705,10 @@ $\alpha = 1/2$ we obtain
 & = & \frac{1}{6}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
 	\sum_{v\in G_{i,j}}\Pr(v)(\alpha i  -1 -\log i) \\
 & \ge & \frac{1}{6}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
-	\sum_{v\in G_{i,j}}\Pr(v)\times (i/4 - 3) \\
-& \ge & \frac{1}{6}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
-	\sum_{v\in G_{i,j}}(1/4)\Pr(v)\log (1/\Pr(v))-4 \\
-& \ge & (1/24)H - O(1) 
+	\sum_{v\in G_{i,j}}\Pr(v)(i/4 - 3) \\
+& \ge & \left(\frac{1}{24}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
+	\sum_{v\in G_{i,j}}\Pr(v)\log (1/\Pr(v))\right)-4 \\
+& \ge & (1/24)H - O(1)  \enspace ,
 \end{eqnarray*}
 where the last inequality follows from \lemref{garbage}.
 \end{proof}
@@ -706,17 +719,17 @@ where the last inequality follows from \lemref{garbage}.
 In this section we consider the problem of point location in convex
 subdivisions. Our data structure is simple.  For each internal face
 $F_i$ of the convex subdivision we triangulate the interior of $F_i$
-using the internal edges of the triangles of a triangle tree $T_i$ for
-the polygon $F_i$ and the distribution $D_{|F_i}$. For the outer face,
-we do the same but keep only the external edges of the triangles.
-Next, we preprocess the resulting triangulation using Iacono's
-distribution-sensitive point location data structure for
-triangulations \cite{i01}.
+using the internal edges of the triangles of a triangle tree
+$T_i=(F_i,D_{|F_i})$ for the polygon $F_i$ and the distribution
+$D_{|F_i}$. For the outer face, we do the same but keep only the
+external edges of the triangles.  Next, we preprocess the resulting
+triangulation using Iacono's distribution-sensitive point location
+data structure for triangulations \cite{i01}.
 
 We have three lower bounds on the expected query time of any linear
-classification tree for point location.  The first lower bound follows from
-the fact that any classification tree must have at least one internal
-node:
+classification tree for point location.  The first lower bound follows
+from the fact that any classification tree with more than 1 class must
+have at least one internal node:
 \[
     B_0 = \Omega(1)
 \]
@@ -736,7 +749,8 @@ decision tree $T'$ that determines if a query point $p$ is in $F_i$
 \]
 Summing over all faces, we obtain the third lower bound:
 \[
-   B_2 = \Omega(1)\times \sum_{i=1}^f \sum_{v\in T_i}\Pr(v|F_i)\log(1/\Pr(v|F_i))
+   B_2 = \Omega(1)\times \sum_{i=1}^f \sum_{v\in T_i}\Pr(F_i)\Pr(v|F_i)\log(1/\Pr(v|F_i))
+	\enspace .
 \]
 
 Now, because we store all the triangles of each $T_i$ in a point
@@ -749,7 +763,7 @@ structure has an expected query time of
 	\Pr(v|F_{i})\log(\Pr(F_i)/\Pr(F_i)\Pr(v)) \\
 & = & O(1)+O(1)\times\sum_{i=1}^f \Pr(F_i)\log (1/\Pr(F_i)) + 
         \sum_{i=1}^f \sum_{v\in T_i}
-	\Pr(v|F_{i})\log(1/\Pr(v|F_i)) \\
+	\Pr(F_i)\Pr(v|F_{i})\log(1/\Pr(v|F_i)) \\
 & \le & O(1)+O(1)\times(B_1 + B_2) \\
 & \le & O(1)\times \max\{B_1, B_2,B_3\} \enspace .
 \end{eqnarray*}
@@ -769,19 +783,45 @@ classification tree that answers point location queries in $G$.
 \section{Discussion}
 \seclabel{discussion}
 
-We have presented data structure for distribution-sensitive point
-location in convex subdivisions.  Our data structures achieve, up to
-constant factors, the best possible query time for data structures in
-the linear decision tree model of computation.  
+We have presented a data structure for distribution-sensitive point
+location in convex subdivisions.  Our data structure achieves, up to
+constant factors, the best possible query time for any data structure
+in the linear decision tree model of computation.  All known data
+structures for point location in planar subdivisions fit into the
+linear decision tree model. 
+
+Our data structure, as described in \secref{polygons}, uses
+comparisons between the query point $p$ and precomputed lines
+determined by points on the edges of $P$ that are, in turn, determined
+by the distribution $D$.  We note that we can obtain an equally
+efficient structure that only does comparisons involving lines through
+two vertices of $G$.  To achieve this, we simply modify the splitting
+process at the nodes of the triangle tree so that, instead of placing
+a single point in the interior of an edge $e$ of $P$ (\figref{split}),
+we place one point on each of the endpoints of $e$
+(\figref{improved-split}). This modification has another nice
+property; it can be implemented so that the only mechanism needed to
+access the probability measure $D$ is a primitive for computing the
+probability of a triangle.
+
+\begin{figure}
+\begin{center}\begin{tabular}{cc}
+\includegraphics{improved-a} & \includegraphics{improved-b}
+\end{tabular}
+\end{center}
+\caption{The data structure can be realized using only lines through
+the vertices of $P$.}
+\figlabel{improved-split}
+\end{figure}
 
 In practice, performing computations with probability distributions is
 at best awkward.  However, one potential real application of our data
-structures is when the distribution $D$ is uniform over a set $S$ of
-$m$ points.  Such distributions are easily obtained by sampling some
+structures is when the distribution $D$ is uniform over a set of $m$
+points.  Such distributions are easily obtained by sampling some
 (unknown) continuous distribution and are often a good enough
 approximation of the continuous distribution.  In this case, it is
 fairly straightforward to construct our point-location structure in
-$O(n+ m\log( mn))$ time.
+$O(n+ m\log(mn))$ time.
 
 When discussing distribution-sensitive point location, the exact
 definition of the problem and the choice of computational model is

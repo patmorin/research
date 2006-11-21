@@ -17,11 +17,10 @@
 while the fourth author was a visiting researcher at the Universit\'e Libre de
 Bruxelles, supported by a grant from FNRS.  The researchers are
 partially supported by NSERC and FNRS.}}
-\author{S\'ebastien Collette 
-  \and John Iacono 
-  \and Stefan Langerman 
-  \and Pat Morin
-  \and Anyone Else}
+\author{S\'ebastien Collette \\ \textit{Universit\'e Libre de Bruxelles}
+  \and John Iacono \\ \textit{Polytechnic University}
+  \and Stefan Langerman \\ \textit{Universit\'e Libre de Bruxelles}
+  \and Pat Morin \\ \textit{Carleton University}}
 \date{}
 
 \begin{document}
@@ -221,7 +220,7 @@ that contains $t$ and that partitions $\Delta$ into two open triangles
 $\Delta_0$ and $\Delta_1$ such that $\Pr(\Delta_0)\le\Pr(\Delta)/2$
 and $\Pr(\Delta_1)\le\Pr(\Delta)/2$.\footnote{Actually, in
 \secref{discussion} we show that this second requirement is not
-strictly necessary.}
+necessary.}
 \end{enumerate}
 
 For a classification tree $T$ that solves a problem
@@ -459,7 +458,7 @@ Let $R=\bigcup_{v\in V} \Xi(v)$. Then, for any linear decision
 tree $T'$,
 \[
     \mu_{D_{|R}}(T) 
-	\ge \frac{1}{6}\sum_{v\in V}\Pr(\Xi(v)\mid
+	\ge \frac{1}{4}\sum_{v\in V}\Pr(\Xi(v)\mid
 R)\log(1/\Pr(\Xi(v)\mid R)) \enspace .
 \]
 \end{lem}
@@ -500,14 +499,14 @@ A \emph{chord tree} is a $4$-ary decision tree that solves the problem
 of testing whether a point $p\in X_0$ is contained in $P$.  Each
 internal node $v$ of a chord tree is labelled with a chord $c(v)$ of
 $X$ and the four children of $v$ correspond to the options,
-$p\in X^{c(v)}_1$, $p\in X^{c(v)}_2$, $p\in X^{c(v)}_3$, and $p\in c$.
+$p\in X^{c(v)}_1$, $p\in X^{c(v)}_2$, $p\in X^{c(v)}_3$, and $p\in c(v)$.
 Observe that, because $X$ is bounded by two convex chains, any line
 intersects $X$ in at most 2 chords.  This immediately implies the
 following relationship between chord trees and linear decision trees.
 \begin{clm}\clmlabel{relation}
 Let $T$ be any linear decision tree that solves the problem of testing
 if $p\in P$.  Then there exists a chord tree $T'$ such that 
-$\mu_{D_{|R}}(T') \le 3\mu_{D_{|R}}(T)$.
+$\mu_{D_{|R}}(T') \le 2\mu_{D_{|R}}(T)$.
 \end{clm}
 
 Now we need only prove a lower bound on $\mu_{D_{|R}}(T')$ for any
@@ -521,7 +520,7 @@ paths terminate at the leaf $\ell$. We will show that in this case
 $T'$ does not solve the problem of testing if any point $p\in X$ is
 contained in $P$ and thus contradicts the assumption that $T'$ is a
 chord tree.  First observe that, because the search paths for $p$ and
-$q$ both end at $\ell$, there exists a closed curve $\rho$ in $S$ with
+$q$ both end at $\ell$, there exists a closed curve $\rho$ in $X$ with
 one endpoint at $p$ and the other endpoint at $q$ and for which all
 points of $\rho$ have a search path that ends at $\ell$.  Indeed, the
 shortest path, in $X$, from $p$ to $q$ has this property.
@@ -536,8 +535,8 @@ search path in $T'$ for $p$ is associated with a chord that contains
 $r$ (otherwise $p$ and $q$ would not have the same search path in
 $T'$).  Therefore, there is a disk $D$, centered at $r$ and having
 positive radius, for which the search path in $T'$ for any point in
-$D\cap S$ terminates at $\ell$.  Again, we obtain a contradiction
-since $D\cap S$ contains points in the interior of $P$.
+$D\cap X$ terminates at $\ell$.  Again, we obtain a contradiction
+since $D\cap X$ contains points in the interior of $P$.
 
 We have established that, for any two points $p$ and $q$
 contained in different triangles $\Delta(u)$ and $\Delta(v)$ the
@@ -557,10 +556,11 @@ and the lemma follows from \clmref{relation}.
 The remainder of our argument involves carefully constructing a
 lower-bound based on \lemref{lower-bound} that matches the upper bound
 in \thmref{upper-bound}.  Let 
-\[
-   H = \sum_{v\in T} \Pr(v)\log (1/\Pr(v))
-\] 
-be the entropy of the distribution of search paths in $T$.  Note that,
+\begin{equation}
+   H = \sum_{v\in T} \Pr(v)\log (1/\Pr(v)) \eqlabel{H}
+\end{equation}
+be the entropy of the distribution of search paths in the triangle
+tree $T$.  Note that,
 ignoring the $O(1)$ term,
 the upper bound of \thmref{upper-bound} is within a constant factor of
 $H$. Thus, our goal is to show that no linear decision tree has an
@@ -646,11 +646,12 @@ $2^{\alpha i}$ remaining elements in group $G_{i,t_i}$.
 We now have all the tools we need to prove our lower bound.
 
 \begin{thm}\thmlabel{lower-bound}
+Let $\epsilon > 0$ be an arbitrarily small constant.
 Any linear decision tree $T'$ that solves the problem of testing 
 if any query point 
 $p\in\R^2$ is contained in $P$ has
 \[
-   \mu_D(T') \ge (1/24)H - O(1) \enspace .
+   \mu_D(T') \ge \left(\frac{1}{4}-\epsilon\right)H - O(1) \enspace .
 \]
 \end{thm}
 
@@ -679,38 +680,42 @@ model since, in this model, there is always the option of ignoring the
 birdie's advice by creating a single linear decision tree $T'$ and
 setting $T_{i,j}=T'$ for all $i$ and $j$.
 
-Now, applying \lemref{lower-bound} to each group $G_{i,j}$ and fixing
-$\alpha = 1/2$ we obtain
+Now, applying \lemref{lower-bound} to each group $G_{i,j}$ 
+we obtain
 \begin{eqnarray*}
 \mu & = & \sum_{i=1}^{\infty}\sum_{j=1}^{t_i}
 	\Pr(G_{i,j})\mu_{D_{i,j}}(T_{i,j}) \\
 & \ge & \sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
 	\Pr(G_{i,j})\mu_{D_{i,j}}(T_{i,j}) \\
 & \ge & \sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}\Pr(G_{i,j})\times
-	\left(\frac{1}{6}
+	\left(\frac{1}{4}
 	\sum_{v\in G_{i,j}}\Pr(v\mid G_{i,j})\log(1/\Pr(v\mid G_{i,j}))
 	\right) \\
-& \ge & \frac{1}{6}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}\Pr(G_{i,j})\times
+& \ge & \frac{1}{4}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}\Pr(G_{i,j})\times
 	\left(
 	\sum_{v\in G_{i,j}}\Pr(v\mid G_{i,j})\log(1/\Pr(v\mid G_{i,j}))
 	\right) \\
-& = & \frac{1}{6}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
+& = & \frac{1}{4}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
 	\sum_{v\in G_{i,j}}\Pr(v)\log(\Pr(G_{i,j})/\Pr(v)) \\
-& = & \frac{1}{6}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
+& = & \frac{1}{4}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
 	\sum_{v\in G_{i,j}}\Pr(v)(\log(1/\Pr(v))+ \log(\Pr(G_{i,j})) \\
-& \ge & \frac{1}{6}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
+& \ge & \frac{1}{4}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
 	\sum_{v\in G_{i,j}}\Pr(v)(\log(2^{i-1}) + \log(2^{\alpha i}/i2^{i}) \\
-& = & \frac{1}{6}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
+& = & \frac{1}{4}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
 	\sum_{v\in G_{i,j}}\Pr(v)(i-1 + \alpha i -i -\log i) \\
-& = & \frac{1}{6}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
+& = & \frac{1}{4}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
 	\sum_{v\in G_{i,j}}\Pr(v)(\alpha i  -1 -\log i) \\
-& \ge & \frac{1}{6}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
+\comment{
+& \ge & \frac{1}{4}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
 	\sum_{v\in G_{i,j}}\Pr(v)(i/4 - 3) \\
 & \ge & \left(\frac{1}{24}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
 	\sum_{v\in G_{i,j}}\Pr(v)\log (1/\Pr(v))\right)-4 \\
-& \ge & (1/24)H - O(1)  \enspace ,
+}
+& \ge & \left(\frac{1}{4}-\epsilon\right)H - O(1)  \enspace ,
 \end{eqnarray*}
-where the last inequality follows from \lemref{garbage}.
+where the last inequality follows from \lemref{garbage} and by setting
+$\alpha = 1-\delta$ for a sufficiently small constant
+$\delta=\delta(\epsilon) > 0$.
 \end{proof}
 
 \section{Convex Subdivisions}
@@ -761,9 +766,9 @@ structure has an expected query time of
 & = & O(1)+O(1)\times\sum_{i=1}^f \Pr(F_i)\times \sum_{v\in T_i} \Pr(v|F_{i})\log(1/\Pr(v)) \\
 & = & O(1)+O(1)\times\sum_{i=1}^f \Pr(F_i)\times \sum_{v\in T_i}
 	\Pr(v|F_{i})\log(\Pr(F_i)/\Pr(F_i)\Pr(v)) \\
-& = & O(1)+O(1)\times\sum_{i=1}^f \Pr(F_i)\log (1/\Pr(F_i)) + 
+& = & O(1)+O(1)\times\left(\sum_{i=1}^f \Pr(F_i)\log (1/\Pr(F_i)) + 
         \sum_{i=1}^f \sum_{v\in T_i}
-	\Pr(F_i)\Pr(v|F_{i})\log(1/\Pr(v|F_i)) \\
+	\Pr(F_i)\Pr(v|F_{i})\log(1/\Pr(v|F_i))\right) \\
 & \le & O(1)+O(1)\times(B_1 + B_2) \\
 & \le & O(1)\times \max\{B_1, B_2,B_3\} \enspace .
 \end{eqnarray*}
@@ -802,7 +807,11 @@ we place one point on each of the endpoints of $e$
 (\figref{improved-split}). This modification has another nice
 property; it can be implemented so that the only mechanism needed to
 access the probability measure $D$ is a primitive for computing the
-probability of a triangle.
+probability of a triangle.  An interesting corollary of this result is
+that, given a convex polygon $P$ and a probability distribution over
+the interior of $P$, the above construction gives a linear-time
+constant factor approximation for the minimum entropy triangulation of
+$P$.
 
 \begin{figure}
 \begin{center}\begin{tabular}{cc}
@@ -833,6 +842,28 @@ P\}=1$. One could imagine another definition of the problem in which
 the data structure is only required to answer correctly for points
 that are in the support of $D$.
 
+We have given upper and lower bounds on the expected complexity of
+testing if a point is in a convex polygon.  These lower bounds match
+to within a constant factor.  If we wish to be more precise, the
+expected number of linear inequalities tested by any data structure is
+at least $(\frac{1}{4}-\epsilon)H-o(H)$ and our data structure tests
+$3H+o(H)$.\footnote{To see how we obtain the upper bound, observe that
+the expected depth of a search in the triangle tree is at most $H$ and
+each node in the triangle tree tests the query point against 3 lines.}
+We observe that we can reduce the upper bound to $H+o(H)$ by
+increasing the space to $O(n\log^* n)$ if we store the triangles of
+the triangle tree in the data structure of Arya \etal\ \cite{amm01a}.
+Alternatively, we can maintain the $O(n)$ space requirement while
+decreasing the upper bound to $(1+\epsilon)H+o(H)$ by storing sufficiently
+large subtrees of the triangle tree in the point location data
+structure of Arya \etal\ \cite{amm01a,amm00}.  All these tricks still
+leave a factor of $4+\epsilon$ between the upper and lower bounds.
+
+\begin{op}
+Close the gap between the lower bounds and upper bounds on the
+expected cost of testing if a point is contained in a convex polygon.
+\end{op}
+
 We have studied point location in convex polygons and convex
 subdivisions.  From here we could try to extend our results to simple
 polygons, and general planar subdivisions whose faces are arbitrary
@@ -846,13 +877,15 @@ problem since it sometimes requires the data structure to distinguish
 between edges of the same face.  At the heart of the vertical ray
 shooting problem is the following decision problem:
 
-\noindent{\textbf{Open Problem:} Let $P$ be a simple polygon whose
+\begin{op}
+Let $P$ be a simple polygon whose
 boundary consists of one line segment and one $x$-monotone chain
 joining the two endpoints of the line segment and let $D$ be a
 probability measure over $\R^2$. Preprocess $P$ and $D$ into a data
 structure that can test if a query point $p$ is contained in $P$ and
 whose expected query time is optimal in the linear decision tree model
 of computation.
+\end{op}
 
 \bibliographystyle{plain}
 \bibliography{entropy}

@@ -1,0 +1,88 @@
+\documentclass[lotsofwhite]{patmorin}
+
+\input{pat}
+
+\title{\MakeUppercase{Manhattan Graph Drawing}}
+\author{Stefan Langerman \and Pat Morin \and Alexander Wolff}
+\date{}
+
+\begin{document}
+\maketitle
+
+Let $G=(V,E)$ be a finite undirected graph with vertex set
+$V\subset\R^2$.  We consider the problem of embedding $G$ in the plane
+so that
+\begin{enumerate}
+\item $v_i$ is drawn as a point at location $v_i$,
+\item $e_i$ is drawn as an $x$ and $y$ monotone curve, and
+\item no two edges intersect except possibly at their common endpoints.
+\end{enumerate}
+We call such an embedding a \emph{Manhattan embedding} of $G$.
+
+\section{The Algorithm}
+
+A \emph{geodesic segment} is a curve whose intersection with any
+vertical or horizontal line consists of at most one point. A
+\emph{geodesic (Jordan) arc} is an infinite geodesic segment.
+
+The \emph{precedence graph} $P(G)=(E,X)$ is a directed graph whose
+vertices are the edges of $V$ and whose edges represent above/below
+relationships.  An edge $(e_1,e_2)$ is present in $G'$ if and only if
+for every pair of geodesic Jordan arcs $a_1$ and $a_2$ such that
+\begin{enumerate}
+\item $a_i$ contains both endpoints of $e_i$, for $i\in\{1,2\}$ and
+\item $a_1\cap a_2=\emptyset$
+\end{enumerate}
+$a_1$ is above $a_2$ (see \figref{X}).
+\notice{What about when one the edges can't be completed without
+intersecting the other?}
+
+\begin{lem}
+If $e_1\prec e_2$ then either $e_1$ and $e_2$ are separated by a
+vertices line
+\end{lem}
+
+\begin{lem}
+The graph $G$ has a Manhattan embedding if and only if $P(G)$ is
+acyclic.
+\end{lem}
+
+\begin{proof}
+If $P(G)$ contains a cycle then\ldots
+
+If $P(G)$ is acyclic then topologically sort the edges of $G$ to
+obtain a total order $(E,\prec)$. We show how to obtain a Manhattan
+drawing of $G$ using a \emph{plane sweep} \cite{boXX}.  We sweep a
+vertical line from left to right over the vertices of $G$.  During the
+sweep, there are three kinds of edges of $G$:
+\begin{enumerate}
+\item The \emph{complete edges} have both endpoints to the left of
+the sweep line.  These edges are already drawn as geodesic segments.
+
+\item The \emph{partial edges} have one endpoint on each side of the
+sweep line.  These edges are partially drawn as a geodesic arc that
+begins at the vertex to the left of the line and ends on the sweep
+line.
+
+\item The \emph{untouched edges} have both endpoints to the right of
+the sweep line.  These edges are not drawn at all.
+\end{enumerate}
+
+Sweep line events occur at the vertices of $G$.  Between the vertices
+of $G$, the partial edges are extended horizontally as the sweep line
+moves.  When the sweep line reaches a vertex of $u$ zero or more new
+partial edges are created at $u$, zero or more partial edges are
+terminated at $u$ and become complete edges, and a number of
+prexisting partial edges have a vertical edge inserted so that they
+pass above or below $u$, as appropriate. 
+
+More precisely, let $e_1,\ldots,e_k$ be the partial edges of $G$,
+ordered from top to bottom, before the sweep line encounters $u$ and
+let $f_1,\ldots,f_\ell$ be the edges whose left endpoint is $u$.  Note
+that $e_1\prec e_2\prec\cdots\prec e_k$ and that there is some value
+$1<i\le k$ such that $e_i\prec f_1,\ldots,f_\ell\prec e_{i+1}$.  
+
+\end{proof}
+
+\end{document}
+

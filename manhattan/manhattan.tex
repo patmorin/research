@@ -22,25 +22,32 @@ We call such an embedding a \emph{Manhattan embedding} of $G$.
 \section{The Algorithm}
 
 A \emph{geodesic segment} is a curve whose intersection with any
-vertical or horizontal line consists of at most one point. A
-\emph{geodesic (Jordan) arc} is an infinite geodesic segment.
+vertical or horizontal line has at most one connected component.  A
+\emph{Manhattan embedding} of an edge in $(u,v)\in E$ is a geodesic
+segment whose endpoints are $u$ and $v$.  A \emph{Manhattan embedding}
+of a subset $\{e_1,\ldots,e_k\}\subseteq E$ is a set of geodesic
+segments $\{s_1,\ldots,s_k\}$ where, for each $1\le i\le k$, $s_i$ is
+a drawing of $e_i$ and no pair of segments intersect, except possibly
+at their common endpoints.  A Manhattan embedding of $G$ is therefore
+Manhattan embedding of $E$.
+
+Assume for now that, for each edge $e\in E$, the $x$-coordinates of
+both endpoints of $e$ are distinct as are the $y$-coordinates.  The
+left endpoint of $e$ is the vertex of $e$ that has smaller
+$y$-coordinate and the right endpoint of $e$ is the vertex that has
+larger $x$-coordinate.  The edge $e$ is \emph{upward} if its left
+endpoint has smaller $y$-coordinate than its right endpoint, otherwise
+$e$ is \emph{downard}.
 
 The \emph{precedence graph} $P(G)=(E,X)$ is a directed graph whose
-vertices are the edges of $V$ and whose edges represent above/below
-relationships.  An edge $(e_1,e_2)$ is present in $G'$ if and only if
-for every pair of geodesic Jordan arcs $a_1$ and $a_2$ such that
-\begin{enumerate}
-\item $a_i$ contains both endpoints of $e_i$, for $i\in\{1,2\}$ and
-\item $a_1\cap a_2=\emptyset$
-\end{enumerate}
-$a_1$ is above $a_2$ (see \figref{X}).
-\notice{What about when one the edges can't be completed without
-intersecting the other?}
-
-\begin{lem}
-If $e_1\prec e_2$ then either $e_1$ and $e_2$ are separated by a
-vertices line
-\end{lem}
+vertices are the edges of $G$ and whose edges represent above/below
+relationships.  An edge $(e_1,e_2)$ is present in $G'$ if and only if,
+in every Manhattan embedding of $\{e_1,e_2\}$ by two segments
+$\{s_1,s_2\}$, there exists a vertical line $\ell$ such that
+$p_1=\ell\cap s_1$ and $p_2=\ell\cap s_2$ are each non-empty and $p_1$
+is above $p_2$.  A special case occurs when there exists no drawing of
+$\{e_1,e_2\}$, in which case we use the convention that the precedence
+graph contains both the directed edges $(e_1,e_2)$ and $(e_2,e_1)$.
 
 \begin{lem}
 The graph $G$ has a Manhattan embedding if and only if $P(G)$ is
@@ -48,16 +55,18 @@ acyclic.
 \end{lem}
 
 \begin{proof}
-If $P(G)$ contains a cycle then\ldots
+If $P(G)$ contains a cycle then it is clear that $G$ does not have a
+Manhattan embedding.
 
 If $P(G)$ is acyclic then topologically sort the edges of $G$ to
 obtain a total order $(E,\prec)$. We show how to obtain a Manhattan
-drawing of $G$ using a \emph{plane sweep} \cite{boXX}.  We sweep a
+embedding of $G$ using a \emph{plane sweep} \cite{boXX}.  We sweep a
 vertical line from left to right over the vertices of $G$.  During the
 sweep, there are three kinds of edges of $G$:
 \begin{enumerate}
-\item The \emph{complete edges} have both endpoints to the left of
-the sweep line.  These edges are already drawn as geodesic segments.
+
+\item The \emph{complete edges} have both endpoints to the left of the
+sweep line.  These edges are already drawn as geodesic segments.
 
 \item The \emph{partial edges} have one endpoint on each side of the
 sweep line.  These edges are partially drawn as a geodesic arc that
@@ -67,6 +76,22 @@ line.
 \item The \emph{untouched edges} have both endpoints to the right of
 the sweep line.  These edges are not drawn at all.
 \end{enumerate}
+At all times, we maintain the following two invariants:
+\begin{enumerate}
+
+\item The complete and partial edges are embedded as geodesic
+segments.
+
+\item For every upward (respecively, downward) partial edge $e$, the
+partial embedding of $e$ is not a downward (respectively, upward)
+geodesic segment.
+
+\item No two segments intersect, except possibly at their common
+endpoint.
+\end{enumerate}
+It is clear that if we maintain these three invariants throughout the
+plane sweep then once the sweep line has passed over the rightmost
+vertex of $G$ we have obtained a Manhattan embedding of $G$ 
 
 Sweep line events occur at the vertices of $G$.  Between the vertices
 of $G$, the partial edges are extended horizontally as the sweep line
@@ -80,8 +105,23 @@ More precisely, let $e_1,\ldots,e_k$ be the partial edges of $G$,
 ordered from top to bottom, before the sweep line encounters $u$ and
 let $f_1,\ldots,f_\ell$ be the edges whose left endpoint is $u$.  Note
 that $e_1\prec e_2\prec\cdots\prec e_k$ and that there is some value
-$1<i\le k$ such that $e_i\prec f_1,\ldots,f_\ell\prec e_{i+1}$.  
+$1<i\le k$ such that $e_i\prec f_1,\ldots,f_\ell\prec e_{i+1}$.
+Without loss of generality, assume that there is some index $j \le i$
+such that all the partial edges $e_{j},\ldots,e_i$ are below $u$
+before the sweep line reaches $u$.  Then $e_j,\ldots,e_i$ all have
+near vertical segments inserted just before $u$ so that they pass
+either just above $u$ if $u$ is not their right endpoint or they
+terminate at $u$ if $u$ is their right endpoint.
 
+Next we show that, after processing $u$, the three invariants are
+maintained.
+
+\begin{enumerate}
+\item We have just created near-vertical segments that cause the embeddings of edges
+$e_j\ldots,e_i$ be bend upwards.  We must therefore ensure that
+$e_j,\ldots,e_i$ are upwards edges.
+
+\end{enumerate}
 \end{proof}
 
 \end{document}

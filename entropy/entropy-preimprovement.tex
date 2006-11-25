@@ -38,40 +38,36 @@ constant factor of optimal.
 \section{Introduction}
 \seclabel{intro}
 
-The planar point location problem is one of the classic problems in
-computational geometry. Given a planar subdivision $G$,\footnote{A
-\emph{planar subdivision} is a partitioning of the plane into points
-(called \emph{vertices}), open line segments (call \emph{edges}), and
-open polygons (called \emph{faces}).} the planar point location
-problems asks us to construct a data structure so that, for any query
-point $p$, we can quickly determine which face of $G$ contains
-$p$.\footnote{In the degenerate case where $p$ is vertex or contained
-in an edge of $G$ any face incident on that vertex/edge may be
-returned as an answer.} The history of the planar point location
-problem parallels, in many ways, the study of binary search trees.
+The planar point location problem is one of the first problems to have
+been considered by the field of computational geometry. Given a planar
+subdivision $G$,\footnote{A \emph{planar subdivision} is a
+partitioning of the plane into points (called \emph{vertices}), open
+line segments (call \emph{edges}), and open polygons (called
+\emph{faces}).} the planar point location problems asks us to
+construct a data structure so that, for any query point $p$, we can
+quickly determine which face of $G$ contains $p$.  The history of the
+planar point location problem parallels, in many ways, the study of
+binary search trees.
 
 After a few initial attempts \cite{dl76,lp77,p81}, asymptotically
 optimal (and quite different) linear-space $O(\log n)$ query time
 solutions to the planar point location problem were obtained by
 Kirkpatrick \cite{k83}, Sarnak and Tarjan \cite{st86}, and
-Edelsbrunner \etal\ \cite{egs86} in the mid 1980s.  These results were
-based on hierarchical simplification, data structural persistence, and
-fractional cascading, respectively.  All three of these techniques have
-subsequently found many other applications.  An elegant randomized
-solution, combining aspects of all three previous solutions, was later
-given by Mulmuley \cite{m90}.  Preparata \cite{p90} gives a
-comprehensive survey of the results of this era.
+Edelsbrunner \etal\ \cite{egs86} in the mid 1980s.  An elegant
+randomized solution was later given by Mulmuley \cite{m90}.  Preparata
+\cite{p90} gives a comprehensive survey of the results of this era.
 
 In the 1990s, several authors became interested in determining the
 exact constants achievable in the query time.  Goodrich \etal\
-\cite{gor97} gave a linear size data structure that, for any query,
+\cite{gor97} gave linear size data structure that, for any query,
 requires at most $2\log n + o(\log n)$ point-line comparisons and
 conjectured that this query time was optimal for linear-space data
-structures. Here and throughout, logarithms are implicitly base 2
-unless otherwise specified. The following year, Adamy and Seidel
-\cite{as98} gave a linear space data structure that answers queries
-using $\log n + 2\sqrt{\log n} + O(\log\log n)$ point-line comparisons
-and showed that this result is optimal up to the third term.
+structures.\footnote{Here and throughout, logarithms are implicitly
+base 2 unless otherwise specified.} The following year, Adamy
+and Seidel \cite{as98} gave a linear space data structure that answers
+queries using $\log n + 2\sqrt{\log n} + O(\log\log n)$ point-line
+comparisons and showed that this result is optimal up to the third
+term.
 
 Still not done with the problem, several authors considered the point
 location problem under various assumptions about the query
@@ -82,49 +78,43 @@ $p_i$ is the probability that $p$ is contained in face $i$ of $G$,
 then no algorithm that makes only binary decisions can answer queries
 using an expected number of decisions that is fewer than 
 \begin{equation}
-    H(p_1,\ldots,p_f) = \sum_{i=1}^f p_i\log(1/p_i) \enspace . 
-	\eqlabel{entropy}
-	\eqlabel{entropy-face}
+    H(p_1,\ldots,p_f) = \sum_{i=1}^f p_i\log(1/p_i) \enspace . \eqlabel{entropy}
 \end{equation}
 
-In the previous results on planar point location, none of the query
-times are affected significantly by the structure of $G$;  they hold
-for arbitrary planar subdivisions.  However, when studying point
-location under a distribution assumption the problem becomes more
-complicated and the results become more specific.  A \emph{convex
-subdivision} is a planar subdivision whose faces are all convex
-polygons, except the outer face, which is the complement of a convex
-polygon.  A \emph{triangulation} is a convex subdivision in which each
-face has at most 3 edges on its boundary.  Note that, if every face of
-$G$ has a constant number of sides, then $G$ can be augmented, by the
-addition of extra edges, so that it is a triangulation without
-increasing \eqref{entropy} by more than a constant.  Thus, in the
-following we will simply refer to results about triangulations where
-it is understood that these also imply the same result for planar
+In the previous results on planar point location,
+none of the query times are affected
+significantly by the structure of $G$.  They hold for arbitrary planar
+subdivisions.  However, when studying point location under a
+distribution assumption the problem becomes more complicated and the
+results become more specific.  A \emph{convex subdivision} is a planar
+subdivision whose faces are all convex polygons, except the outer
+face, which is the complement of a convex polygon.  A
+\emph{triangulation} is a convex subdivision in which each face has at
+most 3 edges on its boundary.  Note that, if every face of $G$ has a
+constant number of sides, then $G$ can be augmented, by the addition
+of extra edges, so that it is a triangulation without increasing
+\eqref{entropy} by more than a constant.  Thus, in the following we
+will simply refer to results about triangulations where it is
+understood that these also imply the same result for planar
 subdivisions with faces of constant size.
 
-Arya \etal\ \cite{acmr00} gave two results for the case where the
-query point $p$ is chosen from a known distribution where the $x$ and
-$y$ coordinates of $p$ are chosen independently and $G$ is a convex
-subdivision.  They give a linear space data structure for which the
-expected number of point-line comparisons is at most $4H+O(1)$ and a
-quadratic space data structure for which the expected number of
-point-line comparisons is at most $2H+O(1)$.  The assumption about the
-independence of the $x$ and $y$ coordinates of $p$ is crucial to the
-these results.
+Arya \etal\ \cite{acmr00} showed that, for convex subdivisions, and for
+distributions where the $x$ and $y$ coordinates of the query point $p$ are
+independent, a data structure exists in which the expected number of
+point-line comparisons is at most $4H+O(1)$ using linear space or at
+most $2H+O(1)$ using quadratic space.
 
-For arbitrary distributions that are known in advance, several results
-exist.  Iacono \cite{i01,i04} showed that, for triangulations, a
-simple variant of Kirkpatrick's original point location structure
-gives a linear space, $O(H+1)$ expected query time data structure.  A
-result by Arya \etal\ \cite{amm00} gives a data structure for
-triangulations that uses $H + O(H^{2/3}+1)$ expected number of
-comparisons per query and $O(n\log n)$ space.  The space requirement
-of this latter data structure was later reduced, by the same authors,
-to $O(n\log^* n)$ \cite{amm01a}.  Finally, the same three authors
-\cite{amm01b} showed that a variant of Mulmuley's randomized algorithm
-gives, for triangulations, a simple $O(H+1)$ expected query time,
-linear space data structure.
+Iacono \cite{i01,i04} showed that, for triangulations, a simple
+variant of Kirkpatrick's original point location structure gives a
+linear space, $O(H+1)$ expected query time data structure.  A result
+by Arya \etal\ \cite{amm00} gives a data structure for triangulations
+that uses $H + O(H^{2/3}+1)$ expected number of comparisons per query
+and $O(n\log n)$ space.  The space requirement of this latter
+data structure was later reduced, by the same authors, to $O(n\log^* n)$
+\cite{amm01a}.  Finally, the same three authors \cite{amm01b} showed
+that a variant of Mulmuley's randomized algorithm gives, for
+triangulations, a simple $O(H+1)$ expected query time, linear space
+data structure.
 
 The above collection of results suggest that point location, and even
 distribution-sensitive point location, is a well-studied and
@@ -188,8 +178,7 @@ required in subsequent sections.
 
 \paragraph{Triangles.}  For the purposes of this paper, a
 \emph{triangle} is the common intersection of at most 3 halfplanes.
-This includes triangles with infinite area and triangles having 0, 1,
-2, or 3, vertices.  
+This includes triangles having 0, 1, 2, or 3, vertices.  
 
 \paragraph{Classification Problems and Classification Trees.}
 
@@ -230,12 +219,10 @@ two operations in constant time:
 intersection of two of $\Delta$'s supporting lines, compute a line $\ell$
 that contains $t$ and that partitions $\Delta$ into two open triangles
 $\Delta_0$ and $\Delta_1$ such that $\Pr(\Delta_0)\le\Pr(\Delta)/2$
-and $\Pr(\Delta_1)\le\Pr(\Delta)/2$.
+and $\Pr(\Delta_1)\le\Pr(\Delta)/2$.\footnote{Actually, in
+\secref{discussion} we show that this second requirement is not
+necessary.}
 \end{enumerate}
-Requirement 2 is used only for convenience in describing our data
-structure.  In \secref{discussion} we show that 
-Requirement 2 is not really necessary and that Requirement 1 is sufficient to
-implement our data structure.
 
 For a classification tree $T$ that solves a problem
 $P:\mathcal{D}\mapsto\{0,\ldots,k-1\}$ and a probability measure $D$
@@ -269,10 +256,6 @@ $d$-ary classification tree $T$ that solves $\mathcal{P}$ has
 \end{equation}
 \end{thm}
 \setcounter{thm}{0}
-\thmref{shannon} is applied to the point location problem by treating
-point location as the problem of classifying the query point $p$ based
-on which face of $G$ contains it.  In this way, we obtain the lower
-bound in \eqref{entropy-face}.
 
 \section{Point In Convex Polygon Testing}
 \seclabel{polygons}
@@ -328,14 +311,12 @@ $S_i\subseteq S_{i+1}$.
 Next we define the sets $S_0,\ldots,S_k$ that define our
 approximations.  The set $S_0$ is empty, and we use the convention
 that the outer approximation in this case is the entire plane and the
-inner approximation is the empty set. The set $S_1$ consists of any
-two points, $x$ and $y$ on $\boundary P$ such that $\Pr(h_1)\le 1/2$
-and $\Pr(h_2)\le 1/2$, for each of the two open halfspaces $h_1$ and
-$h_2$ bounded by the line containing $x$ and $y$. The existence of $x$
-and $y$ is guaranteed, for example, by the planar Ham Sandwich Theorem
-\cite{bz04}.
+inner approximation is the empty set. The set $S_1$ consists of any two
+points, $x$ and $y$ on $\boundary P$ such that $\Pr(h_1)\le 1/2$ and
+$\Pr(h_2)\le 1/2$, for each of the two open halfspaces $h_1$ and $h_2$
+bounded by the line containing $x$ and $y$.
 
-We now show how, for $i\ge 1$, to obtain the set $S_{i+1}$ from the
+We now show how, for $i\ge 2$, to obtain the set $S_{i+1}$ from the
 set $S_{i}$.  Let $p_0,\ldots,p_{m_i-1}$ be the points in $S_i$ as
 they occur in conterclockwise order around the boundary of $P$.  The
 approximation $A_i$ thus consists of $m_i$ open triangles
@@ -373,13 +354,11 @@ are contained in $\Delta_j$.  We call these two triangles the
 \begin{figure}
 \begin{center}
 \begin{tabular}{cc}
-\includegraphics{split-a} & \includegraphics{split-b} \\
-(a) & (b)
+\includegraphics{split-a} & \includegraphics{split-b}
 \end{tabular}
 \end{center}
-\caption{Starting with $\Delta_j$ we (a) subdivide $\Delta_j$ into two triangles
-$\Delta_{j,0}$ and $\Delta_{j,1}$ with a line through $t_j$ and then
-(b) split $\Delta_j$ into its two children.}
+\caption{Splitting the triangle $\Delta_j$ into two triangles
+$\Delta_{j,0}$ and $\Delta_{j,1}$ with a line through $t_j$.}
 \figlabel{split}
 \end{figure}
 
@@ -390,9 +369,6 @@ $A_0,\ldots,A_k$ are stored as a binary tree $T=T(P,D)$ that we call a
 $i$ in $T$ corresponds to an open triangle $\Delta(v)$ in
 approximation $A_{i}$ and the two children of $v$ correspond to the
 two open triangles into which $\Delta(v)$ is split. See \figref{tree}.
-A crucial property of this construction guaranteed by the splitting
-process is that, for any node $v$ at level distance $i$ from the root
-of $T$, $\Pr(\Delta(v))\le 1/2^i$.
 
 \begin{figure}
 \begin{center}\includegraphics[scale=1.2]{tree}\end{center}
@@ -411,7 +387,7 @@ or (2) we can determine in constant time if $p\in P$.
 
 \subsection{Analysis of the Triangle Tree}
 
-Let $T=T(P,D)$ be a triangle tree for a convex $n$-gon $P$ and a distribution
+Let $T$ be a triangle tree for a convex $n$-gon $P$ and a distribution
 $D$. Define, for each node $v$ of $T$,
 \[
    \Xi(v)=\Delta(v)\setminus (\Delta(\lft(v))\cup \Delta(\rght(v)))
@@ -428,10 +404,11 @@ $O(n)$ time.
 Using the triangle tree, the expected number of linear inequalities
 required to check if $p\in P$ for a point $p$ drawn from $D$ is at
 most
-\[
+\begin{eqnarray*}
  \mu_D(T) 
-   \le O(1)+O(1)\times \sum_{v\in T}\Pr(v)\log(1/\Pr(v)) \enspace .
-\]
+   & = & O(1)+O(1)\times \sum_{v\in T}\Pr(v)\times\depth (v) \\
+   &\le& O(1)+O(1)\times \sum_{v\in T}\Pr(v)\log(1/\Pr(v))
+\end{eqnarray*}
 \end{thm}
 
 \begin{proof}
@@ -459,9 +436,11 @@ construction algorithm is given by the recurrence
 \]
 which resolves to $O(n)$.
 
-The expected running time of the query algorithm on $T$ is follows
-immediately from the fact that, for any node $v$ at a distance of $i$
-from the root of $T$, $\Pr(v) \le \Pr(\Delta(v)) \le 1/2^i$.
+The expected running time of the query algorithm on $T$ is
+analyzed as follows: The first equality is simply by the definition of
+expectation.  The second inequality follows immediately from the fact
+that, for any node $v$ other than the root of $T$, $\Pr(v)\le
+\Pr(\Delta(v))\le (1/2)\Pr(\Delta(\prnt(v)))$.
 \end{proof}
 
 
@@ -487,21 +466,21 @@ R)\log(1/\Pr(\Xi(v)\mid R)) \enspace .
 
 \begin{proof}
 
-We define a new model of computation, show that a lower bound in this
+We define new model of computation, show that a lower bound in this
 new model implies a lower bound in the linear decision tree model and
 then prove the lower bound for the new model.  Refer to \figref{s}.
 Let $X_1= \boundary P \cup \bigcup_{v\in V} \Delta(v)$, let
 $X_0=X_1\cup\boundary X_1$ be the closure of $X_1$, and let
 $X=X_0\setminus\{s\}$ for some vertex $s$ of some triangle $\Delta(v)$
-with $v\in V$ and $s\in\boundary P$.\footnote{The removal of $s$
-ensures that $X$ is \emph{simply connected}.  That is, for any two
-points $p,q\in X$ any path, in $X$, from $p$ to $q$ can be
-continuously deformed into any other path, in $X$, from $p$ to $q$
-while remaining in $X$ throughout the deformation.} A \emph{chord} of
-$X$ is a closed line segment with both endpoints on the boundary of
-$X$ and whose interior is contained in $X$. Note that a chord may have
-length zero.  If $c$ is a chord of $X$ then $X\setminus c$ has at most
-3 connected components $X^c_1$, $X^c_2$, and $X^c_3$.
+with $v\in V$.\footnote{The removal of $s$ ensures that $X$ is
+\emph{simply connected}.  That is, for any two points $p,q\in X$ any
+path, in $X$, from $p$ to $q$ can be continuously deformed into any
+other path, in $X$, from $p$ to $q$ while remaining in $X$ throughout
+the deformation.} A \emph{chord} of $X$ is a closed line segment with
+both endpoints on the boundary of $X$ and whose interior is contained
+in $X$. Note that a chord may have length zero.  If $c$ is a chord of
+$X$ then $X\setminus c$ has at most 3 connected components $X^c_1$,
+$X^c_2$, and $X^c_3$.
 
 \begin{figure}
 \begin{center}
@@ -534,6 +513,7 @@ $\mu_{D_{|R}}(T') \le 2\mu_{D_{|R}}(T)$.
 Now we need only prove a lower bound on $\mu_{D_{|R}}(T')$ for any
 chord tree $T'$.  For two nodes $u,v\in V$, $u\neq v$, let $p$ be a
 point in $\Delta(u)$ and let $q$ be a point in $\Delta(v)$.  
+
 We claim that the search path for $p$ in $T'$ and the search path for
 $q$ in $T'$ must end at different leaves of $T'$.  Assume, for the
 sake of contradiction, that this is not the case and that both search
@@ -574,10 +554,8 @@ $\Delta(v)$ contains $p$.  Therefore, by \thmref{shannon},
 and the lemma follows from \clmref{relation}.
 \end{proof}
 
-The remainder of our argument involves carefully piecing together
-subsets of the nodes in $T$ and applying 
-\lemref{lower-bound} to these subsets.  By doing this carefully, we
-will eventually obtain a lower bound that matches the upper bound
+The remainder of our argument involves carefully constructing a
+lower-bound based on \lemref{lower-bound} that matches the upper bound
 in \thmref{upper-bound}.  Let 
 \begin{equation}
    H = \sum_{v\in T} \Pr(v)\log (1/\Pr(v)) \eqlabel{H}
@@ -629,7 +607,7 @@ since $2^{1-\alpha} > 1$.
 \end{proof}
 
 In order to use \lemref{lower-bound} we must partition the vertices of
-$T$ into subsets that are compatible with the conditions of the lemma.
+$T$ into sets that are compatible with the conditions of the lemma.
 
 \begin{lem}\lemlabel{partition}
 Each group $G_i$ can be partitioned into $t_i$ subgroups
@@ -714,7 +692,7 @@ we obtain
 	\left(\frac{1}{4}
 	\sum_{v\in G_{i,j}}\Pr(v\mid G_{i,j})\log(1/\Pr(v\mid G_{i,j}))
 	\right) \\
-& = & \frac{1}{4}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}\Pr(G_{i,j})\times
+& \ge & \frac{1}{4}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}\Pr(G_{i,j})\times
 	\left(
 	\sum_{v\in G_{i,j}}\Pr(v\mid G_{i,j})\log(1/\Pr(v\mid G_{i,j}))
 	\right) \\
@@ -868,26 +846,19 @@ that are in the support of $D$.
 We have given upper and lower bounds on the expected complexity of
 testing if a point is in a convex polygon.  These lower bounds match
 to within a constant factor.  If we wish to be more precise, the
-expected number of linear inequalities tested by any linear decision
-tree is at least $(1/4-\epsilon)H-o(H)$ and our data structure tests
-$3H+o(H)$ linear inqequalities. (The constant 3 appears in the
-upper bound because the expected depth of a search in the triangle
-tree is at most $H$ and each node in the triangle tree tests the query
-point against 3 lines.)
-
-With a mild assumption on the distribution $D$, the proof of
-\lemref{lower-bound} could be modified to use a binary chord tree
-instead of a 4-ary chord tree, increasing the lower bound to
-$(1/2-\epsilon)H-o(H)$. Indeed, it would be sufficient to assume that
-$D$ satisfies $\Pr(X)=0$ if the area of $X$ is 0.  On the other hand,
-the upper bound can be reduced to $H+o(H)$ by increasing the space to
-$O(n\log^* n)$ if we store the triangles of the triangle tree in the
-data structure of Arya \etal\ \cite{amm01a}.  Alternatively, we can
-maintain the $O(n)$ space requirement while decreasing the upper bound
-to $(1+\epsilon)H+o(H)$ by storing sufficiently large subtrees of the
-triangle tree in the point location data structure of Arya \etal\
-\cite{amm00,amm01a}.  All these tricks still leave a factor of
-$2+\epsilon$ between the upper and lower bounds.
+expected number of linear inequalities tested by any data structure is
+at least $(\frac{1}{4}-\epsilon)H-o(H)$ and our data structure tests
+$3H+o(H)$.\footnote{To see how we obtain the upper bound, observe that
+the expected depth of a search in the triangle tree is at most $H$ and
+each node in the triangle tree tests the query point against 3 lines.}
+We observe that we can reduce the upper bound to $H+o(H)$ by
+increasing the space to $O(n\log^* n)$ if we store the triangles of
+the triangle tree in the data structure of Arya \etal\ \cite{amm01a}.
+Alternatively, we can maintain the $O(n)$ space requirement while
+decreasing the upper bound to $(1+\epsilon)H+o(H)$ by storing sufficiently
+large subtrees of the triangle tree in the point location data
+structure of Arya \etal\ \cite{amm01a,amm00}.  All these tricks still
+leave a factor of $4+\epsilon$ between the upper and lower bounds.
 
 \begin{op}
 Close the gap between the lower bounds and upper bounds on the
@@ -896,7 +867,7 @@ expected cost of testing if a point is contained in a convex polygon.
 
 We have studied point location in convex polygons and convex
 subdivisions.  From here we could try to extend our results to simple
-polygons and general planar subdivisions whose faces are arbitrary
+polygons, and general planar subdivisions whose faces are arbitrary
 simple polygons. Perhaps a more realistic next step is to study the
 related problem of \emph{vertical ray shooting}:  Preprocess a set $S$
 of points and open line segments so that, for any query point $p$, we

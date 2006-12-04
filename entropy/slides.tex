@@ -7,7 +7,10 @@
 \usepackage{beamerthemesplit}
 \input{pat}
 
-\title{Distribution-Senvsitive Point Location\\ in Convex Subdivisions}
+\newcommand{\pin}{p_{\mathsf{in}}}
+\newcommand{\pout}{p_{\mathsf{out}}}
+
+\title{Distribution-Sensitive Point Location\\ in Convex Subdivisions}
 \author{Pat Morin}
 \institute{Carleton University}
 \date{December 6, 2006 \\ McGill University}
@@ -81,7 +84,7 @@ o(\log\log n)$ standard comparisons
   \item<2-> What about the average case?
   \item<3-> Assume the point $p$ is selected according to a
 	probability measure $D$ over $\R^2$
-  \item<4-> Given $G$ and $D$ can we optimize the expected cost of
+  \item<4-> Given $(G,D)$ can we optimize the expected cost of
 	locating $p$?
   \end{itemize}
 }
@@ -98,36 +101,36 @@ o(\log\log n)$ standard comparisons
      For any data structure that makes only binary decisions, the
 expected number of decisions is at least
    \[
-      H = \sum_{i=1}^f p_i\log(1/p_i)  \enspace .
+      H(p_1,\ldots,p_f) = \sum_{i=1}^f p_i\log(1/p_i)  \enspace .
    \]
   \end{itemize}
 }
 
 \frame
 {
-   \frametitle{Distribution-Sensitive Point Location}
+   \frametitle{Distribution-Sensitive Point Location: Results}
    \begin{itemize}
-   \item<2-> Arya, Cheng, Mount, and Ramesh (2000)
+   \item<1-> Arya, Cheng, Mount, and Ramesh (2000)
     \begin{itemize}
-      \item<2->For convex subdivisions: $O(n^2)$ space, $2H+o(H)$ comparisons
-      \item<2->For convex subdivisions: $O(n)$ space, $4H+o(H)$ comparisons
-      \item<2->Requires that $x$ and $y$ coordinates of $p$ are independent
+      \item<1->For convex subdivisions: $O(n^2)$ space, $2H+o(H)$ comparisons
+      \item<1->For convex subdivisions: $O(n)$ space, $4H+o(H)$ comparisons
+      \item<1->Requires that $x$ and $y$ coordinates of $p$ are independent
     \end{itemize}
-   \item<3-> Arya, Malamatos, and Mount (2000)
+   \item<2-> Arya, Malamatos, and Mount (2000)
     \begin{itemize}
-      \item<3->For triangulations: $O(n\log n)$ space, $H+o(H)$ comparisons
+      \item<2->For triangulations: $O(n\log n)$ space, $H+o(H)$ comparisons
     \end{itemize} 
-    \item<4-> Arya, Malamatos, and Mount (2001a)
+    \item<3-> Arya, Malamatos, and Mount (2001a)
     \begin{itemize}
-      \item<4->For triangulations: $O(n\log^* n)$ space, $H+o(H)$ comparisons
+      \item<3->For triangulations: $O(n\log^* n)$ space, $H+o(H)$ comparisons
     \end{itemize} 
-    \item<5-> Arya, Malamatos, and Mount (2001b)
+    \item<4-> Arya, Malamatos, and Mount (2001b)
     \begin{itemize}
-      \item<5->For triangulations: $O(n)$ space, $O(H)$ comparisons (randomized)
+      \item<4->For triangulations: $O(n)$ space, $O(H)$ comparisons (randomized)
     \end{itemize} 
-    \item<6-> Iacono (2001)
+    \item<5-> Iacono (2001)
     \begin{itemize}
-      \item<6->For triangulations: $O(n)$ space, $O(H)$ comparisons (deterministic)
+      \item<5->For triangulations: $O(n)$ space, $O(H)$ comparisons (deterministic)
     \end{itemize} 
    \end{itemize}
 
@@ -143,13 +146,20 @@ expected number of decisions is at least
 	well understood, but\ldots
    \item<2-> A simple question: $P$ is a convex $n$-gon, $D$ is a
 	probability measure over $\R^2$
-   \item<3-> Preprocess $P$ and $D$ so that we can quickly determine if a
+   \item<3-> Preprocess $(P,D)$ so that we can quickly determine if a
 point $p$, distributed according to $D$ is inside or outside $P$
    \item<4-> None of the above results apply
-   \item<5-> Even worse, there are only two faces, so
-     \[ H= p_1\log (1/p_1) + p_2\log(1/p_2) \le 1  \]
-   \item<6-> In general, it will be impossible to match the entropy
-	lower bound
+   \end{itemize}
+}
+
+\frame
+{
+   \frametitle{Difficulties I}
+   \begin{itemize}
+   \item<1-> We will want to prove that our data structure is optimal
+   \item<2-> But there are only two outcomes, so
+     \[ H= \pin\log (1/\pin) + \pout\log(1/\pout) \le 1  \]
+   \item<3-> We can't always match the entropy lower bound!
    \end{itemize}
 }
 
@@ -159,25 +169,30 @@ point $p$, distributed according to $D$ is inside or outside $P$
    \begin{itemize}
      \item<1-> We could try to triangulate $P$ and apply a result for 
 	triangulations\\
-     \only<1>{\centerline{\includegraphics[scale=.5]{problema-1}}
-        $H= p_1\sum_{i=1}^3 p_i\log(1/p_i)$}       
-     \only<2>{\centerline{\includegraphics[scale=.5]{problema-2}}
+     \only<1>{\centerline{\includegraphics[scale=.6]{problema-1}}
+        -}       
+     \only<2>{\centerline{\includegraphics[scale=.6]{problema-2}}
         $H= \sum_{i=1}^f (c/f)\log (f/c) = \Theta(\log f)$ }       
-     \only<3>{\centerline{\includegraphics[scale=.5]{problema-3}}
+     \only<3->{\centerline{\includegraphics[scale=.6]{problema-3}}
         $H= p_1\sum_{i=1}^3 p_i\log(1/p_i) = O(1)$ }       
+     \item<4-> Choosing correct triangulation is critical
    \end{itemize}
 }
 
 \frame
 {
-   \frametitle{The Triangle Tree}
+   \frametitle{The Data Structure}
    \begin{itemize}
     \item<1-> We define a binary \emph{triangle tree} $T=T(P,D)$
     \item<2-> The vertices of $T$ correspond to triangles
     \item<3-> Each triangle approximates a section of the boundary of $P$
-    {\includegraphics[scale=.6]{split-a}}
-    \only<4->{\includegraphics[scale=.6]{split-b}}
-    \item<5-> The leaves of $T$ correspond to triangles completely
+    {\includegraphics[scale=.6]{ssplit-a}}
+    \only<4>{\includegraphics[scale=.6]{ssplit-b}}%
+    \only<5>{\includegraphics[scale=.6]{ssplit-c}}%
+    \only<6>{\includegraphics[scale=.6]{ssplit-d}}%
+    \only<7->{\includegraphics[scale=.6]{ssplit-e}}%
+    \item<4-> Each internal node is split into two triangles
+    \item<8-> The leaves of $T$ correspond to triangles completely
 	contained in $P$
    \end{itemize}
 }
@@ -194,6 +209,7 @@ point $p$, distributed according to $D$ is inside or outside $P$
    \begin{itemize}
    \item<1-> Let $\Pr(v)$ denote the probability that a search for $p$ 
 	finishes at node $v\in T$
+   \includegraphics{ssplit-e}
    \item<2-> Note that, if $v$ is at level $i$ in $T$ then $\Pr(v)\le 1/2^i$
    \item<3-> So, the expected cost of searching in $T$ is at most
    \begin{eqnarray*}

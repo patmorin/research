@@ -3,12 +3,16 @@
 
 \DeclareMathOperator{\conv}{conv}
 \DeclareMathOperator{\average}{average}
+\DeclareMathOperator{\support}{support}
+\DeclareMathOperator{\boundary}{\partial}
 
 \usepackage{beamerthemesplit}
 \input{pat}
 
 \newcommand{\pin}{p_{\mathsf{in}}}
 \newcommand{\pout}{p_{\mathsf{out}}}
+\DeclareMathOperator{\cost}{cost}
+\DeclareMathOperator{\depth}{depth}
 
 \title{Distribution-Sensitive Point Location\\ in Convex Subdivisions}
 \author{Pat Morin}
@@ -98,10 +102,10 @@ o(\log\log n)$ standard comparisons
    \item<2-> $D$ induces a distribution over the faces of $G$
    \item<3-> Let $p_i=\Pr\{\mbox{$p$ is contained in face $i$}\}$
    \item<4-> \textbf{Theorem (Shannon 1948):}
-     For any data structure that makes only binary decisions, the
+     For any data structure $X$ that makes only binary decisions, the
 expected number of decisions is at least
    \[
-      H(p_1,\ldots,p_f) = \sum_{i=1}^f p_i\log(1/p_i)  \enspace .
+      \mu_D(X) \ge H(p_1,\ldots,p_f) = \sum_{i=1}^f p_i\log(1/p_i)  \enspace .
    \]
   \end{itemize}
 }
@@ -186,11 +190,11 @@ point $p$, distributed according to $D$ is inside or outside $P$
     \item<1-> We define a binary \emph{triangle tree} $T=T(P,D)$
     \item<2-> The vertices of $T$ correspond to triangles
     \item<3-> Each triangle approximates a section of the boundary of $P$
-    {\includegraphics[scale=.6]{ssplit-a}}
-    \only<4>{\includegraphics[scale=.6]{ssplit-b}}%
-    \only<5>{\includegraphics[scale=.6]{ssplit-c}}%
-    \only<6>{\includegraphics[scale=.6]{ssplit-d}}%
-    \only<7->{\includegraphics[scale=.6]{ssplit-e}}%
+    {\includegraphics{ssplit-a}}
+    \only<4>{\includegraphics{ssplit-b}}%
+    \only<5>{\includegraphics{ssplit-c}}%
+    \only<6>{\includegraphics{ssplit-d}}%
+    \only<7->{\includegraphics{ssplit-e}}%
     \item<4-> Each internal node is split into two triangles
     \item<8-> The leaves of $T$ correspond to triangles completely
 	contained in $P$
@@ -204,21 +208,209 @@ point $p$, distributed according to $D$ is inside or outside $P$
    Each level of $T$ is an approxmation of $\partial P$
 }
 
-\frame{
+
+\frame
+{
+   \frametitle{Searching in $T$}
+   \begin{itemize}
+     \item<1-> Searching in $T$ is done top-down, starting at the root
+     \item<2-> For each triangle either:
+      \begin{itemize}
+        \item<3-> We finish the search:\\
+          \includegraphics{finish}
+        \item<4-> We recurse on one of the two children:\\
+          \includegraphics{recurse}
+      \end{itemize}
+   \end{itemize}
+}
+
+\frame
+{
    \frametitle{Analysis of the Triangle Tree}
    \begin{itemize}
    \item<1-> Let $\Pr(v)$ denote the probability that a search for $p$ 
 	finishes at node $v\in T$
-   \includegraphics{ssplit-e}
-   \item<2-> Note that, if $v$ is at level $i$ in $T$ then $\Pr(v)\le 1/2^i$
+   \item<2-> Note that, if $v$ is at depth $i$ in $T$ then $\Pr(v)\le 1/2^i$
    \item<3-> So, the expected cost of searching in $T$ is at most
    \begin{eqnarray*}
-      \mathrm{cost}(T) 
-    &=& O(1) + O(1)\times\sum_{v\in T} \Pr(v)\times\mathrm{depth}(v) \\
+      \mu_D(T) 
+    &=& O(1) + O(1)\times\sum_{v\in T} \Pr(v)\times\depth(v) \\
        &\le& O(1)+O(1)\times \sum_{v\in T} \Pr(v)\log(1/\Pr(v))
    \end{eqnarray*}
    \end{itemize}
 
+}
+
+\frame
+{
+	\frametitle{Review and Lookahead}
+	\begin{itemize}
+	\item<1-> We have a triangle tree $T$ whose search time is
+	 \[ \mu_D(T) \le O(1)+O(1)\times \sum_{v\in T} \Pr(v)\log(1/\Pr(v))
+         \]
+	and we want to show that this is optimal 
+        \item<2-> We will show that every point location structure $X$ for
+	$P$ is also a point location structure for the triangles of
+$T$, so Shannon's Theorem gives
+	 \[ \mu_D(X) \ge \sum_{v\in T} \Pr(v)\log(1/\Pr(v))
+         \]
+        \item<3-> Well, not exactly\ldots
+          \begin{itemize}
+		\item<4-> $X$ can distinguish between most (but not all) triangles of $T$
+		\item<5-> But this will be good enough
+          \end{itemize}
+	\end{itemize}
+}
+
+\frame
+{
+   \frametitle{Linear Decision Trees}
+   \begin{itemize}
+     \item<1-> We need to fix a model of computation for the lower bound
+     \item<2-> A \emph{linear decision tree} is a binary where
+       \begin{itemize}
+          \item Each internal node is labelled with a linear inequality
+          \item Each leaf is labelled with \emph{in} or \emph{out}
+          \item For every $p\in\R^2$ the search path for $p$ finishes at 
+           a leaf labelled \emph{in} if and only if $p\in P$
+       \end{itemize}
+     \item<3-> Every point location structure in the
+	introduction can be expressed as a linear decision tree
+   \end{itemize}
+}
+
+\frame
+{
+	\frametitle{Linear Decision Tree Example}
+        \only<1>{\includegraphics{ld-a}}%
+        \only<2>{\includegraphics{ld-b}}%
+        \only<3>{\includegraphics{ld-c}}%
+        \only<4>{\includegraphics{ld-d}}%
+        \only<5>{\includegraphics{ld-e}}%
+        \only<6>{\includegraphics{ld-e}}%
+}
+
+
+\frame
+{
+	\frametitle{A Non-Trivial Lower Bound}
+        \begin{itemize}
+          \item<1-> Suppose we have this polygon $P$ and this distribution $D$:
+            \includegraphics{lower-bound}
+          \item<2-> \textbf{Lemma 0:} Any linear decision tree $X$ for
+testing if $p\in P$ has 
+\[  \mu_D(X)\ge \frac{1}{2}\sum_{i=1}^{11} p_i\log(1/p_i)  \]
+        \end{itemize} 
+}
+
+
+\frame
+{
+	\frametitle{Proof of Lemma 0}
+        \begin{itemize}
+           \item<1->We first prove a lower bound for the \emph{chord tree} model\\
+            \only<1>{\includegraphics{lb-proof-a}}%
+            \only<2>{\includegraphics{lb-proof-b}}%
+            \only<3>{\includegraphics{lb-proof-c}}%
+            \only<4->{\includegraphics{lb-proof-d}}%
+           \item<2->Let $C_1,\ldots,C_{11}$ be the components of 
+               $\support(D)\setminus \boundary P$
+
+           \item<3->For any $p\in C_i$ and $q\in C_j$ $i\neq j$, $p$ and $q$
+               must live in different leaves of the chord tree
+
+           \item<4->By labelling leaves of the chord tree $T_C$
+		appropriately we obtain a
+               point location structure for $C_1,\ldots,C_{11}$ \\
+           $\Rightarrow$ By Shannon's Theorem $\mu_D(T_C) \ge \sum_{i=1}^{11}p_i\log (1/p_i)$
+           \item<5->Any line intersects $\support(D)$ in at most 2 chords
+		\hfill{\qed}
+        \end{itemize}
+}
+
+
+\frame
+{
+    \frametitle{Using Lemma 0}
+    \begin{itemize}
+	\item<1-> Let $V\subseteq V(T)$ be such that no vertex in
+$V$ is an ancestor of any other vertex in $V$
+        \item<2-> The triangles of $V$ look like this:\\
+	\includegraphics{using-lemma0}
+        \item<3->Let $D_V$ be the measure $D$ conditioned on the
+search completing at a node in $V$
+        \item<4->\textbf{Lemma 1:} For any linear decision tree $X$
+        \[ \mu_{D_V}(X) \ge \frac{1}{4}\sum_{v\in V} \Pr(v\mid V)\log (1/\Pr(v\mid V))
+         \]
+    \end{itemize}
+}
+
+\frame{
+     \frametitle{Review}
+
+     \begin{itemize}
+	\item<1-> We have a triangle tree $T$ whose search time is
+	 \[ \mu_D(T) \le O(1)+O(1)\times \sum_{v\in T} \Pr(v)\log(1/\Pr(v))
+         \]
+        \item<2-> For any linear decision tree $X$ and any
+	\emph{genetically independent set} $V\subseteq V(T)$ of
+	 \[ \mu_{D_V}(X) \ge \sum_{v\in V} \Pr(v\mid V)\log(1/\Pr(v\mid V))
+         \]
+        \item<3-> For any partition of $V(T)$ into genetically
+independent sets $V_1,\ldots,V_k$, and any linear decision tree $X$,
+	 \[ \mu_D(X) \ge \frac{1}{4}\sum_{i=1}^k\Pr(V_i)\sum_{v\in V_i} \Pr(v\mid
+V_i)\log(1/\Pr(v\mid V_i))
+         \]
+     \end{itemize}
+}
+
+
+\frame
+{
+	\frametitle{Review (Cont'd)}
+
+ 	\begin{itemize}
+	\item<1-> We're now dangerously close to matching upper and lower bounds
+        \begin{eqnarray*}
+	\mu_D(X) &\ge &\frac{1}{4}\sum_{i=1}^k
+	   \Pr(V_i)\sum_{v\in V_i} \Pr(v\mid V_i)\log(1/\Pr(v\mid V_i)) \\
+	& = &\frac{1}{4}\sum_{i=1}^k\sum_{v\in V_i} 
+		\Pr(v)\log(1/\Pr(v\mid V_i)) \\
+	& = &\frac{1}{4}\sum_{i=1}^k\sum_{v\in V_i} 
+		\Pr(v)(\log(1/\Pr(v))-\log(1/\Pr(V_i)))
+	\end{eqnarray*}
+	\item<2-> The trick is to pick our $V_i$s so that
+$\log(1/\Pr(V_i))$ is small
+	\end{itemize}
+
+}
+
+
+\frame
+{
+	\frametitle{Picking the $V_i$s}
+
+	\begin{itemize}
+	\item<1-> Let
+	\[
+		V_i=\{v\in V(T) :1/2^{i-1} \le \Pr(v) \le 1/2^i \}
+	\]
+	\item<2-> But these $V_i$ are not genetically independent!
+ 	\item<3-> While $|V_i|\ge 2^{\alpha i}$
+	   \begin{itemize}
+		\item $V_{i,j}$ is a genetically independent subset of
+			$V_i$ with size $2^{\alpha i}/i$
+		\item $V_i\gets V_i\setminus V_{i,j}$
+		\item $j\gets j+1$
+	   \end{itemize}
+	\item<4-> With the right $\alpha$ and some work, we can show that
+	\begin{eqnarray*}
+	\mu_D(X) & \ge & \frac{1}{4}\sum_{i,j}\sum_{v\in V_{i,j}} 
+		\Pr(v)(\log(1/\Pr(v))-\log(1/\Pr(V_{i,j}))) \\
+	& \ge & \left(\frac{1}{4}-\epsilon\right)\sum_{v\in T}\Pr(V)\log(1/\Pr(V)) -
+O(1)
+	\end{eqnarray*}
+	\end{itemize}
 }
 
 

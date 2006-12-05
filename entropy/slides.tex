@@ -1,4 +1,11 @@
 \documentclass{beamer}
+
+\mode<presentation>{
+\definecolor{cured}{rgb}{.8,0,.2}
+\usecolortheme[named=cured]{structure}
+\usetheme{split}
+}
+
 \usepackage{amsopn}
 
 \DeclareMathOperator{\conv}{conv}
@@ -6,7 +13,6 @@
 \DeclareMathOperator{\support}{support}
 \DeclareMathOperator{\boundary}{\partial}
 
-\usepackage{beamerthemesplit}
 \input{pat}
 
 \newcommand{\pin}{p_{\mathsf{in}}}
@@ -36,9 +42,9 @@
 point $p\in\R^2$, the we can quickly determine the face of $G$
 that contains $p$
   \begin{center}
-  \only<1>{\includegraphics{pl-1}}
-  \only<2>{\includegraphics{pl-2}}
-  \only<3>{\includegraphics{pl-3}}
+  \only<1>{\includegraphics{pl-1}}%
+  \only<2>{\includegraphics{pl-2}}%
+  \only<3>{\includegraphics{pl-3}}%
   \end{center}
   \end{itemize}
 }
@@ -173,19 +179,20 @@ point $p$, distributed according to $D$ is inside or outside $P$
    \begin{itemize}
      \item<1-> We could try to triangulate $P$ and apply a result for 
 	triangulations\\
-     \only<1>{\centerline{\includegraphics[scale=.6]{problema-1}}
+     \only<1>{\centerline{\includegraphics[scale=.6]{problema-1}}%
         -}       
-     \only<2>{\centerline{\includegraphics[scale=.6]{problema-2}}
-        $H= \sum_{i=1}^f (c/f)\log (f/c) = \Theta(\log f)$ }       
-     \only<3->{\centerline{\includegraphics[scale=.6]{problema-3}}
-        $H= p_1\sum_{i=1}^3 p_i\log(1/p_i) = O(1)$ }       
+     \only<2>{\centerline{\includegraphics[scale=.6]{problema-2}}%
+        $H= \sum_{i=1}^f (c/f)\log (f/c) = \Theta(\log f)$ }%       
+     \only<3->{\centerline{\includegraphics[scale=.6]{problema-3}}%
+        $H= p_1\sum_{i=1}^3 p_i\log(1/p_i) = O(1)$ }%  
      \item<4-> Choosing correct triangulation is critical
    \end{itemize}
 }
 
+\subsection{The Triangle Tree}
 \frame
 {
-   \frametitle{The Data Structure}
+   \frametitle{The Triangle Tree}
    \begin{itemize}
     \item<1-> We define a binary \emph{triangle tree} $T=T(P,D)$
     \item<2-> The vertices of $T$ correspond to triangles
@@ -204,8 +211,10 @@ point $p$, distributed according to $D$ is inside or outside $P$
 \frame
 {
    \frametitle{The Triangle Tree (Example)}
-   \includegraphics{tree}
-   Each level of $T$ is an approxmation of $\partial P$
+   \only<1>{\includegraphics{construction-d}}%
+   \only<2>{\includegraphics{construction-e}}%
+   \only<3>{\includegraphics{construction-f}}%
+   \only<4>{\includegraphics{construction-g}}\\
 }
 
 
@@ -224,6 +233,7 @@ point $p$, distributed according to $D$ is inside or outside $P$
    \end{itemize}
 }
 
+\subsection{The Upper Bound}
 \frame
 {
    \frametitle{Analysis of the Triangle Tree}
@@ -262,6 +272,7 @@ $T$, so Shannon's Theorem gives
 	\end{itemize}
 }
 
+\subsection{The Lower Bound}
 \frame
 {
    \frametitle{Linear Decision Trees}
@@ -287,7 +298,6 @@ $T$, so Shannon's Theorem gives
         \only<3>{\includegraphics{ld-c}}%
         \only<4>{\includegraphics{ld-d}}%
         \only<5>{\includegraphics{ld-e}}%
-        \only<6>{\includegraphics{ld-e}}%
 }
 
 
@@ -337,10 +347,10 @@ testing if $p\in P$ has
 $V$ is an ancestor of any other vertex in $V$
         \item<2-> The triangles of $V$ look like this:\\
 	\includegraphics{using-lemma0}
-        \item<3->Let $D_V$ be the measure $D$ conditioned on the
+        \item<3->Let $D_{\mid V}$ be the measure $D$ conditioned on the
 search completing at a node in $V$
         \item<4->\textbf{Lemma 1:} For any linear decision tree $X$
-        \[ \mu_{D_V}(X) \ge \frac{1}{4}\sum_{v\in V} \Pr(v\mid V)\log (1/\Pr(v\mid V))
+        \[ \mu_{D_{\mid V}}(X) \ge \frac{1}{4}\sum_{v\in V} \Pr(v\mid V)\log (1/\Pr(v\mid V))
          \]
     \end{itemize}
 }
@@ -354,7 +364,7 @@ search completing at a node in $V$
          \]
         \item<2-> For any linear decision tree $X$ and any
 	\emph{genetically independent set} $V\subseteq V(T)$ of
-	 \[ \mu_{D_V}(X) \ge \sum_{v\in V} \Pr(v\mid V)\log(1/\Pr(v\mid V))
+	 \[ \mu_{D_{\mid V}}(X) \ge \frac{1}{4}\sum_{v\in V} \Pr(v\mid V)\log(1/\Pr(v\mid V))
          \]
         \item<3-> For any partition of $V(T)$ into genetically
 independent sets $V_1,\ldots,V_k$, and any linear decision tree $X$,
@@ -396,7 +406,8 @@ $\log(1/\Pr(V_i))$ is small
 		V_i=\{v\in V(T) :1/2^{i-1} \le \Pr(v) \le 1/2^i \}
 	\]
 	\item<2-> But these $V_i$ are not genetically independent!
- 	\item<3-> While $|V_i|\ge 2^{\alpha i}$
+ 	\item<3-> While $|V_i|\ge 2^{\alpha i}$  [constant $0< \alpha
+< 1$]
 	   \begin{itemize}
 		\item $V_{i,j}$ is a genetically independent subset of
 			$V_i$ with size $2^{\alpha i}/i$
@@ -413,314 +424,100 @@ O(1)
 	\end{itemize}
 }
 
-
-
-\comment{
-    
-\subsection{Zonoid Depth}
 \frame
 {
-   \frametitle{Zonoid Depth}
-   \begin{itemize}
-   \item<1-> Recall the definition of the \emph{convex hull}
-    \[ \conv(S) = \left\{\sum_{p\in S} p\lambda_p : 
-         \mbox{$0\le\lambda_p\le 1$ and $\sum_{p\in S}\lambda_p = 1$} 
-        \right\} 
-    \]
-   \item<2-> Change it slightly to get the \emph{$k$-zonoid}
-    \[ Z_k(S) = \left\{\sum_{p\in S} p\lambda_p : 
-         \mbox{$0\le\lambda_p\le 1/k$ and $\sum_{p\in S}\lambda_p = 1$} 
-        \right\} 
-    \]
-   \item<3-> Note that $Z_1(S)=\conv(S)$ and $Z_n(S)=\{\average(S)\}$ 
-   \item<4-> The \emph{zonoid depth} of $p$ is 
-     \[ Z(p,S)=\max\{k : p\in Z_k(S)\} \]
-   \end{itemize}
+	\frametitle{Theorem 1}
+	\begin{itemize}
+	\item<1-> For any convex $n$-gon $P$ and
+any probability measure $D$ over $\R^2$, a triangle tree $T=T(P,D)$ can be
+constructed in $O(n)$ time and 
+\[
+	\mu_D(T) = O(1) + O(1)\times\sum_{v\in V(T)} \Pr(v)\log(1/\Pr(v))
+\enspace .
+\]
+
+	\item<2-> Furthermore, for any linear decision tree $X$ that
+	tests if a point $p$ is contained in $P$,
+	\[
+	\mu_D(X) = \Omega(1) + \Omega(1)\times\sum_{v\in V(T)}
+	\Pr(v)\log(1/\Pr(v)) \enspace .
+	\]
+	\end{itemize}
 }
 
+
+\section{Point Location in Convex Subdivisions}
 \frame
 {
-    \frametitle{Zonoid Depth}
-     \only<1>{\centerline{\includegraphics{zonoid-eg-ps}} 
-	$S$} 
-     \only<2>{\centerline{\includegraphics{zonoid-eg-1}}
-	$S,Z_1(S)$}
-     \only<3>{\centerline{\includegraphics{zonoid-eg-2}}
-	$S,Z_1(S),Z_2(S)$}
-     \only<4>{\centerline{\includegraphics{zonoid-eg-3}}
-	$S,Z_1(S),Z_2(S),Z_3(S)$}
-     \only<5>{\centerline{\includegraphics{zonoid-eg-4}}
-	$S,Z_1(S),Z_2(S),Z_3(S),Z_4(S)$}
-     \only<6>{\centerline{\includegraphics{zonoid-eg-5}}
-	$S,Z_1(S),Z_2(S),Z_3(S),Z_4(S),Z_5(S)$}
-     \only<7>{\centerline{\includegraphics{zonoid-eg-6}}
-	$S,Z_1(S),Z_2(S),Z_3(S),Z_4(S),Z_5(S),Z_6(S)$}
+	\frametitle{Point Location in Convex Subdivisions}
+
+	\begin{itemize}
+	\item<1-> Given a convex subdivision $G$ having faces
+$F_1,\ldots,F_f$ and a probability measure $D$ over $\R^2$
+
+	\item<2-> For each $i$, triangulate $F_i$ using the triangles of
+the triangle tree $T_i=T(F_i,D_{\mid F_i})$
+
+	\item<3-> Preprocess the resulting triangulation using Iacono's
+distribution-sensitive point location structure for triangulations to
+obtain a data structure $Q$
+
+	\end{itemize}
 }
 
 \frame
 {
-   \frametitle{Applications of (Zonoid) Depth}
-   \begin{itemize}
-    \item<1-> Exploratory data analysis (visualization)
-    \item<2-> Multivariate statistics
-    \item<3-> Clustering
-    \item<4-> Outlier removal
-    \item<5-> Machine learning (classification)
-    \item<6-> Soft-margin support vector machines
-   \end{itemize}
-}
+	\frametitle{Analysis of $Q$}
 
-
-\subsection{Zonoid Depth Computation}
-\frame
-{
-  \frametitle{Zonoid Depth Computation}
-  \begin{itemize}
-  \item<1-> Given $p$ and $S$ compute the zonoid depth of $p$
-w.r.t. $S$
-  \item<2-> A necessary subroutine for most applications
-  \item<3-> Known algorithms:
-     \begin{itemize}  
-       \item<4-> Polynomial: Solve a linear program in $\lambda_p$ 
-		variables ($n$ variables and $O(n)$ inequalities)
-       \item<5-> Bern and Eppstein 2001:  $O(n(Ld\log n)^c)$ time where $L$
-            is the bit precision of the input  (uses ellipsoid method)
-       \item<6-> Gopala and Morin 2004: $O(n)$ expected time, but only
-            for $d=2$
-       \item<7-> Here: $O(n)$ expected time for any constant $d$ (but
-            with a superpolynomial dependence on $d$)
-     \end{itemize}
-     \item<8-> In this talk we focus mainly on the \emph{decision 
-          problem}:  \\ ``Is $p\in Z_k(S)$?''
-  \end{itemize}
-}
-
-
-\section{The Algorithm}
-
-\subsection{Finding a Zonoid Vertex}
-
-\frame{
-   \frametitle{Finding a Zonoid Vertex}
-   To Find the extreme vertex of $Z_k(S)$ in direction $\overrightarrow{w}$:
-   \only<1>{\includegraphics{project-1}}
-   \only<2>{\includegraphics{project-2}}
-   \only<3>{\includegraphics{project-3}}
-   \only<4>{\includegraphics{project-4}}
-   \begin{enumerate}
-     \item<2->Project points of $S$ onto $\overrightarrow{w}$
-     \item<3->In $O(n)$ time, find the largest $k$ points in the projection 
-     \item<4->Take the average of these $k$ points ($\lambda_p=1/k$)
-   \end{enumerate}
+	\begin{eqnarray*}
+	\mu_D(Q) & = & O(1)+O(1)\times\sum_{i=1}^f\sum_{v\in
+T_i}\Pr(v)\log(1/\Pr(v)) \\
+	         & = & O(1) \\ & & {}+O(1)\times\sum_{i=1}^f\Pr(F_i)\log
+(1/\Pr(F_i)) \\ & & {}+ O(1)\times\sum_{i=1}^f\Pr(F_i)\times\sum_{v\in T_i}\Pr(v\mid
+F_i)\log(1/\Pr(v\mid F_i))
+	\end{eqnarray*}
+	\begin{itemize}
+	\item<2->Each of these three terms is also a lower bound
+	\end{itemize}
 }
 
 \frame
 {
-   \frametitle{The Example Again}
-   \begin{center}
-    \includegraphics{zonoid-eg-6}
-   \end{center}
+	\frametitle{Theorem 2}
+
+	\begin{itemize}
+	\item For any convex subdivision $G$ having complexity $n$ and
+	any probability measure $D$ over $\R^2$, the data structure
+$Q=Q(G,D)$ can be constructed in $O(n)$ time and 
+	\begin{eqnarray*}
+	\mu_D(Q) 
+         & = & O(1)+O(1)\times\sum_{i=1}^f\Pr(F_i)\log
+(1/\Pr(F_i)) \\ & & {}+ O(1)\times\sum_{i=1}^f\sum_{v\in T_i}\Pr(F_i)\Pr(v\mid
+F_i)\log(1/\Pr(v\mid F_i))
+	\end{eqnarray*}
+	and this is (within a constant factor of) optimal in the linear decision tree model of
+computation.
+	\end{itemize}
 }
 
-
-
+\section{Summary and Conclusions}
 \frame
 {
-   \frametitle{Going from Optimization to Decision}
- \begin{itemize}
-   \item<1->\textbf{Recall:} We want to test if $p\in Z_k(S)$
-   \item<1->Finding the extreme vertex of $Z_k(S)$ in any direction
-	is easy
-   \item<2->Bern and Eppstein use this fact in combination with the 
-	ellipsoid method to test if 
-	$p\in Z_k(S)$ by trapping $p$
-	\begin{center}\includegraphics{trap}\end{center}
-   \item<3-> We use this fact to apply a very powerful
-	geometric optimization technique\ldots
-  \end{itemize}
+	\frametitle{Summary and Conclusions}
+	\textbf{Results:}
+	\begin{itemize}
+	\item<2-> A constant factor optimal data structure for
+distributions-sensitive point location in convex subdivisions
+	\end{itemize}
+	\textbf{Open Problems:}
+	\begin{itemize}
+	\item<3-> The constant factor gap between the upper and lower
+bounds is $4+\epsilon$.  Reduce this (to 1). 
+	\item<4-> Obtain similar results for general (non-convex)
+polygons and subdivisions
+	\end{itemize}
 }
 
-\subsection{Chan's Optimization Theorem}
-\frame
-{
-  \frametitle{Chan's Optimization Theorem (2004)}
-  Suppose:  
-  \begin{enumerate}
-   \item<1-> $\mathcal{P}$ is a computational problem
-   \item<2-> $f:\mathcal{P}\mapsto C$ maps problem instances onto closed 
-         convex subsets of $\R^d$
-   \item<3-> $w:\R^d\mapsto \R$ is a linear objective function
-   \item<5-> For any $q\in\R^d$ and any $P\in\mathcal{P}$ of size $n$ we
-         can test if $q\in f(P)$ in $D(n)$ time
-   \item<6-> For any $P\in\mathcal{P}$ of size $n$ we can find
-         $P_1,\ldots, P_r\in\mathcal{P}$ such that $|P_i|\le\alpha n$ 
-         and $f(P)=\bigcap_{i=1}^r f(P_i)$ \hfill{[$r=O(1)$ and $\alpha<1$]}
-  \end{enumerate}
-  Then:
-  \begin{itemize}
-    \item<4-> For any $P\in\mathcal{P}$ of size $n$ we can find the point
-    $q\in f(P)$ that maximizes $w(q)$ in $O(D(n))$ time
-  \end{itemize}
-} 
-
-\frame
-{
-   \frametitle{Chan's Technique}
-
-   \begin{center}
-   \begin{tabular}{ccc}
-    $P$ & $\stackrel{f}{\Rightarrow}$ & \includegraphics[scale=.4]{chan-1} \\
-    $\Downarrow$ \\
-    $P_1$,$P_2$,$P_3$,$P_4$ & $\stackrel{f}{\Rightarrow}$ 
-	& \includegraphics[scale=.2]{chan-2} \\
-   \end{tabular}
-   \end{center}
-}
-
-\subsection{Geometric Duality}
-\frame
-{ \frametitle{Geometric Duality}
-   To apply Chan's Theorem we work in dual-space:
-   \only<1>{\centerline{\includegraphics{dual-7}}
-	Points become\ldots}
-   \only<2>{\centerline{\includegraphics{dual-8}}
-	Points become hyperplanes}
-    \only<3>{\centerline{\includegraphics{dual-9}} 
-	A polytope becomes\ldots}
-    \only<4>{\centerline{\includegraphics{dual-0}} 
-	A polytope becomes a set of hyperplanes}
-}
-
-\subsection{Dual Zonoids}
-\frame
-{
-   \frametitle{Dual Zonoids}
-   \begin{itemize}
-     \item<1-> \textbf{Recall:} We want to test if $p\in Z_k(S)$
-      \begin{center}
-	\only<1>{\includegraphics[scale=.8]{dual-zonoid-1}}
-	\only<2>{\includegraphics[scale=.8]{dual-zonoid-2}}
-	\only<3->{\includegraphics[scale=.8]{dual-zonoid-3}}
-      \end{center}
-     \item<2-> Equivalent to asking if $\mathrm{dual}(p)$ separates 
-	$A_k(S)$ and $B_k(S)$.
-     \item<3-> Assuming $p=(0,0,\ldots,0)$ implies $\mathrm{dual}(p)$ 
-	is the flat hyperplane through the origin
-     \item<4-> Find the lowest point in $A_k(S)$ and the highest point
-	in $B_k(S)$ 
-   \end{itemize}
-}
-
-\subsection{Overview of Algorithm}
-\frame
-{
-     \frametitle{Review}
-     \begin{itemize}
-     \item<1-> To test if $p\in Z_k(S)$:
-     \begin{enumerate}
-      \item<2-> Translate input so that $p=(0,0,\ldots,0)$
-      \item<3-> Find the lowest point $a$ in $A_k(S)$
-      \item<4-> Find the highest point $b$ in $B_k(S)$
-      \item<5-> If $a_d < 0$ or $b_d >0$
-	then return \textbf{false}, else return \textbf{true}
-     \end{enumerate}
-     \item<6->Our problem reduces to two linear optimization problems over
-	the implicit polytopes $A_k(S)$ and $B_k(S)$ 
-     \item<7->We handle these problems using Chan's Optimization Theorem
-    \end{itemize} 
-}
-
-\subsection{Applying Chan's Optimization Theorem}
-
-\frame{
-     \frametitle{Applying Chan's Method}
-     To find the lowest point in $A_k(S)$:
-     \begin{enumerate}
-        \item<1-> Problem instance: $P=(S,k)$
-        \item<2-> Constraint function: $f(S,k) = A_k(S)$
-        \item<3-> Objective function: $w(x_1,\ldots,x_d)=-x_d$
-     \end{enumerate}
-}
-
-\frame
-{
-     \frametitle{Testing if $q\in f(P)$}
-
-     \begin{enumerate}
-	\setcounter{enumi}{3}
-     \item To test if $q\in A_k(S)$:
-     \begin{center}
-	\only<1>{\includegraphics[scale=.9]{decision-0}}
-	\only<2>{\includegraphics[scale=.9]{decision-1}}
-	\only<3>{\includegraphics[scale=.9]{decision-2}}
-	\only<4>{\includegraphics[scale=.9]{decision-3}}
-	\only<5->{\includegraphics[scale=.9]{decision-4}}
-     \end{center}
-     \end{enumerate}
-     \begin{itemize}
-     \item<6->{Testing if $q\in A_k(S)$ can be done in
-	$D(n)=O(n)$ time}
-     \end{itemize}
-} 
-
-
-\frame{
-   \frametitle{Partitioning into Subproblems}
-   
-   \begin{enumerate}
-   \setcounter{enumi}{4}
-   \item To partition $P=(S,k,p)$ into subproblems we use cuttings
-   \begin{itemize}
-   \item<2->A \emph{cutting} partitions $\mathbb{R}^d$ into $O(1)$ simplices
-	$\Delta_1,\ldots,\Delta_r$ such that no simplex intersects
-        more than $\ceil{n/2}$ lines of $\mathrm{dual}(S)$.
-   \begin{center}
-	\only<2>{\includegraphics[scale=.8]{cutting-4}}
-	\only<3>{\includegraphics[scale=.8]{cutting-3}}
-	\only<4->{\includegraphics[scale=.8]{cutting-2}}
-   \end{center}
-   \item<3-> We get subproblem $P_i$ by combining all the lines above 
-	$\Delta_i$ into a single \emph{multiline} and removing all 
-	the lines below $\Delta_i$ 
-   \end{itemize}
-   \end{enumerate}
-}
-
-\frame
-{
-   \frametitle{Correctness of Cutting}
-   \begin{itemize}
-     \item<1-> We need to show that $f(P)=\bigcap_{i=1}^r f(P_i)$
-     \item<2-> For each $P_i$ the associated polytope $f(P_i)$ contains
-          $f(P)=A_k(S)$,  so $f(P) \subseteq \bigcap_{i=1}^r f(P_i)$
-          \begin{center}\includegraphics{correctness}\end{center}
-     \item<3-> For each point $x$ on the boundary of $f(P)$ there is a
-	subproblem $P_i$ such that $x$ is on the boundary of $f(P_i)$,
-	so $\bigcap_{i=1}^r f(P_i)\subseteq f(P)$
-     \item<4-> Done!
-   \end{itemize}
-}
-
-\section{Summary and Open Problems}
-
-\frame
-{
-   \frametitle{Summary and Open Problems}
-   \begin{itemize}
-
-     \item<1-> We give an $O(n)$ time expected-time algorithm for
-computing the zonoid depth of a point $p$ with respect to a set $S$ in
-$\mathbb{R}^d$, for any constant $d$.
-
-     \item<2-> \textbf{Open Problem:} A deterministic algorithm
-     \item<3-> \textbf{Open Problem:} A linear-in-$n$, polynomial-in-$d$
-         algorithm (with no dependence on $L$)
-     \item<4-> \textbf{Open Problem Family:} The computational complexity
-	of other data depth definitions (see Aloupis 2006 for a survey)
-   \end{itemize}
-}
-
-}
 
 \end{document}
 

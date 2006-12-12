@@ -67,6 +67,18 @@ exploit the fact that, for a given direction $v$, it is easy (see
 \secref{dual}) to test if there is a hyperplane orthogonal to $v$ that
 separates $Z_k(S_1)$ and $Z_k(S_2)$.
 
+The zonoid depth \emph{decision problem} asks, given $p$, $k$ and $S$,
+if $Z(p,S)\ge k$. Ogryczak and Tamir \cite{ot03} show that the dual of
+the zonoid depth decision problem can be reduced to a linear
+multiple-choice knapsack problem that can be solved in $O(n)$ time
+using the algorithms of Zemel \cite{z84} or Dyer \cite{d84}.  Zemel
+and Dyer's algorithms are, in turn, modifications of Megiddo's $O(n)$
+time algorithm for linear programming in fixed dimensions
+\cite{m83,m84}.  While these results optimally solve the zonoid depth
+decision problem, further ideas are needed to turn these results into
+an algorithm for computing the zonoid depth of $p$ with respect to
+$S$.
+
 Gopala and Morin \cite{gm06} consider algorithms for bivariate ($d=2$)
 zonoid depth and give a randomized $O(n)$ expected time algorithm for
 computing $Z(p,S)$ when $p$ and $S$ are in $\R^2$.  Their algorithm is
@@ -76,19 +88,13 @@ arrangement and an optimization method due to Chan \cite{c99} for
 efficiently converting decision algorithms into optimization
 algorithms.   While the latter technique extends efficiently into
 arbitrary (constant) dimensions \cite{c04} the former technique,
-unfortunately, does not.  Note that this algorithm is combinatorial in
-that it makes all decisions based on the results of evaluating a few
-different kinds of predicates. Other than evaluating these predicates,
-the running time does not depend on the input precision.
+unfortunately, does not.
 
 The current paper extends and bridges the above results by giving an
 $O(n)$ time algorithm to compute $Z(p,S)$ when $p$ and $S$ are in
 $\R^d$ for any constant dimension $d$.  The algorithm uses a recent
 method, due to Chan \cite{c04}, of solving linear programs with many
 constraints that are defined implicitly by a small number of objects.
-Again, the algorithm is combinatorial, and the input precision affects
-only some low-level predicates.
-
 Besides being the first linear-time algorithm for solving the zonoid
 depth problem in constant dimensions, the current results are
 interesting for two other reasons:
@@ -172,10 +178,10 @@ computing $Z(p,S)$.
 
 Chan \cite{c04} used the following theorem to provide an $O(n\log n)$
 time algorithm for maximum Tukey depth.\footnote{Actually,
-\thmref{chan} applies to LP-type problems \cite{sw92}. Here we only state it's
-specialization to linear programming problems.}  In the following, and
-throughout the remainder of the paper, we use the shorthand $\cap S$
-to denote $\bigcap_{s\in S}s$.
+\thmref{chan} applies to LP-type problems \cite{sw92}. Here we only
+state it's specialization to linear programming problems.}  In the
+following, and throughout the remainder of the paper, we use the
+shorthand $\cap S$ to denote $\bigcap_{s\in S}s$.
 
 \begin{thm}[Chan 2004]\thmlabel{chan}
 Let $\mathcal{H}$ denote the set of all halfspaces in $\R^d$,
@@ -242,7 +248,7 @@ when $x$ is a point in $\R^d$ and
 \[
      \dual(X) = \{\dual(x) : x\in X\}
 \]
-when $S$ is a subset of $\R^d$.  See Edelsbrunner's book \cite{e97}
+when $X$ is a subset of $\R^d$.  See Edelsbrunner's book \cite{e97}
 for properties of this duality. 
 
 Let $H=\dual(S)$.  Then,
@@ -266,15 +272,18 @@ and
           (1-\lfloor k\rfloor/k)(x\drop H_{-\ceil{k}}^x) \right\} \enspace .
 \end{equation}
 The definitions of $A_k(S)$ and $B_k(S)$ follow from \eqref{extreme}
-and the duality $\dual$.
-The two sets $A_k(S)$ and $B_k(S)$ are convex, unbounded from above,
-respectively, below, and piecewise linear.  Indeed, the linear pieces
-of $A_k(S)$ (respectively $B_k(S)$) are in one to one correspondence
-with the linear pieces of the $\ceil{k}$-level (respectively
-the $(n-\floor{k}+1)$-level) of the hyperplanes in $H$.  Thus,
-$A_k(S)$ and $B_k(s)$ are convex polytopes that are implicitly defined
-by the hyperplanes in $H$ and it is these implicit ``linear programs''
-that will ultimately allow us to apply \thmref{chan}.
+and the duality $\dual$.  The two sets $A_k(S)$ and $B_k(S)$ are
+convex, unbounded from above, respectively, below, and piecewise
+linear.  Indeed, the linear pieces of $A_k(S)$ (respectively $B_k(S)$)
+are in correspondence with the linear pieces of the
+$\ceil{k}$-level (respectively the $(n-\floor{k}+1)$-level) of the
+hyperplanes in $H$.\footnote{When $k$ is not an integer, there is a
+bijection between the pieces of $A_k(S)$ and the $\ceil{k}$-level of
+$H$.  When $k$ is an integer there is an injection from $A_k(S)$ onto
+the $k$-level of $H$.}  Thus, $A_k(S)$ and $B_k(s)$ are convex
+polytopes that are implicitly defined by the hyperplanes in $H$ and it
+is these implicit ``linear programs'' that will ultimately allow us to
+apply \thmref{chan}.
 
 
 \section{The Decision Algorithm}
@@ -364,9 +373,8 @@ time.
 \begin{proof}
 Let $f$ be the function that maps the pair $(S,w)$ onto a set of
 halfspaces whose intersection is $A_k(S,w)$ and let the objective
-function $g(p)=p_d$.  We need to show that the function $f$ and $g$
-satisfy
-Conditions~0--2 of \thmref{chan}.
+function $g(x)=x_d$.  We need to show that the functions $f$ and $g$
+satisfy Conditions~0--2 of \thmref{chan}.
 
 To satisfy Condition 0 of \thmref{chan} we can enumerate all the
 linear constraints generated by each of the $d$ subproblems and use
@@ -401,7 +409,7 @@ S$ such that $\dual(p)$ is above the interior of $\Delta_i$.  We first
 construct the pair $(T_i,w_i)$ by contracting $(S,w)$ by $C_i$.  Next,
 we obtain $S_i$ by removing from $T_i$ every point $p$ such that
 $\dual(p)$ is below the interior of $\Delta_i$.  The subproblems
-$(S_i,v_i)$ for $1\le i\le r$ that we obtain in this manner are each
+$(S_i,w_i)$ for $1\le i\le r$ that we obtain in this manner are each
 of size at most $n/2+2$.
 
 It follows from \lemref{contraction} (the contraction step) 
@@ -419,16 +427,15 @@ the sense that
    x_d=\left(\sum_{i=1}^{\floor{k}} \frac{1}{k}(x\drop h_i)\right) 
        + (1-\lfloor k\rfloor/k)(x\drop h_{\ceil{k}}) \enspace .
 \]
-Let $q=x\drop h_{\ceil{k}}$.  There
-is some simplex $\Delta_i$ that contains $q$.  Observe that
-each of $h_1,\ldots,h_{\ceil{k}-1}$ is either completely above
-the interior of $\Delta_i$ or intersects $\Delta_i$.  Furthermore, 
-any hyperplane in
+Let $q$ be the vertical projection of $x$ onto $h_{\ceil{k}}$.  There
+is some simplex $\Delta_i$ that contains $q$.  Observe that each of
+$h_1,\ldots,h_{\ceil{k}-1}$ is either completely above the interior of
+$\Delta_i$ or intersects $\Delta_i$.  Furthermore, any hyperplane in
 $\dual(S)$ that is completely above $\Delta_i$ is one of
-$h_1,\ldots,h_{\ceil{k}-1}$.  Therefore, the subproblem $(S_i,w_i)$
-is obtained from $(S,w)$ by contracting
-$C_i\subseteq\{\dual(h_1),\ldots,\dual(h_{\ceil{k}-1})\}$ and then deleting 
-some subset of
+$h_1,\ldots,h_{\ceil{k}-1}$.  Therefore, the subproblem $(S_i,w_i)$ is
+obtained from $(S,w)$ by contracting
+$C_i\subseteq\{\dual(h_1),\ldots,\dual(h_{\ceil{k}-1})\}$ and then
+deleting some subset of
 $S\setminus\{\dual(h_1),\ldots,\dual(h_{\ceil{k}-1})\}$.  Let
 $I=\dual(S_i^{w_i})$.  Then, every point $x$ in $A_k(S_i,w_i)$ must
 satisfy
@@ -438,6 +445,11 @@ satisfy
    & = & \left(\sum_{i=1}^{\floor{k}} \frac{1}{k}(x\drop h_i)\right) 
        + (1-\lfloor k\rfloor/k)(x\drop h_{\ceil{k}}) \enspace .
 \end{eqnarray*}
+This last equality follows from the fact that the contraction
+operation that creates $(S_i,w_i)$ simply takes the weighted mean of
+$k'\le k$ hyperplanes $h_1,\ldots,h_{k'}\in \dual(S^w)$ and replaces
+these with $k'$ copies $I^x_1,\ldots,I^x_{k'}\in \dual(S_i^{w_i})$ of
+the mean.
 Thus $x$ is on the boundary of $A_k(S_i,w_i)$, as required.  We have
 now satisfied all three conditions necessary to apply \thmref{chan},
 completing the proof.
@@ -450,16 +462,28 @@ In the previous section we showed, given $p$, $S$ and $k$, how to
 answer the question:  Is $p\in Z_k(S)$?  In this section we consider
 the optimization problem, given $p$ and $S$: What is the maximum value
 of $k$ such that $p\in Z_k(S)$?  For this problem, we can apply
-\thmref{chan} again, this time on a problem in $\R^{d+1}$.
+\thmref{chan} again, this time on a problem in $\R^{d+1}$.  To do
+this, we use the $(d+1)$st coordinate of our space to represent the
+value $k$, so that we consider the polytope whose cross-sections are
+the $k$-zonoids for all $1\le k\le n$.
 
-Consider the point set
+Formally,
+consider the point set
 \[
     Z(S)=\{p\in\R^{d+1} : (p_1,\ldots,p_d)\in Z_{p_{d+1}}(S)  \} \enspace .
 \]
 The set $Z(S)$ is a convex polytope in $\R^{d+1}$.
 Dualizing $Z(S)$ as before gives two regions
 $A(S)$ and $B(S)$.
-We are interested in the hyperplane $h_0=\{x\in\R^{d+1}:x_d=0\}$.
+Recall that
+the zonoid depth  of $p$ with respect to $S$ is
+\begin{eqnarray*}
+   Z(p,S) & = & \sup\{k:p\in Z_k(S)\} \\
+          & = & \inf\{k:p\notin Z_k(S) \} \enspace .
+\end{eqnarray*}
+If we assume (by translation) that $p$ is the origin, then,
+in the dual $p$ becomes the hyperplane $h_0=\{x:x_d=0\}$ and $p\in
+Z_k(S)$ if and only if $h_0$ does not intersect $A_k(S)$ or $B_k(S)$.
 In particular, the value $k$ we are searching for is the minimum of
 $k_A$ and $k_B$ where
 \[
@@ -469,9 +493,8 @@ and
 \[
    k_B = \min\{p_{d+1}: p\in h_0\cap B(S)\}
 \]
-In words, we want the minimum value of $k$ such that $A_k(S)$
-(respectively, $B_k(S)$)
-intersects the hyperplane $h_0=\{x\in\R^d: x_d=0\}$.
+In words, we want the minimum value of $k$ such that $A_k(S)$ or
+$B_k(S)$ intersects the hyperplane $h_0=\{x\in\R^d: x_d=0\}$.
 
 \begin{thm}
 Given a set $S$ of $n$ points in $\R^d$ and a point $p\in\R^d$, the
@@ -486,7 +509,7 @@ finding $k_B$ is a symmetric problem.  The details are much the same
 as in \thmref{decision} so we only sketch them.  As before we
 generalize $A(S)$ and $B(S)$ to the weighted setting using multisets
 and let $f(S,w)$ be the function that maps $(S,w)$ on to the set of
-linear constraints that define $h\cap A(S^w)$.
+linear constraints that define $h_0\cap A(S^w)$.
 
 As before, $S$ satisfies Condition~0 of \thmref{chan} since, for
 constant size subproblems we can explictly generate the polytopes

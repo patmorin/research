@@ -68,14 +68,14 @@ exploit the fact that, for a given direction $v$, it is easy (see
 separates $Z_k(S_1)$ and $Z_k(S_2)$.
 
 The zonoid depth \emph{decision problem} asks, given $p$, $k$ and $S$,
-if $Z(p,S)\ge k$. Ogryczak and Tamir \cite{ot03} show that the dual of
+if $p\in Z_k(S)$. Ogryczak and Tamir \cite{ot03} show that the dual of
 the zonoid depth decision problem can be reduced to a linear
 multiple-choice knapsack problem that can be solved in $O(n)$ time
 using the algorithms of Zemel \cite{z84} or Dyer \cite{d84}.  Zemel
 and Dyer's algorithms are, in turn, modifications of Megiddo's $O(n)$
 time algorithm for linear programming in fixed dimensions
-\cite{m83,m84}.  While these results optimally solve the zonoid depth
-decision problem, further ideas are needed to turn these results into
+\cite{m83,m84}. While these results optimally solve the zonoid depth
+decision problem, further machinery is needed to turn these results into
 an algorithm for computing the zonoid depth of $p$ with respect to
 $S$.
 
@@ -93,7 +93,7 @@ unfortunately, does not.
 The current paper extends and bridges the above results by giving an
 $O(n)$ time algorithm to compute $Z(p,S)$ when $p$ and $S$ are in
 $\R^d$ for any constant dimension $d$.  The algorithm uses a recent
-method, due to Chan \cite{c04}, of solving linear programs with many
+method, due to Chan \cite{c04}, for solving linear programs with many
 constraints that are defined implicitly by a small number of objects.
 Besides being the first linear-time algorithm for solving the zonoid
 depth problem in constant dimensions, the current results are
@@ -152,7 +152,7 @@ $x$.  We use the $\cdot$ notation to denote the inner-product of two
 points/vectors, i.e., $x\cdot y=\sum_{i=1}^d x_iy_i$.  For a set $S$
 of $n$ points and a non-zero vector $r$, $S_1^r,\ldots,S_n^r$ is the
 sequence of elements of $S$ ordered by decreasing projections onto
-$r$, i.e., $S_i^r\cdot r \ge S_{i+1}^r\cdot r$ for all $1\le r\le
+$r$, i.e., $S_i^r\cdot r \ge S_{i+1}^r\cdot r$ for all $1\le i\le
 n-1$.
 
 For a point $x$ and a hyperplane $h$, we denote by $x\drop h$ the
@@ -168,10 +168,9 @@ $\{x:x_d=-\infty\}$ (respectively, $\{x:x_d=+\infty\}$).
 The remainder of this paper is organized as follows: \secref{chan}
 reviews Chan's generalized optimization technique.  \secref{dual}
 discusses properties of zonoids in primal and dual space.
-\secref{decision} presents an algorithm to answer to the decision
-problem, given $p$, $S$, and $k$, is $p\in Z_k(S)$?  Finally,
-\secref{optimization} describes our algorithm for, given $p$ and $S$,
-computing $Z(p,S)$.
+\secref{decision} presents an algorithm to answer the zonoid depth
+decision problem.  Finally, \secref{optimization} describes our
+algorithm for computing $Z(p,S)$.
  
 \section{Chan's Generalized Optimization Technique}
 \seclabel{chan}
@@ -294,8 +293,8 @@ $S$ and an integer $k$, is the origin contained in $Z_k(S)$?  By
 translation, a solution to this problem allows us to test if an
 arbitrary point $p\in\R^d$ is contained in $Z_k(S)$. One approach to
 solving this problem is to compute the intersection of $Z_k(S)$ with
-the vertical line $\{x\in\R^d:x_0=x_1=\cdots=x_{d-1}=0\}$ through the origin
-and then check if this intersection contains the origin.
+the vertical line $\{x\in\R^d:x_0=x_1=\cdots=x_{d-1}=0\}$ through the
+origin and then check if this intersection contains the origin.
 
 Under the duality $\dual$, the above strategy is equivalent to finding
 the lowest point on $A_k(S)$ and the highest point on $B_k(S)$ and
@@ -312,7 +311,7 @@ We denote by $S^w$ the multiset in which each element $p\in S$ occurs
 $w(p)$ times.  The \emph{$w$-weighted zonoid} $Z_k(S,w)$ is simply the
 $k$-zonoid of the multiset $S^w$, i.e., $Z_k(S,w)=Z_k(S^w)$.  As with
 standard zonoids, the weighted zonoid $Z_k(S,w)$ dualizes to the set
-of all lines that do not intersect either of two convex regions
+of all hyperplanes that do not intersect either of two convex regions
 $A_k(S,w)$ and $B_k(S,w)$, where $A_k(S,w)=A_k(S^w)$ and
 $B_k(S,w)=B_k(S^w)$.
 
@@ -399,7 +398,7 @@ H_i^x)\times w(\dual(H_i^x))\right)
 \]
 
 To satisfy Condition~2 of \thmref{chan} we make use of \emph{cuttings}
-\cite[Section~4.7]{mat02}.  In particular, we use the fact that, in
+\cite[Section~6.5]{mat02}.  In particular, we use the fact that, in
 $O(n)$ time, it is possible to partition $\R^d$ into $r=O(1)$
 simplices $\Delta_1,\ldots,\Delta_r$ such that the interior of each
 simplex is intersected by at most $n/2$ of the hyperplanes in
@@ -461,7 +460,7 @@ completing the proof.
 In the previous section we showed, given $p$, $S$ and $k$, how to
 answer the question:  Is $p\in Z_k(S)$?  In this section we consider
 the optimization problem, given $p$ and $S$: What is the maximum value
-of $k$ such that $p\in Z_k(S)$?  For this problem, we can apply
+of $k$ such that $p\in Z_k(S)$?  For this problem, we apply
 \thmref{chan} again, this time on a problem in $\R^{d+1}$.  To do
 this, we use the $(d+1)$st coordinate of our space to represent the
 value $k$, so that we consider the polytope whose cross-sections are
@@ -487,11 +486,11 @@ Z_k(S)$ if and only if $h_0$ does not intersect $A_k(S)$ or $B_k(S)$.
 In particular, the value $k$ we are searching for is the minimum of
 $k_A$ and $k_B$ where
 \[
-   k_A = \min\{p_{d+1}: p\in h_0\cap A(S)\}
+   k_A = \min\{x_{d+1}: x\in h_0\cap A(S)\}
 \]
 and
 \[
-   k_B = \min\{p_{d+1}: p\in h_0\cap B(S)\}
+   k_B = \min\{x_{d+1}: x\in h_0\cap B(S)\}
 \]
 In words, we want the minimum value of $k$ such that $A_k(S)$ or
 $B_k(S)$ intersects the hyperplane $h_0=\{x\in\R^d: x_d=0\}$.
@@ -531,6 +530,27 @@ in the current case we need only observe that the paritioning makes no
 use of the value $k$ and the argument used to show its correctness
 holds for all values of $k$.  This completes the proof sketch.
 \end{proof}
+
+We conclude with a few remarks about the constants in the algorithm.
+The use of Chan's technique yields a simple-to-implement algorithm,
+but this algorithm has extremely large constants hidden in the
+asymptotic notation.  Even using the most
+sophisticated forms of cuttings and fixed-dimensional linear
+programming, the expected running time of the algorithm is given by
+the recurrence
+\[
+	T(n) = (\log r)(cd)^{d/2+O(1)}\times T(n/r) + O(r^d n) \enspace ,
+\]
+where $r$ is an integer parameter and $c$ is a constant that occurs in
+Clarkson's randomized linear programming algorithm \cite{c95}.  Thus,
+to even obtain an expected running time of $O(n)$, we require
+$r/\log(r) > (cd)^{d/2+O(1)}$.  It might be possible to reduce the
+dependence on $d$ somewhat by engineering a hybrid algorithm that uses
+Chan's original optimization technique \cite{c99} in conjunction with
+the decision algorithm of Ogryczak and Tamir \cite{ot03}.  However,
+the latter algorithm already includes a factor of $d!$ in the running
+time so the the running time of the resulting algorithm will still have 
+a superpolynomial dependence on $d$.
 
 \bibliographystyle{plain}
 \bibliography{zonoid}

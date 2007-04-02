@@ -1,0 +1,194 @@
+\documentclass[lotsofwhite,12pt]{patmorin}
+\usepackage{amsopn}
+\usepackage{algorithmic}
+\include{pat}
+
+
+\DeclareMathOperator{\td}{depth}
+\DeclareMathOperator{\ch}{conv}
+\newlength{\algwidth}
+\setlength{\algwidth}{\textwidth}
+\addtolength{\algwidth}{-5mm}
+
+\title{\MakeUppercase{Algorithm Ideas for Tukey Depth}}
+\author{Prosenjit Bose \and Dan Chen \and John Chinneck \and Pat Morin}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+\seclabel{intro}
+
+Let $S$ be a set of $n$ points in $\R^d$.
+The \emph{Tukey depth}, or \emph{halfspace depth} of a point $p\in\R^d$ with
+respect to $S$ can be defined in several equivalent ways:
+\begin{eqnarray}
+\td(p,S) & = & \min\{ |h\cap S| :
+                     \mbox{$h$ is a closed halfspace containing $p$} \} 
+                       \eqlabel{tuk-orig} \\ 
+            & = & \min\{ |h\cap S| :
+                      \mbox{$h$ is a closed halfspace 
+                            with $p$ on its boundary} \} 
+                        \eqlabel{tuk-boundary} \\ 
+            & = & \min\{ |S'| :
+                      \mbox{$p$ is outside the convex hull of 
+                           $S\setminus S'$} \}
+                      \eqlabel{tuk-hull}
+\end{eqnarray}
+
+We use the notation $a\cdot b$ to denote the orhogonal projection of
+$a$ onto $b$. When $a$ and $b$ are vectors, this is the usual
+dot-product, but in general, $a$ is a set of points and $b$ is a
+linear subspace of $\R^d$.
+
+
+\section{Exact Algorithms}
+\seclabel{exact}
+
+If $d=1$ then computing $\td(p,S)$ can be done in $O(n)$ time by
+counting the number of points greater than $p$ and the number of
+points less than $p$ and taking the minimum of these two values.  If
+$d=2$ then $\td(p,S)$ can be computed in $O(n\log n)$ time by
+a \emph{sort-and-scan} algorithm that sorts the points of $S$ radially
+about $p$ and sweeps a line around $p$.
+
+\subsection{Enumeration of Halfspaces}
+
+Otherwise, the halfspace $h$ that minimizes \eqref{tuk-boundary} is
+arbitrarily close to a halfspace $h^*$ containing $p$ and $d-1$ points
+of $S$ on its boundary.  We can find $h^*$ by enumerating all $n
+\choose d-1$ points of $S$ and testing each one in $O(n)$ time. This
+gives an $O(n^d)$ time algorithm to find $h^*$.  With a non-degeneracy
+assumption,\footnote{In particular, we assume that no $d+1$ points of
+$S\cup\{p\}$ lie on a common hyperplane.} this allows us to compute
+$\td(p,S)$.
+
+A recursive implementation of the above algorithm (with running time
+$O(n^{d-1}\log n)$) might look like:
+
+\noindent\framebox{
+\begin{minipage}{\algwidth}
+\noindent{\textsc{Tukey$(p,S,d)$}}
+\begin{algorithmic}
+\IF{$d=2$}
+  \STATE{\textbf{return} $\td(p,S)$ 
+     \COMMENT{use $O(n\log n)$ ``sort-and-scan'' algorithm}}
+\ENDIF
+\STATE{$m\gets \infty$}
+\FOR{$x\in S$}
+  \STATE{let $\pi$ be the hyperplane orthogonal to $\vec{px}$}
+  \STATE{$m\gets\min\{m, \textsc{Tukey}(p,S\cdot \pi,d)\}$}
+\ENDFOR
+\STATE{\textbf{return} $m$}
+\end{algorithmic}
+\end{minipage}}
+
+\subsection{Branch-and-Bound}
+
+[Dan's approach.]
+
+\subsection{Reduction to $d$-Hitting Set}
+
+The approach described in 
+[D. Bremner, D. Chen, J. Iacono, S. Langerman, and P. Morin.
+Output-sensitive algorithms for Tukey depth and related problems.
+Submitted to Statistics and Computing, November 2006.]
+
+Can a partition of space into cones that have ``Carath\'eodory
+witnesses'' speed up this algorithm?
+
+\section{Upper Bounds}
+\seclabel{ub}
+
+An upper bound on $\td(p,S)$ can be obtained by selecting any
+non-trivial vector $v\in\R^d$ and computing the Tukey depth of $p\cdot
+v$ in
+the one dimensional point set 
+\[
+      S\cdot v = \{x\cdot v : x\in S\} \enspace .
+\]
+Notice that if we choose $v$ as the inner-normal of the halfspace $h$
+that minimizes \eqref{tuk-boundary} then 
+\begin{equation}
+      \td(p,S) = \td(p\cdot v,S\cdot v) \enspace . \eqlabel{ub-1d}
+\end{equation}
+
+More generally, given any $i$-flat\footnote{An $i$-flat in $\R^d$ is
+an $i$-dimensional linear subspace of $\R^d$. A 0-flat is a point, a
+1-flat is a line, a 2-flat is a plane\ldots} $f$, we have
+\begin{equation}
+      \td(p,S) \le \td(p\cdot f, S\cdot f) \eqlabel{ub-id}
+\end{equation}
+with equality if $f$ is orthogonal to the boundary of the halfspace $h$
+that minimizes \eqref{tuk-boundary}.
+
+These observations lead to several different heuristics for bounding
+$\td(p,S)$ from above:
+
+\begin{enumerate}
+\item Let $v$ be parallel to each of the coordinate axes in turn and
+apply \eqref{ub-1d} to obtain an upper bound on $\td(p,S)$.
+
+\item Repeatedly select random elements from $S$ until obtaining a set
+$T$ such that there is a unique hyperplane $\pi$ containing
+$T\cup\{p\}$.\footnote{With the non-degeneracy assumption this occurs
+as soon as we have selected $d-1$ elements of $S$.} Let $v$ be
+orthogonal to $\pi$ and apply \eqref{ub-1d} to get an upper bound on
+$\td(p,S)$.
+
+\item More generally, for some fixed $i$, repeatedly select random
+elements from $S$ until obtaining a set $T$ such that there is a
+unique $(d-i)$-flat $\pi$  that contains $T\cup\{p\}$.\footnote{With
+the non-degeneracy assumption this occurs as soon as we have selected
+$d-i$ elements of $S$.}  Let $f$ be an
+$i$-flat orthogonal to $\pi$ and apply \eqref{ub-id} to get an upper
+bound on $\td(p,S)$.
+
+\end{enumerate}
+
+
+Computationally, the third option with $i=2$ seems the most attractive
+since the expected number of samples required to find the halfspace
+$h^*$ discussed in \secref{exact} is ${n\choose d-2}/2$ and each
+sample leaves us with a 2-dimensional problem that can be solved in
+$O(n\log n)$ time.  Indeed, this is a randomized version of the
+recursive algorithm described in \secref{exact}.
+
+\section{Lower Bounds}
+\seclabel{lb}
+
+Formulation \eqref{tuk-hull} gives a method for obtaining lower bounds
+on Tukey depth by linear programming.  For a set $S$ of $n$ points,
+the question ``Is $p$ contained in the convex hull of $S$?'' can be
+expressed as 2 linear programs $P^+$ and $P^-$, each with $d$
+variables and $n$ constraints, and whose constraints form a bijection
+with the points in $S$.  
+
+Both linear programs are feasible if and only if $p$ is outside the
+convex hull of $S$. Otherwise, one of the linear programs, say $P^+$
+is infeasible, so it contains a \emph{basic infeasible subsystem} of
+at most $d+1$ constraints that, by themselves, define an infeasible
+linear program.  These constraints correspond to a set $B$ of at most
+$d+1$ points in $S$ whose convex hull contains the point $p$.  We
+obtain a lower bound on $\td(p,S)$ by observing that the set $S'$
+minimizing \eqref{tuk-hull} must contain at least one element of $B$.
+This leads to the following algorithm:
+
+\noindent\framebox{
+\begin{minipage}{\algwidth}
+\noindent{\textsc{TukeyLowerBound$(p,S)$}}
+\begin{algorithmic}
+\STATE{$\ell\gets 0$}
+\WHILE{$p\in \ch(S)$}
+  \STATE{Let $B\subset S$, $|B|\le d+1$, such that $p\in\ch(B)$}
+  \STATE{$S\gets S\setminus B$}
+  \STATE{$\ell \gets \ell+1$}  
+\ENDWHILE
+\STATE{\textbf{return} $\ell$}
+\end{algorithmic}
+\end{minipage}}
+
+
+
+
+\end{document}

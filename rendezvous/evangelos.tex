@@ -1,0 +1,546 @@
+%! program = pdflatex
+\documentclass[12pt]{article}
+%\documentclass{article}
+\usepackage{natbib}
+\usepackage{graphics}
+\usepackage{alltt}
+\usepackage{a4wide}
+\usepackage{amssymb}
+\usepackage{latexsym}
+\usepackage{epsfig}
+%\usepackage{wrapfigure}
+
+%%%% ENVS
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}
+\newtheorem{axiom}{Axiom}
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{problem}{Problem}
+\newtheorem{claim}{Claim}
+\newtheorem{remark}{Remark}
+\newtheorem{question}{Question}
+%%%%%%%%%%%% ENVS %%%%%%%%%%%%%%%
+
+\def\qed{\hfill\rule{2mm}{2mm}}
+\def\bqed{\hfill\rule{2mm}{2mm}}
+\def\wqed{\hfill\mbox{$\sqcap$\llap{$\sqcup$}}}
+
+\newcommand{\pn}{\pi}
+%\newcommand{\ceomni}{{\cal E}_{\mbox{\tiny {\sc omni}}}}
+%\newcommand{\3na}{\mbox{$3$-{\sc na}}}
+%\newcommand{\2na}{\mbox{$2$-{\sc na}}}
+%\newcommand{\23na}{\mbox{$2/3$-{\sc na}}}
+
+
+\begin{document}
+
+\title{\bf An Inequality for Random Walks}
+
+\author{
+Evangelos Kranakis\footnotemark[1]
+\and
+Danny Krizanc\footnotemark[2]
+\and
+Patrick Morin\footnotemark[1]
+}
+
+
+\maketitle
+
+\def\thefootnote{\fnsymbol{footnote}}
+\footnotetext[1]{School of Computer Science, Carleton University,
+K1S 5B6, Ottawa, Ontario, Canada.
+Research supported in part by
+Natural Sciences and Engineering Research Council
+of Canada (NSERC) and Mathematics of Information Technology and Complex
+Systems (MITACS).}
+\footnotetext[2]{Department of Mathematics,
+Wesleyan University, Middletown CT 06459, USA.}
+
+\begin{abstract}
+We consider an inequality that is useful in random walks.
+\end{abstract}
+
+%%% BEGIN DOCUMENT
+%\begin{document}
+
+%\maketitle
+%\tableofcontents
+
+\section{An Inequality}
+
+We want to study time/memory tradeoffs for
+the rendezvous problem concerning
+two mobile agents moving along the vertices of
+a ring. At each vertex, the mobile agents first
+choose a direction at random and then walk in that 
+direction based on a second random variable $Y$.
+The direction they follow at time $i$ is
+a random variable 
+$X_i$ representing a move to the {\em right} or {\em left},
+respectively, with identical probability $1/2$.  
+Our aim is to prove the following theorem.
+\begin{theorem}
+\label{thm}
+Assume that $X_1, X_2, \ldots , X_n$ are $\{ +1 , -1\}$-valued
+i.i.d. random variables such that 
+$\Pr [X_i = +1 ] = \Pr [X_i = -1 ]  =1/2$, for
+all $i=1,2,\ldots ,n$. Further assume that
+$Y_1, Y_2, \ldots , Y_n$ are also i.i.d. random variables with
+mean $E[Y] \geq 0$. If the random variables
+$X_i, Y_i$ are independent for all $i=1,2,\ldots ,n$, then
+we can prove
+\begin{eqnarray}
+& ~ &
+\label{rv:eq}
+E\left[ ~\left( \sum_{i=1}^n X_i Y_i \right)^2 ~ \right]
+= E[Y^2 ] \cdot n  , \mbox{ and }\\
+& ~ &
+\label{rv0:eq}
+E\left[ ~\left| \sum_{i=1}^n X_i Y_i \right| ~ \right]
+\in E[Y] \cdot \Theta (\sqrt{n} ) , 
+\end{eqnarray}
+where $| \cdot |$ denotes the absolute value function.
+\end{theorem}
+{\bf Proof} of Theorem~\ref{thm}.
+First we prove Identity~\ref{rv:eq}. Indeed, by the assumed independence
+of the random variables $X_i, Y_i$ and since $X_i = \pm 1$ we derive easily that
+\begin{eqnarray*}
+E\left[ ~\left( \sum_{i=1}^n X_i Y_i \right)^2 ~ \right]
+& = &
+E\left[ \sum_{i=1}^n Y_i^2  \right] +
+2 E\left[ \sum_{i <j}^n X_i X_jY_i  Y_j \right] \\
+& = &
+\sum_{i=1}^n E[Y_i^2 ] 
++ 2 \sum_{i <j}^n E[X_i X_jY_i  Y_j]  \\
+& = &
+E[Y^2 ] \cdot n .
+\end{eqnarray*}
+The proof of Identity~\ref{rv0:eq}
+will follow from two lemmas that we prove in the sequel.
+\begin{lemma}
+\label{lm1}
+The following inequality is valid
+\begin{equation}
+\label{rv1:eq}
+E\left[ ~\left| \sum_{i=1}^n X_i Y_i \right| ~ \right] \geq 
+E[Y] \cdot E\left[ ~\left| \sum_{i=1}^n X_i \right| ~\right] .
+\end{equation}
+\end{lemma}
+{\bf Proof.}
+First of all recall from the definition of the expectation 
+that for any random variable $Z$ we have that 
+\begin{equation}
+\label{rv2:eq}
+| E[Z]| \leq E[|Z|] .
+\end{equation}
+Consider the vectors $x = (x_1, x_2 ,\ldots ,x_n)$ and
+$y = (y_1, y_2, \ldots , y_n)$ attaining all the values in the
+range of the vector random variables
+$X = (X_1, X_2 ,\ldots ,X_n)$ and
+$Y = (Y_1, Y_2, \ldots , Y_n)$, respectively. 
+From the definition of the expected
+value we obtain that
+\begin{eqnarray*}
+E\left[ ~\left| \sum_{i=1}^n X_i Y_i \right| ~\right]
+& = &
+\sum_{x,y} \left(
+\Pr [X=x] \cdot \Pr [Y=y] \cdot \left| \sum_{i=1}^n x_i y_i \right| 
+\right)\\
+& = &
+\frac{1}{2^n} 
+\sum_{x,y} \Pr [Y=y] \cdot \left| \sum_{i=1}^n x_i y_i \right| 
+\mbox{ (since $\Pr [X_i = x_i ] = 1/2$)} \\
+& = &
+\frac{1}{2^n} 
+\sum_x \sum_y \Pr [Y=y] \cdot \left| \sum_{i=1}^n x_i y_i \right| \\
+& = &
+\frac{1}{2^n} 
+\sum_x E_y \left[ ~\left| \sum_{i=1}^n x_i Y_i \right| ~\right] 
+\mbox{ (definition of expectation)} \\
+& \geq &
+\frac{1}{2^n} 
+\sum_x \left| E_y \left[  \sum_{i=1}^n x_i Y_i  \right] \right| 
+\mbox{ (using Inequality~\ref{rv2:eq})} \\
+& = &
+\frac{1}{2^n} 
+\sum_x \left|   \sum_{i=1}^n x_i E_y [ Y_i]  \right| 
+\mbox{ (by linearity of expectation)} \\
+& = &
+\frac{1}{2^n} 
+\sum_x E_y [Y] \cdot \left|   \sum_{i=1}^n x_i   \right| 
+\mbox{ (since $E_y [Y_i] = E_y [Y] \geq 0$, for all $i$)} \\
+& = &
+E[Y] \cdot  \sum_x \left( \Pr [X = x] \cdot \left|   \sum_{i=1}^n x_i   \right| \right)\\
+& = &
+E[Y] \cdot E\left[ ~\left| \sum_{i=1}^n X_i \right| ~\right] 
+\mbox{ (definition of expectation)} \\
+\end{eqnarray*}
+This completes the proof of the lemma.
+\qed
+
+In the sequel we will need an estimate on binomial coefficients.
+Using Stirling's formula we obtain easily the following bounds.
+\begin{eqnarray}
+\label{stirling:eq}
+& ~ & m {{2m} \choose m} \in 2^{2m} \Theta (\sqrt{m}).\\
+\label{stirling1:eq}
+& ~ & m {{2m-1} \choose m} \in 2^{2m} \Theta (\sqrt{m}).
+\end{eqnarray}
+
+Next we are interested in an estimate on the expected value
+$
+E\left[ ~\left| \sum_{i=1}^n X_i \right| ~\right] .
+$
+In the sequel we will prove the following lemma. 
+\begin{lemma}
+\label{lm2}
+The following estimate is valid.
+\begin{equation}
+\label{sq1:eq}
+E\left[ ~\left| \sum_{i=1}^n X_i \right| ~\right] \in \Theta (\sqrt{n}) .
+\end{equation}
+\end{lemma}
+{\bf Proof.}
+Let $S_n$ denote the random variable $\sum_{i=1}^n X_i$.
+Since the random variables $X_i$ are $\{ +1, -1\}$-valued
+it is clear that $S_n$ indicates an even 
+position if $n$ is even and an odd position if $n$ is odd.
+Without loss of generality assume that $n=2m$ is even
+(a similar argument will work when $n$ is odd but we omit
+the details).
+There is a total of $2^{2m}$ sequences of $+1$s and $-1$s
+and each can occur with probability $2^{-2n}$. 
+For some $-m \leq j\leq m$, 
+$S_{2m} = 2j$. Moreover,
+in order for the sum to be equal to $2j$ there must be
+$n +j$ moves $+1$ and $m-j$ moves $-1$ and the number of these
+moves is given by the binomial coefficient, namely
+\begin{equation}
+\label{sq2:eq}
+\Pr[  S_{2m}  = 2j ] 
+= 2^{-2m} {{2m} \choose {m+j}} . 
+\end{equation}
+Therefore concerning the expected value of $|S_{2m}|$
+we derive the following formula 
+using Identity~\ref{sq2:eq}
+\begin{equation}
+\label{sq4:eq}
+E[|S_{2m}|]
+= 2^{-2m} \sum_{j=-m}^{m} {{2m} \choose {m+j}} |2j|
+= 2^{1-2m} \sum_{j=0}^{m} {{2m} \choose {m+j}} j 
++ 2^{1-2m} \sum_{j=1}^{m} {{2m} \choose {m-j}} j .
+\end{equation}
+It remains to evaluate the two summands in 
+the righ-hand side of Equation~\ref{sq4:eq}.
+First we look at the left-hand term. Elementary calculations
+show that
+\begin{eqnarray*}
+\sum_{j=0}^{m} {{2m} \choose {m+j}} j 
+& = & 
+\sum_{j=0}^{m} {{2m} \choose {m+j}} (m+j) - 
+\sum_{j=0}^{m} {{2m} \choose {m+j}} m \mbox{ (simplify)}\\
+& = &
+2m \sum_{j=0}^{m} {{2m-1} \choose {m+j-1}} - 
+m \sum_{j=0}^{m} {{2m} \choose {m+j}} \mbox{ (use binomial theorem)}\\
+& = &
+2m \frac{1}{2} 
+\left(
+2^{2m-1} +  2 {{2m-1} \choose {m}}
+\right)
+- m \frac{1}{2} 
+\left(
+2^{2m} - {{2m} \choose m }
+\right) \\
+& = &
+m \left( 
+2 {{2m-1} \choose {m}} + {{2m} \choose m }
+\right) \mbox{ (collect terms)} \\
+& \in &
+2^{2m}  \Theta \left( \sqrt{m} \right). 
+\mbox{ (use bounds ~\ref{stirling:eq},~\ref{stirling1:eq})}
+\end{eqnarray*}
+It remains to consider the right-hand term of Equation~\ref{sq4:eq}.
+Arguing as before we derive
+\begin{eqnarray*}
+\sum_{j=1}^{m} {{2m} \choose {m-j}} j 
+& = &
+\sum_{j=1}^{m} {{2m} \choose {m-j}} m -
+\sum_{j=1}^{m} {{2m} \choose {m-j}} (m-j)   \\
+& = &
+m \sum_{j=1}^{m} {{2m} \choose {m-j}} -
+2m \sum_{j=1}^{m} {{2m-1} \choose {m-j-1}}\\
+& \in &
+2^{2m} \Theta \left(  \sqrt{m} \right) .
+\end{eqnarray*} 
+Combining the last two evaluations 
+we derive the estimate for the
+expected value of $|S_{2n}|$ claimed 
+in the lemma.
+\qed
+
+The proof of Theorem~\ref{thm} now follows by
+combining the results of
+Lemmas~\ref{lm1}~and~\ref{lm2}. \qed
+
+
+Our next goal is to determine the probability 
+that the random variable $\left| \sum_{i=1}^n X_i Y_i \right|$
+is bigger than $\sqrt{n} \cdot E[Y]$.
+First of all observe that in
+view of Lemma~\ref{lm2}
+there is a constant $a$ independent of $n$ 
+such that 
+\begin{equation}
+\label{ineq}
+a \sqrt{n} \leq E\left[~\left| \sum_{i=1}^n X_i \right|~\right].
+\end{equation}
+\begin{lemma}
+\label{lm6}
+For some constant probability $0 < p < 1$ independent of $n$ we have that
+\begin{equation}
+\label{rv9:eq}
+\Pr \left[ ~\left| \sum_{i=1}^n X_i Y_i \right| > \frac{a}{2} 
+\cdot \sqrt{n} \cdot E[Y]  ~ \right]
+\geq p .
+\end{equation}
+\end{lemma}
+{\bf Proof.} 
+In addition to the previous notation,
+we use the following notation in the course of this proof.
+\begin{eqnarray*}
+S & = & 
+\left| \sum_{i=1}^n X_i \right| ,\\
+T & = & 
+\left| \sum_{i=1}^n X_i Y_i \right| ,\\
+Z & = &
+\max \{ 0, d \cdot \sqrt{n} \cdot E[Y] - T \} .
+\end{eqnarray*}
+where $d$ is a constant that will be defined later. 
+Observe that
+\begin{eqnarray}
+T < \frac{a}{2} \cdot \sqrt{n} \cdot E[Y]
+& \Leftrightarrow & 
+\label{Zineq1}
+d \cdot \sqrt{n} \cdot E[Y] - T > 
+\left( d - \frac{a}{2}\right) \cdot \sqrt{n} \cdot E[Y] \\
+& \Rightarrow & 
+\label{Zineq2}
+\max\left\{ 0, d \cdot \sqrt{n} \cdot E[Y] - T \right\} >
+\left( d - \frac{a}{2}\right) \cdot \sqrt{n} \cdot E[Y] \\
+& \Leftrightarrow &
+\label{Zineq3} 
+Z > \left( d - \frac{a}{2}\right) \cdot \sqrt{n} \cdot E[Y] ,
+\end{eqnarray}
+by definition of the random variable $Z$.
+Next we provide an upper bound estimate on $E[Z]$.
+\begin{eqnarray*}
+E[Z] 
+& = & 
+E [\max \{ 0, d \cdot \sqrt{n} \cdot E[Y] - T \}] \\
+& = & 
+\sum_{k \geq 0} 
+\Pr [\max \{ 0, d \cdot \sqrt{n} \cdot E[Y] - T \} \geq k] \\
+& = & 
+\sum_{k \geq 0} 
+\Pr [0 \geq k \mbox{ or } d \cdot \sqrt{n} \cdot E[Y] - T \geq k] \\
+& = & 
+1 + \sum_{k \geq 0} \Pr [d \cdot \sqrt{n} \cdot E[Y] - T \geq k] \\
+& = & 
+1 + E[d \cdot \sqrt{n} \cdot E[Y] - T] \\
+& = & 
+1 + E[d \cdot \sqrt{n} \cdot E[Y]] - E[T] \\
+& \leq & 
+1 + d \cdot \sqrt{n} \cdot E[Y] - E[S] \cdot E[Y] 
+\mbox{ (by Lemma~\ref{lm1})}\\
+& \leq & 
+1 + d \cdot \sqrt{n} \cdot E[Y] - a \cdot \sqrt{n} \cdot E[Y] 
+\mbox{ (by Inequality~\ref{ineq})}\\
+& \leq & 
+(1 + \epsilon) (d-a) \cdot \sqrt{n} \cdot E[Y] ,
+\end{eqnarray*}
+asymptotically in $n$ and $\epsilon$ sufficiently small. 
+Using the above upper bound on $E[Z]$ and 
+Inequalities~\ref{Zineq1}-\ref{Zineq3} we derive
+\begin{eqnarray*}
+\Pr \left[T < \frac{a}{2} \cdot \sqrt{n} \cdot E[Y]\right]
+& \leq &
+\Pr \left[Z > \left(d-\frac{a}{2}\right) \cdot \sqrt{n} \cdot E[Y]\right] \\
+& \leq &
+\Pr \left[ Z > \frac{(d-a/2)}{(1+\epsilon)(d-a)} \cdot E[Z] \right] \\
+& \leq &
+\frac{(1+\epsilon)(d-a)}{(d-a/2)}
+\mbox{ (by Markov's inequality)} .
+\end{eqnarray*}
+If we choose $d = 2a$ then we see that the constant in the
+right-hand of the last inequality lies strictly between $0$ and $1$.
+This completes the proof of Lemma~\ref{lm6}.
+\qed 
+
+
+It is interesting that we can obtain estimates 
+on the probability of how much the sum $\sum_{i=1}^n X_i$ deviates
+from its mean (which by Lemma~\ref{lm2} has been shown 
+to be $\Theta (\sqrt{n})$) by 
+using Chernoff bounds. Namely we have the following lemma.
+\begin{lemma}
+\label{lm3}
+For any $\delta$ such that $0 < \delta \leq 1$ we have
+\begin{equation}
+\label{rv3:eq}
+\Pr \left[ ~\left| \sum_{i=1}^n X_i \right| > \delta \frac{n}{2} ~ \right]
+< 2 \cdot \exp \left[ - n \frac{\delta^2}{4} \right].
+\end{equation}
+\end{lemma}
+{\bf Proof.}
+Consider the random variables $Y_i = (1+X_i)/2$ which are i.i.d. and
+$\{ 0, 1\}$-valued. It is clear from the definition of $Y_i$ that 
+\begin{equation}
+\label{rv4:eq}
+\sum_{i=1}^n Y_i = \frac{n}{2} + \frac{1}{2} \sum_{i=1}^n X_i
+\mbox{ and } \mu:= E\left[ \sum_{i=1}^n Y_i \right] = \frac{n}{2} .
+\end{equation}
+If we apply Chernoff bounds to the random variables $Y_i, 
+i=1,2,\ldots ,n$ we derive
+\begin{equation}
+\label{rv5:eq}
+\Pr \left[  \sum_{i=1}^n Y_i  < (1- \delta) \mu  \right]
+< \exp \left[ - \mu \delta^2 /2 \right].
+\end{equation}
+If we substitute in Inequality~\ref{rv5:eq}, use Identities~\ref{rv4:eq}
+and simplify we derive
+\begin{equation}
+\label{rv6:eq}
+\Pr \left[  \sum_{i=1}^n X_i  < - \delta \frac{n}{2}  \right]
+< \exp \left[ - n \frac{\delta^2}{4}  \right].
+\end{equation}
+If in Inequality~\ref{rv6:eq} we replace $X_i$ wirh the random variable
+$-X_i$ we derive the inequality
+\begin{equation}
+\label{rv7:eq}
+\Pr \left[  \sum_{i=1}^n X_i  > \delta \frac{n}{2}  \right]
+< \exp \left[ - n \frac{\delta^2}{4}  \right].
+\end{equation}
+If we combine Inequalities~\ref{rv6:eq}~and~\ref{rv7:eq} we derive
+the desired Inequality~\ref{rv3:eq}. This completes the
+proof of the lemma.
+\qed
+
+We can extend Lemma~\ref{lm3} to a sum of
+random variable $X_i Y_i$, where the random variables 
+$Y_i$ satisfy a boundness condition.
+\begin{lemma}
+\label{lm4}
+Let the random variable $Y$ satisfy $| Y | \leq M$.
+For any $a > 0$ we have
+\begin{equation}
+\label{rv8:eq}
+\Pr \left[ ~\left| \sum_{i=1}^n X_i Y_i \right| \geq a ~ \right]
+< 2 \cdot \exp \left[ \frac{-2a^2}{M^2 n} \right].
+\end{equation}
+\end{lemma}
+{\bf Proof.} This follows from Azuma's inequality.
+\qed 
+
+Lemma~\ref{lm4} is not particular useful for our purposes
+because the random variable $Y$ we are interested in
+is not bounded. Namely,
+given an integer $k$ we are interested
+in the random variable $Y$ which is defined as the number 
+of trials required when flipping a coin until $k$
+Heads in a row are obtained.
+We can estimate easily the expected value and variance of $Y$
+using martingales. 
+\begin{lemma}
+\label{lm5}
+$E[Y] = 2^k $ and $Var (Y) \in O(E[Y]^2 )$.
+\end{lemma}
+{\bf Proof.} 
+Consider the random variable representing the
+execution of a fair coin, i.e., probability of
+{\em Head} is the same as the probability of {\em Tail} 
+and this is equal to $1/2$. Consider $n$ such
+i.i.d. random flips.  
+Let
+$I_i$ be the r.v. which is $1$ if a sequence
+of $k$ consecutive heads starts at position $i$,
+where $i \leq n-k+1$. The random variables $I_i$ are i.i.d.
+Then the expected number of occurrences of $k$
+consecutive heads is $E[\sum_{i=1}^{n-k+1} I_i]
+= (n-k+1) 2^{-k}$. It is now clear that $Y$ is the
+random variable which gives the first time $t$
+such that $k$ consecutive heads occur. 
+Let us define $S_n = \sum_{i=1}^{n} I_i = 1$.
+Observe
+that at stopping time $\sum_{i=1}^{Y} I_i = 1$.
+Therefore, by
+Wald's identity we have that 
+\begin{eqnarray*}
+1 & = & E\left[ S_Y \right] \\
+  & = & E[Y] E[I_i ] \\
+  & = & E[Y] \Pr [I_i = 1 ] \\
+  & = & E[Y] 2^{-k} .
+\end{eqnarray*}
+This implies that $E[Y] = 2^k$, as required. 
+
+In order to estimate the variance of $Y$ first of all observe that
+$E[I_i] = 2^{-k}$ and 
+$Var (I_i) = 2^{-k} (1 - 2^{-k})$.
+Next
+we use the zero mean martingale
+described in S. Ross~\cite{ross}[page 177].
+\begin{eqnarray*}
+%\label{zmean}
+Z_n 
+& := & \left( \sum_{i=1}^n ( I_i - E[I_i] ) \right)^2 - n Var (I_i) \\
+& = & \left( \sum_{i=1}^n ( I_i - 2^{-k} ) \right)^2 - n 2^{-k} (1 - 2^{-k}) \\
+& = &  \left( S_n - n 2^{-k} \right)^2 - n 2^{-k} (1 - 2^{-k}).
+\end{eqnarray*}
+$Z_1,Z_2, \ldots$ is a martingale with respect to $I_1, I_2, \ldots $
+and $Y$ as defined above
+(i.e., the random variable which gives the first time $t$
+such that $k$ consecutive heads occur)
+is a stopping time for $I_1, I_2, \ldots $.
+By the martingale stopping theorem we derive that at the
+stopping time $Y$ we must have $E[Z_Y] =0$. Substituting in 
+the last equation
+we obtain that
+$$
+E \left[  \left( S_Y - Y 2^{-k} \right)^2 - Y 2^{-k} (1 - 2^{-k}) \right] = 0.
+$$
+If we multiply out, simplify and solve for $E[Y^2]$ we obtain that
+\begin{eqnarray*}
+E[Y^2] 
+& = & 2^{2k} (1 - 2^{-k}) + 2^{k+1} E[Y S_Y] - 2^{2k} E[S_Y^2] \\
+& \leq & 2^{2k} (1 - 2^{-k}) + 2^{k+1} E[Y S_Y] \\
+& = & 2^{2k} (1 - 2^{-k}) + 2^{k+1} E\left[\sum_{i=1}^Y Y I_i \right] \\
+& = & 2^{2k} (1 - 2^{-k}) + 2^{k+1} E[Y]  \cdot E[ Y I_i ] 
+\mbox{ (By Wald's identity)}\\
+& = & 2^{2k} (1 - 2^{-k}) + 2^{k+1} E[Y]^2  \cdot E[ I_i ] 
+\mbox{ (By independence of $Y$ and $I_i$)}\\
+& \in & O(E[Y]^2 ).
+\end{eqnarray*}
+This completes the proof of Lemma~\ref{lm5}.
+\qed
+
+
+
+
+
+%\bibliographystyle{plainnat}
+%\bibliographystyle{plain}
+%\bibliography{biblio}
+
+\begin{thebibliography}{99}
+
+\bibitem{ross}
+S. Ross,
+Probability Models for Computer Science,
+Academic Press, 2002.
+
+\end{thebibliography}
+
+\end{document}
+

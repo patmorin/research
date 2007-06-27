@@ -247,39 +247,6 @@ $k$ bits of memory and whose expected rendez-vous time is
 $O(\min\{n^2/2^{2^{k-1}},2^{2^{k-1}}\})$.
 \end{thm}
 
-
-
-\comment{
-
-
-
-
-
-
- the paths of agents $A$ and
-$B$ cross and they rendez-vous within the first $m$ iterations of $A$'s
-algorithm.
-
-By \lemref{counter}, 
-the expected number of steps taken by $A$ during the first $m$
-iterations of $A$'s algorithm is less than 
-\[
-   \mu = 2^{2^{k-1}} m = \frac{n^2}{\beta^2 2^{2^{k-1}}} \enspace ,
-\]
-and an application of Chernoff's bounds shows that the probability that
-the number of steps taken by $A$ is greater than $(1+\epsilon)\mu$ is
-at most $\exp(-\epsilon^2 m/3)$.  Thus, with constant probability,
-agents $A$ and $B$ successfully rendez-vous during the first $m$
-iterations of $A$'s algorithm after $O(n^2/2^{2^{k-1}})$ steps.  If
-this fails, then the same statement is true about the next $m$
-iterations of $A$'s algorithm, and so on.  The resulting geometric
-series gives an upper bound on the expected time it takes for $A$ and
-$B$ to rendez-vous:
-}
-
-
-
-
 \section{The Lower Bound}
 
 Next we show that the algorithm in \secref{algorithm} is, in some
@@ -334,6 +301,8 @@ then we obtain an algorithm $\A'$ with $\bias(\A')=0$.  Furthermore, since
 $|\bias(\A)|\le\reset(\A)$, every edge label $\ell'(e)$ has
 $-2 \le \ell'(e)\le 2$.
 
+
+\comment{
 \noindent
 \framebox{
 \begin{minipage}{\textwidth}
@@ -380,11 +349,45 @@ and, using Markov's Inequality,
 
 To summarize, with probability at least $1/4$, neither agent $A$ nor
 $B$ 
+}
 
 
-\begin{lem}
+\ldots continue this discussion and use Martingales or Spitzer's Theorem to 
+conclude with \ldots
 
+\begin{lem}\lemlabel{well-behaved}
+For any well-behaved $t$-state rendez-vous algorithm $\mathcal{A}$, the expected rendez-vous time is $\Omega(n^2/2^t)$.
 \end{lem}
+
+Finally, we consider the case where the algorithm $\mathcal{A}$ is not
+well-behaved.  In this case, $\mathcal{A}$'s state machines contains a set
+of \emph{terminal components}.  These are disjoint sets of vertices of the
+state machine that are strongly connected and that have no outgoing edges.
+From each terminal component, select an arbitrary vertex and call it
+the \emph{terminal start state} for that terminal component.
+
+\begin{lem}\lemlabel{component}
+The expected time to reach some terminal start state is at most $2^t$.
+\end{lem}
+
+Observe that each terminal component defines a well-behaved algorithm.
+Let $c$ be the number of terminal components and let $t_1,\ldots,t_c$ be
+the sizes of these terminal components.  When two agents execute the same
+algorithm $\mathcal{A}$, \lemref{component} implies that the probability
+that both agents reach the same terminal component after at most $2^{t+2}$
+steps is at least $1/2c$.  By applying \lemref{well-behaved} to each component, we can therefore lower bound the expected rendez-vous time by
+\begin{eqnarray*}
+  \Omega(n^2)\times \frac{1}{2c}\sum_{i=1}^c 1/2^{t_i} 
+    & \ge & \Omega(n^2)\times \left(\frac{1}{2c}\right)\left(\frac{1}{2^{t-c}}+\frac{c}{2}\right) \\
+    & \ge & \Omega(n^2/2^t) \enspace ,
+\end{eqnarray*}
+where the first inequality is obtained by maximizing the sum on the
+left hand side subject to the constraints $\sum_{i=1}^c t_i \le t$
+and $t_i \ge 1$ for all $1\le i\le c$.
+
+\begin{thm}
+Any $t$-state rendez-vous algorithm has expected rendez-vous time $\Omega(n^2/2^t)$.
+\end{thm}
 
 \end{document}
 

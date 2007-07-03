@@ -214,7 +214,7 @@ location.  Set
 \]
 and consider what happens when two agents $A$ and $B$ both execute
 this rendez-vous algorithm.  During the first round of $A$'s
-executtion, with probability at least $\kappa$, agent $A$ will have
+execution, with probability at least $\kappa$, agent $A$ will have
 visited agent $B$'s starting location. Furthermore, with probability
 at least $1/2$ will not have moved away from $A$, so the paths of
 agents $A$ and $B$ will cross, and a rendez-vous will occur, with
@@ -229,7 +229,6 @@ The variables $M_1,M_2,\cdots$ are independent and the algorithm
 terminates when $A$ and $B$ rendez-vous.  If we define $T$ as
 the round in which agents $A$ and $B$ rendez-vous then the time to
 rendez-vous is bounded by
-rendez-vous time is b
 \[
    \sum_{i=1}^T M_i \enspace .
 \]
@@ -252,54 +251,166 @@ $O(\min\{n^2/2^{2^{k-1}},2^{2^{k-1}}\})$.
 Next we show that the algorithm in \secref{algorithm} is, in some
 sense, optimal.
 
-Let $t=2^k$ and observe that, any algorithm that uses $k$ bits of
-memory is represented as a finite state machine with $t$ states.  Each
-state of this state machine has two outgoing edges, representing the
-two possible results of a coin toss and each edge $e$ is labelled with
-a value $\ell(e)\in\{+1,-1, 0\}$ depending on whether the agent go
-clockwise, counterclockwise, or remains at the current location,
-respectively.
+The model of computation for the lower bound represents a rendez-vous
+algorithm $\A$ as a finite state machine (FSM) having $t$ states. Each
+vertex of the FSM has two outgoing edges representing the two possible
+results of a coin toss and each edge $e$ is labelled with a real
+number $\ell(e)\in[-1,+1]$.  The edge label of $e$ is represented as a
+step of length $|\ell(e)|$ with this step being counterclockwise if
+$\ell(e)<0$ and clockwise if $\ell(e)>0$.  As before, both agents use
+identical FSMs and start in the same state. This model is slightly
+stronger than the model used for upper bound, since the edge labels
+are no longer restricted to be in the set $\{-1,0,+1\}$.
+
+\subsection{Well-Behaved Algorithms and Reset Times}
 
 We say that an algorithm is \emph{well-behaved} if the directed graph
 of the state machine has only one strongly connected component that
 contains all nodes.  We are particularly interested in intervals
 between consecutive visits to the start state, which we will call
-\emph{rounds}.  For an edge $e$ of the
+\emph{rounds}.
+
+\begin{lem}\lemlabel{reset}
+Let $R$ be the number of steps during a round. Then 
+$\E[R] \le 2^t$ and $\E[R^2] \le c(\E[R])^2$.
+\end{lem}
+
+\begin{proof}
+To prove the bound on the expected value of $R$, order the vertices of
+the by the expected number of XXXXXXXXXXXXXXXXX steps required reach the start vertex
+from each vertex and label the vertices $v_1,\ldots,v_t$ in this
+order.  Let $R_i$ be the time to reach the start vertex from $v_i$ and
+observe that $\E[R_1]=0$ and, for any $i\in\{2,\ldots,t\}$, we have 
+\[
+   E[R_i] \le \frac{1}{2}\E[R_{i-1}] + \frac{1}{2}\E[R_t] \enspace .
+\]
+Solving the above recurrence gives $\E[R_t] \le 2^t$ and, therefore,
+$E[R] \le 2^t + 1$.
+\end{proof}
+
+Note that $\E[R]$ can be expressed another way: For an edge $e$ of the
 state machine, let $f(e)$ be the expected number of times the edge $e$
 is traversed during a round.  The
 \emph{reset time} of algorithm $\A$ is then defined as
 \[
-   \reset(\A) = \sum_e f(e) \enspace ,
+   \reset(\A) = \sum_e f(e) = E[R] \enspace .
 \]
-which is the expected length of a round.  The following lemma says
-that $\mathcal{A}$ resets itself fairly frequently:
-\begin{lem}
-For a well-behaved algorithm $\A$, $\reset(\A)\le 2^t$.
-\end{lem}
-\begin{proof}
-Easy.
-\end{proof}
+
+\subsection{Unbiasing Algorithms}
 
 The \emph{bias} of a well-behaved algorithm $\A$ is defined as
 \[
-    \bias(\A) = \sum_{e} f(e)\cdot\ell(e)
+    \bias(\A) = \sum_{e} f(e)\cdot\ell(e) \enspace ,
 \]
-is the expected sum of the edge labels encoutered during a round.
+which is the expected sum of the edge labels encoutered during a round.
+We say that $\A$ is \emph{unbiased} if $\bias(\A)=0$, otherwise we say
+that $\A$ is \emph{biased}.
 
-Algorithms with a non-zero bias are somewhat more difficult to study.
-However, observe that, for any algorithm $\mathcal{A}$ we can replace
-every edge label $\ell(e)$ with the value $\ell(e)-x$ for any real
-number $x$ and obtain an equivalent algorithm in the sense that, if
-two agents $A$ and $B$ execute the modified algorithm following the
-same sequence of edges then $A$ and $B$ will rendez-vous after exactly
-the same number of steps.
-In particular, if we replace each edge label $\ell(e)$ with the value
+Biased algorithms are somewhat more difficult to study.  However,
+observe that, for any algorithm $\mathcal{A}$ we can replace every
+edge label $\ell(e)$ with the value $\ell(e)-x$ for any real number
+$x$ and obtain an equivalent algorithm in the sense that, if two
+agents $A$ and $B$ execute the modified algorithm following the same
+sequence of edges then $A$ and $B$ will rendez-vous after exactly the
+same number of steps.  In particular, if we replace each edge label
+$\ell(e)$ with the value
 \[
    \ell'(e) = \ell(e) - \frac{\bias(\A)}{\reset(\A)}
 \]
 then we obtain an algorithm $\A'$ with $\bias(\A')=0$.  Furthermore, since
 $|\bias(\A)|\le\reset(\A)$, every edge label $\ell'(e)$ has
-$-2 \le \ell'(e)\le 2$.
+$-2 \le \ell'(e)\le 2$.  This gives the following relation between
+biased and unbiased algorithms:
+
+\begin{lem}\lemlabel{unbiased}
+Let $\A$ be a well-behaved algorithm with expected rendez-vous time
+$R$.  Then there exists a well-behaved unbiased algorithm $\A'$ with
+expected rendez-vous time at most $2R$.
+\end{lem}
+
+\subsection{The Lower Bound for Well-Behaved Algorithms}
+
+We now have all the tools in place to prove the lower bound for the
+case of well-behaved algorithms.
+
+\begin{lem}
+Let $\A$ be a well-behaved algorithm.  Then the expected rendez-vous
+time of $\A$ is $\Omega(n^2/2^t)$.
+\end{lem}
+
+\begin{proof}
+Suppose the agents are placed at antipodal locations on the ring,
+so that the distance between them is $n/2$.  We will show that there
+exists constants $c >0$ and $p> 0$ such that, after $cn^2/2^t$ steps,
+with probability at least $p$ neither agent will have travelled a
+distance greater than $n/4$ from their starting location.  Thus, the
+expected rendez-vous time is at least $p cn^2/2^t = \Omega(n^2/2^t)$.
+
+By \lemref{unbiased} we can assume that $\A$ is unbiased.
+Consider the actions of a single agent starting at location 0.  The
+actions of the agent proceed in rounds where, during the $i$th round,
+the agent takes $R_i$ steps and the sum of edge labels encountered
+during these steps is $X_i$.  Note that the random variables
+$X_1,X_2,\ldots$ are i.i.d.\ with expectation $\E[X]=0$ and variance
+$\E[X^2]$.  Let $S_i=\left|\sum_{j=1}^i X_i\right|$, for
+$i=0,1,\ldots$ be the agent's
+distance from their starting location at the end of the $i$th round.
+Let $Q_i= (S_i)^2 - i\E[X^2]$ and observe that 
+\begin{eqnarray*}
+ \E\left[Q_{i+1}|X_1,\ldots,X_i\right]
+ & = & \sum_{x} \Pr\{X=x\}\left(S_i + x\right)^2 - (i+1)\E[X^2] \\
+ & = & (S_i)^2 + S_i\E[X] + \E[X^2] - (i+1)\E[X^2] \\
+ & = & (S_i)^2 + i\E[X^2] \\
+ & = & Q_i  \enspace .
+\end{eqnarray*}
+Thus, the sequence $Q_1,Q_2,\ldots$ is a martingale with respect to
+the sequence $X_1,X_2,\ldots$ \cite{ross}.  Define
+\[
+    T = \min\{i : S_i \ge m \} \enspace ,
+\]
+and observe that this is equivalent to 
+\[
+    T = \min\{i : Q_i \ge m^2 - i \} \enspace .
+\]
+The random variable $T$ is a \emph{stopping time} for the martingale
+$Q_1,Q_2,\ldots$ so, by the Optional Stopping Therem \cite{ross}
+\begin{equation}
+  \E[Q_T] 
+    = \E[Q_1] 
+    = \E[(X_1)^2 - \E[X^2]]
+    = 0 \enspace . \eqlabel{mart1}
+\end{equation}
+However, by definition, 
+\begin{equation}
+  \E[Q_T] 
+    = \E[m^2 - T\E[X^2]] 
+    = m^2 - \E[T]\E[X^2] \enspace . \eqlabel{mart2}
+\end{equation}
+Equating the right hand sides of \eqref{mart1} and \eqref{mart2} gives 
+\[
+   \E[T] = \frac{m^2}{\E[X^2]} \enspace .
+\]
+Furthermore, the expected number of steps taken by the agent during
+these $T$ rounds is, by Wald's Equation, 
+\[
+  \E\left[\sum_{i=1}^T R_i\right] 
+    =  \E[T]\E[R_1] 
+   \ge \E[T]\E[|X|] 
+    =  \frac{m^2 \E[|X|]}{\E[X^2]} 
+   \ge \frac{m^2}{c\E[|X|]} 
+   \ge \frac{m^2}{2^t} 
+   \enspace ,
+\] 
+where the last two inequalities follows from \lemref{restart}.
+
+
+
+
+
+
+
+
+\end{proof}
 
 
 \comment{
@@ -359,10 +470,13 @@ conclude with \ldots
 For any well-behaved $t$-state rendez-vous algorithm $\mathcal{A}$, the expected rendez-vous time is $\Omega(n^2/2^t)$.
 \end{lem}
 
+\subsection{Badly-Behaved Algorithms}
+
 Finally, we consider the case where the algorithm $\mathcal{A}$ is not
-well-behaved.  In this case, $\mathcal{A}$'s state machines contains a set
+well-behaved.  In this case, $\mathcal{A}$'s FSM contains a set
 of \emph{terminal components}.  These are disjoint sets of vertices of the
-state machine that are strongly connected and that have no outgoing edges.
+FSM that are strongly connected and that have no outgoing edges (edges
+with source in the component and target outside the component).
 From each terminal component, select an arbitrary vertex and call it
 the \emph{terminal start state} for that terminal component.
 
@@ -386,7 +500,8 @@ left hand side subject to the constraints $\sum_{i=1}^c t_i \le t$
 and $t_i \ge 1$ for all $1\le i\le c$.
 
 \begin{thm}
-Any $t$-state rendez-vous algorithm has expected rendez-vous time $\Omega(n^2/2^t)$.
+Any $t$-state rendez-vous algorithm has expected rendez-vous time
+$\Omega(n^2/2^t-2^t)$.
 \end{thm}
 
 \end{document}

@@ -1,26 +1,10 @@
-\documentclass[lotsofwhite]{patmorin}
-\usepackage{graphicx,amsthm,amsfonts}
+\documentclass{elsart}
+\usepackage{graphicx,amsfonts}
+\journal{JDA}
 
 \usepackage[noend]{algorithmic}
 
 \input{pat}
-
-
-\title{
-\MakeUppercase{Algorithms for Optimal Outlier Removal}%
-\thanks{School of Computer Science. Carleton University. This work was partly funded by NSERC.}}
-
-\author{Rossen Atanassov \and
-	Prosenjit Bose \and
-	Mathieu Couture \and
-	Anil Maheshwari \and
-	Pat Morin \and
-	Michel Paquette \and
-	Michiel Smid \and
-	Stefanie Wuhrer
-}
-
-\date{}
 
 \newcommand{\ch}{\mathrm{conv}}
 \newcommand{\lbl}{\mathrm{label}}
@@ -30,12 +14,30 @@
 
 \newcommand{\ntypes}{C(2c)}
 \newcommand{\timepertype}{(3c)^c n}
-\newcommand{\runtime}{n\log n + \left({4c\choose 2c}(3c)^cn\right)}
+\newcommand{\runtime}{n\log n + {4c\choose 2c}(3c)^cn}
 \newcommand{\Oruntime}{O\left(\runtime\right)}
 
-\begin{document}
+% This is to override elsart paragraph numbering
+\renewcommand{\paragraph}[1]{\noindent\textbf{#1}\ }
 
-\maketitle
+\begin{document}
+\begin{frontmatter}
+
+\title{Algorithms for Optimal Outlier Removal\thanksref{funding}}
+
+\author{Rossen Atanassov,
+	Prosenjit Bose,
+	Mathieu Couture,}
+\author{
+	Anil Maheshwari,
+	Pat Morin,
+	Michel Paquette,}
+\author{Michiel Smid, and
+	Stefanie Wuhrer}
+
+\address{School of Computer Science, Carleton University \\
+	1125 Colonel By Drive, Ottawa, CANADA K1S~5B6}
+\thanks[funding]{This work was partly supported by NSERC}
 
 \begin{abstract}
 We consider the problem of removing $c$ points from a set $S$ of $n$
@@ -45,6 +47,12 @@ having minimum area (perimeter) bounding box, having minimum area
 (perimeter) convex hull.  For constant values of $c$, all our
 algorithms run in $O(n\log n)$ time.
 \end{abstract}
+
+\begin{keyword}
+Computational geometry, outlier removal, computational statistics
+\end{keyword}
+
+\end{frontmatter}
 
 \section{Introduction}
 
@@ -62,9 +70,20 @@ rectangle containing $X$, and
 \item $f(X)$ is the area/perimeter of the convex hull of $X$.
 \end{enumerate}  
 
-We call these problems the \emph{$f$-based $c$ outlier removal problems}.
-We are particularly interested in the case when $c$ (the number of
-outliers) is small.
+We call these problems the \emph{$f$-based $c$ outlier removal
+problems}.  We are particularly interested in the case when $c$ (the
+number of outliers) is small.  The functions we consider all have the
+property that their values can become very large in the presence of
+even one outlier.  Indeed, the same types of outliers that can skew
+non-robust summary statistics such as the mean and standard deviation
+make these functions very large.  The choice of which function to use
+for outlier removal depends on the particular application.  Methods
+based on bounding boxes are well-suited for situations where the data
+consists of two measured variables in which scale is important.  The
+methods based on diameter are well-suited to situations where
+rotations of the data are irrelevant.  The methods based on area of
+the convex hull are well-suited to situations where even affine
+transformations of the data are irrelevant.
 
 \subsection{Previous Work.} 
 
@@ -98,8 +117,8 @@ find the subset of $S$ with the minimum-perimeter enclosing
 axes-parallel rectangle.  Eppstein and Erickson \cite{ee94} improve
 the running time to $O(n\log n + k^2 n)$.  Segal and Kedem \cite{sk98}
 present an algorithm for this problem that runs in $O(n+k(n-k)^2)$
-time using $O(n)$ space, provided $\frac{n}{2}<k\le n$. Their
-algorithm can also find the minimum area rectangle.
+time, provided $\frac{n}{2}<k\le n$. Their algorithm can also find the
+minimum area rectangle.
 
 \paragraph{Minimum-Perimeter/Area Convex Hull.} The problem of finding a
 subset of $S$ of size $k$ that has the least perimeter convex hull was
@@ -181,8 +200,11 @@ $c$.
 
 For fixed values of $k$, the results described above give $O(n\log n)$
 or $O(n^2\log n)$ time algorithms for finding the $k$ point subset of
-$S$ that minimize $f$.  However, when $k$ is close to $n$ even the
-fastest of the algorithms cited above require $\Omega(n^3)$ time.  
+$S$ that minimize $f$.  However, when $k$ is close to $n$, all but one
+of the the algorithms cited above require $\Omega(n^3)$ time.  The one
+except to this is the algorithm of Kedem and Segal \cite{ks00} which
+runs in $O(n + k(n-k)^2) = O(n + (n-c)c^2)$ and is therefore fast when
+$k$ is very large.
 
 In the current paper we consider specifically the case when $k=n-c$.
 For Problem~1 (diameter) we obtain an $O(n\log n + cn + c^6\log^2 c)$
@@ -193,9 +215,19 @@ algorithm.  We also show, by giving $\Omega(n\log n)$ lower bounds for
 both Problems~1 and 3 that, for constant values of $c$, our algorithms
 are optimal.
 
+We obtain many of our results by borrowing techniques from the theory
+of fixed-parameter tractability (FPT) that are typically applied to
+NP-hard problems \cite{dfXX}.  In particular, our solution to Problems
+1 and 2 use the technique of \emph{kernelization} by using a fast
+algorithm to find a problem kernel of size $c^{O(1)}$ whose solution
+gives a solution to the original problem.  Our solution to Problem 3
+can also be viewed as a form of the bounded search tree method
+\cite{dfXX} although its implementation differs considerably from that
+used in typical FPT algorithms.
+
 The remainder of the paper is organized as follows: \secref{diameter}
 presents an algorithm for the diameter-based $c$ outlier removal
-problem.  \secref{box} present algorithms for the (bounding box)
+problem.  \secref{box} presents algorithms for the (bounding box)
 area/perimeter-based $c$ outlier removal problems.  \secref{hull}
 presents algorithms for (convex hull) area/perimeter-based $c$
 outlier removal problems.  An abstract of the results in \secref{hull}
@@ -235,28 +267,26 @@ It must therefore take $\Omega(n\log n)$ time to determine $x$.
 
 Next we give an algorithm for the diameter-based $c$ outlier removal
 problem.  We do this by first considering a more general problem in
-$\mathbb{R}^{n \times n}$ and then use the resulting algorithm to find
+$\mathbb{R}^{n^2}$ and then use the resulting algorithm to find
 a set $\tilde{S}$ of $O(c^2)$ points with the property that any
 optimal set $S'$ for $S$ is also an optimal set for $\tilde{S}$. 
 
 Let $A$ denote an $n\times n$ symmetric matrix of non-negative real
-numbers such that 
-\begin{enumerate}
-\item $A_{i,i} = 0$ for all $1\le i\le n$.
+numbers whose diagonal entries are all equal to 0 and whose
+off-diagonal entries are all unique.  An example of such a matrix,
+that is used for diameter-based outlier removal, is the matrix in
+which $A_{i,j}$ denotes the distance from point $i$ to point $j$ in an
+$n$ point set in which all interpoint distances are unique.
 
-\item For all $1\le i<j\le n$, 
-     $A_{i,j} = A_{k,\ell}$ if and only if $k=i$ and 
-     $\ell=j$ or $k=j$ and $i=\ell$.
-\end{enumerate}
-Let $A_{i,\star}$, respectively, $A_{\star,i}$ denote the $i$th row,
-respectively, column, of $A$.  For a set $I$ of indices we denote by
-$A\setminus I$ the submatrix of $A$ obtained by deleting $A_{i,\star}$
-and $A_{\star,i}$ for every $i\in I$ from $A$.  We consider the
-problem of selecting a set $T$ of $c$ indices, such that the largest
-value in $A\setminus T$ is minimum over all choices of $T$.  We begin
-by showing that the algorithm \textsc{DeepSet} described below selects
-a set $\tilde{T}$ of $(c+1)^2$ indices that are a superset of some
-optimal set $T$.
+Let $A_{i,\star}$, respectively,
+$A_{\star,i}$ denote the $i$th row, respectively, column, of $A$.  For
+a set $I$ of indices we denote by $A\setminus I$ the submatrix of $A$
+obtained by deleting $A_{i,\star}$ and $A_{\star,i}$ for every $i\in
+I$ from $A$.  We consider the problem of selecting a set $T$ of $c$
+indices, such that the largest value in $A\setminus T$ is minimum over
+all choices of $T$.  We begin by showing that the algorithm
+\textsc{DeepSet} described below selects a set $\tilde{T}$ of
+at most $(c+1)^2$ indices that are a superset of some optimal set $T$.
 
 In the following, \emph{marking} an index $i$ means adding $i$ to
 $\tilde{T}$ and \emph{deleting} an index $i$ means removing row $i$
@@ -277,7 +307,7 @@ below:
   \STATE{$\tilde{T}\gets 
      \tilde{T} \cup \{ k : A_{i,k} \ge x \}$ 
           \COMMENT{* mark $c+1$ largest entries in row/column $i$ *}}
-  \STATE{$x\gets$ $(c+1)$-st largest entry in $A_{j,\star}$}
+  \STATE{$x\gets$ $(c+1)$-st largest entry in $A_{\star,j}$}
   \STATE{$\tilde{T}\gets 
      \tilde{T} \cup \{ k : A_{k,j} \ge x \}$
           \COMMENT{* mark $c+1$ largest entries in row/column $j$ *}}
@@ -414,7 +444,7 @@ finding $\tilde{S}$ and finding $S'$) take a total time of $O(n\log n
 \paragraph{Remark.} The \textsc{DeepSet} algorithm can be extended to
 handle slightly more general problems for which the matrix $A$ is not
 necessarily symmetric.  The only modification needed for this
-extension that the indices of the $c+1$ largest entries in
+extension is that the indices of the $c+1$ largest entries in
 $A_{i,\star}$ and in $A_{\star,i}$ as well as $A_{j,\star}$ and
 $A_{\star,j}$ should be marked.  This modification at most doubles the
 size of the resulting set $\tilde{T}$ of marked indices.
@@ -434,13 +464,13 @@ main steps of our algorithm are given by the following pseudocode:
 
 \noindent
 \begin{minipage}{\textwidth}
-$\textsc{FindOptimalRectangle}(S)$
+$\textsc{FindOptimalRectangle}(S,c)$
 \begin{algorithmic}[1]
 \STATE{Find a subset $K\subseteq S$ consisting of 
 $c$ leftmost, $c$ rightmost, $c$ topmost and $c$ bottommost points in
 $S$.}
 \STATE{Compute the smallest axes-parallel bounding box $B$ for points in $S\setminus K$, 
-and then delete all these points.}
+and then delete $S\setminus K$.}
 \STATE{Insert $c$ points at the bottom-left corner of $B$.  Also
 insert $c$-points at the top-right corner of $B$.  Let the set of
 newly inserted points be $I$.}
@@ -504,11 +534,11 @@ $\Omega(n\log n)$ lower bound.
 The proof is by a reduction from the problem \textsc{Set-Equality}, of
 determining whether two sets $A$ and $B$ of real numbers are equal,
 which has an $\Omega(n\log n)$ lower bound in the algebraic decision
-tree model.  The \textsc{Set-Equality} problem can be mapped to an
-outlier removal problem on the point multiset $S=S_A \uplus S_B$ where
-$S_A=\{(x,x^2): x\in A\}$, $S_B=\{(x,x^2):x\in B\}$ and $\uplus$
-denotes multiset union. The sets $A$ and $B$ are equal if and only if
-for every $p\in S$, $\ch(S)=\ch(S\setminus\{p\})$. 
+tree model \cite{bo84}.  The \textsc{Set-Equality} problem can be
+mapped to an outlier removal problem on the point multiset $S=S_A
+\uplus S_B$ where $S_A=\{(x,x^2): x\in A\}$, $S_B=\{(x,x^2):x\in B\}$
+and $\uplus$ denotes multiset union. The sets $A$ and $B$ are equal if
+and only if for every $p\in S$, $\ch(S)=\ch(S\setminus\{p\})$. 
 \end{proof}
 
 \subsection{The Algorithm}
@@ -684,50 +714,12 @@ divide-and-conquer algorithm whose merge step is accomplished by
 solving a dynamic programming problem (as in the Type~2 solutions
 described above).
 
-For ease of exposition (to avoid treating $S_0$ as a special case), we
-describe an algorithm to find the optimal solution with the
-restriction that it does not include both $p_{0,-1}$ and $p_{0,0}$.
-To find the true optimal solution we can run this algorithm at most
-$c$ times, shifting the numerical labelling of the points on $S_0$ by
-one each time.
-
 \subsubsection{The Types of Solutions}
 
 We represent the type of a solution as a rooted ordered binary tree in
 which each node is labeled with a positive integer and the sum of all
-node labels is $c$.  We call such trees \emph{solution trees}.  The
-following lemma tells us that, for small values of $c$, there are not
-too many solution trees:
- 
-\begin{lem}\lemlabel{catalan}
-The number of solution trees is at most $O(C(2c))$, where
-$C(r)={2r\choose r}/(r+1)$ is the $r$th Catalan number.
-\end{lem}
-
-\begin{proof} Given a solution tree $T$, we convert it to an
-unlabelled rooted binary tree as follows: First, for each node $N$ of
-$T$ whose label is $\ell$, we color $N$ black, leave $N$'s left child
-unchanged and replace $N$'s right child with a (right) path of
-$\ell-1$ \emph{white} nodes, the last node of which has $N$'s original
-right child as its right child.  Note that this gives us a binary
-tree with exactly $c$ nodes in which no white node has a left child.
-Next, for each black node we add a leaf, if necessary, to guarantee
-that each black node has a left child.  This gives us an unlabelled
-rooted ordered binary tree $T'$ with at most $2c$ nodes.
-
-Observe that, given only $T'$, we can recover $T$ and its labels since
-we can recognize white nodes by the fact that they have no left child.
-Thus, the number of solution trees is at most equal to the number of
-unlabelled rooted ordered binary trees with at most $2c$ nodes.  The
-number of such trees is 
-\[
-  \sum_{i=1}^{2c} C(i) = O(C(2c))
-\]
-\cite{knuth-graham-patashnik},
-as required.
-\end{proof}
-
-Solution trees are interpreted as follows (refer to
+node labels is $c$.  We call such trees \emph{solution trees}
+and interpret them as follows (refer to
 \figref{solution-tree} for an example): Any solution removes some
 elements of $S_0$ and the elements removed come in $d$ groups
 $G_0^1,\ldots,G_0^d$ of consecutive elements with each group separated
@@ -746,13 +738,13 @@ rightmost path of $T$ has the label $|G_0^j|$.
 \end{tabular}
 \end{center}
 \caption{Examples of (a)~a point set $S$, (b)~a solution
-$S\setminus\{S'\}$, and (c)~the solution tree for $S'$.}
+$S\setminus S'$, and (c)~the solution tree for $S'$.}
 \figlabel{solution-tree}
 \end{figure}
 
 For some group $G_0^j$, let $p_{1,k}, \ldots, p_{1,\ell}$ denote the
 points of $S_1$ that appear on the boundary of $\ch(S\setminus
-G_0^j)$.  Any solution removes some subset $p_{1,k},\ldots,
+G_0^j)$.  Any solution removes some subset of $p_{1,k},\ldots,
 p_{1,\ell}$ of elements from $S_1$.  Again, this subset can be
 partitioned into groups of consecutive elements with any two groups
 separated by at least one element of $S_1$.  In the solution tree $T$,
@@ -772,6 +764,45 @@ $p_{i+1,k}, \ldots, p_{i+1,l}$ of $S_{i+1}$.  In this way, any
 solution $S'$ to the outlier removal problem that does not remove both
 $p_{0,0}$ and $p_{0,-1}$ maps to a unique solution tree.
 
+Since we will be exploring all possible solution trees, we require the
+following lemma to show that, for small values of $c$, there are not
+too many solution trees:
+ 
+\begin{lem}\lemlabel{catalan}
+The number of solution trees is at most $O(C(2c))$, where
+$C(r)={2r\choose r}/(r+1)$ is the $r$th Catalan number.
+\end{lem}
+
+\begin{proof} Given a solution tree $T$, we convert it to an
+unlabelled rooted binary tree as follows: First, for each node $N$ of
+$T$ whose label is $\ell$, we color $N$ black, leave $N$'s left child
+unchanged and replace $N$'s right child with a (right) path of
+$\ell-1$ \emph{white} nodes, the last node of which has $N$'s original
+right child as its right child.  Note that this gives us a binary tree
+with exactly $c$ nodes in which no white node has a left child.  Next,
+for each black node we add a white leaf, if necessary, to guarantee
+that each black node has a left child.  This gives us an unlabelled
+rooted ordered binary tree $T'$ with at most $2c$ nodes.
+
+Observe that, given only $T'$, we can recover $T$ and its labels since
+we can recognize white nodes by the fact that they have no left child.
+Thus, the number of solution trees is at most equal to the number of
+unlabelled rooted ordered binary trees with at most $2c$ nodes.  The
+number of such trees is 
+\[
+  \sum_{i=1}^{2c} C(i) = O(C(2c))
+\]
+\cite{knuth-graham-patashnik},
+as required.
+\end{proof}
+
+Note that the proof of \lemref{catalan} shows how to convert a binary
+tree with at most $2c$ nodes into a solution tree.  Thus, we can
+enumerate all possible solution trees by enumerating all binary trees
+having at most $2c$ nodes using, for example, the algorithm of Solomon
+and Finkel \cite{sf80}.
+
+
 \comment{Note that the mapping between different types of solutions
 and labeled binary search trees is not bijective, because for one type
 of solutions, there are many labeled binary search trees that
@@ -788,12 +819,13 @@ whose solution tree is $T$.
 
 The algorithm we describe is recursive and operates on a subchain
 $p_{i,j},\ldots,p_{i,k}$ of $S_i$ along with a solution (sub)tree $T$.  The
-algorithm requires that some subset of $\bigcup_{j=0}^{i-1}S_i$ has
+algorithm requires that some subset of $\bigcup_{j=0}^{i-1}S_j$ has
 already been removed from $S$ so that $p_{i,j},\ldots,p_{i,k}$ are on
 the boundary of the convex hull of the current point set.  The
 algorithm finds an optimal solution of type $T$ such that the only
 points removed from the convex hull of the current point set are in
-$p_{i,j},\ldots,p_{i,k}$.
+$p_{i,j},\ldots,p_{i,k}$.  The initialization of this algorithm takes
+special care and will be described later.
 
 Let $d$ denote the number of nodes on the rightmost path of $T$.  The
 algorithm accomplishes its task by recursively solving $O(d(k-j+1))$
@@ -816,6 +848,10 @@ $\textsc{FindOptimalOfType}(T,i,j,k)$
   \RETURN{0}
 \ENDIF
 \STATE{$d\gets$ the number of nodes on the rightmost path of $T$}
+\STATE{$N\gets$ the sum of node labels on rightmost path of $T$}
+\IF{$k-j < N + d$}
+  \RETURN{$-\infty$ \COMMENT{* No solution possible *}}
+\ENDIF
 \FOR{$g=1$ to $d$}
   \STATE{$N_g\gets g$th node on the rightmost path of $T$}
   \STATE{$c_g=\lbl(N_g)$}
@@ -842,7 +878,7 @@ algorithm is called as $\textsc{FindOptimalOfType}(T,0,0,|S_0|-1)$.
 
 To analyze the cost of \textsc{FindOptimalOfType} it suffices to
 determine, for each point $p_{i,j}$, the maximum number of times
-$p_{i,j}$ is deleted (in line 8) by the algorithm.  All other work
+$p_{i,j}$ is deleted (in line 9) by the algorithm.  All other work
 done by the algorithm can be bounded in terms of this quantity.  For
 points $p_{0,j}\in S_0$, each point is deleted exactly $g_0$, times,
 where $g_0$ is the sum of labels of nodes on the rightmost path of
@@ -872,6 +908,22 @@ Using the fact that $g_i \le c$, we obtain the (extremely loose) upper
 bound $m_i \le (3c)^{i+1}$.  
 This implies that the points of $S_c$
 (which are never deleted) appear in at most $3m_{c-1}$ subproblems.
+
+All that remains is to describe how we initialize the algorithm.  To
+do this, we first check if the label at the root of $T$ is equal to
+$|S_0|$. If so, and the root of $T$ has a right child, then we
+immediately return the value $-\infty$ since no solution is possible.
+Otherwise (the root of $T$ has no right child) we remove $S_0$ from
+our point set and recurse on $S\setminus S_0$ and the left child of
+the root of $T$.
+
+Otherwise (the label at the root of $T$ is not equal to $|S_0|$) then
+we make $c+1$ calls to \textsc{FindOptimalOfType} using as inputs the
+chains $p_{0,t},\ldots,p_{0,|S_0|-2+t}$, for $t=0,\ldots,c$.  Note
+that each such call fixes one of $p_{0,0},\ldots,p_{0,c}$.  Since the
+optimal solution must leave one of these $c+1$ points we are
+guaranteed that one of these calls will find the optimal solution.
+
 Putting all this together we obtain:
 
 \begin{lem}\lemlabel{recursion}

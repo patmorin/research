@@ -74,39 +74,43 @@ $O(n\log n + n^{d-1})$ expected time algorithm.
 
 In this paper we consider the simpler, but still very difficult,
 problem of computing the Tukey depth of a given point $p$ with respect
-to a set $S$.  We present algorithms have running times that are
-dependent on the value, $k$, of the output.  In some applications,
-such as outlier removal, the goal is to quickly identify data points
-of small depth (so they can be removed).  Our algorithm are
-particularly well-suited to such applications since they run quickly
-when the depth of $p$ is small.  Specifically, we present the
-following results:
+to a set $S$. If the dimension $d$ of the problem is part of the
+input, then this problem is NP-hard \cite{jp78}, and is even APX-hard
+\cite{ak95}.  The current paper presents algorithms whose running
+times are dependent on the dimension $d$ and the value, $k$, of the
+output.  In some applications, such as outlier removal, the goal is to
+identify quickly the data points of small depth (so they can be
+removed).  Our algorithms are particularly well-suited to such
+applications since they run quickly when the depth of $p$ is small.
+Specifically, we present the following results:
 
 \begin{enumerate}
-\item A simple $O(n + k\log k)$ time algorithm for points in $\R^2$
+\item A simple $O(n + k\log k)$ time algorithm to compute the Tukey
+depth of a point in $\R^2$
 (\secref{2d}).  The most complicated data structure used in this
 algorithm is a binary heap.
 
 \item An $O(n + (n-k)\log(n-k))$ time algorithm to find the largest
 clique in an interval graph, where $k$ is the size of the clique found
-(\secref{max-clique}).  This problem is related to the Tukey
-depth problem in $\R^2$.
+(\secref{max-clique}).  This problem is related to the Tukey depth
+problem in $\R^2$.
 
-\item An $O(n\log n + k^2\log n)$ time algorithm for points in $\R^3$
-and an $O(n + k^{11/4}n^{1/4}\log^{O(1)}n)$ time algorithm for points
-in $\R^4$ (\secref{3-4-d}).  These algorithms rely on results of Chan
-on linear programming with violated constraints \cite{c05} which in
-turn rely on sophisticated range searching data structures
-\cite{m92,r99} and/or dynamic convex hull data structures \cite{bj02}.
+\item An $O(n\log n + k^2\log n)$ time algorithm to compute the Tukey
+depth of a point in $\R^3$ and an $O(n + k^{11/4}n^{1/4}\log^{O(1)}n)$
+time algorithm to compute the Tukey depth of a point in $\R^4$
+(\secref{3-4-d}).  These algorithms rely on results of Chan on linear
+programming with violated constraints \cite{c05} which in turn rely on
+sophisticated range searching data structures \cite{m92,r99} and/or
+dynamic convex hull data structures \cite{bj02}.
 
-\item A simple $O(d^k \lp(n,d-1))$ time algorithm for points in
-$\R^d$, where $\lp(n,d)$ denotes the time required to determine the
-feasibility of a linear program having $n$ constraints and $d$
-variables (\secref{d-d}).  Not surprisingly, this algorithm is also
-based on linear programming with violated constraints and is obtained
-by presenting a fixed-parameter tractable algorithm for a
-parameterization of the NP-hard \textsc{MaximumFeasibleSubsystem}
-problem.
+\item A simple $O(d^k \lp(n,d-1))$ time algorithm to compute the Tukey
+depth of a point in $\R^d$, where $\lp(n,d)$ denotes the time required
+to determine the feasibility of a linear program having $n$
+constraints and $d$ variables (\secref{d-d}).  Not surprisingly, this
+algorithm is also based on linear programming with violated
+constraints and is obtained by presenting a fixed-parameter tractable
+algorithm for a parameterization of the NP-hard
+\textsc{MaximumFeasibleSubsystem} problem.
 \end{enumerate}
 
 For the remainder of this paper we use the following notations: For
@@ -165,10 +169,19 @@ Next we extract elements one at a time from each of $H_{i-1}$ and
 $H_{i+1}$ until either (a)~one of the heaps is empty or (b)~we extract
 two elements $q$ from $H_{i-1}$ and $r$ from $H_{i+1}$ such that the
 angle $\angle qpr > \pi$.  Suppose we have extracted $\ell$ elements
-each from $H_{i-1}$ and $H_{i+1}$ when this occurs.  Then it is easy
-to verify that 
+each from $H_{i-1}$ and $H_{i+1}$ when this occurs.  
+Then, any closed halfspace containing $Q_i$ contains $\ell-1$
+elements extracted from $H_{i-1}$ or it contains $\ell-1$ elements
+extracted from $H_{i+1}$.  Therefore,
 \[  
-  |S_i| + \ell - 1 \le \td_i(p,S) \le |S_i| + 2\ell-1 \enspace .
+  |S_i| + \ell - 1 \le \td_i(p,S) \enspace .
+\]
+
+On the other hand, the closed halfspace containing $Q_i$ and bounded by the line through
+$p$ and the last element extracted from $H_{i-1}$ contains at most
+$|S_i|+2\ell -1$ points of $S$, so
+\[
+  \td_i(p,S) \le |S_i| + 2\ell-1  \enspace .
 \]
 
 Next, we continue to extract as many elements as possible from each of
@@ -183,6 +196,10 @@ $S_i$ we can then compute $\td_i(p,S)$ in an additional
 time.  This yields an a total running time of 
 \[  
    O(n + k_i\log n) = O(n + k_i\log k_i) \enspace ,
+   \footnote{This equation follows from the analysis of two cases. If
+$k_i \le n/\log n$ then $k_i\log k_i \le n$.  On the other hand, if $k_i >
+n/\log n$ then $\log k_i > \log n - \log\log n$ so $k_i\log n <
+2k_i\log k_i$ for all $n\ge 16$.}
 \]
 as required.  This completes the proof of:
 
@@ -196,43 +213,65 @@ $k$ is the value of the output.
 \seclabel{max-clique}
 
 The problem of computing Tukey depth in $\R^2$ can be viewed as a
-problem on a set of circular arcs.  By \eqref{tuk-boundary}, computing
-the Tukey depth of $p$ is equivalent to finding a unit normal vector
-$v$ such that the halfspace with $p$ on its boundary and having inner
-normal $v$ contains as few points of $S$ as possible.  Note that the
-set of unit normals in $\R^2$ is homeomorphic to the unit circle
-$\Sp^1$ and that each point $q\in S$ defines an open circular arc of $\Sp^1$
-such that all choices of $v$ in this circular arc yield a halfspace
-that does not contain $q$.  Thus, the Tukey depth problem reduces to
-the problem of finding a vector $v$ that is contained in the largest
-number of circular arcs. The partitioning into 4 quadrants used in
-the algorithm of \thmref{2-d} works because all the circular arcs are
-actually half circles.
+problem on a set of circular arcs.  By the second definition of Tukey
+depth (\Eqref{tuk-boundary}), computing the Tukey depth of $p$ is
+equivalent to finding a unit normal vector $v$ such that the halfspace
+with $p$ on its boundary and having inner normal $v$ contains as few
+points of $S$ as possible.  Note that the set of unit normals in
+$\R^2$ is homeomorphic to the unit circle $\Sp^1$ and that each point
+$q\in S$ defines an open circular arc of $\Sp^1$ such that all choices
+of $v$ in this circular arc yield a closed halfspace with $p$ on its
+boundary that does not contain $q$.  In fact, all the open circular
+arcs obtained this way are half-circles.  Thus, the Tukey depth problem
+reduces to the problem of finding a vector $v$ that is contained in
+the largest number of half-circles. Although it is not immediately
+apparent, the correctness of the algorithm
+in \thmref{2-d} relies crucially on the fact that the arcs of $\Sp^1$
+defined by the Tukey depth problem are all half-circles and not arcs
+of arbitrary length.
 
 An obvious generalization of the Tukey depth problem is that of, given
 a set of $n$ circular arcs of $\Sp^1$, finding a point $p\in\Sp^1$
-contained in the largest number of arcs.  This problem is easily
-solved in $O(n\log n)$ time by the sort-and-scan algorithm.
-Unfortunately, it is not possible to obtain an algorithm whose running
-time depends on the number $k$ of arcs containing $p$ or even on the
-number $(n-k)$ of arcs not containing $p$.  This is because the
-decision problem of testing whether a set of $n$ arcs covers $\Sp^1$
-has an $\Omega(n\log n)$ lower-bound \cite{b-o83}.  This problem is
+contained in the largest number of arcs.  Note that, in this
+generalization, the arcs can have arbitrary and different lengths.
+Like the Tukey depth problem, this problem is easily solved in
+$O(n\log n)$ time by the sort-and-scan algorithm.  Unfortunately, it
+is not possible to obtain an algorithm whose running time depends on
+the number $k$ of arcs containing $p$ or even on the number $(n-k)$ of
+arcs not containing $p$. More precisely, the decision problem of
+testing whether a set of $n$ circular arcs covers $\Sp^1$ has an
+$\Omega(n\log n)$ lower-bound \cite{b-o83}.  This problem is
 equivalent, by taking the complement of each arc, to the problem of
 finding the point contained in the maximum number of arcs.  In
 particular, the original set of arcs do not cover $\Sp^1$ if and only
 if there is a point $p$ contained in every complementary arc.
 
-Since we can not hope to solve the problem for circular arcs of
-$\Sp^1$, we settle for the next best thing.  Let $I$ be a set of real
-intervals.  Here we describe an $O(n+(n-k)\log (n-k))$ time algorithm
-to find a point $p\in\R$ that is contained in the largest number of
-intervals in $I$.  Here $k$ is the number of intervals in $I$ that
-contain $p$.  Let $p_1,\ldots,p_{2n}$ denote the $2n$ endpoints of the
-intervals in $I$, in increasing order.  For convenience we use the
-convention that $p_i = -\infty$ for $i\le 0$ and $p_i=+\infty$ for $i
-> 2n$.  Together, the following two observations imply that all the
-points contained in many intervals are clustered together.
+Since we can not hope to find an output-sensitive algorithm for
+circular arcs of $\Sp^1$, we settle for the next best thing.  Let $I$
+be a set of real intervals.  Here we describe an $O(n+(n-k)\log
+(n-k))$ time algorithm to find a point $p\in\R$ that is contained in
+the largest number of intervals in $I$.  Here $k$ is the number of
+intervals in $I$ that contain $p$.  
+
+Let $p_1,\ldots,p_{2n}$ denote the $2n$ endpoints of the intervals in
+$I$, in increasing order. For convenience we use the convention that
+$p_i = -\infty$ for $i\le 0$ and $p_i=+\infty$ for $i > 2n$.  Note
+that the $p_1,\ldots,p_{2n}$ notation is for convenience only and the
+algorithm we describe does not require that the endpoints be given in
+sorted order, nor will it sort them into this order.  Together, the
+following two observations imply that all the points contained in many
+intervals are clustered together. (Refer to \figref{deep-intervals}.)
+
+\begin{figure}
+\begin{center}
+\includegraphics{deep-intervals}
+\end{center}
+\caption{An illustration of \lemref{close} and \lemref{far}.  The point $q\in
+[p_6,p_7]$ is contained in 6 intervals.  Therefore, by \lemref{close}, the point $q'\in
+[p_{10},p_{11}]$ is contained in at least $6-4 = 2$ intervals and by
+\lemref{far} $q'$ is contained in at most $14-6-4=4$ intervals.}
+\figlabel{deep-intervals}
+\end{figure}
 
 \begin{lem}\lemlabel{close}
 Let $q\in[p_i,p_{i+1}]$ be a point contained in $k$ intervals of $I$.
@@ -265,23 +304,36 @@ the number of intervals that contain $q'$ is at most
 as required.
 \end{proof}
 
-At a high level our algorithm is fairly simple.  Suppose we are given
-a value $k$ and only wish to find a value $p\in\R$
-contained in at least $k$ intervals of $I$.
-We begin by taking a regular sample $s_1,\ldots,s_{2t}$ of
-$p_1,\ldots,p_{2n}$ so that any interval $[s_i,s_{i+1}]$ between two
-consecutive sample points contains at most $n/t$ points of
-$p_1,\ldots,p_{2n}$.  We then compute, for each sample point $s_i$ the
-number of intervals in $I$ that contain $s_i$.  By \lemref{close}, if
-there exists any point $p\in \R$ contained in $k$ intervals of $I$
-then the two sample points $s_j$ and $s_{j+1}$ on either side of $p$
-are \emph{high depth samples} that are each contained in at least
-$k-n/t$ intervals of $I$.  Furthermore, by \lemref{far}, the only high
-depth samples are contained in the interval $[p_{i-r},p_{i+r}]$ for
-$r=2(n-k)+n/t$.  
+We first explain our algorithm at a high level in an idealized way in
+which we deliberately ignore many details implementation details that
+are discussed later.  Refer to \figref{interval-alg}. Suppose we are
+given a value $k$ and only wish to find a value $p\in\R$ contained in
+at least $k$ intervals of $I$.  We begin by taking a regular sample
+$s_1,\ldots,s_{2t}$ of $p_1,\ldots,p_{2n}$ so that any interval
+$[s_i,s_{i+1}]$ between two consecutive sample points contains at most
+$n/t$ points of $p_1,\ldots,p_{2n}$.  We then compute, for each sample
+point $s_i$ the number of intervals in $I$ that contain $s_i$.  By
+\lemref{close}, if there exists any point $p\in \R$ contained in $k$
+intervals of $I$ then the two sample points $s_j$ and $s_{j+1}$ on
+either side of $p$ are \emph{high-depth samples} that are each
+contained in at least $k-n/t$ intervals of $I$.  Furthermore, by
+\lemref{far}, the only high-depth samples are contained in the
+interval $[p_{i-r},p_{i+r}]$ for $r=2(n-k)+n/t$.  
+
+\begin{figure}
+\begin{center}\includegraphics{interval-alg2}\end{center}
+\caption{An illustration of the algorithm for interval graphs
+using sampling at regular intervals (above) and using random samples
+(below).  
+The rows of dots show
+the endpoints of the intervals with samples drawn as circles labelled with the number
+of intervals that contain them.  High-depth samples are indicated as
+filled circles.}
+\figlabel{interval-alg}
+\end{figure}
 
 If we choose $t=\sqrt{n}$ then $r=O(n-k+\sqrt{n})$.  Thus, by
-computing an interval $[p_a,p_b]$ that contains all high depth samples
+computing an interval $[p_a,p_b]$ that contains all high-depth samples
 we can find the point $p$ contained in the largest number of
 intervals of $C$ by applying the standard sort-and-scan algorithm
 on the $O(n-k+\sqrt{n})$ endpoints of the intervals of $C$ that fall
@@ -292,33 +344,43 @@ time of
 \[
    O((n-k+\sqrt{n})\log(n-k+\sqrt n)) = O(n + (n-k)\log (n-k)) \enspace ,
 \]
-as required.
-
-In implementating the above ideas, several issues arise:
+as required.  Note that the value of $k$ has very little effect on the
+execution of the algorithm other than to bound the number of endpoints
+in the interval $[p_a,p_b]$ on which the sort-and-scan algorithm is
+run.
+In implementating the above ideas, several complications arise:
 
 \begin{enumerate}
 
 \item The value of $k$ is not known in advance.  However, we do not
-need the exactly value of $k$ and the value of $k$ can be estimated to
-within an additive error of $\sqrt{n}$ by computing, for each sample
-point $s_i$, the number of intervals of $I$ that contain $s_i$ (see
-Issue~3, below) and using the maximum of these values as an estimate
-for $k$.
+need the exactly value of $k$ and the value of $k$ can be estimated
+using \lemref{close}.  In particular, since the number of endpoints
+between any two consecutive samples is at most at most $\sqrt{n}$ the
+number of intervals containing $s_i$ estimates, to within an additive
+error of $\sqrt{n}$, the number of intervals containing any point $q\in
+[s_{i-1},s_{i+1}]$. In particular, we can estimate the value of $k$ by
+computing, for each sample point $s_i$, the number of intervals of $I$
+that contain $s_i$ (see Issue~3, below) and use the maximum of these
+values as an estimate for $k$.
 
 \item We can not obtain a perfectly regular sample
 $s_1,\ldots,s_{2\sqrt{n}}$ of $p_1,\ldots,p_{2n}$ in $O(n)$ time.
 However, we do not require a perfectly regular sample.  By taking a
 random sample of size $c\sqrt{n}\log n$ for an appropriate constant
 $c$ we obtain a set of samples $s_1,\ldots,s_{c\sqrt{n}\log n}$ such
-that, with high probability, no interval $[s_{i},s_{i+1}]$ contains
-more than $\sqrt{n}$ endpoints of intervals of $I$ \cite{m98}.
+that, with probability $1-n^{-\Omega(c)}$, no interval
+$[s_{i},s_{i+1}]$ contains more than $\sqrt{n}$ endpoints of intervals
+of $I$ \cite{m98}.  Such a sample still guarantees that the number of
+intervals containing a point $q\in [s_i,s_{i+1}]$ is estimated, to
+within an additive error of $\sqrt{n}$, by the number of intervals
+containing $s_i$.
 
 \item We can not compute, in $O(n)$ time, for each sample point $s_i$,
 the number of intervals of $I$ that contain $s_i$.  However, random
 sampling helps again here.  Let $d(s_i)$ denote the number of elements
 of $I$ that contain $s_i$. By taking a random sample $I'\subseteq I$,
-$|I'|=\sqrt{n}$ we can determine for each $s_i$ a
-number $d_i$ such that, with high probability,
+$|I'|=c\sqrt{n}$ we can determine for each $s_i$ a
+number $d_i$ such that, with probability $1-n^{-\Omega(c)}$
 \[
         d(s_i) - O(n^{4/5})\le d_i \le
            d(s_i) + O(n^{4/5}) \enspace .
@@ -330,19 +392,22 @@ in $O(\sqrt{n}\log^2 n)$
 time.  
 \end{enumerate}
 
-None of the above issues have any significant effect on the running
-time of the overall algorithm, which is still dominated by the final
-sort-and-scan step on a problem of size $O(n-k+\sqrt{n})$.  The
-correctness of the resulting output depends on the success of the
-random sampling steps described in points 2 and 3, above.  However,
-\lemref{far} implies that this final sort-and-scan step allows us
-to check the correctness of the output and restart the algorithm from
-scratch if necessary.  This yields:
+Note that each of the above steps can be accomplished in $o(n)$ time,
+determining the endpoints contained in $[p_a,p_b]$ can be done in
+$O(n)$ time, and the final sort-and-scan step takes $O(n + (n-k)\log
+(n-k))$ time.  The correctness of the resulting output depends on the
+success of the random sampling steps described in points 2 and 3,
+above.  However, \lemref{far} implies that this final sort-and-scan
+step allows us to check the correctness of the output (by counting the
+number of intervals containing $p_a$ and $p_b$ and comparing this to
+the computed value of $k$) and restarting the algorithm from scratch
+if necessary.  This yields:
 
 \begin{thm}
 There exists a randomized algorithm that, given a set $I$ of $n$ real
 intervals, finds a value $p\in\R$ contained in the largest number of
-intervals of $I$ and that runs in $O(n+(n-k)\log (n-k))$ expected time.
+intervals of $I$ and that runs in $O(n+(n-k)\log (n-k))$ expected
+time, where $k$ is the number of intervals containing $p$.
 \end{thm}
 
 
@@ -361,7 +426,8 @@ finding the point contained in the largest number of halfspheres in
 $S^*=\{q^* : q\in S\}$.
 
 We observe that this problem can be solved by solving two
-\textsc{MaximumFeasibleSubsystem} problems in $\R^{d-1}$.  Each open
+\textsc{MaximumFeasibleSubsystem} problems in $\R^{d-1}$. Refer to 
+\figref{central}.  Each open
 halfsphere $q^*\in S^*$ is the intersection of an open halfspace
 $q^\#$ with $\Sp^{d-1}$.  Consider the intersection of $q^\#$ with the
 hyperplane $H_+=\{(x_1,\ldots,x_d):x_d=1\}$.  By central projection,
@@ -376,10 +442,17 @@ Finally, we observe that we do not need to consider solutions on the
 equator $\Sp^{d-1}_0$ because our input consists of \emph{open}
 halfspheres.\footnote{A solution to the Tukey depth problem is
 obtained when we find a set $n-k$ open halfspheres that have a
-non-empty common intersection.  The intersection of a set of open
+non-empty common intersection.  The intersection of a finite set of open
 halfspheres is either an empty set or a set with positive measure.
 Since $\Sp^{d-1}_0$ has measure 0 any solution to the Tukey depth
 problem contains points not in $\Sp^{d-1}_0$.}
+
+\begin{figure}
+\begin{center}\includegraphics{central}\end{center}
+\caption{Computing the Tukey depth of a point in $\R^d$ reduces to two
+\textsc{MaximumFeasibleSubsystem} problems in $\R^{d-1}$.}
+\figlabel{central}
+\end{figure}
 
 The above discussion shows that computing the Tukey depth of a point
 in $\R^d$ reduces to two instances of the problem
@@ -414,7 +487,7 @@ previous section we showed that computing the Tukey depth of a point
 $p$ with respect to a set $S$ of $n$ points in $\R^d$ can be reduced
 to two instances of \textsc{MaximumFeasibleSubsystem} in $\R^{d-1}$.
 In this section we give a fixed-parameter tractable \cite{df98}
-algorithm for \textsc{MaximumFeasibleSubsystem}.  
+algorithm for \textsc{MaximumFeasibleSubsystem}.   
 
 The algorithm uses linear programming as a subroutine in the following
 way:  Given a collection $K$ of halfspaces in $\R^{d-1}$, an algorithm
@@ -428,10 +501,10 @@ The set $B$ reported in the latter case is called a \emph{basic
 infeasible subsystem}.  Standard combinatorial algorithms for linear
 programming, including algorithms for linear programming in small
 dimensions \cite{c95,d84,m83,m84,s91,sw92} as well as the simplex
-method (c.f., \cite{chvatal80}), can easily be made to report a basic
-infeasible subsystem.  A method of finding basic infeasible subsystems
-from interior point linear-programming methods is described in
-\appref{bis}.
+method (c.f., \cite{chvatal80}), can generate a basic infeasible
+subsystem given an infeasible linear program.  A method of finding
+basic infeasible subsystems from interior point linear-programming
+methods is described in \appref{bis}.
 
 Let $\textsc{BIS}(K)$ denote a routine that outputs a basic infeasible
 subsystem of $K$ if $K$ is infeasible, and that outputs the empty set
@@ -479,6 +552,20 @@ the value of the output and $\lp(n,d)$ is the time to solve a linear
 program with $n$ constraints and $d$ variables.
 \end{thm}
 
+\noindent\textbf{Remark:}
+The algorithm described above is closely related to Matou\v{s}ek's
+algorithm for \textsc{MaximumFeasibleSubsystem} which, in our setting, 
+has a running
+time of $O(k^{d}\lp(n,d))$ \cite{m95}.  In the language of fixed-parameter
+tractability, the primary difference between the two algorithms is
+that Matou\v{s}ek's algorithm explores the search tree in
+breadth-first order and uses a dictionary to ensure that identical
+subtrees are not explored, whereas the current algorithm explores the
+search tree in depth-first order.  The two algorithms can, of course,
+be combined to obtain an algorithm with running time $O(\min\{k^d +
+d^k\}\lp(n,d))$.
+
+
 \section*{Ackowledgement}
 
 Dan Chen, David Bremner, and Pat Morin are grateful to Diane~Souvaine
@@ -493,6 +580,11 @@ discussions that began at the workshop.
 \appendix
 \section{Computing a Basic Infeasible Subsystem}
 \applabel{bis}
+
+This appendix explains how, given an infeasible linear program, to
+find a basic infeasible subsystem of that linear program.  This
+routine is required as part of the algorithm for solving
+\textsc{MaximumFeasibleSubsystem} described in \secref{d-d}.
 
 For any matrix $M$, let $M_J$ denote the set of rows indexed by $J$.
 Given a system of linear inequalities $Mx \geq b$, $M \in \R^{m \times

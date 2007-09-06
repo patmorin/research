@@ -69,8 +69,9 @@ tukey depth function is defined as $\Gamma_\ell(S)=\{p\in\R^d :
 percentiles that also have many nice properties including convexity,
 robustness, and monotonicity \cite{rr98,rr96,s90}.  Algorithms for
 computing a point $p\in\R^d$ of maximum Tukey depth have a rich
-history \cite{m91,ls03,c04} that has recently culminated in Chan's
-$O(n\log n + n^{d-1})$ expected time algorithm.  
+history \cite{m91,ls03,c04} that has recently culminated (from a
+theoretical point of view) in Chan's $O(n\log n + n^{d-1})$ expected
+time algorithm.  
 
 In this paper we consider the simpler, but still very difficult,
 problem of computing the Tukey depth of a given point $p$ with respect
@@ -92,8 +93,8 @@ algorithm is a binary heap.
 
 \item An $O(n + (n-k)\log(n-k))$ time algorithm to find the largest
 clique in an interval graph, where $k$ is the size of the clique found
-(\secref{max-clique}).  This problem is related to the Tukey depth
-problem in $\R^2$.
+(\secref{max-clique}).  This problem is a generalization of the Tukey
+depth problem in $\R^2$.
 
 \item An $O(n\log n + k^2\log n)$ time algorithm to compute the Tukey
 depth of a point in $\R^3$ and an $O(n + k^{11/4}n^{1/4}\log^{O(1)}n)$
@@ -161,7 +162,7 @@ Let $S_i=S\cap Q_i$. To compute $\td_i(p,S)$ we create two binary
 heaps $H_{i-1}$ and $H_{i+1}$ that store the elements of $S_{i-1}$,
 respectively $S_{i+1}$, in clockwise, respectively, counterclockwise,
 order around $p$.\footnote{Here and in the remainder of this section
-$S_i$ is treated implictly as $S_{i\bmod 4}$.} 
+$S_i$ is treated implicitly as $S_{(i\bmod 4)}$.} 
 Creating these two heaps takes $O(n)$ time using the
 standard bottom-up algorithm to construct a binary heap
 \cite[Chapter~6]{clrs01}.
@@ -196,12 +197,11 @@ $S_i$ we can then compute $\td_i(p,S)$ in an additional
 time.  This yields an a total running time of 
 \[  
    O(n + k_i\log n) = O(n + k_i\log k_i) \enspace ,
-   \footnote{This equation follows from the analysis of two cases. If
+\]
+as required.\footnote{This equation follows from the analysis of two cases. If
 $k_i \le n/\log n$ then $k_i\log k_i \le n$.  On the other hand, if $k_i >
 n/\log n$ then $\log k_i > \log n - \log\log n$ so $k_i\log n <
-2k_i\log k_i$ for all $n\ge 16$.}
-\]
-as required.  This completes the proof of:
+2k_i\log k_i$ for all $n\ge 16$.}  This completes the proof of:
 
 \begin{thm}\thmlabel{2-d}
 The Tukey depth of a point $p$ with respect to a set $S$ of $n$ points
@@ -235,16 +235,26 @@ a set of $n$ circular arcs of $\Sp^1$, finding a point $p\in\Sp^1$
 contained in the largest number of arcs.  Note that, in this
 generalization, the arcs can have arbitrary and different lengths.
 Like the Tukey depth problem, this problem is easily solved in
-$O(n\log n)$ time by the sort-and-scan algorithm.  Unfortunately, it
-is not possible to obtain an algorithm whose running time depends on
-the number $k$ of arcs containing $p$ or even on the number $(n-k)$ of
-arcs not containing $p$. More precisely, the decision problem of
+$O(n\log n)$ time by the sort-and-scan algorithm.  
+
+Unfortunately, for the problem of finding a point $p$ contained in the
+largest number of circular there can be no algorithm whose running
+time depends on the number $k$ of arcs containing $p$ or even on the
+number $(n-k)$ of arcs not containing $p$. There are two reasons for
+this.  The problem of testing if a set of circular arcs are all
+pairwise-disjoint has an $\Omega(n\log n)$ lower bound \cite{b-o83}.
+This problem can be solved by finding a point $p$ contained in the
+largest number of arcs and then determining, in $O(n)$ time, how many
+arcs contain $p$.  Thus, even in the cases where $k\in\{1, 2\}$, the
+$\Omega(n\log n)$ lower bound holds.  At the other end of the scale,
 testing whether a set of $n$ circular arcs covers $\Sp^1$ has an
 $\Omega(n\log n)$ lower-bound \cite{b-o83}.  This problem is
 equivalent, by taking the complement of each arc, to the problem of
-finding the point contained in the maximum number of arcs.  In
+finding the point contained in the maximum number of arcs and checking
+if this point is contained in $n$ of the complementary arcs.  In
 particular, the original set of arcs do not cover $\Sp^1$ if and only
-if there is a point $p$ contained in every complementary arc.
+if there is a point $p$ contained in every complementary arc.  Thus,
+the $\Omega(n\log n)$ lower bound holds even when $k\in\{n,n-1\}$.
 
 Since we can not hope to find an output-sensitive algorithm for
 circular arcs of $\Sp^1$, we settle for the next best thing.  Let $I$
@@ -258,7 +268,7 @@ $I$, in increasing order. For convenience we use the convention that
 $p_i = -\infty$ for $i\le 0$ and $p_i=+\infty$ for $i > 2n$.  Note
 that the $p_1,\ldots,p_{2n}$ notation is for convenience only and the
 algorithm we describe does not require that the endpoints be given in
-sorted order, nor will it sort them into this order.  Together, the
+sorted order, nor will it sort them into this order. Together, the
 following two observations imply that all the points contained in many
 intervals are clustered together. (Refer to \figref{deep-intervals}.)
 
@@ -304,11 +314,11 @@ the number of intervals that contain $q'$ is at most
 as required.
 \end{proof}
 
-We first explain our algorithm at a high level in an idealized way in
-which we deliberately ignore many details implementation details that
-are discussed later.  Refer to \figref{interval-alg}. Suppose we are
-given a value $k$ and only wish to find a value $p\in\R$ contained in
-at least $k$ intervals of $I$.  We begin by taking a regular sample
+We first explain our algorithm at a high level in which we
+deliberately ignore several important implementation details that are
+discussed later.  Refer to \figref{interval-alg}. Suppose we are given
+a value $k$ and only wish to find a value $p\in\R$ contained in at
+least $k$ intervals of $I$.  We begin by taking a regular sample
 $s_1,\ldots,s_{2t}$ of $p_1,\ldots,p_{2n}$ so that any interval
 $[s_i,s_{i+1}]$ between two consecutive sample points contains at most
 $n/t$ points of $p_1,\ldots,p_{2n}$.  We then compute, for each sample
@@ -417,35 +427,42 @@ time, where $k$ is the number of intervals containing $p$.
 The previous section showed how the problem of computing the Tukey
 depth of a point in $\R^2$ is equivalent to the problem of finding a
 point contained in the largest number of halfcircles on the unit
-circle $\Sp^1$.  A similar statement is true in $\R^d$:  Each point
-$q\in S$ defines an open halfsphere $q^*=\{ v\in\Sp^{d-1} : v\cdot q <
-0\}$.  That is, all vectors in $q^*$ are the inner normals of
-halfspaces that contain $p$ but do not contain $q$.  Thus, the problem
-of determining the Tukey depth of $p$ reduces to the problem of
-finding the point contained in the largest number of halfspheres in
-$S^*=\{q^* : q\in S\}$.
+circle $\Sp^1$.  Our main goal in this section is to present a
+reduction from Tukey depth to the \textsc{MaximumFeasibleSubsystem}
+(MFS) Problem. This will allow us to apply known algorithms for the
+MFS problem to give theoretically efficient algorithms for Tukey depth
+in $\R^3$ and $R^4$. The reduction to MFS will also prove useful in the next
+section when we discuss the general dimensional case.
+
+The reduction in $\R^d$ proceeds as follows:  Each point $q\in S$
+defines an open halfsphere $q^*=\{ v\in\Sp^{d-1} : v\cdot q < 0\}$.
+That is, all vectors in $q^*$ are the inner normals of halfspaces that
+contain $p$ but do not contain $q$.  Thus, the problem of determining
+the Tukey depth of $p$ reduces to the problem of finding the point
+contained in the largest number of halfspheres in $S^*=\{q^* : q\in
+S\}$.
 
 We observe that this problem can be solved by solving two
-\textsc{MaximumFeasibleSubsystem} problems in $\R^{d-1}$. Refer to 
-\figref{central}.  Each open
-halfsphere $q^*\in S^*$ is the intersection of an open halfspace
-$q^\#$ with $\Sp^{d-1}$.  Consider the intersection of $q^\#$ with the
-hyperplane $H_+=\{(x_1,\ldots,x_d):x_d=1\}$.  By central projection,
-there is a bijection between points in $\Sp^{d-1}_+$ and $H_+$ and
-this bijection has the property that $r\in\Sp^{d-1}_+$ is in $q^*$ if
-and only if the projection of $r$ is in $q^\#\cap H_+$.  Thus, finding
-the point in $\Sp^{d-1}_+$ contained in the largest number of
-halfspheres is equivalent to finding a point in $H_+$ contained in the
-largest number of halfspaces.  A similar statement holds regarding
-$\Sp^{d-1}_-$ using the hyperplane $H_-=\{(x_1,\ldots,x_d):x_d=-1\}$.
-Finally, we observe that we do not need to consider solutions on the
-equator $\Sp^{d-1}_0$ because our input consists of \emph{open}
+\textsc{MaximumFeasibleSubsystem} problems in $\R^{d-1}$. Refer to
+\figref{central}.  Each open halfsphere $q^*\in S^*$ is the
+intersection of an open halfspace $q^\#$ with $\Sp^{d-1}$.  Consider
+the intersection of $q^\#$ with the hyperplane
+$H_+=\{(x_1,\ldots,x_d):x_d=1\}$.  By central projection, there is a
+bijection between points in $\Sp^{d-1}_+$ and $H_+$ and this bijection
+has the property that $r\in\Sp^{d-1}_+$ is in $q^*$ if and only if the
+projection of $r$ is in $q^\#\cap H_+$.  Thus, finding the point in
+$\Sp^{d-1}_+$ contained in the largest number of halfspheres is
+equivalent to finding a point in $H_+$ contained in the largest number
+of halfspaces.  A similar statement holds regarding $\Sp^{d-1}_-$
+using the hyperplane $H_-=\{(x_1,\ldots,x_d):x_d=-1\}$.  Finally, we
+observe that we do not need to consider solutions on the equator
+$\Sp^{d-1}_0$ because our input consists of \emph{open}
 halfspheres.\footnote{A solution to the Tukey depth problem is
 obtained when we find a set $n-k$ open halfspheres that have a
-non-empty common intersection.  The intersection of a finite set of open
-halfspheres is either an empty set or a set with positive measure.
-Since $\Sp^{d-1}_0$ has measure 0 any solution to the Tukey depth
-problem contains points not in $\Sp^{d-1}_0$.}
+non-empty common intersection.  The intersection of a finite set of
+open halfspheres is either an empty set or a set with positive
+measure.  Since $\Sp^{d-1}_0$ has measure 0 any solution to the Tukey
+depth problem contains points not in $\Sp^{d-1}_0$.}
 
 \begin{figure}
 \begin{center}\includegraphics{central}\end{center}
@@ -459,7 +476,8 @@ in $\R^d$ reduces to two instances of the problem
 \textsc{MaximumFeasibleSubsystem} problem in $\R^{d-1}$: Given a set
 $K$ of $n$ halfspaces in $\mathbb{R}^{d-1}$, find the subset $K'$ of
 $K$ of minimum cardinality such that $\cap (K\setminus K')$ is
-non-empty.  The current best results for
+non-empty. (The set $K'\setminus K$ is called a \emph{maximum feasible
+subsystem}.)  The current best results for
 \textsc{MaximumFeasibleSubsystem} in small dimensions are due to Chan
 \cite{c05}.  Using two instances of his algorithm for
 \textsc{MaximumFeasibleSubsystem} in $\R^2$, respectively, $\R^3$, and
@@ -487,7 +505,8 @@ previous section we showed that computing the Tukey depth of a point
 $p$ with respect to a set $S$ of $n$ points in $\R^d$ can be reduced
 to two instances of \textsc{MaximumFeasibleSubsystem} in $\R^{d-1}$.
 In this section we give a fixed-parameter tractable \cite{df98}
-algorithm for \textsc{MaximumFeasibleSubsystem}.   
+algorithm for \textsc{MaximumFeasibleSubsystem} that, for any fixed
+value of the output, $k$, is polynomial in the dimension, $d$.   
 
 The algorithm uses linear programming as a subroutine in the following
 way:  Given a collection $K$ of halfspaces in $\R^{d-1}$, an algorithm
@@ -501,10 +520,10 @@ The set $B$ reported in the latter case is called a \emph{basic
 infeasible subsystem}.  Standard combinatorial algorithms for linear
 programming, including algorithms for linear programming in small
 dimensions \cite{c95,d84,m83,m84,s91,sw92} as well as the simplex
-method (c.f., \cite{chvatal80}), can generate a basic infeasible
-subsystem given an infeasible linear program.  A method of finding
-basic infeasible subsystems from interior point linear-programming
-methods is described in \appref{bis}.
+method (cf., \cite{chvatal80}), can generate a basic infeasible
+subsystem given an infeasible linear program.  The details of finding
+a basic infeasible subsystem using linear programming are discussed
+further in \appref{bis}.
 
 Let $\textsc{BIS}(K)$ denote a routine that outputs a basic infeasible
 subsystem of $K$ if $K$ is infeasible, and that outputs the empty set

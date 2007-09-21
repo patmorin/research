@@ -9,6 +9,7 @@
 \DeclareMathOperator{\sign}{sign}
 \DeclareMathOperator{\bias}{bias}
 \DeclareMathOperator{\reset}{reset}
+\DeclareMathOperator{\var}{var}
 
 \input{pat}
 
@@ -20,46 +21,120 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-We consider the problem of two identical agents with limited memory, 
-starting at different locations on a ring network, who wish to 
-rendez-vous.
+We present a tradeoff between the expected time for two identical
+agents to rendezvous on a synchronous, anonymous, oriented
+ring. In particular we show 
+there exists a $t$ state agent which
+can achieve rendezvous on an $n$ node ring in expected time
+$O(\min \{ n^2/2^{t/2}, 2^{t/2}\} )$ and that any $t$ state agent
+requires expected time $\Omega( n^2/2^t )$. 
+As a corollary we observe that $\Theta(\log \log n)$ bits of
+memory are necessary and 
+sufficient to achieve rendezvous in linear time. 
 \end{abstract}
 
 \section{Introduction}
 
-We consider the problem of two identical agents with limited memory,
-starting at different locations on a ring network, who wish to
-rendez-vous.  Does Danny or Evangelos want to write the intro?
+The problem of {\em rendezvous} (the gathering of agents widely
+dispersed in some domain at a common place and time) has been studied
+under many guises and in many settings
+\cite{alpernGal03,Marco,dessmark,dobrev,fkkss,fkklss,gakra,kowalski1,
+kowalski2,kkss,markou,RoyDudek,sawchuk04,Yamashita,yu}.  (See
+Reference \cite{kkr} for a survey of recent results.) In this paper we
+consider the problem of autonomous mobile software agents gathering in
+a distributed network. This is a fundamental operation useful in such
+applications as web-crawling, distributed search, meeting scheduling,
+etc. In particular, we study the problem of two identical agents
+attempting to rendezvous on a synchronous anonymous ring.
 
+We consider the standard model of a synchronous anonymous oriented
+$n$-node ring \cite{santoro}. The nodes are assumed to have no
+identities, the computation proceeds in synchronous steps and the
+edges of the ring are labelled {\tt clockwise} and {\tt
+counterclockwise} in a consistent fashion.  We model the agents as
+identical probabilistic finite automata $A = \langle S, \delta, s_0
+\rangle$ where
+$S$ is the set of states of the automata including $s_0$ the initial
+state and the special state ${\tt halt}$, and $\delta:S \times C
+\times P \to S \times M$ where $C = \{ H, T \}$ represents a random
+coin flip, $P = \{ \tt present, notpresent \}$ represents a predicate
+indicating the presence of the other agent at a node, and $M = \{ +1,
+-1, 0 \}$ represents the potential moves the agent may make, $+1$
+representing clockwise, $-1$ counterclockwise and $0$ stay at the
+current node.  During each synchronous step, depending upon its
+current state, the answer to a query for the presence of the other
+agent, and the value of a independent random coin flip with
+probability of $\tt heads$ equal to $1/2$, the agent uses $\delta$ in
+order to change its state and either move across the edge labelled $\tt
+clockwise$ or $\tt counterclockwise$ or $\tt stay$.  We assume that the
+agent halts once it detects the presence of the other agent at a node.
+Rendezvous occurs when both agents halt on the same node.  The
+complexity measures  we are interested in are the expected time (the
+number of synchronous steps) to rendezvous (where the expectation is
+taken over all sequences of coin flips of the two agents) and the size
+($|S|$) or memory requirement ($\log_2 |S|$) of the agents.  
+
+A number of researchers have observed that using random walks one can
+design $O(1)$ state agents that will rendezvous in polynomial number
+steps on any network \cite{coppersmith}. For the ring the expected
+time for two random walks to meet is easily shown to be $O(n^2)$. (See
+Reference~\cite{kk} for an example proof of this fact.) This expected time bound
+can be improved by considering the following strategy.  Repeat the
+following until rendezvous is achieved: flip a fair coin and walk
+$n/2$ steps clockwise if the result is heads, $n/2$ steps
+counterclockwise if the result is tails.  If the two agents choose
+different directions (which they do with probability 1/2) then they
+will rendezvous (at least in the case where they start at an even
+distance apart).  It is easy to see that the expected time until
+rendezvous in this case is $O(n)$. Alpern refers to this strategy as
+Coin Half Tour and studies it in detail \cite{alpern95}.  Note that
+the agents are required to count up to $n/2$ and thus require $\Omega(n)$
+states or $\Omega(\log n)$ bits of memory to perform this algorithm. 
+
+Below we show a tradeoff between the size of the agents and the time
+required for them to rendezvous. We prove there exists a $2t$ state
+algorithm which can achieve rendezvous on an $n$ node ring in expected
+time $O(\min \{ n^2/2^{t}, 2^{t}\} )$ and that any $t$ state algorithm
+requires expected time $\Omega( n^2/2^t )$.  As a corollary we observe
+that $\Theta(\log \log n)$ bits of memory are necessary and sufficient
+to achieve rendezvous in linear time.  Section 2 contains some
+preliminary results, section 3 our upper bound and section 4 the lower
+bound. 
 
 
 \section{Preliminaries}
 
-We begin with some preliminary results on random walks and probabilistic
-counters.
+Our upper bound uses a special kind of random walk using probabilistic
+counters to solve the rendezvous problem.  We therefore begin with
+some preliminary results on random walks and probabilistic counters.
 
-\subsection{The Model}
-
-We are interested in modelling the situation in which the nodes
 \subsection{A Lemma on Random Walks}
 
 Let $X_1,X_2,X_3\ldots\in\{-1,+1\}$ be independent random variables with
 \[ \Pr\{X_i=-1\}=\Pr\{X_i=+1\}=1/2
 \]
-and let $S_i=\sum_{j=1}^i X_j$.
-If we define the \emph{hitting time} $h_m$ as
+and let $S_i=\sum_{j=1}^i X_j$.  The sequence $S_1,S_2,S_3,\ldots$ is
+a \emph{simple random walk} on the line, where each $X_i$ denotes a
+step to the left ($X_i=-1$) or a step to the right ($X_i=+1$).
+Define the \emph{hitting time} $h_m$ as
 \[
-   h_m = \min\left\{i:|S_i|= m\right\} \enspace .
+   h_m = \min\left\{i:|S_i|= m\right\} \enspace ,
 \]
+which is the number of steps in a simple random walk
+before it travels a distance of $m$ from its starting location.
 The following result is well-known:
 \begin{lem}[\cite{X,Y}]\lemlabel{hitting-time}
 $\E[h_m] = m^2$.
 \end{lem}
-Applying Markov's inquality with \lemref{hitting-time} yields the
+Applying Markov's Inequality with \lemref{hitting-time} yields the
 following useful corollary
 \begin{cor}\corlabel{hitting-time}
 $\Pr\{\max\{|S_i|:i\in\{1,\ldots,2m^2\}\} \ge m\} \ge 1/2$ .
 \end{cor}
+In plain english, \corref{hitting-time} says that, at some point
+during the first $2m^2$ steps of a simple random walk, the walk
+typically travels a distance of at least $m$ from its starting
+location.
 
 Let $Y_1,\ldots,Y_m$ be i.i.d.\
 non-negative random variables with finite expectation $r=E[Y_i]$,
@@ -67,37 +142,92 @@ independent of $X_1,\ldots,X_m$, and with the
 property that 
 \[ \Pr\{Y_i \ge \alpha r\} \ge 1/2 \]
 for some constant
-$\alpha > 0$.
-
+$\alpha > 0$.  The following lemma considers a modified random walk in
+which the $i$th step is of length $Y_i$:
 \begin{lem}\lemlabel{walk}
 Let $X_1,\ldots,X_m$ and $Y_1,\ldots,Y_m$ be defined as above.  Then
 there exists constants $\beta,\kappa>0$ such that
 \[
-  \Pr\left\{\left|\sum_{i=1}^m X_iY_i\right| \ge \beta r\sqrt{m}\right\} 
+  \Pr\left\{\max\left\{
+           \left|\sum_{i=1}^{m'} X_jY_j\right| : m'\in\{1,\ldots,m\}\right\}
+            \ge \beta r\sqrt{m}\right\} 
      \ge \kappa \enspace .
 \]
 \end{lem}
 
 \begin{proof}
+We will define 3 events $E_1,E_2,E_3$ such that
+$\Pr\{E_1\cap E_2\cap E_3\} \ge 1/8$ and, if $E_1$, $E_2$, and $E_3$
+all occur, then there exists a value $m'$ such that
+$\left|\sum_{i=1}^{m'}
+X_iY_i\right| \ge \alpha r \sqrt{m}/2^{3/2}$.  This will prove the
+lemma for $\kappa = 1/8$ and $\beta = \alpha/2^{3/2}$.
+
+Let $E_1$ be the event that there exists a value $m'\in\{1,\ldots,m\}$
+such that 
+\[
+   \left|\sum_{i=1}^{m'} X_i\right| \ge \sqrt{m/2} \enspace .
+\]
+By \corref{hitting-time}, $\Pr\{E_1\}\ge 1/2$.  Assume $E_1$ occurs
+and, without loss of generality, assume $\sum_{i=1}^{m'} X_i > 0$.
+
+Let $I^{+} = \{i\in\{1,\ldots,m'\}: X_i=+1\}$ and
+$I^-=\{1,\ldots,m'\}\setminus I^+$.  We further partition $I^+$ into
+two sets $I^+_1$ and $I^+_2$ where $I^+_1$ contains the smallest
+$|I^-|$ elements of $I^+$ and $I^+_2$ contains the remaining elements.
+Note that, with these definitions, $|I^+_1|=|I^-|$ and that
+$|I^+_2|=\sum_{i=1}^{m'} X_i$.  Let $E_2$ be the event that
+\[
+     \sum_{i\in I^+_1}X_iY_i + \sum_{i\in I^-} X_iY_i \ge 0
+\]
+which is equivalent to $\sum_{i\in I^+_1}Y_i \ge \sum_{i\in I^-} Y_i$
+and and observe that, by symmetry, $\Pr\{E_2|E_1\}\ge 1/2$.
+
+Finally, let $E_3$ be the event
+\[
+   \sum_{i\in I^+_2} X_iY_i \ge \alpha r|I^+_2|/2
+\]
+To bound $\Pr\{E_3|E_1\cap E_2\}$, let $T=|\{i\in I^+_2:Y_i\ge \alpha r\}|$ and observe that
+$T\ge |I^+_2|/2$ implies $E_3$. Now, $T$ is a
+$\mathrm{binomial}(|I^+_2|,p)$ random variable for $p\ge 1/2$ so its
+median value is at least $p|I^+_2| \ge |I^+_2|/2$ and therefore
+$\Pr\{T\ge |I^+_2|/2\} \ge \Pr\{E_3\} \ge 1/2$.
+
+We have just shown that $\Pr\{E_1\cap E_2\cap E_3\}\ge 1/8$.  To
+complete the proof we observe that, if $E_1$, $E_2$ and $E_3$ occur
+then
+\begin{eqnarray}
+  \sum_{i=1}^{m'} X_i Y_i 
+    & = & \sum_{i\in I^+_1} X_i Y_i
+           + \sum_{i\in I^-} X_i Y_i 
+           + \sum_{i\in I^+_2} X_i Y_i \\
+    & \ge & \sum_{i\in I^+_2} X_i Y_i \\
+    & \ge & \alpha r|I^+_2|/2 \\
+    & \ge & \alpha r\sqrt{m}/2^{3/2} \enspace ,
+\end{eqnarray}
+and this completes the proof.
+\comment{
 We will define 4 events $E_1,\ldots,E_4$, such that, if all of these
 events occurs then $\left|\sum_{i=1}^m X_iY_i\right| \ge \alpha
-r\sqrt{m}/2$.  Each of $E_1,\ldots,E_4$ occurs with probability at
-least $1/2$ and all of these events are independent, so the
-probability that they all occur is at least $1/16$.  In this way, the 
-lemma will be proven for $\beta = \alpha/2$ and $\kappa=1/16$.
+r\sqrt{m}/2$.  Furthermore, $\Pr\{E_i\mid E_1,\ldots,E_{i-1}\}\ge 1/2$
+for each $i\in\{1,\ldots,4\}$.  Therefore, the probability that all 4
+events occur is at least $1/16$.  In this way, the lemma will be
+proven for $\beta = \alpha/2$ and $\kappa=1/16$.
 
 Consider the index set $I=\{i\in\{1,\ldots,m\}: Y_i \ge \alpha r\}$.
 Let $E_1$ be the event $|I| \ge m/2$.  Then, it follows from the fact
-that the median of a $\textrm{binomial}(1/2,m)$ random variable is
-$\ceil{m/2}$, that $\Pr\{E_1\} \ge 1/2$.  Define $m' = \max\{i\in I\}$ and
-observe that, if $E_1$ occurs, then $m'\ge |I| \ge m/2$.
+that $\ceil{m/2}$ is a median of the $\textrm{binomial}(1/2,m)$
+distribution, that $\Pr\{E_1\} \ge 1/2$. Define $m' = \max\{i\in I\}$
+and observe that, if $E_1$ occurs, then $m'\ge |I| \ge m/2$.  Let
+$\overline{I}=\{1,\ldots,m'\}\setminus I$.
 
 Let $E_2$ be the event
 \begin{equation}
-	\sign\left(\sum_{i\in I} X_iY_i\right) = 
-	\sign\left(\sum_{i\not\in I} X_iY_i\right) \eqlabel{sign}
+  \left|\sum_{i=1}^{m'}X_iY_i\right| 
+     = \left|\sum_{i\in I} X_iY_i\right| 
+        + \left|\sum_{i\in \overline{I}} X_iY_i\right| \eqlabel{sign}
 \end{equation}
-and observe that, again, $\Pr\{E_2\} \ge 1/2$.
+and observe that, again, $\Pr\{E_2\mid E_1\} \ge 1/2$.
 
 Let $I_j=\{i\in I: i\le j\}$ and let $E_3$ be the event
 \begin{equation}
@@ -105,16 +235,18 @@ Let $I_j=\{i\in I: i\le j\}$ and let $E_3$ be the event
 \sqrt{|I|/2} \enspace .
         \eqlabel{big}
 \end{equation}
-By \corref{hitting-time} $\Pr\{E_3\}\ge 1/2$.
+By \corref{hitting-time} $\Pr\{E_3|E_1,E_2\}\ge 1/2$.
 
 Finally, let $I^-=\{i\in I:X_i=-1\}$, let $I^+=\{i\in I:X_i=+1\}$ and
-assume, wlog, that $|I^+| \ge |I^-|$.  Partition $I_+$ arbitrarily
-into two sets $I^+_1$ and $I^+_2$ so that $|I^+_1|=|I^-|$. Let $E_4$ be the event that
+assume, without loss of generality, that $|I^+| \ge |I^-|$.  Partition
+$I^+$ arbitrarily into two sets $I^+_1$ and $I^+_2$ so that
+$|I^+_1|=|I^-|$. Let $E_4$ be the event that
 \[
-     \sum_{i\in I^+_1} Y_i >  \sum_{i\in I^-} Y_i \enspace .
+     \sum_{i\in I^+_1} Y_i \ge  \sum_{i\in I^-} Y_i 
 \]
-Observe that $E_1,\ldots,E_4$ are all independent and, if they all
-occur, then
+and observe that $\Pr\{E_4\mid E_1,E_2,E_3\} \ge 1/2$, so
+$\Pr\{E_1,\ldots,E_4\} \ge 1/16$.  Finally we observe that, if
+$E_1,\ldots,E_4$ all occur, then
 \begin{eqnarray*}
   \left|\sum_{i=1}^{m'} X_iY_i\right|
    & = & \left|\sum_{i\in I} X_iY_i\right|  
@@ -134,14 +266,17 @@ occur, then
            \note{because of $E_1$} \enspace ,\\
 \end{eqnarray*}
 as required.
+}
 \end{proof}
 
 
 \subsection{An Approximate Counter}
 
-Consider a random variable $Y$ generated by the following
-algorithm:
-
+In the previous section we have shown that, if we can generate random
+variables $Y_i$ that are frequently large, then we can speed up the
+rate at which a random walk moves away from its starting location.  In
+this section we consider how to generate these large random variables.
+Consider a random variable $Y$ generated by the following algorithm:
 
 \noindent
 \begin{minipage}{\textwidth}
@@ -202,7 +337,8 @@ algorithm $\bigrand(2^{k-1})$ replacing each increment of the variable
 $Y$ with a step in direction $d$. By using one bit to remember the
 direction $d$ and $k-1$ bits to keep track of the counter $C$ in the
 $\bigrand$ algorithm, this algorithm can be implemented by an agent
-having only $k$ bits of memory.
+having only $k$ bits of memory or by a probabilistic finite automata
+having $2^{k}$ states.
 
 We call $m$ iterations of the above algorithm a \emph{round}.
 Together, \lemref{walk} and \lemref{counter} imply that, during a
@@ -216,9 +352,9 @@ and consider what happens when two agents $A$ and $B$ both execute
 this rendez-vous algorithm.  During the first round of $A$'s
 execution, with probability at least $\kappa$, agent $A$ will have
 visited agent $B$'s starting location. Furthermore, with probability
-at least $1/2$ will not have moved away from $A$, so the paths of
-agents $A$ and $B$ will cross, and a rendez-vous will occur, with
-probability at least $\kappa/2$.
+at least $1/2$ agent $B$ will not have moved away from $A$ when this
+occurs, so the paths of agents $A$ and $B$ will cross, and a
+rendez-vous will occur, with probability at least $\kappa/2$.
 
 By \lemref{counter}, the expected number of steps taken for $A$ to
 execute the $i$th round is at most
@@ -234,7 +370,7 @@ rendez-vous is bounded by
 \]
 Note that the event $T=j$ is independent of $M_{j+1},M_{j+2},\ldots$
 so $T$ is a \emph{stopping time} \cite{mXX} for the sequence
-$M_1,M_2,\ldots$ so, by Wald's equation
+$M_1,M_2,\ldots$ so, by Wald's Equation
 \[
    E\left[\sum_{i=1}^T M_i\right] = E[T]\cdot E[M_1] \le
 \frac{2}{\kappa}\cdot \frac{n^2}{\beta^22^{2^{k-1}}}.
@@ -260,7 +396,7 @@ step of length $|\ell(e)|$ with this step being counterclockwise if
 $\ell(e)<0$ and clockwise if $\ell(e)>0$.  As before, both agents use
 identical FSMs and start in the same state. This model is slightly
 stronger than the model used for upper bound, since the edge labels
-are no longer restricted to be in the set $\{-1,0,+1\}$.
+are no longer restricted to be in the discrete set $\{-1,0,+1\}$.
 
 \subsection{Well-Behaved Algorithms and Reset Times}
 
@@ -272,20 +408,52 @@ between consecutive visits to the start state, which we will call
 
 \begin{lem}\lemlabel{reset}
 Let $R$ be the number of steps during a round. Then 
-$\E[R] \le 2^t$ and $\E[R^2] \le c(\E[R])^2$.
+$\E[R] \le 2^t$ and $\E[R^2] \le c2^{2t}$.
 \end{lem}
 
 \begin{proof}
-To prove the bound on the expected value of $R$, order the vertices of
-the by the expected number of XXXXXXXXXXXXXXXXX steps required reach the start vertex
-from each vertex and label the vertices $v_1,\ldots,v_t$ in this
-order.  Let $R_i$ be the time to reach the start vertex from $v_i$ and
-observe that $\E[R_1]=0$ and, for any $i\in\{2,\ldots,t\}$, we have 
+For each vertex $v$ of $\mathcal{A}$'s automata fix a shortest path
+(a sequence of edges) leading from $v$ to the start vertex.  For an
+automata that is currently at $v$ we say that the next step is a
+\emph{success} if it traverses this edge, otherwise we say that the
+next step is a \emph{failure}.
+
+Thus, each round be further refined into \emph{phases}, where every
+phase consists of 0 or more successes followed by either a failure or
+by reaching the start vertex.  Let $X_i$ denote the length of the
+$i$th phase and note that $X_i$ is dominated\footnote{A random
+variable $X$ dominates a random variable $Y$ if $\Pr\{X > x\}\ge
+\Pr\{Y > x\}$ for all $x\in\R$.} by a $\mathrm{geometric}(1/2)$ random
+variable $X_i'$, so $\E[X_i]\le\E[X_i']\le 2$.  On the other hand, if a phase lasts
+$t-1$ steps then the start vertex is reached.  Therefore, the
+probability of reaching the start vertex during any particular phase
+is at least $1/2^{t-1}$ and the number $T$ of phases is dominated by a
+$\mathrm{geometric}(1/2^{t-1})$ random variable $T'$, so
+$\E[T]\le\E[T']\le 2^{t-1}$.
+Therefore, by Wald's Equation
 \[
-   E[R_i] \le \frac{1}{2}\E[R_{i-1}] + \frac{1}{2}\E[R_t] \enspace .
+  \E[R] = \E\left[\sum_{i=1}^T X_i\right]\le \E\left[\sum_{i=1}^{T'}
+X_i'\right] = E[T']E[X_1'] = 2^t \enspace .
 \]
-Solving the above recurrence gives $\E[R_t] \le 2^t$ and, therefore,
-$E[R] \le 2^t + 1$.
+For the second part of the lemma, we use a version of Wald's Equation
+for the variance to obtain
+\begin{eqnarray*}
+  \E[R^2] & = & \E\left[\left(\sum_{i=1}^T X_i\right)^2\right] \\
+          &\le& \E\left[\left(\sum_{i=1}^{T'} X_i'\right)^2\right] \\
+          & = & \var\left(\sum_{i=1}^{T'} X_i'\right) + 2^{2t} \\
+          & = & \E[T']\cdot\var(X_1')^2 + \var(T')\cdot\E[X_1']^2 + 2^{2t} \\
+          & \le & 2^{t-1}\cdot 4 + 2^{2t-2}\cdot 4 + 2^{2t} \\
+          & \le & 4\cdot 2^{2t}
+\comment{
+          & = & \E\left[\sum_{i=1}^{T'} (X_i')^2
+                + \sum_{i=1}^{T'}\sum_{j=i+1}^{T'} 2X_i'X_j' \right] \\
+          & = & \E\left[\sum_{i=1}^{T'} (X_i')^2\right]
+                + \E\left[\sum_{i=1}^{T'}\sum_{j=i+1}^{T'} 2X_i'X_j'\right] \\
+          & = & \E[T']\cdot \E\left[(X_i')^2\right]
+                + \E\left[\sum_{i=1}^T\sum_{j=i+1}^{T'} 2X_i'X_j'\right] \\
+}
+\end{eqnarray*}
+as required.
 \end{proof}
 
 Note that $\E[R]$ can be expressed another way: For an edge $e$ of the
@@ -339,7 +507,7 @@ time of $\A$ is $\Omega(n^2/2^t)$.
 \end{lem}
 
 \begin{proof}
-Suppose the agents are placed at antipodal locations on the ring,
+Suppose the agents are placed at antipodal locations on an $n$ node ring,
 so that the distance between them is $n/2$.  We will show that there
 exists constants $c >0$ and $p> 0$ such that, after $cn^2/2^t$ steps,
 with probability at least $p$ neither agent will have travelled a
@@ -352,7 +520,7 @@ actions of the agent proceed in rounds where, during the $i$th round,
 the agent takes $R_i$ steps and the sum of edge labels encountered
 during these steps is $X_i$.  Note that the random variables
 $X_1,X_2,\ldots$ are i.i.d.\ with expectation $\E[X]=0$ and variance
-$\E[X^2]$.  Let $S_i=\left|\sum_{j=1}^i X_i\right|$, for
+$\E[X^2]$.  Let $S_i=\left|\sum_{j=1}^i X_j\right|$, for
 $i=0,1,\ldots$ be the agent's
 distance from their starting location at the end of the $i$th round.
 Let $Q_i= (S_i)^2 - i\E[X^2]$ and observe that 
@@ -370,15 +538,14 @@ the sequence $X_1,X_2,\ldots$ \cite{ross}.  Define
 \]
 and observe that this is equivalent to 
 \[
-    T = \min\{i : Q_i \ge m^2 - i \} \enspace .
+    T = \min\{i : Q_i \ge m^2 - i\E[X^2] \} \enspace .
 \]
 The random variable $T$ is a \emph{stopping time} for the martingale
 $Q_1,Q_2,\ldots$ so, by the Optional Stopping Therem \cite{ross}
 \begin{equation}
   \E[Q_T] 
     = \E[Q_1] 
-    = \E[(X_1)^2 - \E[X^2]]
-    = 0 \enspace . \eqlabel{mart1}
+    = \E[(X_1)^2 - \E[X^2]] = 0 \enspace . \eqlabel{mart1}
 \end{equation}
 However, by definition, 
 \begin{equation}
@@ -401,15 +568,7 @@ these $T$ rounds is, by Wald's Equation,
    \ge \frac{m^2}{2^t} 
    \enspace ,
 \] 
-where the last two inequalities follows from \lemref{restart}.
-
-
-
-
-
-
-
-
+where the last two inequalities follows from \lemref{reset}.
 \end{proof}
 
 
@@ -460,11 +619,13 @@ and, using Markov's Inequality,
 
 To summarize, with probability at least $1/4$, neither agent $A$ nor
 $B$ 
-}
-
 
 \ldots continue this discussion and use Martingales or Spitzer's Theorem to 
 conclude with \ldots
+
+}
+
+
 
 \begin{lem}\lemlabel{well-behaved}
 For any well-behaved $t$-state rendez-vous algorithm $\mathcal{A}$, the expected rendez-vous time is $\Omega(n^2/2^t)$.
@@ -497,12 +658,16 @@ steps is at least $1/2c$.  By applying \lemref{well-behaved} to each component, 
 \end{eqnarray*}
 where the first inequality is obtained by maximizing the sum on the
 left hand side subject to the constraints $\sum_{i=1}^c t_i \le t$
-and $t_i \ge 1$ for all $1\le i\le c$.
+and $t_i \ge 1$ for all $1\le i\le c$.  This completes the proof of
+our second theorem:
 
 \begin{thm}
 Any $t$-state rendez-vous algorithm has expected rendez-vous time
 $\Omega(n^2/2^t-2^t)$.
 \end{thm}
+
+\bibliographystyle{plain}
+\bibliography{rendezvous}
 
 \end{document}
 

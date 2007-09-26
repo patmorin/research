@@ -22,21 +22,21 @@
 \maketitle
 \begin{abstract}
 We present a tradeoff between the expected time for two identical
-agents to rendezvous on a synchronous, anonymous, oriented
-ring. In particular we show 
-there exists a $t$ state agent which
-can achieve rendezvous on an $n$ node ring in expected time
-$O(\min \{ n^2/2^{t/2}, 2^{t/2}\} )$ and that any $t$ state agent
+agents to rendez-vous on a synchronous, anonymous, oriented
+ring and the memory requirements of the agents. In particular, we show 
+there exists a $2t$ state agent, which
+can achieve rendez-vous on an $n$ node ring in expected time
+$O( n^2/2^{t} + 2^{t} )$ and that any $t/2$ state agent
 requires expected time $\Omega( n^2/2^t )$. 
 As a corollary we observe that $\Theta(\log \log n)$ bits of
 memory are necessary and 
-sufficient to achieve rendezvous in linear time. 
+sufficient to achieve rendez-vous in linear time. 
 \end{abstract}
 
 \section{Introduction}
 \seclabel{intro}
 
-The problem of {\em rendezvous} (the gathering of agents widely
+The problem of {\em rendez-vous} (the gathering of agents widely
 dispersed in some domain at a common place and time) has been studied
 under many guises and in many settings
 \cite{alpernGal03,Marco,dessmark,dobrev,fkkss,fkklss,gakra,kowalski1,
@@ -46,7 +46,7 @@ consider the problem of autonomous mobile software agents gathering in
 a distributed network. This is a fundamental operation useful in such
 applications as web-crawling, distributed search, meeting scheduling,
 etc. In particular, we study the problem of two identical agents
-attempting to rendezvous on a synchronous anonymous ring.
+attempting to rendez-vous on a synchronous anonymous ring.
 
 We consider the standard model of a synchronous anonymous oriented
 $n$-node ring \cite{santoro}. The nodes are assumed to have no
@@ -59,8 +59,8 @@ $S$ is the set of states of the automata including $s_0$ the initial
 state and the special state ${\tt halt}$, and $\delta:S \times C
 \times P \to S \times M$ where $C = \{ H, T \}$ represents a random
 coin flip, $P = \{ \tt present, notpresent \}$ represents a predicate
-indicating the presence of the other agent at a node, and $M = \{ +1,
--1, 0 \}$ represents the potential moves the agent may make, $+1$
+indicating the presence of the other agent at a node, and $M = \{ -1,
+0, +1 \}$ represents the potential moves the agent may make, $+1$
 representing clockwise, $-1$ counterclockwise and $0$ stay at the
 current node.  During each synchronous step, depending upon its
 current state, the answer to a query for the presence of the other
@@ -72,34 +72,38 @@ stay at the current node. We assume that the
 agent halts once it detects the presence of the other agent at a node.
 Rendezvous occurs when both agents halt on the same node.  The
 complexity measures  we are interested in are the expected time (the
-number of synchronous steps) to rendezvous (where the expectation is
+number of synchronous steps) to rendez-vous (where the expectation is
 taken over all sequences of coin flips of the two agents) and the size
 ($|S|$) or memory requirement ($\log_2 |S|$) of the agents.  
 
 A number of researchers have observed that using random walks one can
-design $O(1)$ state agents that will rendezvous in polynomial number
+design $O(1)$ state agents that will rendez-vous in polynomial number
 steps on any network \cite{coppersmith}. For the ring the expected
 time for two random walks to meet is easily shown to be $O(n^2)$. (See
 Reference~\cite{kk} for an example proof of this fact.) This expected time bound
 can be improved by considering the following strategy.  Repeat the
-following until rendezvous is achieved: flip a fair coin and walk
+following until rendez-vous is achieved: flip a fair coin and walk
 $n/2$ steps clockwise if the result is heads, $n/2$ steps
 counterclockwise if the result is tails.  If the two agents choose
 different directions (which they do with probability 1/2) then they
-will rendezvous (at least in the case where they start at an even
+will rendez-vous (at least in the case where they start at an even
 distance apart).  It is easy to see that the expected time until
-rendezvous in this case is $O(n)$. Alpern refers to this strategy as
+rendez-vous in this case is $O(n)$. Alpern refers to this strategy as
 Coin Half Tour and studies it in detail \cite{alpern95}.  Note that
 the agents are required to count up to $n/2$ and thus require $\Omega(n)$
 states or $\Omega(\log n)$ bits of memory to perform this algorithm. 
+The main result of this paper is that this memory requirement can be
+reduced to $O(\log\log n)$ bits while still achieving rendezvous in
+$O(n)$ expected time, and this is optimal.
 
 Below we show a tradeoff between the size of the agents and the time
-required for them to rendezvous. We prove there exists a $2t$ state
-algorithm which can achieve rendezvous on an $n$ node ring in expected
-time $O(\min \{ n^2/2^{t}, 2^{t}\} )$ and that any $t$ state algorithm
+required for them to rendez-vous. We prove there exists a $2t$ state
+algorithm,   
+which can achieve rendez-vous on an $n$ node ring in expected
+time $O(n^2/2^{t} + 2^{t} )$ and that any $t/2$ state algorithm
 requires expected time $\Omega( n^2/2^t )$.  As a corollary we observe
 that $\Theta(\log \log n)$ bits of memory are necessary and sufficient
-to achieve rendezvous in linear time.  Section 2 contains some
+to achieve rendez-vous in linear time.  Section 2 contains some
 preliminary results, section 3 our upper bound and section 4 the lower
 bound. 
 
@@ -116,7 +120,7 @@ Let $X=X_1,X_2,X_3,\ldots$ be a sequence of random variables and let
 $Q=Q_1,Q_2,Q_3\ldots$ be a sequence of random variables in which $Q_i$
 is a function of $X_1,\ldots,X_i$.  Then we say that \emph{$Q$ is a
 martingale with respect to $X$} if, for all $i$, $\E[|Q_i|] < \infty$
-and $\E[Q_{i+1}\mid X_1,\ldots,X_i] = \E[Q_i]$.
+and $\E[Q_{i+1}\mid X_1,\ldots,X_i] = Q_i$.
 
 A positive integer-valued random variable $T$ is a \emph{stopping
 time} for the sequence $X_1,X_2,X_3,\ldots$ if the event $T=i$ is
@@ -148,8 +152,10 @@ obtain Wald's Equation:
     \E\left[\sum_{i=1}^T X_i \right] = \E[T]\cdot\E[X] \eqlabel{wald-1}
 \end{equation}
 whenever $T$ is a stopping time for $X_1,X_2,X_3,\ldots$  Similarly,
-by considering the martingale $Q_i=\left(\sum_{j=1}^i
-(X_j-\E[X_j]\right)^2 - i\cdot\var(X)$ we obtain
+we can derive a version of Wald's Equation for the variance by considering 
+the martingale 
+$Q_i=\left(\sum_{j=1}^i (X_j-\E[X]\right)^2 - i\cdot\var(X)$ 
+to obtain
 \begin{equation}
     \var\left(\sum_{i=1}^T X_i\right) = \E\left[\left(\sum_{i=1}^T (X_i-\E[X_i])\right)^2 \right] =
 \E[T]\cdot\var(X) \enspace . \eqlabel{wald-2}
@@ -184,14 +190,14 @@ following useful corollary
 \begin{cor}\corlabel{hitting-time}
 $\Pr\{\max\{|S_i|:i\in\{1,\ldots,2m^2\}\} \ge m\} \ge 1/2$ .
 \end{cor}
-In plain english, \corref{hitting-time} says that, at least half the
+In other words, \corref{hitting-time} says that, at least half the
 time, at some point
 during the first $2m^2$ steps of a simple random walk, the 
 walk is at distance $m$ from its starting
 location.
 
 Let $Y_1,\ldots,Y_m$ be i.i.d.\
-non-negative random variables with finite expectation $r=E[Y_i]$,
+non-negative random variables with finite expectation $r=\E[Y_i]$,
 independent of $X_1,\ldots,X_m$, and with the
 property that 
 \[ \Pr\{Y_i \ge \alpha r\} \ge 1/2 \]
@@ -212,7 +218,7 @@ there exists constants $\beta,\kappa>0$ such that
 \begin{proof}
 We will define 3 events $E_1,E_2,E_3$ such that
 $\Pr\{E_1\cap E_2\cap E_3\} \ge 1/8$ and, if $E_1$, $E_2$, and $E_3$
-all occur, then there exists a value $m'$ such that
+all occur, then there exists a value $m'\in\{1,\ldots,m\}$ such that
 $\left|\sum_{i=1}^{m'}
 X_iY_i\right| \ge \alpha r \sqrt{m}/2^{3/2}$.  This will prove the
 lemma for $\kappa = 1/8$ and $\beta = \alpha/2^{3/2}$.
@@ -246,7 +252,7 @@ To bound $\Pr\{E_3|E_1\cap E_2\}$, let $T=\left|\{i\in I^+_2:Y_i\ge
 $T\ge |I^+_2|/2$ implies $E_3$. Now, $T$ is a
 $\mathrm{binomial}(|I^+_2|,p)$ random variable for $p\ge 1/2$ so its
 median value is at least $p|I^+_2| \ge |I^+_2|/2$ and therefore
-$\Pr\{T\ge |I^+_2|/2\} \ge \Pr\{E_3|E_1\cap E_2\} \ge 1/2$.
+$\Pr\{E_3|E_1\cap E_2\} \ge \Pr\{T\ge |I^+_2|/2\} \ge 1/2$.
 
 We have just shown that $\Pr\{E_1\cap E_2\cap E_3\}\ge 1/8$.  To
 complete the proof we observe that, if $E_1$, $E_2$ and $E_3$ occur
@@ -258,9 +264,8 @@ then
            + \sum_{i\in I^+_2} X_i Y_i \\
     & \ge & \sum_{i\in I^+_2} X_i Y_i \\
     & \ge & \alpha r|I^+_2|/2 \\
-    & \ge & \alpha r\sqrt{m}/2^{3/2} \enspace ,
+    & \ge & \alpha r\sqrt{m}/2^{3/2} \enspace .
 \end{eqnarray*}
-and this completes the proof.
 \comment{
 We will define 4 events $E_1,\ldots,E_4$, such that, if all of these
 events occurs then $\left|\sum_{i=1}^m X_iY_i\right| \ge \alpha
@@ -389,21 +394,23 @@ incremented (Line~3), this completes the proof.
 Consider the following algorithm used by an agent to make a random
 walk on a ring.  The agent repeatedly performs the following steps:
 (1)~toss a coin to determine a direction
-$d\in\{\mbox{clockwise},\mbox{counterclockwise}\}$ then (2)~run
-algorithm $\bigrand(2^{k-1})$ replacing each increment of the variable
-$Y$ with a step in direction $d$. By using one bit to remember the
-direction $d$ and $k-1$ bits to keep track of the counter $C$ in the
-$\bigrand$ algorithm, this algorithm can be implemented by an agent
-having only $k$ bits of memory or by a probabilistic finite automata
-having $2^{k}$ states.
+$d\in\{\mbox{{\tt clockwise}},\mbox{{\tt counterclockwise}}\}$ then (2)~run
+algorithm $\bigrand(t)$ replacing each increment of the variable
+$Y$ with a step in direction $d$.  By using  $t$ states for 
+a clockwise counter and $t$ states for a counterclockwise counter this algorithm
+can be implemented by a $2t$ state finite automata. (Or using 
+one bit to remember the
+direction $d$ and $\log t$ bits to keep track of the counter $C$ in the
+$\bigrand$ algorithm, it can be implemented by an agent
+having only $1+\log_2 t$ bits of memory.) 
 
 We call $m$ iterations of the above algorithm a \emph{round}.
 Together, \lemref{walk} and \lemref{counter} imply that, during a
 round, with probability at least $\kappa$, an agent will travel a
-distance of at least $\beta 2^{2^{k-1}}\sqrt{m}$ from their original
+distance of at least $\beta 2^t \sqrt{m}$ from its starting
 location.  Set
 \[
-   m= \frac{n^2}{\beta^2 2^{2^k}}  
+   m= \left\lceil \frac{n^2}{\beta^2 2^{2t}} \right\rceil 
 \]
 and consider what happens when two agents $A$ and $B$ both execute
 this rendez-vous algorithm.  During the first round of $A$'s
@@ -416,7 +423,7 @@ rendez-vous will occur, with probability at least $\kappa/2$.
 By \lemref{counter}, the expected number of steps taken for $A$ to
 execute the $i$th round is at most
 \[
-    \E[M_i] \le m 2^{2^{k-1}} = \frac{n^2}{\beta^22^{2^{k-1}}}
+    \E[M_i] \le m 2^{t} \enspace . 
 \]
 The variables $M_1,M_2,\cdots$ are independent and the algorithm
 terminates when $A$ and $B$ rendez-vous.  If we define $T$ as
@@ -430,33 +437,37 @@ so $T$ is a stopping time for the sequence
 $M_1,M_2,\ldots$ so, by Wald's Equation
 \[
    E\left[\sum_{i=1}^T M_i\right] = E[T]\cdot E[M_1] \le
-\frac{2}{\kappa}\cdot \frac{n^2}{\beta^22^{2^{k-1}}}.
+\frac{2}{\kappa}\cdot 
+m 2^{t} \enspace .
+%\frac{n^2}{\beta^22^{2^{k-1}}}.
 \]
 This completes the proof of our first theorem.
 \begin{thm}
-There exists a rendez-vous algorithm in which each agent uses at most
-$k$ bits of memory and whose expected rendez-vous time is
-$O(\min\{n^2/2^{2^{k-1}},2^{2^{k-1}}\})$.
+There exists a rendez-vous algorithm in which each agent has at most
+$2t$ states and whose expected rendez-vous time is
+$O(n^2/2^{t} + 2^{t})$.
 \end{thm}
 
 \section{The Lower Bound}
 \seclabel{lower-bound}
 
-Next we show that the algorithm in \secref{algorithm} is, in some
-sense, optimal.
+Next we show that the algorithm in \secref{algorithm} is
+%, in some sense, 
+optimal.
 
 The model of computation for the lower bound represents a rendez-vous
-algorithm $\A$ as a finite state machine (FSM) having $t$ states. Each
-vertex of the FSM has two outgoing edges representing the two possible
+algorithm $\A$ as a probablistic finite automata having $t$ states. Each
+vertex of the automata has two outgoing edges representing the two possible
 results of a coin toss and each edge $e$ is labelled with a real
 number $\ell(e)\in[-1,+1]$.  The edge label of $e$ is represented as a
 step of length $|\ell(e)|$ with this step being counterclockwise if
 $\ell(e)<0$ and clockwise if $\ell(e)>0$.  As before, both agents use
-identical FSMs and start in the same state.  The rendez-vous process
+identical automata and start in the same state.  The rendez-vous process
 is complete once the distance between the two agents is at most 1.
-This model is slightly stronger than the model used for upper bound,
+This model is stronger than the model used for upper bound,
 since the edge labels are no longer restricted to be in the discrete
-set $\{-1,0,+1\}$.
+set $\{-1,0,+1\}$ and the definition of a rendezvous has been slightly
+relaxed.
 
 \subsection{Well-Behaved Algorithms and Reset Times}
 
@@ -472,11 +483,11 @@ $\E[R] \le 2^t$ and $\E[R^2] \le c2^{2t}$.
 \end{lem}
 
 \begin{proof}
-For each state $v$ of $\mathcal{A}$'s automata fix a shortest path
-(a sequence of edges) leading from $v$ to the start state.  For an
+For each state $v$ of $\mathcal{A}$'s automata fix a shortest path (a
+sequence of edges) leading from $v$ to the start state.  For an
 automata that is currently at $v$ we say that the next step is a
-\emph{success} if it traverses this edge, otherwise we say that the
-next step is a \emph{failure}.
+\emph{success} if it traverses the first edge of this path, otherwise
+we say that the next step is a \emph{failure}.
 
 Each round can be further refined into \emph{phases}, where every
 phase consists of 0 or more successes followed by either a failure or
@@ -495,13 +506,14 @@ Therefore, by Wald's Equation
   \E[R] = \E\left[\sum_{i=1}^T X_i\right]\le \E\left[\sum_{i=1}^{T'}
 X_i'\right] = \E[T']\cdot\E[X_1'] = 2^t \enspace .
 \]
-For the second part of the lemma, we can apply \eqref{wald-2} to
+For the second part of the lemma, we can apply Wald's Equation for
+the variance \eqref{wald-2} to
 obtain
 \begin{eqnarray*}
   \E[R^2] & = & \E\left[\left(\sum_{i=1}^T X_i\right)^2\right] \\
           &\le& \E\left[\left(\sum_{i=1}^{T'} X_i'\right)^2\right] \\
-          & = & \var\left(\sum_{i=1}^{T'} X_i'\right) + (\E[T']\cdot\E[X_1])^2 \\
-          & = & \E[T']\cdot\var(X_1) + (\E[T']\cdot\E[X_1])^2 \\
+          & = & \var\left(\sum_{i=1}^{T'} X_i'\right) + (\E[T']\cdot\E[X_1'])^2 \\
+          & = & \E[T']\cdot\var(X_1) + (\E[T']\cdot\E[X_1'])^2 \\
           & \le & 2^{t-1}\cdot 4 + (2^{2t-1}\cdot 8) \\
           & \le & 5\cdot2^{2t}
 \comment{
@@ -519,15 +531,16 @@ obtain
 as required.
 \end{proof}
 
+
+\subsection{Unbiasing Algorithms}
+
 Note that $\E[R]$ can be expressed another way: For an edge $e$ of the
 state machine, let $f(e)$ be the expected number of times the edge $e$
 is traversed during a round.  The
 \emph{reset time} of algorithm $\A$ is then defined as
 \[
-   \reset(\A) = \sum_e f(e) = E[R] \enspace .
+   \reset(\A) = \sum_e f(e) = \E[R] \enspace .
 \]
-
-\subsection{Unbiasing Algorithms}
 
 The \emph{bias} of a well-behaved algorithm $\A$ is defined as
 \[
@@ -542,9 +555,9 @@ observe that, for any algorithm $\mathcal{A}$ we can replace every
 edge label $\ell(e)$ with the value $\ell(e)-x$ for any real number
 $x$ and obtain an equivalent algorithm in the sense that, if two
 agents $A$ and $B$ execute the modified algorithm following the same
-sequence of edges then $A$ and $B$ will rendez-vous after exactly the
-same number of steps.  In particular, if we replace each edge label
-$\ell(e)$ with the value
+sequence of state transitions then $A$ and $B$ will rendez-vous after
+exactly the same number of steps.  In particular, if we replace each
+edge label $\ell(e)$ with the value
 \[
    \ell'(e) = \ell(e) - \frac{\bias(\A)}{\reset(\A)}
 \]
@@ -564,9 +577,9 @@ expected rendez-vous time at most $2R$.
 We now have all the tools in place to prove the lower bound for the
 case of well-behaved algorithms.
 
-\begin{lem}
+\begin{lem}\lemlabel{well-behaved}
 Let $\A$ be a well-behaved $t$-state algorithm.  Then the expected rendez-vous
-time of $\A$ is $\Omega(n^2/2^t)$.
+time of $\A$ is $\Omega(n^2/2^{2t})$.
 \end{lem}
 
 \begin{proof}
@@ -583,19 +596,24 @@ actions of the agent proceed in rounds where, during the $i$th round,
 the agent takes $R_i$ steps and the sum of edge labels encountered
 during these steps is $X_i$.  Note that the random variables
 $X_1,X_2,\ldots$ are i.i.d.\ with expectation $\E[X]=0$ and variance
-$\E[X^2]$.  Let $S_i=\left|\sum_{j=1}^i X_j\right|$, for
+$\E[X^2]$. Since the absolute value of $X_i$ is bounded from above by
+$R_i$, we have the inequalities $\E[|X_i|]\le \E[R_i]$ and
+$\E[X_i^2]\le\E[R_i^2]$. 
+
+Let $S_i=\left|\sum_{j=1}^i X_j\right|$, for
 $i=0,1,\ldots$ be the agent's
 distance from their starting location at the end of the $i$th round.
-Let $Q_i= (S_i)^2 - i\E[X^2]$ and observe that 
+Let $Q_i= S_i^2 - i\E[X^2]$ and observe that 
+\comment{
 \begin{eqnarray*}
  \E\left[Q_{i+1}|X_1,\ldots,X_i\right]
- & = & \sum_{x} \Pr\{X=x\}\left(S_i + x\right)^2 - (i+1)\E[X^2] \\
+ & = & \sum_{x} \Pr\{X=x\} (\left(S_i + x\right)^2 - (i+1)\E[X^2]) \\
  & = & (S_i)^2 + S_i\E[X] + \E[X^2] - (i+1)\E[X^2] \\
  & = & (S_i)^2 + i\E[X^2] \\
  & = & Q_i  \enspace .
-\end{eqnarray*}
-Thus, the sequence $Q_1,Q_2,\ldots$ is a martingale with respect to
-the sequence $X_1,X_2,\ldots$ \cite{ross}.  Define
+\end{eqnarray*}}
+the sequence $Q_1,Q_2,\ldots$ is a martingale with respect to
+the sequence $X_1,X_2,\ldots$ \cite[Example 6.1d]{ross}.  Define
 \[
     T = \min\{i : S_i \ge m \} \enspace ,
 \]
@@ -610,28 +628,28 @@ $Q_1,Q_2,\ldots$ so, by the \thmref{martingale}
     = \E[Q_1] 
     = \E[(X_1)^2 - \E[X^2]] = 0 \enspace . \eqlabel{mart1}
 \end{equation}
-However, by definition, 
+However, by definition $Q_T\ge m^2-T\cdot\E[X^2]$, so 
 \begin{equation}
   \E[Q_T] 
-    = \E[m^2 - T\E[X^2]] 
+    \ge \E[m^2 - T\cdot\E[X^2]] 
     = m^2 - \E[T]\cdot\E[X^2] \enspace . \eqlabel{mart2}
 \end{equation}
 Equating the right hand sides of \eqref{mart1} and \eqref{mart2} gives 
 \[
-   \E[T] = \frac{m^2}{\E[X^2]} \enspace .
+   \E[T] \ge \frac{m^2}{\E[X^2]} \enspace .
 \]
 Furthermore, the expected number of steps taken by the agent during
 these $T$ rounds is, by Wald's Equation, 
 \[
   \E\left[\sum_{i=1}^T R_i\right] 
     =  \E[T]\cdot\E[R_1] 
-   \ge \E[T]\cdot\E[|X|] 
-    =  \frac{m^2 \E[|X|]}{\E[X^2]} 
-   \ge \frac{m^2}{c\E[|X|]} 
-   \ge \frac{m^2}{c2^t} 
+    \ge \frac{m^2 \E[R]}{\E[R^2]} 
+    \ge \frac{m^2 \E[R]}{c2^{2t}} 
+    \ge \frac{m^2}{c2^{2t}} 
    \enspace ,
 \] 
-where the last two inequalities follows from \lemref{reset}.
+where the last two inequalities follow from \lemref{reset} and the
+fact that $R\ge 1$.
 \end{proof}
 
 
@@ -690,9 +708,9 @@ conclude with \ldots
 
 
 
-\begin{lem}\lemlabel{well-behaved}
-For any well-behaved $t$-state rendez-vous algorithm $\mathcal{A}$, the expected rendez-vous time is $\Omega(n^2/2^t)$.
-\end{lem}
+%\begin{lem}\lemlabel{well-behaved}
+%For any well-behaved $t$-state rendez-vous algorithm $\mathcal{A}$, the expected rendez-vous time is $\Omega(n^2/2^t)$.
+%\end{lem}
 
 \subsection{Badly-Behaved Algorithms}
 
@@ -703,6 +721,7 @@ FSM that are strongly connected and that have no outgoing edges (edges
 with source in the component and target outside the component).
 From each terminal component, select an arbitrary vertex and call it
 the \emph{terminal start state} for that terminal component.
+An argument similar to that given in \lemref{reset} proves:
 
 \begin{lem}\lemlabel{component}
 The expected time to reach some terminal start state is at most $2^t$.
@@ -711,20 +730,29 @@ The expected time to reach some terminal start state is at most $2^t$.
 Observe that each terminal component defines a well-behaved algorithm.
 Let $c$ be the number of terminal components and let $t_1,\ldots,t_c$ be
 the sizes of these terminal components.  When two agents execute the same
-algorithm $\mathcal{A}$, \lemref{component} implies that the probability
+algorithm $\mathcal{A}$, \lemref{component} and Markov's Inequality
+imply that the probability
 that both agents reach the same terminal component after at most $2^{t+2}$
 steps is at least $1/2c$.  By applying \lemref{well-behaved} to each component, we can therefore lower bound the expected rendez-vous time by
 \begin{eqnarray*}
   \frac{1}{2c}\Omega(n^2/2^{t-c})
-    & \ge & \Omega(n^2/2^t) \enspace ,
+    & \ge & \Omega(n^2/2^{2t}) \enspace ,
 \end{eqnarray*}
-This completes the proof of our second theorem:
+Substituting $t'=t/2$ into the above completes the proof of our second theorem:
 
 \begin{thm}
-Any $t$-state rendez-vous algorithm has expected rendez-vous time
-$\Omega(n^2/2^t)$.
+Any $t/2$-state rendez-vous algorithm has expected rendez-vous time
+$\Omega(n^2/2^{t})$.
 \end{thm}
 
+\subsection{Linear Time Rendez-vous}
+
+We observe that Theorems 2 and 3 immediately imply:
+
+\begin{thm}
+$\Theta( \log \log n)$ bits of memory are necessary and sufficient to 
+achieve rendez-vous in linear time on an $n$ node ring.
+\end{thm}
 \bibliographystyle{plain}
 \bibliography{rendezvous}
 

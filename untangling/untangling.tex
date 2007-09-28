@@ -1,0 +1,677 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[lotsofwhite,charterfonts, letter]{patmorin}
+\usepackage{amsmath, amsthm,amsfonts,graphicx,color,marvosym}
+\usepackage[sort&compress,numbers]{natbib}
+
+\input{vida}
+
+%%Package geometry provides an easy way to set page layout parameters.
+%
+%\usepackage[text={7in,10in},centering]{geometry}.
+%
+% If you want to set each margin 1.5in, you can go
+%
+%\usepackage[margin=1.5in]{geometry}
+%
+%The unspecified dimensions are automatically determined. Example: The total allowable width of the text area is 6.5 inches wide by 8.75 inches high. The top margin on each page should be 1.2 inches from the top edge of the page. The left margin should be 0.9 inch from the left edge. The footer with page number should be at the bottom of the text area. In this case, using geometry you can go
+%
+\usepackage[total={6.5in,9.3in}, top=1in, left=0.9in, includefoot]{geometry}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newcommand{\rep}[1]{^{\langle#1\rangle}}
+\newcommand{\pred}[1]{\ensuremath{P{(#1)}}}
+% small caps
+\newcommand{\sn}[2][]{\ensuremath{\textup{\textsf{\small sn}}_{#1}(#2)}}
+
+% sans serif
+\newcommand{\stack}[1]{\ensuremath{\textup{\textsc{\small stack}}(#1)}}
+\newcommand{\bw}[1]{\textup{\ensuremath{\textsf{\small bw}(#1)}}}
+
+\newcommand{\ray}[2]{\ensuremath{\overrightarrow{#1#2}}}
+\newcommand{\oray}[2]{\ensuremath{\overleftarrow{#1#2}}}
+\newcommand{\WEDGE}[2]{\ensuremath{\bigtriangledown(#1,#2)}}
+\newcommand{\segc}[2]{\ensuremath{
+\raisebox{1ex}{\tiny$\bullet$\hspace*{-0.1em}}
+\overline{\hspace*{0.05em}#1#2\hspace*{0.05em}}
+\raisebox{1ex}{\hspace*{-0.1em}\tiny$\bullet$}}}
+
+\newcommand{\seg}[2]{\ensuremath{\overline{#1#2}}}
+\newcommand{\lin}[2]{\ensuremath{\overleftrightarrow{#1#2}}}
+
+
+
+
+\newcommand{\Figure}[4][htb]{
+\begin{figure}[#1]
+  \vspace*{1ex}
+  \begin{center}#3\end{center}
+	\vspace*{-2ex}
+	\caption{\figlabel{#2}#4}
+\end{figure}}
+
+
+%	\rm roman  \em emphasis  \bf boldface  \it italic  \sl slant
+%	\sf  sans serif  \sc  small caps  \tt monospace typewriter face
+%	\boldmath  use bold math symbols
+
+
+% Makes footnotes use symbols:
+%\renewcommand{\thefootnote}{\fnsymbol{footnote}} 
+%
+% Makes footnotes use numbers
+%\renewcommand{\thefootnote}{\arabic{footnote}}
+%
+%	Vida Dujmovi\'{c}\footnotemark[2] \and
+% \footnotetext[2]{School of Computer Science, Carleton University, Ottawa, Canada. \texttt{Email:\{jit,vida,morin,swuhrer\}@scs.carleton.ca}. The authors are partly supported by NSERC.}
+
+
+\renewcommand{\gg}{geometric graph}
+\newcommand{\gp}{geometric planar graph}
+\newcommand{\go}{geometric outerplanar graph}
+\newcommand{\gt}{geometric tree}
+\newcommand{\gf}{geometric forest}
+\newcommand{\pg}{plane geometric graph}
+\newcommand{\gtt}{geometric $2$-tree}
+\newcommand{\gr}{geometric cubic $3$-connected planar graph}
+
+\newcommand{\x}{\ensuremath{\protect\textup{\textsf{x}}}}
+\newcommand{\y}{\ensuremath{\protect\textup{\textsf{y}}}}
+\newcommand{\fl}{\ensuremath{\protect\textup{\textsf{fl}}}}
+\newcommand{\fr}{\ensuremath{\protect\textup{\textsf{fr}}}}
+\newcommand{\mv}[2][]{\ensuremath{\textup{\textsf{mv}}_{#1}(#2)}}
+
+\newcommand{\eg}{\ensuremath{\mathcal{E}_G}}
+\newcommand{\fg}{\ensuremath{\mathcal{F}_G}}
+\newcommand{\hg}{\ensuremath{\mathcal{H}_G}}
+
+
+\newcommand{\xx}{\ensuremath{x}}
+\newcommand{\yy}{\ensuremath{y}}
+\newcommand{\zz}{\ensuremath{z}}
+\newcommand{\rf}[1]{\ensuremath{\textup{\textsf{roof}}(#1)}}
+\newcommand{\lrf}[1]{\ensuremath{\textup{\textsf{Lroof}}(#1)}}
+\newcommand{\rrf}[1]{\ensuremath{\textup{\textsf{Rroof}}(#1)}}
+
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+\title{\MakeUppercase{Untangling Planar Graphs}}
+
+\author{
+	Prosenjit Bose\,\footnotemark[1] \and
+	Vida Dujmovi\'c \,\footnotemark[2] \and
+	Ferran Hurtado\,\footnotemark[3] \and
+    Stefan Langerman\,\footnotemark[4]  \and
+	Pat Morin\,\footnotemark[1] \and
+	David R. Wood\,\footnotemark[5] \and ??\and
+}
+
+
+%%%%%%%% end vida's commands %%%%%%%%%%
+
+
+\footnotetext[1]{School of Computer Science, Carleton University, Ottawa, Canada. Email: \texttt{\{jit, morin\}@scs.carleton.ca}. Research partially supported by NSERC.}
+
+\footnotetext[2]{Department of Mathematics and Statistics, McGill University, Montreal, Canada. Email: \texttt{vida@cs.mcgill.ca}. Research partially supported by CRM and NSERC.}
+
+
+\footnotetext[3]{Departament de Matem\`atica Aplicada II, Universitat Polit\`ecnica de Catalunya (UPC), Barcelona, Spain. Email: \texttt{Ferran.Hurtado@upc.edu}. Research partially supported by Projects MCYT-FEDER BFM2003-00368 and Gen. Cat 2001SGR00224.}
+
+\footnotetext[4]{Chercheur Qualifi\'e du FNRS, D\'epartement d'Informatique,
+Universit\'e Libre de Bruxelles, Brussels, Belgium. \texttt{Email:stefan.langerman@ulb.ac.be}.}
+
+\footnotetext[5]{Departament de Matem{\`a}tica Aplicada II, Universitat Polit{\`e}cnica de Catalunya, Barcelona, Spain.  \texttt{Email:david.wood@upc.edu}. The author is supported by a Marie Curie Fellowship of the European Community under contract 023865, and by the projects MCYT-FEDER BFM2003-00368 and Gen.\ Cat 2001SGR00224.}
+
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+%\newpage
+\renewcommand{\thefootnote}{\arabic{footnote}}
+
+%\renewcommand{\thefootnote}{\arabic{footnote}}
+\begin{abstract}
+
+\end{abstract}
+\newpage
+\section{Introduction}\seclabel{intro}
+
+%\secref{}
+
+
+Geometric reconfigurations are concerned with the following fundamental problem. Given a starting and a final configuration of an object $\mathcal R$, determine if $\mathcal R$ can move from the starting to the final configuration, subject to some set of movement rules. An object can be a set of disks in the plane, or a graph representing a protein, or robot's arm, for example. Typical movement rules include maintaining connectivity of the object and avoiding collisions or crossings.
+
+%In this paper we study reconfigurations of planar graphs. In particular, given a drawing of a planar graph, such as a tree or an outerplanar graph, 
+
+In this paper we study a problem where the object is a planar graph\footnote{We consider graphs that are simple, finite, and undirected.  The vertex set of a graph $G$ is denoted by $V(G)$, and its edge set by $E(G)$. The subgraph of $G$ induced by a set of vertices $S\se V(G)$ is denoted by $G[S]$. $G\setminus S$ denotes $G[V(G)\setminus S]$. The complete graph on $n$ vertices is denoted by $K_n$. %The cycle on $n$ vertices is denoted by $C_n$. The complete bipartite graph with $n$ vertices in one and $m$ in the other bipartition is denoted by $K_{n,m}$
+} $G$, such as a tree or an outerplanar graph. The starting configuration is a drawing of $G$ in the plane with vertices as distinct points and edges as straight-line segments (and possibly many crossings). 
+%The final configuration is any straight-line drawing of $G$ without edge crossings. 
+Our goal is to relocate as few vertices of $G$ as possible in order to remove all the crossings, that is, to reconfigure $G$ to some straight line crossing-free drawing of $G$. More formally, a \emph{geometric graph} is a graph whose vertices are distinct points in the plane (not necessarily in general position) and whose edges are straight-line segments between pairs of points. If the underlying combinatorial graph of $G$ belongs to a class of graphs $\mathcal K$, then we say that $G$ is a \emph{geometric $\mathcal K$ graph}. For example, if $\mathcal K$ is the class of planar graphs, then $G$ is a \gp. Where it causes no confusion, we do not distinguish between a geometric graph and its underlying combinatorial graph. In a \gg\ $G$, if for every pair of edges $e_1,e_2\in E(G)$, $e_1\cap e_2=\{\emptyset\}$ or $e_1\cap e_2=\{p\}$ where $p$ is an endpoint of both $e_1$ and $e_2$, then $G$ is \emph{plane} \gg. 
+ 
+Consider a \gg\ $G$ with vertex set $V(G)=\{p_1, \dots, p_n\}$. We say that a $G$ can be \emph{untangled} if there exists a plane geometric graph $H$ with vertex set $V(H)=\{q_1, \dots, q_n\}$ such that for every $1\leq i<j\leq n$, $q_i$ is adjacent to $q_j$ in $H$ if and only if $p_i$ is adjacent to $p_j$ in $G$. Furthermore, if $p_l=q_l$ then we say that $p_l$ is \emph{fixed}, otherwise it is \emph{non-fixed}. We say that $G$ untangles into $H$. Clearly only \gp s can be untangled. Moreover since every planar graph is isomorphic to some plane geometric graph \cite{Wagner37, Fary48}, every \gp\ can be untangled while keeping at least $2$ vertices fixed. For a \gg\ $G$, we denote by \mv{G}\ the maximum number of vertices that that can be kept fixed in an untangling of $G$.
+
+%Our goal is to untangle $G$ while keeping as many vertices of $G$ fixed as possible. 
+
+At the $5$th Czech-Slovak Symposium on Combinatorics in Prague in 1998, Mamoru Watanabe asked if every geometric cycle (that is, all polygons) can be untangled while keeping at least $\epsilon n$ vertices fixed. \citet{PT} answered that question in negative by providing a $\Oh{(n\log n)^\frac{2}{3}}$ upper bound on the number of fixed vertices. Furthermore, they prove that every geometric cycle can be untangled while keeping at least $\sqrt{n}$ vertices fixed.
+
+
+\citet{PT} ask if every planar graph can be untangled while keeping $n^\epsilon$ vertices fixed for some $\epsilon>0$. 
+
+\Comment{\tt Complete Intro and Background.}
+
+
+
+%We point out that a much weaker bound is unknown. In particular, can every planar graph be untangled while keeping $f(n)$ vertices fixed for any increasing function $f(n)$. 
+
+This paper contributes the following results:
+
+\Comment{\tt Describe our results}
+
+%\begin{enumerate}
+%\item Every  $n$-vertex  \gt\ can be untangled while keeping at least $\sqrt{\frac{n}{2}}$ vertices fixed.
+%\item Every  $n$-vertex  \go\ can be untangled while keeping at least $\sqrt{\frac{n}{3}}$ vertices fixed.
+%\item Every  $n$-vertex  geometric graph of treewidth at most $2$ can be untangled while keeping at least $(\frac{n}{3})^{\frac{1}{4}}$ vertices fixed.
+%\item Every  $n$-vertex \gr\ can be  untangled while keeping at least $(\frac{n-1}{3})^\frac{1}{4}$ vertices fixed.
+%\end{enumerate}
+
+%Note that we make no general position assumption.
+
+%, throughout this paper we will assume, without loss of generality, that the geometric graphs under consideration have no two points with either \x-coordinate or \y-coordinate in common.
+
+
+
+\section{Preliminaries}
+
+Let $v$ and $w$ be distinct points in 
+the plane; see \figref{Lines}. 
+Let \lin{v}{w} be the line through $v$ and $w$. 
+Let \seg{v}{w} be the open line-segment with endpoints $v$ and $w$. 
+Let \segc{v}{w} be the closed line-segment with endpoints $v$ and $w$.
+Let \ray{v}{w} be the open ray from $v$ through $w$. 
+Let \oray{v}{w} be the open ray opposite to \ray{v}{w}; that is,  $\oray{v}{w}:=(\lin{v}{w}\setminus\ray{v}{w})\setminus\{v\}$.
+
+\Figure{Lines}{\includegraphics{Lines}}{Notation for lines and rays.}
+
+
+%For every point $p\in\Re^2$ and set of points $Q\subset\Re^2\setminus\{p\}$, such that $Q\cup\{p\}$ is in general position, let 
+%\begin{equation*}
+%R(p,Q):=\{\ray{p}{q},\oray{p}{q}:q\in Q\}
+%\end{equation*} 
+%be the set of rays from $p$ to the points in $Q$ together with their opposite rays, in clockwise order around $p$. (Since $Q\cup\{p\}$ is in general position, the rays in $R(p,Q)$ are pairwise disjoint, and their clockwise order is unique.)\ 
+
+Let $r$ and $r'$ be non-collinear rays from a single point $v$. The \emph{wedge} \WEDGE{r}{r'} \emph{centred} at $v$ is the unbounded region of the plane obtained by sweeping a ray from $r$ to $r'$ through the lesser of the two angles formed by $r$ and $r'$ at $v$. We consider \WEDGE{r}{r'} to be open in the sense that $r\cup r'\cup\{v\}$ does not intersect \WEDGE{r}{r'}.
+
+
+\section{Trees -- upper bound}
+
+
+\begin{thm}\thmlabel{trees-lb}
+For every positive number $n$ such that $\sqrt{n}$ is an integer, there exists a geometric forest (of stars) $G$ on $n$ vertices, such that $\mv{G}=3(\sqrt{n}-1)$. That is, $G$ cannot be untangled while keeping less than $3(\sqrt{n}-1)$ vertices fixed, and $G$ can be untangled while keeping exactly that many  vertices fixed. 
+\end{thm}
+
+\begin{proof}
+We first define $G$. A \emph{$k$-star} is a rooted tree on $k+1$ vertices one of which is the root and the rest of the vertices are leaves adjacent to that root. $G$ is a forest on $n$ vertices comprised of trees, $T_i$, $1\leq i\leq \sqrt{n}$, where each $T_i$ is a $(\sqrt{n}-1)$-star. All the vertices of $G$ lie on the line $\ell: \y=0$. For each $i$, the vertices of $T_i$ have the following \x-coordinates $i, i+\sqrt{n}, \dots, i+\sqrt{n}(\sqrt{n}-1)$ where the vertex with the biggest \x-coordinate is the root of $T_i$. That complies the description of $G$.
+
+\noindent{\em Upper bound:}  
+
+We first prove that $\mv{G}\leq 3\sqrt{n}-3$, that is, we prove that $G$ cannot be untangled while keeping less than $3\sqrt{n}-3$ vertices fixed. Let $H$ be a plane geometric graph that $G$ untangles into while keeping $\mv{G}$ vertices fixed. Let \fl\ denote the number of fixed leaves and \fr\ the number of fixed roots. Let \fr' denote the number of fixed roots which are adjacent to a fixed leaf. Considering the ordering of the vertices of $G$ on $\ell$, it is clear that $\fr'\leq 1$.
+
+Partition the set of non-fixed roots into two sets. One, set $A$, containing the non-fixed roots that are above or on $\ell$, and the other, the set $B$, containing the non-fixed roots that are strictly below $\ell$. Thus the total number of roots of $G$ is $|A|+|B|+ \fr$.
+
+Suppose that we can prove that the number of fixed leaves with a neighbour (i.e. a parent) in $A$ is at most $\sqrt{n}-2+|A|$, and similarly for the number of fixed leaves with a neighbour in $B$. As noted above, at most one fixed leaf can be adjacent to a fixed root, thus $\fl\leq 2\sqrt{n}-4 +|A|+|B| + \fr'$. Since $\mv{G}= \fl+\fr$, we get $\mv{G}\leq 2\sqrt{n}-4 +|A|+|B|+ \fr'+ \fr$. Having $|A|+|B|+\fr=\sqrt{n}$ further implies that $\mv{G}\leq 3\sqrt{n}-4 + \fr'$. Since $\fr'\leq 1$, we get the desired result. Thus to complete the proof of the upper bound it remains to prove that the number of fixed leaves with a neighbour in $A$ is at most $\sqrt{n}-2+|A|$.
+
+Partition the leaves of $G$ into a set of blocks $\{P_j\,:\, 1\leq j\leq \sqrt{n}-1\}$, such that $P_1$ contains the first $\sqrt{n}$ leaves on $\ell$, $P_2$ the next $\sqrt{n}$ leaves, and so on. More formally, $P_j$ contains all the leaves  with \x-coordinate in the range  $[1+(j-1)\sqrt{n}, j\sqrt{n}]$. 
+%
+%Consider each leaf of $T_i$ to be coloured $i$.  
+%
+Note that each block contains exactly one leaf from each star of $G$. There are $\sqrt{n}-1$ blocks, each containing $\sqrt{n}$ vertices.
+
+Define an auxiliary graph $Q$ with vertex set $V(Q)=A\cup \{p_j\,:\, 1\leq j\leq \sqrt{n}-1\}$ and edge set $E(Q)$ where $vp_j\in E(Q)$ precisely if $v$ is a vertex of $A$, $v$ has a fixed neighbour in block $P_j$. Note that $|V(Q|\leq |A|+\sqrt{n}-1$. Since each vertex of $A$ has at most one neighbour in each block, the number of fixed leaves whose parents are in  $A$ is precisely $|E(Q)|$. We now show that $Q$ has no cycles. That will complete the proof of the upper bound since in that case $|E(Q)|\leq |V(Q)|-1=|A|+\sqrt{n}-2$.
+
+
+Assume for the sake of contradiction that $Q$ has a cycle. Let $C$ denote the set of vertices of $H$ that correspond to that cycle. In particular, every second vertex on the cycle corresponds to a vertex in $V(H)\cap A$ and each remaining vertex on the cycle is a block corresponding to exactly two fixed leaves in that block. 
+
+Consider the geometric graph $H[C]$. Since $H$ is plane, so is $H[C]$. Furthermore, since all the roots in $C$ are on or above $\ell$ and all the leaves of $C$ are on $\ell$, $H[C]$ is fully contained in a closed half-plane determined by $\ell$. We now show that $H[C]$ cannot be plane, which will provide the desired contradiction. $H[C]$ is a collection of plane geometric paths of length $2$. We first expand $H(C)$ into a plane geometric cycle by adding some segments to it, as follows. Consider a set of blocks that contain a leaf of $H(C)$. Then each such bock $P_j$ contains, in fact, exactly two leaves of $H(C)$, denote by $j_1$ and $j_2$ (see \figref{blocks2} on the last page). We claim that $\seg{j_1}{j_2}\cap H(C)=\emptyset$. There is no edge of $H(C)$ that crosses $\seg{j_1}{j_2}$ in exactly one point since $H(C)$ is fully contained in a closed half-plane determined by $\ell$. Therefore, $\seg{j_1}{j_2}\cap H(C)$ can be non-empty only if there is a root of $H(C)$ that is located on $\ell$ between $j_1$ and $j_2$. That however is impossible since one of the two edges of $H(C)$ incident to that root would contain $j_1$ or $j_2$ in its interior. This observation allows us to conclude that $H(C)$ can be extend into a \emph{plane} geometric cycle $R$ by adding the appropriate line segments into each block that contains a leaf of $H(C)$.
+
+
+Let $v$ be be a root of $C$ such that there is no other root $w\in C$ where $v\in T_i$ and $w\in T_j$ and $j<i$. In other words, amongst all the roots of $C$, $v$ is the root of the star with the smallest index.  $v$ has two neighbours (fixed leaves) in $H(C)$,  $s_1\in P_s$ and $t_1\in P_t$ (see \figref{blocks}). Since $v$ belongs to the smallest indexed tree, there are fixed leaves $s_2\in P_s$  and $t_2\in P_t$ such that in the ordering on $\ell$, $s_1 < s_2 <t_1<t_2$ and $R$ contains two vertex disjoint paths: $R_1$, between $s_1$ and $t_1$, and $R_2$, between $s_2$ and $t_2$. With such ordering of endpoints and since $R$ is fully contained in a half-plane determined by $\ell$, it is impossible to draw $R_1$ and $R_2$ without crossings. That is the desired contradiction.
+%
+\Figure{blocks}{\includegraphics[width=7.5in]{blocks}
+}{Illustration for the proof the upper bound of \thmref{trees-lb}.}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+ 
+%
+%%%%%%%%%%%%
+
+\noindent{\em Lower bound:} 
+
+We now prove that $\mv{G}\geq 3\sqrt{n}-3$, that is, we prove that $G$ can be untangled while keeping $3\sqrt{n}-3$ vertices fixed. Keep the followings vertices of $G$ fixed:\\
+1. all the leaves of $T_1$ and $T_2$, and\\
+2. all the vertices in the block $P_{\sqrt{n}-1}$, and\\
+3. the root of $T_{\sqrt{n}}$.
+
+Move the root of $T_1$ to the half-plane above $\ell$ and move the root of $T_2$ to the half-plane below $\ell$. For all $3 \leq i\leq \sqrt{n}-1$, move all the non-fixed vertices of $T_i$ to a very small disk centered at the fixed leaf of $T_i$. Move all the non-fixed leafs of $T_{\sqrt{n}}$ to a small disk centered at the root of $T_{\sqrt{n}}$. Clearly, this can be done such that the resulting geometric forest $H$ is plane, as illustrated in \figref{trees-lower}. The number of fixed vertices of $H$ is 
+$ 2(\sqrt{n}-1) + (\sqrt{n}-2) +1 = 3\sqrt{n} -3$, as claimed.
+
+\Figure{trees-lower}{\includegraphics[width=6.5in]{trees-lower}
+}{Untangled forest $G$ with $3\sqrt{n}-3$ vertices fixed ($n=16$).}
+
+
+\Figure{blocks2}{\includegraphics[width=5in]{blocks2}
+}{Illustration for the proof the upper bound of \thmref{trees-lb}.}
+
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+~\newpage
+
+~\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Planar graphs - lower bound}
+
+Without loss of generality, we may assume that $G$ is edge
+maximal.\footnote{A planar $G$ graph is edge maximal, if for all
+$vw\not\in E(G)$, the graph resulting from adding $vw$ to $G$ is not
+planar.} Let \eg\ be an embedding in the plane of the underlying
+combinatorial graph of $G$. Each face of \eg\ is a $3$-cycle. Let the
+three vertices on the outer face be \xx, \yy\ and \zz.  We now define
+the main structure used to prove \thmref{planar}. The structure is
+called \emph{frame} of \eg\ and it is denoted by \fg.  \fg\ is defined
+with help of a canonical decomposition of \eg. Canonical
+decompositions of plane triangulations were introduced by
+\citet{dFPP90}, where they prove that
+%\citet{Kant96}
+\eg\ has a vertex ordering $\sigma=(v_1=\xx,v_2=\yy, v_3, \dots,
+v_n=\zz)$, called a \emph{canonical decomposition}, with the following
+properties. Define $G_i$ to be the plane subgraph of \eg\ induced by
+$\{v_1, v_2,\dots,v_i\}$.  Let $C_i$ be the subgraph of \eg\ induced
+by the edges on the boundary of the outer face of $G_i$. Then
+%
+
+\begin{itemize}
+\item \xx, \yy\ and \zz\ form the outer face of \eg, and 
+\item Each $C_i \ ( i>2)$ is a cycle containing $\xx\yy$.
+\item Each $G_i \ ( i>2)$ is biconnected and \emph{internally $3$-connected}; that is, removing any two interior vertices of $G_i$ does not disconnect it.
+\item For each $i\in\{3,4,\dots,n\}$, $v_i$ is a vertex of $C_i$ with at least two neighbours in $C_{i-1}$, and these neighbours are consecutive vertices on $C_{i-1}$.
+\end{itemize}
+For example, the ordering in \figref{canonical}(a) is a canonical decomposition of the depicted plane graph.
+%
+\begin{figure}[htb]
+\begin{center}
+%\includegraphics[width=4in]{CanonicalOrdering} 
+\caption{\figlabel{canonical} (a) Canonical decomposition of \eg\ (b) Frame \fg\ of \eg}
+\end{center}
+\end{figure}
+%
+
+A \emph{frame} \fg\ of \eg\ is a directed graph with vertex set $V(\fg)=V(\eg)$ and edge set $E(\fg)$ defined as follows: 
+\begin{itemize}
+\item \xx\yy\ is in $E(\fg)$ and it is oriented away from \xx.
+\item For each $i\in\{3,4,\dots,n\}$ in the canonical decomposition $\sigma$ of \eg, edges $pv_i$ and $p'v_i$ are in $E(\fg)$, where $p$ and $p'$ and the first and the last neighbour, respectively, of $v_i$ along the path in $C_{i-1}$ from \xx\ to \yy\ that contains $v_i$. Edge $pv_i$ is oriented away from $p$, and edge $p'v_i$ is oriented away from $v_i$, as illustrated in \figref{canonical}(b). We call $p$ the \emph{left predecessor} of $v$ and $p'$ the \emph{right predecessor} of $v$.
+\end{itemize}
+
+
+
+By definition, \fg\ is a single source, \xx, single sink, \yy,
+directed acyclic graph. Thus \fg\ is also a partial order on $V(\fg)$.
+The remainder of this section is dedicated to proving the following two lemmas, which readily imply the desired result, as shown in the proof of \thmref{planar} below.
+
+\Comment{Specify $c_1$ and $c$?}
+\begin{lem}\lemlabel{chain}
+Every $n$-vertex planar geometric graph $G$ whose partial order (that is, the frame) \fg\ has a chain of size $\ell$, can be untangled while keeping $c_1\sqrt{\ell}$ vertices fixed.
+\end{lem}
+
+
+\begin{lem}\lemlabel{antichain}
+Every $n$-vertex planar geometric graph $G$ whose partial order (that is, the frame) \fg\ has an anti-chain of size $t$, can be untangled while keeping $\sqrt{t}$ vertices fixed.
+\end{lem}
+
+\begin{thm}\thmlabel{planar}
+Every geometric planar graph $G$ can be untangled while keeping at least $cn^{1/4}$ vertices fixed.
+\end{thm}
+
+\begin{proof}
+\fg\ is a partial order. If \fg\ has a chain of size at least $c_1\sqrt{n}$ then we are done by \lemref{chain}. Otherwise, by Dilworth's theorem, \fg\ has a partition into $c_1\sqrt{n}$ anti-chains. By pigeon-hole principle there is an anti-chain in that partition that has at least $\frac{n}{c_1\sqrt{n}}$ vertices, which completes the proof, by \lemref{antichain}.
+\end{proof}
+
+
+
+The remainder of this section is dedicated to proving \lemref{chain} and \lemref{antichain}.
+
+\subsection{Big chain - Proof of \lemref{chain}}
+
+Consider a cycle $C$ in an embedded planar graph $\mathcal E$. $C$ is called \emph{weakly chordless} if each chord\footnote{A \emph{chord} of a cycle $C$ is an edge  that has both endpoints in $C$, but itself is not an edge of $C$.} of $C$ is embedded inside of $C$ in $\mathcal E$.
+
+\begin{lem}\lemlabel{weakly}
+Consider any directed path on at least three vertices from \xx\ to \yy\ in \fg. The cycle comprised of that path and edge $\xx\yy$ is a weakly chordless cycle in \eg.
+\end{lem}
+\begin{proof}
+Denote the cycle in question by $C$, and denote the directed path
+between \xx\ and \yy\ in $C$ not containing edge \xx\yy\ by $P$.
+Assume for the sake of contradiction that there are two vertices on
+$C$ that are connected by a chord $e$ embedded outside of $C$ in \eg.
+Denote the first endpoint of $e$ (when moving in the direction of $P$)
+by $v_j$ and the second by $v_i$. \Comment{Swap $i\Leftrightarrow j$?} Consider firsts the case that $v_j<_\sigma v_i$ in the canonical decomposition $\sigma$. Then, $i\geq 3$ and thus $v_i\ne \yy$ (and $v_i\ne \xx$). Let $e_1$ be the incoming and $e_2$ the outgoing edge incident to $v_i$ in $P$. Since $e$ is a chord of $C$, $e$ is between $e_1$ and $e_2$ in the cyclic ordering of edges around $v_i$ in \eg\ when moving \emph{clockwise} from $e_1$ to $e_2$, as illustrated in \figref{weakly}. Let $p$ be the left and $p'$ be the right predecessor of $v$.
+% By their definition, they are both in $C_{i-1}$.
+ (Note that it is possible that $pv_i=e_1$ and/or $v_ip'=e_2$). Since $pv_i$ and $v_ip'$ are the only edges incident to $v_i$ in $\fg[V(G_i)]$, either $e_1=pv_i$, or $e_1$ is between $pv_i$ and $v_ip'$ in the cyclic ordering of edges around $v_i$ in \eg\ when moving clockwise from $pv_i$ to $v_ip'$. Similarly, either $v_ip'=e_2$, or $e_2$ is between $pv_i$ and $v_ip'$ in the cyclic ordering of edges around $v_i$ in \eg\  when moving clockwise from $pv_i$ to $v_ip'$. Since $v_j<_\sigma v_i$ and since $v_i$ and $v_j$ are adjacent in \eg, $v_j\in C_{i-1}$. The fact that $e\not\in \fg[V(G_i)]$ however, implies that $v_j$ is one of the middle neighbours of $v_i$ on $C_{i-1}$, that is,  $e$ is between $e_1$ and $e_2$ in the cyclic ordering of edges around $v_i$ in \eg\ when moving \emph{counterclockwise} from $e_1$ to $e_2$, which contradict the conclusion above. The arguments for the case $v_i<v_j$ are equivalent.
+%
+\Figure{weakly}{\includegraphics[width=4in]{weakly}                
+}{Illustration for the proof of \lemref{weakly}.}
+%
+\end{proof}
+
+This lemma, coupled with the following known result, implies \lemref{chain}, as demonstrated below.
+
+\begin{thm}\thmlabel{alex}\cite{alex}
+Let $G$ be a geometric planar graph. If $G$ has a weakly chordless cycle on $\ell$ vertices, then $G$ can be untangled while keeping at least $c\sqrt{\ell}$ vertices fixed.\footnote{Note that this result is expressed in slightly different form in \cite{alex} (see Theorem $2$ in \cite{alex}).} 
+\end{thm}
+
+\begin{proof}[Proof of \lemref{chain}.]
+If $\ell<3$, the claim follows trivially. Assume now that $\ell\geq
+3$. Since \fg\ has a chain of size $\ell$, \fg\ has a maximal chain of
+size $\ell'\geq \ell$. Every maximal chain in \fg, is a path from \xx\
+to \yy\ in \fg. Therefore, \lemref{weakly} implies that \fg\ contains
+a weakly chordless cycle on $\ell'$ vertices, and the result follows
+from \thmref{alex}.
+\end{proof}
+
+
+
+\subsection{Big Antichain - Proof of \lemref{antichain}}
+For each vertex $v\in V(\fg)$, we define a \emph{left-roof} of $v$, denoted by \lrf{v}, and a \emph{right-roof} of $v$, denoted by \rrf{v}, as the following directed paths in \fg. \\
+$~~~~~~~~~$ $\lrf{v_1=\xx}:=\emptyset$ and $\rrf{v_1=\xx}:=\emptyset$,\\
+$~~~~~~~~~$ $\lrf{v_2=\yy}:=\emptyset$ and $\rrf{v_2=\yy}:=\emptyset$.\\
+For each $2< i\leq n$, define \lrf{v_i}\ and \rrf{v_i} recursively, as follows.\\
+$~~~~~~~~~$ $\lrf{v_i}:=\lrf{p}\cup{pv_i}$, and \\
+$~~~~~~~~~$ $\rrf{v_i}:=v_ip'\cup \rrf{p}$. \\
+where $p$ is the left and $p'$ the right predecessor of $v_i$. Finally, let a \emph{roof} of $v_i$, denoted by \rf{v_i}, be defined as $\rf{v_i}:=\lrf{v_i}\cup\rrf{v_i}$.
+
+Note that for each $2<i\leq n$, \rf{v_i}\ is a directed path in \fg\ from \xx\ to \yy\ containing $v_i$, where the sub-path ending at $v_i$ is \lrf{v_i}, and the sub-path starting $v_i$ is \rrf{v_i}.
+
+%\noindent Definition 2:\\
+%
+%For each vertex $v\in V(\fg)\sm \{\xx\yy\}$, we define a \emph{roof} of $v$, denoted by \rf{v}, as a directed path $P$ in \fg\ from \xx\ to \yy\ containing $v$, such that $P$ has the following property.
+%
+%Let $C$ be the cycle determined by $P\cup \xx\yy$. In any path $P'\not\subset C$ in \fg\ between a pair of vertices $p,q\in C$ such that $P'$ intersects only $C$ and its interior, $p<_{\fg} v$ and $v<_{\fg} q$.
+
+
+Consider two incomparable vertices, $s$ and $q$, of \fg. Let $\xx'$ be
+a vertex of \fg\ such that $\xx'\in\lrf{s}$ and $\xx'\in\lrf{q}$. Then
+the paths between \xx\ and $\xx'$ in \rf{s}\ and in \rf{q}\ coincide
+in \fg, that is, the two paths are both equal to \lrf{\xx'}.
+Similarly, for any vertex $\yy'$ such that $\yy'\in\rrf{s}$ and
+$\yy'\in\rrf{q}$, the paths between \yy\ and $\yy'$ in \rf{p}\ and in
+\rf{q}\ coincide in \fg, that is, they are both equal to \rrf{\yy'},
+as illustrated in \figref{}. More informally, \rf{s}\ and \rf{q}\
+share all vertices from \xx\ until $\xx'$, then they split, then they
+share all vertices from $\yy'$ to \yy.
+
+Let $S$ be the set of vertices that comprise a maximal anti-chain in
+\fg. The previous paragraph suggests a natural ordering on vertices of
+$S$. In particular, for all $p,q\in S$, we define $p<_\gamma q$ if
+each vertex of \rf{p}\ is either on or inside the cycle determined by \rf{q}\ and edge \xx\yy\ in \fg. Based on the observation above, it is simple to verify that this is well defined and it is a partial (in fact, total) order $\gamma$ on $S$.
+
+While we make no general position assumption on vertices of $G$, we
+may assume, by a suitable rotation, that no pair of vertices of $G$
+have the same \y-coordinate. 
+%Order vertices of $G$ by their \y-coordinate. 
+By the Erd{\H{o}}s-Szekeres Theorem \cite{ES35}, there is an ordered
+subset $R\subseteq S$ such that $|R|\geq \sqrt{|S|}$ and the
+\y-coordinates of vertices of $R$ are either monotonically increasing
+or monotonically decreasing when considered in order given by
+$\gamma$. Without loss of generality, assume they are monotonically
+increasing.
+The following geometric lemma simplifies the task of untangling $G$ by allowing us
+to concentrate on the case where all vertices of $R$ are on the
+\y-axis.
+
+\begin{lem}\lemlabel{simplify}
+Let $\mathcal{E}$ be an untangling of some planar geometric graph $G$ 
+such that a subset $R\subseteq
+V(G)$ have the same \y-coordinates in $\mathcal{E}$ and in $G$ and are all on
+the \y-axis.  Then there
+exists an untangling $\mathcal{E}'$ of $G$ in which the vertices in
+$R$ are fixed.
+\end{lem}
+
+\begin{proof}
+The proof uses the fact that it is possible to perturb the vertices of
+a plane graph without introducing crossings.  More precisely, for any
+plane graph $\mathcal{E}$ there exists a value $\epsilon_{\mathcal{E}}>0$ such that each
+vertex $v_i\in V(\mathcal{E})$ can be replaced with $v_i+u_i$, where $u_i$ is any
+vector of length at most $\epsilon_{\mathcal{E}}$, and the resulting
+geometric graph $\mathcal{E}'$ is also a plane graph.
+
+To make use of the above fact,
+let $X$ denote the maximum absolute value of an \x-coordinate of a
+vertex $v\in R$.  Scale $\mathcal{E}$ by
+multiplying the \x-coordinates of all vertices by
+$X/\epsilon_{\mathcal{E}}$ to
+obtain a plane graph $\mathcal{E}'$. Note that, in $\mathcal{E}'$ the
+vertices of $R$ are still on the \y-axis.  Furthermore, in
+$\mathcal{E'}$ it is 
+possible to change
+the \x-coordinate of every vertex by up to $X$ and the resulting
+geometric graph will be a plane graph.  In particular, it is possible
+to move every vertex of $R$ so that it has the same location in
+$\mathcal{E}'$
+as in $G$.  Thus, $\mathcal{E}'$ is an untangling of $G$ that keeps the vertices
+of $R$ fixed.
+\end{proof}
+
+
+
+
+Let \hg\ be the graph induced in \eg\ by the following set of vertices: $\{v\,:\, v\in\rf{w}\ \textup{and}\ w\in R\}$. Note that \hg\ is not necessarily a subgraph of \fg, (as illustrated in \figref{hg}).
+%
+\Figure{hg}{%\includegraphics[width=7.5in]{hg}
+}{\hg}
+%
+We say that a closed (respectively, open) simple curve $C$ is \emph{strictly
+\x-monotone} if, for every vertical line $\ell$, $|C\cap\ell| \le 2$
+(respectively, $|C\cap\ell| \le 1$).
+A simple closed curve $C$ is \emph{star-shaped} (from $p$) if there 
+is a point $p$ such that
+for every point $q\in C$, $\overline{pq}\cap C =
+\emptyset$.
+The following lemma is the main ingredient of
+our proof. 
+
+\begin{lem}\lemlabel{drawing}
+%OLD:\\
+%\hg\ can be untangled while keeping $R$ fixed. Moreover, in the resulting plane geometric graph all internal faces are star-shaped and the outer face is strictly \x-monotone\footnote{define this}.\\
+%%
+%NEW:\\
+\hg\ can be untangled so that the vertices in $R$ are all on the
+\y-axis and all have the same
+\y-coordinates in $G$ as in the untangling. Moreover, in the
+resulting plane geometric graph all internal faces are star-shaped and
+the outer face is strictly \x-monotone.\end{lem}
+
+We delay the proof of \lemref{drawing} until the end of the section.
+We first show how it implies our desired result when coupled with the
+following known theorem.
+
+\begin{thm}\cite{DBLP:conf/wg/HongN06}\thmlabel{star}
+Consider a $3$-connected plane graph ${\mathcal E}$, with outer face
+cycle $C$. Given any geometric graph $\overline{C}$ that is isomorphic
+to $C$ and is a star-shaped polygon, there is a geometric graph 
+$\overline{\mathcal E}$ with $\overline{C}$, as its outer face.
+\end{thm}
+
+
+\begin{proof}[Proof of \lemref{antichain}.]
+Since \fg\ has an anti-chain of size $t$, \fg\ has a maximal antichain
+$S$ of size $t'\geq t$. Then $S$ has a subset of vertices $R$ where
+$|R|\geq \sqrt{t}$, and thus, by \lemref{drawing}, \hg\ can be
+untangled so that the vertices of $R$ are all on the \y-axis and their
+\y-coordinates are preserved.  If $z\not\in R$, then assign \x- and
+\y-coordinates to \zz, and connect \zz\ to its neighbours in $R$, such
+that the resulting geometric graph $H$ is plane and all the internal
+faces of $H$ are star-shaped. This is always possible since the outer
+face of the above untangled graph is strictly \x-monotone. $H$ is a
+geometric plane graph that is isomorphic to $\hg$. \Comment{$\eg[R\cup
+\zz]$.}
+
+It remains to determine a placement of vertices of $V(\eg)\sm V(H)$.
+Vertices of $V(\eg)\sm V(H)$ can be partitioned into sets $I_j$, $1
+\leq j\leq |V(H)|-|E(H)|-3$, where each vertex in $I_j$ is inside of
+the cycle in \eg\ determined by the internal face $f_j$ of $H$. For
+each internal face $f_j$ of $H$, let $G_j$ be the following subgraph
+of \eg. $V(G_j)$ is the union of $V(f_j)$ and $I_j$. $E(G_j)$ is
+comprised of the edges of the cycle $f_j$, the edges in $\eg[I_j]$,
+and the edges between $V(f_j)$ and $I_j$. Each $f_j$ is star-shaped in
+$H$, by \lemref{drawing}. Therefore, to apply \thmref{star}, it
+remains to show that $G_j$ is $3$-connected. 
+
+Assume, for the sake of contradiction, that $G_j$ is not
+$3$-connected. All the faces of $G_j$ are triangles except possibly
+the outer face $C_j$. Therefore, $G_j$ is internally $3$-connected,
+that is, removing any two interior vertices of $G_j$ does not
+disconnect it. Thus each cut-set of size $2$ of $G_j$ has a vertex,
+say $v$, that is in $C_i$.  Removing $v$ from $G_i$ results in the
+graph that is not $2$-connected. The outer face $C_i$ has no chords,
+since $f_j$ is the face of $H$. Therefore, removing $v$ from $G_j$
+results in graph whose outer face is a cycle and all internal faces
+are triangles. Thus that graph is $2$-connected graph, which provides
+the contradiction.  
+
+Applying \thmref{star} to embed each subgraph $G_j$ yields an
+untangling of $G$ in which the vertices of $R$ are all on the \y-axis
+and have their \y-coordinates preserved.  Applying \lemref{simplify}
+to this untangling completes the proof of the theorem.
+\end{proof}
+
+Finally, all that remains is to prove \lemref{drawing}.
+%As discussed above, the following proof completes the proof of \thmref{planar}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%% PAT START
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\begin{proof}[Proof of \lemref{drawing}]
+
+We proceed by induction on the number of vertices in $R$, but require
+a somewhat stronger inductive hypothesis than the statement of the
+lemma.  Let $C$ be a simple strictly \x-monotone curve.  We say that $C$ is
+\emph{$\epsilon$-ray-monotone} from a point $p=(x,y)$ if for every
+point $r=(x,y+t)$ with $t\ge\epsilon$, and every point $q\in C$,
+$\overline{rq}\cap C=\emptyset$.  Informally, $C$ is
+$\epsilon$-ray-monotone from $p$ if every point sufficiently far above
+$p$ sees all of $C$. 
+Note that, under this definition, if $C$ is $\epsilon$-ray-monotone
+from $p$ then $C$ is $\epsilon$-ray-monotone from any point
+$q=(x,y+t)$, $t>0$, above $p$.  Furthermore, there exists a value
+$\delta=\delta(p,C,\epsilon)$ such that $C$ is
+$\epsilon$-ray-monotone from any point $p'$ whose distance
+from $p$ is at most $\delta$.  (This follows from the fact that the
+set of points $p$ from which $C$ is $\epsilon$-ray-monotone is an open
+set.)
+
+Let $\epsilon'$ be the minimum difference between the \y-coordinates of
+any two vertices in $R$.  We will construct an embedding
+$\overline{\hg}$. In addition to the conditions of the lemma,
+$\overline{\hg}$ will have the following property:
+If $|R|>0$ then the outer face of $\hg$ is bounded by the edge
+$xy$ and a path $C$ from $x$ to $y$ that is $\epsilon$-ray-monotone from
+some vertex $v\in R\cap V(C)$ and some $\epsilon < \epsilon'$.
+
+The base case in our proof occurs when $|R|=0$ in which case $\hg$
+consists of the single edge $xy$ that we can embed by placing $x$ at
+$(-1,t)$ and $y$ at $(1,t)$ where $t$ is smaller than any \y-coordinate
+in $R$.  Clearly this embedding satisfies the conditions of the lemma
+as well as the inductive hypothesis.  Next, suppose $|R|\ge 1$ and let
+$v$ be the largest vertex of $R$ in the total order $\gamma$. By induction, we can embed all roofs of $R\setminus \{v\}$ to
+obtain a plane graph $\overline{\hg'}$ that satisfies the inductive
+hypothesis and the conditions of the lemma.  What remains is to place
+$v$ and the vertices of $\rf{v}$ that are not yet placed. These
+vertices form a path $P$ that goes from some vertex $x'$ of $\hg'$ to
+$v$ to some vertex $y'$ of $\hg'$. 
+
+The conditions of the lemma entirely specify the location of $v$. In
+particular, $v$ is on the \y-axis, with its \y-coordinate equal to its
+\y-coordinate $G$.
+The second inductive hypothesis guarantees that the vertex $v$ and any
+point sufficiently close to $v$ can see all vertices of the
+outer face of $\overline{\hg'}$.  Finally, we note that, if $|R|>1$,
+then directly
+below $v$, on the y-axis, is a vertex $u\in R$. The fact that $u$ is
+on the \y-axis and that the outer face of $\overline{\hg'}$ is
+strictly \x-monotone implies that the \x-coordinate of $x'$ is less than 0 and
+that the \x-coordinate of $y'$ is greater than 0.  (For the special
+case when  $|R|=1$,
+$x'=x$, $y'=y$ and the above statement is still true.)
+
+Next we place the interior vertices of $P$ to obtain the plane graph
+$\overline{\hg}$.
+To do this, we draw a unit circle $c$, containing
+$v$, whose center is on the $y$-axis and below $v$.  We place all
+vertices of $P$ on $c$ and sufficiently close to $v$ so that
+\begin{enumerate}
+\item the outer face of $\overline{\hg}$ is strictly x-monotone,
+\item all vertices of $P$ see all other vertices of $P$ in $\overline{\hg}$,
+\item all vertices of $P$ see all vertices on the outer face of
+$\overline{\hg'}$, and
+\item the upper chain of the outer face of $\overline{\hg}$ is $\epsilon$-ray-monotone from $v$ for some
+$\epsilon<\epsilon'$.
+\end{enumerate}
+That the first condition can be achieved follows from the fact that
+$x'$ and $y'$ are the left and right, respectively, of the \y-axis.
+That the second condition can be achieved follows from the fact that
+we are placing the vertices of $P$ on a convex curve (a circle) as
+close to $v$ as necessary.  The third condition can be achieved thanks
+to the fact that the upper chain of $\overline{\hg'}$ is
+$\epsilon$-ray-monotone from $u$ and hence also from $v$.  That the
+fourth condition can be achieved follows from the 
+definition of $\epsilon$-ray-monotonicity and the first condition.
+
+Note that Conditions~2 and 3 above imply that $\overline{\hg}$ is a
+plane graph and Conditions~1 and 4 imply that $\overline{\hg}$
+satisfies the inductive hypothesis and its outer face is strictly
+\x-monotone.  All that remains to show is that the interior faces of
+$\overline{\hg}$ are star-shaped.  The only new faces in $\overline{\hg}$
+not present in $\overline{\hg'}$ are the faces having edges of $P$ on
+their boundary.  However, Conditions~2 and 3 above imply that each
+such face is star-shaped from some vertex $w\in P$.  This completes
+the proof of the lemma.
+\end{proof}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%% PAT ENDS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+\section*{Acknowledgements}
+
+This research was initiated at the Bellairs Workshop on Computational
+Geometry for Geometric Reconfigurations, February 1st to 9th, 2009.  The
+authors are grateful to Godfried Toussaint for organizing the workshop
+and to the other workshop participants for providing a stimulating
+working environment.
+
+%\bibliographystyle{plain}
+\bibliographystyle{myBibliographyStyle}
+\bibliography{paper,2trees}
+\end{document}

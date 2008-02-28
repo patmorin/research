@@ -1,0 +1,112 @@
+\documentclass{article}
+\usepackage{amsthm,amsfonts}
+
+\newcommand{\dn}{\mathsf{dn}}
+\newcommand{\R}{\mathbb{R}}
+\newtheorem{thm}{Theorem}
+\newtheorem{clm}{Claim}
+
+\begin{document}
+For points $a$ and $b$, let $ab$ denote the open line segment whose
+endpoints are $a$ and $b$.  A set $S\subset\R^2$ is 2-dimensional if
+it contains a disk of positive radius.  $S$ is 1-dimensional if it is
+not 2-dimensional but contains a curve of positive length.  If $S$ is
+neither 1-dimensional nor 2-dimensional but non-empty then $S$ is
+0-dimensional.
+
+\begin{thm} 
+Let $G$ be an outerplanar graph.  Then $\dn(G) \le 3$.
+\end{thm}
+
+\begin{proof}
+Without loss of generality, assume that $G$ is edge-maximal.  We will
+describe a drawing of $G$ in which every 3-cycle in $G$ is represented
+by reflections of one root triangle $t$.  Select any 3-cycle in $G$
+and draw its vertices at the vertices of $t$.  Each of the (up to 3)
+3-cycles of $G$ that share an edge with $t$ is then drawn by reflecting
+$t$ through the shared edge.  Their neighbours are drawn by reflecting
+these copies of $t$ through the shared edges, and so on.
+
+What remains is to show how to select $t$.  Let $P$, $Q$ and $R$ be
+any 3 disks of positive radius.  We select $t$ to be the triangle
+whose vertices are chosen by selecting $p\in P$, $q\in Q$, and $r\in
+R$ uniformly and independently at random.  We will show that, with
+this selection process, the probability that any vertex of our drawing
+is contained in any (non-incident) edge of our drawing is 0.
+
+We will fix $p\in P$ and $q\in Q$ and show that, for any vertex $v$
+of $G$, the $\Pr\{v\in pq\mid pq\} = 0$.  We can then uncondition the
+choice of $p$ and $q$, since
+\begin{eqnarray*}
+  \Pr\{v\in pq\} 
+    & = & \int_P\int_Q\Pr\{v\in pq\mid pq\}\times\Pr\{pq\}dpdq \\
+    & = & \int_P\int_Q 0\times\Pr\{pq\}dpdq = 0 \\ 
+    & = & \int_P\int_Q 0\times1 = 0 \enspace .
+\end{eqnarray*}
+Repeating the same argument shows that, for $v\not\in\{p,q,r\}$,
+$\Pr\{v\in pq\cup qr \cup rp\} = 0$.  Finally we observe that, from
+the point of view of the construction, the choice of the initial
+3-cycle in $G$ is irrelevant, since selecting a different 3 cycle will
+result in the same drawing translated, rotated, and possibly reflected
+through a line.  Therefore, repeating the same argument above for each
+3-cycle of $G$ shows
+that the probability that any vertex of $G$ is drawn in the interior
+of any edge is 0.
+
+All that remains to show is that, for fixed $p\in P$ and $q\in Q$,
+$\Pr\{v\in pq\mid pq\} = 0$.  Let $f_v:R\mapsto \R^2$ be the function
+that determines the location of the vertex $v$ given $r\in R$ (with
+$p$ and $q$ fixed). Note that $f_v$ is continuous, since it is a
+composition of a finite number of continuous functions.
+
+\begin{clm}\label{clm:big-image}
+Let $D\subseteq R$ be a disk of positive radius.  Then the image 
+$f_v(D) = \{f_v(r):r\in D\}$ is 2-dimensional.
+\end{clm}
+
+\begin{proof}[Proof of Claim]
+
+Suppose, by way of contradiction that $f_v(D)$ has dimension less than
+2.  Let $v^* = f(d)$ where $d$ is the center of the disk $D$.  Then,
+since $f_v(D)$ is not 2-dimensional, there is a non-zero vector $x$
+and a value $\epsilon >0$ such that, for every $0< t \le \epsilon$,
+the point $v^*+tx \not\in f(D)$. That is, the point $v^*$ immediately
+leaves $f_v(D)$ when travelling along the vector $x$.
+
+Select some 3-cycle $t'$ in $G$ that contains $v$.  This cycle, when
+$p$ and $q$ are fixed, and $r=d$ is drawn as a triangle $\Delta(t')$,
+one of whose vertices is $v^*$.  Let $D'$ be a small disk centered at
+$v^*$.\marginpar{How small?}  Fix the other two vertices of $\Delta(t')$ at these locations
+and consider the function $g_r:D'\mapsto\R^2$ that expresses the
+location of $r$ as a function of $v^*$ (by treating the triangle
+$\Delta(t')$ as the root triangle).  Like $f_v$, the function
+$g_r$ is continuous and $g_r(v^*) = d$.  However, by the choice
+of $x$ and $\epsilon$ above, for any $0< t \le \epsilon$ the point
+$g_r(v^*+tx)$ is not contained in $D$, which contradicts the
+continuity of $g_r$.  This completes the proof.
+\end{proof}
+
+The above claim shows that the range of $f$ is a 2-dimensional.  On
+the other hand, the segment $pq$ is 1-dimensional.  The next claim is
+that the preimage of $pq$ is also 1-dimensional.
+
+\begin{clm}\label{clm:small-image}
+The set $f^{-1}(pq) = \{ r\in R : f_v(r) \in pq\}$ is 1-dimensional.
+\end{clm}
+
+\begin{proof}[Proof of Claim]
+Suppose by way of contradiction that $f^{-1}(pq)$ is
+2-dimensional.  Then $f^{-1}(pq)$ contains a disk of positive radius.
+Therefore, by Claim~\ref{clm:big-image}, the segment $pq$ is
+2-dimensional, a contradiction.
+\end{proof}
+
+Thus, the preimage of the segment $pq$ in $R$ is a 1-dimensional
+subset of the 2-dimensional set $R$.  Therefore, the probability that
+we select a point $r\in R$ such that $f_v(r)\in pq$ is 0, and this
+completes the proof.
+\end{proof}
+
+\end{document}
+
+

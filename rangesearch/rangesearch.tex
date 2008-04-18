@@ -20,12 +20,98 @@ structure are $O(n\log n)$.
 
 \section{Introduction}
 
+Let $S$ be a set of $n$ points in $\R^2$ and let $D$ be a probability
+measure over $\R^2$.  A \emph{2-sided range counting query} over $S$
+asks, for a query point $q=(q_1,q_2)$, the number of points in
+$(p_1,p_2)\in S$ such $p_1 \ge q_1$ and $p_2 \ge q_2$.  A 2-sided
+range counting query \emph{has distribution $D$} if the query point
+$q$ is chosen from the probability measure $D$.  If $T$ is a data
+structure for answering 2-sided range queries over $S$ then we denote
+by $\mu_D(T)$ the expected time, using $T$, to answering a range query
+with distribution $D$.  The current paper is concerned with
+preprocessing a point set $S$ and a distribution $D$ to build a data
+structure $T$ that minimizes $\mu_D(T)$.
+
+\subsection{Previous Work}
+
+\begin{enumerate}
+
+\item The topic of geometric range queries is a huge field
+\cite{agarwal_erickson}.
+
+\item Range trees \cite{bentley} use $O(n\log n)$ space and
+preprocessing and answer range queries in $O(\log^2 n)$
+worst-case time.  When combined with fractional cascading, the query
+time can be reduced to $O(\log n)$.
+
+\item $k$-d trees use $O(n)$ space and answer range queries in
+$O(\sqrt{n})$ time.
+
+\item Get the two SICOMP papers by Chazelle.
+\end{enumerate}
+
+\subsection{New Results}
+
+In the current paper we present a data structure of size $O(n\log n)$,
+that can be constructed in $O(n\log n)$ time, and that answers range
+counting (or semigroup) queries in $O(\mu_D(T))$ expected time, where
+$T$ is any comparison tree that answers range counting queries over $S$.
+In particular, $T$ could be the comparison tree that minimizes
+$\mu_D(T)$ implying that the expected query time of our data structure
+is as fast as the fastest comparison tree.
+
+Note that we do not place any restrictions on the comparison tree $T$.
+Thus, our data structure, while requiring only $O(n\log n)$ space, is
+competitive with any data structure that can be represented as a
+comparison tree, without any limits of the space required by that data
+structure.
+
+\section{Preliminaries}
+
+\begin{itemize}
+\item Define a rectangle (possibly unbounded)
+\item Definition of decision tree and comparison tree
+\item Shannon's entropy lower bound
+\item Lemma that says that entropy decreases when the support is
+partitioned
+\item Lower bound in terms of the entropy of the ray shooting
+arrangement
+\end{itemize}
 
 \section{Biased Range Trees}
 
+In this section we present our data structure, which, like range trees
+is a two level structure consisting of a primary tree whose nodes
+store secondary structures.
+
+\subsection{The Primary Tree}
+
+The primary tree is a 2-dimensional $k$-d tree \cite{X} $T$.  Each
+node $v$ of $T$ is associated with an open rectangle $r(v)$.  The
+rectangle associated with the root of $T$ is all of $\R^2$. The two
+children of a node $v$ are associated with the two rectangles obtained
+by splitting $r(v)$ with a horizontal or vertical line depending on
+whether the distance from $v$ to the root of $T$ is even or odd,
+respectively. 
+
+The line used to split the rectangle $r(v)$ into two rectangles $r_1$
+and $r_2$ is selected so that $\Pr\{r_1\}\le \Pr\{r(v)\}/2$ and
+$\Pr\{r_2\}\le \Pr\{r(v)\}/2$.
+
+  The root of
+the tree stores a vertical line that paritions $\R^2$ into two open
+halfspaces $h_1$ and $h_2$ such that $\Pr\{h_1\}\le 1/2$ and
+$\Pr\{h2\} \le 1/2$
+
+
+\subsection{The Catalogues}
 
 \section{Optimality of Biased Range Trees}
 
+\subsection{The Catalogue Location Step}
+
+
+\subsection{The Tree Searching Step}
 
 \section{Summary and Conclusions}
 

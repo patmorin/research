@@ -1,5 +1,12 @@
 \documentclass[lotsofwhite,charterfonts]{patmorin}
+\usepackage{amsopn}
 \input{pat}
+
+\DeclareMathOperator{\lft}{left}
+\DeclareMathOperator{\rght}{right}
+\DeclareMathOperator{\tp}{up}
+\DeclareMathOperator{\bttm}{down}
+
 
 \title{\MakeUppercase{Biased Range Trees}}
 \author{Vida Dujmovi\'c
@@ -69,7 +76,18 @@ structure.
 \section{Preliminaries}
 
 \begin{itemize}
-\item Define a rectangle (possibly unbounded)
+\item A \emph{rectangle} $R(a,b,c,d)$ is defined as
+\[
+    R(a,b,c,d) = \{ (x,y) : \mbox{$a\le x < b$ and $c \le y < d$}\}
+	\enspace .
+\]
+Notice that this implies that rectangles are open on their top and
+right sides but closed on their bottom and left sides.  We also allow
+unbounded rectangles by setting $a,c=-\infty$ and/or $b,d=\infty$.
+Therefore, under this definition, rectangles can have 0, 1, 2, 3,
+or 4
+sides.
+
 \item Definition of decision tree and comparison tree
 \item Shannon's entropy lower bound
 \item Lemma that says that entropy decreases when the support is
@@ -80,31 +98,144 @@ arrangement
 
 \section{Biased Range Trees}
 
-In this section we present our data structure, which, like range trees
+In this section we present our data structure that, like range trees
 is a two level structure consisting of a primary tree whose nodes
-store secondary structures.
+store secondary structures.  Throughout this section, for the sake of
+simplicity, we will assume that the probability measure $D$ is smooth
+in the sense that, if $X$ is a 0 or 1 dimensional set then
+$\Pr\{X\}=0$.  This assumption is only used to simplify the
+exposition, and at the end of \secref{analysis} we show how it can be
+removed.
 
 \subsection{The Primary Tree}
 
-The primary tree is a 2-dimensional $k$-d tree \cite{X} $T$.  Each
-node $v$ of $T$ is associated with an open rectangle $r(v)$.  The
+The primary tree is a 2-dimensional $k$-d tree \cite{X} $T=T(D,S)$.
+Each node $v$ of $T$ is associated with a rectangle $r(v)$.  The
 rectangle associated with the root of $T$ is all of $\R^2$. The two
 children of a node $v$ are associated with the two rectangles obtained
 by splitting $r(v)$ with a horizontal or vertical line depending on
 whether the distance from $v$ to the root of $T$ is even or odd,
-respectively. 
+respectively.  For a node $v$ that is split with a vertical line, we
+denote its children by $\lft(v)$ and $\rght(v)$ and we call them the
+left and right children of $v$.  For a node $v$ that is split with a
+horizontal line, we denote its children by $\top(v)$ and $\bttm(v)$
+and we call them the up and down children of $v$. 
 
 The line used to split the rectangle $r(v)$ into two rectangles $r_1$
-and $r_2$ is selected so that $\Pr\{r_1\}\le \Pr\{r(v)\}/2$ and
-$\Pr\{r_2\}\le \Pr\{r(v)\}/2$.
-
-  The root of
-the tree stores a vertical line that paritions $\R^2$ into two open
-halfspaces $h_1$ and $h_2$ such that $\Pr\{h_1\}\le 1/2$ and
-$\Pr\{h2\} \le 1/2$
+and $r_2$ is selected so that $\Pr\{r_1\}=\Pr\{r_2\}=\Pr\{r(v)\}/2$.
+This splitting process is applied recursively to any node $v$ such as
+long as $r(v)$ contains more than one point of $S$ and $\Pr\{r(v)\}
+\ge 1/n$.  This naturally partitions the leaves of $T$ into two
+classes; the \emph{bad} leaves are those leaves $v$ such that
+$|r(v)\cap S| > 1$ and the remaining leaves are the \emph{good}
+leaves.  Note that, in $T$ a node $v$ at level $i$ has
+$\Pr\{r(v)\}=1/2^i$ and hence the height of the structure is at most
+$\log n+1$.
 
 
 \subsection{The Catalogues}
+
+The nodes of the tree $T$ are augmented with additional data
+structures called \emph{catalogues}.  The $x$-catalogue $C_x(v)$
+(respectively, $y$-catalogue $C_y(v)$) contains the set of points
+$r(v)\cap S$ sorted by $x$ (respectively, $y$) coordinate.
+
+In addition to the catalogues, fractional cascading \cite{X} is used
+to help navigate between specific pairs of catalogues.  In order to
+understand the flow of information within catalogues, it is useful to
+understand a little about the query algorithm.  To determine the
+number of points of $S$ in $r(v)$, for a query point $q$ contained in
+$r(\lft(v))$, it suffices to recursively search for $q$ in $\lft(v)$
+and then locate $y(q)$ in $C_y(\rght(v))$.  Thus, after recursing in
+$\lft(v)$ we would like to have enough information to locate $y(q)$ in
+$C_y(\rght(v))$ in $O(1)$ time.  Note that the structure is very
+asymmetric in this sense since answering a query $q\in r(\rght(v))$
+does not require locating $q\in C_y(\lft(v))$ or even locating $q\in
+C_y(v)$.
+
+
+
+Similarly, a query
+that recurses in $\bttm(v)$ should have gathered enough information
+to locate $x(q)$ in $C_x(\tp(v))$.
+
+
+If the query algorithm
+has already recursively performed a range counting query $q$ on $\lft(v)$
+(respectively, $bttm(v)$) the answer to entire query can be obtained
+by locating $x(q)$ in the $C_y(\rght(v))$
+
+Suppose that a node $v$ is split with a vertical line into two
+children $\lft(v)$ and $\rght(v)$.  Let $LR^i(v)$ denote the set of
+nodes in the subtree rooted at $\lft(v)$ that can be reached by a path
+from $\lft(v)$ of length $2i$ that does not take any edge from a node
+to its left child.  Define $RL^i(v)$ in a symmetric manner, reversing
+the roles of left and right. For each $i$, the $y$-catalogues of nodes
+in $RL^i(v)$ is cascaded into the appropriate nodes of 
+$LR^i(v)$. 
+
+  Suppose
+further that $\lft(v)$ is split into two children $\tp(\lft(v))$ and
+$\bttm(\lft(v))$.  Then, every second point of $C_y(\rght(v))$ is
+cascaded into one of $\tp(\lft(v))$ or $\bttm(\lft(v))$ depending on
+whether its horizontal projection intersects the horizontal projection
+of $\tp(\lft(v))$ or $\bttm(\lft(v))$, respectively.  With the extra
+information provided by this fractional cascading, if the search
+algorithm has determined the location of $q_2$ in $C_y(\tp(\lft(v)))$
+or $C_y(\bttm(\lft(v)))$ then, in $O(1)$ time, it can determine the
+location of $q_2$ in $\rght(v)$.
+
+Similarly, suppose a node $v$ is split with a horizontal line into two
+children $\tp(v)$ and $\bttm(v)$.  Suppose further that $\bttm(v)$ is
+split into two children $\lft(\bttm(v))$ and $\rght(\bttm(v))$.  Then,
+every second point of $C_x(\tp(v))$ is cascaded into one of
+$\lft(\bttm(v))$ or $\rght(\bttm(v))$ depending on whether its
+horizontal projection intersects the horizontal projection of
+$\lft(\bttm(v))$ or $\rght(\bttm(v))$, respectively.  Again, if the
+search algorithm has located $q_1$ in $\lft(\bttm(v))$ or
+$C_x(\rght(\bttm(v)))$ then it can determine, in $O(1)$ time, the location
+of $q_1$ in $C_x(\tp(v))$.
+
+An important property of our structure is that the points in $C_x(v)$
+are all contained in the 3-sided range bounded by the left, bottom,
+and right sides of $r(v)$.  Similarly, the points in $C_y(v)$ are all
+contained in the 3-sided range bounded by the top, left, and bottom
+sides of $r(v)$.
+
+In addition their catalogues, the good leaves of $T$ have additional
+indexing structures associated with them.  Recall that each good leaf
+$v$ of $T$ has $|r(v)\cap S| \le 1$. However, $C_x(v)$ and $C_y(v)$
+could still be quite large since they contain elements that were
+cascaded from nodes higher in $T$.  For each good leaf $v$, we
+therefore maintain two biased binary search trees $T_x(v)$ and
+$T_y(v)$ over the intervals defined by the $x$, respectively, $y$,
+coordinates of the points in $C_x(v)$, respectively, $C_y(v)$.  The
+weight of an interval $(x_1,x_2)$ is the probability that a query
+point $q=(q_1,q_2)$ drawn from the distribution $D\mid r(v)$ has
+$q_1\in(x_1,x_2)$.   Similarly, the weight of an interval $(y_1,y_2)$
+is the probability that $q_2\in (y_1,y_2)$.
+
+\subsection{The Query Algorithm}
+
+To answer a 2-sided range query $q=(q_1,q_2)$ using $T$ we proceed in
+three phases:
+
+\begin{enumerate}
+
+\item The algorithm navigates the tree $T$ from top to bottom to
+locate the unique leaf $v$ of $T$ such that $q\in r(v)$.  This takes
+$O(d_T(q))$ time, where $d_T(q)$ is the depth of the node $v$.
+
+
+\item If the leaf $v$ is a bad leaf then the algorithm performs a
+range query using the range tree $R(S)$ and the query algorithm is
+done.  Otherwise ($v$ is a good leaf) the algorithm uses $T_x(v)$ and
+$T_y(v)$ to locate $q_1$ and $q_2$, respectively, in $C_x(v)$ and
+$C_y(v)$, respectively.
+
+\item The walks back from $v$ to the root of $T$.
+
+\end{enumerate}
 
 \section{Optimality of Biased Range Trees}
 

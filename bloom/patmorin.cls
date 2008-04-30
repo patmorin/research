@@ -139,7 +139,7 @@
         \@author
       \end{tabular}\par}%
     \vskip 1em%
-    {\large \@date}%
+    {\@date}%
   \end{center}%
   \par
   \vskip 1.5em}

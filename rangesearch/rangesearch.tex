@@ -70,13 +70,16 @@ is as fast as the fastest comparison tree.
 Note that we do not place any restrictions on the comparison tree $T$.
 Thus, our data structure, while requiring only $O(n\log n)$ space, is
 competitive with any data structure that can be represented as a
-comparison tree, without any limits of the space required by that data
-structure.
+comparison tree, without any limits on the space required by that data
+structure.  Thus, our data structure uses only as much space as a
+range tree, but answers queries as quickly as any data structure
+possibly could.
 
 \section{Preliminaries}
 
 \begin{itemize}
-\item A \emph{rectangle} $R(a,b,c,d)$ is defined as
+\item For the purposes of the current paper, a \emph{rectangle} 
+$R(a,b,c,d)$ is defined as
 \[
     R(a,b,c,d) = \{ (x,y) : \mbox{$a\le x < b$ and $c \le y < d$}\}
 	\enspace .
@@ -107,6 +110,18 @@ $\Pr\{X\}=0$.  This assumption is only used to simplify the
 exposition, and at the end of \secref{analysis} we show how it can be
 removed.
 
+
+\subsection{The Backup Tree}
+
+In trying to achieve optimal query time, our data structure  will try
+to quickly answer queries that are, in some sense, easy.  In some
+cases, a query is difficult in the sense that our data structure can
+not answer it in $o(\log n)$ time.  For these queries, our data
+structure keeps a \emph{backup} range tree that stores the points of
+$S$ and can answer any 2-sided range query in $O(\log n)$ time.
+The preprocessing time and space requirements of this backup tree are
+$O(n\log n)$.
+
 \subsection{The Primary Tree}
 
 The primary tree is a 2-dimensional $k$-d tree \cite{X} $T=T(D,S)$.
@@ -115,11 +130,19 @@ rectangle associated with the root of $T$ is all of $\R^2$. The two
 children of a node $v$ are associated with the two rectangles obtained
 by splitting $r(v)$ with a horizontal or vertical line depending on
 whether the distance from $v$ to the root of $T$ is even or odd,
-respectively.  For a node $v$ that is split with a vertical line, we
-denote its children by $\lft(v)$ and $\rght(v)$ and we call them the
-left and right children of $v$.  For a node $v$ that is split with a
-horizontal line, we denote its children by $\top(v)$ and $\bttm(v)$
-and we call them the up and down children of $v$. 
+respectively.  We call a node $v$ at even distance from the root a
+\emph{vertical node}, otherwise we call $v$ a \emph{horizontal node}.
+
+For a vertical node $v$, we denote its children by $\lft(v)$ and
+$\rght(v)$ and call them the left and right children of $v$, depending
+on which side of the vertical line (left or right) they are.  For
+convenience, we will also call the children of a node $v$ that is
+split with a horizontal line $\lft(v)$ and $\rght(v)$ depending on
+whether the child is below or above the splitting line, respectively.
+Note that, with this notation, if the query point $q$ is in
+$r(\lft(v))$ then the query range intersects $r(\rght(v))$.  However,
+if $q\in r(\rght(v))$ then the query range does not intersect
+$r(\lft(v))$.
 
 The line used to split the rectangle $r(v)$ into two rectangles $r_1$
 and $r_2$ is selected so that $\Pr\{r_1\}=\Pr\{r_2\}=\Pr\{r(v)\}/2$.
@@ -139,9 +162,17 @@ The nodes of the tree $T$ are augmented with additional data
 structures called \emph{catalogues}.  The $x$-catalogue $C_x(v)$
 (respectively, $y$-catalogue $C_y(v)$) contains the set of points
 $r(v)\cap S$ sorted by $x$ (respectively, $y$) coordinate.
+Each of the two catalogues at a node $v$ is doubly-linked into two
+lists.  The \emph{full catalogue} contains all elements of $r(v)\cap
+S$ in sorted order. The \emph{partial catalogue} contains all elements
+of $r(\rght(v))\cap S$ in sorted order.
 
 In addition to the catalogues, fractional cascading \cite{X} is used
-to help navigate between specific pairs of catalogues.  In order to
+to help navigate between specific pairs of catalogues.  In particular,
+for a node $v$, data in  
+
+
+In order to
 understand the flow of information within catalogues, it is useful to
 understand a little about the query algorithm.  To determine the
 number of points of $S$ in $r(v)$, for a query point $q$ contained in

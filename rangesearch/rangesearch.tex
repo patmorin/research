@@ -543,13 +543,33 @@ HV-independent.
 
 \begin{lem}\lemlabel{independent}
 Let $T=T(S,D)$ be a biased range tree and label each node of $T$ white
-or black.  There exists constants $\alpha,\gamma\in(1,2)$ and $x>1$ such that,
-if $T$ contains more than $\gamma^i$ white nodes at level at most $i$
-then there is an HV-independent set of white nodes at level at most $i$
-of size at least $\alpha^{i-x}$.
+or black, such that all white nodes are at distance at most $i$ from
+the root of $T$.  Then, if $T$ contains more than $\gamma^i$ white nodes
+then $T$ contains an HV-independent set of white nodes of size
+$\Omega((\gamma/\sqrt{2})^i)$.
 \end{lem}
 
 \begin{proof}
+Define a graph $G=(V,E)$ whose vertices are the white nodes of $T$ and
+for which $uv\in E$ iff there is a horizontal or vertical line that
+intersects both $r(u)$ and $r(v)$.  Note that an independent set in
+$G$ is an HV-independent set in $T$.  Thus, it suffices to find a
+sufficiently large independent set in $G$
+
+A well-know result on $k$-d trees states that, for a $k$-d tree of
+height $i$, any horizontal or vertical line intersects at most
+$O(2^{i/2})$ rectangles of the $k$-d tree. Therefore, since $T$ is a
+$k$-d tree, the number of edges in $G$ is at most $O(|V|\cdot
+2^{i/2})$.  This implies that $G$ has a vertex $v$ of degree at most
+$O(2^{i/2})$ and this is also true of any vertex-induced subgraph of
+$G$.
+
+We can therefore obtain an independent set in $G$ by repeatedly
+selecting a vertex $v$ of degree $O(2^{i/2})$, adding $v$ to the
+independent set and deleting $v$'s neighbours from $G$.  Since, at
+each step we add one vertex to the independent set and delete at most
+$O(2^{i/2})$ vertices from $G$, this produces an independent of size
+$\Omega(|V|/2^{i/2}) = \Omega((\gamma/\sqrt{2})^i)$, as required.
 \end{proof}
 
 We can now provide the second piece of the lower bound.
@@ -565,11 +585,11 @@ range tree $T=T(S,D)$ such that $q\in s(v)$.  Then
 
 
 \begin{proof}
-
 Partition the nodes of $G$ into groups $G_1,G_2,\ldots$ where $G_i$
 contains all nodes $v$ such that $1/2^{i} \le \Pr(v) \le 1/2^{i-1}$.
 Observe that the nodes in group $G_i$ occur in the first $i$ levels of
-$T$.  Select a constant $\beta$ with $\gamma < \beta < 2$.  By
+$T$.  Select a constants $\gamma$ and $\beta$ with $\sqrt{2} < \gamma
+< \beta < 2$ and define $\alpha=\gamma/\sqrt{2}$.  By
 repeatedly applying \lemref{independent}, each group $G_i$ can be
 partitioned into groups $G_{i,1},\ldots,G_{i,t_i}$ where, for each $1
 \le j < t_i$, $G_{i,j}$ is an HV-independent set with $|G_{i,j}|

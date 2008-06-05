@@ -36,10 +36,10 @@ of points $(p_x,p_y)\in S$ such that $p_x \ge q_x$ and $p_y \ge q_y$.
 A 2-sided range counting query \emph{has distribution $D$} if the
 query point $q$ is chosen from the probability measure $D$.  If $T$ is
 a data structure for answering 2-sided range counting queries over $S$
-then we denote by $\mu_D(T)$ the expected time, using $T$, to
-answering a range query with distribution $D$.  The current paper is
-concerned with preprocessing the pair $(S,D)$ to build a data
-structure $T$ that minimizes $\mu_D(T)$.
+then we denote by $\mu_D(T)$ the expected time, using $T$, to answer a
+range query with distribution $D$.  The current paper is concerned
+with preprocessing the pair $(S,D)$ to build a data structure $T$ that
+minimizes $\mu_D(T)$.
 
 \subsection{Previous Work}
 
@@ -70,11 +70,11 @@ For 2-sided orthogonal range counting queries, Chazelle
 constructed in $O(n\log n)$ time, and that can answer range couting
 queries in $O(\log n)$ time.  Unfortunately, this data structure is
 not capable of answering semigroup queries in the same time bound.
-For semigroup queries in the RAM model, Chazelle provides data
-structures with the following requirements: (1)~$O(n)$ space and
-$O(\log^{2+\epsilon} n)$ query time, (2)~$O(n\log\log n)$ space and
-$O(\log^{2}n\log\log n)$ query time, and (3)~$O(n\log^\epsilon n)$
-space and $O(\log^2 n)$ query time.
+For semigroup queries, Chazelle provides data structures with the
+following requirements: (1)~$O(n)$ space and $O(\log^{2+\epsilon} n)$
+query time, (2)~$O(n\log\log n)$ space and $O(\log^{2}n\log\log n)$
+query time, and (3)~$O(n\log^\epsilon n)$ space and $O(\log^2 n)$
+query time.
 
 Practical linear space data structures for range counting include
 $k$-d trees \cite{ae41}, quad-trees \cite{ae251}, and their
@@ -104,7 +104,7 @@ range tree}, of size $O(n\log n)$, that can be constructed in $O(n\log
 n)$ time, and that answers range counting (or semigroup) queries in
 $O(\mu_D(T^*))$ expected time, where $T^*$ is any comparison tree that
 answers range counting queries over $S$.  In particular, $T^*$ could
-be the comparison tree that minimizes $\mu_D(T^*)$ implying that the
+be a comparison tree that minimizes $\mu_D(T^*)$ implying that the
 expected query time of our data structure is as fast as the fastest
 comparison-based data structure for answering range counting queries
 over $S$.  Moreover, the worst-case search time of biased range trees
@@ -118,7 +118,7 @@ trees but their expected query time can never be any worse.
  
 The remainder of the paper is organized as follows. In
 \secref{preliminaries} we present background material that is used in
-subsequent sections.  In \secref{data-structure} we define the biased
+subsequent sections.  In \secref{data-structure} we define biased
 range trees. In \secref{lower-bound} we prove that biased range trees
 are optimal.  In \secref{summary} we recap, summarize, and describe
 directions for future work.
@@ -140,7 +140,7 @@ $R(a,b,c,d)$ is defined as
 \]
 We also allow unbounded rectangles by setting $a,c=-\infty$ and/or
 $b,d=\infty$.  Therefore, under this definition, rectangles can have
-0, 1, 2, 3, or 4 sides.  For a query point $q=(q_x,q_y)$ we denote the
+0, 1, 2, 3, or 4 sides.  For a query point $q=(q_x,q_y)$ we denote 
 by $R(q)$ the query range $R(q_x,\infty,q_y,\infty)$.  A
 \emph{horizontal strip} is rectangle of the form
 $R(-\infty,\infty,c,d)$ and a \emph{vertical strip} is a rectangle of
@@ -170,7 +170,7 @@ which the function $P_v$ at each node $v$ compares either $q_x$ or
 $q_y$ to a fixed value (that may depend on the point set $S$ and the
 distribution $D$).  For the problem of 2-sided range counting over
 $S$, the leaves of $T$ are labelled with values in $\{0,\ldots,|S|\}$
-and $T(q)=|R(q)\cap S|$.
+and $T(q)=|R(q)\cap S|$ for all $q\in\R^2$.
 
 
 \paragraph{Probability.}
@@ -185,7 +185,8 @@ given a rectangle $r$, determine $\Pr(r)$.
 
 For a classification tree $T$ that solves a problem
 $P:\mathcal{D}\mapsto\{0,\ldots,k-1\}$ and a probability measure $D$
-over $\mathcal{D}$, the \emph{expected search time} of $T$ is the
+over $\mathcal{D}$, the \emph{expected search time} of $T$, denoted
+by $\mu_D(T)$, is the
 expected length of the search path for $q$ when $q$ is drawn at random
 from $\mathcal{D}$ according to $D$.  Note that, for each leaf $\ell$
 of $T$ there is a maximal subset $r(\ell)\subseteq \mathcal{D}$ such
@@ -229,7 +230,7 @@ the plane into a set of faces $F(A)$.  If $T$ is a comparison tree for
 range counting in $S$, then there is no leaf $\ell$ of $T$ such that
 the interior of $r(\ell)$ intersects any edge of $A$ since otherwise
 there are query points $q$ in the neighbourhood of this intersection
-for which $T(q)$ is incorrect.  Therefore, by relabelling the leaves
+for which $T(q)\neq |R(q)\cap S|$.  Therefore, by relabelling the leaves
 of $T$ with the faces of $A$, we obtain a data structure for
 determining which face of $A$ contains the query point $q$.
 By \thmref{shannon}, this implies that
@@ -239,11 +240,12 @@ By \thmref{shannon}, this implies that
 Unfortunately, this bound is still not strong enough and, in general,
 there is no decision tree $T$ that matches this lower bound.  To see
 this, consider \figref{arrangement}.b, when the query point $q$ is
-uniformly distributed among the $n+1$ shaded circles.  In this case, $q$ is
-always in the same face of $A$ so the lower bound given above is
-useless.  Nevertheless, the leaves of any decision tree
-$T$ for range searching in $S$ can be relabelled to determine which of
-the $n+1$ circles contains $q$, so $\mu_D(T) \ge \log(n+1)$.
+uniformly distributed among the $n+1$ shaded circles.  In this case,
+$q$ is always in the same face of $A$ so the lower bound given above
+is 0.  Nevertheless, it is not hard to see that the leaves of
+any decision tree $T$ for range searching in $S$ can be relabelled to
+determine which of the $n+1$ circles contains $q$, so $\mu_D(T) \ge
+\log(n+1)$.
 
 \begin{figure}
   \begin{center}
@@ -295,34 +297,46 @@ set of catalogues that adorn the nodes of the primary tree.
 
 In trying to achieve optimal query time, biased range trees will try
 to quickly answer queries that are, in some sense, easy.  In some
-cases, a query is difficult and our data structure cannot answer it
-in $o(\log n)$ time.  For these queries, our data structure keeps a
-\emph{backup} range tree that stores the points of $S$ and can answer
-any 2-sided range query in $O(\log n)$ worst-case time.  The
-preprocessing time and space requirements of this backup tree are
-$O(n\log n)$ \cite{bkos97}.
+cases, a query is difficult and it cannot be answered in $o(\log n)$
+time.  For these queries, a \emph{backup} range tree that stores the
+points of $S$ and can answer any 2-sided range query in $O(\log n)$
+worst-case time is used.  The preprocessing time and space
+requirements of this backup tree are $O(n\log n)$ \cite{bkos97}.
 
 \subsection{The Primary Tree}
 
 Like a range tree, a biased range tree is an augmented data structure
 consisting of a primary tree whose nodes store secondary structures.
 However, in a range tree the primary tree is a binary search tree that
-discriminates based only on the $x$ coordinate of the query point
-$q$.  In order to achieve optimal expected query time, this turns out
-to be insufficient, so instead biased range trees use a $k$-d tree
-as the primary tree.
+discriminates based only on the $x$ coordinate of the query point $q$.
+In order to achieve optimal expected query time, this turns out to be
+insufficient, so instead biased range trees use a variation of a $k$-d
+tree as the primary tree.
 
-Each node $v$ of $T$ is associated with a rectangle $r(v)$.  The
-rectangle associated with the root of $T$ is all of $\R^2$. The two
-children of a node $v$ are associated with the two rectangles obtained
-by removing an open horizontal strip or vertical strip from $r(v)$
-depending on whether the depth of $v$ is even or odd, respectively.
-We call a node $v$ at even distance from the root a \emph{vertical
-node}, otherwise we call $v$ a \emph{horizontal node}.  We denote by
-$s(v)$ the strip that is removed from $r(v)$ to make its two children.
-For a vertical (respectively, horizontal) node $v$, we use the
-convention that $s(v)$ includes its left (respectively, bottom) side
-but not its right (respectively, top) side.
+The primary tree is constructed in a top-down fashion.  Each node $v$
+of $T$ is associated with a rectangle $r(v)$.  The rectangle
+associated with the root of $T$ is all of $\R^2$.  We say that a node
+$v$ is \emph{bad} if its depth is at least $\ceil{\log_2 n}$ and
+$r(v)\cap S \neq \emptyset$. 
+A node $v$ is \emph{split} if
+\begin{enumerate}
+\item $v$ is not bad,
+\item $r(v)$ is 2-dimensional, and
+\item $r(v)\cap S\neq \emptyset$.
+\end{enumerate}
+The two children of a split node
+$v$ are associated with the two rectangles obtained by removing a
+horizontal or vertical strip $s(v)$ from $r(v)$ depending on whether the
+depth of $v$ is even or odd, respectively.  We call a node $v$ at even
+distance from the root a \emph{vertical node}, otherwise we call $v$ a
+\emph{horizontal node}. 
+Note that, with these definitions, exactly one of the following is true
+for each leaf of $T$:
+\begin{enumerate}
+\item $v$ is bad, 
+\item $r(v)$ is not 2-dimensional, or
+\item $r(v)\cap S = \emptyset$.
+\end{enumerate}
 
 Refer to \figref{left-right}.
 For a vertical node $v$, we denote its children by $\lft(v)$ and
@@ -336,9 +350,8 @@ $s(v)$ at a horizontal node $v$ refer to the bottom and top sides of
 $s(v)$.  Note that, with these conventions, if the query point $q$ is
 in $r(\lft(v))$ then $R(q)$ intersects $r(\rght(v))$.  However, if
 $q\in r(\rght(v))$ then $R(q)$ does not intersect $r(\lft(v))$.
-Similarly, for a query $q$ in the interior of $s(v)$, the query range
-$R(q)$ intersects the right boundary of $s(v)$ but not the left
-boundary.
+Similarly, for a query point $q\in s(v)$, the query range
+$R(q)$ intersects $r(\rght(v))$ but not $r(\lft(v))$
 
 \begin{figure}
   \begin{center}
@@ -352,25 +365,35 @@ boundary.
   \figlabel{left-right}
 \end{figure}
 
-The strip $s(v)$ is selected as the unique maximal strip containing no
-point of $r(v)\cap S$ in its interior and such that each of the two
-components of $r(v)\setminus s(v)$ has probability at most
-$\Pr(r(v))/2$.  To construct $s(v)$, begin with the unique (horizontal
-or vertical, as appropriate) line that splits $\Pr(r(v))$ as equally
-as possible and expand its left and right sides until they each hit a
-point of $S$ or a (horizontal or vertical, as appropriate) side of
-$r(v)$. Note that, this may result in one or both of the children of
-$v$ having a region with 0 area.
+All that remains is to describe how the strip $s(v)$ is chosen. If $v$
+is a leaf then we use the convention that $s(v)=r(v)$.  If $v$ is
+not a leaf then $s(v)\subseteq r(v)$ is selected as the unique maximal
+strip containing no point of $r(v)\cap S$ in its interior and such
+that each of the two components of $r(v)\setminus s(v)$ has
+probability at most $\Pr(r(v))/2$.  To construct $s(v)$, begin with
+the unique (horizontal or vertical, as appropriate) line that splits
+$\Pr(r(v))$ as equally as possible and expand its left and right sides
+until they each hit a point of $S$ or a (horizontal or vertical, as
+appropriate) side of $r(v)$. Note that this may result in one or both
+of the children of $v$ having a 1-dimensional region.
 
-This splitting process is applied recursively to any
-node $v$ as long as $r(v)$ contains more than one point of $S$ and
-$\depth(v)\le \log n$. These rules guarantee that a node $v$ at depth
-$i$ in $T$ has $\Pr(r(v))\le 1/2^i$.
-The leaves of $T$ are partitioned into two classes; the \emph{bad}
-leaves are those leaves $v$ such that $|r(v)\cap S| > 1$ and the
-remaining leaves are the \emph{good} leaves.  We will use the
-convention that, at a leaf $v$, $s(v)=r(v)$ so that, for any point
-$q\in\R^2$ there is at least one node $v\in T$ such that $q\in s(v)$.
+For a node $v$ that is not a leaf, we use the convention that $s(v)$
+contains its right side but not its left side and that $r(\rght(v)$
+and $r(\lft(v))$ are the two components of $r(v)\setminus s(v)$.  In
+this way, for any point $q\in \R^2$ there is exactly one vertex $v$ of
+$T$ such that $q\in s(v)$.  Another important property of the tree $T$
+is that, for any vertex $v$, the closure of $r(v)$ contains at least
+one point of $S$.
+
+%This splitting process is applied recursively to any
+%node $v$ as long as $r(v)$ contains more than one point of $S$ and
+%$\depth(v)\le \log n$. These rules guarantee that a node $v$ at depth
+%$i$ in $T$ has $\Pr(r(v))\le 1/2^i$.
+%The leaves of $T$ are partitioned into two classes; the \emph{bad}
+%leaves are those leaves $v$ such that $|r(v)\cap S| > 1$ and the
+%remaining leaves are the \emph{good} leaves.  We will use the
+%convention that, at a leaf $v$, $s(v)=r(v)$ so that, for any point
+%$q\in\R^2$ there is at least one node $v\in T$ such that $q\in s(v)$.
 
 \subsection{The Catalogues}
 
@@ -474,11 +497,11 @@ catalogues of the primary tree.
 
 The backup tree has size $O(n\log n)$ and can be constructed in
 $O(n\log n)$ time.  To construct the primary tree quickly we presort
-the points of $S$ by their first and second coordinates.  Since the
+the points of $S$ by their $x$ and $y$ coordinates.  Since the
 primary tree has height $O(\log n)$, it is then easily constructed in
 $O(n\log n)$ time. 
 Ignoring any copies of points created by fractional cascading,
-each point in $S$ occurs in a constant number of catalogues at each
+each point in $S$ occurs in at most 2 catalogues at each
 level of the primary tree.  Thus, the sizes of all catalogues (before
 fractional cascading) is $O(n\log n)$ and these catalogues can be
 constructed in $O(n\log n)$ time (because of elements of $S$ are
@@ -530,12 +553,14 @@ trees is as good as the expected query time of any comparison tree.
 The expected query time has two components.  The first component is
 the expected depth, $d_T(q)$,  of the node $v$ such that $s(v)$
 contains $q$.  The second component is the expected cost of locating
-$q$ in the catalogues of $\lft(v)$.  We will show that each of these two
-components is a lower bound on the expected cost of any decision tree
-for two-sided range searching on $S$ where queries come from
+$q$ in the catalogues of $\lft(v)$.  We will show that each of these
+two components is a lower bound on the expected cost of any decision
+tree for two-sided range searching on $S$ where queries come from
 distribution $D$.  In order to simplify notation in this section we
-will use the convention $\Pr(v)=\Pr(s(v))$ is the probability that a
-search terminates at node $v$ of $T$.
+will use the convention $\Pr(v)$ is the probability that a search
+terminates at node $v$ of $T$.  Note that, in most cases
+$\Pr(v)=\Pr(s(v))$, except possibly when $v$ is a leaf and $s(v)$ has
+0 area.
 
 \subsection{The Catalogue Location Step}
 
@@ -606,11 +631,11 @@ We can now complete the proof with
 
 \subsection{The Tree Searching Step}
 
-Next we bound the expected depth of the node $v$ of $T$ such that
-$q\in s(v)$.  We do this by showing that any decision tree $T^*$ for
-range counting in $S$ must solve a set of point location problems and
-that the expected depth of $v$ is a lower bound on the complexity of
-solving these problems.
+Next we bound the expected depth $d_T(q)$ of the node $v$ of $T$ such
+that $q\in s(v)$.  We do this by showing that any decision tree $T^*$
+for range counting in $S$ must solve a set of point location problems
+and that the expected depth of $v$ is a lower bound on the complexity
+of solving these problems.
 
 We say that a set of rectangles is \emph{HV-independent} if no
 horizontal or vertical line intersects more than one rectangle in the
@@ -621,7 +646,8 @@ HV-independent.
 \begin{lem}\lemlabel{independent}
 Let $S$ be a set of $n$ points and let $D$ be a probability measure
 over $\R^2$.
-Let $T=T(S,D)$ be a biased range tree and label each node of $T$ white
+Let $T=T(S,D)$ be the biased range tree for $(S,D)$ and label
+each node of $T$ white
 or black, such that all white nodes are at distance at most $i$ from
 the root of $T$.  Then, if $T$ contains more than $\gamma^i$ white nodes
 then $T$ contains an HV-independent set of white nodes of size
@@ -630,24 +656,26 @@ $\Omega((\gamma/\sqrt{2})^i)$.
 
 \begin{proof}
 Define a graph $G=(V,E)$ whose vertices are the white nodes of $T$ and
-for which $uv\in E$ iff there is a horizontal or vertical line that
-intersects both $r(u)$ and $r(v)$.  Note that an independent set in
-$G$ is an HV-independent set in $T$.  Thus, it suffices to find a
-sufficiently large independent set in $G$
+for which $uv\in E$ if and only if there is a horizontal or vertical line that
+intersects both $r(u)$ and $r(v)$.  Note that an independent set of
+vertices in $G$ is an HV-independent set of which nodes in $T$.  Thus,
+it suffices to find a sufficiently large independent set in $G$
 
 A well-know result on $k$-d trees states that, for a $k$-d tree of
 height $i$, any horizontal or vertical line intersects at most
-$O(2^{i/2})$ rectangles of the $k$-d tree. Therefore, since $T$ is a
-$k$-d tree, the number of edges in $G$ is at most $O(|V|\cdot
-2^{i/2})$.  This implies that $G$ has a vertex $v$ of degree at most
-$O(2^{i/2})$ and this is also true of any vertex-induced subgraph of
-$G$.
+$2^{\ceil{i/2}}$ rectangles of the $k$-d tree \cite{bkos97}.
+Therefore, since $T$ is a $k$-d tree,\footnote{Although $T$ is not
+exactly a $k$-d tree as described in Reference~\cite{bkos97}, the
+proof found there still holds.} the number of edges in $G$ is at most
+$|V|\cdot 2^{\ceil{i/2}}$.  This implies that $G$ has a vertex $v$ of
+degree at most $2^{\ceil{i/2}+1}$ and this is also true of any
+vertex-induced subgraph of $G$.
 
 We can therefore obtain an independent set in $G$ by repeatedly
-selecting a vertex $v$ of degree $O(2^{i/2})$, adding $v$ to the
-independent set and deleting $v$'s neighbours from $G$.  Since, at
+selecting a vertex $v$ of degree $2^{\ceil{i/2}+1}$, adding $v$ to the
+independent set and deleting $v$ and its neighbours from $G$.  Since, at
 each step we add one vertex to the independent set and delete at most
-$O(2^{i/2})$ vertices from $G$, this produces an independent of size
+$2^{\ceil{i/2}+1}+1$ vertices from $G$, this produces an independent of size
 $\Omega(|V|/2^{i/2}) = \Omega((\gamma/\sqrt{2})^i)$, as required.
 \end{proof}
 
@@ -682,7 +710,7 @@ leaf of $T^*$ and observe that, because the nodes in $G_{i,j}$ are
 independent and each one contains at least one point of $S$, there are
 at most 4 nodes $v$ in $G_{i,j}$ such that $r(\ell)$ intersects
 $r(v)$.  (Otherwise $r(\ell)$ contains a point of $S$ in its interior
-and therefore does not solve the range counting problem for $S$.)
+and therefore $T^*$ does not solve the range counting problem for $S$.)
 Thus, by performing two additional comparisons, $T^*$ can be used to
 determine which node of $v\in G_{i,j}$ (if any) contains the query
 point $q$ in $s(v)$.  However, $G_{i,j}$ contains $\Omega(\alpha^i)$
@@ -703,16 +731,16 @@ applying
 Putting this all together, we obtain
 \begin{eqnarray*}
 \mu_D(T^*) 
-  & = & \sum_{i=1}^{\ceil{\log n}}\sum_{j=1}^{t_i}\Pr(G_{i,j})\mu_{D_{i,j}}(T^*) \\
-  & \ge & \sum_{i=1}^{\ceil{\log n}}
+  & = & \sum_{i=1}^{\infty}\sum_{j=1}^{t_i}\Pr(G_{i,j})\mu_{D_{i,j}}(T^*) \\
+  & \ge & \sum_{i=1}^{\infty}
     \sum_{j=1}^{t_i-1}\Pr(G_{i,j})\mu_{D_{i,j}}(T^*) \\
-  & \ge & \sum_{i=1}^{\ceil{\log n}}\sum_{j=1}^{t_i-1}
+  & \ge & \sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
            \Pr(G_{i,j})( i\log\alpha -O(1)) \\
   & \ge & (\log\alpha)\cdot
-         \sum_{i=1}^{\ceil{\log n}}\sum_{j=1}^{t_i-1}
+         \sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
 		\sum_{v\in G_{i,j}}\Pr(v)\cdot\depth(v) - O(1)\\
   & = & (\log\alpha)\cdot\sum_{v\in T}\Pr(v)\cdot \depth(v)
-          -    \sum_{i=1}^{\ceil{\log n}}
+          -    \sum_{i=1}^{\infty}
 		\sum_{v\in G_{i,t_i}}\Pr(v)\cdot\depth(v) - O(1)\\
   & \ge & (\log\alpha)\cdot\sum_{v\in T}\Pr(v)\cdot \depth(v)
           -    \sum_{i=1}^{\ceil{\log n}}i\cdot\Pr(G_{i,t_i}) - O(1) \\
@@ -761,12 +789,12 @@ We have presented biased range trees, an optimal data structure for
 2-sided orthogonal range counting queries when the point set $S$ and
 query distribution $D$ is known in advance. The expected time required
 to answer queries with a biased range tree, when the queries are
-distributed according to $S$, is within a constant factor of any
+distributed according to $D$, is within a constant factor of any
 decision tree for answering range queries over $S$.  Like standard
 range trees, biased range trees use $O(n\log n)$ space and can also
-answer semigroup queries \cite{ae133,ae292}.  Although their analysis
-is complicated, their implementation is not much more complicated than
-that of range trees.
+answer semigroup queries \cite{ae133,ae292}.  Although the analysis of
+biased range trees is complicated, their implementation is not much
+more complicated than that of standard range trees.
 
 As a small optimization, the backup range tree data structure can be
 eliminated from biased range trees.  Instead, once the probability of
@@ -781,16 +809,34 @@ immediately arise from this work.
 
 \begin{op}
 Are there efficient distribution-sensitive data structures for 3-sided
-and 4-sided range queries?
+and 4-sided orthogonal range counting queries?
 \end{op}
 
-\begin{op}
-A point $q$ is \emph{maximal} if $R(q)\cap S=\emptyset$.  In $d\ge 3$
-dimensions,  is there a distribution sensitive data structure for
-testing if a query point $q$ is maximal?  For point sets in 2
-dimensions, a variant of the point-location techniques of Collette
-\etal\ \cite{cdilm08} seems to apply. 
-\end{op}
+Note that a 4-sided orthogonal range counting query can be reduced to
+4 2-sided orthogonal range counting queries using the principle of
+inclusion-exclusion.  Unfortunately, this reduction does not produce
+an optimal distribution-sensitive data structure.  To see this,
+consider 4-sided queries consisting of unit squares whose bottom left
+corner is uniformly distributed in the shaded region of
+\figref{squares}.  All such queries contain no points in the query
+region and all such queries can be answered in $O(1)$ time by simply
+checking that all 4 corners of the square are to the left of the point
+set.  However, when we decompose these queries into a 4 2-sided
+queries we obtain 2-sided queries that require $\Omega(\log n)$ time
+to answer.
+
+\begin{figure}
+  \begin{center}
+    \begin{tabular}{c}
+      \includegraphics{squares}
+    \end{tabular}
+  \end{center}
+  \caption{Decomposing a 4-sided query into 4 2-sided queries can
+           produce a bad distribution of 2-sided queries.}
+  \figlabel{squares}
+\end{figure}
+
+
 
 \begin{op}
 Biased range trees require that the point set $S$ and the
@@ -811,19 +857,22 @@ an $O(n\log n)$ space structure with the same performance?
 \end{op}
 
 \begin{op}
-Determine the worst-case or the average case constants associated with
-2-d orthogonal range searching for comparison-based data structures.
-The results of Adamy and Seidel \cite{as98} on point location  imply an
-$O(n^2)$ space data structure that answers queries using at most
-$2\log n + O(\log\log n)$ comparisons.  Is there an $O(n\log n)$ space
-structure with the same performance?
+A point $q\in \R^d$ is \emph{maximal} with respect to $S\subseteq\R^d$
+if no point of $S$ has every coordinate larger than the corresponding
+coordinate of $q$. For $d\ge 3$,  is there a distribution-sensitive 
+data structure for
+testing if a query point $q$ is maximal?  For point sets in 2
+dimensions, an orthogonal variant of the point-location techniques of Collette
+\etal\ \cite{cdilm08} seems to apply. 
 \end{op}
+
 
 \begin{op}
 Are there distribution-sensitive data structures for $d$-sided range
 search in point sets in $\R^d$?  The current fastest structures
 for range search in point sets in $\R^d$ that use near-linear space have
-$\Theta(\log^{d-1} n)$ time.  Is there a structure that is optimal
+$\Theta(\log^{d-1} n)$ query time.  Is there a structure that uses
+near-linear space and is optimal
 when the point set $S$ and the distribution $D$ are known in advance?
 \end{op}
 

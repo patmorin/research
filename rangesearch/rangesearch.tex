@@ -314,44 +314,34 @@ insufficient, so instead biased range trees use a variation of a $k$-d
 tree as the primary tree.
 
 The primary tree is constructed in a top-down fashion.  Each node $v$
-of $T$ is associated with a rectangle $r(v)$.  The rectangle
+of $T$ is associated with a region $r(v)$ whose closure is a rectangle.
+The region
 associated with the root of $T$ is all of $\R^2$.  We say that a node
 $v$ is \emph{bad} if its depth is at least $\ceil{\log_2 n}$ and
 $r(v)\cap S \neq \emptyset$. 
 A node $v$ is \emph{split} if
-\begin{enumerate}
-\item $v$ is not bad,
-\item $r(v)$ is 2-dimensional, and
-\item $r(v)\cap S\neq \emptyset$.
-\end{enumerate}
+$v$ is not bad,
+and $r(v)\cap S\neq \emptyset$.
 The two children of a split node
-$v$ are associated with the two rectangles obtained by removing a
+$v$ are associated with the two regions obtained by removing a
 horizontal or vertical strip $s(v)$ from $r(v)$ depending on whether the
 depth of $v$ is even or odd, respectively.  We call a node $v$ at even
 distance from the root a \emph{vertical node}, otherwise we call $v$ a
 \emph{horizontal node}. 
-Note that, with these definitions, exactly one of the following is true
-for each leaf of $T$:
-\begin{enumerate}
-\item $v$ is bad, 
-\item $r(v)$ is not 2-dimensional, or
-\item $r(v)\cap S = \emptyset$.
-\end{enumerate}
 
-Refer to \figref{left-right}.
-For a vertical node $v$, we denote its children by $\lft(v)$ and
-$\rght(v)$ and call them the \emph{left child} and \emph{right child}
-of $v$, depending on which side of the vertical strip (left or right)
-they are.  For uniformity, we will also call the children of a node
-$v$ that is split with a horizontal strip $\lft(v)$ and $\rght(v)$
-depending on whether the child is below or above the strip,
-respectively.  Similarly, the left and right boundaries of a strip
-$s(v)$ at a horizontal node $v$ refer to the bottom and top sides of
-$s(v)$.  Note that, with these conventions, if the query point $q$ is
-in $r(\lft(v))$ then $R(q)$ intersects $r(\rght(v))$.  However, if
-$q\in r(\rght(v))$ then $R(q)$ does not intersect $r(\lft(v))$.
-Similarly, for a query point $q\in s(v)$, the query range
-$R(q)$ intersects $r(\rght(v))$ but not $r(\lft(v))$
+Refer to \figref{left-right}.  For a vertical node $v$, we denote its
+children by $\lft(v)$ and $\rght(v)$ and call them the \emph{left
+child} and \emph{right child} of $v$, depending on which side of the
+vertical strip (left or right) they are.  For uniformity, we will also
+call the children of a node $v$ that is split with a horizontal strip
+$\lft(v)$ and $\rght(v)$ depending on whether the child is below or
+above the strip, respectively.  Similarly, the left and right
+boundaries of a strip $s(v)$ at a horizontal node $v$ refer to the
+bottom and top sides of $s(v)$.  Note that, with these conventions, if
+the query point $q$ is in $r(\lft(v))$ then $R(q)$ intersects
+$r(\rght(v))$.  However, if $q\in r(\rght(v))$ then $R(q)$ does not
+intersect $r(\lft(v))$.  Similarly, for a query point $q\in s(v)$, the
+query range $R(q)$ intersects $r(\rght(v))$ but not $r(\lft(v))$
 
 \begin{figure}
   \begin{center}
@@ -365,46 +355,54 @@ $R(q)$ intersects $r(\rght(v))$ but not $r(\lft(v))$
   \figlabel{left-right}
 \end{figure}
 
-All that remains is to describe how the strip $s(v)$ is chosen. If $v$
-is a leaf then we use the convention that $s(v)=r(v)$.  If $v$ is
+All that remains is to define the strip $s(v)$ for each node $v$. If
+$v$ is a leaf then we use the convention that $s(v)=r(v)$.  If $v$ is
 not a leaf then $s(v)\subseteq r(v)$ is selected as the unique maximal
 strip containing no point of $r(v)\cap S$ in its interior and such
-that each of the two components of $r(v)\setminus s(v)$ has
+that each of the at most two components of $r(v)\setminus s(v)$ has
 probability at most $\Pr(r(v))/2$.  To construct $s(v)$, begin with
 the unique (horizontal or vertical, as appropriate) line that splits
 $\Pr(r(v))$ as equally as possible and expand its left and right sides
 until they each hit a point of $S$ or a (horizontal or vertical, as
-appropriate) side of $r(v)$. Note that this may result in one or both
-of the children of $v$ having a 1-dimensional region.
+appropriate) side of $r(v)$. 
 
 For a node $v$ that is not a leaf, we use the convention that $s(v)$
 contains its right side but not its left side and that $r(\rght(v)$
-and $r(\lft(v))$ are the two components of $r(v)\setminus s(v)$.  In
-this way, for any point $q\in \R^2$ there is exactly one vertex $v$ of
-$T$ such that $q\in s(v)$.  Another important property of the tree $T$
-is that, for any vertex $v$, the closure of $r(v)$ contains at least
-one point of $S$.
+and $r(\lft(v))$ are the two components of $r(v)\setminus s(v)$.  This
+implies that $r(\lft(v))$ and/or $r(\rght(v))$ may be empty, in which
+case $\lft(v)$, respectively, $\rght(v)$ is a leaf of $T$.  With these
+definitions, for any point $q\in \R^2$ there is exactly one vertex $v$
+of $T$ such that $q\in s(v)$.
 
-%This splitting process is applied recursively to any
-%node $v$ as long as $r(v)$ contains more than one point of $S$ and
-%$\depth(v)\le \log n$. These rules guarantee that a node $v$ at depth
-%$i$ in $T$ has $\Pr(r(v))\le 1/2^i$.
-%The leaves of $T$ are partitioned into two classes; the \emph{bad}
-%leaves are those leaves $v$ such that $|r(v)\cap S| > 1$ and the
-%remaining leaves are the \emph{good} leaves.  We will use the
-%convention that, at a leaf $v$, $s(v)=r(v)$ so that, for any point
-%$q\in\R^2$ there is at least one node $v\in T$ such that $q\in s(v)$.
+The following two properties are easily derived from the definition of
+$T$ and are necessary to prove the optimality of biased range trees:
+\begin{enumerate}
+
+\item Any node $v$ at depth $i$ in $T$ has $\Pr(s(v))\le \Pr(r(v))\le 1/2^i$ (by
+the choice of $s(v)$).
+
+\item For any node $v$ of $T$, if $\Pr(r(v)) > 0$, then the closure of
+$r(v)$ contains at least one point of $S$. (Either $r(v)$ contains a
+point of $S$, or $r(v)=\emptyset$ (so $\Pr(r(v))=0$), or the left or
+bottom side of $r(v)$ contains a point of $S$.)
+
+\end{enumerate}
 
 \subsection{The Catalogues}
+\seclabel{catalogues}
 
 The nodes of the tree $T$ are augmented with additional data
 structures called \emph{catalogues} that hold subsets of $S$.  Each
 node $v$ has two catalogues, $C_x(v)$ and $C_y(v)$ that store subsets
-of $S$ sorted by their $x$-, respectively, $y$-, coordinate.  If $v$
-is a horizontal node, then $C_x(v)= (s(v)\cup r(\rght(v)))\cap S$ and
-$C_y(v)=\emptyset$.  If $v$ is a vertical node, then $C_y(v) =
-(s(v)\cup r(\rght(v)))\cap S$ and $C_x(v)=\emptyset$. See
-\figref{catalogues}.
+of $S$ sorted by their $x$-, respectively, $y$-, coordinate.
+Intuitively, $C_x(v)$ stores points that are ``above'' $r(v)$ and
+$C_y(v)$ stores points that are ``to the right of'' $r(v)$.  (Refer to
+\figref{catalogues}.)  More precisely, if $v$ is a horizontal node,
+then $C_x(\lft(v))= (s(v)\cup r(\rght(v)))\cap S$ and
+$C_y(\lft(v))=\emptyset$.  If $v$ is a vertical node, then
+$C_y(\lft(v)) = (s(v)\cup r(\rght(v)))\cap S$ and
+$C_x(\lft(v))=\emptyset$.  For any node $v$ that is the root of $T$ or
+a right child of its parent, $C_x(v)=C_y(v)=\emptyset$.  
 
 \begin{figure}
   \begin{center}
@@ -419,13 +417,10 @@ $C_y(v)=\emptyset$.  If $v$ is a vertical node, then $C_y(v) =
   \figlabel{catalogues}
 \end{figure}
 
-Consider any node $v$ that is not a bad leaf and any point $q\in
-s(v)$.  Consider the path $P$ from $v$ to the root of
-$T$ and let $v_1,\ldots,v_k$ denote the subsequence of $P$ consisting of
-$v=v_1$ and all nodes whose predecessors in $P$ are their left child
-(see \figref{3d-view}).
-Then the catalogues of $v_1,\ldots,v_k$ have the
-following properties:
+Consider any node $v$ that is not a bad leaf and any point $q\in s(v)$.
+Let $v_1,\ldots,v_k$ denote the path from $\lft(v)$ to the root of $T$
+(see \figref{3d-view}).  Then the catalogues of $v_1,\ldots,v_k$ have
+the following properties:
 \begin{figure}
   \begin{center}
     \includegraphics{3d-view}
@@ -440,7 +435,7 @@ of $T$. The $\times$ symbol shows the location of the query point $q$.}
 \item The points in the catalogues of $v_1,\ldots,v_k$ are above or to
 the right of $q$.  That is, for each $1\le i \le k$, all points in
 $C_y(v_i)$, respectively, $C_x(v_i)$ have their $x$-, respectively,
-$y$-, coordinate greater than $q_x$, respectively, $q_y$.
+$y$-, coordinate greater than or equal to $q_x$, respectively, $q_y$.
 
 \item All catalogues at nodes in $v_1,\ldots,v_k$ are disjoint.  That,
 is, for each $1\le i\le j \le k$,
@@ -457,21 +452,14 @@ the query range $R(q)$.  That is,
 \]
 \end{enumerate}
 
-Note that, points 1, 2 and 3 above imply that determining $|R(q)\cap S|$
-can be done by solving a sequence of 1-dimensional 1-sided range
-queries in the catalogues of $v_1,\ldots,v_k$.  However, performing
-these queries individually would take too long.
-
-
-%\begin{figure}
-%
-%\caption{The catalogues of $T$ at (a)~a horizontal node and (b)~a
-%vertical node.}
-%\figlabel{catalogues}
-%\end{figure}
+Note that, points 1, 2 and 3 above imply that determining $|R(q)\cap
+S|$ can be done by solving a sequence of 1-sided range queries in the
+catalogues of $v_1,\ldots,v_k$.  However, performing these queries
+individually would take too long.
 
 To speed up the process of navigating the catalogues of $T$,
-fractional cascading \cite{ae76} is used.  If $v$ is a horizontal
+fractional cascading \cite{ae76} is used.  Refer to
+\figref{cascading}. If $v$ is a horizontal
 node, then (a fraction of) all the data in $C_x(v)$ is cascaded into
 both $C_x(\lft(v))$ and $C_x(\rght(v))$.  However, $C_y(v)$ is
 partitioned into two sets.  If $h(v)$ denotes the smallest horizontal
@@ -487,6 +475,13 @@ of $T$.  Although fractional cascading introduces extra data into the
 catalogues of $T$ we will continue to use the notations $C_x(v)$ and
 $C_y(v)$ to denote the set of points contained in the catalogues of
 $v$ before fractional cascading takes place.
+
+\begin{figure}
+  \begin{center} \includegraphics{cascade} \end{center}
+  \caption{The fractional cascading that takes place at a horizontal
+           node $v$.}
+  \figlabel{cascading}
+\end{figure}
 
 Finally, each catalogue $C_x(v)$ and $C_y(v)$ is indexed by a biased
 binary search tree $T_x(v)$, respectively, $T_y(v)$.  The weight of an
@@ -535,11 +530,12 @@ is a bad leaf (so $d_T(q)\ge \log n$) then the algorithm performs a
 range query in $O(\log n)$ time using the backup range tree and the
 query algorithm does not execute the next two steps.
 
-\item  Otherwise, the algorithm uses $T_x(\lft(v))$ and
-$T_y(\lft(v))$ to locate $q_x$ and $q_y$, respectively, in the catalogues
-$C_x(\lft(v))$ and $C_y(\lft(v))$, respectively.
+\item  If $v$ has a left child then let $u=\lft(v)$, otherwise let
+$u=v$. The algorithm uses $T_x(u)$ and $T_y(u)$ to locate $q_x$ and
+$q_y$, respectively, in the catalogues $C_x(u)$ and $C_y(u)$,
+respectively.
 
-\item The algorithm walks back from $v$ to the root of $T$, locating
+\item The algorithm walks back from $u$ to the root of $T$, locating
 $q$ in the catalogues of all nodes on this path and computing the
 results of the range counting query as it goes.  Thanks to fractional
 cascading, each step of this walk can be done in constant time, so the
@@ -548,8 +544,8 @@ overall time for this step is also $O(d_T(q))$.
 
 Observe that Steps~1 and 3 of the query algorithm each take
 $O(d_T(q))$ time.  The time needed to accomplish Step~2 of the
-algorithm depends on exactly what is in the catalogues $C_x(v)$ and
-$C_y(v)$, and will be the first quantity we study in the next section.
+algorithm depends on exactly what is in the catalogues $C_x(u)$ and
+$C_y(u)$, and will be the first quantity we study in the next section.
 
 \section{Optimality of Biased Range Trees}
 \seclabel{lower-bound}
@@ -563,15 +559,13 @@ $q$ in the catalogues of $\lft(v)$.  We will show that each of these
 two components is a lower bound on the expected cost of any decision
 tree for two-sided range searching on $S$ where queries come from
 distribution $D$.  In order to simplify notation in this section we
-will use the convention $\Pr(v)$ is the probability that a search
-terminates at node $v$ of $T$.  Note that, in most cases
-$\Pr(v)=\Pr(s(v))$, except possibly when $v$ is a leaf and $s(v)$ has
-0 area.
+will use the convention $\Pr(v)=\Pr(s(v))$ is the probability that a
+search terminates at node $v$ of $T$.  
 
 \subsection{The Catalogue Location Step}
 
 First we show that the expected cost of locating $q$ in the two
-catalogues, $C_x(\lft(v))$ and $C_y(\lft(v))$, of the leaf $v$
+catalogues, $C_x(u)$ and $C_y(u)$, of the leaf $v$
 with $q\in r(v)$ is
 a lower bound on the expected cost of any decision tree for answering
 2-sided range queries in $S$.  The intuition behind this proof is
@@ -600,8 +594,8 @@ Then
 We first observe that, by definition,
 \[
   C_2(S,D) =  \sum_{v\in T} 
-              \Pr(v)\left( \mu_{D_{\mid s(v)}}(T_x(\lft(v)))
-                               +  \mu_{D_{\mid s(v)}}(T_y(\lft(v))) \right)
+              \Pr(v)\left( \mu_{D_{\mid s(v)}}(T_x(u))
+                               +  \mu_{D_{\mid s(v)}}(T_y(u)) \right)
            \enspace .
 \]
 Consider some node $v$ of $T$.  For a point $q\in s(v)$, all of the
@@ -612,25 +606,25 @@ point $q\in s(v)$ then it must determine the location of the
 $x$-coordinate of $q$ with respect to all points in $T_x(v)$.  More
 precisely, the leaves of $T^*$ could be relabelled to obtain a
 comparison tree that determines, for any $q\in s(v)$, which interval
-of $T_x(v)$ contains $q_x$.  Since $T_x(\lft(v))$ is a biased search tree,
+of $T_x(v)$ contains $q_x$.  Since $T_x(u)$ is a biased search tree
 for the probability measure $D_{\mid s(v)}$, this implies that
 \[
-  \mu_{D_{\mid s(v)}}(T^*) \ge \mu_{D_{\mid s(v)}}(T_x(\lft(v))) - 1\enspace .
+  \mu_{D_{\mid s(v)}}(T^*) \ge \mu_{D_{\mid s(v)}}(T_x(u)) - 1\enspace .
 \]
 Similarly, the same argument applied to $T_y(v)$ yields 
 \[
-  \mu_{D_{\mid s(v)}}(T^*) \ge \mu_{D_{\mid s(v)}}(T_y(\lft(v))) - 1\enspace .
+  \mu_{D_{\mid s(v)}}(T^*) \ge \mu_{D_{\mid s(v)}}(T_y(u)) - 1\enspace .
 \]
 We can now complete the proof with
 \begin{eqnarray*}
 \mu_D(T^*) 
  & = & \sum_{v\in T} \Pr(v)\cdot\mu_{D_{\mid s(v)}}(T^*) \\
  & \ge & \sum_{v\in T}
-	\Pr(v) \cdot\max\left\{\mu_{D_{\mid s(v)}}(T_x(\lft(v))), 
-		       \mu_{D_{\mid s(v)}}(T_y(\lft(v)))\right\} - 1 \\
+	\Pr(v) \cdot\max\left\{\mu_{D_{\mid s(v)}}(T_x(u)), 
+		       \mu_{D_{\mid s(v)}}(T_y(u))\right\} - 1 \\
  & \ge & \sum_{v\in T}
-	\frac{1}{2}\Pr(v)\cdot\left( \mu_{D_{\mid s(v)}}(T_x(\lft(v)))
-                             +  \mu_{D_{\mid s(v)}}(T_y(\lft(v))) \right) - 1 \\
+	\frac{1}{2}\Pr(v)\cdot\left( \mu_{D_{\mid s(v)}}(T_x(u))
+                             +  \mu_{D_{\mid s(v)}}(T_y(u)) \right) - 1 \\
  & = & \frac{1}{2}\cdot C_2(S,D) - 1 = \Omega(C_2(S,D)) \enspace .
 \end{eqnarray*}
 \end{proof}
@@ -798,7 +792,10 @@ to answer queries with a biased range tree, when the queries are
 distributed according to $D$, is within a constant factor of any
 decision tree for answering range queries over $S$.  Like standard
 range trees, biased range trees use $O(n\log n)$ space and can also
-answer semigroup queries \cite{ae133,ae292}.  Although the analysis of
+answer semigroup queries \cite{ae133,ae292}.\footnote{That biased
+range trees can answer semigroup queries follows
+from Properties~1--3 of the catalogues in \secref{catalogues}.}
+Although the analysis of
 biased range trees is complicated, their implementation is not much
 more complicated than that of standard range trees.
 

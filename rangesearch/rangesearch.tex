@@ -308,7 +308,7 @@ requirements of this backup tree are $O(n\log n)$ \cite{bkos97}.
 Like a range tree, a biased range tree is an augmented data structure
 consisting of a primary tree whose nodes store secondary structures.
 However, in a range tree the primary tree is a binary search tree that
-discriminates based only on the $x$ coordinate of the query point $q$.
+discriminates based only on the $x$-coordinate of the query point $q$.
 In order to achieve optimal expected query time, this turns out to be
 insufficient, so instead biased range trees use a variation of a $k$-d
 tree as the primary tree.
@@ -401,12 +401,10 @@ The nodes of the tree $T$ are augmented with additional data
 structures called \emph{catalogues} that hold subsets of $S$.  Each
 node $v$ has two catalogues, $C_x(v)$ and $C_y(v)$ that store subsets
 of $S$ sorted by their $x$-, respectively, $y$-, coordinate.  If $v$
-is a horizontal node, then $C_x(\lft(v))= r(\rght(v))\cap S$ and
-$C_y(\lft(v))=\emptyset$.  If $v$ is a vertical node, then
-$C_y(\lft(v)) = r(\rght(v))\cap S$ and $C_x(\lft(v))=\emptyset$.  In
-either case, $C_x(\rght(v))=C_y(\rght(v))=\emptyset$.  This defines
-the catalogues of all nodes except the root of $T$ which has
-$C_x(v)=C_y(v)=\emptyset$. See \figref{catalogues}.
+is a horizontal node, then $C_x(v)= (s(v)\cup r(\rght(v)))\cap S$ and
+$C_y(v)=\emptyset$.  If $v$ is a vertical node, then $C_y(v) =
+(s(v)\cup r(\rght(v)))\cap S$ and $C_x(v)=\emptyset$. See
+\figref{catalogues}.
 
 \begin{figure}
   \begin{center}
@@ -422,9 +420,12 @@ $C_x(v)=C_y(v)=\emptyset$. See \figref{catalogues}.
 \end{figure}
 
 Consider any node $v$ that is not a bad leaf and any point $q\in
-s(v)$.  Let $v_1,\ldots,v_k$ denote the path from $\lft(v)$ to the
-root of $T$.  Then the catalogues of $v_1,\ldots,v_k$ have the
-following properties (see \figref{3d-view}):
+s(v)$.  Consider the path $P$ from $v$ to the root of
+$T$ and let $v_1,\ldots,v_k$ denote the subsequence of $P$ consisting of
+$v=v_1$ and all nodes whose predecessors in $P$ are their left child
+(see \figref{3d-view}).
+Then the catalogues of $v_1,\ldots,v_k$ have the
+following properties:
 \begin{figure}
   \begin{center}
     \includegraphics{3d-view}
@@ -456,6 +457,12 @@ the query range $R(q)$.  That is,
 \]
 \end{enumerate}
 
+Note that, points 1, 2 and 3 above imply that determining $|R(q)\cap S|$
+can be done by solving a sequence of 1-dimensional 1-sided range
+queries in the catalogues of $v_1,\ldots,v_k$.  However, performing
+these queries individually would take too long.
+
+
 %\begin{figure}
 %
 %\caption{The catalogues of $T$ at (a)~a horizontal node and (b)~a
@@ -463,24 +470,23 @@ the query range $R(q)$.  That is,
 %\figlabel{catalogues}
 %\end{figure}
 
-To speed up the process of navigation in $T$, fractional cascading
-\cite{ae76} is applied to the catalogues of $T$.  If $v$ is a
-horizontal node, then (a fraction of) all the data in $C_x(v)$ is
-cascaded into both $C_x(\lft(v))$ and $C_x(\rght(v))$.  However,
-$C_y(v)$ is partitioned into two sets.  If $h(v)$ denotes the smallest
-horizontal strip that contains $r(v)$, then $C_y(v)$ is
-partitioned into the two sets $h(\rght(v))\cap C_y(v)$ and
-$h(\lft(v))\cap C_y(v)$ and (a fraction of) these is cascaded into
-$\lft(v)$, respectively, $\rght(v)$.  Similarly, if $v$ is a vertical
-node, then (a fraction of) all the data in $C_y(v)$ is cascaded into
-both $C_y(\lft(v))$ and $C_y(\rght(v))$ but the data in $C_x(v)$ is
-partitioned before being cascaded into $C_x(\lft(v))$ and
-$C_x(\rght(v))$.  Note that this cascading is done only to speed up
-navigation between the catalogues of $T$.  Although fractional
-cascading introduces extra data into the catalogues of $T$ we will
-continue to use the notations $C_x(v)$ and $C_y(v)$ to denote the
-set of points contained in the catalogues of $v$ before fractional
-cascading takes place.
+To speed up the process of navigating the catalogues of $T$,
+fractional cascading \cite{ae76} is used.  If $v$ is a horizontal
+node, then (a fraction of) all the data in $C_x(v)$ is cascaded into
+both $C_x(\lft(v))$ and $C_x(\rght(v))$.  However, $C_y(v)$ is
+partitioned into two sets.  If $h(v)$ denotes the smallest horizontal
+strip that contains $r(v)$, then $C_y(v)$ is partitioned into the two
+sets $h(\rght(v))\cap C_y(v)$ and $h(\lft(v))\cap C_y(v)$ and (a
+fraction of) these is cascaded into $\lft(v)$, respectively,
+$\rght(v)$.  Similarly, if $v$ is a vertical node, then (a fraction
+of) all the data in $C_y(v)$ is cascaded into both $C_y(\lft(v))$ and
+$C_y(\rght(v))$ but the data in $C_x(v)$ is partitioned before being
+cascaded into $C_x(\lft(v))$ and $C_x(\rght(v))$.  Note that this
+cascading is done only to speed up navigation between the catalogues
+of $T$.  Although fractional cascading introduces extra data into the
+catalogues of $T$ we will continue to use the notations $C_x(v)$ and
+$C_y(v)$ to denote the set of points contained in the catalogues of
+$v$ before fractional cascading takes place.
 
 Finally, each catalogue $C_x(v)$ and $C_y(v)$ is indexed by a biased
 binary search tree $T_x(v)$, respectively, $T_y(v)$.  The weight of an

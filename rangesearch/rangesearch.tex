@@ -314,20 +314,16 @@ insufficient, so instead biased range trees use a variation of a $k$-d
 tree as the primary tree.
 
 The primary tree is constructed in a top-down fashion.  Each node $v$
-of $T$ is associated with a region $r(v)$ whose closure is a rectangle.
-The region
-associated with the root of $T$ is all of $\R^2$.  We say that a node
-$v$ is \emph{bad} if its depth is at least $\ceil{\log_2 n}$ and
-$r(v)\cap S \neq \emptyset$. 
-A node $v$ is \emph{split} if
-$v$ is not bad,
-and $r(v)\cap S\neq \emptyset$.
-The two children of a split node
-$v$ are associated with the two regions obtained by removing a
-horizontal or vertical strip $s(v)$ from $r(v)$ depending on whether the
-depth of $v$ is even or odd, respectively.  We call a node $v$ at even
-distance from the root a \emph{vertical node}, otherwise we call $v$ a
-\emph{horizontal node}. 
+of $T$ is associated with a region $r(v)$ whose closure is a
+rectangle.  The region associated with the root of $T$ is all of
+$\R^2$.  We say that a node $v$ is \emph{bad} if its depth is at least
+$\ceil{\log_2 n}$ and $r(v)\cap S \neq \emptyset$.  A node $v$ is
+\emph{split} if $v$ is not bad, and $r(v)\cap S\neq \emptyset$.  The
+two children of a split node $v$ are associated with the two regions
+obtained by removing a horizontal or vertical strip $s(v)$ from $r(v)$
+depending on whether the depth of $v$ is even or odd, respectively.
+We call a node $v$ at even distance from the root a \emph{vertical
+node}, otherwise we call $v$ a \emph{horizontal node}. 
 
 Refer to \figref{left-right}.  For a vertical node $v$, we denote its
 children by $\lft(v)$ and $\rght(v)$ and call them the \emph{left
@@ -417,8 +413,11 @@ a right child of its parent, $C_x(v)=C_y(v)=\emptyset$.
   \figlabel{catalogues}
 \end{figure}
 
+
 Consider any node $v$ that is not a bad leaf and any point $q\in s(v)$.
-Let $v_1,\ldots,v_k$ denote the path from $\lft(v)$ to the root of $T$
+If $v$ has a left child then let $v_1=\lft(v)$, otherwise, let
+$v_1=v$.
+Let $v_1,\ldots,v_k$ denote the path from $v_1$ to the root of $T$
 (see \figref{3d-view}).  Then the catalogues of $v_1,\ldots,v_k$ have
 the following properties:
 \begin{figure}
@@ -484,17 +483,20 @@ $v$ before fractional cascading takes place.
 \end{figure}
 
 Finally, each catalogue $C_x(v)$ and $C_y(v)$ is indexed by a biased
-binary search tree $T_x(v)$, respectively, $T_y(v)$.  The weight of an
-interval $[a,b)$ in $T_x(v)$, respectively, $T_y(v)$ is given by the
-probability that $q_x$, respectively, $q_y$, is in the interval
-$[a,b)$ when $q$ is drawn according to the distribution $D_{\mid
-s(\prnt(v))}$.
+binary search tree $T_x(v)$, respectively, $T_y(v)$.  If $v$ is the
+left child of its parent, then the weight of an interval $[a,b)$ in
+$T_x(v)$, respectively, $T_y(v)$ is given by the probability that
+$q_x$, respectively, $q_y$, is in the interval $[a,b)$ when $q$ is
+drawn according to the distribution $D_{\mid s(\prnt(v))}$.
+Otherwise ($v$ is not a left child), the weight of an interval is determined by the distribution
+$D_{\mid s(v)}$.
 
 \subsection{Construction Time and Space Requirements}
 
 The biased range tree data structure is now completely defined.  The
 structure consists of a backup tree, a primary tree, and the
-catalogues of the primary tree.
+catalogues of the primary tree.  We now analyze the construction time
+and space requirements of biased range trees.
 
 The backup tree has size $O(n\log n)$ and can be constructed in
 $O(n\log n)$ time.  To construct the primary tree quickly we presort
@@ -555,7 +557,7 @@ trees is as good as the expected query time of any comparison tree.
 The expected query time has two components.  The first component is
 the expected depth, $d_T(q)$,  of the node $v$ such that $s(v)$
 contains $q$.  The second component is the expected cost of locating
-$q$ in the catalogues of $\lft(v)$.  We will show that each of these
+$q$ in the catalogues of $u$.  We will show that each of these
 two components is a lower bound on the expected cost of any decision
 tree for two-sided range searching on $S$ where queries come from
 distribution $D$.  In order to simplify notation in this section we
@@ -565,8 +567,7 @@ search terminates at node $v$ of $T$.
 \subsection{The Catalogue Location Step}
 
 First we show that the expected cost of locating $q$ in the two
-catalogues, $C_x(u)$ and $C_y(u)$, of the leaf $v$
-with $q\in r(v)$ is
+catalogues, $C_x(u)$ and $C_y(u)$ is
 a lower bound on the expected cost of any decision tree for answering
 2-sided range queries in $S$.  The intuition behind this proof is
 that, in order to correctly answer range counting queries, any decision tree
@@ -707,18 +708,18 @@ $G_{i,t_i}$ is not necessarily HV-independent.)
 
 Consider some group $G_{i,j}$ for $1\le j < t_i$.  Let $\ell$ be a
 leaf of $T^*$ and observe that, because the nodes in $G_{i,j}$ are
-independent and each one contains at least one point of $S$, there are
-at most 4 nodes $v$ in $G_{i,j}$ such that $r(\ell)$ intersects
-$r(v)$.  (Otherwise $r(\ell)$ contains a point of $S$ in its interior
-and therefore $T^*$ does not solve the range counting problem for $S$.)
-Thus, by performing two additional comparisons, $T^*$ can be used to
-determine which node of $v\in G_{i,j}$ (if any) contains the query
-point $q$ in $s(v)$.  However, $G_{i,j}$ contains $\Omega(\alpha^i)$
-nodes and the search path for $q$ terminates at each of these with
-probability between $1/2^i$ and $1/2^{i-1}$.  Therefore, if we denote
-by $D_{i,j}$ the distribution $D$ conditioned on the search path for
-$q$ terminating in one of the nodes in $G_{i,j}$ then we have, by
-applying
+independent and each one contains at least one point of $S$ in its
+closure, there are at most 4 nodes $v$ in $G_{i,j}$ such that
+$r(\ell)$ intersects the closure of $r(v)$.  (Otherwise $r(\ell)$
+contains a point of $S$ in its interior and therefore $T^*$ does not
+solve the range counting problem for $S$.) Thus, by performing 2 
+additional comparisons, $T^*$ can be used to determine which node of
+$v\in G_{i,j}$ (if any) contains the query point $q$ in $s(v)$.
+However, $G_{i,j}$ contains $\Omega(\alpha^i)$ nodes and the search
+path for $q$ terminates at each of these with probability between
+$1/2^i$ and $1/2^{i-1}$.  Therefore, if we denote by $D_{i,j}$ the
+distribution $D$ conditioned on the search path for $q$ terminating in
+one of the nodes in $G_{i,j}$ then we have, by applying
 \thmref{shannon},
 \begin{eqnarray*}
    \mu_{D_{i,j}}(T^*) + 2 
@@ -743,7 +744,7 @@ Putting this all together, we obtain
           -    \sum_{i=1}^{\infty}
 		\sum_{v\in G_{i,t_i}}\Pr(v)\cdot\depth(v) - O(1)\\
   & \ge & (\log\alpha)\cdot\sum_{v\in T}\Pr(v)\cdot \depth(v)
-          -    \sum_{i=1}^{\ceil{\log n}}i\cdot\Pr(G_{i,t_i}) - O(1) \\
+          -    \sum_{i=1}^{\infty}i\cdot\Pr(G_{i,t_i}) - O(1) \\
   & \ge & (\log\alpha)\cdot\sum_{v\in T}\Pr(v)\cdot \depth(v)
           -    \sum_{i=1}^{\ceil{\log n}}i\gamma^i/2^{i-1} - O(1) \\
   & \ge &  (\log\alpha)\cdot\sum_{v\in T}\Pr(v)\cdot \depth(v) - O(1) \\

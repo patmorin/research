@@ -3,7 +3,7 @@
 \mode<presentation>{
 \definecolor{cured}{rgb}{.8,0,.2}
 \usecolortheme[named=cured]{structure}
-\usefonttheme{structurebold}
+%\usefonttheme{structurebold}
 \usetheme{split}
 }
 
@@ -22,9 +22,11 @@
 \DeclareMathOperator{\depth}{depth}
 
 \title{Distribution-Sensitive Point Location\\ in Convex Subdivisions}
-\author{Pat Morin}
-\institute{Carleton University}
-\date{December 6, 2006 \\ McGill University}
+\author{S\'ebastien~Collette 
+	\and Vida~Dujmovi\'c 
+	\and John~Iacono
+	\and Pat~Morin}
+\date{May 14, 2008 \\ University of Sydney}
 
 \begin{document}
 
@@ -127,22 +129,22 @@ expected number of decisions is at least
       \item<1->For convex subdivisions: $O(n)$ space, $4H+o(H)$ comparisons
       \item<1->Requires that $x$ and $y$ coordinates of $p$ are independent
     \end{itemize}
-   \item<2-> Arya, Malamatos, and Mount (2000)
+   \item<2-> Arya, Malamatos, and Mount (2000,2001a,2001b,2007)
     \begin{itemize}
-      \item<2->For triangulations: $O(n\log n)$ space, $H+o(H)$ comparisons
-    \end{itemize} 
-    \item<3-> Arya, Malamatos, and Mount (2001a)
-    \begin{itemize}
-      \item<3->For triangulations: $O(n\log^* n)$ space, $H+o(H)$ comparisons
-    \end{itemize} 
-    \item<4-> Arya, Malamatos, and Mount (2001b)
-    \begin{itemize}
-      \item<4->For triangulations: $O(n)$ space, $O(H)$ comparisons
+      \item<2->For triangulations: $O(n)$ space, $H+O(H^{1/2}+1)$ comparisons
+%    \end{itemize} 
+%    \item<3-> Arya, Malamatos, and Mount (2001a)
+%    \begin{itemize}
+%      \item<3->For triangulations: $O(n\log^* n)$ space, $H+o(H)$ comparisons
+%    \end{itemize} 
+%    \item<4-> Arya, Malamatos, and Mount (2001b)
+%    \begin{itemize}
+      \item<3->For triangulations: $O(n)$ space, $O(H)$ comparisons
 (randomized --- Mulmuley)
     \end{itemize} 
-    \item<5-> Iacono (2001)
+    \item<4-> Iacono (2001)
     \begin{itemize}
-      \item<5->For triangulations: $O(n)$ space, $O(H)$ comparisons
+      \item<4->For triangulations: $O(n)$ space, $O(H)$ comparisons
 (deterministic --- Kirkpatrick)
     \end{itemize} 
    \end{itemize}
@@ -188,7 +190,7 @@ point $p$, distributed according to $D$ is inside or outside $P$
         $H= \sum_{i=1}^f (c/f)\log (f/c) = \Theta(\log f)$ }%       
      \only<3->{\centerline{\includegraphics[scale=.6]{problema-3}}%
         $H= p_1\sum_{i=1}^3 p_i\log(1/p_i) = O(1)$ }%  
-     \item<4-> Choosing correct triangulation is critical
+     \item<4-> Choosing a good triangulation is critical
    \end{itemize}
 }
 
@@ -281,7 +283,7 @@ $T$, so Shannon's Theorem gives
    \frametitle{Linear Decision Trees}
    \begin{itemize}
      \item<1-> We need to fix a model of computation for the lower bound
-     \item<2-> A \emph{linear decision tree} is a binary where
+     \item<2-> A \emph{linear decision tree} is a binary tree where
        \begin{itemize}
           \item Each internal node is labelled with a linear inequality
           \item Each leaf is labelled with \emph{in} or \emph{out}
@@ -312,35 +314,76 @@ $T$, so Shannon's Theorem gives
             \includegraphics{lower-bound}
           \item<2-> \textbf{Lemma 0:} Any linear decision tree $X$ for
 testing if $p\in P$ has 
-\[  \mu_D(X)\ge \frac{1}{2}\sum_{i=1}^{11} p_i\log(1/p_i)  \]
+\[  \mu_D(X) + \log(\mu_D(X)) \ge \sum_{i=1}^{11} p_i\log(1/p_i)
+ \]
         \end{itemize} 
 }
-
 
 \frame
 {
 	\frametitle{Proof of Lemma 0}
         \begin{itemize}
-           \item<1->We first prove a lower bound for the \emph{chord tree} model\\
-            \only<1>{\includegraphics{lb-proof-a}}%
-            \only<2>{\includegraphics{lb-proof-b}}%
-            \only<3>{\includegraphics{lb-proof-c}}%
-            \only<4->{\includegraphics{lb-proof-d}}%
-           \item<2->Let $C_1,\ldots,C_{11}$ be the components of 
-               $\support(D)\setminus \boundary P$
-
-           \item<3->For any $p\in C_i$ and $q\in C_j$ $i\neq j$, $p$ and $q$
-               must live in different leaves of the chord tree
-
-           \item<4->By labelling leaves of the chord tree $T_C$
-		appropriately we obtain a
-               point location structure for $C_1,\ldots,C_{11}$ \\
-           $\Rightarrow$ By Shannon's Theorem $\mu_D(T_C) \ge \sum_{i=1}^{11}p_i\log (1/p_i)$
-           \item<5->Any line intersects $\support(D)$ in at most 2 chords
-		\hfill{\qed}
+	   \item<1-> Consider a leaf $\ell$ of $X$
+            \only<1>{\includegraphics{lower-bound}}%
+            \only<2>{\includegraphics{lower-bound-out}}%
+            \only<3->{\includegraphics{lower-bound-in}}%
+	   \item<2-> If $\ell$ is labelled ``out'' then $r(\ell)$
+intersects at most one of $p_1,p_3,p_5,p_7,p_9,p_{11}$.
+           \item<3-> If $\ell$ is labelled ``in'' then $r(\ell)$ may
+intersects several of $p_2,p_4,p_6,p_8,p_{10}$.
+	   \begin{itemize}
+		\item <4->If $\ell$ intersects $k$ pieces then
+$r(\ell)$ has at least $k$ sides
+		\item <5->The depth of $\ell$ in $X$ must be at least
+$k$.
+	   \end{itemize}
         \end{itemize}
 }
 
+\frame
+{
+	\frametitle{Proof of Lemma 0}
+        \begin{itemize}
+	   \item<1-> Split $r(\ell)$ up into $k$ pieces 
+           \includegraphics{lower-bound-in-triangulate}
+	   \item<2-> The depth of these pieces is at most $k+\log k$.
+           \item<3-> We now have a linear decision tree $X'$, and each
+leaf of $X'$ intersects at most one of $p_1,\ldots,p_{11}$ so
+	     $ \sum_{i=1}^{11}p_i\log(1/p_i) \le \mu_D(X') $
+           \item<4-> And the expected 
+cost of $X'$ is at most 
+	\[ \mu_D(X') \le \mu_D(X) + \log(\mu_D(X)) \]
+        \end{itemize}
+}
+
+
+
+
+
+%\frame
+%{
+%	\frametitle{Proof of Lemma 0}
+%        \begin{itemize}
+%           \item<1->We first prove a lower bound for the \emph{chord tree} model\\
+%            \only<1>{\includegraphics{lb-proof-a}}%
+%            \only<2>{\includegraphics{lb-proof-b}}%
+%            \only<3>{\includegraphics{lb-proof-c}}%
+%            \only<4->{\includegraphics{lb-proof-d}}%
+%           \item<2->Let $C_1,\ldots,C_{11}$ be the components of 
+%               $\support(D)\setminus \boundary P$
+%
+%           \item<3->For any $p\in C_i$ and $q\in C_j$ $i\neq j$, $p$ and $q$
+%               must live in different leaves of the chord tree
+%
+%           \item<4->By labelling leaves of the chord tree $T_C$
+%		appropriately we obtain a
+%               point location structure for $C_1,\ldots,C_{11}$ \\
+%           $\Rightarrow$ By Shannon's Theorem $\mu_D(T_C) \ge \sum_{i=1}^{11}p_i\log (1/p_i)$
+%           \item<5->Any line intersects $\support(D)$ in at most 2 chords
+%		\hfill{\qed}
+%        \end{itemize}
+%}
+%
 
 \frame
 {
@@ -353,8 +396,11 @@ $V$ is an ancestor of any other vertex in $V$
         \item<3->Let $D_{\mid V}$ be the measure $D$ conditioned on the
 search completing at a node in $V$
         \item<4->\textbf{Lemma 1:} For any linear decision tree $X$
-        \[ \mu_{D_{\mid V}}(X) \ge \frac{1}{4}\sum_{v\in V} \Pr(v\mid V)\log (1/\Pr(v\mid V))
-         \]
+        \only<4>{\[ \mu_{D_{\mid V}}(X) + \log(\mu_{D_{\mid V}}(X))  \ge \sum_{v\in V} \Pr(v\mid V)\log (1/\Pr(v\mid V))
+         \]}
+        \only<5>{\[ \mu_{D_{\mid V}}(X) \ge \sum_{v\in V} \Pr(v\mid V)\log (1/\Pr(v\mid V))
+         \]}
+
     \end{itemize}
 }
 
@@ -367,11 +413,11 @@ search completing at a node in $V$
          \]
         \item<2-> For any linear decision tree $X$ and any
 	\emph{genetically independent set} $V\subseteq V(T)$ of
-	 \[ \mu_{D_{\mid V}}(X) \ge \frac{1}{4}\sum_{v\in V} \Pr(v\mid V)\log(1/\Pr(v\mid V))
+	 \[ \mu_{D_{\mid V}}(X) \ge \sum_{v\in V} \Pr(v\mid V)\log(1/\Pr(v\mid V))
          \]
         \item<3-> For any partition of $V(T)$ into genetically
 independent sets $V_1,\ldots,V_k$, and any linear decision tree $X$,
-	 \[ \mu_D(X) \ge \frac{1}{4}\sum_{i=1}^k\Pr(V_i)\sum_{v\in V_i} \Pr(v\mid
+	 \[ \mu_D(X) \ge \sum_{i=1}^k\Pr(V_i)\sum_{v\in V_i} \Pr(v\mid
 V_i)\log(1/\Pr(v\mid V_i))
          \]
      \end{itemize}
@@ -385,11 +431,11 @@ V_i)\log(1/\Pr(v\mid V_i))
  	\begin{itemize}
 	\item<1-> We're now dangerously close to matching upper and lower bounds
         \begin{eqnarray*}
-	\mu_D(X) &\ge &\frac{1}{4}\sum_{i=1}^k
+	\mu_D(X) &\ge &\sum_{i=1}^k
 	   \Pr(V_i)\sum_{v\in V_i} \Pr(v\mid V_i)\log(1/\Pr(v\mid V_i)) \\
-	& = &\frac{1}{4}\sum_{i=1}^k\sum_{v\in V_i} 
+	& = &\sum_{i=1}^k\sum_{v\in V_i} 
 		\Pr(v)\log(1/\Pr(v\mid V_i)) \\
-	& = &\frac{1}{4}\sum_{i=1}^k\sum_{v\in V_i} 
+	& = &\sum_{i=1}^k\sum_{v\in V_i} 
 		\Pr(v)(\log(1/\Pr(v))-\log(1/\Pr(V_i)))
 	\end{eqnarray*}
 	\item<2-> The trick is to pick our $V_i$s so that
@@ -419,9 +465,9 @@ $\log(1/\Pr(V_i))$ is small
 	   \end{itemize}
 	\item<4-> With the right $\alpha$ and some work, we can show that
 	\begin{eqnarray*}
-	\mu_D(X) & \ge & \frac{1}{4}\sum_{i,j}\sum_{v\in V_{i,j}} 
+	\mu_D(X) & \ge & \sum_{i,j}\sum_{v\in V_{i,j}} 
 		\Pr(v)(\log(1/\Pr(v))-\log(1/\Pr(V_{i,j}))) \\
-	& \ge & \left(\frac{1}{4}-\epsilon\right)\sum_{v\in T}\Pr(V)\log(1/\Pr(V)) -
+	& \ge & \left(1-\epsilon\right)\sum_{v\in T}\Pr(V)\log(1/\Pr(V)) -
 O(1)
 	\end{eqnarray*}
 	\end{itemize}
@@ -461,7 +507,7 @@ $F_1,\ldots,F_f$ and a probability measure $D$ over $\R^2$
 	\item<2-> For each $i$, triangulate $F_i$ using the triangles of
 the triangle tree $T_i=T(F_i,D_{\mid F_i})$
 
-	\item<3-> Preprocess the resulting triangulation using Iacono's
+	\item<3-> Preprocess the resulting triangulation using a
 distribution-sensitive point location structure for triangulations to
 obtain a data structure $Q$
 
@@ -511,14 +557,19 @@ computation.
 	\begin{itemize}
 	\item<2-> A constant factor optimal data structure for
 distributions-sensitive point location in convex subdivisions
+	\item<3-> Extends to non-convex polygonal subdivisions
 	\end{itemize}
 	\textbf{Open Problems:}
 	\begin{itemize}
-	\item<3-> The constant factor gap between the upper and lower
-bounds is $1+\epsilon$.  Reduce this (to 1). 
-	\item<4-> Obtain similar results for general (non-convex)
-polygons and subdivisions
+	\item<4-> What can be done for point location in higher dimensions?
+	\item<5-> This data structure gives an optimal $O(n^2)$ space data structure for halfspace range queries.  What can be done with $O(n)$ space?
 	\end{itemize}
+}
+
+\frame
+{
+	\frametitle{Thank You}
+	\Huge Thank You!
 }
 
 

@@ -27,7 +27,7 @@ preprocesses a set $S$ of $n$ points in $\R^2$ and a query
 distribution $D$ for 2-sided orthogonal range counting queries.  The
 expected query time for this data structure, when queries are drawn
 according to $D$, matches, to within a constant factor, that of the
-optimal decision tree for $S$ and $D$.   The memory and preprocessing
+optimal comparison tree for $S$ and $D$.   The memory and preprocessing
 requirements of the data structure are $O(n\log n)$.
 \end{abstract}
 
@@ -739,67 +739,7 @@ range tree $T=T(S,D)$ such that $q\in s(v)$.  Then
 \]
 \end{lem}
 
-The proof of \lemref{depth} is included in \appref{proof}.
-
-And now the main event:
-
-\begin{thm}
-Let $S$ be a set of $n$ points and let $D$ be a probability measure
-over $\R^2$.
-Let $T=T(S,D)$ be the biased range tree for $S$ and $D$ and 
-let $T^*$ be any decision
-tree that answers range counting queries for $S$.  Then
-\[
-  \mu_D(T^*) = \Omega(\mu_D(T)) \enspace .
-\]
-\end{thm}
-
 \begin{proof}
-By the definition of $C_1$ and $C_2$, the expected cost of searching in
-$T$ is $\mu_D(T)=O(C_1(S,D)+C_2(S,D))$.  On the other hand, by
-\lemref{depth} and \lemref{cataloguer} $\mu_D(T^*) =
-\Omega(\max\{C_1(S,D),C_2(S,D)\}) =
-\Omega(C_1(S,D)+C_2(S,D))=\Omega(\mu_D(T))$.  This completes the proof.
-\end{proof}
-
-\section{Summary, Discussion, and Conclusions}
-\seclabel{summary}
-
-We have presented biased range trees, an optimal data structure for
-2-sided orthogonal range counting queries when the point set $S$ and
-query distribution $D$ is known in advance. The expected time required
-to answer queries with a biased range tree, when the queries are
-distributed according to $D$, is within a constant factor of any
-decision tree for answering range queries over $S$.  Like standard
-range trees, biased range trees use $O(n\log n)$ space and can also
-answer semigroup queries \cite{ae133,ae292}.\footnote{That biased
-range trees can answer semigroup queries follows
-from Properties~1--3 of the catalogues in \secref{catalogues}.}
-Although the analysis of
-biased range trees is complicated, their implementation is not much
-more complicated than that of standard range trees.
-
-As a small optimization, the backup range tree data structure can be
-eliminated from biased range trees.  Instead, once the probability of
-a node $v$ drops below $1/n$ the node can be split by ignoring the
-distribution $D$ and simply splitting the points of $r(v)\cap S$ into
-two sets of roughly equal size.  This results in a tree of depth at
-most $2(\log n+1)$.
-
-This work is just one of many possible results on
-distribution-sensitive range searching.  Several open problems
-immediately arise.  Refer to \appref{openproblems} for a list of
-directions for future research.
-
-
-\bibliographystyle{plain}
-\bibliography{rangesearch}
-
-\appendix
-\section{Proof of \lemref{depth}}
-\applabel{proof}
-
-\begin{proof}[Proof of \lemref{depth}]
 Partition the nodes of $T$ into groups $G_1,G_2,\ldots$ where $G_i$
 contains all nodes $v$ such that $1/2^{i} \le \Pr(v) \le 1/2^{i-1}$.
 Observe that the nodes in group $G_i$ occur in the first $i$ levels of
@@ -867,8 +807,54 @@ within a factor of $1/0.178071905\approx 5.615$ and an additive
 constant of 20.  Alternatively, selecting $\gamma=1.8$ gives a
 constant factor less than 3 and an additive term of approximately 90.
 
-\section{Open Problems}
-\applabel{openproblems}
+And now the main event:
+
+\begin{thm}
+Let $S$ be a set of $n$ points and let $D$ be a probability measure
+over $\R^2$.
+Let $T=T(S,D)$ be the biased range tree for $S$ and $D$ and 
+let $T^*$ be any decision
+tree that answers range counting queries for $S$.  Then
+\[
+  \mu_D(T^*) = \Omega(\mu_D(T)) \enspace .
+\]
+\end{thm}
+
+\begin{proof}
+By the definition of $C_1$ and $C_2$, the expected cost of searching in
+$T$ is $\mu_D(T)=O(C_1(S,D)+C_2(S,D))$.  On the other hand, by
+\lemref{depth} and \lemref{cataloguer} $\mu_D(T^*) =
+\Omega(\max\{C_1(S,D),C_2(S,D)\}) =
+\Omega(C_1(S,D)+C_2(S,D))=\Omega(\mu_D(T))$.  This completes the proof.
+\end{proof}
+
+\section{Summary, Discussion, and Conclusions}
+\seclabel{summary}
+
+We have presented biased range trees, an optimal data structure for
+2-sided orthogonal range counting queries when the point set $S$ and
+query distribution $D$ is known in advance. The expected time required
+to answer queries with a biased range tree, when the queries are
+distributed according to $D$, is within a constant factor of any
+decision tree for answering range queries over $S$.  Like standard
+range trees, biased range trees use $O(n\log n)$ space and can also
+answer semigroup queries \cite{ae133,ae292}.\footnote{That biased
+range trees can answer semigroup queries follows
+from Properties~1--3 of the catalogues in \secref{catalogues}.}
+Although the analysis of
+biased range trees is complicated, their implementation is not much
+more complicated than that of standard range trees.
+
+As a small optimization, the backup range tree data structure can be
+eliminated from biased range trees.  Instead, once the probability of
+a node $v$ drops below $1/n$ the node can be split by ignoring the
+distribution $D$ and simply splitting the points of $r(v)\cap S$ into
+two sets of roughly equal size.  This results in a tree of depth at
+most $2(\log n+1)$.
+
+This work is just one of many possible results on
+distribution-sensitive range searching.  Several open problems
+immediately arise.  
 
 \begin{op}
 Are there efficient distribution-sensitive data structures for 3-sided
@@ -938,6 +924,10 @@ $\Theta(\log^{d-1} n)$ query time.  Is there a structure that uses
 near-linear space and is optimal
 when the point set $S$ and the distribution $D$ are known in advance?
 \end{op}
+
+\bibliographystyle{plain}
+\bibliography{rangesearch}
+
 
 
 \end{document}

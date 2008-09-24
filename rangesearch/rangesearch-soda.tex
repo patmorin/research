@@ -1,5 +1,5 @@
-\documentclass[charterfonts]{patmorin}
-\usepackage{amsopn,amsfonts,graphicx}
+\documentclass[twoside,leqno,twocolumn]{article}  
+\usepackage{ltexpprt,amsopn,amsfonts,graphicx}
 
 \input{pat}
 
@@ -11,7 +11,7 @@
 \newcommand{\depth}{d}
 
 
-\title{\MakeUppercase{Biased Range Trees}}
+\title{Biased Range Trees}
 \author{Vida Dujmovi\'c\thanks{School of Computer Science,
 	Carleton University
 \texttt{\{vida,jhowat,morin\}@cg.scs.carleton.ca}}
@@ -54,20 +54,20 @@ and on the shape of the query ranges.  In this section we only mention
 a few data structures for orthogonal range counting and semigroup
 queries in 2 dimensions.  The interested reader is directed to the
 excellent, and easily accessible, survey by Agarwal and Erickson
-\cite{ea99}.
+\cite{ae99}.
 
 Orthogonal range counting is a classic problem in computational
 geometry.  The 2- (and 3- and 4-) sided range counting problem can be
 solved by Bentley's \emph{range trees} \cite{ae42}.  Range trees use
 $O(n\log n)$ space and can be constructed in $O(n\log n)$ time.
 Originally, range trees answered queries in $O(\log^2 n)$ time.
-However, with the application of fractional cascading
-\cite{ae76,ae196} the query time can be reduced to $O(\log n)$ without
-increasing the space requirement by more than a constant factor.
-Range trees can also answer more general \emph{semigroup queries} in
-which each point of $S$ is assigned a weight from a commutative
-semigroup and the goal is to report the weight of all points in the
-query range \cite{ae133,ae292}.
+However, with a careful layering use of pointers or fractional
+cascading \cite{ae76,ae196}, the query time can be reduced to $O(\log
+n)$ without increasing the space requirement by more than a constant
+factor.  Range trees can also answer more general \emph{semigroup
+queries} in which each point of $S$ is assigned a weight from a
+commutative semigroup and the goal is to report the weight of all
+points in the query range \cite{ae133,ae292}.
 
 For 2-sided orthogonal range counting queries, Chazelle
 \cite{ae55,ae58} proposes a data structure of size $O(n)$, that can be
@@ -268,7 +268,7 @@ any decision tree $T$ for range searching in $S$ can be relabelled to
 determine which of the $n+1$ circles contains $q$, so $\mu_D(T) \ge
 \log(n+1)$.
 
-\begin{figure}
+\begin{figure*}
   \begin{center}
     \begin{tabular}{cc}
       \includegraphics{arrangement} &
@@ -281,7 +281,7 @@ determine which of the $n+1$ circles contains $q$, so $\mu_D(T) \ge
      comparison tree for range counting in $S$. (b)~The lower bound is
      not always achievable by a comparison tree.}
   \figlabel{arrangement}
-\end{figure}
+\end{figure*}
 
 \paragraph{Biased Search Trees.}
 
@@ -362,7 +362,7 @@ $r(\rght(v))$.  However, if $q\in r(\rght(v))$ then $R(q)$ does not
 intersect $r(\lft(v))$.  Similarly, for a query point $q\in s(v)$, the
 query range $R(q)$ intersects $r(\rght(v))$ but not $r(\lft(v))$
 
-\begin{figure}
+\begin{figure*}
   \begin{center}
     \begin{tabular}{cc}
       \includegraphics{left-right-a} & \includegraphics{left-right-b} \\
@@ -372,7 +372,7 @@ query range $R(q)$ intersects $r(\rght(v))$ but not $r(\lft(v))$
   \caption{The splitting of (a)~a vertical node $v$ and (b)~a horizontal
   node $v$.}
   \figlabel{left-right}
-\end{figure}
+\end{figure*}
 
 All that remains is to define the strip $s(v)$ for each node $v$. If
 $v$ is a leaf then we use the convention that $s(v)=r(v)$.  If $v$ is
@@ -434,7 +434,7 @@ $C_y(\lft(v)) = (s(v)\cup r(\rght(v)))\cap S$ and
 $C_x(\lft(v))=\emptyset$.  For any node $v$ that is the root of $T$ or
 a right child of its parent, $C_x(v)=C_y(v)=\emptyset$.  
 
-\begin{figure}
+\begin{figure*}
   \begin{center}
     \begin{tabular}{c|c}
       \includegraphics{catalogue-horizontal} &
@@ -445,7 +445,7 @@ a right child of its parent, $C_x(v)=C_y(v)=\emptyset$.
   \caption{The catalogues of (a)~a horizontal node $v$ and (b)~a
   vertical node $v$.}
   \figlabel{catalogues}
-\end{figure}
+\end{figure*}
 
 
 Consider any node $v$ that is not a bad leaf and any point $q\in s(v)$.
@@ -551,7 +551,7 @@ then easily constructed in $O(n\log n)$ time.  Ignoring any copies of
 points created by fractional cascading, each point in $S$ occurs in at
 most 2 catalogues at each level of the primary tree.  Thus, the sizes
 of all catalogues (before fractional cascading) is $O(n\log n)$ and
-these catalogues can be constructed in $O(n\log n)$ time (because the
+these catalogues can be constructed in $O(n\log n)$ time (because the 
 elements of $S$ are presorted; see de~Berg \etal\
 \cite[Section~5.3]{bkos97} for details).  The fractional cascading
 between catalogues does not increase the size of catalogues by more
@@ -667,11 +667,15 @@ We can now complete the proof with
 \mu_D(T^*) 
  & = & \sum_{v\in T} \Pr(v)\cdot\mu_{D_{\mid s(v)}}(T^*) \\
  & \ge & \sum_{v\in T}
-	\Pr(v) \cdot\max\left\{\mu_{D_{\mid s(v)}}(T_x(u)), 
-		       \mu_{D_{\mid s(v)}}(T_y(u))\right\} - 1 \\
+	\Pr(v) \cdot\max
+            \left\{\begin{array}{l}\mu_{D_{\mid s(v)}}(T_w(u)), \\
+		       \mu_{D_{\mid s(v)}}(T_y(u))
+            \end{array}\right\} - 1 \\
  & \ge & \sum_{v\in T}
-	\frac{1}{2}\Pr(v)\cdot\left( \mu_{D_{\mid s(v)}}(T_x(u))
-                             +  \mu_{D_{\mid s(v)}}(T_y(u)) \right) - 1 \\
+	\frac{1}{2}\Pr(v)\cdot
+               \left(\begin{array}{l} \mu_{D_{\mid s(v)}}(T_x(u)) \\
+                             {} +  \mu_{D_{\mid s(v)}}(T_y(u)) 
+               \end{array}\right) - 1 \\
  & = & \frac{1}{2}\cdot C_2(S,D) - 1 = \Omega(C_2(S,D)) \enspace .
 \end{eqnarray*}
 \end{proof}
@@ -785,17 +789,18 @@ Putting this all together, we obtain
   & \ge & (\log\alpha)\cdot
          \sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
 		\sum_{v\in G_{i,j}}\Pr(v)\cdot\depth(v) - O(1)\\
-  & = & (\log\alpha)\cdot\sum_{v\in T}\Pr(v)\cdot \depth(v)
-          -    \sum_{i=1}^{\infty}
+  & = & (\log\alpha)\cdot\sum_{v\in T}\Pr(v)\cdot \depth(v) \\
+  & &      {}  -  (\log\alpha)\cdot  \sum_{i=1}^{\infty}
 		\sum_{v\in G_{i,t_i}}\Pr(v)\cdot\depth(v) - O(1)\\
-  & \ge & (\log\alpha)\cdot\sum_{v\in T}\Pr(v)\cdot \depth(v)
-          -    \sum_{i=1}^{\infty}i\cdot\Pr(G_{i,t_i}) - O(1) \\
-  & \ge & (\log\alpha)\cdot\sum_{v\in T}\Pr(v)\cdot \depth(v)
-          -    \sum_{i=1}^{\ceil{\log n}}i\gamma^i/2^{i-1} - O(1) \\
+  & \ge & (\log\alpha)\cdot\sum_{v\in T}\Pr(v)\cdot \depth(v) \\
+  & &      {}  -  (\log\alpha)\cdot  \sum_{i=1}^{\infty}i\cdot\Pr(G_{i,t_i}) - O(1) \\
+  & \ge & (\log\alpha)\cdot\sum_{v\in T}\Pr(v)\cdot \depth(v) \\
+   & &      {} - (\log\alpha)\cdot   \sum_{i=1}^{\ceil{\log n}}i\gamma^i/2^{i-1} - O(1) \\
   & \ge &  (\log\alpha)\cdot\sum_{v\in T}\Pr(v)\cdot \depth(v) - O(1) \\
   & = & \Omega(C_1(S,D)) \enspace ,
 \end{eqnarray*}
-where the last inequality follows from the fact that $\gamma/2 < 1$. 
+where the last inequality follows from the fact that $\gamma/2 < 1$ so
+that the second summation is bounded by a constant. 
 \end{proof}
 
 To get some idea of the constants involved in the proof of
@@ -870,7 +875,7 @@ corner is uniformly distributed in the shaded region of
 \figref{squares}.  All such queries contain no points in the query
 region and all such queries can be answered in $O(1)$ time by simply
 checking that all four corners of the square are to the left of the point
-set.  However, when we decompose these queries into a four 2-sided
+set.  However, when we decompose these queries into four 2-sided
 queries we obtain 2-sided queries that require $\Omega(\log n)$ time
 to be answered.
 
@@ -896,13 +901,12 @@ independently from $D$ in $O(n\log n+ m\mu_D(T^*))$ expected time?
 \end{op}
 
 \begin{op}
-Determine the worst-case or the average case constants associated with
-2-dimensional orthogonal range searching for comparison-based data structures.
-By applying the result of Adamy and Seidel \cite{as98} on point
-location to the arrangement $A$ described in \secref{preliminaries} one
-immediately obtains an $O(n^2)$ space data structure that answers
-queries using at most $2\log n + O(\log\log n)$ comparisons.  Is there
-an $O(n\log n)$ space structure with the same performance?
+Determine the worst-case or the average-case constants associated with
+2-sided 2-dimensional orthogonal range searching for comparison-based data
+structures.  By using a table of size $O(n^2)$, one immediately
+obtains an $O(n^2)$ space data structure that answers queries using at
+most $2\log n + O(1)$ comparisons.  Is there an $O(n\log n)$ space
+structure with the same performance?
 \end{op}
 
 \begin{op}
@@ -912,7 +916,8 @@ coordinate of $q$. For $d\ge 3$,  is there a distribution-sensitive
 data structure for
 testing if a query point $q$ is maximal?  For point sets in 2
 dimensions, an orthogonal variant of the point-location techniques of Collette
-\etal\ \cite{cdilm08} seems to apply. 
+\etal\ \cite{cdilm08} yield an optimal data structure with $O(n)$
+size.
 \end{op}
 
 

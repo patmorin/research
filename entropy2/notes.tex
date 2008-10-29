@@ -1,0 +1,75 @@
+\documentclass{article}
+
+
+\title{Notes on Entropy-Sensitive Range Searching}
+\author{John Iacono \and Stefan Langerman \and Pat Morin}
+
+\begin{document}
+\maketitle
+
+Here are some things we know (and think we know) about
+entropy-sensitive range searching.
+
+\section{Interval Searching}
+
+Suppose we are given $n$ real number $x_1,\ldots,x_n$ and a
+probability distribution $D$ over $Q=\{(i,j): 1\le i\le j\le n\}$.
+Then we obtain a data structure for interval range searching whose
+expected running time is $O(H(Q))$ in the following way:  For each
+$1\le i\le n$, compute the quantity
+\[
+	p_i = \frac{1}{2}\left(\sum_{j=1}^i D(j,i) + \sum_{j=i+1}^n D(i,j)\right)
+\]
+and then build a biased binary search tree on $x_i$ to $x_n$ using the
+weights $p_i$.
+
+\section{Point in Polygon Testing}
+
+Given a convex polygon $P$ and a distribution over $D$ over $\R^2$,
+there exists an optimal linear decision tree $T$ that takes as input a
+point $p$ distributed according to $D$ and determines whether $p$ is
+in $P$.  Can we find this optimal decision tree, or even an
+approximation of it?
+
+\section{Alternative Model}
+
+With each point we are given a probability that the point is in the
+range.
+
+\section{Halfplane Range Searching}
+
+In this model, there is a set $Q$ of ${n \choose 2}$ possible query
+halfspaces and we are given a probability distribution $D$ over $Q$.
+
+\subsection{Range Counting}
+
+For range counting queries, we obtain a data structure with query time
+$O(\min\{2^{cH},\sqrt{n}\})$ in the following way:  Dualize our input
+points to get a line arrangement $A$ and triangulate $A$.  Each
+triangle $t$ in the resulting triangulation is associated with three
+vertices and from these we derive the probability of querying $t$.
+Take the $n$ highest probability triangles and store them in an
+entropy-sensitive point-location structure (Iacono, SODA 200X).  Also
+store everything in a partition tree.  The query algorithm first looks
+for the result in the point-location structure and then looks in the
+partition tree. If $p$ is the probability of finding our answer in the
+first structure and $D'$ is the probability distribution $D$
+conditioned on finding our answer in the first structure, then a careful analysis of
+\[
+     H(D') + (1-p)\sqrt{n} = 2^{cH(D)}
+\]
+will determine the constant $c$.
+
+\subsection{Range Reporting}
+
+We can use the convex layers structure to obtain an $O(H+k)$ time data
+structure for range reporting in $2d$.  Do exactly what they do, but
+in the dual figure, make a trapezoidal decomposition and then use
+John's point location result instead of standard point location.
+
+\subsection{Lower Bounds}
+
+Can Chazelle's lower bounds be carried over to work in our setting?
+
+
+\end{document}

@@ -10,14 +10,27 @@
 \DeclareMathOperator{\rght}{right}
 \DeclareMathOperator{\prnt}{parent}
 \newcommand{\blah}{O(1/(1-\alpha)^2)}
+\newcommand{\junk}[1]{O\left(H(#1)^{2/3}+1\right)}
+\newcommand{\note}[1]{$^\star$\marginpar{\small $^*$#1}}
+
+\newcommand{\kangle}{kangle}
+\newcommand{\kangles}{kangles}
+\newcommand{\kangulation}{kangulation}
+\newcommand{\kangulate}{kangulate}
+\newcommand{\kangulated}{kangulated}
 
 
 \title{\MakeUppercase{Distribution-Sensitive Point 
-	Location in Convex Subdivisions}%
+	Location in Simple Subdivisions}%
 	\thanks{The research presented in this article took place
 while the fourth author was a visiting researcher at the Universit\'e Libre de
-Bruxelles, supported by a grant from FNRS.  The researchers are
-partially supported by NSERC and FNRS.}}
+Bruxelles, supported by a grant from FNRS and when the fourth author
+was a visiting researcher at National ICT Australia/University of
+Sydney supported by grants from National ICT Australia and the
+University of Sydney.  The researchers are
+partially supported by NSERC, FNRS, and the Ontario Ministry of Research and
+Innovation.}}
+
 \author{S\'ebastien Collette \\ \textit{Universit\'e Libre de Bruxelles}
   \and Vida Dujmovi\'c \\ \textit{McGill University}
   \and John Iacono \\ \textit{Polytechnic University}
@@ -29,10 +42,17 @@ partially supported by NSERC and FNRS.}}
 \maketitle
 
 \begin{abstract}
-A data structure is presented for point location in convex planar
+A data structure is presented for point location in connected planar
 subdivisions when the distribution of queries is known in advance.
 The data structure has an expected query time that is within a
-constant factor of optimal.
+constant factor of optimal.  More specifically, the algorithm
+preprocesses a planar subdivision $G$ and a query distribution $D$ to
+produce a point location data structure for $G$. The expected number
+of point-line comparisons performed by this data structure, when the
+queries are distributed according to $D$, is $H +
+O(H^{2/3}+1)$ where $H=H(G,D)$ is a lower bound on the expected number of
+point-line comparisons performed by any linear decision tree for point
+location in $G$ under the query distribution $D$.
 \end{abstract}
 
 \keywords{Planar point location, Entropy}
@@ -45,23 +65,26 @@ computational geometry. Given a planar subdivision $G$,\footnote{A
 \emph{planar subdivision} is a partitioning of the plane into points
 (called \emph{vertices}), open line segments (call \emph{edges}), and
 open polygons (called \emph{faces}).} the planar point location
-problems asks us to construct a data structure so that, for any query
+problem asks us to construct a data structure so that, for any query
 point $p$, we can quickly determine which face of $G$ contains
-$p$.\footnote{In the degenerate case where $p$ is vertex or contained
+$p$.\footnote{In the degenerate case where $p$ is a vertex or contained
 in an edge of $G$ any face incident on that vertex/edge may be
-returned as an answer.} The history of the planar point location
-problem parallels, in many ways, the study of binary search trees.
+returned as an answer.}
 
-After a few initial attempts \cite{dl76,lp77,p81}, asymptotically
-optimal (and quite different) linear-space $O(\log n)$ query time
-solutions to the planar point location problem were obtained by
-Kirkpatrick \cite{k83}, Sarnak and Tarjan \cite{st86}, and
-Edelsbrunner \etal\ \cite{egs86} in the mid 1980s.  These results were
-based on hierarchical simplification, data structural persistence, and
-fractional cascading, respectively.  All three of these techniques have
-subsequently found many other applications.  An elegant randomized
-solution, combining aspects of all three previous solutions, was later
-given by Mulmuley \cite{m90}.  Preparata \cite{p90} gives a
+The history of the planar point location problem parallels, in many
+ways, the study of binary search trees.  After a few initial attempts
+\cite{dl76,lp77,p81}, asymptotically optimal (and quite different)
+linear-space $O(\log n)$ query time solutions to the planar point
+location problem were obtained by Kirkpatrick \cite{k83}, Sarnak and
+Tarjan \cite{st86}, and Edelsbrunner \etal\ \cite{egs86} in the mid
+1980s.  These results were based on hierarchical simplification, data
+structural persistence, and fractional cascading, respectively.  All
+three of these techniques have subsequently found many other
+applications.  An elegant randomized solution, combining aspects of
+all three previous solutions, was later given by Mulmuley \cite{m90},
+and uses randomized incremental construction, a technique that has
+since become pervasive in computational geometry
+\cite[Section~9.5]{bcko08}.  Preparata \cite{p90} gives a
 comprehensive survey of the results of this era.
 
 In the 1990s, several authors became interested in determining the
@@ -97,13 +120,19 @@ complicated and the results become more specific.  A \emph{convex
 subdivision} is a planar subdivision whose faces are all convex
 polygons, except the outer face, which is the complement of a convex
 polygon.  A \emph{triangulation} is a convex subdivision in which each
-face has at most 3 edges on its boundary.  Note that, if every face of
-$G$ has a constant number of sides, then $G$ can be augmented, by the
-addition of extra edges, so that it is a triangulation without
-increasing \eqref{entropy} by more than a constant.  Thus, in the
-following we will simply refer to results about triangulations where
-it is understood that these also imply the same result for planar
-subdivisions with faces of constant size.
+face has at most 3 edges on its boundary.
+
+Note that, if every face of $G$ has a constant number of sides, then
+$G$ can be augmented, by the addition of extra edges, so that it is a
+triangulation without increasing \eqref{entropy} by more than a
+constant.  Similarly, in a convex subdivision $G$ where the query
+distribution $D$ is uniform within each face of $G$, the faces of the
+subdivision can be triangulated without increasing the entropy by more
+than a constant \cite{amm00}. Thus, in the following we will simply
+refer to results about triangulations where it is understood that
+these also imply the same result for planar subdivisions with faces of
+constant size or convex subdivisions when the query distribution is
+uniform within each face.
 
 Arya \etal\ \cite{acmr00} gave two results for the case where the
 query point $p$ is chosen from a known distribution where the $x$ and
@@ -128,10 +157,16 @@ to $O(n\log^* n)$ \cite{amm01a}.  The same three authors
 gives, for triangulations, a simple $O(H+1)$ expected query time,
 linear space data structure.  Most recently, Arya \etal\
 \cite{ammw07}, have given an $O(n)$ space structure for point-location
-in triangulations with query time $H+O(H^{1/2}+1)$.  This last result
-extends to convex subdivisions but only in the case where the query
-distribution is uniform within each face.
+in triangulations with query time $H+O(H^{1/2}+1)$. 
 
+\begin{thm}[Arya \etal\ 2007]\thmlabel{ammw07}
+Let $G$, $D$, $n$, and $H$ be as defined above.  Then there exists a
+data structure of size $O(n)$ that can be constructed in $O(n\log n)$
+time, and for which the expected number of point/line comparisons
+required to locate the face of $G$ containing a query point $p$, drawn
+according to $D$, is $H + O(\sqrt{H}+1)$.
+\end{thm}
+ 
 The above collection of results suggest that point location, and even
 distribution-sensitive point location, is a well-studied and
 well-understood problem, with solutions that are optimal up to
@@ -149,8 +184,9 @@ $f=2$ the entropy bound is at most 1.
 We begin our investigation of distribution-sensitive point location
 with the fundamental problem of testing if a query point $p$, drawn
 from an arbitrary distribution $D$ over $\R^2$, is contained in a
-convex polygon $P$.  We describe a hierarchical triangulation $T$ of
-$\R^2$ that we use to simultaneously achieve two objectives:
+convex polygon $P$.  We describe a hierarchical triangulation
+$T=T(P,D)$ of $\R^2$ that we use to simultaneously achieve two
+objectives:
 \begin{enumerate}
 \item $T$ is used with a query algorithm to check if a point $p$ 
 	is contained in $P$, and
@@ -164,30 +200,42 @@ algorithms that can be expressed as linear decision trees, our
 algorithm is optimal. This result is the first to give
 \emph{any} lower bound on the expected complexity of \emph{any} point
 location problem that exceeds the entropy bound. Proving the lower
-bound is by far the hardest part of our result.  
+bound is by far the hardest part of our results.  
 
-As an easy consequence of the above result we obtain a data structure
-for point location in convex subdivisions.  The expected query time of
-the resulting algorithm is optimal in the linear decision tree model
-of computation. Note that all known algorithms for planar point
-location that do not place special restrictions on the input
-subdivision can be described in the linear decision tree model of
-computation.\footnote{Although significant breakthroughs have recently been
-made in this area \cite{c06,p06}, we deliberately do not survey algorithms
-that require the vertices of the subdivision to be on integer
-coordinates.}  This data structure for point location in convex
-subdivisions where the query point is drawn according to an arbitrary
-distribution is the most general result known about planar point
-location and implies, to within constant factors, all of the results
-discussed above.
+In proving the lower bound, we show that finding (near) optimal point
+location structures is essentially equivalent to finding (near)
+minimum-entropy conforming triangulations, and we develop tools for
+proving upper and lower bounds on the entropy of the minimum-entropy
+conforming triangulation of a geometric graph.  By applying these
+tools and combining them with the recent results of Arya \etal\
+\cite{ammw07}, we obtain linear-space data structures for point
+location in convex subdivisions and, more generally, in connected
+planar subdivisions.  The expected query time of these data structures
+is optimal, up to a lower order term, in the linear decision tree
+model of computation.  More precisely, the data structures answer a query
+in expected time $O(\tilde H)$, where $\tilde H=\tilde H(G,D)$ is a
+lower bound on the expected cost of any linear decision tree for point
+location in the subdivision $G$ with query distribution $D$.  In terms
+of comparisons, the expected number of point/line comparisons
+performed by our data structure is $\tilde H + O(\tilde H^{2/3}+1)$.
+
+Note that all known algorithms for planar point location that do not
+place special restrictions on the input subdivision can be described
+in the linear decision tree model of computation.\footnote{Although
+significant breakthroughs have recently been made in this area
+\cite{c06,p06}, we deliberately do not survey algorithms that require
+the vertices of the subdivision to be on integer coordinates.}  The
+data structures presented in the current paper are the most general
+results known about planar point location and imply, to within a
+lower order term, all of the results discussed in the introduction.
 
 The remainder of this paper is organized as follows:  \Secref{prelim}
 presents definitions and notations used throughout the paper.
 \Secref{polygons} discusses algorithms and lower bounds for point
-location in convex polygons.  \Secref{subdivisions} presents algorithms
-and lower bounds for point location in convex subdivisions.  Finally,
-\Secref{discussion} concludes with a discussion and points out
-directions for further research.
+location in convex polygons.  \Secref{subdivisions} presents
+algorithms and lower bounds for point location in convex subdivisions.
+\Secref{simple} extends these results to simple (non-convex) planar
+subdivisions.
 
 
 \section{Preliminaries}
@@ -196,11 +244,19 @@ directions for further research.
 In this section we give definitions, notations, and background
 required in subsequent sections.
 
-\paragraph{Triangles and Convex Polygons.}  For the purposes of this paper, a
-\emph{triangle} is the common intersection of at most 3 halfplanes.
-This includes triangles with infinite area and triangles having 0, 1,
-2, or 3, vertices. Similarly, a \emph{convex $k$-gon} is the common
-intersection of at most $k$ halfplanes.
+\paragraph{Triangles and Convex Polygons.}  For the purposes of this
+paper, a \emph{triangle} is the common intersection of at most 3
+closed halfplanes.  This includes triangles with infinite area and
+triangles having 0, 1, 2, or 3, vertices. Similarly, a \emph{\kangle}
+is the common intersection of at most $k$ closed halfplanes.  For a
+closed region $X\subseteq \R^2$, a \emph{\kangulation} of $X$ is a set
+of \kangles\ whose interiors are pairwise disjoint and whose union is
+$X$.  We use the convention that, unless $X$ is explicity mentioned,
+the \kangulation\ in question is a \kangulation\ of $\R^2$.  A
+\kangle\ conforms to a geometric graph $G$ if the interior of the
+\kangle\ does not intersect any edge or vertex of $G$.  A
+\kangulation\ $\Delta$ of $X$ \emph{conforms} to a geometric graph $G$
+if each \kangle\ of $\Delta$ conforms to $G$.
 
 \paragraph{Classification Problems and Classification Trees.}
 
@@ -231,22 +287,16 @@ denoted by $\lft(v)$, $\rght(v)$ and $\prnt(v)$, respectively.
 For a distribution $D$ and an event $X$, we denote by $D_{|X}$ the
 distribution $D$ conditioned on $X$.  That is, the distribution where
 the probability of an event $Y$ is $\Pr(Y|X)=\Pr(Y\cap X)/\Pr(X)$.
+For any set $X$, we use the shorthand $\cup X$ to denote
+$\bigcup_{x\in X} x$.  For a set $S$ of subsets of $\R^2$, we define
+the \emph{induced entropy of $S$}, denoted by $H(S)$ as
+$H(S)=\sum_{s\in S}\Pr(s|{\cup S})\log(1/\Pr(s|{\cup S}))$, where the
+probability measure used is the query distribution $D$.
+
 The probability measures used in this paper are usually defined over
 $\R^2$.  We make no assumptions about how these measures are
-represented, but we assume that an algorithm can perform the following
-two operations in constant time:
-\begin{enumerate}
-\item given an open triangle $\Delta$, compute $\Pr(\Delta)$, and
-\item given an open triangle $\Delta$ and a point $t$ at the
-intersection of two of $\Delta$'s supporting lines, compute a line $\ell$
-that contains $t$ and that partitions $\Delta$ into two open triangles
-$\Delta_0$ and $\Delta_1$ such that $\Pr(\Delta_0)\le\Pr(\Delta)/2$
-and $\Pr(\Delta_1)\le\Pr(\Delta)/2$.
-\end{enumerate}
-Requirement 2 is used only for convenience in describing our data
-structure.  In \secref{discussion} we show that 
-Requirement 2 is not really necessary and that Requirement 1 is sufficient to
-implement our data structure.
+represented, but we assume that an algorithm can, in constant time,
+determine the $\Pr(t)$ for any triangle $t$.
 
 For a classification tree $T$ that solves a problem
 $P:\mathcal{D}\mapsto\{0,\ldots,k-1\}$ and a probability measure $D$
@@ -268,8 +318,7 @@ Fundamental Theorem for a Noiseless Channel \cite[Theorem 9]{s48}, is
 what all existing results on distribution-sensitive planar point
 location use to establish their optimality:
 
-\setcounter{thm}{8}
-\begin{thm}\thmlabel{shannon}
+\begin{thm}[Fundamental Theorem for a Noiseless Channel]\thmlabel{shannon}
 Let $\mathcal{P}:\mathcal{D}\mapsto \{0,\ldots,k-1\}$ be a classification
 problem and let $p\in \mathcal{D}$ be selected from a distibution $D$ such
 that $\Pr\{\mathcal{P}(p)= i\}=p_i$, for $0\le i< k$.  Then, any
@@ -279,14 +328,15 @@ $d$-ary classification tree $T$ that solves $\mathcal{P}$ has
 	\eqlabel{shannon}
 \end{equation}
 \end{thm}
-\setcounter{thm}{0}
-\thmref{shannon} is applied to the point location problem by treating
-point location as the problem of classifying the query point $p$ based
-on which face of $G$ contains it.  In this way, we obtain the lower
-bound in \eqref{entropy-face}.
+\thmref{shannon} is typically applied to the point location problem by
+treating point location as the problem of classifying the query point
+$p$ based on which face of $G$ contains it.  In this way, we obtain
+the lower bound in \eqref{entropy-face}.
+
 
 \section{Point In Convex Polygon Testing}
 \seclabel{polygons}
+\seclabel{convex}
 
 Let $P$ be a convex $n$-gon whose boundary is denoted by $\partial P$
 and consider a probability measure $D$ over $\R^2$.  For technical
@@ -298,14 +348,14 @@ according to $D$, is contained in $P$.
 
 In particular, we are interested in algorithms that can be described
 as \emph{linear decision trees}.  These are decision trees such that
-each internal node $v$ contains a linear inequality $P_v(x,y)=[ax+by
-\ge c]$.\footnote{Here, and throughout, we use Iverson's notation
-where $[X]=0$ if $X$ is false and $[X]=1$ if $X$ is true \cite{k92}.}
+each internal node $v$ contains a linear inequality $P_v(x,y)=ax+by
+\ge c$, and the node evaluates to 1 or 0 depending on whether the
+query point $(x,y)$ satisifies the inequality or not, respectively.
 We require that, for every $p\in\R^2$ the leaf reached in the search
 path for $p$ is labelled with a 1 if and only if $p\in P$.
 Geometrically, each internal node of $T$ is labelled with a directed
 line and the decision to go to the left or right child depends on
-whether p is to the left or right (or on) this line.  
+whether $p$ is to the left or right (or on) this line.  
 
 Our exposition is broken up into three sections.  We begin by
 describing a data structure (in fact, a decision tree) that tests if
@@ -321,76 +371,69 @@ At a high level, our data structure works by creating a sequence of
 successively finer approximations $A_0,\ldots,A_k$ to $\boundary P$.
 Each approximation $A_i$ consists of two convex polygons; an
 \emph{outer approximation} that contains $P$ and an \emph{inner
-approximation} that is contained in $P$.
+approximation} that is contained in $P$.  For an edge $e$ of $P$, let
+$e_0$, respectively, $e_1$, denote the first, respectively, endpoint
+of $e$ that we encounter when traversing the boundary of $P$ in
+counterclockwise order, starting from a point $p\not\in e$.
 
-Each approximation $A_i$ is completely defined by a set $S_i$ of
-points on $\boundary P$.  The inner approximation is simply the convex
-hull of $S_i$.  The outer approximation has an edge tangent to $P$ at
-each of the points of $S_i$.  More precisely, for each point $x\in
-S_i$ there is an edge $e$ of the outer approximation that contains
-$x$.  If $x$ is in the interior of an edge of $P$ then $e$ is
-contained in the same line that contains that edge. Otherwise ($x$ is
-a vertex of $P$) $e$ is supported by the line containing the edge
-incident to $x$ that precedes $x$ in counterclockwise order.  We
-ensure that successive approximations have a containment relationship,
-i.e., $A_i\supseteq A_{i+1}$, by choosing our boundary points so that
-$S_i\subseteq S_{i+1}$.
+Each approximation $A_i$ is completely defined by a set $S_i$ of edges
+of $P$.  The inner approximation $I_i$ is simply the convex hull of $S_i$.
+The outer approximation $O_i$ is the common intersection of all closed
+halfplanes whose bounding lines contains the edges in $S_i$ and whose
+interiors contain $P$.  We ensure that successive approximations have
+a containment relationship, i.e., $A_i\supseteq A_{i+1}$, by choosing
+our edges so that $S_i\subseteq S_{i+1}$.
 
 Next we define the sets $S_0,\ldots,S_k$ that define our
 approximations.  The set $S_0$ is empty, and we use the convention
 that the outer approximation in this case is the entire plane and the
-inner approximation is the empty set. The set $S_1$ consists of any
-two points, $x$ and $y$ on $\boundary P$ such that $\Pr(h_1)\le 1/2$
-and $\Pr(h_2)\le 1/2$, for each of the two open halfspaces $h_1$ and
-$h_2$ bounded by the line containing $x$ and $y$. The existence of $x$
-and $y$ is guaranteed, for example, by the planar Ham Sandwich Theorem
-\cite{bz04}.
+inner approximation is the empty set. 
+
+The set $S_1$ consists of any two edges, $x$ and $y$ so that each of
+the two connected components of $O_1\setminus I_1$ has probability at
+most $1/2$.  The existence of $x$ and $y$ is guaranteed, for example,
+by the planar Ham Sandwich Theorem \cite{bz04}, and such a pair of
+edges is easily found in $O(n)$ time.
 
 We now show how, for $i\ge 1$, to obtain the set $S_{i+1}$ from the
-set $S_{i}$.  Let $p_0,\ldots,p_{m_i-1}$ be the points in $S_i$ as
-they occur in conterclockwise order around the boundary of $P$.  The
-approximation $A_i$ thus consists of $m_i$ open triangles
-$\Delta_0,\ldots,\Delta_{m_i-1}$ where $\Delta_j$ is the intersections
-of the following halfspaces:
+set $S_{i}$.  Let $e_0,\ldots,e_{m_i-1}$ be the edges in $S_i$ as they
+occur in conterclockwise order around the boundary of $P$.  The
+approximation $A_i$ thus consists of $m_i$ edges of $P$ joining a
+sequence of triangles triangles $\Delta_0,\ldots,\Delta_{m_i-1}$ where
+$\Delta_j$ is the common intersection of the following halfspaces:
 
 \begin{enumerate}
-\item the open halfspace to the right of the directed line through 
-	$p_j$ and $p_{j+1}$,
-\item the open halfspace bounded by the tangent to $P$ at $p_j$ and that
-contains $p_{j+1}$, and 
-\item the open halfspace bounded by the tangent to $P$ at $p_{j+1}$ and
-that contains $p_j$.
+\item the halfspace to the right of the directed line through 
+	the $e_{j,1}$ and $e_{j+1,0}$,
+\item the halfspace that contains $P$ and whose bounding line contains
+$e_j$, and
+\item the halfspace that contains $P$ and whose bounding line contains
+$e_{j+1}$.
 \end{enumerate}
-Let $t_j$ be the intersection point of 
-the two lines tangent to $P$ at $p_j$ and
-$p_{j+1}$.\footnote{Throughout this discussion, subscripts are
-implicitly taken modulo $m_i$.}  Refer to \figref{split}. For each
-triangle $\Delta_j$ that is not completely contained in $P$
-we add a new point to
-$S_{i+1}$ as follows:  we subdivide $\Delta_j$ into two open triangles
-$\Delta_{j,0}$ and $\Delta_{j,1}$ by a line $\ell$ through $t_j$ and
-such that 
+
+Refer to \figref{split}. For each triangle $\Delta_j$ that is not
+completely contained in $P$ we find an edge $e_{j.5}$ of $P$ that
+occurs between $e_j$ and $e_{j+1}$ and such that adding $e_{j.5}$ to
+$S_{i+1}$ results in two triangles
+$\Delta_{j,0}$ and $\Delta_{j,1}$ of $A_{i+1}$ contained in $\Delta_i$
+and that each have the property that
 \[  
      \Pr(\Delta_{j,b}) \le \Pr(\Delta_{j})/2 \enspace ,
 \]
 for $b\in\{0,1\}$.
-We then select a new point to add to $S_{i+1}$ at the intersection of
-$\ell$ and $\boundary P$ that occurs in $\Delta_j$.  Note that the
-next level of approximation $A_{i+1}$ now contains two triangles that
-are contained in $\Delta_j$.  We call these two triangles the
+We call the two triangles $\Delta_{j,0}$ and $\Delta_{j,1}$ the
 \emph{children} of $\Delta_j$ and we say that this operation
 \emph{splits} $\Delta_j$ into these two triangles.
 
 \begin{figure}
 \begin{center}
 \begin{tabular}{cc}
-\includegraphics{split-a} & \includegraphics{split-b} \\
+\includegraphics{crack-1} & \includegraphics{crack-2} \\
 (a) & (b)
 \end{tabular}
 \end{center}
-\caption{Starting with $\Delta_j$ we (a) subdivide $\Delta_j$ into two triangles
-$\Delta_{j,0}$ and $\Delta_{j,1}$ with a line through $t_j$ and then
-(b) split $\Delta_j$ into its two children.}
+\caption{Splitting $\Delta_j$ into its two children $\Delta_{j,0}$ and
+$\Delta_{j,1}$.}
 \figlabel{split}
 \end{figure}
 
@@ -402,15 +445,21 @@ $i$ in $T$ corresponds to an open triangle $\Delta(v)$ in
 approximation $A_{i}$ and the two children of $v$ correspond to the
 two open triangles into which $\Delta(v)$ is split. See \figref{tree}.
 A crucial property of this construction guaranteed by the splitting
-process is that, for any node $v$ at level distance $i$ from the root
+process is that, for any node $v$ at distance $i$ from the root
 of $T$, $\Pr(\Delta(v))\le 1/2^i$.
 
 \begin{figure}
-\begin{center}\includegraphics[scale=1.2]{tree}\end{center}
-\caption{A convex polygon $P$, the triangles of the triangle 
-tree $T$, and the sequence
-of approximations $A_1,\ldots,A_3$ that approximate $\boundary P$.}
-\figlabel{tree}
+  \begin{center}
+    \begin{tabular}{cccc}
+      \includegraphics{t0} & 
+      \includegraphics{t1} & 
+      \includegraphics{t2} & 
+      \includegraphics{t3} \\
+      $A_0$ & $A_1$ & $A_2$ & $A_3$ 
+    \end{tabular}
+  \end{center}
+  \caption{The sequence $A_0,\ldots,A_3$ that approximate $\boundary P$.}
+  \figlabel{tree}
 \end{figure}
 
 To use the tree $T$ to determine if a point $p$ is contained in $P$ we
@@ -420,20 +469,41 @@ of the two open triangles $\Delta(\lft(v))$ or $\Delta(\rght(v))$ in
 which case we recurse on the right or left child of $v$, respectively,
 or (2) we can determine in constant time if $p\in P$.
 
+Before we proceed, we make note of the following simple lemma that
+will be crucial to our arguments in subsequent sections.
+
+\begin{lem}\lemlabel{gen-indep}
+Let $P$ be a convex polygon, let $D$ be a probability measure over
+$\R^2$, and let $T=T(P,D)$ be a triangle tree for $P$ and $D$.
+Let $v_1,\ldots,v_m$ be a set of nodes in $T$ such $v_i$ is not an
+ancestor of $v_j$ for any $1\le i,j\le m$.  Then, for any \kangle\
+$t$ that conforms to $P$, there exists at most $k$ indices $i$ such that
+$t$ intersects $\Delta(v_i)$.
+\end{lem}
+
+\begin{proof}
+To be added later.
+\end{proof}
+
 \subsection{Analysis of the Triangle Tree}
 
-Let $T=T(P,D)$ be a triangle tree for a convex $n$-gon $P$ and a distribution
-$D$. Define, for each node $v$ of $T$,
+Let $T=T(P,D)$ be a triangle tree for a convex $n$-gon $P$ and a
+probability measure 
+$D$ over $\R^2$. Define, for each node $v$ of $T$,
 \[
    \Xi(v)=\Delta(v)\setminus (\Delta(\lft(v))\cup \Delta(\rght(v)))
 \]
-and define $\Pr(v)=\Pr(\Xi(v))$.  Notice that the search for a point
+and define $\Pr(v)=\Pr(\Xi(v))$.  
+In many cases, $\Xi(v)$ has two connected components, one outside of
+$P$ and one inside of $P$, which we denote
+by $\Xi_0(v)$ and $\Xi_1(v)$, respectively.
+Notice that the search for a point
 $p$ terminates at $v$ precisely when $p\in\Xi(v)$.  Thus, $\Pr(v)$ is
 the probability that a search terminates at node $v$.  For a set $V$
 of nodes in $T$ we use the notation $\Pr(V)=\sum_{v\in V}\Pr(v)$ to
 denote the probability that the search path ends at some node in $V$.
 
-\begin{thm}\thmlabel{upper-bound}
+\begin{lem}\lemlabel{upper-bound}
 A triangle tree $T$ contains $O(n)$ nodes and can be constructed in
 $O(n)$ time.
 Using the triangle tree, the expected number of linear inequalities
@@ -443,27 +513,19 @@ most
  \mu_D(T) 
    \le O(1)+O(1)\times \sum_{v\in T}\Pr(v)\log(1/\Pr(v)) \enspace .
 \]
-\end{thm}
+\end{lem}
 
 \begin{proof}
-For each $1\le i\le n$, let $e_i$ be the $i$th edge of $P$, defined so
-that it does not include its first (clockwise) endpoint but does
-include its second (counterclockwise) endpoint.  Observe that if,
-during some iteration of the algorithm for constructing $T$, we select
-a point $x\in e_i$ then $e_i$ moves to the boundary of the outer
-approximation and no point of $e_i$ will ever be selected again.  This
-implies that $T$ has $O(n)$ nodes.
 
+Observe that each internal node of $T$ is split by choosing some edge
+$e$ of $P$, and each edge is used to split at most one node of $T$.
+This implies that $T$ has $O(n)$ nodes.
 To obtain an $O(n)$ time algorithm to construct $T$ we apply a trick
 used by Mehlhorn \cite{m75} in the construction of biased binary
-search trees.  Splitting a triangle $\Delta_j$ involves finding the
-line $\ell$ and computing the intersection of $\ell$ with
-$\boundary P\cap \Delta_j$.  The former operation takes, by
-assumption, $O(1)$ time.  The latter operation, by using two
-exponential searches in parallel, can be done in $O(\log
-(\min\{m-k,k\}))$ time, where $m$ is the number of edges of $P$ that
-intersect $\Delta_j$ and $k$ is the rank in this set of the edge that
-intersects $\ell$.  In this way, the overall running time of the
+search trees.  Finding an edge $e$ that splits a node $v$ can be done
+in $O(\log (\min\{m-k,k\}))$ time, where $m$ is the number of edges of $P$ that
+contained in $\Delta(v)$ and $k$ is the rank of $e$ in this set of
+edges.  In this way, the overall running time of the
 construction algorithm is given by the recurrence
 \[
     T(n) \le T(n-k) + T(k) + O(\log(\min\{n-k,k\}))
@@ -479,150 +541,166 @@ from the root of $T$, $\Pr(v) \le \Pr(\Delta(v)) \le 1/2^i$.
 \subsection{Optimality of the Triangle Tree}
 
 Next we will show that the performance bound given by
-\thmref{upper-bound} is optimal.  More precisely, we show that there
+\lemref{upper-bound} is optimal.  More precisely, we show that there
 is no linear decision tree whose expected search time (on distribution
-$D$) is asymptotically better than that of the triangle tree.  The key
-ingredient in our argument is the following lemma:
+$D$) is asymptotically better than that of the triangle tree $T$.  The
+argument proceeds as follows:  First we show that the expected search
+time of any decision tree is (almost) lower bounded by the cost of the
+minimum-entropy conforming triangulation of $P$
+(\lemref{triangulate}).  Next, we develop a technique for lower
+bounding the entropy of one triangulation in terms of another
+(\lemref{pieces}).  Finally, we use this technique to show how the
+entropy of the triangulation defined by the triangle tree $T$ can be
+used to lower bound the entropy of the minimum-entropy triangulation
+(\lemref{partition} and \lemref{big-bugger}). The loose ends are then
+wrapped up to produce the proof of \lemref{lower-bound}.
 
-\begin{lem}\lemlabel{lower-bound}
-Let $V$ be a subset of the vertices of the triangle tree $T$ such that
-no vertex in $V$ is the descendent of any other vertex in $V$.  
-Let $R=\bigcup_{v\in V} \Xi(v)$. Then, for any linear decision
-tree $T'$,
+\begin{lem}\lemlabel{triangulate}
+Let $T^*$ be any linear decision tree for a classification problem
+$\mathcal{P}$ over $\R^2$.  Then there exists a linear decision tree
+$T'$ for $\mathcal{P}$, such that, for each leaf $\ell$ of $T'$,
+$r(\ell)$ is a triangle and $T'$ satisifies
 \[
-    \mu_{D_{|R}}(T') + \log\left(\mu_{D_{|R}}(T')\right)
-	\ge \sum_{v\in V}\Pr(\Xi(v)\mid R)\log(1/\Pr(\Xi(v)\mid R)) \enspace .
+    \mu_D(T') \le \mu_D(T^*) + O(\log\mu_D(T^*))
 \]
+for any probability measure $D$ over $\R^2$.
 \end{lem}
 
 \begin{proof}
-We will show that $T'$ can be transformed into a tree $T''$, with
-$\mu_{D_{|R}}(T') + \log\left(\mu_{D_{|R}}(T')\right) \ge
-\mu_{D_{|R}}(T'')$, and such that $T''$ is a point location structure
-for $R$. By then applying \thmref{shannon} to $T''$ we obtain the
-lemma.
-
-Recall that, for a leaf $\ell$ in $T'$, $r(\ell)$ is the set of all query
-points whose search path, in $T'$, leads to $\ell$.  Because $T'$ is a
-linear decision tree, it follows that $r(\ell)$ is a
-convex polygon and, if $r(\ell)$ is
-a convex $k$-gon, then $\depth(\ell) \ge k$.  To obtain $T''$ we will
-subdivide the leaves of $T'$ so that, for each leaf $\ell$, $r(\ell)$
-intersects $\Xi(v)$ for at most one $v\in V$.
-
-The tree $T'$ has two kinds of leaves.  An \emph{out leaf} is a leaf
-$\ell$ such that $r(\ell)$ is disjoint from $P$.  In this case, it
-follows from the fact that $r(\ell)$ is convex and disjoint from $P$,
-that $r(\ell)$ intersects $\Xi(v)$ for at most one $v\in V$.
-
-An \emph{in leaf} is a leaf $\ell$ of $T'$ such that $r(\ell)$ is
-contained in $P$.  For an in leaf $\ell$, such that $r(\ell)$ is a
-$k$-gon, there can be up to $k$ vertices $v$ in $V$ such
-that $r(\ell)$ intersects $\Xi(v)$. However, in this case, it is
-always possible to partition $r(\ell)$, using a single line, into two generalized polygons,
-that intersect $\ceil{k/2}$ and $\floor{k/2}$, respectively, of the
-$\Xi(v)$.  By doing this recursively, we obtain a tree $T''$ such
-that, for each leaf $\ell'\in T''$, there is at most one $v\in V$ such
-that $r(\ell')$ intersects $\Xi(v)$. Furthermore, for any point
-$p\in\R^2$ for which the search path ends at $\ell$, respectively
-$\ell'$ in $T'$, respectively $T''$, we have $\depth(\ell') \le
-\depth(\ell) + \log(\depth(\ell))$.  By labelling the leaves of $T''$
-appropriately we obtain a point location structure for $R$. Applying
-\thmref{shannon} to this structure we obtain
+Each leaf $\ell$ of $T^*$ has a region $r(\ell)$ that is a convex
+polygon.  If $r(\ell)$ has $k$ sides then the depth of $\ell$ in $T$
+is at least $k$.  To obtain the tree $T'$ replace each such leaf
+$\ell$ of $T^*$ by a balanced binary tree of depth $O(\log k)$ by
+repeatedly splitting the leaf into two children $\ell_1$ and $\ell_2$
+whose regions have $\ceil{(k+2)/2}$ and $\floor{(k+2)/2}$ vertices.
+For a leaf $\ell\in L(T)$, let $s(\ell)$ denote the set of leaves in $T'$
+in the subtree of $\ell$.   Then
 \begin{eqnarray*}
-\sum_{v\in V}\Pr(\Xi(v)\mid R)\log(1/\Pr(\Xi(v)\mid R)
- & \le & \mu_{D_{|R}}(T'')  \\
-  & = & 
-     \sum_{\ell'\in L(T'') v\in V}\Pr(r(\ell')\mid R)\depth(\ell') \\
-  & \le & 
-     \sum_{\ell\in L(T') v\in V}
-         \Pr(r(\ell)\mid R)
-            \left(\depth(\ell)+\log(\depth(\ell))\right) \\
-  & \le &
-     \mu_{D_{|R}}(T') + \log\left(\mu_{D_{|R}}(T')\right) \enspace ,
+   \mu_D(T^*) 
+     &  =  & \sum_{\ell\in L(T^*)} \Pr(r(\ell))\cdot \depth(\ell) \\
+     &  =  & \sum_{\ell\in L(T^*)}\sum_{\ell'\in s(\ell)} 
+              \Pr(r(\ell'))\cdot \depth(\ell) \\
+     & \ge & \sum_{\ell\in L(T^*)} 
+             \sum_{\ell'\in s(\ell)}\Pr(r(\ell'))\cdot (\depth(\ell')
+                   - O(\log (\depth(\ell)))) \\
+     &  =  & \mu_D(T') - \sum_{\ell\in L(T^*)} 
+             \sum_{\ell'\in s(\ell)}\Pr(r(\ell'))\cdot O(\log (\depth(\ell))) \\
+     &  =  & \mu_D(T') - \sum_{\ell\in L(T^*)} 
+             \Pr(r(\ell))\cdot O(\log (\depth(\ell))) \\
+     & \ge & \mu_D(T') - O(\log(\mu_D(T^*)) \enspace , 
 \end{eqnarray*}
-where the last inequality follows from Jensen's Inequality \cite{j06}
-and concavity of the logarithm.
+where the last inequality is an application of Jensen's Inequality.
 \end{proof}
 
-The remainder of our argument involves carefully piecing together
-subsets of the nodes in $T$ and applying 
-\lemref{lower-bound} to these subsets.  By doing this carefully, we
-will eventually obtain a lower bound that matches the upper bound
-in \thmref{upper-bound}.  Let 
-\begin{equation}
-   H = \sum_{v\in T} \Pr(v)\log (1/\Pr(v)) \eqlabel{H}
-\end{equation}
-be the entropy of the distribution of search paths in the triangle
-tree $T$.  Note that,
-ignoring the $O(1)$ term,
-the upper bound of \thmref{upper-bound} is within a constant factor of
-$H$. Thus, our goal is to show that no linear decision tree has an
-expected search time in $o(H)$.
+\lemref{triangulate} says that for any linear decision tree for point
+location, there is an underlying triangulation.  The entropy of this
+triangulation gives a lower bound on the cost of the decision tree.
+Thus, one way to give lower bounds for linear decision trees is to
+give lower bounds on the entropy of a minimum-entropy triangulation.
 
-We start our analysis by partitioning the internal nodes of $T$ in
+To obtain lower bounds on the entropy of a minimum-entropy
+triangulation $\Delta^*$, consider the following easily proven
+observation: If each triangle in $\Delta^*$ intersects at most $c$
+triangles of some \kangulation\ $\Delta$ then $H(\Delta^*) \ge
+H(\Delta) - \log c$.\footnote{Proof: Consider the set $X=\{
+t^*\cap t : t^*\in\Delta^*, t\in \Delta\}$. Each triangle of
+$\Delta^*$ contributes at most $c$ pieces to $X$, so we have
+$H(\Delta) \le H(X) \le H(\Delta^*) + \log c$.}  This observation
+allows us to use a \kangulation\ $\Delta$ to prove a lower bound on
+the entropy of a triangulation $\Delta^*$.  Unfortunately, the
+condition that each triangle of $\Delta^*$ intersect at most $c$
+triangles of $\Delta$ is too restrictive for our purposes.  Instead,
+we require following stronger result:
+
+\begin{lem}\lemlabel{pieces}
+Let $D$ be a probability measure over $\R^2$.  Let $\Delta$ be a
+\kangulation, let $\Delta^*$ be triangulation, and let
+$\{\Delta_1,\ldots,\Delta_m\}$ be a partition of the \kangles\
+in $\Delta$.  Suppose that, for all $i\in\{1,\ldots,m\}$ and for each
+triangle $t^*\in\Delta^*$, $t^*$ intersects
+at most $c$ \kangles\ in $\Delta_i$.  Then
+\begin{eqnarray*}
+   H(\Delta) \le 
+%     \sum_{i=1}^k \Pr(\cup\Delta_i) \cdot H(\Delta_i|{\cup\Delta_i}) - \log c
+	 H(\Delta^*) + H(\{\cup\Delta_1,\ldots,\cup\Delta_m\}) + \log c
+ \enspace . 
+\end{eqnarray*}
+\end{lem}
+
+Intuitively, \lemref{pieces} can be thought of as follows:  If we tell
+an observer which of the $\Delta_i$ a point $p$ drawn according to $D$
+occurs in then the amount of information we are giving the observer
+about the outcome is $H(\{\cup\Delta_1,\ldots,\cup\Delta_m\})$.
+However, after giving away this information, we are able to apply the
+simple observation in the previous paragraph, since each triangle in
+$\Delta^*$ intersects at most $c$ elements of each $\Delta_i$.  Thus,
+\lemref{pieces} is really just $m$ applications of the simple
+observation.  The following proof formalizes this:
+
+\begin{proof} Help Vida: Justify the first line of the following please 
+--- I'm stuck.
+Intuition: LHS represents picking a point $p$ according to $D$ and
+asking how much uncertainty there is about which triangle of
+$\Delta^*$ contains $p$.  The RHS represents picking $p$, telling you
+which of the $\Delta_i$ contains $p$ and then asking how much
+uncertainty remains about which triangle of $\Delta^*$ contains $p$.
+Surely knowing which of the $\Delta_i$ contains $p$ does not increase
+the uncertainty.
+\begin{eqnarray*}
+   H(\Delta^*) 
+     & \ge & \sum_{i=1}^m \Pr(\Delta_i)H(\Delta^*|\Delta_i) \\
+     &  =  & \sum_{i=1}^m \Pr(\Delta_i)\sum_{t^*\in\Delta^*}
+       \Pr(t^*|\Delta_i)\log(1/\Pr(t^*|\Delta_i)) \\
+     &  =  & \sum_{i=1}^m \sum_{t^*\in\Delta^*}
+       \Pr(t^*\cap\Delta_i)\log(\Pr(\Delta_i)/\Pr(t^*\cap\Delta_i)) \\
+     &  =  & \sum_{i=1}^m \sum_{t^*\in\Delta^*}
+       \Pr(t^*\cap\Delta_i)\log(1/\Pr(t^*\cap\Delta_i)) 
+        + \sum_{i=1}^m \Pr(\Delta_i)\log(\Pr(\Delta_i)) \\
+     &  =  & \sum_{i=1}^m \sum_{t^*\in\Delta^*}
+       \Pr(t^*\cap\Delta_i)\log(1/\Pr(t^*\cap\Delta_i)) 
+        - H(\{\cup\Delta_1,\ldots,\cup\Delta_m\}) \\
+     & \ge  & \sum_{i=1}^m \sum_{t^*\in\Delta^*}\sum_{t\in\Delta}
+       \Pr(t^*\cap t)\log(1/\Pr(t^*\cap t)) 
+        -\log c - H(\{\cup\Delta_1,\ldots,\cup\Delta_m\}) \\
+     & \ge  & \sum_{i=1}^m \sum_{t\in\Delta}
+       \Pr(t)\log(1/\Pr(t)) 
+        -\log c - H(\{\cup\Delta_1,\ldots,\cup\Delta_m\}) \\
+     &  =  & H(\Delta) -\log c - H(\{\cup\Delta_1,\ldots,\cup\Delta_m\})
+\end{eqnarray*}
+\end{proof}
+
+
+The remainder of our argument involves carefully partitioning the
+triangles of $T$ into subsets that are compatible with \lemref{pieces}
+and that give a lower-bound that matches the upper-bound in
+\lemref{upper-bound}.
+We begin by partitioning the internal nodes of $T$ in
 \emph{groups} $G_1,G_2,\ldots$ where
 \[
 	G_i = \{v\in T : 1/2^{i} \le \Pr(v) < 1/2^{i-1} \} \enspace .
 \]
 In what follows, we fix some a real number $0< \alpha < 1$ that will be
-specified later.  Our first
-result shows that, in our lower bound, we can discard a fairly large
-number of elements from each group without having much effect on the
-overall entropy:
-
-\begin{lem}\lemlabel{garbage}
-For each $i$, let $G_i'$ be obtained by deleting at most $2^{\alpha
-i}$ elements from $G_i$.  Then
-\[
-    \sum_{i=1}^\infty \sum_{v\in G_i'} \Pr(v)\log(1/\Pr(v)) 
-       \ge H-\blah \enspace .
-\]
-\end{lem}
-
-\begin{proof}
-\begin{eqnarray*}
-   H & = & \sum_{v\in T} \Pr(v)\log(1/\Pr(v)) \\
-   & = & \sum_{i=1}^{\infty}\sum_{v\in G_i'} \Pr(v)\log (1/\Pr(v)) +
-         \sum_{i=1}^{\infty}\sum_{v\in G_i\setminus G_i'} \Pr(v)\log (1/\Pr(v)) \\
-   & \le & \sum_{i=1}^{\infty}\sum_{v\in G_i'} \Pr(v)\log (1/\Pr(v)) +
-         \sum_{i=1}^{\infty}\sum_{v\in G_i\setminus G_i'} (1/2^{i-1})\log (2^i) \\
-   & \le & \sum_{i=1}^{\infty}\sum_{v\in G_i'} \Pr(v)\log (1/\Pr(v)) +
-         \sum_{i=1}^{\infty}\sum_{v\in G_i\setminus G_i'} 2i(1/2^{i}) \\
-   & \le & \sum_{i=1}^{\infty}\sum_{v\in G_i'} \Pr(v)\log (1/\Pr(v)) +
-         \sum_{i=1}^{\infty} 2i(1/2^{i-\alpha i}) \\
-   & = & \sum_{i=1}^{\infty}\sum_{v\in G_i'} \Pr(v)\log (1/\Pr(v)) +
-         2\sum_{i=1}^{\infty} i/(2^{1-\alpha})^{i} \\
-   & = & \sum_{i=1}^{\infty}\sum_{v\in G_i'} \Pr(v)\log (1/\Pr(v)) 
-        + \frac{2/2^{1-\alpha}}{(1-1/2^{1-\alpha})^2} \\
-   & = & \sum_{i=1}^{\infty}\sum_{v\in G_i'} \Pr(v)\log (1/\Pr(v)) + \blah
-	\enspace ,
-\end{eqnarray*}
-where the last equality is obtained using Taylor series.
-\end{proof}
-
-In order to use \lemref{lower-bound} we must partition the vertices of
-$T$ into subsets that are compatible with the conditions of the lemma.
+specified later.   The following lemma gives the structure of the sets
+that will be used in the application of \lemref{pieces}.
 
 \begin{lem}\lemlabel{partition}
-Each group $G_i$ can be partitioned into $t_i$ subgroups
-$G_{i,1},\ldots,G_{i,t_i}$ such that
+Each group $G_i$ can be partitioned into $r_i$ subgroups
+$G_{i,1},\ldots,G_{i,r_i}$ such that
 \begin{enumerate}
-\item $|G_{i,t_i}|\le 2^{\alpha i}$.
+\item There is an integer $t_i$ such that $r_i-t_i\le 2^{\alpha i}$.
 
-\item $|G_{i,j}| \ge 2^{\alpha i} / i$, for all $1\le j< t_i$, and
+\item $|G_{i,j}| \ge 2^{\alpha i} / i$, for all $1\le j \le t_i$, and
 
-\item for every $1\le j< t_i$ and every $u,v\in G_{i,j}$ node $u$ is
-not an ancestor of node $v$ in $T$. 
-
+\item for every $1\le j< r_i$ and every $u,v\in G_{i,j}$, $u\neq v$, 
+node $u$ is not an ancestor of node $v$ in $T$. 
 \end{enumerate}
 \end{lem}
 
 \begin{proof}
-Assume that $|G_i|> 2^{\alpha i}$, otherwise there is nothing to
-prove.  Observe that all vertices in $G_i$ appear within the first $i$
-levels of $T$.  Thus, any node in $G_i$ has at most $i-1$ ancestors in
-$T$.  
+Assume that $|G_i|> 2^{\alpha i}$, otherwise simply set $t_i=0$ and
+place each element of $G_i$ into a single group so that $r_i=|G_i|$.
+Next, observe that all vertices in $G_i$ appear within the first $i$ levels
+of $T$.  Thus, any node in $G_i$ has at most $i-1$ ancestors in $T$.  
 
 We can obtain the first subgroup $G_{i,1}$ by first defining all nodes of
 $G_i$ to be \emph{unmarked} and \emph{unselected}.  To obtain
@@ -635,271 +713,476 @@ process selects at least
 \] 
 elements to take part in $G_{i,1}$.  We can then apply this process
 recursively on $G_i\setminus G_{i,1}$ to obtain the sets
-$G_{i,2},\ldots,G_{i,t_i-1}$.  Once this is done, we place the at most
-$2^{\alpha i}$ remaining elements in group $G_{i,t_i}$.
+$G_{i,2},\ldots,G_{i,t_i}$.  The recursion completes when there are
+fewer than $2^{\alpha i}$ elements remaining, at which point the
+remaining elements are placed into singleton groups.
+\end{proof}
+
+Next we apply \lemref{triangulate} and \lemref{partition} to obtain a
+lower bound for triangulations.  For a triangle tree $T$, let
+$\Delta(T)=\{\Xi_b(v) : v\in T, b\in\{0,1\}  \}$ be the \kangulation\
+induced by $T$.  Note that each vertex in $T$ contributes at most 2
+\kangles\ to $\Delta(T)$.  This implies that $H(\Delta(T))$ is closely
+related to $\mu_D(T)$.  In particular, $\mu_D(T)=\Theta(H(\Delta(T))+1)$.
+
+\begin{lem}\lemlabel{big-bugger}
+Let $P$ be a convex polygon, let $D$ be a probability measure over
+$\R^2$, and 
+let $\Delta=\Delta(T)$ be the \kangulation\ induced by a triangle tree
+$T=T(P,D)$. Then, for any triangulation $\Delta^*$ conforming to $P$,
+\[
+    H(\Delta) \le H(\Delta^*) + O(H(\Delta)^{2/3}+1) \enspace .
+\]
+\end{lem}
+
+\begin{proof}
+For any group $G_{i,j}$ defined by \lemref{partition}, Condition~3 and
+\lemref{gen-indep} ensures that any triangle of $\Delta^*$ can
+intersect at most 3 \kangles\ of $G_{i,j}$.  Therefore, applying
+\lemref{pieces} with $c=3$, we obtain:
+\[ 
+ H(\Delta) \le 
+   H(\Delta^*) + H(\{{\cup G_{i,j}} : i\in\N , j\in\{1,\ldots,r_i\}\}) 
+   + O(1)  \enspace .
+\]
+Thus, all that remains is to show that the contribution of $\overline
+H=H(\cup\{G_{i,j}\} : i\in\N , j\in\{1,\ldots,r_i\}\})$ is at most
+$O(H(\Delta)^{2/3})$.
+\begin{eqnarray*}
+\overline H 
+ & = & H(\cup\{G_{i,j}\} : i\in\N , j\in\{1,\ldots,r_i\}\}) \\
+ & = & \sum_{i=1}^\infty
+         \sum_{j=1}^{r_i}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j})) \\
+ & = & \sum_{i=1}^\infty
+         \sum_{j=1}^{t_i}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j})) 
+         + \sum_{i=1}^\infty
+         \sum_{j=t_i+1}^{r_i}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j})) \\
+ & \le & \sum_{i=1}^\infty
+         \sum_{j=1}^{t_i-1}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j})) 
+         + \sum_{i=1}^{\infty} (2^{\alpha i}/ 2^{i-1})\log(2^i) \\
+ &  =  & \sum_{i=1}^\infty
+         \sum_{j=1}^{t_i-1}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j})) 
+         + 2\cdot\sum_{i=1}^{\infty} i/2^{(1-\alpha)i} \\
+ &  =  & \sum_{i=1}^\infty
+         \sum_{j=1}^{t_i-1}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j}))
+         + O(1/(1-\alpha)^2) \enspace ,
+\end{eqnarray*}
+where the last equality is obtained using Taylor series.
+Continuing, we get 
+\begin{eqnarray*}
+\overline H
+ &  =  & \sum_{i=1}^\infty
+         \sum_{j=1}^{t_i-1}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j}))
+         + O(1/(1-\alpha)^2) \\
+ & \le  & \sum_{i=1}^\infty
+         \sum_{j=1}^{t_i-1} \Pr(\cup G_{i,j})
+              \log(i2^{i}/2^{\alpha i})
+         + O(1/(1-\alpha)^2) \\
+ & \le  & \sum_{i=1}^\infty
+         \sum_{j=1}^{t_i-1} \Pr(\cup G_{i,j})((1-\alpha)i+\log i)
+         + O(1/(1-\alpha)^2) \\
+ & \le  & \sum_{i=1}^\infty
+         \sum_{j=1}^{t_i-1} \Pr(\cup G_{i,j})((1-\alpha)\log(1/\Pr(\cup G_{i,j})) + \log\log(1/\Pr(\cup G_{i,j})))
+         + O(1 + 1/(1-\alpha)^2) \\
+ & \le &  (1-\alpha)H(\Delta) + \log(H(\Delta)) + O(1 + 1/(1-\alpha)^2) \\
+ & \le &  O(H(\Delta)^{2/3}+ 1)
+\end{eqnarray*} 
+where the second last inequality follows from Jensen's Inequality and the
+last inequality is obtained by setting $\alpha=1-1/H(\Delta)^{1/3}$.
 \end{proof}
 
 We now have all the tools we need to prove our lower bound.
 
-\begin{thm}\thmlabel{lower-bound}
-Let $\epsilon > 0$ be an arbitrarily small constant.
-Any linear decision tree $T'$ that solves the problem of testing 
+\begin{lem}\lemlabel{lower-bound}
+Let $\Delta=\Delta(T)$ denote the set of triangles in a triangle tree
+$T=T(P,D)$.
+Any linear decision tree $T^*$ that solves the problem of testing 
 if any query point 
 $p\in\R^2$ is contained in $P$ has
 \[
-   \mu_D(T') \ge H - O(H^{2/3}) \enspace .
+   \mu_D(T^*) \ge H(\Delta) - O(H(\Delta)^{2/3}+1) \enspace .
 \]
-\end{thm}
+\end{lem}
 
 \begin{proof}
-Our proof is an application of the little-birdie principle.    We work in a slightly stronger model of
-computation in which we are given a triangle tree $T=T(P,D)$ and the partitioning of
-the vertices of $T$ into the sets $G_{i,j}$ described in
-\lemref{partition}.  In this model, an algorithm consists of a whole
-collection of linear decision trees $T_{i,j}$; one for each group $G_{i,j}$.
-Now, when the point $p$ is selected according to $D$, a \emph{little
-birdie}
-tells the algorithm which group $G_{i,j}$ contains the vertex $v$ such
-that $p\in\Xi(v)$.  The algorithm then uses the information
-provided by the little birdie to select the decision tree $T_{i,j}$
-and uses $T_{i,j}$ to determine if $p\in P$.  The cost of this is the
-cost of searching in $T_{i,j}$.  Thus, the expected cost of a search
-in this model of computation is
+Let $T^*$ be a linear decision tree for point location in $P$.  Apply
+\lemref{triangulate} to $T^*$ to obtain a decision tree $T'$ for point
+location in $P$, all of whose leaves have regions that are triangles.
+Let $\Delta'$ be the set of triangles corresponding to the leaves of
+$T'$, and let $\Delta=\Delta(T)$ be the \kangulation\ induced by
+$T$.  The triangulation $\Delta'$ is a 
+conforming triangulations of $P$, so by \lemref{big-bugger}, we have
 \[
-     \mu = \sum_{i=1}^\infty \sum_{j=1}^{t_i}
-	\Pr(G_{i,j})\mu_{D_{i,j}}(T_{i,j}) \enspace ,
+    H(\Delta) \le H(\Delta')  + O(H(\Delta)^{2/3} + 1) \enspace .
 \]
-where $D_{i,j}$ denotes the probability distribution $D$ conditioned
-on the search for $p$ ending at a node in $G_{i,j}$.  Clearly this
-model of computation is at least as strong as the linear decision tree
-model since, in this model, there is always the option of ignoring the
-birdie's advice by creating a single linear decision tree $T'$ and
-setting $T_{i,j}=T'$ for all $i$ and $j$.
-
-Now, applying \lemref{lower-bound} to each group $G_{i,j}$ 
-we obtain
-\begin{eqnarray*}
-\mu & = & \sum_{i=1}^{\infty}\sum_{j=1}^{t_i}
-	\Pr(G_{i,j})\mu_{D_{i,j}}(T_{i,j}) \\
-& \ge & \sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
-	\Pr(G_{i,j})\mu_{D_{i,j}}(T_{i,j}) \\
-& \ge & \sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}\Pr(G_{i,j})\times
-	\left(
-	\sum_{v\in G_{i,j}}\Pr(v\mid G_{i,j})\log(1/\Pr(v\mid G_{i,j}))
-	\right) 
-        - \log\mu \\
-%& = & \sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}\Pr(G_{i,j})\times
-%	\left(
-%	\sum_{v\in G_{i,j}}\Pr(v\mid G_{i,j})\log(1/\Pr(v\mid G_{i,j}))
-%	\right) 
-%        - \log\mu \\
-& = & \sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
-	\sum_{v\in G_{i,j}}\Pr(v)\log(\Pr(G_{i,j})/\Pr(v)) 
-        - \log\mu \\
-& = & \sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
-	\sum_{v\in G_{i,j}}\Pr(v)(\log(1/\Pr(v))+ \log(\Pr(G_{i,j})) 
-        - \log\mu \\
-& \ge & H-\blah +
-        \sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
-	\sum_{v\in G_{i,j}}\Pr(v)\log(\Pr(G_{i,j})) 
-        - \log\mu \\
-& \ge & H-\blah +
-        \sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
-	\sum_{v\in G_{i,j}}\Pr(v)\log(2^{\alpha i}/i2^{i}) 
-        - \log\mu \\
-& = & H-\blah 
-        +\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
-	\sum_{v\in G_{i,j}}\Pr(v)(\alpha i -i -\log i) 
-        - \log\mu \\
-& \ge & H-\blah + \alpha H - H - \log H - 2 - \log\mu \\
-& \ge & \alpha H-\blah - \log H - \log \mu - 2 \enspace . \\
-& \ge & \alpha H-\blah - 2\log H - 2 \enspace . \\
-\comment{
-&=&XXXXXXXXXXXXXXXXXXXXXXx \\
-& = & \sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
-	\sum_{v\in G_{i,j}}\Pr(v)(\alpha i  -1 -\log i) 
-        - \log\mu \\
-\comment{
-& \ge & \frac{1}{4}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
-	\sum_{v\in G_{i,j}}\Pr(v)(i/4 - 3) \\
-& \ge & \left(\frac{1}{24}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
-	\sum_{v\in G_{i,j}}\Pr(v)\log (1/\Pr(v))\right)-4 \\
-}
-& \ge & H - \alpha\blah - O(1) - 2\log\mu \enspace ,
-where the last inequality follows from \lemref{garbage} and by setting
-$\alpha = 1-\delta$ for a sufficiently small constant
-$\delta=\delta(\epsilon) > 0$.
-}
-\end{eqnarray*}
-Setting $\alpha=1-1/H^{1/3}$, and rearranging terms
-we obtain
+Since $H(\Delta')$ is a lower bound on $\mu_D(T')$ this gives
 \[
-    \mu \ge H - O(H^{2/3}) \enspace ,
+   \mu_D(T') \ge H(\Delta) - O(H(\Delta)^{2/3} + 1) \enspace ,
+\]
+and finally
+\[
+   \mu_D(T^*) \ge \mu_D(T') - O(\log\mu_D(T'))
+            \ge H(\Delta) - O(H(\Delta)^{2/3} + 1) \enspace ,
 \]
 completing the proof.
 \end{proof}
+
+It is worth noting the differences between the lower bound in
+\lemref{lower-bound} and the upper bound in \lemref{upper-bound}.  The
+upper bound is stated in terms of the expected depth of a node in the
+triangle tree $T$, while the lower bound is in terms of the entropy
+$H(\Delta)$ of the triangles in $T$.  Although the higher order term
+in these bounds match, a more precise inspection reveals that the
+number of point/line comparisons required to reach a node of depth $i$
+in $T$ is as high as $4(i+1)$, so the search time in $T$ only matches
+the lower bound to within a constant factor.  However, as we will see
+in the next section, a tighter upper bound can be obtained by using
+the point-location structure of \thmref{ammw07} for triangulations and
+applying it to $\Delta(T)$. 
 
 \section{Convex Subdivisions}
 \seclabel{subdivisions}
 
 In this section we consider the problem of point location in convex
-subdivisions. Our data structure is simple.  For each internal face
-$F_i$ of the convex subdivision we triangulate the interior of $F_i$
-using the internal edges of the triangles of a triangle tree
-$T_i=(F_i,D_{|F_i})$ for the polygon $F_i$ and the distribution
-$D_{|F_i}$. For the outer face, we do the same but keep only the
-external edges of the triangles.  Next, we preprocess the resulting
-triangulation using some linear-space distribution-sensitive point location
-data structure for triangulations \cite{ammw07,i01}.
+subdivisions.  This should be considered a warm-up exercise to
+introduce the techniques that are used in \secref{simple}.
 
-We have three lower bounds on the expected query time of any linear
-classification tree for point location.  The first lower bound follows
-from the fact that any classification tree with more than 1 class must
-have at least one internal node:
-\[
-    B_0 = \Omega(1)
-\]
-The second lower bound is the
-entropy bound:
-\[
-	B_1 = \sum_{i=1}^f \Pr(F_i)\log(1/\Pr(F_i)) \enspace .
-\]
-The third lower bound is a bit more subtle.  It follows from the fact
-that, inside any classification tree for point location is a decision
-tree for testing, for each $1\le i\le f$, if a query point $p$ is
-contained in $F_i$.  From \thmref{lower-bound} we know that, for any
-decision tree $T'$ that determines if a query point $p$ is in $F_i$
-\[
-   \mu_{D_{|F_i}(T')} \ge \Omega(1)\times \sum_{v\in T_i}\Pr(v\mid
-F_i)\log(1/\Pr(v\mid F_i))
-	\enspace .
-\]
-Summing over all faces, we obtain the third lower bound:
-\[
-   B_2 = \Omega(1)\times \sum_{i=1}^f \sum_{v\in T_i}\Pr(F_i)\Pr(v\mid
-F_i)\log(1/\Pr(v\mid F_i))
-	\enspace .
-\]
-
-Now, because we store all the triangles of each $T_i$ in a point
-location structure that achieves the entropy bound, the resulting
-structure has an expected query time of 
-\begin{eqnarray*}
-\mu & = & O(1)+O(1)\times \sum_{i=1}^f \sum_{v\in T_i} \Pr(v)\log(1/\Pr(v)) \\
-& = & O(1)+O(1)\times\sum_{i=1}^f \Pr(F_i)\times \sum_{v\in T_i}
-\Pr(v\mid F_{i})\log(1/\Pr(v)) \\
-& = & O(1)+O(1)\times\sum_{i=1}^f \Pr(F_i)\times \sum_{v\in T_i}
-	\Pr(v\mid F_{i})\log(\Pr(F_i)/\Pr(F_i)\Pr(v)) \\
-& = & O(1)+O(1)\times\left(\sum_{i=1}^f \Pr(F_i)\log (1/\Pr(F_i)) + 
-        \sum_{i=1}^f \sum_{v\in T_i}
-	\Pr(F_i)\Pr(v\mid F_{i})\log(1/\Pr(v\mid F_i))\right) \\
-& \le & O(1)+O(1)\times(B_1 + B_2) \\
-& \le & O(1)\times \max\{B_1, B_2,B_3\} \enspace .
-\end{eqnarray*}
-This completes the proof of our main result:
+The data structure is simple.  For each face $F_i$ of the convex
+subdivision we \kangulate\ $F_i$ using the \kangles, $\Delta(T_i)$,
+defined by a triangle tree $T_i=(F_i,D_{|F_i})$.  Note that
+$\Delta(T_i)$ contains \kangles\ not $\R^2$ that we obtain.  in $F_i$,
+but we discard these.  Let $\Delta$ denote the \kangulation\ of $\R^2$
+obtained this way and let $\Delta_i$ denote the subset of $\Delta$
+that are contained in $F_i$.  Next, we preprocess $\Delta$ using
+\thmref{ammw07}.  Note that the \kangles\ in $\Delta$ have at most 4
+sides so that they can be split into two triangles without increasing
+the entropy by more than 1. Thus, the expected number of point/line
+comparisons performed when using this structure is $H(\Delta) +
+O(H(\Delta)^{1/2} + 1)$.  The following theorem shows that this is
+nearly optimal:
 
 \begin{thm}
-Given a convex subdivision $G$ with $n$ vertices and a probability measure
-$D$ over $\R^2$, a data structure of size
-$O(n)$ can be constructed in $O(n)$ time that answers point location queries in 
-$G$. 
-The expected query time of this data structure, for a point $p$
-drawn according to $D$ is $O(\mu_D(T))$, where $T$ is any linear
-classification tree that answers point location queries in $G$.
+Given a convex subdivision $G$ with $n$ vertices and a probability
+measure $D$ over $\R^2$, a data structure $T$ of size $O(n)$ can be
+constructed in $O(n)$ time that answers point location queries in $G$.
+The expected number of point/line comparisons performed by $T$, 
+for a point $p$ drawn according to $D$ is 
+\[
+  \mu_D(T) \le \mu_D(T^*) + O(\mu_D(T)^{2/3}+1) \enspace , 
+\] 
+where $T^*$ is any linear classification tree that answers point
+location queries in $G$.
 \end{thm}
 
+\begin{proof}
+The space and preprocessing requirements follow from
+\lemref{upper-bound} and \thmref{ammw07}.
+To prove the bound on the expected query time, apply
+\lemref{triangulate} to the tree $T^*$ and consider the resulting tree
+$T'$, each of whose leaves have regions that are triangles and such
+that
+\[
+     \mu_D(T') \le \mu_D(T^*) + O(\log \mu_D(T^*)) \enspace .
+\]
+Observe that each leaf of $T'$ corresponds to a triangle in $\R^2$
+that is completely contained in one of the faces of $G$.  Let
+$\Delta'$ denote this set of triangles and let $\Delta'_i$ denote the
+subset of $\Delta'$ contained in $F_i$.
+Consider the entropy $H(\Delta')$ of the distribution induced by the
+triangles of $T'$:
+\begin{eqnarray*}
+   H(\Delta') 
+     & = & \sum_{i=1}^f \sum_{t\in \Delta'_i}\Pr(t)\log(1/\Pr(t)) \\
+     & = & \sum_{i=1}^f \Pr(F_i)\sum_{t\in \Delta'_i}
+            \Pr(t|F_i)\log(1/\Pr(t)) \\
+     & = & \sum_{i=1}^f \Pr(F_i)\sum_{t\in \Delta'_i}
+            \Pr(t|F_i)
+            \left(
+              \log(1/\Pr(t|F_i))-\log(\Pr(F_i))
+            \right) \\
+     & = & \sum_{i=1}^f \Pr(F_i)\sum_{t\in \Delta'_i}
+            \Pr(t|F_i)\log(1/\Pr(t|F_i)) 
+          +
+      \sum_{i=1}^f \Pr(F_i) \log(1/\Pr(F_i)) \\
+     & = & \sum_{i=1}^f \Pr(F_i) H(\Delta'_i) + H(F) \enspace .
+\end{eqnarray*}
+(Recall that $F=\{F_1,\ldots,F_f\}$ is the set of faces in $G$.)
+Similarly, the entropy of $\Delta$ is given by 
+\begin{eqnarray*}
+   H(\Delta) 
+     & = & \sum_{i=1}^f \sum_{t\in \Delta_i}\Pr(t)\log(1/\Pr(t)) \\
+     & = & \sum_{i=1}^f \Pr(F_i)\sum_{t\in \Delta_i}
+            \Pr(t|F_i)\log(1/\Pr(t|F_i)) 
+          + H(F) \\
+     & = & \sum_{i=1}^f \Pr(F_i) H(\Delta_i) + H(F) \enspace .
+\end{eqnarray*}
+By \lemref{lower-bound}, the \kangles\ in $T_i$ form a nearly-minimum
+entropy \kangulation\ of $F_i$.  More specifically, 
+\[  
+   H(\Delta_i) \le H(\Delta'_i) + O(H(\Delta_i)^{2/3}+1)  \enspace .
+\]
+Putting this all together, we have
+\begin{eqnarray*}
+  H(\Delta) 
+    &  =  & \sum_{i=1}^f\Pr(F_i) H(\Delta_i) + H(F) \\ 
+    & \le & \sum_{i=1}^f\Pr(F_i) (H(\Delta'_i) + O(H(\Delta_i)^{2/3}+1)) + H(F) \\ 
+    &  =  & H(\Delta') + \sum_{i=1}^f\Pr(F_i) O(H(\Delta_i)^{2/3}+1) \\ 
+    & \le & \mu_D(T') + \sum_{i=1}^f\Pr(F_i) O(H(\Delta_i)^{2/3}+1) \\ 
+    & \le & \mu_D(T') + O(H(\Delta)^{2/3}+1) \\
+    & \le & \mu_D(T^*) + O(H(\Delta)^{2/3}+1)
+\end{eqnarray*}
+Finally, since we preprocess $\Delta$ using \thmref{ammw07}, the
+expected number of comparisons required to answer a query is
+\begin{eqnarray*}
+  H(\Delta) + O(H(\Delta)^{1/2} + 1)
+   & = & \mu_D(T^*) + + O(\mu_D(T^*)^{1/2} + H(\Delta)^{2/3} + H(\Delta)^{1/3} + 1) \\
+   & = & \mu_D(T^*) + O(\mu_D(T)^{2/3} + 1)
+\end{eqnarray*}
+and this completes the proof.
+\end{proof}
 
-\section{Discussion}
-\seclabel{discussion}
+\section{Simple Planar Subdivisions}
+\seclabel{simple}
 
-We have presented a data structure for distribution-sensitive point
-location in convex subdivisions.  Our data structure achieves, up to
-constant factors, the best possible query time for any data structure
-in the linear decision tree model of computation.  
+Next, we consider how to handle simple (possibly non-convex) planar
+subdivisions.  We take the same approach used in the previous section.
+Namely, we subdivide the input into a \kangulation\ and apply
+\thmref{ammw07}  on the resulting \kangulation.  As before, the trick
+is in arguing that the triangulation we find has near-minimum entropy.
+Since the faces of $G$ are simple polygons, we first tackle the
+problem of finding a (near) minimum-entropy \kangulation of a simple
+polygon.
 
-Our data structure, as described in \secref{polygons}, uses
-comparisons between the query point $p$ and precomputed lines
-determined by points on the edges of $P$ that are, in turn, determined
-by the distribution $D$.  We note that we can obtain an equally
-efficient structure that only does comparisons involving lines through
-two vertices of $G$.  To achieve this, we simply modify the splitting
-process at the nodes of the triangle tree so that, instead of placing
-a single point in the interior of an edge $e$ of $P$ (\figref{split}),
-we place one point on each of the endpoints of $e$
-(\figref{improved-split}). This modification has another nice
-property; it can be implemented so that the only mechanism needed to
-access the probability measure $D$ is a primitive for computing the
-probability of a triangle.  An interesting corollary of this result is
-that, given a convex polygon $P$ and a probability distribution over
-the interior of $P$, the above construction gives a linear-time
-constant factor approximation for the minimum entropy triangulation of
-$P$.
+\subsection{Low-Entropy Triangulations of Simple Polygons}
+\seclabel{simple-triangulation}
 
-\begin{figure}
-\begin{center}\begin{tabular}{cc}
-\includegraphics{improved-a} & \includegraphics{improved-b}
-\end{tabular}
-\end{center}
-\caption{The data structure can be realized using only lines through
-the vertices of $P$.}
-\figlabel{improved-split}
-\end{figure}
+Let $P$ be a simple polygon with vertices, as encountered in a
+counterclockwise traversal of its boundary are $p_1,\ldots,p_n$.  In
+this section, we show how to \kangulate\ the interior of $P$ to obtain
+a set of \kangles\ $\Delta=\Delta(P,D)$ such that $H(\Delta)$ is
+nearly minimum over all possible triangulations of $P$.  Although our
+only goal is to construct the subdivision $\Delta$, it will be helpful
+when analyzing $H(\Delta)$ to impose a tree structure on its \kangles.
+We refer to this tree as the \emph{\kangle\ tree} for $(P,D)$ and
+denote it by $T=T(P,D)$.
 
-In practice, performing computations with probability distributions is
-at best awkward.  However, one potential real application of our data
-structures is when the distribution $D$ is uniform over a set of $m$
-points.  Such distributions are easily obtained by sampling some
-(unknown) continuous distribution and are often a good enough
-approximation of the continuous distribution.  In this case, it is
-fairly straightforward to construct our point-location structure in
-$O(n+ m\log(mn))$ time.
+A \emph{funnel polygon} is a polygon whose boundary consists of two
+reflex chains $X=x_1,\ldots,x_k$ and $Y=y_1,\ldots,y_{k'}$ where $x_1$
+and $y_{k'}$ are joined by a (possibly zero length) edge, as are $x_k$
+and $y_{1}$.  A \emph{half-funnel} is a funnel polygon in which one of
+the reflex chains, say $X$, consists of a single edge.  For two edges
+$e$ and $e'$ of $P$ the \emph{funnel} between $e$ and $e'$ is the
+union of all shortest paths in $P$ from a point on $e$ to a point on
+$e'$.  Note that a funnel is either a single funnel polygon or two
+funnel polygons joined by a path.
 
-When discussing distribution-sensitive point location, the exact
-definition of the problem and the choice of computational model is
-important.  For example, our definition of the problem requires that
-our data structure outputs the correct answer for every input point in
-$\R^2$.  This means that, for example, we can obtain non-trivial lower
-bounds for testing if $p\in P$ even in the case when $\Pr\{p\in
-P\}=1$. One could imagine another definition of the problem in which
-the data structure is only required to answer correctly for points
-that are in the support of $D$.
+To \kangulate\ $P$ we fix a \emph{root edge} $e$ of $P$ and find the
+edge $e'$ of $P$ such that the funnel $f$ between $e$ and $e'$ has
+property that each connected component $C$ of $P\setminus f$ has
+$\Pr(C)\le 1/2$. The existence of such an edge $e'$ is easily
+established by a standard continuity argument \cite{geoham}.  The
+funnel $f$ corresponds to the root of the kangle tree $T$.
 
-We have given upper and lower bounds on the expected complexity of
-testing if a point is in a convex polygon and these bounds match to
-within a constant factor.  More precisely, the expected number of
-linear inequalities tested by any linear decision tree is at least
-$H-O(H^{2/3})$ and our data structure tests $3H+O(1)$ linear
-inequalities. The constant 3 appears in the upper bound because the
-expected depth of a search in the triangle tree is at most $H$ and
-each node in the triangle tree tests the query point against 3 lines.
-However, we could alternatively store the triangles of the triangle
-tree using the recent point location structure of Mount \etal\
-\cite{ammw07}, in which case the query time becomes $H+O(H^{1/2}+1)$ and
-we obtain an $O(n)$ space structure whose query time is optimal to
-within a lower-order ($H^{2/3}$) term.
+Next, we proceed differently depending on the structure of $f$.  If
+$f$ consists of two funnel polygons joined by a path, then we make
+each edge of this path a child of the root and we make each of the two
+funnel polygons a child of the root.  Otherwise $f$ consists of a
+single funnel polygon, in which case we don't do anything special ($f$
+is the root of $T$).
 
-We have studied point location in convex polygons and convex
-subdivisions.  From here we could try to extend our results to simple
-polygons and general planar subdivisions whose faces are arbitrary
-simple polygons. Perhaps a more realistic next step is to study the
-related problem of \emph{vertical ray shooting}:  Preprocess a set $S$
-of points and open line segments so that, for any query point $p$, we
-can determine the first object in $S$ intersected by an upward
-vertical ray originating at $p$.  Vertical ray shooting is often used
-interchangeably with planar point location but is a strictly harder
-problem since it sometimes requires the data structure to distinguish
-between edges of the same face.  At the heart of the vertical ray
-shooting problem is the following decision problem:
+Next, for each child $v$ of the root of $T$ that is a funnel polygon,
+we split this funnel polygon using a single edge into two half-funnel
+polygons.  These two half-funnels become children of $v$.
 
-\begin{op}
-Let $P$ be a simple polygon whose
-boundary consists of one line segment and one $x$-monotone chain
-joining the two endpoints of the line segment and let $D$ be a
-probability measure over $\R^2$. Preprocess $P$ and $D$ into a data
-structure that can test if a query point $p$ is contained in $P$ and
-whose expected query time is optimal in the linear decision tree model
-of computation.
-\end{op}
+Since the boundary of a half-funnel $h$ consists of at most one reflex
+chain $C$ and at most 3 edges that are not in $C$  we can triangulate
+a half-funnel in the following way:  Take the convex hull $H$ of $C$,
+treat it as a convex polygon and compute the triangles of a triangle
+tree for $(H,D_{\mid h})$ using the algorithm in \secref{convex}.
+This yields a triangulation $\Delta(H)$ of $\R^2$ that conforms to
+$H$.  From this \kangulation, we keep only the edges that intersect
+$h$ and trim them so that they form a subdivision $\Delta(h)$ of the
+interior of $h$. Note that this trimming results in polygons that have
+at most 7 sides (the original \kangles\ have at most 4 sides and
+trimming adds at most 3 more sides).  Furthermore, the triangles of
+$\Delta(h)$ have a tree imposed on them by the triangle tree defined
+in \secref{convex}.  The \kangles\ in $\Delta(h)$ are the descendents,
+in $T$, of $h$ and are organized, according to the order imposed on
+them by the triangle tree.
+
+In this way, we obtain a tree $T_0$ whose leaves correspond to regions
+$r_1,\ldots,r_k$ that share an edge $e_1,\ldots,e_k$ with the
+components $P_1,\ldots,P_k$ of $P\setminus f$.  We will recursively
+operate on each component $P_i$ using edge $e_i$ as the root edge to
+obtain a subdivision of $P_i$ and a subtree $T_i$ that is rooted at
+the leaf of $T_0$ whose region contains the edge $e_i$.  One small,
+but important, detail is a special case that occurs when one of the
+sub problems $P_i$ contains more than $n/2$ vertices of $P$.  In this
+case, instead of recursing directly on $P_i$ we first subdivide $P_i$
+using a funnel into pieces that each contain at most $n/2$ vertices of
+$P$.  This completes the definition of the kangle tree $T$ and the
+subdivision $\Delta=\Delta(P,D)$. 
+
+We first consider the time required to construct a \kangle\ tree for
+$(P,D)$.  
+
+\begin{lem}\lemlabel{construction}
+Let $P$ be a simple polygon with $n$ vertices and let $D$ be a
+probability measure over $\R^2$.  The \kangulation\
+$\Delta=\Delta(P,D)$ has size $O(n)$ and can be computed in $O(n\log n)$
+time.
+\end{lem}
+
+\begin{proof}
+The construction algorithm described above is a recursive algorithm in
+which we find the root funnel, triangulate it, and then recurse on the
+subpolygons incident to the root funnel.  Finding the root funnel can
+be done in $O(n)$ time by computing the two shortest path trees
+joining the endpoints of the root edge to all other vertices of $P$.
+(See Bose \etal\ \cite{geoham} for a similar computation.)  However,
+one of the subpolygons $P_i$ incident on the root funnel might have
+many (more than $n/2$) vertices.  In this case, we compute a secondary
+funnel in $P_i$ that splits $P_i$ into subpolygons each of which have
+at most $n/2$ vertices.  In this way, we obtain an algorithm with a
+recursion tree of depth $O(\log n)$ and at which the total work done
+at each level is $O(n)$, for a total construction time of $O(n\log
+n)$.
+
+To see that the number of \kangles\ in $\Delta$ is $O(n)$, observe
+that the \kangle\ tree has $O(n)$ nodes and each node contributes
+$O(1)$ \kangles\ to $\Delta$.
+\end{proof}
+
+Each node $v$ of a \kangle\ tree has a region $\Delta(v)$ associated
+with it.  
+ For each node $v$ with children $v_1,\ldots,v_k$, we define
+$\Xi(v)$ as 
+\[
+    \Xi(v) = \Delta_v\setminus(\Delta(v_1),\ldots,\Delta(v_k)) \enspace .
+\]
+and, as before, we define $\Pr(v)=\Pr(\Xi(v))$.  Note that $\Xi(v)$ is
+a (possibly not connected) polygonal region with $O(1)$ edges.
+An important property of the \kangle\ tree that is easily verified is
+that a node $v$ at
+distance $i$ from the root of has $\Pr(\Delta(v)) \le 1/2^{\floor{i/4}}$.
+
+\begin{lem}
+Let $v_1,\ldots,v_k$ be a set of nodes in a kangle tree $T$ such
+$v_i$ is not an ancestor of $v_j$ for any $1\le i,j\le k$.  Then, for
+any conforming triangle $t$ of $P$, there exists at most three indices
+$i$ such that $t$ intersects $\Delta(v_i)$.
+\end{lem}
+
+\begin{proof}
+Easy enough, but first prove \lemref{gen-indep}.
+\end{proof}
+
+Next, we partition the polygons of $\Delta$ into groups
+$G_1,G_2,\ldots$ where
+\[
+	G_i = \{t\in \Delta : 1/2^{i} \le \Pr(t) < 1/2^{i-1} \} \enspace .
+\]
+Note that each polygon $v$ in $\Delta$ corresponds to a unique node
+$v(t)$ in $T$.
+In what follows, we fix some a real number $0< \alpha < 1$ that will be
+specified later.   The following lemma gives the structure of the sets
+that will be used in the application of \lemref{pieces}.
+
+\begin{lem}\lemlabel{partition-w}
+Each group $G_i$ can be partitioned into $r_i$ subgroups
+$G_{i,1},\ldots,G_{i,r_i}$ such that
+\begin{enumerate}
+\item There is an integer $t_i$ such that $r_i-t_i\le 2^{\alpha i}$.
+
+\item $|G_{i,j}| \ge 2^{\alpha i} / 4i$, for all $1\le j \le t_i$, and
+
+\item for every $1\le j< r_i$ and every $t,s\in G_{i,j}$, $t\neq s$, 
+node $v(t)$ is not an ancestor of node $v(s)$ in $T$. 
+\end{enumerate}
+\end{lem}
+
+\begin{proof}
+The proof is identical to the proof of \lemref{partition}, which
+relies only on the fact that, for an element $t\in G_i$, there are at
+most $4i$ elements of $s\in G_i$ such that $v(s)$ is an ancestor of
+$v(t)$.
+\end{proof}
+
+\begin{lem}\lemlabel{big-bugger-w}
+Let $P$ be a simple polygon with $n$ vertices and let $D$ be a
+probability measure over $\R^2$.  Let $\Delta=\Delta(P,D)$ denote the
+set of triangles in a kangle tree for $(P,D)$.  Then, for any
+triangulation $\Delta^*$ conforming to $P$,
+\[
+    H(\Delta) \le H(\Delta^*) + O(H(\Delta)^{2/3}+1) \enspace .
+\]
+Furthermore, the triangulation $\Delta$ contains $O(n)$ vertices and
+can be computed in $O(n\log n)$ time.
+\end{lem}
+
+\begin{proof}
+The bound on the entropy is proven by applying \lemref{pieces} to the
+partition of $\Delta$ given by \lemref{partition-w}. The computations
+are identical to those in the proof of \lemref{big-bugger}.
+\end{proof}
+
+
+
+\subsection{Low Entropy Triangulations of Simple Subdivisions}
+
+Given a simple, connected, planar subdivision $G$, we can subdivide
+$G$ into polygons of constant size as follows.  We first compute the
+convex hull $H$ of $G$.  Consider the planar subdivision $G'$ whose
+edges consist of all the edges of $G$ and $H$.  Each of the bounded
+faces $F_i$ of $G'$ is a simple polygon that can be \kangulated\ using the
+algorithm given in \secref{simple-triangulation} on the distribution
+$D_{\mid F_i}$.  The outer face $\overline{F}$ of $G'$ is the
+complement of a convex polygon that can subdivided using the algorithm
+of \secref{convex} using the distribution $D_{\mid \overline{F}}$.
+
+\begin{lem}\lemlabel{lower-bound-w}
+Let $\Delta=\Delta(G,D)$ denote the triangulation of $G$ obtained by
+the above algorithm. 
+Then, for any triangulation $\Delta^*$ conforming to $G$,
+\[
+    H(\Delta) \le H(\Delta^*) + O(H(\Delta)^{2/3}+1) \enspace .
+\]
+\end{lem}
+
+\begin{proof}
+The proof of this lemma is identical to the proof of
+\lemref{lower-bound}, with the exception that the addition of the
+convex hull edges in $H$ increases $H(\Delta)$ by at most 1 (since
+each triangle in $\Delta^*$ intersects at most one edge of $H$).
+\end{proof}
+
+\subsection{Point Location in Simple Subdivisions}
+
+Finally, the data structure for point location in planar subdivisions
+comes as no surprise.  Given $G$ and $D$, construct the kangulation
+$\Delta=\Delta(G,D)$ described in the previous section.  The data
+structure of \thmref{ammw07} is then used to preprocess $\Delta$ and
+$D$ for point location.  The performance of this data structure is
+summarized by our main theorem.
+
+\begin{thm}
+Given a simple, connected, planar subdivision $G$ and a probability
+measure $D$ over $\R^2$, there exists a data structure $T=T(G,D)$ for
+answering point location queries in $G$ that can be
+constructed in $O(n\log n)$ time and with expected query time
+\[
+   \mu_D(T) \le \mu_D(T^*) + O(\mu_D(T)^{2/3} + 1)
+\]
+where $T^*$ is any linear decision tree for point location in $G$.
+\end{thm} 
+
+\begin{proof}
+The bound on the query time follows from \lemref{triangulate} and
+\lemref{lower-bound-w}. The running time follows from
+\lemref{construction} and by using, for
+example, Melkman's
+Algorithm to compute the convex hull of $G$ in $O(n)$ time.
+\end{proof}
 
 \bibliographystyle{plain}
 \bibliography{entropy}

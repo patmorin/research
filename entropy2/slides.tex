@@ -14,19 +14,20 @@
 \DeclareMathOperator{\support}{support}
 \DeclareMathOperator{\boundary}{\partial}
 
-\input{pat}
+\input{pat-slides}
 
 \newcommand{\pin}{p_{\mathsf{in}}}
 \newcommand{\pout}{p_{\mathsf{out}}}
 \DeclareMathOperator{\cost}{cost}
 \DeclareMathOperator{\depth}{depth}
 
-\title{Distribution-Sensitive Point Location\\ in Convex Subdivisions}
+\title{Minimum-Entropy Conforming Triangulations}
 \author{S\'ebastien~Collette 
 	\and Vida~Dujmovi\'c 
 	\and John~Iacono
+	\and Stefan~Langerman
 	\and Pat~Morin}
-\date{May 14, 2008 \\ University of Sydney}
+\date{November 13, 2008 \\ NICTA Algorithms Seminar}
 
 \begin{document}
 
@@ -147,34 +148,41 @@ expected number of decisions is at least
       \item<4->For triangulations: $O(n)$ space, $O(H)$ comparisons
 (deterministic --- Kirkpatrick)
     \end{itemize} 
+    \item<5-> Collette, Dujmovi\'c, Iacono, Langerman, Morin (2007)
+    \begin{itemize}
+      \item<5->For convex subdivisions: $O(n)$ space, $\tilde{H} + O(\tilde{H}^{2/3} + 1)$ comparisons
+(deterministic --- Kirkpatrick)
+    \end{itemize} 
    \end{itemize}
+
 
 
 }
 
-\section{Point-in-Polygon Testing}
 \frame
 {
-   \frametitle{Point-in-Polygon Testing}
+   \frametitle{What's Left}
    \begin{itemize}
    \item<1-> It looks like distribution-sensitive point location is 
-	well understood, but\ldots
-   \item<2-> A simple question: $P$ is a convex $n$-gon, $D$ is a
-	probability measure over $\R^2$
-   \item<3-> Preprocess $(P,D)$ so that we can quickly determine if a
-point $p$, distributed according to $D$ is inside or outside $P$
-   \item<4-> None of the above results apply
+	well understood, but\ldots\\
+   \begin{center}
+     \only<2->{\includegraphics[height=1.5in]{australia_regions}}
+   \end{center}
+   \item<2-> This isn't a triangulation or even a convex subdivision
    \end{itemize}
 }
 
+\section{Triangulations, Entropy, and Linear Decision Trees}
+
 \frame
 {
-   \frametitle{Difficulties I}
+   \frametitle{Minimum-Entropy Triangulations}
    \begin{itemize}
-   \item<1-> We will want to prove that our data structure is optimal
-   \item<2-> But there are only two outcomes, so
-     \[ H= \pin\log (1/\pin) + \pout\log(1/\pout) \le 1  \]
-   \item<3-> We can't always match the entropy lower bound!
+   \item<1-> Recall the result of Arya et al 2007:
+     \begin{itemize}
+      \item For triangulations: $O(n)$ space, $H+O(H^{1/2}+1)$ comparisons
+     \end{itemize}
+   \item<2-> Idea: Triangulate the subdivision and apply the above result
    \end{itemize}
 }
 
@@ -182,118 +190,35 @@ point $p$, distributed according to $D$ is inside or outside $P$
 {
    \frametitle{Difficulties}
    \begin{itemize}
-     \item<1-> We could try to triangulate $P$ and apply a result for 
-	triangulations\\
-     \only<1>{\centerline{\includegraphics[scale=.6]{problema-1}}%
-        -}       
-     \only<2>{\centerline{\includegraphics[scale=.6]{problema-2}}%
-        $H= \sum_{i=1}^f (c/f)\log (f/c) = \Theta(\log f)$ }%       
-     \only<3->{\centerline{\includegraphics[scale=.6]{problema-3}}%
-        $H= p_1\sum_{i=1}^3 p_i\log(1/p_i) = O(1)$ }%  
-     \item<4-> Choosing a good triangulation is critical
+   \item<1-> Not enough choice when triangulating
+   \begin{center}
+     \only<1>{\includegraphics{unique1}}
+     \only<2->{\includegraphics{unique2}}
+   \end{center}
+   \item<2-> The only triangulation may increase $H$ too much
    \end{itemize}
 }
 
-\subsection{The Triangle Tree}
-\frame
-{
-   \frametitle{The Triangle Tree}
-   \begin{itemize}
-    \item<1-> We define a binary \emph{triangle tree} $T=T(P,D)$
-    \item<2-> The vertices of $T$ correspond to triangles
-    \item<3-> Each triangle approximates a section of the boundary of $P$
-    {\includegraphics{ssplit-a}}
-    \only<4>{\includegraphics{ssplit-b}}%
-    \only<5>{\includegraphics{ssplit-c}}%
-    \only<6>{\includegraphics{ssplit-d}}%
-    \only<7->{\includegraphics{ssplit-e}}%
-    \item<4-> Each internal node is split into two triangles
-    \item<8-> The leaves of $T$ correspond to triangles completely
-	contained in $P$
-   \end{itemize}
-}
-
-\frame
-{
-   \frametitle{The Triangle Tree (Example)}
-   \only<1>{\includegraphics{construction-d}}%
-   \only<2>{\includegraphics{construction-e}}%
-   \only<3>{\includegraphics{construction-f}}%
-   \only<4>{\includegraphics{construction-g}}\\
-}
-
-
-\frame
-{
-   \frametitle{Searching in $T$}
-   \begin{itemize}
-     \item<1-> Searching in $T$ is done top-down, starting at the root
-     \item<2-> For each triangle either:
-      \begin{itemize}
-        \item<3-> We finish the search:\\
-          \includegraphics{finish}
-        \item<4-> We recurse on one of the two children:\\
-          \includegraphics{recurse}
-      \end{itemize}
-   \end{itemize}
-}
-
-\subsection{The Upper Bound}
-\frame
-{
-   \frametitle{Analysis of the Triangle Tree}
-   \begin{itemize}
-   \item<1-> Let $\Pr(v)$ denote the probability that a search for $p$ 
-	finishes at node $v\in T$
-   \item<2-> Note that, if $v$ is at depth $i$ in $T$ then $\Pr(v)\le 1/2^i$
-   \item<3-> So, the expected cost of searching in $T$ is at most
-   \begin{eqnarray*}
-      \mu_D(T) 
-    &=& O(1) + O(1)\times\sum_{v\in T} \Pr(v)\times\depth(v) \\
-       &\le& O(1)+O(1)\times \sum_{v\in T} \Pr(v)\log(1/\Pr(v))
-   \end{eqnarray*}
-   \end{itemize}
-
-}
-
-\frame
-{
-	\frametitle{Review and Lookahead}
-	\begin{itemize}
-	\item<1-> We have a triangle tree $T$ whose search time is
-	 \[ \mu_D(T) \le O(1)+O(1)\times \sum_{v\in T} \Pr(v)\log(1/\Pr(v))
-         \]
-	and we want to show that this is optimal 
-        \item<2-> We will show that every point location structure $X$ for
-	$P$ is also a point location structure for the triangles of
-$T$, so Shannon's Theorem gives
-	 \[ \mu_D(X) \ge \sum_{v\in T} \Pr(v)\log(1/\Pr(v))
-         \]
-        \item<3-> Well, not exactly\ldots
-          \begin{itemize}
-		\item<4-> $X$ can distinguish between most (but not all) triangles of $T$
-		\item<5-> But this will be good enough
-          \end{itemize}
-	\end{itemize}
-}
-
-\subsection{The Lower Bound}
 \frame
 {
    \frametitle{Linear Decision Trees}
    \begin{itemize}
-     \item<1-> We need to fix a model of computation for the lower bound
+     \item<1-> We need to fix a model of computation if we want to
+       prove any data structure is optimal
      \item<2-> A \emph{linear decision tree} is a binary tree where
        \begin{itemize}
           \item Each internal node is labelled with a linear inequality
-          \item Each leaf is labelled with \emph{in} or \emph{out}
+          \item Each leaf is labelled with the name of a face of $G$
           \item For every $p\in\R^2$ the search path for $p$ finishes at 
-           a leaf labelled \emph{in} if and only if $p\in P$
+           a leaf labelled $F_i$ if and only if $p\in F_i$
        \end{itemize}
      \item<3-> Every point location structure in the
 	introduction can be expressed as a linear decision tree
    \end{itemize}
 }
+
+
+
 
 \frame
 {
@@ -305,145 +230,156 @@ $T$, so Shannon's Theorem gives
         \only<5>{\includegraphics{ld-e}}%
 }
 
-
 \frame
 {
-	\frametitle{A Non-Trivial Lower Bound}
-        \begin{itemize}
-          \item<1-> Suppose we have this polygon $P$ and this distribution $D$:
-            \includegraphics{lower-bound}
-          \item<2-> \textbf{Lemma 0:} Any linear decision tree $X$ for
-testing if $p\in P$ has 
-\[  \mu_D(X) + \log(\mu_D(X)) \ge \sum_{i=1}^{11} p_i\log(1/p_i)
- \]
-        \end{itemize} 
+   \frametitle{Linear Decision Trees and Triangulations}
+   \begin{itemize}
+     \item<1->
+     \textbf{Lemma 1:}
+       For every linear decision tree $T$ there exists a linear
+decision tree $T'$ in which every leaf of $T'$ is a triangle and 
+$\mu_D(T') \le \mu_D(T) + O(\log(\mu_D(T))$.
+     \item<2-> \textit{Proof:}
+      \begin{itemize}
+        \item<3-> If $T$ has a leaf $\ell$ with $k$ sides then
+          the depth of $\ell$ in $T$ is at least $k$ 
+        \item<4-> Triangulate $\ell$ using a balanced triangulation,
+increasing its depth only by $O(\log k)$
+        \item<5-> Apply Jensen's Inequality
+        \item<6-> ???
+        \item<7-> Profit! (QED)
+     \end{itemize}
+   \end{itemize}
 }
 
 \frame
 {
-	\frametitle{Proof of Lemma 0}
-        \begin{itemize}
-	   \item<1-> Consider a leaf $\ell$ of $X$
-            \only<1>{\includegraphics{lower-bound}}%
-            \only<2>{\includegraphics{lower-bound-out}}%
-            \only<3->{\includegraphics{lower-bound-in}}%
-	   \item<2-> If $\ell$ is labelled ``out'' then $r(\ell)$
-intersects at most one of $p_1,p_3,p_5,p_7,p_9,p_{11}$.
-           \item<3-> If $\ell$ is labelled ``in'' then $r(\ell)$ may
-intersects several of $p_2,p_4,p_6,p_8,p_{10}$.
-	   \begin{itemize}
-		\item <4->If $\ell$ intersects $k$ pieces then
-$r(\ell)$ has at least $k$ sides
-		\item <5->The depth of $\ell$ in $X$ must be at least
-$k$.
-	   \end{itemize}
-        \end{itemize}
+   \frametitle{Review}
+
+   \begin{itemize}
+     \item<1-> If we find a triangulation with entropy $H$ then we get a
+point location structure with query time $H+O(H^{1/2}+1)$
+     \item<2-> If the minimum entropy of \emph{any} triangulation is $H$
+then the expected cost of \emph{any} linear decision tree is at least
+$H-O(\log H)$
+     \item<3-> Finding a (nearly) optimal point location structure is
+(nearly) equivalent to finding a (nearly) minimum-entropy triangulation
+   \end{itemize} 
 }
 
 \frame
 {
-	\frametitle{Proof of Lemma 0}
-        \begin{itemize}
-	   \item<1-> Split $r(\ell)$ up into $k$ pieces 
-           \includegraphics{lower-bound-in-triangulate}
-	   \item<2-> The depth of these pieces is at most $k+\log k$.
-           \item<3-> We now have a linear decision tree $X'$, and each
-leaf of $X'$ intersects at most one of $p_1,\ldots,p_{11}$ so
-	     $ \sum_{i=1}^{11}p_i\log(1/p_i) \le \mu_D(X') $
-           \item<4-> And the expected 
-cost of $X'$ is at most 
-	\[ \mu_D(X') \le \mu_D(X) + \log(\mu_D(X)) \]
-        \end{itemize}
-}
+    \frametitle{A Simple(ton) Plan}
 
-
-
-
-
-%\frame
-%{
-%	\frametitle{Proof of Lemma 0}
-%        \begin{itemize}
-%           \item<1->We first prove a lower bound for the \emph{chord tree} model\\
-%            \only<1>{\includegraphics{lb-proof-a}}%
-%            \only<2>{\includegraphics{lb-proof-b}}%
-%            \only<3>{\includegraphics{lb-proof-c}}%
-%            \only<4->{\includegraphics{lb-proof-d}}%
-%           \item<2->Let $C_1,\ldots,C_{11}$ be the components of 
-%               $\support(D)\setminus \boundary P$
-%
-%           \item<3->For any $p\in C_i$ and $q\in C_j$ $i\neq j$, $p$ and $q$
-%               must live in different leaves of the chord tree
-%
-%           \item<4->By labelling leaves of the chord tree $T_C$
-%		appropriately we obtain a
-%               point location structure for $C_1,\ldots,C_{11}$ \\
-%           $\Rightarrow$ By Shannon's Theorem $\mu_D(T_C) \ge \sum_{i=1}^{11}p_i\log (1/p_i)$
-%           \item<5->Any line intersects $\support(D)$ in at most 2 chords
-%		\hfill{\qed}
-%        \end{itemize}
-%}
-%
-
-\frame
-{
-    \frametitle{Using Lemma 0}
     \begin{itemize}
-	\item<1-> Let $V\subseteq V(T)$ be such that no vertex in
-$V$ is an ancestor of any other vertex in $V$
-        \item<2-> The triangles of $V$ look like this:\\
-	\includegraphics{using-lemma0}
-        \item<3->Let $D_{\mid V}$ be the measure $D$ conditioned on the
-search completing at a node in $V$
-        \item<4->\textbf{Lemma 1:} For any linear decision tree $X$
-        \only<4>{\[ \mu_{D_{\mid V}}(X) + \log(\mu_{D_{\mid V}}(X))  \ge \sum_{v\in V} \Pr(v\mid V)\log (1/\Pr(v\mid V))
-         \]}
-        \only<5>{\[ \mu_{D_{\mid V}}(X) \ge \sum_{v\in V} \Pr(v\mid V)\log (1/\Pr(v\mid V))
-         \]}
+      \item<1-> We want to find a triangulation $\Delta$ of $G$ and compare it to
+a minimum entropy triangulation $\Delta^*$ of $G$
+      \item<2-> But we have no idea what $\Delta^*$ looks like
+      \item<3-> \textbf{Lemma 2:} If each triangle in $\Delta^*$ intersects
+at most $c$ triangles in $\Delta$ then $H(\Delta) \le H(\Delta^*)+\log c$
+      \item<4-> Idea (wrong): Find a triangulation $\Delta$ such that \emph{no}
+ triangle intersects more than $c$ triangles in $\Delta$
+    \end{itemize}	
+}
 
+
+\frame
+{
+    \frametitle{A Better Plan}
+
+    \begin{itemize}
+      \item<1-> \textbf{Lemma 3:} Let $\Delta_1,\ldots,\Delta_m$ be a
+partition of the triangles in $\Delta$ such that \emph{no triangle
+contained in a single face of $G$}
+intersects more than $c$ triangles of $\Delta_i$ for any $1\le i\le
+m$. Then, for any triangulation $\Delta^*$
+\[
+      H(\Delta) \le H(\Delta^*) + H(\cup\Delta_1,\ldots,\cup\Delta_m) + \log c
+\]
+\[
+      H(\Delta^*) \ge H(\Delta) - H(\cup\Delta_1,\ldots,\cup\Delta_m) - \log c
+\]
+     \item<2-> \textit{Proof:} 
+      \begin{itemize}
+       \item<3-> Give away information about which $\Delta_i$ occurs
+(gives up $H(\cup\Delta_1,\ldots,\cup\Delta_m)$ bits of entropy)
+       \item<4-> Apply Lemma~2 to each $\Delta_i$ (gives up
+           $\Pr(\Delta_i)\log c$ bits of entropy)
+       \item<5-> QED
+      \end{itemize} 
     \end{itemize}
 }
 
-\frame{
-     \frametitle{Review}
+\section{A Low-Entropy Triangulation}
+\frame
+{
+   \frametitle{A Low-Entropy Triangulation}
 
+   \begin{itemize}
+     \item<1->We triangulate each face of $G$ (a simple polygon)
+recursively
+     \begin{center}
+       \only<1>{\includegraphics[height=1in]{x1}}
+       \only<2>{\includegraphics[height=1in]{x2}}
+       \only<3>{\includegraphics[height=1in]{x3}}
+       \only<4->{\includegraphics[height=1in]{x4}}
+     \end{center}
      \begin{itemize}
-	\item<1-> We have a triangle tree $T$ whose search time is
-	 \[ \mu_D(T) \le O(1)+O(1)\times \sum_{v\in T} \Pr(v)\log(1/\Pr(v))
-         \]
-        \item<2-> For any linear decision tree $X$ and any
-	\emph{genetically independent set} $V\subseteq V(T)$ of
-	 \[ \mu_{D_{\mid V}}(X) \ge \sum_{v\in V} \Pr(v\mid V)\log(1/\Pr(v\mid V))
-         \]
-        \item<3-> For any partition of $V(T)$ into genetically
-independent sets $V_1,\ldots,V_k$, and any linear decision tree $X$,
-	 \[ \mu_D(X) \ge \sum_{i=1}^k\Pr(V_i)\sum_{v\in V_i} \Pr(v\mid
-V_i)\log(1/\Pr(v\mid V_i))
-         \]
+     \item<2->Split $P$ into pieces $P_1,\ldots,P_k$ with a funnel $F$, so
+that $\Pr(P_i) \le \Pr(P)/2$. 
+     \item<3->Triangulate $F$
+     \item<4->Recursively triangulate each of $P_1,\ldots,P_k$
      \end{itemize}
+     \item<5->Notice: Any triangle contained in $P$ intersects at most
+3 pieces of $P_1,\ldots,P_m$
+   \end{itemize}
 }
+
 
 
 \frame
 {
-	\frametitle{Review (Cont'd)}
-
- 	\begin{itemize}
-	\item<1-> We're now dangerously close to matching upper and lower bounds
-        \begin{eqnarray*}
-	\mu_D(X) &\ge &\sum_{i=1}^k
-	   \Pr(V_i)\sum_{v\in V_i} \Pr(v\mid V_i)\log(1/\Pr(v\mid V_i)) \\
-	& = &\sum_{i=1}^k\sum_{v\in V_i} 
-		\Pr(v)\log(1/\Pr(v\mid V_i)) \\
-	& = &\sum_{i=1}^k\sum_{v\in V_i} 
-		\Pr(v)(\log(1/\Pr(v))-\log(1/\Pr(V_i)))
-	\end{eqnarray*}
-	\item<2-> The trick is to pick our $V_i$s so that
-$\log(1/\Pr(V_i))$ is small
-	\end{itemize}
-
+   \frametitle{Triangulating a Funnel}
+   \begin{center} 
+     \only<1>{\includegraphics[height=1in]{funnel1}}
+     \only<2>{\includegraphics[height=1in]{funnel2}}
+     \only<3>{\includegraphics[height=1in]{funnel3}}
+     \only<4>{\includegraphics[height=1in]{funnel4}}
+   \end{center}
+   \begin{itemize}
+     \item<2->Split into two half-funnels (one reflex chain each)
+     \item<3->Treat each half-funnel like a convex polygon using Dujmovi\'c et al 2007
+     \item<4->Finish off by trimming and triangulating any non-triangles
+   \end{itemize}
 }
 
+\frame
+{
+  \frametitle{Analysis}
+  \begin{itemize}
+    \item<1-> Treat the triangulation as a tree
+      \item<2-> The root is the funnel $F$
+      \item<3-> $P_1,\ldots,P_k$ are subtrees of the root
+      \item<4-> The triangulation of $F$ is a subtree of the root
+      \item<5-> Notice: If $t$ is a triangle at depth $i$, then $\Pr(t)\le
+1/2^i$
+      \item<5-> Notice: If $t_1,\ldots,t_m$ are genetically
+independent then any triangle in $P$ intersects at most $3\times O(1)$ of
+$t_1,\ldots,t_m$ 
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Finishing Up}
+  \begin{itemize}
+    \item<1-> We now have a triangulation $\Delta$ whose triangles are
+oganized into a tree
+    \item<2-> Partition $\Delta$ into genetically independent subsets
+$\Delta_1,\ldots,\Delta_m$ 
+    \item<3-> Show that $H(\Delta_1,\ldots,\Delta_m)$ is small
+  \end{itemize}
+}
 
 \frame
 {
@@ -452,124 +388,54 @@ $\log(1/\Pr(V_i))$ is small
 	\begin{itemize}
 	\item<1-> Let
 	\[
-		V_i=\{v\in V(T) :1/2^{i-1} \le \Pr(v) \le 1/2^i \}
+		\Delta_i=\{t\in \Delta :1/2^{i-1} \le \Pr(\Delta) \le 1/2^i \}
 	\]
-	\item<2-> But these $V_i$ are not genetically independent!
- 	\item<3-> While $|V_i|\ge 2^{\alpha i}$  [constant $0< \alpha
+	\item<2-> But these $\Delta_i$ are not genetically independent!
+ 	\item<3-> While $|\Delta_i|\ge 2^{\alpha i}$  [constant $0< \alpha
 < 1$]
 	   \begin{itemize}
-		\item $V_{i,j}$ is a genetically independent subset of
-			$V_i$ with size $2^{\alpha i}/i$
-		\item $V_i\gets V_i\setminus V_{i,j}$
+		\item $\Delta_{i,j}$ is a genetically independent subset of
+			$\Delta_i$ with size $2^{\alpha i}/i$
+		\item $\Delta_i\gets \Delta_i\setminus \Delta_{i,j}$
 		\item $j\gets j+1$
 	   \end{itemize}
 	\item<4-> With the right $\alpha$ and some work, we can show that
 	\begin{eqnarray*}
-	\mu_D(X) & \ge & \sum_{i,j}\sum_{v\in V_{i,j}} 
-		\Pr(v)(\log(1/\Pr(v))-\log(1/\Pr(V_{i,j}))) \\
-	& \ge & \left(1-\epsilon\right)\sum_{v\in T}\Pr(V)\log(1/\Pr(V)) -
-O(1)
+	H(\{\cup\Delta_{i,j}\}) \le O(H(\Delta)^{2/3}+1)
 	\end{eqnarray*}
 	\end{itemize}
 }
 
+
+\frame
+{
+  \frametitle{Finishing Up}
+  \begin{itemize}
+    \item<1-> By Lemma~3, 
+     \[ H(\Delta) \le H(\Delta^*) + O(H(\Delta^*)^{2/3}+1) \]
+    \item<2-> By Lemma~1, the expected query time of any linear decision tree is at least
+     \[ \mu_D(T^*) \ge H(\Delta^*) + O(\log (H(\Delta^*)) \]
+    \item<3-> Using the algorithm of Arya et al, we get a data
+structure whose expected cost is at most
+     \[ \mu_D(T) \le H(\Delta) + O(H(\Delta)^{1/2}+1) \le \mu_D(T^*) + O(\mu_D(T^*)^{2/3}) \]
+  \end{itemize}
+}
+
+\section{Theorem 1}
 \frame
 {
 	\frametitle{Theorem 1}
 	\begin{itemize}
-	\item<1-> For any convex $n$-gon $P$ and
-any probability measure $D$ over $\R^2$, a triangle tree $T=T(P,D)$ can be
-constructed in $O(n)$ time and 
+	\item<1-> For any simple planar subdivision $G$ of size $n$ and
+any probability measure $D$ over $\R^2$, a point location structure
+$T$ for $G$ can be
+constructed in $O(n\log n)$ time and
 \[
-	\mu_D(T) = O(1) + O(1)\times\sum_{v\in V(T)} \Pr(v)\log(1/\Pr(v))
-\enspace .
+	\mu_D(T) \le \mu_D(T*) + O(\mu_D(T^*)^{2/3}) \enspace ,
 \]
-
-	\item<2-> Furthermore, for any linear decision tree $X$ that
-	tests if a point $p$ is contained in $P$,
-	\[
-	\mu_D(X) = \Omega(1) + \Omega(1)\times\sum_{v\in V(T)}
-	\Pr(v)\log(1/\Pr(v)) \enspace .
-	\]
-	\end{itemize}
-}
-
-
-\section{Point Location in Convex Subdivisions}
-\frame
-{
-	\frametitle{Point Location in Convex Subdivisions}
-
-	\begin{itemize}
-	\item<1-> Given a convex subdivision $G$ having faces
-$F_1,\ldots,F_f$ and a probability measure $D$ over $\R^2$
-
-	\item<2-> For each $i$, triangulate $F_i$ using the triangles of
-the triangle tree $T_i=T(F_i,D_{\mid F_i})$
-
-	\item<3-> Preprocess the resulting triangulation using a
-distribution-sensitive point location structure for triangulations to
-obtain a data structure $Q$
-
-	\end{itemize}
-}
-
-\frame
-{
-	\frametitle{Analysis of $Q$}
-
-	\begin{eqnarray*}
-	\mu_D(Q) & = & O(1)+O(1)\times\sum_{i=1}^f\sum_{v\in
-T_i}\Pr(v)\log(1/\Pr(v)) \\
-	         & = & O(1) \\ & & {}+O(1)\times\sum_{i=1}^f\Pr(F_i)\log
-(1/\Pr(F_i)) \\ & & {}+ O(1)\times\sum_{i=1}^f\Pr(F_i)\times\sum_{v\in T_i}\Pr(v\mid
-F_i)\log(1/\Pr(v\mid F_i))
-	\end{eqnarray*}
-	\begin{itemize}
-	\item<2->Each of these three terms is also a lower bound
-	\end{itemize}
-}
-
-\frame
-{
-	\frametitle{Theorem 2}
-
-	\begin{itemize}
-	\item For any convex subdivision $G$ having complexity $n$ and
-	any probability measure $D$ over $\R^2$, the data structure
-$Q=Q(G,D)$ can be constructed in $O(n)$ time and 
-	\begin{eqnarray*}
-	\mu_D(Q) 
-         & = & O(1)+O(1)\times\sum_{i=1}^f\Pr(F_i)\log
-(1/\Pr(F_i)) \\ & & {}+ O(1)\times\sum_{i=1}^f\sum_{v\in T_i}\Pr(F_i)\Pr(v\mid
-F_i)\log(1/\Pr(v\mid F_i))
-	\end{eqnarray*}
-	and this is (within a constant factor of) optimal in the linear decision tree model of
-computation.
-	\end{itemize}
-}
-
-\section{Summary and Conclusions}
-\frame
-{
-	\frametitle{Summary and Conclusions}
-	\textbf{Results:}
-	\begin{itemize}
-	\item<2-> A constant factor optimal data structure for
-distributions-sensitive point location in convex subdivisions
-	\item<3-> Extends to non-convex polygonal subdivisions
-	\end{itemize}
-	\textbf{Open Problems:}
-	\begin{itemize}
-	\item<4-> What can be done for point location in higher dimensions?
-	\item<5-> This data structure gives an optimal $O(n^2)$ space data structure for halfspace range queries.  What can be done with $O(n)$ space?
-	\end{itemize}
-}
-
-\frame
-{
-	\frametitle{Thank You}
-	\Huge Thank You!
+where $T^*$ is any linear decision tree for point location in $G$.
+         \item<2-> \begin{center}\Huge THE END\end{center}
+         \end{itemize}
 }
 
 

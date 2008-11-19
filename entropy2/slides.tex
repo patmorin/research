@@ -33,8 +33,8 @@
 
 \frame{\titlepage}
 
-\section[Outline]{}
-\frame{\tableofcontents}
+%\section[Outline]{}
+%\frame{\tableofcontents}
 
 \section{Introduction}
 \subsection{Planar Point Location}
@@ -112,7 +112,7 @@ o(\log\log n)$ standard comparisons
    \item<2-> $D$ induces a distribution over the faces of $G$
    \item<3-> Let $p_i=\Pr\{\mbox{$p$ is contained in face $i$}\}$
    \item<4-> \textbf{Theorem (Shannon 1948):}
-     For any data structure $X$ that makes only binary decisions, the
+     For any point-location structure $X$ that makes only binary decisions, the
 expected number of decisions is at least
    \[
       \mu_D(X) \ge H(p_1,\ldots,p_f) = \sum_{i=1}^f p_i\log(1/p_i)  \enspace .
@@ -165,10 +165,11 @@ expected number of decisions is at least
    \begin{itemize}
    \item<1-> It looks like distribution-sensitive point location is 
 	well understood, but\ldots\\
-   \begin{center}
-     \only<2->{\includegraphics[height=1.5in]{australia_regions}}
-   \end{center}
-   \item<2-> This isn't a triangulation or even a convex subdivision
+   \item<2->[ ]
+      \begin{center}
+         \includegraphics[height=1.5in]{australia_regions}
+      \end{center}
+   \item<3-> This isn't a triangulation or even a convex subdivision
    \end{itemize}
 }
 
@@ -183,19 +184,13 @@ expected number of decisions is at least
       \item For triangulations: $O(n)$ space, $H+O(H^{1/2}+1)$ comparisons
      \end{itemize}
    \item<2-> Idea: Triangulate the subdivision and apply the above result
-   \end{itemize}
-}
-
-\frame
-{
-   \frametitle{Difficulties}
-   \begin{itemize}
-   \item<1-> Not enough choice when triangulating
-   \begin{center}
-     \only<1>{\includegraphics{unique1}}
-     \only<2->{\includegraphics{unique2}}
-   \end{center}
-   \item<2-> The only triangulation may increase $H$ too much
+   \item<3-> Problem: Not enough choice when triangulating
+    \only<1-3>{\begin{center}\includegraphics{unique1}\end{center}}
+    \only<4>{\begin{center}\includegraphics{unique2}\end{center}}
+    \only<5>{\begin{center}\includegraphics{unique3}\end{center}}
+   \item<4-> The only triangulation may increase $H$ too much
+   \item<5-> Steiner vertices are needed to keep the entropy
+             small
    \end{itemize}
 }
 
@@ -317,12 +312,12 @@ m$. Then, for any triangulation $\Delta^*$
 
    \begin{itemize}
      \item<1->We triangulate each face of $G$ (a simple polygon)
-recursively
+         recursively
      \begin{center}
-       \only<1>{\includegraphics[height=1in]{x1}}
-       \only<2>{\includegraphics[height=1in]{x2}}
-       \only<3>{\includegraphics[height=1in]{x3}}
-       \only<4->{\includegraphics[height=1in]{x4}}
+       \only<1>{\includegraphics[height=1in]{x1}}%
+       \only<2>{\includegraphics[height=1in]{x2}}%
+       \only<3>{\includegraphics[height=1in]{x3}}%
+       \only<4->{\includegraphics[height=1in]{x4}}%
      \end{center}
      \begin{itemize}
      \item<2->Split $P$ into pieces $P_1,\ldots,P_k$ with a funnel $F$, so
@@ -330,8 +325,7 @@ that $\Pr(P_i) \le \Pr(P)/2$.
      \item<3->Triangulate $F$
      \item<4->Recursively triangulate each of $P_1,\ldots,P_k$
      \end{itemize}
-     \item<5->Notice: Any triangle contained in $P$ intersects at most
-3 pieces of $P_1,\ldots,P_m$
+     \item<5->Notice: Any triangle contained in $P$ intersects at most 2 pieces of $P_1,\ldots,P_m$
    \end{itemize}
 }
 
@@ -363,7 +357,7 @@ that $\Pr(P_i) \le \Pr(P)/2$.
       \item<4-> The triangulation of $F$ is a subtree of the root
       \item<5-> Notice: If $t$ is a triangle at depth $i$, then $\Pr(t)\le
 1/2^i$
-      \item<5-> Notice: If $t_1,\ldots,t_m$ are genetically
+      \item<6-> Notice: If $t_1,\ldots,t_m$ are genetically
 independent then any triangle in $P$ intersects at most $3\times O(1)$ of
 $t_1,\ldots,t_m$ 
   \end{itemize}
@@ -373,11 +367,20 @@ $t_1,\ldots,t_m$
 {
   \frametitle{Finishing Up}
   \begin{itemize}
-    \item<1-> We now have a triangulation $\Delta$ whose triangles are
-oganized into a tree
-    \item<2-> Partition $\Delta$ into genetically independent subsets
+      \item<1-> \textbf{Lemma 3 (Reminder):} Let $\Delta_1,\ldots,\Delta_m$ be a
+partition of the triangles in $\Delta$ such that \emph{no triangle
+contained in a single face of $G$}
+intersects more than $c$ triangles of $\Delta_i$ for any $1\le i\le
+m$. Then, for any triangulation $\Delta^*$
+\[
+      H(\Delta) \le H(\Delta^*) + H(\cup\Delta_1,\ldots,\cup\Delta_m) + \log c
+\]
+
+    \item<2-> We now have a triangulation $\Delta$ whose triangles are
+organized into a tree
+    \item<3-> Partition $\Delta$ into genetically independent subsets
 $\Delta_1,\ldots,\Delta_m$ 
-    \item<3-> Show that $H(\Delta_1,\ldots,\Delta_m)$ is small
+    \item<4-> Show that $H(\Delta_1,\ldots,\Delta_m)$ is small
   \end{itemize}
 }
 
@@ -434,7 +437,7 @@ constructed in $O(n\log n)$ time and
 	\mu_D(T) \le \mu_D(T*) + O(\mu_D(T^*)^{2/3}) \enspace ,
 \]
 where $T^*$ is any linear decision tree for point location in $G$.
-         \item<2-> \begin{center}\Huge THE END\end{center}
+         \item<2->[ ] \begin{center}\Huge THE END\end{center}
          \end{itemize}
 }
 

@@ -1,0 +1,776 @@
+\documentclass[lotsofwhite]{patmorin}
+\usepackage{fullpage,graphicx,graphics}
+
+\include{pat}
+
+\newcommand{\boundary}{\partial}
+\newcommand{\interior}{\mathrm{int}}
+\newcommand{\z}[1]{{\hat{#1}}}
+\newcommand{\depth}{\mathrm{depth}}
+
+\begin{document}
+\section{Introduction}
+
+
+\section{Introduction}
+\seclabel{intro}
+
+The planar point location problem is one of the classic problems in
+computational geometry. Given a planar subdivision $G$,\footnote{A
+\emph{planar subdivision} is a partitioning of the plane into points
+(called \emph{vertices}), open line segments (call \emph{edges}), and
+open polygons (called \emph{faces}).} the planar point location
+problem asks us to construct a data structure so that, for any query
+point $p$, we can quickly determine which face of $G$ contains
+$p$.\footnote{In the degenerate case where $p$ is a vertex or contained
+in an edge of $G$ any face incident on that vertex/edge may be
+returned as an answer.}
+
+The history of the planar point location problem parallels, in many
+ways, the study of binary search trees.  After a few initial attempts
+\cite{dl76,lp77,p81}, asymptotically optimal (and quite different)
+linear-space $O(\log n)$ query time solutions to the planar point
+location problem were obtained by Kirkpatrick \cite{k83}, Sarnak and
+Tarjan \cite{st86}, and Edelsbrunner \etal\ \cite{egs86} in the mid
+1980s.  These results were based on hierarchical simplification, data
+structural persistence, and fractional cascading, respectively.  All
+three of these techniques have subsequently found many other
+applications.  An elegant randomized solution, combining aspects of
+all three previous solutions, was later given by Mulmuley \cite{m90},
+and uses randomized incremental construction, a technique that has
+since become pervasive in computational geometry
+\cite[Section~9.5]{bcko08}.  Preparata \cite{p90} gives a
+comprehensive survey of the results of this era.
+
+In the 1990s, several authors became interested in determining the
+exact constants achievable in the query time.  Goodrich \etal\
+\cite{gor97} gave a linear-size data structure that, for any query,
+requires at most $2\log n + o(\log n)$ point-line comparisons and
+conjectured that this query time was optimal for linear-space data
+structures. Here and throughout, logarithms are implicitly base 2
+unless otherwise specified. The following year, Adamy and Seidel
+\cite{as98} gave a linear-space data structure that answers queries
+using $\log n + 2\sqrt{\log n} + O(\log\log n)$ point-line comparisons
+and showed that this result is optimal up to the third term.
+
+Still not done with the problem, several authors considered the point
+location problem under various assumptions about the query
+distribution.  All these solutions compare the expected query time to
+the \emph{entropy bound};  in a planar subdivision with $f$ faces, if the query
+point $p$ is chosen from a probability measure over $\R^2$ such that
+$p_i$ is the probability that $p$ is contained in face $i$ of $G$,
+then no algorithm that makes only binary decisions can answer queries
+using an expected number of decisions that is fewer than 
+\begin{equation}
+    H(p_1,\ldots,p_f) = \sum_{i=1}^f p_i\log(1/p_i) \enspace . 
+	\eqlabel{entropy}
+	\eqlabel{entropy-face}
+\end{equation}
+
+In the previous results on planar point location, none of the query
+times are affected significantly by the structure of $G$;  they hold
+for arbitrary planar subdivisions.  However, when studying point
+location under a distribution assumption the problem becomes more
+complicated and the results become more specific.  A \emph{convex
+subdivision} is a planar subdivision whose faces are all convex
+polygons, except the outer face, which is the complement of a convex
+polygon.  A \emph{triangulation} is a convex subdivision in which each
+face has at most 3 edges on its boundary.
+
+Note that, if every face of $G$ has a constant number of sides, then
+$G$ can be augmented, by the addition of extra edges, so that it is a
+triangulation without increasing \eqref{entropy} by more than a
+constant.  Similarly, in a convex subdivision $G$ where the query
+distribution $D$ is uniform within each face of $G$, the faces of the
+subdivision can be triangulated without increasing the entropy by more
+than a constant \cite{amm00}. Thus, in the following we will simply
+refer to results about triangulations where it is understood that
+these also imply the same result for planar subdivisions with faces of
+constant size or convex subdivisions when the query distribution is
+uniform within each face.
+
+Arya \etal\ \cite{acmr00} gave two results for the case where the
+query point $p$ is chosen from a known distribution where the $x$ and
+$y$ coordinates of $p$ are chosen independently and $G$ is a convex
+subdivision.  They give a linear space data structure for which the
+expected number of point-line comparisons is at most $4H+O(1)$ and a
+quadratic space data structure for which the expected number of
+point-line comparisons is at most $2H+O(1)$.  The assumption about the
+independence of the $x$ and $y$ coordinates of $p$ is crucial to the
+these results.
+
+For arbitrary distributions that are known in advance, several results
+exist.  Iacono \cite{i01,i04} showed that, for triangulations, a
+simple variant of Kirkpatrick's original point location structure
+gives a linear space, $O(H+1)$ expected query time data structure.  A
+result by Arya \etal\ \cite{amm00} gives a data structure for
+triangulations that uses $H + O(H^{2/3}+1)$ expected number of
+comparisons per query and $O(n\log n)$ space.  The space requirement
+of this latter data structure was later reduced, by the same authors,
+to $O(n\log^* n)$ \cite{amm01a}.  The same three authors
+\cite{amm01b} also showed that a variant of Mulmuley's randomized algorithm
+gives, for triangulations, a simple $O(H+1)$ expected query time,
+linear space data structure.  Very recently, Arya \etal\
+\cite{ammw07}, have given an $O(n)$ space structure for point-location
+in triangulations with query time $H+O(H^{1/2}+1)$. 
+
+In a preliminary version of this paper, the current authors
+\cite{soda07} showed that, when $G$ is a convex subdivision, there
+exists a data structure of size $O(n)$ that can answer point location
+queries using $\tilde H + O(\tilde H^{2/3}+1)$ point/line comparisons.
+Here, $\tilde H=\tilde H(G,D)$ is a lower bound on the expected cost
+of point location for any linear decision tree for point location in
+$G$ when the query point $p$ is drawn from $D$.  In general, $\tilde
+H$ is larger than $H$.
+
+In the current paper, we show that, for any connected planar
+subdivision (not necessarily convex), there exists a data structure of
+size $O(n)$ that can answer point location queries using $\tilde H +
+O(\tilde H^{2/3}+1)$ point/line comparisons.  Again, $\tilde H=\tilde
+H(G,D)$ is a lower bound on the expected cost of any linear decision
+tree that solves this problem.  We achieve this result by showing how
+to compute a near-minimum-entropy Steiner triangulation $\Delta$ of
+$G$ and then proving that the entropy of a minimum-entropy Steiner
+triangulation of $G$ is a lower bound on the cost of any linear
+decision tree for point location in $G$.  By then applying the recent
+result of Arya \etal\ to the triangulation $\Delta$ we obtain nearly
+matching upper and lower bounds.
+
+Note that all known algorithms for planar point location that do not
+place special restrictions on the input subdivision can be described
+in the linear decision tree model of computation.\footnote{Although
+significant breakthroughs have recently been made in this area
+\cite{c06,p06}, we deliberately do not survey algorithms that require
+the vertices of the subdivision to be on integer coordinates.}  The
+data structures presented in the current paper are the most general
+results known about planar point location and imply, to within a
+lower order term, all of the results discussed in the introduction.
+
+The remainder of this paper is organized as follows:  \Secref{prelim}
+presents definitions and notations used throughout the paper.
+\Secref{polygons} shows how to compute a near-minimum-entropy
+triangulation of a simple polygon.  Finally, \Secref{subdivisions}
+presents our point location structure for connected planar
+subdivisions.
+
+\section{Definitions}
+Polygon, Reflex chain, pseudotriangle, 2-convex pseudotriangle,
+geodesic triangle, partition, $V(T)$, $\z t$, decision trees,
+classification problems, linear decision trees, $\depth(\ell)$.
+
+\section{Minimum Entropy Triangulations} 
+
+Let $P$ be a simple polygon with $n$ vertices, denoted
+$p_0,\ldots,p_{n-1}$ as they occur, in counterclockwise order, on the
+boundary of $P$.  We denote the boundary of $P$ by $\boundary P$ and
+the interior of $P$ by $\interior(P)$.  We will show how to find a
+triangulation of $P$ that has near-minimum entropy.  That is, we will
+find a triangulation $\Delta=\Delta(P,D)$ such that $H(\Delta) =
+\sum_{t\in\Delta} \Pr(t|P)\log(1/\Pr(t|P))$ is near-minimum over all
+triangulations of $P$.  
+
+\subsection{The Triangulation $\Delta=\Delta(P,D)$}
+
+Our triangulation algorithm is recursive and takes as input a polygon
+$P$ and a reflex chain $p_i,\ldots,p_j$ on the boundary of $P$.  If
+$P$ is a triangle, then there is nothing to do, so the algorithm
+outputs $P$ and terminates. Otherwise, the
+algorithm first selects a point $p_k$ on the boundary of $P$ and adds
+all the edges of the geodesic triangle $t=\triangle p_ip_jp_k$ to the
+triangulation $\Delta$.
+Observe that removing $t$ from $P$ disconnects $P$ into
+components $P_1,\ldots,P_m$ where $P_i$ is a polygon that shares a
+reflex chain $C_i$ with the pseudotriangle $t$ (see
+\figref{ii}).  The point
+$p_k$ is selected in such a way that, for all $i\in\{1,\ldots,m\}$, $\Pr(P_i)
+\le (1/2)\Pr(P)$.\footnote{The existence of such a point $p_k$ is
+readily established by a standard continuity argument; see Bose \etal
+\cite{bXX} for an example.} Each of the sub-polygons $P_1,\ldots,P_m$
+can then be triangulated recursively by applying the algorithm to
+$P_i$ and the reflex chain $C_i$.
+
+\begin{figure}
+  \begin{center}
+    \begin{tabular}{cc}
+      \includegraphics{ii-1} & \includegraphics{ii-2} 
+    \end{tabular}
+  \end{center}
+  \caption{The geodesic triangle $t=\triangle p_i p_j p_k$ partitions $P$ into several
+pieces $P_1,\ldots,P_m$.}
+  \figlabel{ii}
+\end{figure}
+
+
+To complete the triangulation $\Delta$ all that remains is to
+partition $\z t$ into triangles.  To do this, we first
+partition $\z t$ into at most 1 triangle $t'$ and 3 2-convex
+pseudotriangles $t_0,t_1,t_2$ as shown in \figref{pt-partition}.a. Let
+$Q_i$ be the connected component of $(P\setminus \z t)\cup t_i$ that
+contains $t_i$.  To complete the triangulation we will partition
+$t_i$ into triangles, for each $i\in\{0,1,2\}$, using a recursive
+algorithm.  This algorithm selects an edge $e_i$ of the reflex chain
+in $t_i$ and
+extends $e_i$ in both directions until it reaches the boundary of $t_i$
+(see \figref{pt-partition}.b).  The resulting line segment partitions
+$t_i$ into a triangle $t_i'$, and 2 2-convex pseudotriangles $t_{i,0}$
+and
+$t_{i,1}$.  At the same time, $Q_i$ is partitioned into up to 4 pieces
+(see \figref{pt-partition}.c):
+\begin{enumerate}
+\item The triangle $t_i'$, and
+\item A subpolygon $P_j$ incident to $e_i$,
+\item The two connected components $Q_{i,0}$
+and $Q_{i,1}$ of $Q_i\setminus t_i'$ that contain $t_{i,0}$ and
+$t_{i,1}$, respectively.
+\end{enumerate}
+The edge $e_i$ is selected
+so that $\Pr(Q_{i,b})\le (1/2)\Pr(Q_i)$ for each
+$b\in\{0,1\}$.\footnote{The existence of such an edge $e_i$ is assured
+by yet another continuity argument.}  This
+completes the description of the triangulation $\Delta$.  A partially
+completed triangulation is show in \figref{delta-example}.
+
+\begin{figure}
+  \begin{center}
+    \begin{tabular}{ccc}
+      \includegraphics{pt-partition} & 
+      \includegraphics{t-partition} &
+      \includegraphics{t-partition-2} \\
+      (a) & (b) & (c)
+    \end{tabular}
+  \end{center}
+  \caption{Partitioning (a) a pseudotriangle $t$ into 3 2-convex
+pseudotriangles $t_0,t_1,t_2$ and one triangle $t'$ (b) a 2-convex
+pseudotriangle $t_i$ into one triangle $t_i'$ and 2 2-convex
+pseudotriangles $t_{i,0}$ and $t_{i,1}$, and (c) $Q_i$ into 4 pieces.}
+  \figlabel{pt-partition}
+\end{figure}
+
+\begin{figure}
+  \begin{center}
+      \includegraphics{delta-example}
+  \end{center}
+  \caption{The triangles obtained during the first level of recursive
+triangulation.  The yellow subpolygons are triangulated recursively.}
+  \figlabel{delta-example}
+\end{figure}
+
+\subsection{Analysis of $H(\Delta)$}
+
+In order to study the entropy of triangulation $\Delta$ defined above,
+we will impose a tree structure on the pieces of $P$ induced by the
+triangles in $\Delta$.  The $\Delta$-tree $T=T(P,D)$ for $P$ is a tree
+whose nodes are subpolygons of $P$ and which has the property that,
+for any node $y$ that is the child of a node $x$, $y\subseteq x$. The
+root $r$ of $T$ is the polygon $P$.  The root of $T$ has the following
+children (defined in terms of the construction algorithm in the
+previous section; see \figref{delta-tree}):
+\begin{enumerate}
+\item Each subpolygon $P_i$ whose boundary does not share a segment
+      with $\z t$ is a child of $r$.  
+\item In addition, the subpolygons $Q_0,Q_1,Q_2$ are each children
+     of $r$.  The subtree rooted at $Q_i$ is a binary tree corresponding
+     to the recursive partitioning of $t_i$ and $Q_i$ done by the algorithm.
+\end{enumerate}
+Note that the above definition yields a tree whose leaves are the
+subpolygons $P_1,\ldots,P_m$  obtained by removing $t$ from $P$.  The
+subtree rooted at each such leaf is therefore obtained recursively
+from the recursive triangulation of $P_i$.
+
+\begin{figure}
+ \begin{center}\includegraphics{delta-tree}\end{center}
+   \caption{The $\Delta$-tree $T$.  Yellow leaves in this tree are the
+     root of subtrees obtained recursively.  Grey areas show the
+portions of a node not covered by its children.}
+  \figlabel{delta-tree}
+\end{figure}
+
+In the tree $T$, we will distinguish between two different kinds of
+edges.  The edges joining $r$ to $Q_i$, for each $i\in\{0,1,2\}$ are
+called \emph{red edges}, and the remaining edges are called
+\emph{black} edges.  We call a node $x$ a \emph{black child} if the
+edge from $x$ to its parent is black, otherwise we call $x$ a
+\emph{red child}.
+
+\begin{lem}\lemlabel{t-halving}\lemlabel{A}
+Let $T=T(P,D)$ be the $\Delta$-tree for $(P,D)$ and
+Let $x$ and $y$ be nodes in $T$ where $x$ is the parent of $y$ and
+$xy$ is a black edge.  Then $\Pr(y)\le(1/2)\Pr(x)$.
+\end{lem}
+
+\begin{proof}
+This follows immediately from the definition of $T$.
+\end{proof}
+
+\begin{lem}\lemlabel{t-red-black}
+Let $T=T(P,D)$ be the $\Delta$-tree for $(P,D)$ and
+Let $x$ be a node at depth $i$ in $T$.  Then the number of black edges
+on the path from the root of $T$ to $x$ is at least $\floor{i/2}$.
+\end{lem}
+
+\begin{proof}
+This follows from the fact that any red child has only (2,
+1, or 0) black children.
+\end{proof}
+
+
+\begin{lem}\lemlabel{t-depth}
+Let $T=T(P,D)$ be the $\Delta$-tree for $(P,D)$ and
+let $x$ be a node at depth $i$ in $T$.  Then $\Pr(x)\le 1/2^{\floor{i/2}}$.
+\end{lem}
+
+\begin{proof}
+This is an immediate consequence of \lemref{t-halving} and
+\lemref{t-red-black}.
+\end{proof}
+
+We call a set of nodes $\{x_1,\ldots,x_m\}$ in $T$ RB-independent if 
+for each $i,j\in\{1,\ldots,m\}$, $i\neq j$, $x_i$ is not an ancestor
+of $x_j$ and the path from $x_i$ to $x_j$ in $T$ contains at least one
+black edge.
+
+\begin{lem}\lemlabel{t-intersect-rb-indep}
+Let $T=T(P,D)$ be the $\Delta$-tree for $(P,D)$ and
+let $\{x_1,\ldots,x_m\}$ be an RB-independent set of vertices in $T$.
+Then any triangle contained in $P$ intersects at most 3 elements of
+$w_1,\ldots,w_m$.
+\end{lem}
+
+\begin{proof}
+Coming soon.
+\end{proof}
+
+\begin{lem}\lemlabel{t-big-rb-indep}
+Let $S=\{x_1,\ldots,x_m\}$ be a set of nodes in $T$ each of depth at
+most $i$.  Then there exists an RB-independent subset of $S$ whose
+size is at least $m/3i$.
+\end{lem}
+
+\begin{proof}
+Simply select elements greedily from $S$. When the element $x_i$ is
+selected, remove from consideration all ancestors of $x_i$ and all red
+children of these ancestors.  Since each step selects one node and 
+eliminates at most $3(i-1)+1$ nodes from consideration, this process 
+will select at least $m/((3(i-1)+1) \ge m/3i$ nodes.
+\end{proof}
+
+\subsection{Minimum-Entropy Triangulation}
+
+Next, we show that the triangulation $\Delta$ defined above is
+nearly-minimum entropy over all possible triangulations of $P$.  We do
+this by developing a technique for lower-bounding the entropy of one
+triangulation in terms of the entropy of another triangulation
+(\lemref{pieces}).  We then show how to apply this technique to lower
+bound the entropy of any triangulation $\Delta^*$ in terms of the
+entropy of $\Delta$ (\lemref{partition} and \lemref{min-H-triangulation}).
+  
+To obtain lower bounds on the entropy of a triangulation $\Delta^*$,
+consider the following easily proven observation: If each triangle in
+$\Delta^*$ intersects at most $c$ triangles of some triangulation
+$\Delta$ then $H(\Delta^*) \ge H(\Delta) - \log c$.\footnote{Proof:
+Consider the set $X=\{ t^*\cap t : t^*\in\Delta^*, t\in \Delta\}$.
+Each triangle of $\Delta^*$ contributes at most $c$ pieces to $X$, so
+we have $H(\Delta) \le H(X) \le H(\Delta^*) + \log c$.}  This
+observation allows us to use $\Delta$ to prove a lower bound on the
+entropy of a triangulation $\Delta^*$.  Unfortunately, the condition
+that each triangle of $\Delta^*$ intersect at most $c$ triangles of
+$\Delta$ is too restrictive for our purposes.  Instead, we require
+following stronger result:
+
+\begin{lem}\lemlabel{pieces}
+Let $D$ be a probability measure over $\R^2$.  Let $\Delta$ and
+$\Delta^*$ be triangulations, and let $\{\Delta_1,\ldots,\Delta_m\}$
+be a partition of the triangles in $\Delta$.  Suppose that, for all
+$i\in\{1,\ldots,m\}$ and for each triangle $t^*\in\Delta^*$, $t^*$
+intersects at most $c$ triangles in $\Delta_i$.  Then
+\begin{eqnarray*}
+   H(\Delta) \le 
+	 H(\Delta^*) + H(\{\cup\Delta_1,\ldots,\cup\Delta_m\}) + \log c
+ \enspace . 
+\end{eqnarray*}
+\end{lem}
+
+Intuitively, \lemref{pieces} can be thought of as follows:  If we tell
+an observer which of the $\Delta_i$ a point $p$ drawn according to $D$
+occurs in then the amount of information we are giving the observer
+about the experiment is at most
+$H(\{\cup\Delta_1,\ldots,\cup\Delta_m\})$.  However, after giving away
+this information, we are able to apply the simple observation in the
+previous paragraph, since each triangle in $\Delta^*$ intersects at
+most $c$ elements of each $\Delta_i$.  Thus, \lemref{pieces} is really
+just $m$ applications of the simple observation.  The following proof
+formalizes this:
+
+\begin{proof} Help Vida: Justify the first line of the following please 
+--- I'm stuck.
+Intuition: LHS represents picking a point $p$ according to $D$ and
+asking how much uncertainty there is about which triangle of
+$\Delta^*$ contains $p$.  The RHS represents picking $p$, telling you
+which of the $\Delta_i$ contains $p$ and then asking how much
+uncertainty remains about which triangle of $\Delta^*$ contains $p$.
+Surely knowing which of the $\Delta_i$ contains $p$ does not increase
+the uncertainty.
+\begin{eqnarray*}
+   H(\Delta^*) 
+     & \ge & \sum_{i=1}^m \Pr(\Delta_i)H(\Delta^*|\Delta_i) \\
+     &  =  & \sum_{i=1}^m \Pr(\Delta_i)\sum_{t^*\in\Delta^*}
+       \Pr(t^*|\Delta_i)\log(1/\Pr(t^*|\Delta_i)) \\
+     &  =  & \sum_{i=1}^m \sum_{t^*\in\Delta^*}
+       \Pr(t^*\cap\Delta_i)\log(\Pr(\Delta_i)/\Pr(t^*\cap\Delta_i)) \\
+     &  =  & \sum_{i=1}^m \sum_{t^*\in\Delta^*}
+       \Pr(t^*\cap\Delta_i)\log(1/\Pr(t^*\cap\Delta_i)) 
+        + \sum_{i=1}^m \Pr(\Delta_i)\log(\Pr(\Delta_i)) \\
+     &  =  & \sum_{i=1}^m \sum_{t^*\in\Delta^*}
+       \Pr(t^*\cap\Delta_i)\log(1/\Pr(t^*\cap\Delta_i)) 
+        - H(\{\cup\Delta_1,\ldots,\cup\Delta_m\}) \\
+     & \ge  & \sum_{i=1}^m \sum_{t^*\in\Delta^*}\sum_{t\in\Delta_i}
+       \Pr(t^*\cap t)\log(1/\Pr(t^*\cap t)) 
+        -\log c - H(\{\cup\Delta_1,\ldots,\cup\Delta_m\}) \\
+     & \ge  & \sum_{i=1}^m \sum_{t\in\Delta_i}
+       \Pr(t)\log(1/\Pr(t)) 
+        -\log c - H(\{\cup\Delta_1,\ldots,\cup\Delta_m\}) \\
+     &  =  & H(\Delta) -\log c - H(\{\cup\Delta_1,\ldots,\cup\Delta_m\}) 
+            \enspace ,
+\end{eqnarray*}
+and this completes the proof.
+\end{proof}
+
+The remainder of our argument involves carefully partitioning the
+triangles of $\Delta$ into subsets $\Delta_1,\ldots,\Delta_m$ that are
+compatible with \lemref{pieces}, and then showing that
+$H(\Delta_1,\ldots,\Delta_m)$ is not too big.  To help us, we will use
+the $\Delta$-tree $T$.  For a node $x$ in $T$ with children
+$x_1,\ldots,x_k$, let $t(x) = x \setminus (\bigcup_{i=1}^m x_i)$ be
+the portion of $x$ not covered by $x$'s children.  Note that $t(x)$ is
+always either the empty set or is a triangle in $\Delta$.  In fact,
+for every triangle $t\in\Delta$, there is exactly one $x\in V(T)$ such
+that $t(x)=t$, and for every $x\in V(T)$ such that $t(x)$ is non-empty
+there is exactly one $t\in\Delta$ such that $t(x)=t$.  This implies
+that\footnote{Here, and throughout the remainder, we slightly abuse notation by
+using the convention that $0\cdot\log(1/0)=0$.}
+\[
+    H(\Delta) = \sum_{t\in\Delta}\Pr(t|P)\log(1/\Pr(t|P)) =
+       \sum_{x\in V(T)}\Pr(t(x)|P)\log(1/\Pr(t(x)|P)) \enspace .
+\]
+
+For a node $x\in V(T)$, we define $\Pr(x)=\Pr(t(x))$ is the
+probability that a point drawn from $D$ is contained in $t(x)$.
+We begin by partitioning the nodes of $T$ into
+\emph{groups} $G_1,G_2,\ldots$ where
+\[
+	G_i = \{x\in V(T) : 1/2^{i} \le \Pr(x) < 1/2^{i-1} \} \enspace .
+\]
+In what follows, we fix some a real number $0< \alpha < 1$ that will be
+specified later.   The following lemma gives the structure of the sets
+that will be used in the application of \lemref{pieces}.
+
+\begin{lem}\lemlabel{partition}
+Each group $G_i$ can be partitioned into $r_i$ subgroups
+$G_{i,1},\ldots,G_{i,r_i}$ such that
+\begin{enumerate}
+\item There is an integer $t_i$ such that $r_i-t_i\le 2^{\alpha i}$,
+
+\item $|G_{i,j}| \ge 2^{\alpha i} / 6i$, for all $j\in\{1,\ldots,r_i\}$, and 
+
+\item $G_{i,j}$ is RB-independent, for all $j\in\{1,\ldots,r_i\}$.
+\end{enumerate}
+\end{lem}
+
+\begin{proof}
+Note that \lemref{t-depth} implies that any node in group $G_{i}$ has
+depth at most $2i+1$ in $T$.  Therefore, as long as 
+$|G_i|>2^{\alpha i}$, we can apply \lemref{t-big-rb-indep} to obtain
+an RB-independent subset of $G_i$ of size at least $2^{\alpha i}/6i$,
+make this into a group $G_{i,j}$, and remove these elements from $G_i$.
+We repeat this until, after $t_i$ iterations, $|G_i| \le 2^{\alpha
+i}$.  At this point we simply create $|G_i|$ singleton groups
+$G_{i,t_i},\ldots,G_{i,r_i}$ and observe that
+all groups $G_{i,j}$ are RB-independent (Condition~3),
+$G_{i,1},\ldots,G_{i,t_i}$ satisfy Condition~2, and $r_i$ and $t_i$ satisfy
+Condition~1.
+\end{proof}
+
+Next we apply \lemref{pieces} and \lemref{partition} to obtain a lower
+bound on the entropy of any triangulation $\Delta^*$. 
+
+\begin{lem}\lemlabel{min-H-triangulation}\lemlabel{Z}
+Let $P$ be a simple polygon, let $D$ be a probability measure over
+$\R^2$, and consider the triangulation $\Delta=\Delta(P,D)$.
+Then, for any triangulation $\Delta^*$ of $P$,
+\[
+    H(\Delta) \le H(\Delta^*) + O(H(\Delta)^{2/3}+1) \enspace .
+\]
+\end{lem}
+
+\begin{proof}
+Let $T=T(P,D)$ be the $\Delta$-tree for $(P,D)$ and apply
+\lemref{partition} to obtain groups $\{G_{i,j}: i=1,\ldots,\infty,
+j=1,\ldots,r_i\}$.  For any group $G_{i,j}$ Condition~3 and
+\lemref{t-intersect-rb-indep} ensures that any triangle of
+$\Delta^*$ can intersect at most 3 triangles of $G_{i,j}$.  Therefore,
+applying \lemref{pieces} with $c=3$, we obtain:
+\[ 
+ H(\Delta) \le 
+   H(\Delta^*) + H(\{{\cup G_{i,j}} : i\in\N , j\in\{1,\ldots,r_i\}\}) 
+   + O(1)  \enspace .
+\]
+Thus, all that remains is to show that the contribution of $\overline
+H=H(\cup\{G_{i,j}\} : i\in\N , j\in\{1,\ldots,r_i\}\})$ is at most
+$O(H(\Delta)^{2/3})$. 
+\begin{eqnarray*}
+\overline H 
+ & = & H(\cup\{G_{i,j}\} : i\in\N , j\in\{1,\ldots,r_i\}\}) \\
+ & = & \sum_{i=1}^\infty
+         \sum_{j=1}^{r_i}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j})) \\
+ & = & \sum_{i=1}^\infty
+         \sum_{j=1}^{t_i}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j})) 
+         + \sum_{i=1}^\infty
+         \sum_{j=t_i+1}^{r_i}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j})) \\
+ & \le & \sum_{i=1}^\infty
+         \sum_{j=1}^{t_i-1}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j})) 
+         + \sum_{i=1}^{\infty} (2^{\alpha i}/ 2^{i-1})\log(2^i) \\
+ &  =  & \sum_{i=1}^\infty
+         \sum_{j=1}^{t_i-1}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j})) 
+         + 2\cdot\sum_{i=1}^{\infty} i/2^{(1-\alpha)i} \\
+ &  =  & \sum_{i=1}^\infty
+         \sum_{j=1}^{t_i-1}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j}))
+         + O(1/(1-\alpha)^2) \enspace ,
+\end{eqnarray*}
+where the last equality is obtained using Taylor series.
+Continuing, we get 
+\begin{eqnarray*}
+\overline H
+ &  =  & \sum_{i=1}^\infty
+         \sum_{j=1}^{t_i-1}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j}))
+         + O(1/(1-\alpha)^2) \\
+ & \le  & \sum_{i=1}^\infty
+         \sum_{j=1}^{t_i-1} \Pr(\cup G_{i,j})
+              \log(i2^{i}/2^{\alpha i})
+         + O(1/(1-\alpha)^2) \\
+ & \le  & \sum_{i=1}^\infty
+         \sum_{j=1}^{t_i-1} \Pr(\cup G_{i,j})((1-\alpha)i+\log i)
+         + O(1/(1-\alpha)^2) \\
+ & \le  & \sum_{i=1}^\infty
+         \sum_{j=1}^{t_i-1} \Pr(\cup G_{i,j})((1-\alpha)\log(1/\Pr(\cup G_{i,j})) + \log\log(1/\Pr(\cup G_{i,j})))
+         + O(1 + 1/(1-\alpha)^2) \\
+ & \le &  (1-\alpha)H(\Delta) + \log(H(\Delta)) + O(1 + 1/(1-\alpha)^2) \\
+ & \le &  O(H(\Delta)^{2/3}+ 1)
+\end{eqnarray*} 
+where the second last inequality follows from Jensen's Inequality and the
+last inequality is obtained by setting $\alpha=1-1/H(\Delta)^{1/3}$.
+This completes the proof.
+\end{proof}
+
+\lemref{min-H-triangulation} shows that the triangulation
+$\Delta=\Delta(P,D)$ defined previously is nearly minimum-entropy over
+all triangulations of $P$.  The following theorem gives an algorithmic
+version of \lemref{min-H-triangulation}
+
+\begin{thm}\thmlabel{min-H-triangulation}
+Let $P$ be a simple polygon with $n$ vertices, and let $D$ be a
+probability measure over $\R^2$.  Then there exists an $O(n\log n)$
+time algorithm that computes a triangulation $\Delta'$ of $P$ having
+$O(n)$ triangles and such that, for any triangulation $\Delta^*$ of
+$P$,
+\[
+    H(\Delta') \le H(\Delta^*) + O(H(\Delta')^{2/3}+1) \enspace .
+\]
+\end{thm}
+
+\begin{proof}
+To construct $\Delta$ we first find the third vertex $p_k$ of the
+geodesic triangle $t=\triangle p_i p_j p_k$.  This can be accomplished
+in $O(n)$ time by computing the shortest path trees from
+$p_i$ and $p_j$ to all other vertices of $P$ and using these to find $p_k$.
+For an example of a similar computation, see Bose \etal \cite[Lemma~X]{BXX}.
+
+Next, $\z t$ is split into 3 2-convex pseudotriangles $t_0,t_1,t_2$,
+which is easily accomplished in $O(n)$ time.  The last step, before
+recursing, is to triangulate each of $t_0,t_1,t_2$.  This step can be
+accomplished in $O(n)$ time using a 2-sided exponential searching
+trick that was used by Mehlhorn \cite{mXX} in the construction of
+biased binary search trees (see also, Dujmovi\'c \etal
+\cite[Lemma~X]{soda07}).
+
+Finally, the algorithm recurses on each of the pieces
+$P_1,\ldots,P_m$.  In this way, we obtain a divide-and-conquer
+algorithm for constructing $\Delta$.  Unfortunately, this algorithm
+may have running time $\Omega(n^2)$ since there is no bound
+significantly smaller than $n$ on the size of an individual subproblem
+$P_i$.  To overcome this, before recursing on a subproblem $P_i$ we
+check if it contains more than $n/2$ vertices.  If so, then rather
+than recursing normally on $P_i$ we choose a geodesic triangle of
+$P_i$ whose removal leaves only subpolygons $P_{i,1},\ldots,P_{i,m_i}$
+each with at most $n/2$ vertices.  This modification then yields an
+algorithm whose recursion tree has depth $O(\log n)$ and at which the
+work done at each level is $O(n)$, so the total running time of this
+algorithm is $O(n\log n)$.
+
+Note that this algorithm yields a triangulation $\Delta'$ that is
+different from $\Delta$.  In particular, there may exist one $P_{i,j}$
+with $\Pr(P_{i,j})>\Pr(P_i)/2$.  In this case, $P_{i,j}$ would become
+a red child of its parent in the $\Delta'$-tree.  Despite this, all the
+proofs of \lemref{A}-\lemref{Z} continue to hold almost without
+modification.  The only difference occurs in \lemref{t-red-black} only
+guarantees a bound of $\floor{i/3}$ on the number of black edges, but
+this has almost no effect on subsequent computations.
+
+Help: Can someone offer a short proof that the number of vertices is
+$O(n)$, perhaps by arguing that the number of leaves in $T$ is at most
+$2n$?
+\end{proof}
+
+\section{Point Location in Simple Planar Subdivisions}
+
+Next, we consider the problem of point location in simple
+subdivisions.  The following theorem of Arya \etal\ \cite{ammw07}
+shows that triangulations can be used to give upper bounds on the cost
+of a point location structure:
+
+\begin{thm}[Arya \etal\ 2007]\thmlabel{ammw07}
+Let $D$ be a probability measure over $\R^2$ and let $\Delta$ be a
+triangulation of $\R^2$ having a total of $n$ triangles.  Then there exists a
+data structure of size $O(n)$ that can be constructed in $O(n\log n)$
+time, and for which the expected number of point/line comparisons
+required to locate the face of $G$ containing a query point $p$, drawn
+according to $D$, is $H(\Delta) + O(H(\Delta)^{1/2}+1)$.
+\end{thm}
+
+The following lemma shows that the minimum-entropy triangulation can
+be used to give a lower bound on the cost of any point location
+structure.
+
+\begin{lem}\lemlabel{triangulate}
+Let $T^*$ be any linear decision tree for a classification problem
+$\mathcal{P}$ over $\R^2$.  Then there exists a linear decision tree
+$T'$ for $\mathcal{P}$, such that, for each leaf $\ell$ of $T'$,
+$r(\ell)$ is a triangle and $T'$ satisifies
+\[
+    \mu_D(T') \le \mu_D(T^*) + O(\log\mu_D(T^*))
+\]
+for any probability measure $D$ over $\R^2$.
+\end{lem}
+
+\begin{proof}
+Each leaf $\ell$ of $T^*$ has a region $r(\ell)$ that is a convex
+polygon.  If $r(\ell)$ has $k$ sides then the depth of $\ell$ in $T$
+is at least $k$.  To obtain the tree $T'$ replace each such leaf
+$\ell$ of $T^*$ by a balanced binary tree of depth $O(\log k)$ by
+repeatedly splitting the leaf into two children $\ell_1$ and $\ell_2$
+whose regions have $\ceil{(k+2)/2}$ and $\floor{(k+2)/2}$ vertices.
+For a leaf $\ell\in L(T)$, let $s(\ell)$ denote the set of leaves in $T'$
+in the subtree of $\ell$.   Then
+\begin{eqnarray*}
+   \mu_D(T^*) 
+     &  =  & \sum_{\ell\in L(T^*)} \Pr(r(\ell))\cdot \depth(\ell) \\
+     &  =  & \sum_{\ell\in L(T^*)}\sum_{\ell'\in s(\ell)} 
+              \Pr(r(\ell'))\cdot \depth(\ell) \\
+     & \ge & \sum_{\ell\in L(T^*)} 
+             \sum_{\ell'\in s(\ell)}\Pr(r(\ell'))\cdot (\depth(\ell')
+                   - O(\log (\depth(\ell)))) \\
+     &  =  & \mu_D(T') - \sum_{\ell\in L(T^*)} 
+             \sum_{\ell'\in s(\ell)}\Pr(r(\ell'))\cdot O(\log (\depth(\ell))) \\
+     &  =  & \mu_D(T') - \sum_{\ell\in L(T^*)} 
+             \Pr(r(\ell))\cdot O(\log (\depth(\ell))) \\
+     & \ge & \mu_D(T') - O(\log(\mu_D(T^*)) \enspace , 
+\end{eqnarray*}
+where the last inequality is an application of Jensen's Inequality.
+\end{proof}
+
+\lemref{triangulate} says that for any linear decision tree for point
+location, there is an underlying triangulation.  The entropy of this
+triangulation gives a lower bound on the cost of the decision tree.
+Thus, one way to give lower bounds for linear decision trees is to
+give lower bounds on the entropy of a minimum-entropy triangulation.
+
+Now, our point location structure is simple.  Let $G$ be a connected
+planar subdivision whose faces are $F_1,\ldots,F_m$ and let $D$ be a
+probability measure over $\R^2$.  We triangulate each face $F_i$ of
+$G$ (a simple polygon) using \thmref{min-H-triangulation} to obtain a
+triangulation $\Delta_i$.\footnote{Note that the outer face is the
+complement of a simple polygon.  This can be handled by, for example,
+working with a central projection of $G$ onto a sphere.} The union of
+all $\Delta_i$ is a triangulation $\Delta$ of $\R^2$, to which we
+apply \thmref{ammw07} to obtain a point location structure $R=R(G,D)$
+for point location in $\Delta$ and hence also in $G$.  The following
+theorem shows that $R$ is nearly optimal:
+
+\begin{thm}
+Given a connected planar subdivision $G$ with $n$ vertices and a probability
+measure $D$ over $\R^2$, a data structure $R=R(G,D)$ of size $O(n)$ can be
+constructed in $O(n\log n)$ time that answers point location queries in $G$.
+The expected number of point/line comparisons performed by $R$, 
+for a point $p$ drawn according to $D$ is 
+\[
+  \mu_D(R) \le \mu_D(T^*) + O(\mu_D(R)^{2/3}+1) \enspace , 
+\] 
+where $T^*$ is any linear classification tree that answers point
+location queries in $G$.
+\end{thm}
+
+\begin{proof}
+The space and preprocessing requirements follow from
+\thmref{min-H-triangulation} and \thmref{ammw07}.
+To prove the bound on the expected query time, apply
+\lemref{triangulate} to the tree $T^*$ and consider the resulting tree
+$T'$, each of whose leaves have regions that are triangles and such
+that
+\[
+     \mu_D(T') \le \mu_D(T^*) + O(\log \mu_D(T^*)) \enspace .
+\]
+Observe that each leaf of $T'$ corresponds to a triangle in $\R^2$
+that is completely contained in one of the faces of $G$.  Let
+$\Delta'$ denote this set of triangles and let $\Delta'_i$ denote the
+subset of $\Delta'$ contained in $F_i$.
+Consider the entropy $H(\Delta')$ of the distribution induced by the
+triangles of $T'$:
+\begin{eqnarray*}
+   H(\Delta') 
+     & = & \sum_{i=1}^f \sum_{t\in \Delta'_i}\Pr(t)\log(1/\Pr(t)) \\
+     & = & \sum_{i=1}^f \Pr(F_i)\sum_{t\in \Delta'_i}
+            \Pr(t|F_i)\log(1/\Pr(t)) \\
+     & = & \sum_{i=1}^f \Pr(F_i)\sum_{t\in \Delta'_i}
+            \Pr(t|F_i)
+            \left(
+              \log(1/\Pr(t|F_i))-\log(\Pr(F_i))
+            \right) \\
+     & = & \sum_{i=1}^f \Pr(F_i)\sum_{t\in \Delta'_i}
+            \Pr(t|F_i)\log(1/\Pr(t|F_i)) 
+          +
+      \sum_{i=1}^f \Pr(F_i) \log(1/\Pr(F_i)) \\
+     & = & \sum_{i=1}^f \Pr(F_i) H(\Delta'_i) + H(F) \enspace .
+\end{eqnarray*}
+Similarly, the entropy of $\Delta$ is given by 
+\begin{eqnarray*}
+   H(\Delta) 
+     & = & \sum_{i=1}^f \sum_{t\in \Delta_i}\Pr(t)\log(1/\Pr(t)) \\
+     & = & \sum_{i=1}^f \Pr(F_i)\sum_{t\in \Delta_i}
+            \Pr(t|F_i)\log(1/\Pr(t|F_i)) 
+          + H(F) \\
+     & = & \sum_{i=1}^f \Pr(F_i) H(\Delta_i) + H(F) \enspace .
+\end{eqnarray*}
+By \thmref{min-H-triangulation}, the triangles in $\Delta_i$ form a
+nearly-minimum entropy triangulation of $F_i$.  More specifically, 
+\[  
+   H(\Delta_i) \le H(\Delta'_i) + O(H(\Delta_i)^{2/3}+1)  \enspace .
+\]
+Putting this all together, we have
+\begin{eqnarray*}
+  H(\Delta) 
+    &  =  & \sum_{i=1}^f\Pr(F_i) H(\Delta_i) + H(F) \\ 
+    & \le & \sum_{i=1}^f\Pr(F_i) (H(\Delta'_i) + O(H(\Delta_i)^{2/3}+1)) + H(F) \\ 
+    &  =  & H(\Delta') + \sum_{i=1}^f\Pr(F_i) O(H(\Delta_i)^{2/3}+1) \\ 
+    & \le & \mu_D(T') + \sum_{i=1}^f\Pr(F_i) O(H(\Delta_i)^{2/3}+1) \\ 
+    & \le & \mu_D(T') + O(H(\Delta)^{2/3}+1) \\
+    & \le & \mu_D(T^*) + O(H(\Delta)^{2/3}+1)
+\end{eqnarray*}
+Finally, since we preprocess $\Delta$ using \thmref{ammw07}, the
+expected number of comparisons required to answer a query is
+\begin{eqnarray*}
+  H(\Delta) + O(H(\Delta)^{1/2} + 1)
+   & = & \mu_D(T^*) +  O(\mu_D(T^*)^{1/2} + H(\Delta)^{2/3} + H(\Delta)^{1/3} + 1) \\
+   & = & \mu_D(T^*) + O(\mu_D(R)^{2/3} + 1)
+\end{eqnarray*}
+and this completes the proof.
+\end{proof}
+\end{document}

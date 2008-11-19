@@ -9,6 +9,7 @@
 \DeclareMathOperator{\lft}{left}
 \DeclareMathOperator{\rght}{right}
 \DeclareMathOperator{\prnt}{parent}
+\DeclareMathOperator{\spp}{SP}
 \newcommand{\blah}{O(1/(1-\alpha)^2)}
 \newcommand{\junk}[1]{O\left(H(#1)^{2/3}+1\right)}
 \newcommand{\note}[1]{$^\star$\marginpar{\small $^*$#1}}
@@ -18,6 +19,7 @@
 \newcommand{\kangulation}{kangulation}
 \newcommand{\kangulate}{kangulate}
 \newcommand{\kangulated}{kangulated}
+\newcommand{\kangulating}{kangulating}
 
 
 \title{\MakeUppercase{Distribution-Sensitive Point 
@@ -458,7 +460,8 @@ of $T$, $\Pr(\Delta(v))\le 1/2^i$.
       $A_0$ & $A_1$ & $A_2$ & $A_3$ 
     \end{tabular}
   \end{center}
-  \caption{The sequence $A_0,\ldots,A_3$ that approximate $\boundary P$.}
+  \caption{The sequence $A_0,\ldots,A_3$ that approximate $\boundary
+P$ and the resulting triangle tree.}
   \figlabel{tree}
 \end{figure}
 
@@ -476,14 +479,50 @@ will be crucial to our arguments in subsequent sections.
 Let $P$ be a convex polygon, let $D$ be a probability measure over
 $\R^2$, and let $T=T(P,D)$ be a triangle tree for $P$ and $D$.
 Let $v_1,\ldots,v_m$ be a set of nodes in $T$ such $v_i$ is not an
-ancestor of $v_j$ for any $1\le i,j\le m$.  Then, for any \kangle\
-$t$ that conforms to $P$, there exists at most $k$ indices $i$ such that
+ancestor of $v_j$ for any $1\le i,j\le m$.  Then, for any triangle
+$t$ that conforms to $P$, there exists at most $3$ indices $i$ such that
 $t$ intersects $\Delta(v_i)$.
 \end{lem}
 
 \begin{proof}
-To be added later.
+There are two cases to consider:
+
+\noindent\textbf{Case 1:} The triangle $t$ is contained in $P$ (see
+\figref{gen-indep}.a).  In this case, observe that each $\Delta(v_i)$
+is a triangle with 2 vertices on the boundary of $P$ and one vertex
+outside of $P$. Let $s$ denote the edge of $\Delta(v_i)$ that is
+interior to $P$.  If $t$ intersects $\Delta(v_i)$ and is not contained
+in $\Delta(v_i)$ then $\boundary t$ must intersect
+$\boundary\Delta(v_i)$ in at least 2 points.  More specifically, since
+$t$ conforms to $P$ this means that $\boundary t$ must intersect $s$
+in at least 2 points.  However, since $s$ is a straight line segment
+this means that $t$ must have at least one vertex in the interior of
+$\Delta(v_i)$.  Since $t$ has only three vertices, the lemma follows
+from the fact that $\Delta(v_i)$ is disjoint from $\Delta(v_j)$ for
+all $1\le i,j\le m$.
+
+\noindent \textbf{Case 2:} The triangle $t$ does not intersect the
+interior of $P$ (see \figref{gen-indep}.b). In this case, there is a
+line $\ell$ tangent to $P$ that separates the interior of $t$ from the
+interior of $P$.  We claim that there is at most 1 index $i$ such that
+$\ell$ intersects $\Delta(v_i)$, hence there is at most 1 index $i$ such
+that $t$ intersects $v_i$.  To see why this is true, observe that
+there is a convex $2m$-gon $P'$ that contains
+$\Delta(v_1),\ldots,\Delta(v_m)$ and whose intersection with $\ell$ is
+exactly $\Delta(v_i)\cap \ell$.  Therefore, the line $\ell$ separates
+$\Delta(v_j)$ from $t$ for all $j\neq i$.
 \end{proof}
+
+\begin{figure}
+  \begin{center}
+   \begin{tabular}{cc}
+     \includegraphics{gen-indep-1} & \includegraphics{gen-indep-2} \\
+     (a) & (b) 
+   \end{tabular}
+  \end{center}
+  \caption{The two cases in the Proof of \lemref{gen-indep}.}
+  \figlabel{gen-indep}
+\end{figure}
 
 \subsection{Analysis of the Triangle Tree}
 
@@ -516,7 +555,6 @@ most
 \end{lem}
 
 \begin{proof}
-
 Observe that each internal node of $T$ is split by choosing some edge
 $e$ of $P$, and each edge is used to split at most one node of $T$.
 This implies that $T$ has $O(n)$ nodes.
@@ -948,80 +986,175 @@ Next, we consider how to handle simple (possibly non-convex) planar
 subdivisions.  We take the same approach used in the previous section.
 Namely, we subdivide the input into a \kangulation\ and apply
 \thmref{ammw07}  on the resulting \kangulation.  As before, the trick
-is in arguing that the triangulation we find has near-minimum entropy.
-Since the faces of $G$ are simple polygons, we first tackle the
+is in arguing that the \kangulation\ we find has near-minimum entropy.
+Since the faces of $G$ are simple polygons, we first address the
 problem of finding a (near) minimum-entropy \kangulation of a simple
 polygon.
 
 \subsection{Low-Entropy Triangulations of Simple Polygons}
 \seclabel{simple-triangulation}
 
-Let $P$ be a simple polygon with vertices, as encountered in a
-counterclockwise traversal of its boundary are $p_1,\ldots,p_n$.  In
+Let $P$ be a simple polygon whose vertices, as encountered in a
+counterclockwise traversal of its boundary, are $p_1,\ldots,p_n$.  In
 this section, we show how to \kangulate\ the interior of $P$ to obtain
 a set of \kangles\ $\Delta=\Delta(P,D)$ such that $H(\Delta)$ is
-nearly minimum over all possible triangulations of $P$.  Although our
-only goal is to construct the subdivision $\Delta$, it will be helpful
-when analyzing $H(\Delta)$ to impose a tree structure on its \kangles.
-We refer to this tree as the \emph{\kangle\ tree} for $(P,D)$ and
-denote it by $T=T(P,D)$.
+nearly minimum over all possible triangulations of $P$.  The approach
+is similar to that taken in \secref{convex}.  We attempt to find a
+simple figure $f$ whose removal from $P$ leaves pieces each of whose
+probability is less than half the probability of $P$.  In the convex
+case, $f$ is a 4-sided convex polygon and the removal of $f$ splits
+$P$ into 2 pieces that each share a side with $f$.  In the non-convex
+case, $f$ is considerably more complicated, and the removal of $f$
+leaves many pieces that share a portion of the boundary with $f$.
 
-A \emph{funnel polygon} is a polygon whose boundary consists of two
-reflex chains $X=x_1,\ldots,x_k$ and $Y=y_1,\ldots,y_{k'}$ where $x_1$
-and $y_{k'}$ are joined by a (possibly zero length) edge, as are $x_k$
-and $y_{1}$.  A \emph{half-funnel} is a funnel polygon in which one of
-the reflex chains, say $X$, consists of a single edge.  For two edges
-$e$ and $e'$ of $P$ the \emph{funnel} between $e$ and $e'$ is the
-union of all shortest paths in $P$ from a point on $e$ to a point on
-$e'$.  Note that a funnel is either a single funnel polygon or two
-funnel polygons joined by a path.
+A \emph{pseudotriangle} is a polygon whose boundary consists of at
+most 3 reflex chains.  A \emph{pseudo-triangle} is \emph{$i$-convex} if its
+boundary consists of $3-i$ reflex chains.  A 3-convex pseudotriangle
+is therefore a triangle.   It is not hard to see that any
+pseudotriangle can be partitioned in to 3 2-convex pseudotriangles
+using at most 4 additional line segments and one additional vertex
+(see \figref{partition}).
 
-To \kangulate\ $P$ we fix a \emph{root edge} $e$ of $P$ and find the
-edge $e'$ of $P$ such that the funnel $f$ between $e$ and $e'$ has
+Let $e_1$ and $e_2$ each be connected
+subsets of the boundary of $P$ with $e_1\cap e_2=\emptyset$.  Then the
+\emph{funnel} from $e_1$ to $e_2$ is the union of all shortest paths
+in $P$ from a point on $e_1$ to a point on $e_2$, i.e.,
+\[
+   f(e_1,e_2) = \bigcup_{s\in e_1}\bigcup_{t\in e_2} \spp_P(s,t)
+\]
+where $\spp_P(s,t)$ denotes the shortest path in $P$ from $s$ to $t$.
+We are particularly interested in the special case where $e_1$ is a
+reflex chain of $P$ and $e_2$ is an edge of $P$.  In this case, there
+are two possibility for the structure of $f(e_1,e_2)$.  Either
+$f(e_1,e_2)$ consists of two pseudotriangles joined by a path in $P$,
+or $f(e_1,e_2)$ is a subpolygon of $P$ consisting of at most three reflex
+chains and at most one additional edge ($e_2$).  See \figref{funnel}.
+Note that, in the latter case, $P$ can be partitioned into two
+pseudotriangles using a single line segment.
+
+\begin{figure}
+  \begin{center}
+    \begin{tabular}{cc}
+      \includegraphics{funnel-a} &  \includegraphics{funnel-b} \\
+      (a) & (b)
+    \end{tabular}
+  \end{center}
+  \caption{A funnel consists either of (a)~a single funnel polygon or
+           (b)~two funnel polygons joined by a path.}
+  \figlabel{funnel}
+\end{figure}
+
+Although our only goal is to construct the \kangulation\ $\Delta$, it
+will be helpful when analyzing $H(\Delta)$ to impose a tree structure
+on its \kangles.  We will refer to this tree as the \emph{\kangle\
+tree} for $(P,D)$ and denote it by $T=T(P,D)$.  Each node $v$ of the
+\kangle\ tree will correspond to a subpolygon of $P$ denoted
+$\Delta(v)$ and the children $v_1,\ldots,v_m$ of $v$ will have the
+property that $\bigcup_{i=1}^m \Delta(v_i)=\Delta(v)$ and $\Delta_i$
+and $\Delta_j$ intersect only at their boundaries, for each $1\le i\le
+j\le m$.
+
+The algorithm for \kangulating\ $P$ is recursive and takes as input a
+reflex chain $e_1$ on the boundary of $P$.  The algorithm then finds
+the edge $e_2$ of $P$ such that the funnel $f=f(e_1,e_2)$ has the
 property that each connected component $C$ of $P\setminus f$ has
-$\Pr(C)\le 1/2$. The existence of such an edge $e'$ is easily
-established by a standard continuity argument \cite{geoham}.  The
-funnel $f$ corresponds to the root of the kangle tree $T$.
+$\Pr(C)\le 1/2$. The existence of the edge $e_2$ is easily established
+by a standard continuity argument (see, e.g., Bose \etal\
+\cite{geoham}).  We denote by $P_1,\ldots,P_m$, the connected
+components of $P\setminus f$ and call these \emph{subpolygons} of $P$.
+Note that each subpolygon $P_i$ intersects $f$ at its boundary and
+this intersection is a reflex chain in $P_i$.  Thus, we can
+recursively obtain a \kangulation\ of $P_i$ and a \kangle\ tree $T_i$
+by recursing on the subpolygon $P_i$ and the reflex chain that $P_i$
+shares with $f$.
 
-Next, we proceed differently depending on the structure of $f$.  If
-$f$ consists of two funnel polygons joined by a path, then we make
-each edge of this path a child of the root and we make each of the two
-funnel polygons a child of the root.  Otherwise $f$ consists of a
-single funnel polygon, in which case we don't do anything special ($f$
-is the root of $T$).
+What remains is to show how to \kangulate\ $f$ and to show how this
+\kangulation\ of $f$ organizes the subtrees $T_1,\ldots,T_m$ into one
+\kangle\ tree for $P$. This process is different depending on the
+structure of $f$.  If $f$ consists of two pseudotriangles joined by a
+path, then we make each of the two pseudotriangles a child of the root
+of $T$.  Otherwise we partition $f$ into two pseudotriangles $f_1$ and
+$f_2$ using a single line segment and make $f_1$ and $f_2$ children of
+the root.  The pairs of pseudotriangles created this way are called
+\emph{split siblings}.
 
-Next, for each child $v$ of the root of $T$ that is a funnel polygon,
-we split this funnel polygon using a single edge into two half-funnel
-polygons.  These two half-funnels become children of $v$.
+Now, the root of $T$ corresponds to the funnel $f$ and has at most 4
+children that correspond to pseudotriangles.  For each child $v$ of the
+root of that corresponds to a pseudotriangle we split this
+pseudotriangle into at most 3 2-convex pseudotriangles.  These three
+pseudotriangles become children of $v$ in $T$.  These groups of (up to
+3) pseudotriangles are also referred to as \emph{split siblings}.
 
-Since the boundary of a half-funnel $h$ consists of at most one reflex
-chain $C$ and at most 3 edges that are not in $C$  we can triangulate
-a half-funnel in the following way:  Take the convex hull $H$ of $C$,
-treat it as a convex polygon and compute the triangles of a triangle
-tree for $(H,D_{\mid h})$ using the algorithm in \secref{convex}.
-This yields a triangulation $\Delta(H)$ of $\R^2$ that conforms to
-$H$.  From this \kangulation, we keep only the edges that intersect
-$h$ and trim them so that they form a subdivision $\Delta(h)$ of the
-interior of $h$. Note that this trimming results in polygons that have
-at most 7 sides (the original \kangles\ have at most 4 sides and
-trimming adds at most 3 more sides).  Furthermore, the triangles of
-$\Delta(h)$ have a tree imposed on them by the triangle tree defined
-in \secref{convex}.  The \kangles\ in $\Delta(h)$ are the descendents,
-in $T$, of $h$ and are organized, according to the order imposed on
-them by the triangle tree.
+Next we show how to recursively \kangulate\ each 2-convex
+pseudotriangle.
+Each such pseudotriangle $f'$ shares
+an edge with 0 or more subpolygons $P_i,\ldots,P_j$.  We wish to
+impose a recursive tree structure on $f'$ that creates a balanced
+decomposition of the probability measure $D_{\mid (f\cup
+P_i\cup\cdots\cup P_j)}$.   To do this, we select one of the edges
+$e_k$ on the (unique) reflex chain of $f'$ and extend it in both directions
+until it intersects the boundary of $f'$.  This partitions $f'\cup
+P_i\cup\cdots\cup P_j$ into 4 pieces (See \figref{half-funnel}.b):
+\begin{enumerate}
+\item A subpolygon $P_k$ incident on edge $e_k$,
+\item A half-funnel $f_1$ incident on subpolygons $P_i,\ldots,P_{k-1}$,
+\item A half-funnel $f_2$ incident on subpolygons
+$P_{k+1},\ldots,P_j$, and 
+\item A $\kangle$ $t$ with at most 4 sides that is interior to $f'$.
+This \kangle\ becomes a piece of the \kangulation $\Delta=\Delta(P,D)$.
+\end{enumerate}
+The edge $e$ is selected so that
+\[
+   \Pr(f_1\cup P_i\cup\cdots\cup P_{k-1}) 
+      \le (1/2)\Pr(f'\cup P_i\cup\cdots\cup P_j)
+\]
+and
+\[
+   \Pr(f_2\cup P_{k+1}\cup\cdots\cup P_{j}) 
+      \le (1/2)\Pr(f'\cup P_i\cup\cdots\cup P_j) \enspace .
+\]
+These four pieces of $f\cup\P_i\cup\cdots\cup P_j$ become the children
+of $f\cup\P_i\cup\cdots\cup P_j$
 
-In this way, we obtain a tree $T_0$ whose leaves correspond to regions
-$r_1,\ldots,r_k$ that share an edge $e_1,\ldots,e_k$ with the
-components $P_1,\ldots,P_k$ of $P\setminus f$.  We will recursively
-operate on each component $P_i$ using edge $e_i$ as the root edge to
-obtain a subdivision of $P_i$ and a subtree $T_i$ that is rooted at
-the leaf of $T_0$ whose region contains the edge $e_i$.  One small,
-but important, detail is a special case that occurs when one of the
-sub problems $P_i$ contains more than $n/2$ vertices of $P$.  In this
-case, instead of recursing directly on $P_i$ we first subdivide $P_i$
-using a funnel into pieces that each contain at most $n/2$ vertices of
-$P$.  This completes the definition of the kangle tree $T$ and the
-subdivision $\Delta=\Delta(P,D)$. 
+The same process is then applied recursively to $f_1$ and $f_2$, with
+the recursion ending when the pseudotriangle degenerates to a single edge.
+In the \kangle\ tree, the node corresponding to $f'$ will have 3 children:  
+the two $\kangle$ trees obtained from the recursion becomes the children
+of $f'$ in the \kangle\ tree.  The third child of $f'$ is the root of
+the subtree $T_k$ that represents a \kangulation\ of $P_k$.
+\begin{figure}
+  \begin{center}
+    \begin{tabular}{cc}
+      \includegraphics{half-funnel} & \includegraphics{half-funnel-b} \\
+      (a) & (b)
+    \end{tabular}
+  \end{center}
+  \caption{A half-funnel $f'$ (a)~before being subdivided and (b)~after
+being subdivided.}
+  \figlabel{half-funnel}
+\end{figure}
+In this way, we obtain a tree $T_0$ that represents a partition of the
+root funnel $f$ (see \figref{t0}).  Some of the \kangle\ trees
+$T_1,\ldots,T_m$ are part of $T_0$, but others are not.  These
+remaining kangle trees are made children of the root of $T_0$ (see
+\figref{funnel-example}).
+
+
+\begin{figure}
+  \begin{center}
+    \includegraphics{funnel-example}
+  \end{center}
+  \caption{The tree $T_0$.  The leaves of $T_0$ correspond to
+           subpolygons of $P$ on which the decomposition algorithm recurses.}
+  \figlabel{t0}
+\end{figure}
+
+One small, but important, detail is a special case that occurs when
+one of the subpolygons $P_i$ contains more than $n/2$ vertices of
+$P$.  In this case, instead of recursing directly on $P_i$ we first
+subdivide $P_i$ using a funnel into pieces that each contain at most
+$n/2$ vertices of $P$.  This completes the definition of the kangle
+tree $T$ and the subdivision $\Delta=\Delta(P,D)$. 
 
 We first consider the time required to construct a \kangle\ tree for
 $(P,D)$.  
@@ -1039,16 +1172,15 @@ which we find the root funnel, triangulate it, and then recurse on the
 subpolygons incident to the root funnel.  Finding the root funnel can
 be done in $O(n)$ time by computing the two shortest path trees
 joining the endpoints of the root edge to all other vertices of $P$.
-(See Bose \etal\ \cite{geoham} for a similar computation.)  However,
-one of the subpolygons $P_i$ incident on the root funnel might have
-many (more than $n/2$) vertices.  In this case, we compute a secondary
-funnel in $P_i$ that splits $P_i$ into subpolygons each of which have
-at most $n/2$ vertices.  In this way, we obtain an algorithm with a
-recursion tree of depth $O(\log n)$ and at which the total work done
-at each level is $O(n)$, for a total construction time of $O(n\log
-n)$.
-
-To see that the number of \kangles\ in $\Delta$ is $O(n)$, observe
+(See Bose \etal\ \cite{geoham} for a similar computation.)
+Triangulating the root funnel can be done in $O(k)$ time, where $k$ is
+the size of the root funnel using the same technique used in the proof
+of \lemref{upper-bound}.  Note that, because special care is taken to
+break up a subpolygon with more than $n/2$ vertices, the construction
+algorithm has a recursion tree of depth $O(\log n)$.  Furthermore, the
+total amount of work done at each level of the recursion tree is
+$O(n)$, for a total construction time of $O(n\log n)$.
+Finally, to see that the number of \kangles\ in $\Delta$ is $O(n)$, observe
 that the \kangle\ tree has $O(n)$ nodes and each node contributes
 $O(1)$ \kangles\ to $\Delta$.
 \end{proof}

@@ -8,23 +8,54 @@
 \newcommand{\z}[1]{{\hat{#1}}}
 \newcommand{\depth}{\mathrm{depth}}
 
+\title{\MakeUppercase{Entropy, Triangulation, and Point Location}%
+	\thanks{The research presented in this article began
+while the fourth author was a visiting researcher at the Universit\'e Libre de
+Bruxelles, supported by a grant from FNRS and was finished while
+ the fourth author was a visiting researcher at National ICT 
+Australia/University of
+Sydney supported by grants from National ICT Australia and the
+University of Sydney.  The researchers are
+partially supported by NSERC, FNRS, and the Ontario Ministry of Research and
+Innovation.}}
+
+\author{S\'ebastien Collette \\ \textit{Universit\'e Libre de Bruxelles}
+  \and Vida Dujmovi\'c \\ \textit{McGill University}
+  \and John Iacono \\ \textit{Polytechnic University}
+  \and Stefan Langerman \\ \textit{Universit\'e Libre de Bruxelles}
+  \and Pat Morin \\ \textit{Carleton University}}
+
 \begin{document}
-\section{Introduction}
+\maketitle
 
+\begin{abstract}
+  A data structure is presented for point location in connected planar
+  subdivisions when the distribution of queries is known in advance.
+  The data structure has an expected query time that is within a
+  constant factor of optimal.  More specifically, the algorithm
+  preprocesses a planar subdivision $G$ and a query distribution $D$ to
+  produce a point location data structure for $G$. The expected number
+  of point-line comparisons performed by this data structure, when the
+  queries are distributed according to $D$, is $H +
+  O(H^{2/3}+1)$ where $H=H(G,D)$ is a lower bound on the expected number of
+  point-line comparisons performed by any linear decision tree for point
+  location in $G$ under the query distribution $D$.
+\end{abstract}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 \seclabel{intro}
 
-The planar point location problem is one of the classic problems in
+The planar point location problem is the classic search problem in
 computational geometry. Given a planar subdivision $G$,\footnote{A
 \emph{planar subdivision} is a partitioning of the plane into points
 (called \emph{vertices}), open line segments (call \emph{edges}), and
 open polygons (called \emph{faces}).} the planar point location
 problem asks us to construct a data structure so that, for any query
 point $p$, we can quickly determine which face of $G$ contains
-$p$.\footnote{In the degenerate case where $p$ is a vertex or contained
-in an edge of $G$ any face incident on that vertex/edge may be
-returned as an answer.}
+$p$.\footnote{In the degenerate case where $p$ is a vertex or
+contained in an edge of $G$ any face incident on that vertex/edge may
+be returned as an answer.}
 
 The history of the planar point location problem parallels, in many
 ways, the study of binary search trees.  After a few initial attempts
@@ -114,27 +145,31 @@ linear space data structure.  Very recently, Arya \etal\
 \cite{ammw07}, have given an $O(n)$ space structure for point-location
 in triangulations with query time $H+O(H^{1/2}+1)$. 
 
-In a preliminary version of this paper, the current authors
-\cite{soda07} showed that, when $G$ is a convex subdivision, there
-exists a data structure of size $O(n)$ that can answer point location
-queries using $\tilde H + O(\tilde H^{2/3}+1)$ point/line comparisons.
-Here, $\tilde H=\tilde H(G,D)$ is a lower bound on the expected cost
-of point location for any linear decision tree for point location in
-$G$ when the query point $p$ is drawn from $D$.  In general, $\tilde
-H$ is larger than $H$.
-
 In the current paper, we show that, for any connected planar
-subdivision (not necessarily convex), there exists a data structure of
-size $O(n)$ that can answer point location queries using $\tilde H +
-O(\tilde H^{2/3}+1)$ point/line comparisons.  Again, $\tilde H=\tilde
-H(G,D)$ is a lower bound on the expected cost of any linear decision
-tree that solves this problem.  We achieve this result by showing how
-to compute a near-minimum-entropy Steiner triangulation $\Delta$ of
-$G$ and then proving that the entropy of a minimum-entropy Steiner
-triangulation of $G$ is a lower bound on the cost of any linear
-decision tree for point location in $G$.  By then applying the recent
-result of Arya \etal\ to the triangulation $\Delta$ we obtain nearly
-matching upper and lower bounds.
+subdivision, there exists a data structure of size $O(n)$ that can
+answer point location queries using $\tilde H + O(\tilde H^{2/3}+1)$
+point/line comparisons.  Here, $\tilde H=\tilde H(G,D)$ is a lower
+bound on the expected cost of any linear decision tree that solves
+this problem.  Note that $\tilde H$ is often greater than the quantity
+$H$ defined above and this is necessarily so.  To see this, consider
+that the problem of testing whether a query point is contained in a
+simple polygon $P$ with $n$ vertices is a special case of planar point
+location in a connected planar subdivision.  However, in this special
+case the subdivision only has 2 faces, so $H\le 1$.  It seems unlikely
+that for any polygon $P$ and any probability measure $D$ over $\R^2$
+that it is always possible to test in $O(1)$ expected time if a point
+$p$ drawn from $D$ is contained in $P$.  Indeed, it is not hard to
+design a polygon $P$ and distribution $D$ so that the expected cost of
+any algebraic decision tree for point location in $P$ is $\Omega(\log
+n)$.
+
+We achieve our results by showing how to compute a
+near-minimum-entropy Steiner triangulation $\Delta$ of $G$ and then
+proving that the entropy of a minimum-entropy Steiner triangulation of
+$G$ is a lower bound on the cost of any linear decision tree for point
+location in $G$.  By then applying the recent result of Arya \etal\ to
+the Steiner triangulation $\Delta$ we obtain nearly matching upper and
+lower bounds.
 
 Note that all known algorithms for planar point location that do not
 place special restrictions on the input subdivision can be described
@@ -146,24 +181,184 @@ data structures presented in the current paper are the most general
 results known about planar point location and imply, to within a
 lower order term, all of the results discussed in the introduction.
 
+A preliminary version of this paper, which dealt only with convex
+subdivisions has appeared in the Proceedings of the 19th ACM-SIAM
+Symposium on Discrete Algorithms (SODA~2008) \cite{cdilm08}.
+
 The remainder of this paper is organized as follows:  \Secref{prelim}
 presents definitions and notations used throughout the paper.
 \Secref{polygons} shows how to compute a near-minimum-entropy
-triangulation of a simple polygon.  Finally, \Secref{subdivisions}
-presents our point location structure for connected planar
-subdivisions.
+triangulation of a simple polygon.  \Secref{subdivisions} presents our
+point location structure for connected planar subdivisions.  Finally,
+\secref{discussion} provides a concluding discussion.
 
-\section{Definitions}
-Polygon, Reflex chain, pseudotriangle, 2-convex pseudotriangle,
-geodesic triangle, partition, $V(T)$, $\z t$, decision trees,
-classification problems, linear decision trees, $\depth(\ell)$.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Preliminaries}
+\seclabel{prelim}
+
+In this section we give definitions, notations, and background
+required in subsequent sections.
+
+\paragraph{Interiors and Boundaries.}
+For a set $P\subseteq \R^2$, we denote the boundary of $P$ by $\boundary P$
+and the interior of $P$ by $\interior(P)$.
+
+
+\paragraph{Triangles and Convex Polygons.}  For the purposes of this
+paper, a \emph{triangle} is the common intersection of at most 3
+closed halfplanes.  This includes triangles with infinite area and
+triangles having 0, 1, 2, or 3, vertices. Similarly, a \emph{convex
+$k$-gon} is the common intersection of at most $k$ closed halfplanes.
+
+For a closed region $X\subseteq \R^2$, a triangulation of $X$ is a set
+of triangles whose interiors are pairwise disjoint and whose union is
+$X$.  We use the convention that, unless $X$ is explicity mentioned,
+the triangulation in question is a triangulation of $\R^2$.  This
+definition of a triangulation is often referred to as a Steiner
+triangulation since it allows vertices of the triangles to be anywhere
+in $X$, and not at some finite predefined set of locations.
+
+\paragraph{Simple Polygons, Pseudotriangles, and Geodesic Triangles.}
+
+A \emph{(simple) polygon} $P$ is a closed subset of $\R^2$ whose
+boundary is piecewise linear and such that $\interior(P)$ is homeomorphic
+to an open disk.  Note that this definition of a polygon implies that
+every bounded face of a connected planar subdivision is a
+polygon.  Also, triangles, as defined above, are polygons.  
+
+A reflex chain in a polygon $P$ is a consecutive sequence of vertices
+$p_i,\ldots,p_j$ of $P$, where the internal angle at $p_k$ is at least
+$\pi$, for all $k\in\{i+1,\ldots,j-1\}$. A \emph{pseudotriangle} is a
+polygon whose boundary consists of 3 reflex chains.  An $i$-convex
+pseudotriangle ($i\in\{0,1,2,3\}$) is a pseudotriangle in which $i$ of
+the reflex chains consist of single line segments.
+
+A \emph{shortest path} between points $a,b\in P$, denoted
+$\overline{ab}_P$ is a curve of minimum length that is contained in
+$P$ and that has $a$ and $b$ as endpoints.  For 3 points $a,b,c\in P$
+A \emph{geodesic triangle} in $P$, denoted $\triangle_P abc$ is the
+union of all shortest paths of the form $\overline{xc}_P$, where
+$x\in\overline{ab}_P$.  Geodesic triangles are closely related to
+pseudotriangles.  In particular, every geodesic triangle $t$ consists
+of a pseudotriangle $\z t$ and three paths joining the three convex
+vertices of $\z t$ to $a$, $b$, and $c$.
+
+\paragraph{Classification Problems and Classification Trees.}
+
+A \emph{classification problem} over a domain $\mathcal{D}$ is a
+function $\mathcal{P}:\mathcal{D}\mapsto \{0,\ldots,k-1\}$.  The
+special case in which $k=2$ is called a \emph{decision problem}.  A
+$d$-ary \emph{classification tree} is a full $d$-ary tree\footnote{A
+full $d$-ary tree is a rooted ordered tree in which each non-leaf node
+has exactly $d$ children.} in which each internal node $v$ is labelled
+with a function $P_v:\mathcal{D}\mapsto\{0,.\ldots,d-1\}$ and for
+which each leaf $\ell$ is labelled with a value
+$d(\ell)\in\{0,\ldots,k-1\}$. The \emph{search path} of an input $p$
+in a classification tree $T$ starts at the root of $T$ and, at each
+internal node $v$, evaluates $i=P_v(p)$ and proceeds to the $i$th
+child of $v$.  We denote by $T(p)$ the label of the final (leaf) node
+in the search path for $p$.  We say that the classification tree $T$
+\emph{solves} the classification problem $\mathcal{P}$ over the domain
+$\mathcal{D}$ if, for every $p\in \mathcal{D}$, $\mathcal{P}(p)=T(p)$.
+
+\paragraph{Probability.}
+
+For a probability measure $D$ and an event $X$, we denote by $D_{|X}$ the
+distribution $D$ conditioned on $X$.  That is, the distribution where
+the probability of an event $Y$ is $\Pr(Y|X)=\Pr(Y\cap X)/\Pr(X)$.
+For any set $X$, we use the shorthand $\cup X$ to denote
+$\bigcup_{x\in X} x$.  For a set $S$ of subsets of $\R^2$, we define
+the \emph{induced entropy of $S$}, denoted by $H(S)$ as
+$H(S)=\sum_{s\in S}\Pr(s|{\cup S})\log(1/\Pr(s|{\cup S}))$.
+
+We will sometimes abuse terminology slightly by referring to a
+triangulation $\Delta$ of $X$ as a \emph{partition} of $X$ into
+triangles, although strictly speaking this is not true since the
+triangles in $\Delta$ are closed sets that overlap at their
+boundaries.  We will then compute the induced entropy of $\Delta$.
+This introduces a technical difficulty in that
+$\sum_{t\in\Delta}\Pr(t)\ge 1$ and inequality is possible if there
+exists sets $Y\subset \R^2$ such that the area of $Y$ is 0 and
+$\Pr(Y)>0$.  To avoid this technical difficulty, we will assume that
+$D$ is \emph{nice} in the sense that, if the area of $Y$ is 0 then
+$\Pr(Y)=0$.   More specifically, for every $t$ in $\Delta$ $\Pr(t) =
+\Pr(\interior(t))$.  This assumption will avoid lengthy technical but
+uninteresting cases in our results.  A discussion on how to avoid this
+assumption is included in \secref{discussion}.
+
+The probability measures used in this paper are usually defined over
+$\R^2$.  We make no assumptions about how these measures are
+represented, but we assume that an algorithm can, in constant time,
+perform each of the following 2 operations:
+\begin{enumerate}
+\item given a triangle $t$, compute $\Pr(t)$, and
+\item given a triangle $t$ and a point $x$ at the
+intersection of two of $t$'s supporting lines, compute a line $\ell$
+that contains $x$ and that partitions $t$ into two open triangles
+$t_0$ and $t_1$ such that $\Pr(t_0)\le\Pr(t_1)\le\Pr(t)/2$
+\end{enumerate}
+Requirement 2 is used only for convenience in describing our data
+structure.  It is not strictly necessary, but its use greatly
+simplifies the exposition of our results.  The modifications needed to
+remove the second assumption are discussed in \secref{discussion}.
+
+For a classification tree $T$ that solves a problem
+$P:\mathcal{D}\mapsto\{0,\ldots,k-1\}$ and a probability measure $D$
+over $\mathcal{D}$, the \emph{expected search time} of $T$ is the
+expected length of the search path for $p$ when $p$ is drawn at random
+from $\mathcal{D}$ according to $D$.  Note that, for each leaf $\ell$
+of $T$ there is a maximal subset $r(\ell)\subseteq \mathcal{D}$ such
+that the search path for any $p\in r(\ell)$ ends at $\ell$.  Thus, the
+expected search time of $T$ (under distribution $D$) can be written as
+\[
+     \mu_D(T) = \sum_{\ell\in L(T)} \Pr(r(\ell))\times \depth(\ell)
+	\enspace ,
+\]
+where $L(T)$ denotes the leaves of $T$ and $\depth(\ell)$ denotes the
+length of the path from the root of $T$ to $\ell$.  For any tree $T$
+we use $V(T)$ to denote the vertices of $T$.
+
+The following theorem, which is a restatement of (half of) Shannon's
+Fundamental Theorem for a Noiseless Channel \cite[Theorem 9]{s48}, is
+what all existing results on distribution-sensitive planar point
+location use to establish their optimality:
+
+\begin{thm}[Fundamental Theorem for a Noiseless Channel]\thmlabel{shannon}
+Let $\mathcal{P}:\mathcal{D}\mapsto \{0,\ldots,k-1\}$ be a classification
+problem and let $p\in \mathcal{D}$ be selected from a distibution $D$ such
+that $\Pr\{\mathcal{P}(p)= i\}=p_i$, for $0\le i< k$.  Then, any
+$d$-ary classification tree $T$ that solves $\mathcal{P}$ has
+\begin{equation}
+     \mu_D(T) \ge \sum_{i=0}^{k-1} p_i\log_d(1/p_i) \enspace .
+	\eqlabel{shannon}
+\end{equation}
+\end{thm}
+\thmref{shannon} is typically applied to the point location problem by
+treating point location as the problem of classifying the query point
+$p$ based on which face of $G$ contains it.  In this way, we obtain
+the lower bound in \eqref{entropy-face}.
+
+In this paper, we are especially concerned with \emph{linear decision
+trees}. These are binary classification trees for a problem
+$\mathcal{P}$ over the domain $\R^2$.  Each internal node $v$ of a
+linear decision tree contains a linear inequality $P_v(x,y)=ax+by \ge
+c$, and the node evaluates to 1 or 0 depending on whether the query
+point $(x,y)$ satisifies the inequality or not, respectively.
+Geometrically, each internal node of $T$ is labelled with a directed
+line and the decision to go to the left or right child depends on
+whether $p$ is to the left or right (or on) this line.  An immediate
+consequence of this is that, for each leaf $\ell$ of $T$, the closure
+of $r(\ell)$ is a convex polygon. 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Minimum Entropy Triangulations} 
+\seclabel{polygons}
 
 Let $P$ be a simple polygon with $n$ vertices, denoted
 $p_0,\ldots,p_{n-1}$ as they occur, in counterclockwise order, on the
-boundary of $P$.  We denote the boundary of $P$ by $\boundary P$ and
-the interior of $P$ by $\interior(P)$.  We will show how to find a
+boundary of $P$.    We will show how to find a
 triangulation of $P$ that has near-minimum entropy.  That is, we will
 find a triangulation $\Delta=\Delta(P,D)$ such that $H(\Delta) =
 \sum_{t\in\Delta} \Pr(t|P)\log(1/\Pr(t|P))$ is near-minimum over all
@@ -185,7 +380,7 @@ reflex chain $C_i$ with the pseudotriangle $t$ (see
 $p_k$ is selected in such a way that, for all $i\in\{1,\ldots,m\}$, $\Pr(P_i)
 \le (1/2)\Pr(P)$.\footnote{The existence of such a point $p_k$ is
 readily established by a standard continuity argument; see Bose \etal
-\cite{bXX} for an example.} Each of the sub-polygons $P_1,\ldots,P_m$
+\cite{bdhlim07} for an example.} Each of the sub-polygons $P_1,\ldots,P_m$
 can then be triangulated recursively by applying the algorithm to
 $P_i$ and the reflex chain $C_i$.
 
@@ -205,7 +400,7 @@ To complete the triangulation $\Delta$ all that remains is to
 partition $\z t$ into triangles.  To do this, we first
 partition $\z t$ into at most 1 triangle $t'$ and 3 2-convex
 pseudotriangles $t_0,t_1,t_2$ as shown in \figref{pt-partition}.a. Let
-$Q_i$ be the connected component of $(P\setminus \z t)\cup t_i$ that
+$Q_i$ be the connected component of $(\interior(P)\setminus \z t)\cup t_i$ that
 contains $t_i$.  To complete the triangulation we will partition
 $t_i$ into triangles, for each $i\in\{0,1,2\}$, using a recursive
 algorithm.  This algorithm selects an edge $e_i$ of the reflex chain
@@ -214,7 +409,8 @@ extends $e_i$ in both directions until it reaches the boundary of $t_i$
 (see \figref{pt-partition}.b).  The resulting line segment partitions
 $t_i$ into a triangle $t_i'$, and 2 2-convex pseudotriangles $t_{i,0}$
 and
-$t_{i,1}$.  At the same time, $Q_i$ is partitioned into up to 4 pieces
+$t_{i,1}$ that are triangulated recursively.  
+At the same time, $Q_i$ is partitioned into up to 4 pieces
 (see \figref{pt-partition}.c):
 \begin{enumerate}
 \item The triangle $t_i'$, and
@@ -255,7 +451,7 @@ triangulation.  The yellow subpolygons are triangulated recursively.}
   \figlabel{delta-example}
 \end{figure}
 
-\subsection{Analysis of $H(\Delta)$}
+\subsection{The $\Delta$-Tree $T=T(P,D)$}
 
 In order to study the entropy of triangulation $\Delta$ defined above,
 we will impose a tree structure on the pieces of $P$ induced by the
@@ -269,7 +465,7 @@ previous section; see \figref{delta-tree}):
 \item Each subpolygon $P_i$ whose boundary does not share a segment
       with $\z t$ is a child of $r$.  
 \item In addition, the subpolygons $Q_0,Q_1,Q_2$ are each children
-     of $r$.  The subtree rooted at $Q_i$ is a binary tree corresponding
+     of $r$.  The subtree rooted at $Q_i$ is a ternary tree corresponding
      to the recursive partitioning of $t_i$ and $Q_i$ done by the algorithm.
 \end{enumerate}
 Note that the above definition yields a tree whose leaves are the
@@ -281,16 +477,23 @@ from the recursive triangulation of $P_i$.
  \begin{center}\includegraphics{delta-tree}\end{center}
    \caption{The $\Delta$-tree $T$.  Yellow leaves in this tree are the
      root of subtrees obtained recursively.  Grey areas show the
-portions of a node not covered by its children.}
+portions of a node not covered by its children. Solid edges represent strong
+edges and dashed edges indicate weak edges.}
   \figlabel{delta-tree}
 \end{figure}
 
-In the tree $T$, we will distinguish between two different kinds of
-edges.  The edges joining $r$ to $Q_i$, for each $i\in\{0,1,2\}$ are
-called \emph{red edges}, and the remaining edges are called
-\emph{black} edges.  We call a node $x$ a \emph{black child} if the
-edge from $x$ to its parent is black, otherwise we call $x$ a
-\emph{red child}.
+In the tree $T$, we will distinguish between different kinds of edges.
+The edges joining $r$ to $Q_i$, for each $i\in\{0,1,2\}$ are
+\emph{weak red edges}.  The edges joining joining $t_i$ to $t_{i,0}$
+and $t_{i,1}$ are \emph{weak black edges}.  All other edges are
+\emph{strong black edges}.  We call a node $x$ a \emph{black child} if
+the edge from $x$ to its parent is black, otherwise we call $x$ a
+\emph{red child}.  Similarly, a node $x$ is a \emph{weak child} if the
+edge from $x$ to its parent is weak, otherwise we call $x$ a
+\emph{strong child}.
+
+The color of an edge gives us information about the probability of a
+child relative to the probability of its parent:
 
 \begin{lem}\lemlabel{t-halving}\lemlabel{A}
 Let $T=T(P,D)$ be the $\Delta$-tree for $(P,D)$ and
@@ -298,8 +501,26 @@ Let $x$ and $y$ be nodes in $T$ where $x$ is the parent of $y$ and
 $xy$ is a black edge.  Then $\Pr(y)\le(1/2)\Pr(x)$.
 \end{lem}
 
-\begin{proof}
-This follows immediately from the definition of $T$.
+
+\begin{proof}[Proof sketch]
+This follows from a simple case analysis of the steps in the algorithm for
+constructing $\Delta$.
+\end{proof}
+
+The strength of an edge gives us information about the boundary
+between a child and its parent.
+
+\begin{lem}\lemlabel{t-strong}
+Let $T=T(P,D)$ be the $\Delta$-tree for $(P,D)$ and
+Let $x$ and $y$ be nodes in $T$ where $x$ is the parent of $y$ and
+$xy$ is a strong edge.  Then $\boundary(x\setminus y)\cap\boundary y$
+is a shortest path in $P$ joining two points on the boundary of $P$.
+\end{lem}
+
+\begin{proof}[Proof sketch]
+This can be proven inductively by showing that, in a recursive
+subproblem $(P_i,C_i)$, $\boundary P_i\setminus C_i\subseteq \boundary
+P$.
 \end{proof}
 
 \begin{lem}\lemlabel{t-red-black}
@@ -308,7 +529,7 @@ Let $x$ be a node at depth $i$ in $T$.  Then the number of black edges
 on the path from the root of $T$ to $x$ is at least $\floor{i/2}$.
 \end{lem}
 
-\begin{proof}
+\begin{proof}[Proof sketch]
 This follows from the fact that any red child has only (2,
 1, or 0) black children.
 \end{proof}
@@ -324,35 +545,48 @@ This is an immediate consequence of \lemref{t-halving} and
 \lemref{t-red-black}.
 \end{proof}
 
-We call a set of nodes $\{x_1,\ldots,x_m\}$ in $T$ RB-independent if 
-for each $i,j\in\{1,\ldots,m\}$, $i\neq j$, $x_i$ is not an ancestor
-of $x_j$ and the path from $x_i$ to $x_j$ in $T$ contains at least one
-black edge.
+We call a set of nodes of $t$ \emph{genetically independent}
 
 \begin{lem}\lemlabel{t-intersect-rb-indep}
 Let $T=T(P,D)$ be the $\Delta$-tree for $(P,D)$ and
-let $\{x_1,\ldots,x_m\}$ be an RB-independent set of vertices in $T$.
+let $S=\{x_1,\ldots,x_m\}$ be an RB-independent set of vertices in $T$.
 Then any triangle contained in $P$ intersects at most 3 elements of
-$w_1,\ldots,w_m$.
+$x_1,\ldots,x_m$.
 \end{lem}
 
 \begin{proof}
-Coming soon.
+FIXME: The above lemma is not true for any constant.
 \end{proof}
 
 \begin{lem}\lemlabel{t-big-rb-indep}
 Let $S=\{x_1,\ldots,x_m\}$ be a set of nodes in $T$ each of depth at
-most $i$.  Then there exists an RB-independent subset of $S$ whose
-size is at least $m/3i$.
+most $i$.  Then there exists an RB-independent subset $S'\subseteq S$
+with $|S'|\ge m/3i$.
 \end{lem}
 
 \begin{proof}
-Simply select elements greedily from $S$. When the element $x_i$ is
-selected, remove from consideration all ancestors of $x_i$ and all red
-children of these ancestors.  Since each step selects one node and 
-eliminates at most $3(i-1)+1$ nodes from consideration, this process 
-will select at least $m/((3(i-1)+1) \ge m/3i$ nodes.
+Repeatedly select some element $x_i\in S$ such that $x_i$ has no
+descendants in $S$ and make $x_i$ part of the RB-independent subset.
+When the element $x_i$ is selected, remove from consideration all
+ancestors of $x_i$ and all weak children of these ancestors.  Since
+each step selects one node and eliminates at most $3i$ nodes from
+consideration, this process will select at least $m/3i$ nodes.
 \end{proof}
+
+
+A set of nodes in $S=\{x_1,\ldots,x_m\}\in V(T)$ is RB-independent if
+any triangle $t\subseteq P$ intersects at most $O(1)$ nodes in $S$.
+
+\begin{lem}\lemlabel{t-big-rb-indep}
+Let $S=\{x_1,\ldots,x_m\}$ be a set of nodes in $T$ each of depth at
+most $i$.  Then there exists an RB-independent subset $S'\subseteq S$
+with $|S'|\ge m/O(i^d)$, for some constant $d$.
+\end{lem}
+
+\begin{proof}
+Why are these kinds of s
+\end{proof}
+
 
 \subsection{Minimum-Entropy Triangulation}
 
@@ -401,8 +635,8 @@ most $c$ elements of each $\Delta_i$.  Thus, \lemref{pieces} is really
 just $m$ applications of the simple observation.  The following proof
 formalizes this:
 
-\begin{proof} Help Vida: Justify the first line of the following please 
---- I'm stuck.
+\begin{proof}
+HELP: Justify the first line of the following please --- I'm stuck.
 Intuition: LHS represents picking a point $p$ according to $D$ and
 asking how much uncertainty there is about which triangle of
 $\Delta^*$ contains $p$.  The RHS represents picking $p$, telling you
@@ -580,17 +814,18 @@ $P$,
 \begin{proof}
 To construct $\Delta$ we first find the third vertex $p_k$ of the
 geodesic triangle $t=\triangle p_i p_j p_k$.  This can be accomplished
-in $O(n)$ time by computing the shortest path trees from
-$p_i$ and $p_j$ to all other vertices of $P$ and using these to find $p_k$.
-For an example of a similar computation, see Bose \etal \cite[Lemma~X]{BXX}.
+in $O(n)$ time by computing the shortest path trees from $p_i$ and
+$p_j$ to all other vertices of $P$ and using these to find $p_k$.  For
+an example of a similar computation, see Bose \etal\
+\cite[Section~2.2]{bdhlim07}.
 
 Next, $\z t$ is split into 3 2-convex pseudotriangles $t_0,t_1,t_2$,
 which is easily accomplished in $O(n)$ time.  The last step, before
 recursing, is to triangulate each of $t_0,t_1,t_2$.  This step can be
 accomplished in $O(n)$ time using a 2-sided exponential searching
-trick that was used by Mehlhorn \cite{mXX} in the construction of
-biased binary search trees (see also, Dujmovi\'c \etal
-\cite[Lemma~X]{soda07}).
+trick that was used by Mehlhorn \cite{m75} in the construction of
+biased binary search trees (see also, Dujmovi\'c \etal\
+\cite[Theorem~1]{cdilm08}).
 
 Finally, the algorithm recurses on each of the pieces
 $P_1,\ldots,P_m$.  In this way, we obtain a divide-and-conquer
@@ -609,18 +844,23 @@ algorithm is $O(n\log n)$.
 Note that this algorithm yields a triangulation $\Delta'$ that is
 different from $\Delta$.  In particular, there may exist one $P_{i,j}$
 with $\Pr(P_{i,j})>\Pr(P_i)/2$.  In this case, $P_{i,j}$ would become
-a red child of its parent in the $\Delta'$-tree.  Despite this, all the
-proofs of \lemref{A}-\lemref{Z} continue to hold almost without
-modification.  The only difference occurs in \lemref{t-red-black} only
-guarantees a bound of $\floor{i/3}$ on the number of black edges, but
-this has almost no effect on subsequent computations.
+a red child of its parent in the $\Delta'$-tree.  Despite this, all
+the proofs of \lemref{A}-\lemref{Z} continue to hold almost without
+modification.  The only difference occurs in \lemref{t-red-black},
+which now only guarantees a bound of $\floor{i/3}$ on the number of
+black edges, but this has almost no effect on subsequent computations.
 
-Help: Can someone offer a short proof that the number of vertices is
-$O(n)$, perhaps by arguing that the number of leaves in $T$ is at most
-$2n$?
+Finally, to see that $\Delta$ contains $O(n)$ triangles, we observe
+that each step of the triangulation adds $O(1)$ edges to $\Delta$ and
+partitions the remaining polygon into subpolygons that have strictly
+fewer edges than the original.  This implies that the total number of
+edges used in all triangles of the triangulation, and hence the total
+number of triangles, is $O(n)$.
 \end{proof}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Point Location in Simple Planar Subdivisions}
+\seclabel{subdivisions}
 
 Next, we consider the problem of point location in simple
 subdivisions.  The following theorem of Arya \etal\ \cite{ammw07}
@@ -773,4 +1013,12 @@ expected number of comparisons required to answer a query is
 \end{eqnarray*}
 and this completes the proof.
 \end{proof}
+
+\section{Discussion and Conclusions}
+\seclabel{discussion}
+
+\bibliographystyle{plain}
+\bibliography{entropy2}
+
+
 \end{document}

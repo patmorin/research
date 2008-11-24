@@ -81,7 +81,7 @@
                                      {1.5ex \@plus .2ex}%
                                      {\normalfont\normalsize\bfseries}}
 \renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
-                                    {0ex \@plus1ex \@minus0ex}%
+                                    {3.25ex \@plus1ex \@minus.2ex}%
                                     {-1em}%
                                     {\normalfont\normalsize\bfseries}}
 \renewcommand\subparagraph{\@startsection{subparagraph}{5}{\parindent}%
@@ -139,7 +139,7 @@
         \@author
       \end{tabular}\par}%
     \vskip 1em%
-    {\large \@date}%
+    {\@date}%
   \end{center}%
   \par
   \vskip 1.5em}

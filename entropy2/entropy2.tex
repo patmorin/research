@@ -188,9 +188,9 @@ Symposium on Discrete Algorithms (SODA~2008) \cite{cdilm08}.
 The remainder of this paper is organized as follows:  \Secref{prelim}
 presents definitions and notations used throughout the paper.
 \Secref{polygons} shows how to compute a near-minimum-entropy
-triangulation of a simple polygon.  \Secref{subdivisions} presents our
-point location structure for connected planar subdivisions.  Finally,
-\secref{discussion} provides a concluding discussion.
+triangulation of a simple polygon.  Finally \secref{subdivisions}
+applies these tools to obtain our point location structure for
+connected planar subdivisions.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -284,8 +284,8 @@ $\Pr(Y)>0$.  To avoid this technical difficulty, we will assume that
 $D$ is \emph{nice} in the sense that, if the area of $Y$ is 0 then
 $\Pr(Y)=0$.   More specifically, for every $t$ in $\Delta$ $\Pr(t) =
 \Pr(\interior(t))$.  This assumption will avoid lengthy technical but
-uninteresting cases in our results.  A discussion on how to avoid this
-assumption is included in \secref{discussion}.
+uninteresting cases in our analysis.  In practice, this problem can
+be avoided by using a symbolic perturbation of the query point.
 
 The probability measures used in this paper are usually defined over
 $\R^2$.  We make no assumptions about how these measures are
@@ -300,8 +300,9 @@ $t_0$ and $t_1$ such that $\Pr(t_0)\le\Pr(t_1)\le\Pr(t)/2$
 \end{enumerate}
 Requirement 2 is used only for convenience in describing our data
 structure.  It is not strictly necessary, but its use greatly
-simplifies the exposition of our results.  The modifications needed to
-remove the second assumption are discussed in \secref{discussion}.
+simplifies the exposition of our results.  To eliminate requirement 2,
+one can use the same method described by Collette \etal
+\cite[Section~5]{cdilm08}
 
 For a classification tree $T$ that solves a problem
 $P:\mathcal{D}\mapsto\{0,\ldots,k-1\}$ and a probability measure $D$
@@ -365,6 +366,7 @@ find a triangulation $\Delta=\Delta(P,D)$ such that $H(\Delta) =
 triangulations of $P$.  
 
 \subsection{The Triangulation $\Delta=\Delta(P,D)$}
+\seclabel{delta}
 
 Our triangulation algorithm is recursive and takes as input a polygon
 $P$ and a reflex chain $p_i,\ldots,p_j$ on the boundary of $P$.  If
@@ -501,8 +503,7 @@ Let $x$ and $y$ be nodes in $T$ where $x$ is the parent of $y$ and
 $xy$ is a black edge.  Then $\Pr(y)\le(1/2)\Pr(x)$.
 \end{lem}
 
-
-\begin{proof}[Proof sketch]
+\begin{proof}
 This follows from a simple case analysis of the steps in the algorithm for
 constructing $\Delta$.
 \end{proof}
@@ -517,7 +518,7 @@ $xy$ is a strong edge.  Then $\boundary(x\setminus y)\cap\boundary y$
 is a shortest path in $P$ joining two points on the boundary of $P$.
 \end{lem}
 
-\begin{proof}[Proof sketch]
+\begin{proof}[Proof (sketch)]
 This can be proven inductively by showing that, in a recursive
 subproblem $(P_i,C_i)$, $\boundary P_i\setminus C_i\subseteq \boundary
 P$.
@@ -545,49 +546,43 @@ This is an immediate consequence of \lemref{t-halving} and
 \lemref{t-red-black}.
 \end{proof}
 
-We call a set $S$ of nodes of $t$ \emph{genetically independent} if no
-node in $S$ is the ancestor of any other node in $S$.  Note that a set
-of genetically independent nodes in $T$ is a set of subpolygons of $P$
-whose interiors are disjoint.  The following lemma says that a single
-triangle contained in $T$ can not intersect too many genetically
-independent nodes.  
 
-\begin{lem}\lemlabel{t-intersect-rb-indep}
-Let $T=T(P,D)$ be the $\Delta$-tree for $(P,D)$ and let
-$S=\{x_1,\ldots,x_m\}$ be a genetically independent set of vertices in
-$T$ all at distance at most $i$ from the root of $T$, and such that
-there is a single line segment $s\in P$ that intersects each of
-$x_1,\ldots,x_m$.  Then $m\le 3i$.
+\begin{lem}\lemlabel{t-segment-x}
+Let $T=T(P,D)$ be the $\Delta$-tree for $(P,D)$, let $s\subseteq P$ be
+a line segment, and let $S_i\subseteq V(T)$ be the set of all vertices
+of $T$ that are distance at most $i$ from the root of $T$ and that
+intersect $s$.  Then $|S_i|\le 6i^2$
 \end{lem}
 
 \begin{proof}
-Note that at, if $x_i$ is a strong child then it must be the case that
-an endpoint of $s$ is contained in $x_i$.  Thus, at most 2 elements
-of $S$ are strong children, and the remaining $m-2$ elements are weak
-children.
+Let $w$ be any strong child that does not contain an endpoint of $s$.
+Notice that $s$ is a shortest path in $P$ between its two endpoints.
+Therefore, by \lemref{t-strong}, $w$ does not intersect $s$, since
+otherwise the path separating $w$ from the rest of $P$ would not be a
+shortest path.
 
-Now, consider the set $S'$ of all the nodes of $T$ whose distance from
-the root of $T$ is at most $i$ and whose interiors are intersected by
-$S$.  These form a connected subtree of $T$ that contains all the
-nodes in $S$. \ldots
+There are therefore 3 types of nodes of $T$ that intersect $s$.
+Type~1~nodes contain one endpoint of $s$. Type~2 nodes contain both
+endpoints of $s$.  Type~0 nodes that contain no endpoints of $s$, but
+for which there is a path in $T$ to a Type~1 or Type~2 node that uses
+only weak edges.  Notice that each level of $T$ contains at most 1
+Type~2 node or 2 Type~1 nodes, so all that remains is to bound the
+number of Type~0 nodes whose distance from the root is at most $i$.
+
+There are two types of weak children.  Type~A children are obtained by
+splitting a pseudo triangle into three 2-convex pseudotriangles.
+Type~B children are obtained by splitting a 2-convex pseudotriangle
+into 2 2-convex pseudotriangles.  Each Type~A child is the root of a
+subtree of weak children that are separated from the remainder of the
+tree by strong edges.  Furthemore, 2 siblings of Type~B are not
+visible to each other, so $s$ can only intersect one of them. 
+
+All of this implies that each of the at most $2i$ Type~1 or Type~2 or
+node is adjacent to at most 3 Type~0 nodes, each of forms a path of at
+most $i$ Type~0 nodes that are at most distance $i$ from the root and
+that intersect $s$.  Therefore, the total number of nodes in $T$ that
+intersect $s$ is at most $6i^2$.
 \end{proof}
-
-\begin{lem}\lemlabel{t-big-rb-indep}
-Let $S=\{x_1,\ldots,x_m\}$ be a set of nodes in $T$ each of depth at
-most $i$.  Then there exists a genetically independent subset
-$S'\subseteq S$ with $|S'|\ge m/i$.
-\end{lem}
-
-\begin{proof}
-Repeatedly select some element $x_i\in S$ such that $x_i$ has no
-descendants in $S$ and make $x_i$ part of the genetically independent
-subset.  When the element $x_i$ is selected, remove from consideration
-all ancestors of $x_i$.  This clearly produces a genetically
-independent set of vertices.  Furthermore, since each step selects one
-node and eliminates at most $3i$ nodes from consideration, this
-process will select at least $m/3i$ nodes.
-\end{proof}
-
 
 \subsection{Minimum-Entropy Triangulation}
 
@@ -597,7 +592,7 @@ this by developing a technique for lower-bounding the entropy of one
 triangulation in terms of the entropy of another triangulation
 (\lemref{pieces}).  We then show how to apply this technique to lower
 bound the entropy of any triangulation $\Delta^*$ in terms of the
-entropy of $\Delta$ (\lemref{partition} and \lemref{min-H-triangulation}).
+entropy of $\Delta$ (\lemref{min-H-triangulation}).
   
 To obtain lower bounds on the entropy of a triangulation $\Delta^*$,
 consider the following easily proven observation: If each triangle in
@@ -617,10 +612,11 @@ Let $D$ be a probability measure over $\R^2$.  Let $\Delta$ and
 $\Delta^*$ be triangulations, and let $\{\Delta_1,\ldots,\Delta_m\}$
 be a partition of the triangles in $\Delta$.  Suppose that, for all
 $i\in\{1,\ldots,m\}$ and for each triangle $t^*\in\Delta^*$, $t^*$
-intersects at most $c$ triangles in $\Delta_i$.  Then
+intersects at most $c_i$ triangles in $\Delta_i$.  Then
 \begin{eqnarray*}
    H(\Delta) \le 
-	 H(\Delta^*) + H(\{\cup\Delta_1,\ldots,\cup\Delta_m\}) + \log c
+	 H(\Delta^*) + H(\{\cup\Delta_1,\ldots,\cup\Delta_m\}) + 
+	\sum_{i=1}^m \Pr(\cup\Delta_i)\log c_i
  \enspace . 
 \end{eqnarray*}
 \end{lem}
@@ -632,7 +628,7 @@ about the experiment is at most
 $H(\{\cup\Delta_1,\ldots,\cup\Delta_m\})$.  However, after giving away
 this information, we are able to apply the simple observation in the
 previous paragraph, since each triangle in $\Delta^*$ intersects at
-most $c$ elements of each $\Delta_i$.  Thus, \lemref{pieces} is really
+most $c_i$ elements of each $\Delta_i$.  Thus, \lemref{pieces} is really
 just $m$ applications of the simple observation.  The following proof
 formalizes this:
 
@@ -659,12 +655,14 @@ the uncertainty.
        \Pr(t^*\cap\Delta_i)\log(1/\Pr(t^*\cap\Delta_i)) 
         - H(\{\cup\Delta_1,\ldots,\cup\Delta_m\}) \\
      & \ge  & \sum_{i=1}^m \sum_{t^*\in\Delta^*}\sum_{t\in\Delta_i}
-       \Pr(t^*\cap t)\log(1/\Pr(t^*\cap t)) 
-        -\log c - H(\{\cup\Delta_1,\ldots,\cup\Delta_m\}) \\
+       \Pr(t^*\cap t)
+          \left(
+            \log(1/\Pr(t^*\cap t)) -\log c_i 
+          \right)- H(\{\cup\Delta_1,\ldots,\cup\Delta_m\}) \\
      & \ge  & \sum_{i=1}^m \sum_{t\in\Delta_i}
        \Pr(t)\log(1/\Pr(t)) 
-        -\log c - H(\{\cup\Delta_1,\ldots,\cup\Delta_m\}) \\
-     &  =  & H(\Delta) -\log c - H(\{\cup\Delta_1,\ldots,\cup\Delta_m\}) 
+        -\sum_{i=1}^m \Pr(\cup\Delta_i)\log c_i - H(\{\cup\Delta_1,\ldots,\cup\Delta_m\}) \\
+     &  =  & H(\Delta) -\sum_{i=1}^m \Pr(\cup\Delta_i)\log c_i - H(\{\cup\Delta_1,\ldots,\cup\Delta_m\}) 
             \enspace ,
 \end{eqnarray*}
 and this completes the proof.
@@ -673,7 +671,8 @@ and this completes the proof.
 The remainder of our argument involves carefully partitioning the
 triangles of $\Delta$ into subsets $\Delta_1,\ldots,\Delta_m$ that are
 compatible with \lemref{pieces}, and then showing that
-$H(\Delta_1,\ldots,\Delta_m)$ is not too big.  To help us, we will use
+$H(\Delta_1,\ldots,\Delta_m)$ and $\sum_{i=1}^m \Pr(\cup\Delta_i)\log
+c_i$ are not too big.  To help us, we will use
 the $\Delta$-tree $T$.  For a node $x$ in $T$ with children
 $x_1,\ldots,x_k$, let $t(x) = x \setminus (\bigcup_{i=1}^m x_i)$ be
 the portion of $x$ not covered by $x$'s children.  Note that $t(x)$ is
@@ -687,46 +686,11 @@ using the convention that $0\cdot\log(1/0)=0$.}
     H(\Delta) = \sum_{t\in\Delta}\Pr(t|P)\log(1/\Pr(t|P)) =
        \sum_{x\in V(T)}\Pr(t(x)|P)\log(1/\Pr(t(x)|P)) \enspace .
 \]
-
 For a node $x\in V(T)$, we define $\Pr(x)=\Pr(t(x))$ is the
 probability that a point drawn from $D$ is contained in $t(x)$.
-We begin by partitioning the nodes of $T$ into
-\emph{groups} $G_1,G_2,\ldots$ where
-\[
-	G_i = \{x\in V(T) : 1/2^{i} \le \Pr(x) < 1/2^{i-1} \} \enspace .
-\]
-In what follows, we fix some a real number $0< \alpha < 1$ that will be
-specified later.   The following lemma gives the structure of the sets
-that will be used in the application of \lemref{pieces}.
 
-\begin{lem}\lemlabel{partition}
-Each group $G_i$ can be partitioned into $r_i$ subgroups
-$G_{i,1},\ldots,G_{i,r_i}$ such that
-\begin{enumerate}
-\item There is an integer $t_i$ such that $r_i-t_i\le 2^{\alpha i}$,
-
-\item $|G_{i,j}| \ge 2^{\alpha i} / 6i$, for all $j\in\{1,\ldots,r_i\}$, and 
-
-\item $G_{i,j}$ is RB-independent, for all $j\in\{1,\ldots,r_i\}$.
-\end{enumerate}
-\end{lem}
-
-\begin{proof}
-Note that \lemref{t-depth} implies that any node in group $G_{i}$ has
-depth at most $2i+1$ in $T$.  Therefore, as long as 
-$|G_i|>2^{\alpha i}$, we can apply \lemref{t-big-rb-indep} to obtain
-an RB-independent subset of $G_i$ of size at least $2^{\alpha i}/6i$,
-make this into a group $G_{i,j}$, and remove these elements from $G_i$.
-We repeat this until, after $t_i$ iterations, $|G_i| \le 2^{\alpha
-i}$.  At this point we simply create $|G_i|$ singleton groups
-$G_{i,t_i},\ldots,G_{i,r_i}$ and observe that
-all groups $G_{i,j}$ are RB-independent (Condition~3),
-$G_{i,1},\ldots,G_{i,t_i}$ satisfy Condition~2, and $r_i$ and $t_i$ satisfy
-Condition~1.
-\end{proof}
-
-Next we apply \lemref{pieces} and \lemref{partition} to obtain a lower
-bound on the entropy of any triangulation $\Delta^*$. 
+Next we apply \lemref{pieces} to obtain a lower bound on the
+entropy of any triangulation $\Delta^*$. 
 
 \begin{lem}\lemlabel{min-H-triangulation}\lemlabel{Z}
 Let $P$ be a simple polygon, let $D$ be a probability measure over
@@ -738,61 +702,82 @@ Then, for any triangulation $\Delta^*$ of $P$,
 \end{lem}
 
 \begin{proof}
-Let $T=T(P,D)$ be the $\Delta$-tree for $(P,D)$ and apply
-\lemref{partition} to obtain groups $\{G_{i,j}: i=1,\ldots,\infty,
-j=1,\ldots,r_i\}$.  For any group $G_{i,j}$ Condition~3 and
-\lemref{t-intersect-rb-indep} ensures that any triangle of
-$\Delta^*$ can intersect at most 3 triangles of $G_{i,j}$.  Therefore,
-applying \lemref{pieces} with $c=3$, we obtain:
-\[ 
- H(\Delta) \le 
-   H(\Delta^*) + H(\{{\cup G_{i,j}} : i\in\N , j\in\{1,\ldots,r_i\}\}) 
-   + O(1)  \enspace .
+Let $T=T(P,D)$ be the $\Delta$-tree for $(P,D)$.
+Partition the nodes of $T$ into
+\emph{groups} $G_1,G_2,\ldots$ where
+\[
+	G_i = \{x\in V(T) : 1/2^{i} < \Pr(x) \le 1/2^{i-1} \} \enspace .
 \]
-Thus, all that remains is to show that the contribution of $\overline
-H=H(\cup\{G_{i,j}\} : i\in\N , j\in\{1,\ldots,r_i\}\})$ is at most
+In the following we will fix a value $\alpha > 0$ to be defined later.
+A group $G_i$ is
+\emph{large} if it contains at least $2^{\alpha i}$ elements,
+otherwise $G_i$ is \emph{small}.  Let $I^+$ denote the index set of
+the large groups, i.e., $I^{+}=\{i\in\N : |G_i| \ge 2^{\alpha i}\}$.
+Let $I^{-}= \N\setminus I^+$.
+
+For any group $G_{i}$ 
+\lemref{t-segment-x} ensures that any triangle of
+$\Delta^*$ can intersect at most $18i^2$ triangles of $G_{i}$.  Therefore,
+applying \lemref{pieces} with $c_{i}=18i^2$, we obtain:
+\begin{equation} 
+ H(\Delta) \le 
+   H(\Delta^*) + H(\{{\cup G_{i}} : i\in\N\}) 
+   + \sum_{i=1}^{\infty}\Pr(\cup G_{i})\log(18i^2)  \enspace .
+   \eqlabel{doit}
+\end{equation}
+Thus, all that remains is to bound the contribution of the last two
+terms on the right hand side of \eqref{doit}.  First,
+\begin{eqnarray*}
+   \sum_{i=1}^{\infty}\Pr(\cup G_{i,j})\log(18i^2)
+   &   =  & \sum_{i=1}^\infty\sum_{t\in G_i}\Pr(t)\log(18i^2) \\
+   &  \le  & \sum_{i=1}^\infty\sum_{t\in G_i}\Pr(t)(O(1)+\log\log(1/\Pr(t))) \\
+    &  =  & \sum_{t\in\Delta} \Pr(t) (O(1)+\log\log(1/\Pr(t))) \\
+    &  =  & O(\log H(\Delta)+1) \enspace ,
+\end{eqnarray*}
+where the last equality follows from Jensen's Inequality.
+Finally, we show that the contribution of $\overline
+H=H(\{\cup\{G_{i}\} : i\in\N\})$ is at most
 $O(H(\Delta)^{2/3})$. 
 \begin{eqnarray*}
 \overline H 
- & = & H(\cup\{G_{i,j}\} : i\in\N , j\in\{1,\ldots,r_i\}\}) \\
- & = & \sum_{i=1}^\infty
-         \sum_{j=1}^{r_i}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j})) \\
- & = & \sum_{i=1}^\infty
-         \sum_{j=1}^{t_i}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j})) 
-         + \sum_{i=1}^\infty
-         \sum_{j=t_i+1}^{r_i}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j})) \\
- & \le & \sum_{i=1}^\infty
-         \sum_{j=1}^{t_i-1}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j})) 
-         + \sum_{i=1}^{\infty} (2^{\alpha i}/ 2^{i-1})\log(2^i) \\
- &  =  & \sum_{i=1}^\infty
-         \sum_{j=1}^{t_i-1}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j})) 
-         + 2\cdot\sum_{i=1}^{\infty} i/2^{(1-\alpha)i} \\
- &  =  & \sum_{i=1}^\infty
-         \sum_{j=1}^{t_i-1}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j}))
+ &  =  & H(\cup\{G_{i}\} : i\in\N\}) \\
+ &  =  & \sum_{i=1}^\infty\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) \\
+ &  =  & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
+         + \sum_{i\in I^-}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) \\
+ & \le & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
+         + \sum_{i\in I^-}2^{\alpha i}/2^{i-1}\log(2^{i}) \\
+ & \le & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
+         + \sum_{i=1}^\infty 2^{\alpha i}/2^{i-1}\log(2^{i}) \\
+ & \le & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
+         + \sum_{i=1}^\infty i2^{\alpha i}/2^{i-1} \\
+ & \le & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
+         + 2\cdot\sum_{i=1}^{\infty} i/2^{(1-\alpha)} \\
+ & \le & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
          + O(1/(1-\alpha)^2) \enspace ,
 \end{eqnarray*}
 where the last equality is obtained using Taylor series.
 Continuing, we get 
 \begin{eqnarray*}
 \overline H
- &  =  & \sum_{i=1}^\infty
-         \sum_{j=1}^{t_i-1}\Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j}))
+  & \le & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
          + O(1/(1-\alpha)^2) \\
- & \le  & \sum_{i=1}^\infty
-         \sum_{j=1}^{t_i-1} \Pr(\cup G_{i,j})
-              \log(i2^{i}/2^{\alpha i})
+  & \le & \sum_{i\in I^+}\Pr(\cup G_{i})\log(2^i/|G_i|)
          + O(1/(1-\alpha)^2) \\
- & \le  & \sum_{i=1}^\infty
-         \sum_{j=1}^{t_i-1} \Pr(\cup G_{i,j})((1-\alpha)i+\log i)
+  & \le & \sum_{i\in I^+}\Pr(\cup G_{i})\log(2^i/2^{\alpha i})
          + O(1/(1-\alpha)^2) \\
- & \le  & \sum_{i=1}^\infty
-         \sum_{j=1}^{t_i-1} \Pr(\cup G_{i,j})((1-\alpha)\log(1/\Pr(\cup G_{i,j})) + \log\log(1/\Pr(\cup G_{i,j})))
-         + O(1 + 1/(1-\alpha)^2) \\
- & \le &  (1-\alpha)H(\Delta) + \log(H(\Delta)) + O(1 + 1/(1-\alpha)^2) \\
- & \le &  O(H(\Delta)^{2/3}+ 1)
+  &  =  & \sum_{i\in I^+}\Pr(\cup G_{i})(1-\alpha) i
+         + O(1/(1-\alpha)^2) \\
+  &  =  & (1-\alpha)\sum_{i\in I^+}\Pr(\cup G_{i}) i
+         + O(1/(1-\alpha)^2) \\
+  &  =  & (1-\alpha)\sum_{i\in I^+}\Pr(\cup G_{i})\log(2^i)
+         + O(1/(1-\alpha)^2) \\
+  &  =  & (1-\alpha)\sum_{i\in I^+}\sum_{t\in G_i}\Pr(t)\log(1/\Pr(t))
+         + O(1+1/(1-\alpha)^2) \\
+  & \le & (1-\alpha)H(\Delta) + O(1+1/(1-\alpha)^2) \\
+  & \le &  O(H(\Delta)^{2/3}+ 1)
 \end{eqnarray*} 
-where the second last inequality follows from Jensen's Inequality and the
-last inequality is obtained by setting $\alpha=1-1/H(\Delta)^{1/3}$.
+Where the last inequality is obtained by setting 
+$\alpha=1-1/H(\Delta)^{1/3}$.
 This completes the proof.
 \end{proof}
 
@@ -813,7 +798,9 @@ $P$,
 \end{thm}
 
 \begin{proof}
-To construct $\Delta$ we first find the third vertex $p_k$ of the
+We show how the construction of the triangulation $\Delta$ described in
+\secref{delta} can be modified to run in $O(n\log n)$ time.  When
+constructing $\Delta$ the first step is to find the third vertex $p_k$ of the
 geodesic triangle $t=\triangle p_i p_j p_k$.  This can be accomplished
 in $O(n)$ time by computing the shortest path trees from $p_i$ and
 $p_j$ to all other vertices of $P$ and using these to find $p_k$.  For
@@ -1008,15 +995,13 @@ Putting this all together, we have
 Finally, since we preprocess $\Delta$ using \thmref{ammw07}, the
 expected number of comparisons required to answer a query is
 \begin{eqnarray*}
-  H(\Delta) + O(H(\Delta)^{1/2} + 1)
+  \mu_D(R) 
+   & = & H(\Delta) + O(H(\Delta)^{1/2} + 1) \\
    & = & \mu_D(T^*) +  O(\mu_D(T^*)^{1/2} + H(\Delta)^{2/3} + H(\Delta)^{1/3} + 1) \\
    & = & \mu_D(T^*) + O(\mu_D(R)^{2/3} + 1)
 \end{eqnarray*}
 and this completes the proof.
 \end{proof}
-
-\section{Discussion and Conclusions}
-\seclabel{discussion}
 
 \bibliographystyle{plain}
 \bibliography{entropy2}

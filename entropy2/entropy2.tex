@@ -1,5 +1,5 @@
 \documentclass[lotsofwhite]{patmorin}
-\usepackage{fullpage,graphicx,graphics,url}
+\usepackage{fullpage,graphicx,graphics,url,amsmath}
 
 \include{pat}
 
@@ -10,22 +10,36 @@
 \newcommand{\depth}{\mathrm{depth}}
 \newcommand{\prnt}{\mathrm{parent}}
 
-\title{\MakeUppercase{Entropy, Tessellation, and Point Location}%
-	\thanks{The research presented in this article began
-while the fifth author was a visiting researcher at the Universit\'e Libre de
-Bruxelles, supported by a grant from FNRS and was completed while
- the fifth author was a visiting researcher at National ICT 
-Australia and the University of
-Sydney supported by grants from National ICT Australia and the
-University of Sydney.  The researchers are
-partially supported by NSERC, FNRS, and the Ontario Ministry of Research and
-Innovation.}}
+\title{\MakeUppercase{Entropy, Triangulation, and Point Location}}
 
-\author{S\'ebastien Collette \\ \textit{Universit\'e Libre de Bruxelles}
-  \and Vida Dujmovi\'c \\ \textit{McGill University}
-  \and John Iacono \\ \textit{Polytechnic University}
-  \and Stefan Langerman \\ \textit{Universit\'e Libre de Bruxelles}
-  \and Pat Morin \\ \textit{Carleton University}}
+\author{%
+  S\'ebastien Collette%
+    \thanks{Charg\'e de Recherches du F.R.S.-FNRS.} \\ 
+    \textit{Universit\'e Libre de Bruxelles}
+  \and Vida Dujmovi\'c%
+    \thanks{Research partially supported by NSERC and the Ontario
+            Ministry of Research and Innovation.} \\ 
+    \textit{Carleton University}
+  \and John Iacono%
+    \thanks{Research partially supported by
+            NSF grants OISE-0334653 and CCF-0430849 
+            and by an Alfred P. Sloan research fellowship.} \\ 
+    \textit{Polytechnic Institute of NYU}
+  \and Stefan Langerman%
+    \thanks{Ma\^{\i}tre de recherches du F.R.S.-FNRS.} \\ 
+    \textit{Universit\'e Libre de Bruxelles}
+  \and Pat Morin%
+    \thanks{This research began
+while the author was a visiting researcher at the Universit\'e Libre de
+Bruxelles and was completed while
+ the author was a visiting researcher at National ICT 
+Australia and the University of
+Sydney. Research partially supported by NSERC, FNRS, the Ontario
+            Ministry of Research and Innovation, Canada Foundation 
+            for Innovation, The University of Sydney, and National 
+            ICT Australia.} \\ 
+    \textit{Carleton University}
+}
 
 \begin{document}
 \maketitle
@@ -100,23 +114,24 @@ can answer queries using an expected number of decisions that is fewer
 than 
 \begin{equation}
     H = H(G,D) = \sum_{i=1}^m \Pr(F_i)\log(1/\Pr(F_i)) \enspace . 
-	\eqlabel{entropy}
-	\eqlabel{entropy-face}
+	\eqlabelx{entropy-face}
 \end{equation}
 
 In the previous results on planar point location, none of the query
 times are affected significantly by the structure of $G$;  they hold
 for arbitrary planar subdivisions.  However, when studying point
 location under a distribution assumption the problem becomes more
-complicated and the results become more specific.  A \emph{convex
-subdivision} is a planar subdivision whose faces are all convex
-polygons, except the outer face, which is the complement of a convex
-polygon.  A \emph{triangulation} is a convex subdivision in which each
-face has at most 3 edges on its boundary.
+complicated and the results become more specific.  A \emph{connected
+subdivision} is a planar subdivision whose underlying (vertex and
+edge) graph is connected.  A \emph{convex subdivision} is a planar
+subdivision whose faces are all convex polygons, except the outer
+face, which is the complement of a convex polygon.  A
+\emph{triangulation} is a convex subdivision in which each face has at
+most 3 edges on its boundary.
 
 Note that, if every face of $G$ has a constant number of sides, then
 $G$ can be augmented, by the addition of extra edges, so that it is a
-triangulation without increasing \eqref{entropy} by more than a
+triangulation without increasing \eqrefx{entropy-face} by more than a
 constant.  Similarly, in a convex subdivision $G$ where the query
 distribution $D$ is uniform within each face of $G$, the faces of the
 subdivision can be triangulated without increasing the entropy by more
@@ -158,7 +173,7 @@ that the problem of testing whether a query point is contained in a
 simple polygon $P$ with $n$ vertices is a special case of planar point
 location in a connected planar subdivision.  However, in this special
 case the subdivision only has 2 faces, so $H\le 1$.  It seems unlikely
-that, for any polygon $P$ and any probability measure $D$ over $\R^2$,
+that, for any simple polygon $P$ and any probability measure $D$ over $\R^2$,
 it is always possible to test in $O(1)$ expected time if a point
 $p$ drawn from $D$ is contained in $P$.  Indeed, it is not hard to
 design a convex polygon $P$ and distribution $D$ so that the expected
@@ -186,13 +201,13 @@ match to within a lower-order term.
 
 
 A preliminary version of this paper, which dealt only with convex
-subdivisions has appeared in the Proceedings of the 19th ACM-SIAM
+subdivisions, has appeared in the Proceedings of the 19th ACM-SIAM
 Symposium on Discrete Algorithms (SODA~2008) \cite{cdilm08}.
 
 The remainder of this paper is organized as follows:  \Secref{prelim}
 presents definitions and notations used throughout the paper.
 \Secref{polygons} shows how to compute a near-minimum-entropy
-triangulation of a simple polygon.  Finally \secref{subdivisions}
+triangulation of a simple polygon.  Finally, \secref{subdivisions}
 applies these tools to obtain our point location structure for
 connected planar subdivisions.
 
@@ -201,7 +216,7 @@ connected planar subdivisions.
 \section{Preliminaries}
 \seclabel{prelim}
 
-In this section we give definitions, notations, and background
+In this section we give definitions, notation, and background
 required in subsequent sections.
 
 \paragraph{Interiors and Boundaries.}
@@ -257,8 +272,7 @@ vertices of $\z t$ to $a$, $b$, and $c$.
 \paragraph{Classification Problems and Classification Trees.}
 
 A \emph{classification problem} over a domain $\mathcal{D}$ is a
-function $\mathcal{P}:\mathcal{D}\mapsto \{0,\ldots,k-1\}$.  The
-special case in which $k=2$ is called a \emph{decision problem}.  A
+function $\mathcal{P}:\mathcal{D}\mapsto \{0,\ldots,k-1\}$.  A
 $d$-ary \emph{classification tree} is a full $d$-ary tree\footnote{A
 full $d$-ary tree is a rooted ordered tree in which each non-leaf node
 has exactly $d$ children.} in which each internal node $v$ is labelled
@@ -271,6 +285,18 @@ child of $v$.  We denote by $T(p)$ the label of the final (leaf) node
 in the search path for $p$.  We say that the classification tree $T$
 \emph{solves} the classification problem $\mathcal{P}$ over the domain
 $\mathcal{D}$ if, for every $p\in \mathcal{D}$, $\mathcal{P}(p)=T(p)$.
+
+In this paper, we are especially concerned with \emph{linear decision
+trees}. These are binary classification trees for a problem
+$\mathcal{P}$ over the domain $\R^2$.  Each internal node $v$ of a
+linear decision tree contains a linear inequality $P_v(x,y)=ax+by \ge
+c$, and the node evaluates to 1 or 0 depending on whether the query
+point $(x,y)$ satisfies the inequality or not, respectively.
+Geometrically, each internal node of $T$ is labelled with a directed
+line and the decision to go to the left or right child depends on
+whether $p$ is to the left or right (or on) this line.  An immediate
+consequence of this is that, for each leaf $\ell$ of $T$, the closure
+of $r(\ell)$ is a convex polygon. 
 
 \paragraph{Probability.}
 
@@ -293,7 +319,8 @@ We will sometimes abuse terminology slightly by referring to a
 triangulation $\Delta$ of $X$ as a \emph{partition} of $X$ into
 triangles, although strictly speaking this is not true since the
 triangles in $\Delta$ are closed sets that overlap at their
-boundaries.  We will then compute the induced entropy of $\Delta$.
+boundaries.  We will then continue the abuse by computing the induced 
+entropy of $\Delta$.
 This introduces a technical difficulty in that
 $\sum_{t\in\Delta}\Pr(t)\ge 1$ and inequality is possible if there
 exists sets $Y\subset \R^2$ such that the area of $Y$ is 0 and
@@ -307,7 +334,7 @@ be avoided by using a symbolic perturbation of the query point.
 The probability measures used in this paper are usually defined over
 $\R^2$.  We make no assumptions about how these measures are
 represented, but we assume that an algorithm can, in constant time,
-perform each of the following 2 operations:
+perform each of the following two operations:
 \begin{enumerate}
 \item given a triangle $t$, compute $\Pr(t)$, and
 \item given a triangle $t$ and a point $x$ at the
@@ -337,17 +364,6 @@ where $L(T)$ denotes the leaves of $T$ and $\depth(\ell)$ denotes the
 length of the path from the root of $T$ to $\ell$.  For any tree $T$
 we use $V(T)$ to denote the vertices of $T$.
 
-In this paper, we are especially concerned with \emph{linear decision
-trees}. These are binary classification trees for a problem
-$\mathcal{P}$ over the domain $\R^2$.  Each internal node $v$ of a
-linear decision tree contains a linear inequality $P_v(x,y)=ax+by \ge
-c$, and the node evaluates to 1 or 0 depending on whether the query
-point $(x,y)$ satisifies the inequality or not, respectively.
-Geometrically, each internal node of $T$ is labelled with a directed
-line and the decision to go to the left or right child depends on
-whether $p$ is to the left or right (or on) this line.  An immediate
-consequence of this is that, for each leaf $\ell$ of $T$, the closure
-of $r(\ell)$ is a convex polygon. 
 
 The following theorem, which is a restatement of (half of) Shannon's
 Fundamental Theorem for a Noiseless Channel \cite[Theorem 9]{s48}, is
@@ -361,13 +377,13 @@ that $\Pr\{\mathcal{P}(p)= i\}=p_i$, for $0\le i< k$.  Then, any
 $d$-ary classification tree $T$ that solves $\mathcal{P}$ has
 \begin{equation}
      \mu_D(T) \ge \sum_{i=0}^{k-1} p_i\log_d(1/p_i) \enspace .
-	\eqlabel{shannon}
+	\eqlabelx{shannon}
 \end{equation}
 \end{thm}
 \thmref{shannon} is typically applied to the point location problem by
 treating point location as the problem of classifying the query point
 $p$ based on which face of $G$ contains it.  In this way, we obtain
-the lower bound in \eqref{entropy-face}.
+the lower bound in \eqrefx{entropy-face}.
 
 
 
@@ -380,10 +396,10 @@ $p_0,\ldots,p_{n-1}$ as they occur, in counterclockwise order, on the
 boundary of $P$.  We will show how to find a triangulation of $P$ that
 has near-minimum entropy.  That is, we will find a triangulation
 $\Delta=\Delta(P,D)$ such that $H(\Delta)$ is near-minimum over all
-triangulations of $P$.  In order to shorten simplify the formulas in
-this section, we will implicitly condition the distribution $D$ on
-$P$.  More precisely, throughout this section the notation $\Pr(X)$
-should be treated as shorthand for $\Pr(X|D)$.
+triangulations of $P$.  In order to shorten the formulas in this
+section, we will implicitly condition the distribution $D$ on $P$.
+More precisely, throughout this section the notation $\Pr(X)$ should
+be treated as shorthand for $\Pr(X|P)$.
 
 \subsection{The Triangulation $\Delta=\Delta(P,D)$}
 \seclabel{delta}
@@ -429,13 +445,13 @@ each $i\in\{0,1,2\}$, using a recursive algorithm.  This algorithm
 selects an edge $e_i$ of the reflex chain in $t_i$ and extends $e_i$
 in both directions until it reaches the boundary of $t_i$ (see
 \figref{pt-partition}.b).  The resulting line segment partitions $t_i$
-into a triangle $t_i'$, and 2 2-convex pseudotriangles $t_{i,0}$ and
+into a triangle $t_i'$, and two 2-convex pseudotriangles $t_{i,0}$ and
 $t_{i,1}$ that are triangulated recursively.  At the same time, $Q_i$
 is partitioned into up to 4 pieces (see \figref{pt-partition}.c):
 
 \begin{enumerate}
-\item The triangle $t_i'$, and
-\item A subpolygon $P_j$ incident to $e_i$,
+\item the triangle $t_i'$, and
+\item a subpolygon $P_j$ incident to $e_i$,
 \item The two connected components $Q_{i,0}$
 and $Q_{i,1}$ of $Q_i\setminus t_i'$ that contain $t_{i,0}$ and
 $t_{i,1}$, respectively.
@@ -481,7 +497,7 @@ tree whose nodes are subpolygons of $P$ and which has the property
 that, for any node $y$ that is the child of a node $x$, $y\subseteq
 x$.
 
-The tree $T$ has several different kinds of nodes, called P-nodes,
+The tree $T$ has three different kinds of nodes, called P-nodes,
 T-nodes, and Q-nodes.  The root $r$ of $T$ is the polygon $P$ and is
 a \emph{P-node}.  The root of $T$ has the following children
 (defined in terms of the construction algorithm in the previous
@@ -601,7 +617,9 @@ There are 3 types of nodes in $T$ whose interiors intersect $s$:
 Type~1~nodes contain one endpoint of $s$ in their interior, Type~2
 nodes contain both endpoints of $s$ in their interior, and Type~0
 nodes contain no endpoints of $s$ in their interior.  Notice that each
-level of $T$ contains at most 1 Type~2 node or 2 Type~1 nodes, so all
+level of $T$ contains at most 1 Type~2 node or 2 Type~1 nodes, so the
+total number of Type~1 and Type~2 nodes at distance at most $i$ from
+the root is at most $2i+1$.  Thus, all
 that remains is to bound the number of Type~0 nodes whose distance
 from the root is at most $i$.
 
@@ -621,7 +639,7 @@ Q-nodes, we see that two sibling Q-nodes $x$ and $y$ are not mutually
 visible, i.e., there is no line segment $s\subseteq P$ that intersects
 both $\interior(x)$ and $\interior(y)$.
 
-All of this implies that each of the at most $2i$ Type~1 or Type~2 
+All of this implies that each of the at most $2i+1$ Type~1 or Type~2 
 nodes is adjacent to at most 1 Type~0 T-node, and this T-node is the
 endpoint of at most 3 paths of Type~0 Q-nodes. Each such path is of
 length at most $i$.  Therefore, the total number of nodes in $T$ that
@@ -754,10 +772,10 @@ applying \lemref{pieces} with $c_{i}=288i^2$, we obtain:
  H(\Delta) \le 
    H(\Delta^*) + H(\{{\cup G_{i}} : i\in\N\}) 
    + \sum_{i=1}^{\infty}\Pr(\cup G_{i})\log(288i^2)  \enspace .
-   \eqlabel{doit}
+   \eqlabelx{doit}
 \end{equation}
 Thus, all that remains is to bound the contribution of the last two
-terms on the right hand side of \eqref{doit}.  First,
+terms on the right hand side of \eqrefx{doit}.  First,
 \begin{eqnarray*}
    \sum_{i=1}^{\infty}\Pr(\cup G_{i})\log(288i^2)
    &   =  & \sum_{i=1}^\infty\sum_{t\in G_i}\Pr(t)\log(288i^2) \\
@@ -788,8 +806,8 @@ $O(H(\Delta)^{2/3})$.
  & \le & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
          + O(1/(1-\alpha)^2) \enspace ,
 \end{eqnarray*}
-where the last equality is obtained using the tailor series expansion
-for $e^{x}$ to obtain the inequality $1-2^{-x} \ge x\ln 2 - (x^2\ln 2)/2$
+where the last equality is obtained using the Taylor series expansion
+for $e^{x}$ to obtain the inequality $1-1/2^{x} \ge x\ln 2 - (x^2\ln 2)/2$
 for $x$ close to 0.  Continuing, we get 
 \begin{eqnarray*}
 \overline H
@@ -816,10 +834,10 @@ Where the last inequality is obtained by setting
 $\alpha=1-1/H(\Delta)^{1/3}$.  Thus, we have shown that
 \begin{equation}
   H(\Delta) \le H(\Delta^*) + O(H(\Delta)^{2/3}+1) \enspace ,
-   \eqlabel{almost-last}
+   \eqlabelx{almost-last}
 \end{equation}
 which implies that $H(\Delta) = O(H(\Delta)^*+1)$.  Applying this to
-the right hand side of \eqref{almost-last} yields $H(\Delta) \le
+the right hand side of \eqrefx{almost-last} yields $H(\Delta) \le
 H(\Delta^*) + O(H(\Delta^*)^{2/3} + 1)$, completing the proof.
 \end{proof}
 
@@ -849,7 +867,7 @@ $p_j$ to all other vertices of $P$ and using these to find $p_k$.  For
 an example of a similar computation, see Bose \etal\
 \cite[Section~2.2]{bdhlim07}.
 
-Next, $\z t$ is split into 3 2-convex pseudotriangles $t_0,t_1,t_2$,
+Next, $\z t$ is split into three 2-convex pseudotriangles $t_0,t_1,t_2$,
 which is easily accomplished in $O(n)$ time.  The last step, before
 recursing, is to triangulate each of $t_0,t_1,t_2$.  This step can be
 accomplished in $O(n)$ time using a 2-sided exponential searching
@@ -875,30 +893,31 @@ total running time of this algorithm is $O(n\log n)$.
 Note that this algorithm yields a triangulation $\Delta'$ that is
 different from $\Delta$.  In particular, there may exist one $P_{i,j}$
 with $\Pr(P_{i,j})>\Pr(P_i)/2$.  Despite this, all the proofs of
-\lemref{A}-\lemref{Z} continue to hold almost without modification.
+Lemmas~\ref{lem:A}--\ref{lem:Z} continue to hold almost without modification.
 The only difference occurs in \lemref{t-halving}, which now only
 guarantees a bound of $2^\floor{i/8}$ on the number of black edges,
 but this has almost no effect on subsequent computations.
 
-Finally, to see that $\Delta$ contains $O(n)$ triangles, we count the
-different types of edges used in the triangulation $\Delta$.  Some of
-these edges are edges of $P$, of which there are at most $n$.  Some of
-these edges are edges of funnels which always connect two vertices of
-$P$, so there are at most $n-2$ of these.  The remaining edges are
-used to triangulate the interiors of funnels.  A funnel that has $k$
-vertices is triangulated using $3 + 2(k-3)$ edges.  Since the total
-number of vertices in all funnels is at most $2n$, this means that
-there are at most $6n$ edges used to triangulate funnels.  Therefore,
-the total number of edges used by triangles in $\Delta'$, and hence
-the number of triangles in $\Delta'$,
-is $O(n)$.
+Finally, to see that $\Delta'$ contains $O(n)$
+triangles, we count the different types of edges used in the
+triangulation $\Delta'$.  Some of these edges are edges of $P$, of
+which there are at most $n$.  Some of these edges are edges of
+geodesic triangles,
+which always connect two vertices of $P$ and do not cross each other,
+so there are at most $n-2$ of these.  The remaining edges are used to
+triangulate the interiors of pseudotriangles.  A pseudotriangle that has $k$ vertices
+is triangulated using $3 + 2(k-3)$ edges.  Since the total number of
+vertices in all pseudotriangles is at most $2n$, this means that there are at
+most $6n$ edges used to triangulate pseudotriangles.  Therefore, the total
+number of edges used by triangles in $\Delta'$, and hence the number
+of triangles in $\Delta'$, is $O(n)$.  
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Point Location in Simple Planar Subdivisions}
 \seclabel{subdivisions}
 
-Next, we consider the problem of point location in simple
+Next we consider the problem of point location in simple
 subdivisions.  The following theorem of Arya~\etal~\cite{ammw07}
 shows that a low entropy triangulation can be used to make a good
 point location structure.
@@ -920,7 +939,7 @@ structure.
 Let $T^*$ be any linear decision tree for a classification problem
 $\mathcal{P}$ over $\R^2$.  Then there exists a linear decision tree
 $T'$ for $\mathcal{P}$, such that, for each leaf $\ell$ of $T'$,
-$r(\ell)$ is a triangle and $T'$ satisifies
+$\closure(r(\ell))$ is a triangle and $T'$ satisifies
 \[
     \mu_D(T') \le \mu_D(T^*) + O(\log\mu_D(T^*))
 \]
@@ -1002,7 +1021,7 @@ $T'$, each of whose leaves have regions that are triangles and such
 that
 \begin{equation}
      \mu_D(T') \le \mu_D(T^*) + O(\log \mu_D(T^*)) \enspace .
-       \eqlabel{t-triangle}
+       \eqlabelx{t-triangle}
 \end{equation}
 Observe that each leaf of $T'$ corresponds to a triangle in $\R^2$
 that is completely contained in one of the faces of $G$.  Let
@@ -1010,22 +1029,23 @@ $\Delta'$ denote this set of triangles and let $\Delta'_i$ denote the
 subset of $\Delta'$ contained in $F_i$.
 Consider the entropy $H(\Delta')$ of the distribution induced by the
 leaves of $T'$:
-\begin{eqnarray*}
+\begin{equation}\eqlabelx{h-delta-prime}
+ \begin{split}
    H(\Delta') 
-     & = & \sum_{i=1}^m \sum_{t\in \Delta'_i}\Pr(t)\log(1/\Pr(t)) \\
-     & = & \sum_{i=1}^m \Pr(F_i)\sum_{t\in \Delta'_i}
+     & =  \sum_{i=1}^m \sum_{t\in \Delta'_i}\Pr(t)\log(1/\Pr(t)) \\
+     & =  \sum_{i=1}^m \Pr(F_i)\sum_{t\in \Delta'_i}
             \Pr(t|F_i)\log(1/\Pr(t)) \\
-     & = & \sum_{i=1}^m \Pr(F_i)\sum_{t\in \Delta'_i}
+     & =  \sum_{i=1}^m \Pr(F_i)\sum_{t\in \Delta'_i}
             \Pr(t|F_i)
             \left(
               \log(1/\Pr(t|F_i))-\log(\Pr(F_i))
             \right) \\
-     & = & \sum_{i=1}^m \Pr(F_i)\sum_{t\in \Delta'_i}
+     & =  \sum_{i=1}^m \Pr(F_i)\sum_{t\in \Delta'_i}
             \Pr(t|F_i)\log(1/\Pr(t|F_i)) 
              + \sum_{i=1}^m \Pr(F_i) \log(1/\Pr(F_i)) \\
-     & = & \sum_{i=1}^m \Pr(F_i) H(\Delta'_i) + H(F) \enspace .
-      \eqlabel{h-delta-prime}
-\end{eqnarray*}
+     & =  \sum_{i=1}^m \Pr(F_i) H(\Delta'_i) + H(F) \enspace .
+ \end{split}
+\end{equation}
 Similarly, the entropy of $\Delta$ is given by 
 \begin{eqnarray*}
    H(\Delta) 
@@ -1034,59 +1054,61 @@ Similarly, the entropy of $\Delta$ is given by
             \Pr(t|F_i)\log(1/\Pr(t|F_i)) 
           + H(F) \\
      & = & \sum_{i=1}^m \Pr(F_i) H(\Delta_i) + H(F) \enspace .
-      \eqlabel{h-delta}
+      \eqlabelx{h-delta}
 \end{eqnarray*}
 By \thmref{min-H-triangulation}, the triangles in $\Delta_i$ form a
 nearly-minimum entropy triangulation of $F_i$.  More specifically, 
 \begin{equation}
    H(\Delta_i) \le H(\Delta'_i) + O(H(\Delta'_i)^{2/3}+1)  \enspace .
-    \eqlabel{h-delta-i}
+    \eqlabelx{h-delta-i}
 \end{equation}
 Putting this all together, we have
 \[
-\begin{array}{rclr}
+ \begin{aligned}
   H(\Delta) 
-    &  =  & \sum_{i=1}^m\Pr(F_i) H(\Delta_i) + H(F) \\ 
-    & \le & \sum_{i=1}^m\Pr(F_i) (H(\Delta'_i) 
+    &  =  \sum_{i=1}^m\Pr(F_i) H(\Delta_i) + H(F) 
+             \\ 
+    & \le \sum_{i=1}^m\Pr(F_i) (H(\Delta'_i) 
              + O(H(\Delta'_i)^{2/3}+1)) + H(F) 
-             & \mbox{\hfill{(by \eqref{h-delta-i})}} \\ 
-    &  =  & H(\Delta') + \sum_{i=1}^m\Pr(F_i) O(H(\Delta'_i)^{2/3}+1)
-             & \mbox{ (by \eqref{h-delta-prime})} \\ 
-    &  =  & H(\Delta') + 
+             && \text{\hfill{(by \eqrefx{h-delta-i})}} \\ 
+    &  =  H(\Delta') + \sum_{i=1}^m\Pr(F_i) O(H(\Delta'_i)^{2/3}+1)
+             && \text{(by \eqrefx{h-delta-prime})} \\ 
+    &  =  H(\Delta') + 
              \left(
                \sum_{i=1}^m\Pr(F_i) O(H(\Delta'_i)
              \right)^{2/3} + O(1)
-             & \mbox{ (by Jensen's Inequality)} \\
-    &  =  & H(\Delta') + 
+             && \text{(by Jensen's Inequality)} \\
+    &  =  H(\Delta') + 
              \left(
                O(1) \cdot
                 \sum_{i=1}^m\Pr(F_i)
                  \sum_{t'\in\Delta'_i}
                   \Pr(t'|F_i)\log(1/\Pr(t'|F_i))
              \right)^{2/3} + O(1)
-             &  \\
-    &  =  & H(\Delta') + 
+              \\
+    &  =  H(\Delta') + 
              \left(
                O(1) \cdot
                 \sum_{i=1}^m
                  \sum_{t'\in\Delta'_i}
                   \Pr(t')\log(\Pr(F_i)/\Pr(t'))
              \right)^{2/3} + O(1)
-             &  \\
-    & \le & H(\Delta') + 
+              \\
+    & \le H(\Delta') + 
              \left(
                O(1) \cdot
                 \sum_{i=1}^m
                  \sum_{t'\in\Delta'_i}
                   \Pr(t')\log(1/\Pr(t'))
              \right)^{2/3} + O(1)
-             &  \\
-    &  =  & H(\Delta') + O(H(\Delta')^{2/3}+1) \\
-    & \le & \mu_D(T') + O(\mu_D(T')^{2/3}+1) 
-          & by \thmref{shannon} \\
-    & \le & \mu_D(T^*) + O(\mu_D(T^*)^{2/3}+1) 
-             & \mbox{ (by \eqref{t-triangle})}
-\end{array}
+             \\
+    &  =  H(\Delta') + O(H(\Delta')^{2/3}+1) 
+             \\
+    & \le \mu_D(T') + O(\mu_D(T')^{2/3}+1) 
+             && \text{(by \thmref{shannon})} \\
+    & \le \mu_D(T^*) + O(\mu_D(T^*)^{2/3}+1) 
+             && \text{(by \eqrefx{t-triangle})} 
+ \end{aligned}
 \]
 Finally, since we preprocess $\Delta$ using \thmref{ammw07}, the
 expected number of comparisons required to answer a query is

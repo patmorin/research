@@ -14,7 +14,7 @@
 
 \newcommand{\ntypes}{C(2c)}
 \newcommand{\timepertype}{(3c)^c n}
-\newcommand{\runtime}{n\log n + {4c\choose 2c}(3c)^cn}
+\newcommand{\runtime}{n\log n + {4c\choose 2c}(3c)^{c+1}n}
 \newcommand{\Oruntime}{O\left(\runtime\right)}
 
 % This is to override elsart paragraph numbering
@@ -200,9 +200,9 @@ $c$.
 
 For fixed values of $k$, the results described above give $O(n\log n)$
 or $O(n^2\log n)$ time algorithms for finding the $k$ point subset of
-$S$ that minimize $f$.  However, when $k$ is close to $n$, all but one
-of the the algorithms cited above require $\Omega(n^3)$ time.  The one
-except to this is the algorithm of Kedem and Segal \cite{sk98} which
+$S$ that minimizes $f$.  However, when $k$ is close to $n$, all but one
+of the algorithms cited above require $\Omega(n^3)$ time.  The one
+exception to this is the algorithm of Kedem and Segal \cite{sk98}, which
 runs in $O(n + k(n-k)^2) = O(n + (n-c)c^2)$ and is therefore fast when
 $k$ is very large.
 
@@ -211,18 +211,18 @@ For Problem~1 (diameter) we obtain an $O(n\log n + cn + c^6\log^2 c)$
 time algorithm.  For problem~2 (minimum area/perimeter bounding
 rectangle) we obtain an $O(n + c^3)$ time algorithm.  For Problem~3
 (minimum area/perimeter convex hull) we obtain an $\Oruntime$ time
-algorithm.  We also show, by giving $\Omega(n\log n)$ lower bounds for
-both Problems~1 and 3 that, for constant values of $c$, our algorithms
-are optimal.
+algorithm.  We also give $\Omega(n\log n)$ lower bounds for Problems~1
+and 3, thereby showing that, for constant values of $c$, our
+algorithms are optimal.
 
 We obtain many of our results by borrowing techniques from the theory
 of fixed-parameter tractability (FPT) that are typically applied to
-NP-hard problems \cite{df99}.  In particular, our solution to Problems
+NP-hard problems \cite{df99}.  In particular, our solutions to Problems
 1 and 2 use the technique of \emph{kernelization} by using a fast
 algorithm to find a problem kernel of size $c^{O(1)}$ whose solution
 gives a solution to the original problem.  Our solution to Problem 3
 can also be viewed as a form of the bounded search tree method
-\cite{df99} although its implementation differs considerably from that
+\cite{df99}, although its implementation differs considerably from that
 used in typical FPT algorithms.
 
 The remainder of the paper is organized as follows: \secref{diameter}
@@ -274,12 +274,12 @@ optimal set $S'$ for $S$ is also an optimal set for $\tilde{S}$.
 Let $A$ denote an $n\times n$ symmetric matrix of non-negative real
 numbers whose diagonal entries are all equal to 0 and whose
 off-diagonal entries are all unique.  An example of such a matrix,
-that is used for diameter-based outlier removal, is the matrix in
+which is used for diameter-based outlier removal, is the matrix in
 which $A_{i,j}$ denotes the distance from point $i$ to point $j$ in an
 $n$ point set in which all interpoint distances are unique.
 
-Let $A_{i,\star}$, respectively,
-$A_{\star,i}$ denote the $i$th row, respectively, column, of $A$.  For
+Let $A_{i,\star}$ and
+$A_{\star,i}$ denote the $i$th row and column of $A$, respectively.  For
 a set $I$ of indices we denote by $A\setminus I$ the submatrix of $A$
 obtained by deleting $A_{i,\star}$ and $A_{\star,i}$ for every $i\in
 I$ from $A$.  We consider the problem of selecting a set $T$ of $c$
@@ -398,7 +398,7 @@ $A\setminus T_c$).
 Let $\tilde{A}$ be the submatrix of $A$ induced by the row and column
 indices in the set $\tilde{T}$ produced by Algorithm \textsc{DeepSet}.
 Then the value of the optimal solution for $\tilde{A}$ is equal to the
-the value of the optimal solution for $A$.
+value of the optimal solution for $A$.
 \end{lem}
 
 We can use the algorithm $\textsc{DeepSet}$ to reduce a problem of
@@ -407,7 +407,7 @@ $n\times n$ \emph{distance matrix} $A$ where $A_{i,j}$ is the distance
 from the $i$th point in $S$ to the $j$th point in $S$.  Note that $A$
 is a symmetric matrix of non-negative real numbers with zero values
 along the diagonal.  To ensure that $A$ also has the second property
-we perform comparisons between the element of $A$ lexicographically
+we perform comparisons between the elements of $A$ lexicographically
 using the key $(A_{i,j}, i, j)$ for the element $A_{i,j}$.  In this
 way we can run algorithm $\textsc{DeepSet}$ on $A$ to obtain a
 superset of the indices of points that need to be removed to minimize
@@ -580,22 +580,22 @@ $p_{1,k},\ldots,p_{1,\ell}$ of $S_1$ appears on the boundary of
 $\ch(S\setminus\{p_{0,j}\})$.  When this happens we say that
 $p_{1,k},\ldots,p_{1,\ell}$ is \emph{exposed}.  This exposed sequence
 can be obtained from the preprocessing described above by using two
-tangents $p_{1,k}$ and $p_{1,\ell}$ joining $p_{0,j-1}$ and
-$p_{0,j+1}$ to $S_1$.  Finding the two tangent points takes $O(1)$
-time and traversing the sequence takes $O(t_j)$ time, where
-$t_j=\ell-k+1$.
+tangents joining $p_{0,j-1}$ and $p_{0,j+1}$ to $p_{1,k}$ and
+$p_{1,\ell}$, respectively.  Finding the two tangent points $p_{1,k}$
+and $p_{1,\ell}$ takes $O(1)$ time and traversing the sequence takes
+$O(t_j)$ time, where $t_j=\ell-k+1$.
 
 \begin{figure}
 \begin{center}\includegraphics{point-removal}\end{center}
 \caption{Removing a point $p_{0,j}$ from $S_0$ exposes a chain
-$p_{1,\ell},\ldots,p_{1,k}$ of $S_1$.}
+$p_{1,k},\ldots,p_{1,\ell}$ of $S_1$.}
 \figlabel{point-removal}
 \end{figure}
 
 Once we have removed a point $p_{0,j}$ from $S_0$, if we know the area
-(or perimeter) of $\ch(S)$ we can compute the area (or perimeter) of
-$\ch(S\setminus\{p_{0,j}\})$ in $O(t_j)$ time.  We do this by
-computing the area of the triangle $\triangle
+(or perimeter) of $\ch(S)$, then we can compute the area (or
+perimeter) of $\ch(S\setminus\{p_{0,j}\})$ in $O(t_j)$ time.  We do
+this by computing the area of the triangle $\triangle
 p_{0,j-1}p_{0,j}p_{0,j+1}$ and subtracting from it the area of
 $\ch(\{p_{0,j-1},p_{0,j+1}\}\cup\{p_{1,k},\ldots,p_{1,\ell}\})$.  This
 gives us the difference in area (perimeter) between $\ch(S)$ and
@@ -640,7 +640,7 @@ as claimed.
 \subsubsection{Removing 2 Outliers}
 
 Next we consider the case $c=2$.  In this case, the optimal solution
-$S'$ has one of three following forms:
+$S'$ has one of the three following forms:
 
 \begin{enumerate}
 
@@ -683,17 +683,17 @@ running time of this algorithm is therefore bounded by
 as required.
 
 Finally, we consider solutions of Type~2.  To find these we compute,
-for each $p_{0,j}\in S_0$ the difference $x_j$ between the area of
+for each $p_{0,j}\in S_0$, the difference $x_j$ between the area of
 $\ch(S\setminus\{p_{0,j}\})$ and $\ch(S)$ using the technique
 described for the case $c=1$.  In this way, we reduce the problem to
 that of finding two indices $0\le j_1,j_2< |S_0|$ with $j_2\ge j_1+2$
 such that $x_{j_1}+x_{j_2}$ is maximum.  This can be accomplished by
 computing the quantity
 \[
-     D_j = \max\{x_{j_1}+x_{j_2} :
-       \mbox{$0\le j_1,j_2\le j$ and $j_2 \ge j_1+2$}\} \enspace ,
+     D_{|S_0|} = \max\{x_{j_1}+x_{j_2} :
+       \mbox{$0\le j_1,j_2\le |S_0|$ and $j_2 \ge j_1+2$}\} \enspace ,
 \]
-that can be computed in $O(|S_0|)$ time using the dynamic-programming 
+which can be computed in $O(|S_0|)$ time using the dynamic-programming 
 recurrence
 \[
     D_j = \max\{D_{j-1}, x_{j} + \max\{x_{0},\ldots,x_{j-2}\}\}
@@ -701,10 +701,10 @@ recurrence
 \]
 
 Since the best solution of each of the three types can be found in
-$O(n\log n)$ time we can find the overall best solution in $O(n\log
+$O(n\log n)$ time, we can find the overall best solution in $O(n\log
 n)$ time by keeping the best of the three.
 
-\subsubsection{Removing $\mathbf{c}$ Outliers}
+\subsubsection{Removing $c$ Outliers}
 
 The solution for the case $c=2$ illustrates all of the ideas used in 
 our algorithm.  We begin by enumerating the combinatorial types of
@@ -753,7 +753,7 @@ by the labels of the rightmost path in the subtree of $T$ rooted at
 the left child of $N_0^j$.
 
 This process is repeated recursively: Let
-$S_{<i}=\bigcup_{j=0}^{i-1}S_i$ and let $S_{<i}'=S_{<i}\cap S'$.  For
+$S_{<i}=\bigcup_{j=0}^{i-1}S_j$ and let $S_{<i}'=S_{<i}\cap S'$.  For
 each consecutive group $G_i^j$ of nodes that are removed from $S_i$,
 let $p_{i+1,k}, \ldots, p_{i+1,\ell}$ denote the vertices on $S_{i+1}$
 that appear on the boundary of $CH(S \setminus (S_{<i}'\cup G_i^j))$.
@@ -819,13 +819,13 @@ whose solution tree is $T$.
 
 The algorithm we describe is recursive and operates on a subchain
 $p_{i,j},\ldots,p_{i,k}$ of $S_i$ along with a solution (sub)tree $T$.  The
-algorithm requires that some subset of $\bigcup_{j=0}^{i-1}S_j$ has
+algorithm requires that some subset of $S_{<i}$ has
 already been removed from $S$ so that $p_{i,j},\ldots,p_{i,k}$ are on
 the boundary of the convex hull of the current point set.  The
 algorithm finds an optimal solution of type $T$ such that the only
 points removed from the convex hull of the current point set are in
-$p_{i,j},\ldots,p_{i,k}$.  The initialization of this algorithm takes
-special care and will be described later.
+$p_{i,j},\ldots,p_{i,k}$.  The initialization of this algorithm
+requires special care and will be described later.
 
 Let $d$ denote the number of nodes on the rightmost path of $T$.  The
 algorithm accomplishes its task by recursively solving $O(d(k-j+1))$
@@ -862,7 +862,7 @@ $\textsc{FindOptimalOfType}(T,i,j,k)$
            $S_{i,\ell},\ldots,S_{i,\ell+c_g-1}$} 
     \STATE{$X_{g,\ell-j+1}\gets
             s+\textsc{FindOptimalOfType}(\lft(N_g),i+1,j',k')$}
-    \STATE{reinsert $S_{i,\ell},\ldots,S_{i,\ell+c_d-1}$ into $S_{i}$}
+    \STATE{reinsert $S_{i,\ell},\ldots,S_{i,\ell+c_g-1}$ into $S_{i}$}
   \ENDFOR
 \ENDFOR
 \RETURN{$\textsc{CombineSolutions}(X,d,k-j+1,c_1,\ldots,c_d)$}
@@ -885,13 +885,13 @@ where $g_0$ is the sum of labels of nodes on the rightmost path of
 $T$. 
 
 More generally, let $g_i$ denote the sum of labels of all nodes $N$ of
-$T$ for which the path from the root of $T$ to $N$ make exactly $i$
+$T$ for which the path from the root of $T$ to $N$ makes exactly $i$
 left turns. (These nodes correspond to groups that are deleted from
 $S_i$).  Consider some point $p_{i,j}\in S_i$, for $i\ge 1$.  By
 Carath\'eodory's Theorem \cite{eckhoff93}, each such point is contained
 in some triangle $\Delta_{i,j}=\triangle
 p_{i-1,\ell_1},p_{i-1,\ell_2},p_{i-1,\ell_3}$. If $p_{i,j}$ is deleted
-by \textsc{FindOptimalOfType} then it is on the boundary of the convex
+by \textsc{FindOptimalOfType}, then it is on the boundary of the convex
 hull of the current point set.  However, this implies that at least
 one of the three vertices of $\Delta_{i,j}$ must be deleted from the
 current point set.  Thus, if we define $m_i$ as the maximum number of
@@ -922,13 +922,13 @@ we make $c+1$ calls to \textsc{FindOptimalOfType} using as inputs the
 chains $p_{0,t},\ldots,p_{0,|S_0|-2+t}$, for $t=0,\ldots,c$.  Note
 that each such call fixes one of $p_{0,0},\ldots,p_{0,c}$.  Since the
 optimal solution must leave one of these $c+1$ points we are
-guaranteed that one of these calls will find the optimal solution.
+guaranteed that at least one of these calls will find the optimal solution.
 
 Putting all this together we obtain:
 
 \begin{lem}\lemlabel{recursion}
 The algorithm \textsc{FindOptimalOfType} finds the optimal solution
-whose solution tree is $T$ in $O((3c)^c n)$ time.
+whose solution tree is $T$ in $O((3c)^{c+1} n)$ time.
 \end{lem}
 
 \subsubsection{Combining the Solutions}

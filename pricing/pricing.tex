@@ -1,0 +1,153 @@
+\documentclass[lotsofwhite]{patmorin}
+\usepackage{amsmath,graphicx}
+
+\input{pat}
+
+\title{Algorithms for Price/Quality Tradeoffs}
+\author{Joachim Gudmundsson%
+	\and Pat Morin%
+	\and Michiel Smid}
+
+\newcommand{\cost}{\operatorname{cost}}
+\newcommand{\ppu}{\operatorname{ppu}}
+\newcommand{\val}{\operatorname{profit}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The abstract should go here.
+\end{abstract}
+
+\section{Introduction}
+
+This paper considers a marketing problem in which a product
+$P=(q_1,\ldots,q_d,p)$ is defined by a number of real-valued
+\emph{qualities} $q_1,\ldots,q_d$ and its \emph{price} $p$.  The
+\emph{market} for a product is a collection of customers
+$C=\{C_1,\ldots,C_n\}$, where $C_i=(q_{i,1},\ldots,q_{i,d},p_i)$.  A
+customer will purchase the least expensive product that meets all
+their minimum quality requirements and whose price is below their
+maximum price range.  That is, the customer $C_i$ will \emph{consider}
+the product $P$ if $q_j \ge q_{i,j}$ for all $j\in\{1,\ldots,d\}$ and
+$p \le p_i$.  The customer $C_i$ will \emph{purchase} the product if
+it has minimum price among all products $C_i$ considers.
+
+We consider markets that are \emph{saturated}.  That is, for every
+customer there is an existing product that satisfies their
+requirements. From the point of view of a manufacturer introducing one
+or more new products, this means that all customers are \emph{pareto
+optimal}, i.e., there are no two customers $C_i$ and $C_j$ such that
+$q_{i,k} > q_{j,k}$ for all $k\in\{1,\ldots,d\}$ and $p_i < p_j$.  In
+a saturated market, there is no need to consider existing products, as
+these can be encoded into the customers' prices.
+
+As an example of such a market, consider a market for computers in
+which an example customer may be looking for a computer with a minimum
+of 8 GB of RAM, a PC Benchmark(?) score of at least 3000, and 3D
+Mark video score of at least 2000, and is willing to pay at most
+\$1500.  In addition, there is already a computer on the market which
+meets these requirements and retails for \$1200.  Thus, this customer
+would be described the vector $(8,3000,2000,1200)$.  If a manufacturer
+introduces a new product $(8,3500,2000,1199)$ then this customer would
+buy the product.
+
+With appropriate scaling, one can assume that the cost, $\cost(P)$, of
+manufacturing $P$ is equal to the sum of its qualities
+\[
+   \cost(P) = \sum_{i=1}^d q_i \enspace .
+\]
+The \emph{profit per unit sold} of $P$ is therefore
+\[
+   \ppu(P) = p-\cost(P) \enspace .
+\]
+In this paper we consider algorithms that a manufacturer can use when
+choosing new products to introduce into an existing saturated market.
+The goal of a manufacturer is to introduce 1 or more new products into
+the market in order to maximize their profit.  More precisely, given
+an integer $k$ and customers $C_1,\ldots,C_n$, the goal is to find $k$
+products $P_1,\ldots,P_k$ such that 
+\[
+  \val(P_1,\ldots,P_k) = \sum_{j=1}^k \ppu(P_j)
+    \times |\{i:\mbox{$C_i$ purchases $P_j$}\}|
+\]
+is maximized.  Note that, when computing the quantity $|\{i:\mbox{$C_i$
+purchases $P_j$}\}|$ one must consider all products $P_1,\ldots,P_k$
+since a product $P_\ell$, $\ell\neq j$, may be preferable to a
+customer who would otherwise buy $P_j$ if $P_\ell$ were unavailable.
+
+\section{An $O(n\log n)$ algorithm for the case $k=d=1$}
+
+In this section, we consider the simplest case, when the manufacturer
+wishes to introduce one new product in which the quality of a product
+has only one dimension.  Examples of such markets include, for
+example, suppliers to the construction industry in which items (steel
+I-beams, finished lumber, logs) must have a certain minimum length to
+be used for a particular application.  An overly long piece can be cut
+down to size, but gluing two short pieces together is not an option.
+
+
+Throughout this section, since $d=1$ and $k=1$, we will use the
+shorthand $q_i$ for $q_{i,1}$ and $P=(q,p)$ for $P_1$.
+Our algorithm is an implementation of the \emph{plane-sweep} paradigm
+\cite{bsXX}.  The correctness of the algorithm relies on the following
+critical lemma, which is illustrated in \figref{lemma-monotone}:
+\begin{figure}
+  \begin{center}
+    \includegraphics{lemma-monotone}
+  \end{center}
+  \caption{$\val(q,p) \le \val(q',p)$ implies that $\val(q,p') \le
+           \val(q',p')$ for all $p' \le p$.}
+  \figlabel{lemma-monotone}
+\end{figure}
+
+\begin{lem}\lemlabel{monotone}
+Let $q' \le q$ and let $p$ be such that $0 < \val(q,p) \le \val(q',p)$.
+Then, for any $p' \le p$, $\val(q',p) \le \val(q',p')$
+\end{lem}
+
+\begin{proof}
+By definition, $\val(q,p) = a(p-q)$ and $\val(q',p) = a'(p-q')$, where
+$a$ and $a'$ are the number of customers who would purchase $(q,p)$
+and $(q',p)$, respectively.
+
+These customers are all taken from the set $\{C_i: p_i \ge p\}$.  Now,
+consider the customers in the set $C'=\{C_i: p' \le p_i < p\}$.  By
+the assumption that customers are pareto optimal, any customer $C_i$
+in $C'$ has $q_i \le q'$, so they will purchase either $(p',q')$ or
+$(p',q)$ if it is offered.  Therefore, 
+\[
+  \begin{aligned}
+    \val(q',p')
+      &  =   (a'+|C'|)(p'-q') \\
+      &  =   a'(p'-q') + |C'|(p'-q') \\
+      & \ge  a'(p'-q') + |C'|(p'-q) 
+        && \mbox{since $q > q'$} \\
+      &  =   a'(p-q') + a'(p'-p) + |C'|(p'-q) \\
+      & \ge  a'(p-q') + a(p'-p) + |C'|(p'-q) 
+        && \mbox{since $a \ge a'$ and $(p'-p) < 0$} \\
+      & \ge  a(p-q) + a(p'-p) + |C'|(p'-q) 
+        && \mbox{by assumption} \\
+      &  =  a(p'-q) + |C'|(p'-q) \\
+      &  =  \val(q,p') \enspace , \\
+  \end{aligned}
+\]
+as required.
+\end{proof}
+
+\Lemref{monotone} allows us to apply the plane sweep paradigm by
+sweeping by decreasing price.  It tells us that a product $(q',p)$
+that gives better profit than the higher-quality product $(q,p)$ at
+the current price $p$, then it will always give a better profit for
+the remainder of the sweep.  In particular, there will never be a
+reason to offer a product with quality $q$ for the remainder of the
+algorithm's execution.
+
+At any point in the algorithm, there is a current price $p$, which
+starts at $p=\infty$ and decreases throughout the execution of the
+algorithm.  At all times, the algorithm maintains a list of qualities
+$q_1^* > q_2^* > \cdots > q_m^*$ such that $\val(q_1^*,p) >
+\val(q_2^*,p) >\cdots>\val(q_m^*,p)$.
+
+
+\end{document}

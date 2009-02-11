@@ -3,7 +3,7 @@
 
 \input{pat}
 
-\title{Algorithms for Price/Quality Tradeoffs}
+\title{\MakeUppercase{Algorithms for Price/Quality Tradeoffs}}
 \author{Joachim Gudmundsson%
 	\and Pat Morin%
 	\and Michiel Smid}
@@ -14,10 +14,15 @@
 
 \begin{document}
 \maketitle
-
 \begin{abstract}
 The abstract should go here.
 \end{abstract}
+
+\newpage
+
+\tableofcontents
+
+\newpage 
 
 \section{Introduction}
 
@@ -86,7 +91,14 @@ the $\textsc{ProductDesign}(d,k)$ problem is to find $k$ products $P_1,\ldots,P_
 \]
 is maximized.  
 
-\section{An $O(n\log n)$ algorithm for the case $k=d=1$}
+\section{The Single Product Case}
+
+In this section we consider cases of $\textsc{ProductDesign}(d,k)$
+where number, $k$, of new products to introduce is 1.  We begin by
+giving an $O(n\log n)$ algorithm and $\Omega(n\log n)$ lower bound for
+the case $d=1$.
+
+\subsection{An $O(n\log n)$ algorithm for $d=1$}
 
 In this section, we consider the simplest case, when the manufacturer
 wishes to introduce one new product in which the quality of a product
@@ -323,45 +335,14 @@ algorithms.
   \figlabel{lemma-lower-bound}
 \end{figure}
 
-
-\section{Approximations for $d=1$ with variable $k$}
-
-\begin{thm}
-There exists an $O((n\log_{1/(1-\epsilon)} n)^k)$ time algorithm that,
-given an instance of $\textsc{ProductDesign}(1,k)$ finds a solution
-$P_1,\ldots,P_k$ such that $\val(P_1,\ldots,P_k) \ge
-(1-\epsilon)\val(P_1^*,\ldots,P_k^*)$, where $P_1^*,\ldots,P_k^*$ is
-an optimal solution.
-\end{thm}
-
-
-\begin{thm}
-There exists an $O(kn\log n)$ time algorithm that,
-given an instance of $\textsc{ProductDesign}(1,k)$ finds a solution
-$P_1,\ldots,P_k$ such that $\val(P_1,\ldots,P_k) \ge
-H_n\val(P_1^*,\ldots,P_k^*)$, where $P_1^*,\ldots,P_k^*$ is
-an optimal solution.
-\end{thm}
-
-\section{The Complexity of $d=2$}
-
-\begin{thm}
-  $\textsc{ProductDesign}(d,k)$ is NP-hard for any $d\ge 2$.
-\end{thm}
-
-\begin{thm}
-  $\textsc{ProductDesign}(d,1)$ can be $(1-epsilon)$-approximated in
-  $O(n^d\log n)$ time for any $d\ge 1$.
-\end{thm}
-
-\subsection{An approximation algorithm for $d=2$, $k=1$}
+\subsection{A near-linear approximation algorithm for $d=2$}
 
 Let $r=\max\{\ppu(C_i) : i\in\{1,\ldots, n\}\}$ and observe that $r$
 is the maximum profit per unit that can be achieved in this market.
-Let $\ell = \lceil\log_{1/(1-\epsilon)} n\rceil$ and observe that
-$\ell = O(\epsilon^{-1}\log n)$, as can be seen by taking the limit
-$\lim_{\epsilon\rightarrow 0+} (\epsilon/\log(1/(1-\epsilon)))$ using one
-application of L'H\^opital's Rule. For each $i\in\{0,1,2,\ldots,\ell\}$,
+Let $\ell = \lceil\log_{1/(1-\epsilon)} n\rceil$ and observe that $\ell =
+O(\epsilon^{-1}\log n)$.\footnote{This can be seen by taking the limit
+$\lim_{\epsilon\rightarrow 0^+} (\epsilon/\log(1/(1-\epsilon)))$ using one
+application of L'H\^opital's Rule.} For each $i\in\{0,1,2,\ldots,\ell\}$,
 define the plane $H_i = \{ (p,q_1,q_2) : p-q_1-q_2 = r(1-\epsilon)^i \}$.
 The following lemma says that a search for an approximate solution can
 be restricted to be contained in one of the planes $H_i$.
@@ -415,16 +396,48 @@ the following result:
 \end{thm}
 
 \paragraph{Remark.}
+
 For $d>2$, the above technique reduces the problem to finding a point
-contained in the largest number of regular simplices in
-$d$ dimensions.  Aronov and Har-Peled might also say something about
-this, and so might Kaplan and Sharir.  At best, it will give an
-algorithm with a running time of $O(\epsilon^{-3}(n\log n)^{d/2})$.
+contained in the largest number of regular simplices in $d$
+dimensions.  I can't find anything Aronov and Har-Peled, Kaplan and
+Sharir, or Chan about this.  However, it should be possible to get a
+running time of $O(\epsilon^{-3}n(\log n)^{O(d)})$.  To do this, we
+would need an algorithm that compute the deepest point in a set of
+(isothetic) simplices in $O(n k^O(d))$ time where $k$ is the depth.
 
 \paragraph{Remark.} What is the complexity of finding the deepest
 point in a collection of equilateral triangles.  Is it 3-sum hard?
 Probably not, but worth checking into.  Aronov and Har-Peled's paper
 would be a good place to look.
+
+\section{Multiple Product Design}
+
+\subsection{Approximations for $d=1$ with variable $k$}
+
+\begin{thm}
+There exists an $O((n\log_{1/(1-\epsilon)} n)^k)$ time algorithm that,
+given an instance of $\textsc{ProductDesign}(1,k)$ finds a solution
+$P_1,\ldots,P_k$ such that $\val(P_1,\ldots,P_k) \ge
+(1-\epsilon)\val(P_1^*,\ldots,P_k^*)$, where $P_1^*,\ldots,P_k^*$ is
+an optimal solution.
+\end{thm}
+
+
+\begin{thm}
+There exists an $O(kn\log n)$ time algorithm that,
+given an instance of $\textsc{ProductDesign}(1,k)$ finds a solution
+$P_1,\ldots,P_k$ such that $\val(P_1,\ldots,P_k) \ge
+H_n\val(P_1^*,\ldots,P_k^*)$, where $P_1^*,\ldots,P_k^*$ is
+an optimal solution.
+\end{thm}
+
+\subsection{NP-hardness for $d=2$ with variable $k$}
+
+\begin{thm}
+  $\textsc{ProductDesign}(d,k)$ is NP-hard for any $d\ge 2$.
+\end{thm}
+
+
 
 
 \end{document}

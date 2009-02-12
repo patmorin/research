@@ -11,6 +11,7 @@
 \newcommand{\cost}{\operatorname{cost}}
 \newcommand{\ppu}{\operatorname{ppu}}
 \newcommand{\val}{\operatorname{profit}}
+\newcommand{\eps}{\epsilon}
 
 \begin{document}
 \maketitle
@@ -339,34 +340,34 @@ algorithms.
 
 Let $r=\max\{\ppu(C_i) : i\in\{1,\ldots, n\}\}$ and observe that $r$
 is the maximum profit per unit that can be achieved in this market.
-Let $\ell = \lceil\log_{1/(1-\epsilon)} n\rceil$ and observe that $\ell =
-O(\epsilon^{-1}\log n)$.\footnote{This can be seen by taking the limit
-$\lim_{\epsilon\rightarrow 0^+} (\epsilon/\log(1/(1-\epsilon)))$ using one
+Let $\ell = \lceil\log_{1/(1-\eps)} n\rceil$ and observe that $\ell =
+O(\eps^{-1}\log n)$.\footnote{This can be seen by taking the limit
+$\lim_{\eps\rightarrow 0^+} (\eps/\log(1/(1-\eps)))$ using one
 application of L'H\^opital's Rule.} For each $i\in\{0,1,2,\ldots,\ell\}$,
-define the plane $H_i = \{ (p,q_1,q_2) : p-q_1-q_2 = r(1-\epsilon)^i \}$.
+define the plane $H_i = \{ (p,q_1,q_2) : p-q_1-q_2 = r(1-\eps)^i \}$.
 The following lemma says that a search for an approximate solution can
 be restricted to be contained in one of the planes $H_i$.
 
 \begin{lem}\lemlabel{plane-approx}
   For any product $P^*=(p^*,q_1^*,q_2^*)$, there exists a product
   $P=(p,q_1,q_2)$ such that $P\in H_i$ for some $i\in\{0,\ldots,\ell\}$
-  and $\val(P) \ge (1-\epsilon)\val(P^*)$.
+  and $\val(P) \ge (1-\eps)\val(P^*)$.
 \end{lem}
 
 \begin{proof}
   There are two cases to consider.  If $\ppu(P^*) \le r/n$ then $\val(P^*)
   \le r$, in which case we set $P=C_i$ where $\ppu(C_i) = r$, so that
-  $P\in H_0$ and $\val(P) = r \ge \val(P^*)\ge (1-\epsilon)\val(P^*)$,
+  $P\in H_0$ and $\val(P) = r \ge \val(P^*)\ge (1-\eps)\val(P^*)$,
   as required.
 
   Otherwise, $r/n < \ppu(P^*) \le r$.  In this case, consider
-  the plane $H_i$ where $i = \lceil\log_{1/(1-\epsilon)}
+  the plane $H_i$ where $i = \lceil\log_{1/(1-\eps)}
   (r/\ppu(P^*))\rceil$.  Notice, that for any point $P\in H_i$, $\ppu(P)
-  \ge (1-\epsilon)\ppu(P^*)$.  More specifically, the orthogonal
+  \ge (1-\eps)\ppu(P^*)$.  More specifically, the orthogonal
   projection $P=(p,q_1,q_2)$ of $P^*$ onto $H_i$ is a product with $p\le
   p^*$, $q_1\ge q_1^*$, and $q_2\ge q_2^*$.  Therefore, any customer
   who would consider $P^*$ would also consider $P$, so $\val(P) \ge
-  (1-\epsilon)\val(P^*)$, as required.
+  (1-\eps)\val(P^*)$, as required.
 \end{proof}
 
 \lemref{plane-approx} implies that the problem of finding an
@@ -385,40 +386,115 @@ with the same orientation, so they form a collection
 \emph{pseudodisks} and we wish to find the deepest point in this
 collection of pseudodisks.  No algorithm with running time $o(n^2)$ is
 known for solving this problem exactly, but Aronov and Har-Peled have
-recently given a $(1-\epsilon)$-approximation algorithm for this
-problem that runs in time $O(\epsilon^{-2}n\log n)$.  By applying this
+recently given a $(1-\eps)$-approximation algorithm for this
+problem that runs in time $O(\eps^{-2}n\log n)$.  By applying this
 algorithm to each of $\Delta_i$ for $i\in\{1,\ldots,\ell\}$, we obtain
 the following result:
 
 \begin{thm}
-  $\textsc{ProductDesign}(2,1)$ can be $(1-\epsilon)$-approximated in
-  $O(\epsilon^{-3}n\log^2 n)$ time.
+  $\textsc{ProductDesign}(2,1)$ can be $(1-\eps)$-approximated in
+  $O(\eps^{-3}n\log^2 n)$ time.
 \end{thm}
 
-\paragraph{Remark.}
-
-For $d>2$, the above technique reduces the problem to finding a point
-contained in the largest number of regular simplices in $d$
-dimensions.  I can't find anything Aronov and Har-Peled, Kaplan and
-Sharir, or Chan about this.  However, it should be possible to get a
-running time of $O(\epsilon^{-3}n(\log n)^{O(d)})$.  To do this, we
-would need an algorithm that compute the deepest point in a set of
-(isothetic) simplices in $O(n k^O(d))$ time where $k$ is the depth.
-
 \paragraph{Remark.} What is the complexity of finding the deepest
-point in a collection of equilateral triangles.  Is it 3-sum hard?
-Probably not, but worth checking into.  Aronov and Har-Peled's paper
-would be a good place to look.
+point in a collection of homothets of a triangle?  Is it 3-sum hard?
+Probably not, but worth checking into.  If it is, then we can probably
+give an 3-sum lower bound for the case $d=2$.
+
+\subsection{A near-linear approximation algorithm small $d$}
+
+In this section we extend the algorithm from the previous section to work
+for any constant value of $d$.  The algorithm is more or less unchanged,
+except that the proof requires some new results on the combinatorics of
+arrangements of fat objects.
+
+As before, let $r=\max\{\ppu(C_i) : i\in\{1,\ldots, n\}\}$ and let $\ell =
+\lceil\log_{1/(1-\eps)} n\rceil$. For each $i\in\{0,1,2,\ldots,\ell\}$,
+define the hyperplane $H_i = \{ (p,q_1,\ldots,q_d) : p-\sum_{i=1}^d
+q_i =  r(1-\eps)^i \}$.  The following lemma has exactly the same proof
+as \lemref{plane-approx}.
+
+\begin{lem}\lemlabel{plane-approx-d}
+  For any product $P^*=(p^*,q_1^*,\ldots,q_d^*)$, there exists
+  a product $P=(p,q_1,\ldots,q_d)$ such that $P\in H_i$ for some
+  $i\in\{0,\ldots,\ell\}$ and $\val(P) \ge (1-\eps)\val(P^*)$.
+\end{lem}
+
+Again, consider the intersection of $H_i$ with each of the elements of $C$
+and observe that this yields a set
+$\Delta_i=\{\Delta_{i,1},\ldots,\Delta_{i,n}\}$ of regular simplices in
+$\R^d$, where $\Delta_{i,j}$ is the intersection of $H_i$ and $C_i$.  We
+require an algorithm to find a ($(1-\eps)$-approximation to) the point that
+is contained in the largest number of these simplices.  The machinery of
+Aranov and Har-Peled can be used to help solve this problem, but not before
+we prove some preliminary results, the first of which is a combinatorial
+geometry result.  An arrangement is \ldots A feature is \ldots A simplex is
+involved in a feature if \ldots
+
+\begin{lem}
+Let $\Delta$ be a set of $n$ homothets of a regular simplex in $\R^d$, for
+$d=O(1)$ and such that no point in $\R^d$ is contained in more than $k$
+elements of $\Delta$.  Then, the total complexity of the arrangement,
+$A(\Delta)$, of the simplices in $\Delta$ is $O(nk^{d-1})$.
+\end{lem}
+
+\begin{proof}
+We first consider the simpler case in which the elements of $\Delta$
+are translates (without scaling) of a regular simplex.  Suppose that
+the total complexity of $A(\Delta)$ is $m$.  Then, by the pigeonhole
+principle, there is some element $T$ in $\Delta$ that is involved
+in $m/n$ features of $A(\Delta)$.  Note that this implies that $T$
+intersects all the elements of a set $\Delta'\subseteq\Delta$ with
+$|\Delta'|=\Omega((m/n)^{1/(d-1)})$, since otherwise there are not enough
+elements in $\Delta'$ to generate $m/n$ features on the surface of
+$\Delta$.
+
+Observe that, since the elements of $\Delta'$ are all unit size and
+they all intersect $T$, that they are all contained in a ball of radius
+$O(1)$ centered at the center of $T$.  Furthermore, since each element
+of $\Delta'$ has volume $\Omega(1)$ this implies that some point must be
+contained in $\Omega((m/n)^{1/(d-1)})$ elements of $\Delta'$.  Thus, we
+obtain the inequality $k \ge \Omega((m/n)^{1/(d-1)})$, or, equivalently,
+$m \le O(nk^{d-1})$, as required.
+
+Now, for the case where the elements of $\Delta$ are homothets
+(translations and scalings) of a regular simplex, we proceed as follows.
+Assume, by way of contradiction, that $|A(\Delta)| > rn$ for some $r$ to be
+defined later.  Label the elements of $\Delta$ $T_1,\ldots,T_n$ in
+increasing order of size and consider the smallest element $T_i$ such that
+$T_i$ contributes at least $r$ features to $A(\{T_i,\ldots,T_n\})$.  Such a
+$T_i$ is guaranteed to exist, since otherwise $|A(\Delta)|\le rn$.
+
+Now, $T_i$ intersects all the elements in some set $\Delta'\subseteq
+\{T_{i+1},\ldots,T_n\}$ with $|\Delta'| = \Omega(r^{1/(d-1)})$.  Shrink each
+element $T'$ in $\Delta'$ so as to obtain an element $T''$ such that (a)~the
+size of $T''$ is equal to the size of $T$ and (b)~$T'' \subseteq T'$.  Call
+the resulting set of shrunken elements $\Delta''$.
+Condition~(a) and the packing argument above imply that there is a point
+$p\in\R^d$ that is contained in $\Omega(r^{1/(d-1)})$ elements of $\Delta''$.
+Condition~(b) implies that $p$ is contained in $\Omega(r^{1/(d-1)})$
+elements of $\Delta'$ and hence also $\Delta$.  Therefore, we conclude, as
+before that
+$r \le O(k^{d-1})$.  Thus, for a sufficiently large constant $c$, setting
+$r=ck^{d-1}$
+yields a contradiction to the assumption that $|A(C)| > rn$.  We conclude
+that $|A(C)| = O(nk^{d-1})$, as required.
+\end{proof}
+
+\lemref{plane-approx-d} reduces our problem to that of finding an
+point $p$ contained in the maximum number of simplices 
+
+
 
 \section{Multiple Product Design}
 
 \subsection{Approximations for $d=1$ with variable $k$}
 
 \begin{thm}
-There exists an $O((n\log_{1/(1-\epsilon)} n)^k)$ time algorithm that,
+There exists an $O((n\log_{1/(1-\eps)} n)^k)$ time algorithm that,
 given an instance of $\textsc{ProductDesign}(1,k)$ finds a solution
 $P_1,\ldots,P_k$ such that $\val(P_1,\ldots,P_k) \ge
-(1-\epsilon)\val(P_1^*,\ldots,P_k^*)$, where $P_1^*,\ldots,P_k^*$ is
+(1-\eps)\val(P_1^*,\ldots,P_k^*)$, where $P_1^*,\ldots,P_k^*$ is
 an optimal solution.
 \end{thm}
 

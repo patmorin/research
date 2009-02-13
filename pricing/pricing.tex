@@ -420,18 +420,18 @@ as \lemref{plane-approx}.
   $i\in\{0,\ldots,\ell\}$ and $\val(P) \ge (1-\eps)\val(P^*)$.
 \end{lem}
 
-Again, consider the intersection of $H_i$ with each of the elements of $C$
-and observe that this yields a set
+Again, consider the intersection of $H_i$ with each
+of the elements of $C$ and observe that this yields a set
 $\Delta_i=\{\Delta_{i,1},\ldots,\Delta_{i,n}\}$ of regular simplices in
-$\R^d$, where $\Delta_{i,j}$ is the intersection of $H_i$ and $C_i$.  We
-require an algorithm to find a ($(1-\eps)$-approximation to) the point that
-is contained in the largest number of these simplices.  The machinery of
-Aranov and Har-Peled can be used to help solve this problem, but not before
-we prove some preliminary results, the first of which is a combinatorial
-geometry result.  An arrangement is \ldots A feature is \ldots A simplex is
-involved in a feature if \ldots
+$\R^d$, where $\Delta_{i,j}$ is the intersection of $H_i$ and $C_i$.
+We require an algorithm to find a ($(1-\eps)$-approximation to) the
+point that is contained in the largest number of these simplices.
+The machinery of Aranov and Har-Peled can be used to help solve this
+problem, but not before we prove some preliminary results, the first of
+which is a combinatorial geometry result.  An arrangement is \ldots A
+feature is \ldots A simplex is involved in a feature if \ldots
 
-\begin{lem}
+\begin{lem}\lemlabel{arrangement}
 Let $\Delta$ be a set of $n$ homothets of a regular simplex in $\R^d$, for
 $d=O(1)$ and such that no point in $\R^d$ is contained in more than $k$
 elements of $\Delta$.  Then, the total complexity of the arrangement,
@@ -466,19 +466,86 @@ $T_i$ contributes at least $r$ features to $A(\{T_i,\ldots,T_n\})$.  Such a
 $T_i$ is guaranteed to exist, since otherwise $|A(\Delta)|\le rn$.
 
 Now, $T_i$ intersects all the elements in some set $\Delta'\subseteq
-\{T_{i+1},\ldots,T_n\}$ with $|\Delta'| = \Omega(r^{1/(d-1)})$.  Shrink each
-element $T'$ in $\Delta'$ so as to obtain an element $T''$ such that (a)~the
-size of $T''$ is equal to the size of $T$ and (b)~$T'' \subseteq T'$.  Call
-the resulting set of shrunken elements $\Delta''$.
-Condition~(a) and the packing argument above imply that there is a point
-$p\in\R^d$ that is contained in $\Omega(r^{1/(d-1)})$ elements of $\Delta''$.
-Condition~(b) implies that $p$ is contained in $\Omega(r^{1/(d-1)})$
-elements of $\Delta'$ and hence also $\Delta$.  Therefore, we conclude, as
-before that
-$r \le O(k^{d-1})$.  Thus, for a sufficiently large constant $c$, setting
-$r=ck^{d-1}$
-yields a contradiction to the assumption that $|A(C)| > rn$.  We conclude
-that $|A(C)| = O(nk^{d-1})$, as required.
+\{T_{i+1},\ldots,T_n\}$ with $|\Delta'| = \Omega(r^{1/(d-1)})$.
+Shrink each element $T'$ in $\Delta'$ so as to obtain an element
+$T''$ such that (a)~the size of $T''$ is equal to the size of $T$ and
+(b)~$T'' \subseteq T'$.  Call the resulting set of shrunken elements
+$\Delta''$.  Condition~(a) and the packing argument above imply that
+there is a point $p\in\R^d$ that is contained in $\Omega(r^{1/(d-1)})$
+elements of $\Delta''$.  Condition~(b) implies that $p$ is contained in
+$\Omega(r^{1/(d-1)})$ elements of $\Delta'$ and hence also $\Delta$.
+Therefore, we conclude, as before that $r \le O(k^{d-1})$.  Thus,
+for a sufficiently large constant $c$, setting $r=ck^{d-1}$ yields a
+contradiction to the assumption that $|A(C)| > rn$.  We conclude that
+$|A(C)| = O(nk^{d-1})$, as required.
+\end{proof}
+
+\paragraph{Remark.} The proof of \lemref{arrangement} makes almost no use
+of the assumption that the elements of $\Delta$ are regular simplices other
+than using the property that their volume is related to their diameter.
+Thus, a version of this lemma holds for collections \emph{fat} objects
+\cite{X}, a result which will probably be of independent interest.
+
+\paragraph{Remark.} \lemref{arrangement} is somewhat surprising, since the
+union of $n$ simplices in, for example, $\R^2$ can easily have size
+$\Omega(n^2)$.  This fact makes it impossible to apply the ``usual'' proof
+technique of Clarkson that relates the complexity of the first $k$ levels
+to that of the boundary of the union.
+
+\begin{lem}
+Let $\Delta$ be a set of $n$ homothets of the regular simplex in $\R^d$
+such that no point of $\R^d$ is contained in more than $k$ simplices of
+$\Delta$.  Then the arrangement $A(\Delta)$ of $\Delta$ can be computed
+in $O(n(k^{d-1}+(\log n)^{d+1}))$ time.
+\end{lem}
+
+\begin{proof}
+Computing the arrangement $A(\Delta)$ can be done in the following way.
+Sort the elements of $\Delta$ by decreasing size and construct the $A(C)$
+incrementally by inserting the elements one by one.  When inserting an
+element $T$, use a data structure (described below) to retrieve the
+elements of $\Delta$ that are larger than $T$ and that intersect $T$.
+There will be at most $O(k)$ such elements and their intersection with the
+surface of $T$ has size $O(k^{d-1})$ and can be computed in $O(k^{d-1})$
+time using $d+1$ applications of the standard algorithm for computing an
+arrangement of hyperplanes in $\R^{d-1}$.  Thus, ignoring the cost of
+finding the elements that intersect $T$, the overall running time of the
+algorithm is $O(nk^{d-1})$.
+
+All that remains is to describe a data structure for retrieving the
+elements that intersect a given simplex $T\in\Delta$.  In the following we
+describe a data structure that can be constructed in $O(n(\log n)^{d+1})$
+time and can answer queries in $O(x + (\log n)^{d+1})$ time, where $x$ is
+the size of the output.  Since this data structure is constructed once and
+queried $n$ times, with an output size of $O(k)$ for each query, this gives
+the stated running time.
+
+Since the elements of $\Delta$ are homothets, the each element of $\Delta$
+can be described concisely by the lexicographically smallest of its
+coordinates and one real number describing its size. In this way, each
+element of $\Delta$ can be represented as a point in $\R^{d+1}$ and thus
+$\Delta$ can be represented as a set of $n$ points
+$\Delta'\subseteq\R^{d+1}$.  
+
+Observe that, given a half space $h$ in $\R^d$, the set of elements of
+$\Delta$ intersected by $h$ is given by the set of points of $\Delta'$
+contained in some halfspace $h'=f(h)$ in $\R^{d+1}$.  Furthermore, the
+transformation $f$ preserves parallel halfspaces.  That is, if
+$h_1,h_2\subseteq{\R^d}$ are halfspaces that have the same inner normal
+then $f(h_1)$ and $f(h_2)$ also have the same inner normal.
+
+Now, observe that any simplex $T\in\Delta$ can be expressed as the
+intersection of closed halfspaces all of whose inner normals are taken from
+the set of $N=\{n_1,\ldots,n_{d+1}\}$ of inner normals of the facets of a
+regular simplex.  Thus, the data structure for storing $\Delta'$ is a $d+2$
+layer range tree \cite{bsXX} in which the $i$th layer, for
+$i\in\{1,\ldots,d+1\}$, stores its points ordered by their projection onto
+$f(n_i)$ and the $(d+2)$th layer stores its points ordered by their
+$(d+1)$st coordinate.   Thus, this range tree can return the set of all
+simplices in $\Delta$ that intersect $T$ (using the first $d+1$ layers) and
+that are larger than $T$ (using the $(d+2)$th layer). The size of this
+range tree is $O(n(\log n)^{d+1})$ and it can answer queries in time
+$O(x+n(\log n)^{d+1})$ where $x$ is the size of the query result.
 \end{proof}
 
 \lemref{plane-approx-d} reduces our problem to that of finding an
@@ -513,7 +580,10 @@ an optimal solution.
   $\textsc{ProductDesign}(d,k)$ is NP-hard for any $d\ge 2$.
 \end{thm}
 
+\section*{Acknowledgement}
 
+The authors would like to thank Timothy~Chan for helpful discussions
+on the subject of approximate depth.
 
 
 \end{document}

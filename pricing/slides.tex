@@ -1,0 +1,311 @@
+\documentclass{beamer}
+
+\mode<presentation>{
+\definecolor{cured}{rgb}{.8,0,.2}
+\usecolortheme[named=cured]{structure}
+%\usefonttheme{structurebold}
+\usetheme{split}
+}
+
+\usepackage{amsopn}
+
+\DeclareMathOperator{\val}{profit}
+\DeclareMathOperator{\average}{average}
+\DeclareMathOperator{\support}{support}
+\DeclareMathOperator{\boundary}{\partial}
+\newcommand{\eps}{\epsilon}
+
+\input{pat-slides}
+
+\title{Algorithms for Price/Quality Tradeoffs}
+\author{Joachim Gudmundsson
+	\and Pat Morin
+	\and Michiel Smid}
+\date{February 19, 2009 \\ NICTA Algorithms Seminar \\
+  \includegraphics[width=1in]{I-Beam} }
+
+\begin{document}
+
+\frame{\titlepage}
+
+%\section[Outline]{}
+%\frame{\tableofcontents}
+
+\section{Introduction}
+
+
+\frame
+{
+  \frametitle{Motivating Example - Construction Industry}
+  \begin{itemize}
+    \item Customer 1 wants to build small office building
+      \begin{itemize}
+        \item Needs 100 $\ge$10m steel I-beams
+        \item Can afford \$200 per beam
+      \end{itemize}
+    \item Customer 2 wants to build large office building
+      \begin{itemize}
+        \item Needs 100 $\ge$20m steel I-beams
+        \item Can afford \$500 per beam
+      \end{itemize}
+    \item Customer 3 wants to build bridge
+      \begin{itemize}
+        \item Needs 20 $\ge$50m steel I-beams
+        \item Can afford \$5000 per beam
+      \end{itemize}
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Price/Quality Tradeoffs}
+  \begin{itemize}
+    \item We have a market of customers $\{(p_i,q_i):i\in\{1,\ldots,n\}\}$
+    \begin{itemize}
+      \item Customer is willing to pay at most $p_i$
+      \item Customer wants quality at least $q_i$
+    \end{itemize}
+    \item We want to market a product $(p,q)$ that maximizes profit
+    \begin{itemize}
+      \item $q$ is also the cost to manufacture
+      \item We want to maximize 
+          $\val(p,q) = (p-q)\times(\mbox{\# units sold}$)
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Price/Quality Tradeoffs - Graphically}
+  \begin{center}
+     \only<1>{\includegraphics{s-graphical}}%
+     \only<2>{\includegraphics{s-graphical2}}%
+     \only<3>{\includegraphics{s-graphical3}}%
+     \only<4>{\includegraphics{s-graphical4}}
+  \end{center}
+}
+
+\frame
+{
+  \frametitle{Technical Condition}
+  \begin{itemize}
+    \item We assume all customers are \emph{Pareto optimal}
+    \begin{itemize}
+      \item There are no $i,j$ such that $p_i < p_j$ and $q_i > q_j$
+      \item Customer $i$ wants more for less
+    \end{itemize} 
+    \includegraphics{s-pareto}
+    \item Justified in \emph{saturated} markets
+  \end{itemize}
+}
+
+
+\frame
+{
+  \frametitle{A First Observation}
+  \begin{lem}
+    The optimal solution is of the form $(p_i, q_j)$ for some 
+       $i,j\in\{1,\ldots,n\}$
+  \end{lem}
+  \begin{center}\includegraphics[scale=0.8]{s-graphical}\end{center}
+  \begin{itemize}
+    \item<2> Gives easy $O(n^2)$ time algorithm
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Price Sweeping}
+  \begin{itemize}
+    \item Reduce the price from $\infty$ down to $-\infty$,
+     pausing at each $p_i$ \\
+    \item[] \includegraphics[scale=0.8]{s-graphical}
+    \item Need to keep track of the \emph{sweep line status}
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{A Useful Lemma}
+  \begin{lem}
+    $\color{blue}{\val(p,q')} \color{black}\ge \color{red}\val(p,q) 
+        \color{black}\Rightarrow \color{blue}{\val(p',q')} \color{black}\ge
+\color{red}\val(p',q)$
+  \end{lem}
+  \begin{center}
+    \only<1>{\includegraphics{s-lemma-monotone}}%
+    \only<2>{\includegraphics{s-lemma-monotone2}}
+  \end{center}
+}
+
+\frame
+{
+  \frametitle{The Sweep Line Status}
+  \begin{itemize}
+    \item For the current price $p$, the sweepline stores a list $L=\langle
+\ell_1,\ldots,\ell_k\rangle$
+    \begin{enumerate}
+      \item $\ell_1>\ell_2>\cdots>\ell_k$
+      \item $\val(p,\ell_1)>\val(p,\ell_2)>\cdots>\val(p,\ell_k)$
+    \end{enumerate}
+    \item When updating $L$, we need to ensure (1) and (2) are maintained
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{The Sweep Line Status}
+  \begin{itemize}
+    \item We must maintain
+    \begin{enumerate}
+      \item $\ell_1>\ell_2>\cdots>\ell_k$
+      \item $\val(p,\ell_1)>\val(p,\ell_2)>\cdots>\val(p,\ell_k)$
+    \end{enumerate}
+    \includegraphics{s-sweepline}
+    \item To maintain (1), we append $q_i$ to $L$
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{The Sweep Line Status}
+  \begin{itemize}
+    \item We have a list $L$ with
+    \begin{enumerate}
+      \item $\ell_1>\ell_2>\cdots>\ell_k$
+    \end{enumerate}
+    \item We want to delete elements from $L$ so that
+    \begin{enumerate} 
+      \item[2.] $\val(p,\ell_1)>\val(p,\ell_2)>\cdots>\val(p,\ell_k)$
+    \end{enumerate}
+    \item Consider the inequality $\val(p_{t'},\ell_i) > \val(p_{t'},\ell_{i+1})$
+      \[
+         (p_{t'}-\ell_i)(a_i+t'-t) \le (p_{t'}-\ell_{i+1})(a_{i+1}+t'-t)  \enspace , 
+      \]
+      where $t$ is the ``time'' at which $\ell_i$ and $\ell_{i+1}$ became
+adjacent in $L$
+    \item This is a linear inequality in $p_t$ and $t$
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Storing Linear Inequalities}
+  \begin{itemize}
+    \item We need a structure $D$ that 
+    \begin{itemize}
+      \item stores linear inequalities (over $p_t$ and $t$)
+      \item can insert and delete inequalities
+      \item Given a query $(x,y)$ return an inequality (if any) that is
+         violated when $p_t=x$ and $t=y$
+    \end{itemize}
+    \item Brodal and Jacob (2002) - $O(\log n)$ time per operation
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Summary of Algorithm}
+  \begin{itemize}
+    \item We sweep a price-line over $n$ points and maintain a list $L$
+    \item To update $L$ when sweeping over $(p_t,q_t)$
+    \begin{itemize}
+      \item Append $q_i$ to $L$ ($\ell_k = q_t$)
+      \item Insert the inequality $\val(\ell_{k-1}, p) > \val(\ell_{k},p)$
+            into $D$
+      \item While some inequality $I$ in $D$ is violated by $(p_t,t)$
+      \begin{itemize}
+        \item Delete $I$ from $D$
+        \item Delete the offending element $\ell_j$ from $L$
+        \item Insert the inequality $\val(\ell_{j-1}, p) >
+\val(\ell_{j+1},p)$ into $D$
+      \end{itemize}
+    \end{itemize}
+    \item<2-> The optimal solution will appear as $(\ell_1,p_t)$ at some time
+       $t\in\{1,\ldots,n\}$.
+    \item<3-> Runs in $O(n\log n)$ time
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Algorithm for 1-d}
+
+  \begin{thm}
+    There exists an $O(n\log n)$ time algorithm that, given a set of $n$ customers
+$\{(p_i,q_i) : i\in\{1,\ldots,n\}\}$, returns the point $(p^*,q^*)$ that
+maximizes $\val(p^*,q^*)$.
+  \end{thm}
+
+  \begin{thm}
+    Any algebraic decision tree algorithm that provides a $c$-approximation
+for $c<2$ requires $\Omega(n\log n)$ time.
+  \end{thm}
+}
+
+\frame
+{
+  \frametitle{An Approximation Algorithm}
+
+  \begin{itemize}
+    \item Consider the value $r=\max\{p_i-q_i: i\in\{1,\ldots,n\}\}$
+    \item Let $H_i = \{(p,q) : p-q = (1-\epsilon)^i r\}$ for
+$i=0,\ldots,\lceil\log_{1/(1-\epsilon)} n\rceil$
+    \item[] \includegraphics[scale=0.7]{s-gradation}
+    \item[]
+    \begin{lem}
+      For any point $(p^*,q^*)$, there exists some $i$ such that $(p,q)\in
+H_i$ and $\val(p,q) \ge (1-\epsilon)\val(p^*,q^*)$
+    \end{lem}
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{An Approximation Algorithm}
+
+  \begin{itemize}
+    \item Find the point on each $H_i$ contained in the
+largest number of intervals
+    \item[] \includegraphics[scale=0.7]{s-gradation}
+    \item Can be solved in $O(n\log n)$ time for each $H_i$
+    \item Gives an $O(n (\log n)^2)$ time $(1-\epsilon)$ approximation
+     algorithm
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Higher Dimensions}
+
+  \begin{itemize}
+    \item Each customer is modelled as a $(d+1)$-tuple
+$(p_i,q_{i,1},\ldots,q_{i,d})$
+    \item Customer $i$ will buy $(p,q_1,\ldots,q_d)$ if $p \le p_i$ and $q_j
+\ge q_{i,j}$ for each $j\in\{1,\ldots,d\}$
+    \item $H_i$ is now a hyperplane in $\R^{d+1}$
+    \item Should find the point in $H_i$ contained in the largest number of
+       simplices
+    \item Can be done (approximately) in $O(n(\log n)^{O(d)})$ time
+    \item[]
+     \begin{thm}
+       There exists an $O(\eps^{-(2d+1)}n(\log n)^d + n(\log n)^{d+1})$
+       time $(1-\epsilon)$-approximation algorithm
+     \end{thm}
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Conclusion}
+
+  \begin{itemize}
+    \item $O(n\log n)$ time exact algorithm for $d=1$
+    \item $O_{\epsilon,d}(n(\log n)^{O(d)})$ time $(1-\epsilon)$-approximation algorithm
+    \item Open Problem: What about the case where we want to introduce $k >
+1$ new products into the market?
+  \end{itemize}
+}
+
+\end{document}
+

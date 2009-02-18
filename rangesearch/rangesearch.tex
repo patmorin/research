@@ -1,5 +1,5 @@
 \documentclass[charterfonts]{patmorin}
-\usepackage{amsopn,amsfonts,graphicx}
+\usepackage{amsmath,amsopn,amsfonts,graphicx}
 
 \input{pat}
 
@@ -86,7 +86,8 @@ variants.  These structures are practical in the sense that they are
 easy to implement and use only $O(n)$ space.  Unfortunately, neither
 of these structures has a worst-case query time of $\log^{O(1)} n$.
 Thus, in terms of query time, $k$-d trees and quad-trees are nowhere
-near competitive with range trees.
+near competitive with range trees, at least with respect to asymptotic
+complexity.
 
 %Chazelle \cite{ae61} has proven lower bounds on the time-space
 %tradeoffs associated with orthogonal range searching in the semigroup
@@ -129,11 +130,11 @@ for answering range counting queries over $S$.  Moreover, the
 worst-case search time of biased range trees is $O(\log n)$, matching
 the worst-case performance of range trees.
 
-Note that we do not place any restrictions on the comparison tree
-$T^*$.  Biased range trees, while requiring only $O(n\log n)$ space,
-are competitive with any comparison-based data structure.  Thus, the
-memory requirement of biased range trees is the same as that of range
-trees but their expected query time can never be any worse.
+Note that we do not place any restrictions on the comparison tree $T^*$.
+Biased range trees, while requiring only $O(n\log n)$ space, are
+competitive with any comparison-based data structure.  Thus, the memory
+requirement of biased range trees is the same as that of range trees, but
+their expected query time can never be any worse.
  
 The remainder of the paper is organized as follows. In
 \secref{preliminaries} we present background material that is used in
@@ -227,7 +228,7 @@ The following theorem is a restatement of (half of) Shannon's
 Fundamental Theorem for a Noiseless Channel \cite[Theorem 9]{s48}.
 \begin{thm}\thmlabel{shannon}
 Let $\mathcal{P}:\mathcal{D}\mapsto \{0,\ldots,k-1\}$ be a classification
-problem and let $p\in \mathcal{D}$ be selected from a distibution $D$ such
+problem, and let $p\in \mathcal{D}$ be selected from a distibution $D$ such
 that $\Pr\{\mathcal{P}(p)= i\}=p_i$, for $0\le i< k$.  Then, any
 $d$-ary classification tree $T$ that solves $\mathcal{P}$ has
 \begin{equation}
@@ -261,7 +262,7 @@ By \thmref{shannon}, this implies that
 Unfortunately, this bound is still not strong enough and, in general,
 there is no decision tree $T$ that matches this lower bound.  To see
 this, consider \figref{arrangement}.b, when the query point $q$ is
-uniformly distributed among the $n+1$ shaded circles.  In this case,
+uniformly distributed among the $n+1$ shaded disks.  In this case,
 $q$ is always in the same face of $A$ so the lower bound given above
 is 0.  Nevertheless, it is not hard to see that the leaves of
 any decision tree $T$ for range searching in $S$ can be relabelled to
@@ -329,38 +330,41 @@ requirements of this backup tree are $O(n\log n)$ \cite{bkos97}.
 Like a range tree, a biased range tree is an augmented data structure
 consisting of a primary tree whose nodes store secondary structures.
 However, in a range tree the primary tree is a binary search tree that
-discriminates based only on the $x$-coordinate of the query point $q$.
-In order to achieve optimal expected query time, this turns out to be
-insufficient, so instead biased range trees use a variation of a $k$-d
-tree as the primary tree.
+discriminates based only on the $x$-coordinate of the query point $q$.  In
+order to achieve optimal expected query time, this turns out to be
+insufficient,\footnote{This is because it would force the query algorithm
+to resolve the rank of $x$-coordinate of the query point with respect to
+the $x$-coordinates of all data points. For certain distributions this
+would require $\Omega(\log n)$ expected time even though the query could be
+answered in $O(1)$ expected time by first discriminating based on the
+query's $y$ coordinate.} so instead biased range trees use a variation of a
+$k$-d tree as the primary tree.
 
-The primary tree is constructed in a top-down fashion.  Each node $v$
-of $T$ is associated with a region $r(v)$ whose closure is a
-rectangle.  The region associated with the root of $T$ is all of
-$\R^2$.  We say that a node $v$ is \emph{bad} if its depth is at least
-$\ceil{\log_2 n}$ and $r(v)\cap S \neq \emptyset$.  A node $v$ is
-\emph{split} if $v$ its depth is less than $\ceil{\log_2 n}$, and
-$r(v)\cap S\neq \emptyset$.  The two children of a split node $v$ are
-associated with the two regions obtained by removing a horizontal or
-vertical strip $s(v)$ from $r(v)$ depending on whether the depth of
-$v$ is even or odd, respectively.  We call a node $v$ at even distance
-from the root a \emph{vertical node}, otherwise we call $v$ a
-\emph{horizontal node}. 
+The primary tree is constructed in a top-down fashion.  Each node $v$ of
+$T$ is associated with a region $r(v)$ whose closure is a rectangle.  The
+region associated with the root of $T$ is all of $\R^2$.  We say that a
+node $v$ is \emph{bad} if its depth is at least $\ceil{\log_2 n}$ and
+$r(v)\cap S \neq \emptyset$.  A node $v$ is \emph{split} if its depth is
+less than $\ceil{\log_2 n}$, and $r(v)\cap S\neq \emptyset$.  The two
+children of a split node $v$ are associated with the two regions obtained
+by removing a horizontal or vertical strip $s(v)$ from $r(v)$ depending on
+whether the depth of $v$ is even or odd, respectively.  We call a node $v$
+at even distance from the root a \emph{vertical node}, otherwise we call
+$v$ a \emph{horizontal node}. 
 
 Refer to \figref{left-right}.  For a vertical node $v$, we denote its
-children by $\lft(v)$ and $\rght(v)$ and call them the \emph{left
-child} and \emph{right child} of $v$, depending on which side of the
-vertical strip (left or right) they are.  For uniformity, we will also
-call the children of a node $v$ that is split with a horizontal strip
-$\lft(v)$ and $\rght(v)$.  The child below the strip is denote by $\lft(v)$ and
-the child above the strip is denoted by $\rght(v)$.
-Similarly, the left and right
-boundaries of a strip $s(v)$ at a horizontal node $v$ refer to the
-bottom and top sides of $s(v)$.  Note that, with these conventions, if
-the query point $q$ is in $r(\lft(v))$ then $R(q)$ intersects
-$r(\rght(v))$.  However, if $q\in r(\rght(v))$ then $R(q)$ does not
-intersect $r(\lft(v))$.  Similarly, for a query point $q\in s(v)$, the
-query range $R(q)$ intersects $r(\rght(v))$ but not $r(\lft(v))$
+children by $\lft(v)$ and $\rght(v)$ and call them the \emph{left child}
+and \emph{right child} of $v$, depending on which side of the vertical
+strip (left or right) they are.  For uniformity, we will also call the
+children of a node $v$ that is split with a horizontal strip $\lft(v)$ and
+$\rght(v)$.  The child below the strip is denote by $\lft(v)$ and the child
+above the strip is denoted by $\rght(v)$.  Similarly, the left and right
+boundaries of a strip $s(v)$ at a horizontal node $v$ refer to the bottom
+and top sides of $s(v)$.  Note that, with these conventions, if the query
+point $q$ is in $r(\lft(v))$ then $R(q)$ intersects $r(\rght(v))$.
+However, if $q\in r(\rght(v))$ then $R(q)$ does not intersect $r(\lft(v))$.
+Similarly, for a query point $q\in s(v)$, the query range $R(q)$ intersects
+$r(\rght(v))$ but not $r(\lft(v))$
 
 \begin{figure}
   \begin{center}
@@ -409,14 +413,14 @@ $T$ and are necessary to prove the optimality of biased range trees:
 $r(v)$ contains at least one point of $S$.
 \end{enumerate}
 
-Point~1 above follows immediately from the definition of $s(v)$. Next
-we explain the logic leading to Point~2.  If $r(v)$ contains a point
-of $S$ then so does the closure of $r(v)$.   If $r(v)=\emptyset$, then
-$\Pr(r(v)) = 0$.  Otherwise, $r(v) \neq \emptyset$ and $r(v)$ has no
-point of $S$ in its interior.  Then consider the parent $w$ of $v$.
-Since $s(w)$ does not contain $r(v)$ there must be a point of $S$ on
-the boundary of $s(w)$ that is also on the boundary of $r(v)$.
-Therefore $r(v)$ contains this point in its closure.
+Point~1 above follows immediately from the definition of $s(v)$. Next we
+explain the logic leading to Point~2.  If $r(v)$ contains a point of $S$
+then so does the closure of $r(v)$.   If $r(v)=\emptyset$, then $\Pr(r(v))
+= 0$.  Otherwise, $r(v) \neq \emptyset$ and $r(v)$ has no point of $S$ in
+its interior.  Then consider the parent $w$ of $v$.  Since $s(w)$ does not
+contain $r(v)$ there must be a point of $S$ on the boundary of $s(w)$ that
+is also on the boundary of $r(v)$.  Therefore $r(v)$ contains this point in
+its closure.
 
 \subsection{The Catalogues}
 \seclabel{catalogues}
@@ -518,7 +522,9 @@ cascading is done only to speed up navigation between the catalogues
 of $T$.  Although fractional cascading introduces extra data into the
 catalogues of $T$ we will continue to use the notations $C_x(v)$ and
 $C_y(v)$ to denote the set of points contained in the catalogues of
-$v$ before fractional cascading takes place.
+$v$ before fractional cascading takes place.  If needed, the catalogues
+that include the cascaded data will be referred to as $C'_x(v)$ and
+$C'_y(v)$.
 
 %\begin{figure}
 %  \begin{center} \includegraphics{cascade} \end{center}
@@ -549,7 +555,7 @@ primary tree quickly we presort the points of $S$ by their $x$ and $y$
 coordinates.  Since the primary tree has height $O(\log n)$, it is
 then easily constructed in $O(n\log n)$ time.  Ignoring any copies of
 points created by fractional cascading, each point in $S$ occurs in at
-most 2 catalogues at each level of the primary tree.  Thus, the sizes
+most two catalogues at each level of the primary tree.  Thus, the sizes
 of all catalogues (before fractional cascading) is $O(n\log n)$ and
 these catalogues can be constructed in $O(n\log n)$ time (because the
 elements of $S$ are presorted; see de~Berg \etal\
@@ -577,12 +583,12 @@ is a bad leaf (so $d_T(q)\ge \log n$) then the algorithm performs a
 range query in $O(\log n)$ time using the backup range tree and the
 query algorithm does not execute the next two steps.
 
-\item  If $v$ has a left child then let $u=\lft(v)$, otherwise let
-$u=v$. The algorithm uses $T_x(u)$ and $T_y(u)$ to locate $q_x$ and
-$q_y$, respectively, in the catalogues $C_x(u)$ and $C_y(u)$,
+\item  If $v$ has a left child then let $v'=\lft(v)$, otherwise let
+$v'=v$. The algorithm uses $T_x(v')$ and $T_y(v')$ to locate $q_x$ and
+$q_y$, respectively, in the catalogues $C_x(v')$ and $C_y(v')$,
 respectively.
 
-\item The algorithm walks back from $u$ to the root of $T$, locating
+\item The algorithm walks back from $v'$ to the root of $T$, locating
 $q$ in the catalogues of all nodes on this path and computing the
 results of the range counting query as it goes.  Thanks to fractional
 cascading, each step of this walk can be done in constant time, so the
@@ -602,7 +608,7 @@ trees is as good as the expected query time of any comparison tree.
 The expected query time has two components.  The first component is
 the expected depth, $d_T(q)$,  of the node $v$ such that $s(v)$
 contains $q$.  The second component is the expected cost of locating
-$q$ in the catalogues of $u$ (recall that $u=\lft(v)$ or $u=v$ if $v$
+$q$ in the catalogues of $v'$ (recall that $v'=\lft(v)$ or $v'=v$ if $v$
 has no left child).  We will show that each of these two components
 is a lower bound on the expected cost of any decision tree for
 two-sided range searching on $S$ where queries come from distribution
@@ -613,7 +619,7 @@ terminates at node $v$ of $T$.
 \subsection{The Catalogue Location Step}
 
 First we show that the expected cost of locating $q$ in the two
-catalogues, $C_x(u)$ and $C_y(u)$ is
+catalogues, $C_x(v')$ and $C_y(v')$ is
 a lower bound on the expected cost of any decision tree for answering
 2-sided range queries in $S$.  The intuition behind this proof is
 that, in order to correctly answer range counting queries, any decision tree
@@ -641,8 +647,8 @@ Then
 We first observe that, by definition,
 \[
   C_2(S,D) =  \sum_{v\in T} 
-              \Pr(v)\left( \mu_{D_{\mid s(v)}}(T_x(u))
-                               +  \mu_{D_{\mid s(v)}}(T_y(u)) \right)
+              \Pr(v)\left( \mu_{D_{\mid s(v)}}(T_x(v'))
+                               +  \mu_{D_{\mid s(v)}}(T_y(v')) \right)
            \enspace .
 \]
 Consider some node $v$ of $T$.  For a point $q\in s(v)$, all of the
@@ -653,25 +659,25 @@ point $q\in s(v)$ then it must determine the location of the
 $x$-coordinate of $q$ with respect to all points in $T_x(v)$.  More
 precisely, the leaves of $T^*$ could be relabelled to obtain a
 comparison tree that determines, for any $q\in s(v)$, which interval
-of $T_x(v)$ contains $q_x$.  Since $T_x(u)$ is a biased search tree
+of $T_x(v)$ contains $q_x$.  Since $T_x(v')$ is a biased search tree
 for the probability measure $D_{\mid s(v)}$, this implies that
 \[
-  \mu_{D_{\mid s(v)}}(T^*) \ge \mu_{D_{\mid s(v)}}(T_x(u)) - 1\enspace .
+  \mu_{D_{\mid s(v)}}(T^*) \ge \mu_{D_{\mid s(v)}}(T_x(v')) - 1\enspace .
 \]
 The same argument applied to $T_y(v)$ yields 
 \[
-  \mu_{D_{\mid s(v)}}(T^*) \ge \mu_{D_{\mid s(v)}}(T_y(u)) - 1\enspace .
+  \mu_{D_{\mid s(v)}}(T^*) \ge \mu_{D_{\mid s(v)}}(T_y(v')) - 1\enspace .
 \]
 We can now complete the proof with
 \begin{eqnarray*}
 \mu_D(T^*) 
  & = & \sum_{v\in T} \Pr(v)\cdot\mu_{D_{\mid s(v)}}(T^*) \\
  & \ge & \sum_{v\in T}
-	\Pr(v) \cdot\max\left\{\mu_{D_{\mid s(v)}}(T_x(u)), 
-		       \mu_{D_{\mid s(v)}}(T_y(u))\right\} - 1 \\
+	\Pr(v) \cdot\max\left\{\mu_{D_{\mid s(v)}}(T_x(v')), 
+		       \mu_{D_{\mid s(v)}}(T_y(v'))\right\} - 1 \\
  & \ge & \sum_{v\in T}
-	\frac{1}{2}\Pr(v)\cdot\left( \mu_{D_{\mid s(v)}}(T_x(u))
-                             +  \mu_{D_{\mid s(v)}}(T_y(u)) \right) - 1 \\
+	\frac{1}{2}\Pr(v)\cdot\left( \mu_{D_{\mid s(v)}}(T_x(v'))
+                             +  \mu_{D_{\mid s(v)}}(T_y(v')) \right) - 1 \\
  & = & \frac{1}{2}\cdot C_2(S,D) - 1 = \Omega(C_2(S,D)) \enspace .
 \end{eqnarray*}
 \end{proof}
@@ -696,7 +702,8 @@ over $\R^2$.
 Let $T=T(S,D)$ be the biased range tree for $(S,D)$ and label
 each node of $T$ white
 or black, such that all white nodes are at distance at most $i$ from
-the root of $T$.  Then, if $T$ contains more than $\gamma^i$ white nodes
+the root of $T$.  Then, if $T$ contains more than $\gamma^i$, for
+$\gamma\ge 0$, white nodes
 then $T$ contains an HV-independent set of white nodes of size
 $\Omega((\gamma/\sqrt{2})^i)$.
 \end{lem}
@@ -768,7 +775,7 @@ one of the nodes in $G_{i,j}$ then we have, by applying
 \thmref{shannon},
 \begin{eqnarray*}
    \mu_{D_{i,j}}(T^*) + 2 
-    & \ge & \sum_{v\in G_{i,j}}\Pr(v\mid G_{i,j})\log(1/\Pr(v\mid G_{i,j}) \\
+    & \ge & \sum_{v\in G_{i,j}}\Pr(v\mid G_{i,j})\log(1/\Pr(v\mid G_{i,j})) \\
     & \ge & \sum_{v\in G_{i,j}}\Pr(v\mid G_{i,j})\log(\Omega(\alpha^i)) \\
     & \ge & \log(\Omega(\alpha^i)) \\
     & = & i\log\alpha - O(1) \enspace .
@@ -783,15 +790,24 @@ Putting this all together, we obtain
   & \ge & \sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
            \Pr(G_{i,j})( i\log\alpha -O(1)) \\
   & \ge & (\log\alpha)\cdot
+       \left(
          \sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
-		\sum_{v\in G_{i,j}}\Pr(v)\cdot\depth(v) - O(1)\\
-  & = & (\log\alpha)\cdot\sum_{v\in T}\Pr(v)\cdot \depth(v)
+		\sum_{v\in G_{i,j}}\Pr(v)\cdot\depth(v) 
+       \right) - O(1)
+         \\
+  & = & (\log\alpha)\cdot
+       \left(\sum_{v\in T}\Pr(v)\cdot \depth(v)
           -    \sum_{i=1}^{\infty}
-		\sum_{v\in G_{i,t_i}}\Pr(v)\cdot\depth(v) - O(1)\\
-  & \ge & (\log\alpha)\cdot\sum_{v\in T}\Pr(v)\cdot \depth(v)
-          -    \sum_{i=1}^{\infty}i\cdot\Pr(G_{i,t_i}) - O(1) \\
-  & \ge & (\log\alpha)\cdot\sum_{v\in T}\Pr(v)\cdot \depth(v)
-          -    \sum_{i=1}^{\ceil{\log n}}i\gamma^i/2^{i-1} - O(1) \\
+		\sum_{v\in G_{i,t_i}}\Pr(v)\cdot\depth(v)
+       \right) - O(1)\\
+  & \ge & (\log\alpha)\cdot
+       \left(\sum_{v\in T}\Pr(v)\cdot \depth(v)
+          -    \sum_{i=1}^{\infty}i\cdot\Pr(G_{i,t_i})
+       \right) - O(1) \\
+  & \ge & (\log\alpha)\cdot
+       \left(\sum_{v\in T}\Pr(v)\cdot \depth(v)
+          -    \sum_{i=1}^{\ceil{\log n}}i\gamma^i/2^{i-1}
+       \right) - O(1) \\
   & \ge &  (\log\alpha)\cdot\sum_{v\in T}\Pr(v)\cdot \depth(v) - O(1) \\
   & = & \Omega(C_1(S,D)) \enspace ,
 \end{eqnarray*}
@@ -833,7 +849,7 @@ $T$ is $\mu_D(T)=O(C_1(S,D)+C_2(S,D))$.  On the other hand, by
 
 We have presented biased range trees, an optimal data structure for
 2-sided orthogonal range counting queries when the point set $S$ and
-query distribution $D$ is known in advance. The expected time required
+query distribution $D$ are known in advance. The expected time required
 to answer queries with a biased range tree, when the queries are
 distributed according to $D$, is within a constant factor of any
 decision tree for answering range queries over $S$.  Like standard
@@ -858,21 +874,22 @@ immediately arise.
 
 \begin{op}
 Are there efficient distribution-sensitive data structures for 3-sided
-and 4-sided orthogonal range counting queries?
+and 4-sided orthogonal range counting queries?  In this case, the query
+distribution is defined as a distribution over a subset of $\R^3$,
+respectively, $\R^4$ that defines the 3 or 4 sides of the query range.
 \end{op}
 
-Note that a 4-sided orthogonal range counting query can be reduced to
-4 2-sided orthogonal range counting queries using the principle of
-inclusion-exclusion.  Unfortunately, this reduction does not produce
-an optimal distribution-sensitive data structure.  To see this,
-consider 4-sided queries consisting of unit squares whose bottom left
-corner is uniformly distributed in the shaded region of
-\figref{squares}.  All such queries contain no points in the query
-region and all such queries can be answered in $O(1)$ time by simply
-checking that all four corners of the square are to the left of the point
-set.  However, when we decompose these queries into a four 2-sided
-queries we obtain 2-sided queries that require $\Omega(\log n)$ time
-to be answered.
+Note that a 4-sided orthogonal range counting query can be reduced to 4
+2-sided orthogonal range counting queries using the principle of
+inclusion-exclusion.  Unfortunately, this reduction does not produce an
+optimal distribution-sensitive data structure.  To see this, consider
+4-sided queries consisting of unit squares whose bottom left corners are
+uniformly distributed in the shaded region of \figref{squares}.  All such
+queries contain no points in the query region, and all such queries can be
+answered in $O(1)$ time by simply checking that all four corners of the
+square are to the left of the point set.  However, when we decompose these
+queries into four 2-sided queries we obtain 2-sided queries that require
+$\Omega(\log n)$ time to be answered.
 
 \begin{figure}
   \begin{center}

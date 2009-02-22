@@ -17,17 +17,16 @@
 \maketitle
 \begin{abstract}
 Algorithms for determining quality/cost/price tradeoffs in saturated
-markets are considered.  In the model considered, a product is defined by
-$d$ real-valued qualities whose sum determines the unit cost of producing
-the product.  The optimization problem considers the following scenario:
-given a set of $n$ customers, each of whom has certain minimum quality
-requirements and a maximum price they are willing to pay, the goal is to
-design a new product and select a price for that product in order to
-maximize the resulting profit.
+markets are considered.  A product is modeled by $d$ real-valued
+qualities whose sum determines the unit cost of producing the product.
+This leads to the following optimization problem: given a set of $n$
+customers, each of whom has certain minimum quality requirements and a
+maximum price they are willing to pay, design a new product and select
+a price for that product in order to maximize the resulting profit.
 
 An $O(n\log n)$ time algorithm is given for the case, $d=1$, of linear
-products, and $O(n(\log n)^{O(d)})$ time approximation algorithms are given
-for products with any constant number, $d$, of qualities.
+products, and $O(n(\log n)^{d+1})$ time approximation algorithms are
+given for products with any constant number, $d$, of qualities.
 \end{abstract}
 
 \section{Introduction}
@@ -54,15 +53,16 @@ if has minimum price among all available products that $C_i$ considers.
 
 We consider markets that are \emph{saturated}.  That is, for every customer
 $C_i$ there is an existing product that satisfies their $C_i$'s
-requirements. From the point of view of a manufacturer introducing one or
-more new products, this means that all customers are \emph{Pareto optimal},
-i.e., there are no two customers $C_i$ and $C_j$ such that $q_{i,k} >
-q_{j,k}$ for all $k\in\{1,\ldots,d\}$ and $p_i < p_j$.  This is because, in
-a saturated market, $C_j$ and $C_i$ will purchase the same product, namely
-the lowest-priced product that satisfies $C_i$'s (and therefore also
-$C_j$'s) requirements.  When modelling a saturated market, there is no need
-to explicitly consider existing products since these can be encoded into
-the customers themselves.
+requirements and among all products that satisfy $C_i$'s requirements,
+$C_i$ will choose the least expensive product.  From the point of view of a
+manufacturer introducing one or more new products, this means that all
+customers are \emph{Pareto optimal}, i.e., there are no two customers $C_i$
+and $C_j$ such that $q_{i,k} > q_{j,k}$ for all $k\in\{1,\ldots,d\}$ and
+$p_i < p_j$.  This is because, in a saturated market, $C_j$ and $C_i$ will
+purchase the same product, namely the lowest-priced product that satisfies
+$C_i$'s (and therefore also $C_j$'s) requirements.  When modelling a
+saturated market, there is no need to explicitly consider existing products
+since these can be encoded into the customers themselves.
 
 As an example, consider a market for computers in which an example customer
 $C_i$ may be looking for a computer with a minimum of 8 GB of RAM, a CPU
@@ -88,9 +88,9 @@ The \emph{profit per unit sold} of $P$ is therefore
 In this paper we consider algorithms that a manufacturer can use when
 a choosing new product to introduce into an existing saturated market
 with the goal being to maximize the profit obtained.  More precisely,
-given a \emph{market} of customers $M=\{C_1,\ldots,C_n\}$, each have $d$
-qualities, the $\textsc{ProductDesign}(d)$ problem is to find a product
-$P^*\in\R^{d+1}$ such that
+given a Pareto-optimal \emph{market} of customers $M=\{C_1,\ldots,C_n\}$,
+each have $d$ qualities, the $\textsc{ProductDesign}(d)$ problem is to
+find a product $P^*\in\R^{d+1}$ such that
 \[
   \val(P^*) = \ppu(P^*)
     \times 
@@ -99,7 +99,7 @@ $P^*\in\R^{d+1}$ such that
 is maximized.  
 
 In the remainder of the paper we give an $O(n\log n)$ time algorithm for
-$\textsc{ProductDesign}(1)$ (\secref{1-d}), and $O(n(\log n)^{O(d)})$ time
+$\textsc{ProductDesign}(1)$ (\secref{1-d}), and $O(n(\log n)^{d+1})$ time
 approximation algorithms for $\textsc{ProductDesign}(d)$ (\secref{2-d}
 and \secref{d-d}).  \secref{conclusion} summarizes our results and
 concludes with directions for future research.
@@ -145,7 +145,7 @@ the structure of the solution space.  The first lemma is quite easy:
       \le \max\{q_i:i\in\{1,\ldots,n\}\} \enspace .
   \] 
   Consider the arrangement of lines obtained by drawing a
-  horizontal and vertical line through each customer $(q_i,p_i)$
+  horizontal and vertical line through each customer $(p_i,q_i)$
   for $i\in\{1,\ldots,n\}$.  Within each cell of this arrangement,
   the function $\val(p,q)$ is a linear function of $p$ and $q$ and it is
   bounded.  Therefore, within a particular cell, the function is maximized
@@ -327,13 +327,17 @@ algorithms.
   $O(n)$ time as follows (refer to \figref{lemma-lower-bound}).  For each
   $x_i$, $i\in\{1,\ldots,n\}$ we introduce a customer $(p_i,q_i)$ with
   $p_i=q_i+1/2$ and $q_i=x_i$.  If there exists a value $x$ in $A$ that
-  occurs $2$ or more times, then the product $(x,x+1/2)$ gives a value
-  $\val(x,x+1/2) \ge 1$.  On the other hand, if there is no such $x$,
-  then \begin{enumerate} \item any product $(q,p)$ with $p-q>1/2$ can not
-  be sold to any customers and \item any product $(q,p)$ with $p-q>0$
-  can be sold to at most $1$ customer.  \end{enumerate} Therefore,
-  if all the elements of $A$ are unique, then $\val(q^*,p^*) = 1/2$,
-  otherwise $\val(q^*,p^*) \ge 1$.  The result follows.
+  occurs $2$ or more times, then the product $(x+1/2,x)$ gives a value
+  $\val(x+1/2,x) \ge 1$.  On the other hand, if there is no such $x$,
+  then 
+  \begin{enumerate} 
+    \item any product $(p,q)$ with $p-q>1/2$ can not be sold to any
+    customers and
+    \item any product $(p,q)$ with $p-q>0$ can be sold to at most $1$
+    customer.
+  \end{enumerate} 
+  Therefore, if all the elements of $A$ are unique, then $\val(p^*,q^*)
+  = 1/2$, otherwise $\val(p^*,q^*) \ge 1$.  The result follows.
 \end{proof}
 
 \begin{figure}
@@ -405,14 +409,15 @@ to be contained in one of the planes $H_i$.
 \end{proof}
 
 \lemref{plane-approx} implies that the problem of finding an approximate
-solution to  $\textsc{ProductDesign}(2)$ can be reduced to a sequence
-of problems on the planes $H_0,\ldots,H_\ell$.  In fact, each customer
-$C_j$ defines a (possibly empty) equilateral triangle $\Delta_{i,j}$
-on the plane $H_i$ such that $C_j$ will consider a product $P$ in $H_i$
-if and only $P$ is in $\Delta_{i,j}$.  Thus, the problem of solving
-$\textsc{ProductDesign}(2,1)$ restricted to the plane $H_i$ is the
-problem of finding a point contained in the largest number of equilateral
-triangles from the set $\Delta_i=\{\Delta_{i,j}: j\in\{1,\ldots,n\}\}$.
+solution to  $\textsc{ProductDesign}(2)$ can be reduced to a sequence of
+problems on the planes $H_0,\ldots,H_\ell$.  Each customer $C_j$ considers
+all products in a quadrant whose corner is $C_j$.   The intersection of
+this quadrant with $H_i$ is a (possibly empty) equilateral triangle
+$\Delta_{i,j}$.  The customer $C_j$ will consider a product $P$ in $H_i$ if
+and only $P$ is in $\Delta_{i,j}$.  Thus, the problem of solving
+$\textsc{ProductDesign}(2,1)$ restricted to the plane $H_i$ is the problem
+of finding a point contained in the largest number of equilateral triangles
+from the set $\Delta_i=\{\Delta_{i,j}: j\in\{1,\ldots,n\}\}$.
 
 Note that the elements in $\Delta_i$ are \emph{homothets} (translations and
 scalings) of an equilateral triangle, so they form a collection
@@ -425,8 +430,8 @@ algorithm to each of $\Delta_i$ for $i\in\{1,\ldots,\ell\}$, we obtain the
 following result:
 
 \begin{thm}
-  For any $\eps >0$, there exists an $O(\eps^{-3}n(\log n)^2)$
-  time Monte-Carlo $(1-\eps)$-approximation algorithm for
+  For any $\eps >0$, there exists an $O(\eps^{-3}n(\log n)^2)$ time
+  (high-probability) Monte-Carlo $(1-\eps)$-approximation algorithm for
   $\textsc{ProductDesign}(2)$.
 \end{thm}
 
@@ -451,16 +456,16 @@ as \lemref{plane-approx}.
   $i\in\{0,\ldots,\ell\}$ and $\val(P) \ge (1-\eps)\val(P^*)$.
 \end{lem}
 
-Again, each customer $C_j$ defines a regular simplex $\Delta_{i,j}$ in
-$H_{i}$ such that $C_j$ will purchase $P\in H_i$ if and only if
-$P\in\Delta_{i,j}$.  In this way, we obtain a set
-$\Delta_i=\{\Delta_{i,1},\ldots,\Delta_{i,n}\}$ of homothets of a regular
-simplex in $\R^d$ and we require an algorithm to find a
+Again, each customer $C_j$ defines a regular simplex $\Delta_{i,j}$
+in $H_{i}$ such that $C_j$ will consider $P\in H_i$ if and
+only if $P\in\Delta_{i,j}$.  In this way, we obtain a set
+$\Delta_i=\{\Delta_{i,1},\ldots,\Delta_{i,n}\}$ of homothets of
+a regular simplex in $\R^d$ and we require an algorithm to find a
 ($(1-\eps)$-approximation to) the point that is contained in the largest
 number of these simplices.  The machinery of Aranov and Har-Peled
-\cite{ah08} can be used to help solve this problem, but not before we prove
-some preliminary results, the first of which is a combinatorial geometry
-result.  
+\cite{ah08} can be used to help solve this problem, but not before we
+prove some preliminary results, the first of which is a combinatorial
+geometry result.
 
 \begin{lem}\lemlabel{arrangement}
   Let $\Delta$ be a set of $n$ homothets of a regular simplex in $\R^d$,
@@ -519,10 +524,10 @@ Thus, a version of this lemma holds for collections \emph{fat} objects, a
 result that will probably be of independent interest.
 
 \paragraph{Remark.} \lemref{arrangement} is somewhat surprising, since the
-union of $n$ simplices in, for example, $\R^2$ can easily have size
-$\Omega(n^2)$.  This fact makes it impossible to apply the ``usual'' proof
-technique of Clarkson that relates the complexity of the first $k$ levels
-to that of the boundary of the union.
+union of $n$ homothets of a regular tetrahderon in, for example, $\R^3$ can
+easily have size $\Omega(n^2)$.  This fact makes it impossible to apply the
+``usual'' proof technique of Clarkson that relates the complexity of the
+first $k$ levels to that of the boundary of the union.
 
 \begin{lem}\lemlabel{arrangement-construct}
   Let $\Delta$ be a set of $n$ homothets of the regular simplex in
@@ -551,7 +556,7 @@ to that of the boundary of the union.
   n)^{d})$ time and can answer queries in $O(x + (\log n)^{d})$ time,
   where $x$ is the size of the output.  This data structure will be
   constructed once and queried $n$ times.  The total size of the outputs
-  over all $n$ queries will be be the $O(|A(C)|)=O(nk^{d-1})$.
+  over all $n$ queries will be the $O(|A(C)|)=O(nk^{d-1})$.
 
   Since the elements of $\Delta$ are homothets, each element of $\Delta$
   can be described concisely by the lexicographically smallest of its
@@ -595,10 +600,10 @@ the following Corollary.
 \begin{cor}\corlabel{deep-point}
   Let $\Delta$ be a set of $n$ homothets of a regular simplex in $\R^d$
   such that some point $p\in\R^d$ is contained in $\delta$ elements
-  of $\Delta$.  Then there exists a Monte-Carlo algorithm whose running
-  time is $O(\eps^{-2d}n(\log n)^{d-1} + n(\log n)^d)$ and that, with high
-  probability, returns a point $p'\in\R^{d}$ contained in at least $(1-\eps)\delta$
-  elements of $\Delta$.
+  of $\Delta$.  Then there exists an algorithm whose running time is
+  $O(\eps^{-2d}n(\log n)^{d-1} + n(\log n)^d)$ and that, with high
+  probability, returns a point $p'\in\R^{d}$ contained in at least
+  $(1-\eps)\delta$ elements of $\Delta$.
 \end{cor}
 
 As before, an approximate solution to $\textsc{ProductDesign}(d)$ problem
@@ -608,59 +613,42 @@ $d$-simplices in $H_i$.  By using the algorithm of \corref{deep-point} to
 do this we obtain the following result:
 
 \begin{thm}
-  For any $\eps >0$, there exists an $O(\eps^{-(2d+1)}n(\log n)^d +
-  n(\log n)^{d+1})$ time Monte-Carlo $(1-\eps)$-approximation algorithm
-  for $\textsc{ProductDesign}(d)$.
+  For any $\eps >0$, there exists an $O(\eps^{-(2d+1)}n(\log n)^d + n(\log
+  n)^{d+1})$ time (high-probability) Monte-Carlo $(1-\eps)$-approximation
+  algorithm for $\textsc{ProductDesign}(d)$.
 \end{thm}
 
 \section{Conclusions}
 \seclabel{conclusion}
 
 We have given an $O(n\log n)$ time exact algorithm for solving
-$\textsc{ProductDesign}(1)$ and $O(n(\log n)^O(d))$ time approximation
+$\textsc{ProductDesign}(1)$ and $O(n(\log n)^{d+1})$ time approximation
 algorithms for solving $\textsc{ProductDesign}(d)$.  The running time of
 the exact $\textsc{ProductDesign}(1)$ algorithm is optimal and no algorithm
-that produces a $(2-\eps)$-approximation algorithm can run in $o(n\log n)$
-time.
+that produces a $(2-\eps)$-approximation, for any $\epsilon > 0$, can run
+in $o(n\log n)$ time.  
+
+In developing these algorithms, we gave a proof (the
+proof of \lemref{arrangement}) that shows that an arrangement of $n$ fat convex
+objects in $\R^d$ has complexity $O(nk^{d-1})$ where $k$ is the maximum
+number of objects that contain any given point. We expect that this result,
+and the algorithm for approximate depth that arise from it \cite{ah08},
+will find other applications.
 
 An exact near-linear time algorithm for the case $d=2$ seems to be out of
 reach.  It appears as if this problem requires (at least) a solution to the
 problem of finding a point contained in the largest number of homothets of
 an equilateral triangle, a problem for which no subquadratic time algorithm
-is known.  Is it possible possible to prove some kind of a lower bound?
-The related problem of finding the point contained in the largest number of
-unit disks is \textsc{3-Sum} hard providing some evidence that this problem
-will be difficult to solve in subquadratic time.
+is known.  Is it possible to prove some kind of a lower bound?  The related
+problem of finding the point contained in the largest number of unit disks
+is \textsc{3-Sum} hard \cite{ah08} providing some evidence that this
+problem will be difficult to solve in subquadratic time.
 
 In this paper we considered the case where the problem is parameterized by
 the number, $d$, of orthogonal qualities that a product may have.  Another
 case to consider is the case in which a manufacturer wishes to introduce
-some number, $k$, $k>1$, of new products into a market.  For the case
-$d=2$, this already appears to be NP-hard.  The sketch of this NP-hardness
-proof is as follows:  Let $X$ be a set of $n$ identical equilateral
-triangles such that, for any two triangles in $T_1,T_2\in X$, $T_1\cap T_2$
-is either empty of is contained in a ball of radius $\delta$ around one of
-$T_1$'s vertices.  Determining whether there exists a set $S$ of $n/2$
-points such that every triangle in $X$ contains a point in $S$ can be shown
-to be NP-hard using a proof similar (but a little simpler) than the proof
-by X and Y that vertex cover in penny graphs is NP-hard.  Given the set $X$
-described a above, we can produce a set of customers such that there exists
-$k$ products whose 
-
- since 
-using a construction similar to that of \secref{X} it is possible to
-take
-
-
-\secref{X}, a solution
-problem can be used to solve the problem of finding the fewest number of
-points that \emph{stab} \cite{X} a set of equilateral triangles, which is
-probably NP-hard \cite{X,X,X}.
-
-Does the case $d=1$ have a polynomial time solution?  Does the case $d=2$
-have a polynomial time approximation algorithm?  Despite some effort, we
-have not been able to find algorithms, approximate, or exact, that avoid
-having $k$ in the exponent of the running time. 
+some number, $k$, $k>1$, of new products into a market.   Is this problem
+NP-hard?  Does it have a polynomial time approximation algorithm?
 
 
 \section*{Acknowledgement}

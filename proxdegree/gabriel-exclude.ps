@@ -1,0 +1,127 @@
+%!  File "gabriel-exclude.ps". 
+% Gabriel-max degree paper: figure for upper bound proof.
+% Gabriel edges exclude halfspaces.
+%%BoundingBox: 61 61 540 540
+% Luc Devroye, November 4, 1995
+/POINTSIZE 2 def
+/LINEWIDTH 1 def
+/CIRCLELINEWIDTH 0 def
+/IT { /Times-Italic findfont 10 scalefont setfont } def
+/SMIT { /Times-Italic findfont 7 scalefont setfont } def
+/RM { /Times-Roman findfont 10 scalefont setfont } def
+/SMRM { /Times-Roman findfont 7 scalefont setfont } def
+/SY { /Symbol findfont 10 scalefont setfont } def
+
+
+
+
+/T { aload pop ysigma mul ymu add exch xsigma mul 
+     xmu add exch [ 3 1 roll ] } def
+        % transforms [ x y ] and leaves new array.
+/arrowlength 8 def
+/arrow  % need point [ x y ] theta (angle pointed to)
+  {
+  gsave exch aload pop translate rotate
+  newpath 0 0 moveto 
+          arrowlength 2 div neg 0 arrowlength 3 mul 4 div neg arrowlength 4 div neg arrowlength neg arrowlength 3 mul 4 div neg curveto
+          arrowlength neg arrowlength 3 mul 4 div lineto
+          arrowlength 3 mul 4 div neg arrowlength 4 div arrowlength 2 div neg 0 0 0 curveto closepath
+          0 setgray fill
+  grestore
+  } def
+
+% Definitions.
+
+/gabpoint  % as in xmu ymu xsigma ysigma  
+        %       [ [ x y ] pairs ]  (before transform)
+        %       maxradius (before transform; for clipping)
+        %       showcircles? (true, false)
+        %             gabpoint
+{
+/showcircles exch def
+/maxradius exch def
+/PAIRS exch def % array
+% PAIRS { == } forall
+/ysigma exch def
+/xsigma exch def
+/ymu exch def
+/xmu exch def
+maxradius ysigma mul /MAXRADIUS exch def
+/origin [ 0 0 ] T def
+ newpath origin aload pop MAXRADIUS 0 360 arc clip   % clippath
+
+% Coloring all outer stuff
+PAIRS
+ {
+ aload pop /y exch def /x exch def
+ y dup mul x dup mul add sqrt /dist exch def  % distance
+ /perpx y dist div def
+ /perpy x neg dist div def  % perp unit distance vector
+ newpath [ x y ] T aload pop moveto
+ perpx 5 MAXRADIUS mul mul
+ perpy 5 MAXRADIUS mul mul rlineto
+ x dist div 5 MAXRADIUS mul mul 
+ y dist div 5 MAXRADIUS mul mul rlineto
+ perpx 10 MAXRADIUS mul mul neg
+ perpy 10 MAXRADIUS mul mul neg rlineto
+ x dist div 5 MAXRADIUS mul mul neg 
+ y dist div 5 MAXRADIUS mul mul neg rlineto
+ closepath
+ 0.9 setgray fill
+ } forall
+
+% Lines:
+PAIRS
+ {
+ aload pop /y exch def /x exch def
+ y dup mul x dup mul add sqrt /dist exch def  % distance
+ /perpx y dist div def
+ /perpy x neg dist div def  % perp unit distance vector
+ newpath [ x y ] T aload pop moveto
+ perpx 5 MAXRADIUS mul mul
+ perpy 5 MAXRADIUS mul mul rlineto
+ x dist div 5 MAXRADIUS mul mul 
+ y dist div 5 MAXRADIUS mul mul rlineto
+ perpx 10 MAXRADIUS mul mul neg
+ perpy 10 MAXRADIUS mul mul neg rlineto
+ x dist div 5 MAXRADIUS mul mul neg 
+ y dist div 5 MAXRADIUS mul mul neg rlineto
+ closepath
+ 0 setgray 0.5 setlinewidth stroke
+ } forall
+
+ % origin
+ newpath origin aload pop POINTSIZE 0 360 arc 0 setgray fill
+
+ % points
+ PAIRS{ newpath T aload pop POINTSIZE 0 360 arc 0 setgray fill } forall
+
+% circles
+showcircles
+  {
+   PAIRS { aload pop /y exch def /x exch def
+           /radius y dup mul x dup mul add sqrt def
+           newpath
+           [ x 2 div radius 2 div add y 2 div ] T aload pop moveto
+           [ x 2 div y 2 div ] T aload pop radius 2 div ysigma mul
+              0 360 arc
+           0 setlinewidth stroke
+         } forall
+  } if
+} def    % gabpoint
+
+/NUMBEROFPTS 12 def
+/MAXINT 2 30 exp 1 sub 2 mul 1 add def
+/SEED 65555 def
+SEED srand
+/uni {rand MAXINT div} def
+
+300 300 120 120 
+[ NUMBEROFPTS
+   { [ 360 uni mul /theta exch def
+     0.2 1.6 uni sqrt mul add /RAD exch def
+     RAD theta cos mul RAD theta sin mul ] } repeat ]
+2 true gabpoint
+
+
+showpage

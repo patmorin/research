@@ -1,0 +1,129 @@
+%!  File "wedge.ps". 
+% Gabriel-max degree paper: figure for upper bound proof.
+%%BoundingBox: 169 132 467 491
+% Luc Devroye, November 4, 1995
+/POINTSIZE 2 def
+/LINEWIDTH 1 def
+/CIRCLELINEWIDTH 0 def
+/IT { /Times-Italic findfont 10 scalefont setfont } def
+/SMIT { /Times-Italic findfont 7 scalefont setfont } def
+/RM { /Times-Roman findfont 10 scalefont setfont } def
+/SMRM { /Times-Roman findfont 7 scalefont setfont } def
+/SY { /Symbol findfont 10 scalefont setfont } def
+
+
+
+
+/T { aload pop ysigma mul ymu add exch xsigma mul 
+     xmu add exch [ 3 1 roll ] } def
+        % transforms [ x y ] and leaves new array.
+/arrowlength 8 def
+/arrow  % need point [ x y ] theta (angle pointed to)
+  {
+  gsave exch aload pop translate rotate
+  newpath 0 0 moveto 
+          arrowlength 2 div neg 0 arrowlength 3 mul 4 div neg arrowlength 4 div neg arrowlength neg arrowlength 3 mul 4 div neg curveto
+          arrowlength neg arrowlength 3 mul 4 div lineto
+          arrowlength 3 mul 4 div neg arrowlength 4 div arrowlength 2 div neg 0 0 0 curveto closepath
+          0 setgray fill
+  grestore
+  } def
+
+% Definitions.
+
+/wedge  % as in xmu ymu xsigma ysigma  
+        %       openingangle startangle
+        %       point-r (before transf) pointangle
+        %             wedge
+{
+/pointangle exch def     % relative to startangle
+/point-r exch def
+/startangle exch def
+/openingangle exch def     % relative to startangle
+/ysigma exch def
+/xsigma exch def
+/ymu exch def
+/xmu exch def
+/extend 1.2 def
+point-r ysigma mul /radius exch def
+/origin [ 0 0 ] T def
+gsave
+origin aload pop translate
+startangle rotate
+
+% Coloring all and inner circle
+newpath
+0 0 moveto
+% radius pointangle cos mul 
+% radius pointangle sin mul lineto
+radius pointangle cos div 0 lineto
+% closepath
+% 0.8 setgray fill
+% newpath
+% 0 0 moveto
+% radius pointangle cos mul 
+% radius pointangle sin mul lineto
+radius openingangle pointangle sub cos div /long exch def
+long openingangle cos mul 
+long openingangle sin mul  lineto
+closepath
+0.8 setgray fill
+newpath
+0 0 moveto
+0 0 radius 0 openingangle arc
+closepath 
+1 setgray fill 0 setgray
+
+% Perimeters
+newpath
+0 0 moveto
+% radius pointangle cos mul 
+% radius pointangle sin mul lineto
+radius pointangle cos div 0 lineto
+% closepath
+% 0.8 setgray fill
+% newpath
+% 0 0 moveto
+% radius pointangle cos mul 
+% radius pointangle sin mul lineto
+radius openingangle pointangle sub cos div /long exch def
+long openingangle cos mul 
+long openingangle sin mul  lineto
+closepath
+0.5 setlinewidth stroke
+newpath
+0 0 moveto
+0 0 radius 0 openingangle arc
+closepath 
+0.5 setlinewidth stroke
+
+ % origin
+ newpath 0 0 POINTSIZE 0 360 arc 0 setgray fill
+
+ % point
+ newpath
+ radius pointangle cos mul 
+ radius pointangle sin mul 
+ POINTSIZE 0 360 arc 0 setgray fill
+
+grestore
+} def    % wedge
+
+% first draw figure
+
+% 300 300 120 120 57 27 1 41 wedge
+
+/NUMBEROFPIECES 10 def
+/MAXINT 2 30 exp 1 sub 2 mul 1 add def
+/SEED 55555 def
+SEED srand
+/uni {rand MAXINT div} def
+
+0 1 NUMBEROFPIECES 1 sub 
+{ /I exch def
+300 300 120 120 360 NUMBEROFPIECES div  dup I mul
+   1.6 uni sqrt mul 2 index uni mul wedge
+   } for
+
+
+showpage

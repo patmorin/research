@@ -1,0 +1,98 @@
+%!  File "gabrieldef.ps". Shows random Gabriel graph. With empty circles
+%%BoundingBox: 79 85 525 414
+% Luc Devroye, October 25, 1995
+/POINTSIZE 1.2 def
+/LINEWIDTH 0.3 def
+/FONTSIZE 8 def
+/FONT /Times-Roman def
+
+
+
+
+% draw random point set
+
+555 srand
+%realtime srand
+/MAXINT 2 30 exp 1 sub 2 mul 1 add def
+/uni { rand MAXINT div } def
+/A 100 def
+/B 500 def
+/C 100 def
+/D 400 def
+/NUMBER 200 def
+/N 10 def
+/theta
+  { 2 add 120 exch div } def  % 120/(n+2)
+
+
+/DATA
+[
+ NUMBER { [ A B A sub uni mul add C D C sub uni mul add ]  } repeat
+ ] def   % data set
+
+
+/gabrieldraw
+  {
+     0 1 DATA length 1 sub {
+	  /I exch def
+	  0 1 DATA length 1 sub {
+	       /J exch def
+	       J I eq { exit } if
+	       /EDGE true def
+	       /CENTERX DATA J get 0 get DATA I get 0 get add 2 div def
+	       /CENTERY DATA J get 1 get DATA I get 1 get add 2 div def
+	       /RADIUS2 DATA J get 0 get DATA I get 0 get sub dup mul
+	                DATA J get 1 get DATA I get 1 get sub dup mul add 4 div def
+	       0 1 DATA length 1 sub {
+                    /M exch def
+		    M I ne M J ne and 
+		    {
+                    /L DATA M get 0 get CENTERX sub dup mul
+		    DATA M get 1 get CENTERY sub dup mul add  def
+		    L RADIUS2 0.001 add lt { /EDGE false def exit } if
+		    } if
+		    EDGE not { exit } if
+		    } for
+	       EDGE { 
+		      10 dict begin
+		      DATA I get aload pop /Y1 exch def /X1 exch def
+		      DATA J get aload pop /Y2 exch def /X2 exch def
+		      /RADIUS X1 X2 sub dup mul Y1 Y2 sub dup mul add 
+			  sqrt 2 div def
+		      newpath X1 X2 add 2 div 
+			      Y1 Y2 add 2 div moveto
+			      RADIUS 0 rmoveto
+		            X1 X2 add 2 div 
+			    Y1 Y2 add 2 div RADIUS 0 360 arc
+			    closepath
+			      0 setlinewidth stroke
+		      newpath DATA I get aload pop moveto
+			      DATA J get aload pop lineto 
+			      closepath
+			      0 setlinewidth stroke 
+			end
+			     } if
+	       } for
+	  } for
+  } def
+
+/pointdraw{
+   DATA {
+	aload pop newpath moveto 
+	currentpoint
+	POINTSIZE 2 div 0 rmoveto
+	POINTSIZE 0 360 arc 0 setgray fill
+	} forall
+   } def
+
+gabrieldraw
+pointdraw
+
+ % box around all
+ newpath
+ A C moveto A D lineto B D lineto B C lineto closepath
+ 0 setlinewidth stroke 
+
+
+
+showpage

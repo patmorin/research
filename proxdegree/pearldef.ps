@@ -1,0 +1,186 @@
+%!  File "pearldef.ps". 
+% Gabriel-max degree paper: explanation of definition.
+%%BoundingBox: 6 0 612 609
+% Luc Devroye, November 2, 1995
+/POINTSIZE 2 def
+/LINEWIDTH 1 def
+/CIRCLELINEWIDTH 0 def
+/IT { /Times-Italic findfont 10 scalefont setfont } def
+/SMIT { /Times-Italic findfont 7 scalefont setfont } def
+/RM { /Times-Roman findfont 10 scalefont setfont } def
+/SMRM { /Times-Roman findfont 7 scalefont setfont } def
+/SY { /Symbol findfont 10 scalefont setfont } def
+
+
+
+
+/T { aload pop ysigma mul ymu add exch xsigma mul 
+     xmu add exch [ 3 1 roll ] } def
+	% transforms [ x y ] and leaves new array.
+/arrowlength 8 def
+/arrow  % need point [ x y ] theta (angle pointed to)
+  {
+  gsave exch aload pop translate rotate
+  newpath 0 0 moveto 
+	  arrowlength 2 div neg 0 arrowlength 3 mul 4 div neg arrowlength 4 div neg arrowlength neg arrowlength 3 mul 4 div neg curveto
+	  arrowlength neg arrowlength 3 mul 4 div lineto
+	  arrowlength 3 mul 4 div neg arrowlength 4 div arrowlength 2 div neg 0 0 0 curveto closepath
+	  0 setgray fill
+  grestore
+  } def
+
+% Definitions.
+
+/pearl  % as in xmu ymu xsigma ysigma k pearl
+{
+/k exch def       % number of pearls
+/ysigma exch def
+/xsigma exch def
+/ymu exch def
+/xmu exch def
+/xi 360 3 k mul div def
+/theta xi dup add def
+/radius 1 ysigma mul def   % inner radius
+/extend 1.2 def  % extension  of radii beyond perimeter
+/outerradius radius theta xi sub cos div def
+/origin [ 0 0 ] T def
+
+% Draw circles
+
+ % circles
+ % big outer circle colored
+
+ newpath
+  origin aload pop moveto
+  outerradius 0 rmoveto
+  origin aload pop outerradius 0 360 arc
+  0.9 setgray fill  0 setgray
+
+% color the pearls
+
+
+gsave origin aload pop translate
+gsave
+k {
+newpath radius 0 moveto 
+  outerradius 0 lineto
+  0 0 outerradius 0 theta arc
+  radius theta cos mul radius theta sin mul lineto
+  0 0 radius theta 0 arcn
+  closepath
+  gsave 0.4 setgray fill grestore
+  1 setlinewidth stroke
+  xi 3 mul rotate
+   } repeat
+grestore
+grestore
+
+ % big outer circle stroked
+
+ newpath
+  origin aload pop moveto
+  outerradius 0 rmoveto
+  origin aload pop outerradius 0 360 arc
+  0.5 setlinewidth stroke
+
+ % small inner circle
+
+ newpath
+  origin aload pop moveto
+  radius 0 rmoveto
+  origin aload pop radius 0 360 arc
+  0.5 setlinewidth stroke
+	     
+% sector lines at angles 2 xi apart
+
+gsave
+origin aload pop translate
+0 xi 360 
+   {
+   pop xi rotate
+   newpath 
+     0 0 moveto outerradius extend mul 0 lineto
+      0.5 setlinewidth stroke
+   } for
+grestore
+
+% stroke for r/R definition
+
+gsave
+origin aload pop translate
+newpath 
+radius theta xi sub neg cos mul
+radius theta xi sub neg sin mul moveto
+outerradius 0 lineto
+[ 2 2 ] 2 setdash
+1 setlinewidth stroke
+grestore
+
+ % origin
+
+ newpath
+  origin aload pop moveto
+  origin aload pop POINTSIZE 0 360 arc
+  0 setgray fill
+
+} def    % pearl
+
+% first draw pearl
+
+300 300 200 200 3 pearl
+
+% draw r, R arrows
+
+gsave
+origin aload pop translate
+-50 rotate
+newpath arrowlength 0 moveto radius arrowlength sub 0 lineto
+ 0 setlinewidth [ 2 2 ] 2 setdash stroke
+radius 2 div 5 moveto gsave 50 rotate IT (r) show grestore
+[ 0 0 ] 180 arrow 
+[ radius 0 ] 0 arrow
+grestore
+gsave
+origin aload pop translate
+230 rotate
+newpath arrowlength 0 moveto radius arrowlength sub 0 lineto
+ 0 setlinewidth [ 2 2 ] 2 setdash stroke
+radius 2 div -5 moveto gsave -230 rotate IT (R) show grestore
+[ 0 0 ] 180 arrow 
+[ radius 0 ] 0 arrow
+grestore
+
+% another circle
+
+ newpath
+  origin aload pop moveto
+  outerradius 0 rmoveto
+  origin aload pop exch outerradius 2 div add exch
+    outerradius 2 div 0 360 arc
+  0.5 setlinewidth stroke
+
+% arcs for angles
+
+ newpath
+  origin aload pop moveto
+  radius 0.2 mul 0 rmoveto
+  origin aload pop  radius 0.2 mul
+    0 xi neg arcn
+  0.5 setlinewidth stroke
+ newpath
+  origin aload pop moveto
+  radius 0.2 mul 0 rmoveto
+  origin aload pop  radius 0.2 mul
+    0 xi 3 mul arc
+  0.5 setlinewidth stroke
+
+  gsave
+  origin aload pop translate
+  radius 0.25 mul /rr exch def  % for drawing
+  rr xi 2 div cos mul rr xi 2 div sin mul moveto SY (x) show
+  rr xi 2 div cos mul rr xi 2 div sin mul neg moveto SY (x) show
+  rr xi 3 mul 2 div cos mul rr xi 3 mul 2 div sin mul moveto SY (x) show
+  rr xi 5 mul 2 div cos mul rr xi 5 mul 2 div sin mul moveto SY (x) show
+  grestore
+
+showpage

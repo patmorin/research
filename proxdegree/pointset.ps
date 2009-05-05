@@ -1,0 +1,124 @@
+%!  File "pointset.ps". Shows random point set with towers.
+%%BoundingBox: 81 99 519 418
+% Luc Devroye, October 25, 1995
+/POINTSIZE 1 def
+/LINEWIDTH 0.3 def
+/FONTSIZE 8 def
+/FONT /Times-Roman def
+
+
+
+/draw
+{
+50 dict begin
+
+/T { aload pop ysigma mul ymu add exch xsigma mul 
+     xmu add exch [ 3 1 roll ] } def
+	% transforms [ x y ] and leaves new array.
+
+/Y N 1 add array def
+/R N 1 add array def
+/currentY 0 def
+/currentR 1 def
+Y 0 currentY put
+R 0 currentR put
+0 1 N 1 sub
+  {
+  /n exch def
+  currentY currentR n theta sin mul add /currentY exch def
+  Y n 1 add currentY put
+  currentR n theta cos mul /currentR exch def
+  R n 1 add currentR put
+  } for
+/SIZE Y N get def
+
+% erase box
+gsave
+newpath
+[ R 0 get neg SIZE sub SIZE neg ] T aload pop moveto
+[ R 0 get  SIZE add SIZE neg ] T aload pop lineto
+[ R 0 get  SIZE add Y N get SIZE add ] T aload pop lineto
+[ R 0 get neg  SIZE sub Y N get SIZE add ] T aload pop lineto
+closepath
+gsave 1 setgray fill grestore
+0 setlinewidth [ 3 3 ] 0 setdash stroke
+grestore
+gsave
+newpath
+[ R 0 get neg 0 ] T aload pop moveto
+[ R 0 get  0] T aload pop lineto
+[ R 0 get  SIZE ] T aload pop lineto
+[ R 0 get neg  SIZE  ] T aload pop lineto
+closepath
+0 setlinewidth [ 3 3 ] 0 setdash stroke
+grestore
+
+
+newpath      % lines
+[ R 0 get neg Y 0 get ] T aload pop moveto
+1 1 N 
+  {
+  /n exch def
+  [ R n get neg Y n get ] T aload pop lineto
+  } for
+N -1 0
+  {
+  /n exch def
+  [ R n get Y n get ] T aload pop lineto
+  } for
+LINEWIDTH setlinewidth stroke
+
+0 1 N          % points
+ {
+ /n exch def
+ newpath
+  [ R n get neg Y n get ] T aload pop moveto
+  [ R n get neg Y n get ] T aload pop POINTSIZE 0 360 arc 
+   0 setgray fill
+ newpath
+  [ R n get Y n get ] T aload pop moveto
+  [ R n get Y n get ] T aload pop POINTSIZE 0 360 arc 
+   0 setgray fill
+ } for
+
+
+end} def
+
+% draw random point set
+% include towers that erase
+
+555 srand
+/MAXINT 2 30 exp 1 sub 2 mul 1 add def
+/uni { rand MAXINT div } def
+/A 100 def
+/B 500 def
+/C 100 def
+/D 400 def
+/NUMBER 200 def
+/TOWERSIZE 20 def
+/xsigma  TOWERSIZE def
+/ysigma  TOWERSIZE def
+/N 10 def
+/theta
+  { 2 add 120 exch div } def  % 120/(n+2)
+
+ NUMBER {
+ newpath
+    A B A sub uni mul add C D C sub uni mul add moveto
+    currentpoint POINTSIZE 0 360 arc 0 setgray fill
+	} repeat
+
+ [ [ A B A sub 0.1 mul add C D C sub 0.7 mul add ]
+   [ A B A sub 0.4 mul add C D C sub 0.2 mul add ]
+   [ A B A sub 0.5 mul add C D C sub 0.8 mul add ]
+   [ A B A sub 0.9 mul add C D C sub 0.3 mul add ] ]
+   {
+   aload pop /ymu exch def /xmu exch def
+   draw
+   } forall
+ % box around all
+ newpath
+ A C moveto A D lineto B D lineto B C lineto closepath
+ 0 setlinewidth stroke 
+
+showpage

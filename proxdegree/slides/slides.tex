@@ -1,0 +1,402 @@
+\documentclass{beamer}
+\usepackage{amsmath}
+
+\mode<presentation>{
+\definecolor{cured}{rgb}{.8,0,.2}
+\usecolortheme[named=cured]{structure}
+%\usefonttheme{structurebold}
+\usetheme{split}
+}
+
+\usepackage{amsopn}
+
+\newcommand{\GG}{\mathrm{GG}}
+\newcommand{\YG}{\mathrm{YG}}
+\newcommand{\RDG}{\mathrm{RDG}}
+
+\input{pat-slides}
+
+\newcommand{\pin}{p_{\mathsf{in}}}
+\newcommand{\pout}{p_{\mathsf{out}}}
+\DeclareMathOperator{\cost}{cost}
+\DeclareMathOperator{\depth}{depth}
+
+\title{On the Expected Maximum Degree \\ 
+	of Gabriel and Yao Graphs}
+\author{Luc Devroye 
+	\and Joachim Gudmundsson
+	\and Pat Morin}
+\date{May 7, 2009 \\ NICTA Algorithms Seminar}
+
+\begin{document}
+
+\frame{\titlepage}
+
+%\section[Outline]{}
+%\frame{\tableofcontents}
+
+\frame
+{
+  \frametitle{Wireless \emph{ad hoc} Networks}
+  \begin{itemize}
+    \item Network is an $r$ disk graph
+    \begin{itemize}
+      \item Nodes are a set of points in $\R^2$
+      \item Nodes $u$ and $v$ can communicate directly iff $\|uv\|\le r$  
+    	($r$ is the transmission range)
+      \begin{center}
+	\includegraphics{rdg}
+      \end{center}
+    \end{itemize}
+    \item Operate without any centralized infrastructure, 
+  	planning, or organization
+    \item Nodes only have local knowledge of network
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Gabriel Graphs (Gabriel and Sokal 1969)}
+  \begin{itemize}
+    \item Nodes are a set of points in $\R^2$
+    \item The edge $uv$ exists iff the disk with diameter $uv$ contains
+            no points other than $u$ and $v$
+    \begin{center}
+      \includegraphics{gg}
+    \end{center}
+  \item Gabriel graph is planar and connected
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Gabriel Graphs and $r$ Disk Graphs}
+  \begin{center}
+    \begin{tabular}{ccc}
+      \includegraphics[scale=0.6]{rdg} 
+           & \includegraphics[scale=0.6]{gg} 
+           &  \includegraphics[scale=0.6]{gg-rdg} \\
+      $\RDG$ & $\GG$ & $\GG\cap\RDG$
+    \end{tabular}
+  \end{center}
+  \begin{itemize}
+    \item $\GG\cap\RDG$ is planar and as connected as $\RDG$
+    \item $\GG\cap\RDG$ can be computed locally
+    \item This forms the basis of guaranteed delivery routing protocols
+          (Bose \etal\ 2001, Karp and Kung 2000)
+  \end{itemize}
+}
+
+
+\frame
+{
+  \frametitle{Yao Graphs (Yao 1982)}
+  \begin{itemize}
+    \item Defined on a set of points in $\R^2$
+    \item For each point $u$, partition space around $u$ into $p$ cones,
+           each of angle $2\pi/p$ and connect $u$ to nearest point in each cone
+    \begin{center}
+      \includegraphics{yao}
+    \end{center}
+    \item Yao graph has at most $pn$ edges and is a $t$-spanner, i.e., 
+       $\|uv\|_{\YG} \le t\|uv\|$
+    \item Yao graph is also a $t'$ power spanner
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Yao Graphs and $r$ Disk Graphs}
+  \begin{itemize}
+    \item $\GG\cap\RDG$ has at most $pn$ edges
+    \item $\GG\cap\RDG$ is a $t'$ power spanner of the $\RDG$
+    \item $\GG\cap\RDG$ can be computed locally
+    \item This forms the basis of power-efficient routing protocols
+          (Li et al. 2001, Bahl et al. 2001)
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Random Gabriel and Yao Graphs}
+  \begin{itemize}
+    \item Place $n$ point u.i.d. in the unit square $[0,1]^2$
+    \item What can you say about $\RDG$?
+      \begin{itemize}
+        \item It depends on the value of $r$
+       \end{itemize}
+    \item What can you say about $\GG$ and/or $\YG$?
+       \begin{itemize}
+         \item \textbf{Theorem:}
+           For a set of $n$ points uniformly and independently distributed
+		in a unit square, 
+           \[\lim_{n\rightarrow\infty}
+              \Pr\left\{\mbox{Max degree} \in \Theta\left(\frac{\log
+n}{\log\log n}\right)\right\} = 1 \]
+         \item Will discuss proof for Yao graphs with $p=4$ only
+       \end{itemize}
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{A Special Value}
+  \begin{itemize}
+    \item Let $k=c\log n / \log\log n$
+    \item Then
+     \[ k^k = n^{c(1 + \frac{\log c+\log\log\log n}{\log\log n})} \]
+    \item In particular, for any $\epsilon > 0$,
+     \[ k^k = O(n^c) \]
+     and 
+     \[ k^k = \Omega(n^{c-\epsilon}) \]
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{$(k,r)$-Staircases}
+
+  \begin{center}
+    \includegraphics{staircase}
+  \end{center}
+  \begin{itemize}
+    \item A $(k,r)$ staircase (at $x$) includes one point in each step
+          and no points anywhere else
+    \item In a Yao graph (with $p=4$), $x$ will have degree at least $k$
+  \end{itemize}
+}
+
+
+\frame
+{
+  \frametitle{$(k,r)$-Staircases}
+
+  \begin{center}
+      \includegraphics[height=1.2in]{condition} 
+  \end{center}
+  \begin{itemize}
+    \item Let $X_1,\ldots,X_n$ be i.u.d. in $[0,1]^2$
+    \item $r=\sqrt{2/n}$, $k=c\log n/\log\log n$, and $p=(r/k)^2$, then
+    \[\begin{aligned}
+      & \Pr\{\mbox{$(k,r)$-staircase at $X_1$}| X\in[r,1-r]^2\}  \\
+       &  = \frac{(n-1)!}{(n-k-1)!} p^k (1-8/n)^{n-k-1} \\
+       &  \ge (1-k/n)^k (1-8/n)^{n} 2^k k^{-2k} \\
+       &  \ge k^{-2k} \sim 1/n^{2c}
+      \end{aligned}
+    \]
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{$(k,r)$-Staircases}
+
+  \begin{itemize}
+    \item Let $X_1,\ldots,X_n$ be i.u.d. in $[0,1]^2$
+    \item $r=\sqrt{2/n}$, $k=c\log n/\log\log n$, and $p=(r/k)^2$, then
+    \[\begin{aligned}
+      & \Pr\{\mbox{$(k,r)$-staircase at $X_1$}\}  \\
+       &  \ge (1-2r)^2 (1/n^{2c})  \\
+       &  = (1-2\sqrt{2/n}+2/n)(1/n^{2c}) \\
+       &  \ge 1/n^{2c} - 2\sqrt{2}/n^{2c+1/2} = \Omega(1/n^{2c})
+      \end{aligned}
+    \]
+    \item $\E[\mbox{\#$(k,r)$-staircases}] = n\Pr\{\mbox{$(k,r)$-staircase at $X_1$}\}
+      = \Omega(1/n^{2c-1}) $
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Lower Bound --- Summary}
+
+  \begin{itemize}
+    \item Each $(k,r)$-staircase is a vertex of degree at least $k$
+    \item $\E[\mbox{\#$(k,r)$-staircases}]=\Omega(1/n^{2c-1})$
+    \item $\E[\mbox{\#$(k,r)$-staircases}]\rightarrow\infty$ for $c < 1/2$
+    \item This almost proves:\\
+       \textbf{Theorem 1:}
+           For a set of $n$ points uniformly and independently distributed
+		in a unit square, 
+           \[\lim_{n\rightarrow\infty}
+              \Pr\left\{\mbox{Max degree} > \frac{c\log
+n}{\log\log n}\right\} = 1 \]
+           for any $c < 1/4$.
+    \item Finish the proof using the second moment method
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Upper Bound (Sketch)}
+
+  \begin{center}
+    \includegraphics[height=1.2in]{upper-bound}
+  \end{center}
+  \begin{itemize}
+    \item Consider neighbours of $X_1$ in only one quadrant
+    \item Consider only neighbours that that are ``close to'' to $X_1$
+    \item Show that, with probability at least $(1-a)$, the number of
+neighbours ``close to'' $X_1$ is at most $c\log n/\log\log n$
+    \item Show that, with probability at least $(1-b)$, there are no neighbours
+   ``far from'' $X_1$
+    \item With probability, at least $1-4n(a+b)$,
+no vertex has degree greater than $c\log n/\log\log n$
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Chernoff's Bounds}
+
+    \textbf{Lemma (Chernoff 1952):}
+    Let $Y_1,\ldots,Y_m$ be a sequence of independent $\{0,1\}$-valued
+    random variables, let $Y=\sum_{i=1}^m Y_i$, and let $\mu=\E[Y]$.
+    Then, for any, $\delta > 0$,
+    \[
+       \Pr\{Y > (1+\delta)\mu\} 
+         \le \left(\frac{e^{\delta}}{(1+\delta)^{(1+\delta)}}\right)^{\mu}
+    \]
+}
+
+\frame
+{
+  \frametitle{Close Points}
+
+
+   \begin{itemize}
+     \item
+       \textbf{Lemma:} The number of points ``close to'' $X_1$ is at most
+$2d\log n$, with probability at least $1-1/n^{\Omega(d)}$
+
+     \item \textbf{Proof:}
+       \begin{itemize}
+         \item Let $Y_i=1$ if $X_i$ is close to $X_1$ and 0 otherwise
+         \item $Y_2,\ldots,Y_n$ are independent and
+             \[ \E\left[\sum_{i=2}^n Y_i\right] = (1-1/n)d\log n \]
+         \item Apply Chernoff's bound with $\delta=1$ and $\mu=(1-1/n)d\log n$ 
+       \end{itemize}
+     \item How many of these points are neighbours of $X_1$?
+     \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Neighbours and Minima}
+
+   \begin{itemize}
+     \item The neighbours of $X_1$ are all \emph{minima}
+      \begin{center}
+        \includegraphics[height=1.2in]{minima}
+      \end{center}
+     \item Minima have been studied extensively
+   \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Minima}
+
+   \begin{center} \includegraphics[height=1in]{minima} \end{center}
+   \begin{itemize}
+     \item Place $m$ points $Z_1,\ldots,X_m$ uniformly in the unit squarei$^{*}$
+     \item Sort by increasing $x$-coordinate
+     \item $Z_i$ is a minima iff $x(Z_i) = \min\{ x(Z_j) : j=1,\ldots,i\}$
+     \item $\Pr\{\mbox{$Z_i$ is a minima}\} = 1/i$
+     \item $\E[\mbox{\#minima}] =\sum_{i=1}^m 1/i$
+     \item $\ln m \le \E[\mbox{\#minima}] \le \ln m +1$
+     \item $\Pr\{\mbox{\#minima} > (1+\delta)(\ln m +1)\} \le 
+         \left(\frac{e^{\delta}}{(1+\delta)^{(1+\delta)}}\right)^{\ln m}$
+   \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Minima and Neighbours}
+
+   \begin{itemize}
+     \item For us, $m=2d\log n$, so $\E[\mbox{\#minima}] \le \ln(2d\log n) +1$
+     \item We want to bound $\Pr\{\mbox{\#minima} > c\log n/\log\log n\}$
+     \item We get, for any $\epsilon > 0$,
+       \[\Pr\{\mbox{\#minima} > c\log n/\log\log n\}
+         \le O(1/n^{c/4-\epsilon}) \]
+   \end{itemize}
+}
+
+
+\frame
+{
+  \frametitle{Review so Far}
+
+   \begin{itemize}
+     \item So far we know
+       \[
+         \begin{aligned}
+          &\Pr\{\mbox{$X_1$ has more than $c\log n/\log\log n$ close neighbours}\} \\
+          & \le 1/n^{\Omega(d)} + O(1/n^{c/4+\epsilon}) 
+         \end{aligned}
+       \]
+     \item What about neighbours that are ``far from'' $X_1$?
+   \end{itemize}
+}
+
+
+\frame
+{
+  \frametitle{Far Neighbours}
+
+   \begin{itemize}
+     \item A far neighbour defines an empty region of area at last
+           $(\pid\log n)/4n$, so
+       \[
+         \begin{aligned}
+          &\Pr\{\mbox{$X_2$ is a far neigbour of $X_1$}\} \\
+          & \le (1-(\pi d\log n)/4n)^{n-2}
+          & \le (1/e)^{\Omega(d\log n)}
+          & \le 1/n^{\Omega(d)}
+         \end{aligned}
+       \]
+      \item 
+       \[
+         \begin{aligned}
+          &\Pr\{\mbox{$X_1$ has any far neighbour}\} \\
+          & \le n/n^{\Omega(d)}
+          & = 1/n^{\Omega(d)}
+         \end{aligned}
+       \]
+   \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Finishing Up}
+
+   \begin{itemize}
+     \item So far we know
+       \[
+         \begin{aligned}
+          &\Pr\{\mbox{$X_1$ has more than $c\log n/\log\log n$ neighbours}\} \\
+          & \le 1/n^{\Omega(d)} + O(1/n^{c/4+\epsilon}) 
+         \end{aligned}
+       \]
+     \item So,
+       \[
+         \begin{aligned}
+          &\Pr\{\mbox{any vertex has more than $c\log n/\log\log n$ neighbours}\} \\
+          & \le n/n^{\Omega(d)} + O(n/n^{c/4+\epsilon}) 
+          & = 1/n^{\Omega(d)} + O(1/n^{c/4+1+\epsilon}) \rightarrow 0
+         \end{aligned}
+       \]
+      for large enough $d$ and $c>4$.
+   \end{itemize}
+}
+
+
+
+
+
+
+
+\end{document}
+

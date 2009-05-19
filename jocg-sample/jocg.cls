@@ -124,7 +124,7 @@
 \pagestyle{fancy}
 \fancyhead{}
 \fancyfoot{}
-\fancyhead[L]{\sf Journal on Computational Geometry}
+\fancyhead[L]{\sf Journal of Computational Geometry}
 \fancyhead[R]{\texttt{jocg.org}}
 \renewcommand{\headrulewidth}{1pt}
 \pagestyle{fancy}

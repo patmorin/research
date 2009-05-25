@@ -1,0 +1,62 @@
+#!/bin/bash
+
+usage="Usage: $0 <infile.pdf> <vol> <num> <firstpage> <lastpage>"
+
+if [[ $# -ne 5 ]] ; then
+  echo "$usage"
+  exit -1
+fi
+
+# input file
+f="$1"
+if [[ ! -eq "$f" ]] ; then
+  echo "Input file \"$f\" missing"
+  echo "$usage"
+  exit -1
+fi
+r="${f%.pdf}"
+
+# other parameters
+v="$2"
+y="$((v+2008))"
+n="$3"
+fp="$4"
+lp="$5"
+
+# print parameters for user to check
+echo "infile=$f"
+echo "year=$y"
+echo "vol=$v"
+echo "num=$n"
+echo "firstpage=$fp"
+echo "lastpage=$lp"
+
+# generate a pdf file with nothing but the footer that includes volume
+# information and page numbers
+texfile="$r-pagenums.tex"
+cat <<END > "$texfile"
+\documentclass{jocg}
+
+\\fancyhead{}
+\\fancyfoot[L]{\sf JoCG $v($n), $fp--$lp, $y}
+\\fancyfoot[C]{\\thepage}
+\\renewcommand{\\footrulewidth}{1pt}
+\\renewcommand{\\headrulewidth}{0pt}
+\\setcounter{page}{$fp}
+\\begin{document}
+\\ 
+END
+
+i="$fp"
+while [[ $((i++)) -lt $lp ]]; do
+  echo "\\newpage \ " >> "$texfile"
+done
+echo "\\end{document}" >> "$texfile"
+
+pdff="${texfile%.tex}.pdf"
+pdflatex "$texfile"
+
+of="$r-numbered.pdf"
+pdfovl "$f" "$pdff" "$of"
+echo "Output written to \"$of\" - check volume, number, and page numbers"
+

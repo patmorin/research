@@ -1,0 +1,75 @@
+#!/bin/bash
+
+usage="Usage: $0 <infile.pdf> <vol> <num> <firstpage> <lastpage>"
+
+# input file
+f="$1"
+if [[ ! -e "$f" ]] ; then
+  echo "Input file \"$f\" missing"
+  echo "$usage"
+  exit -1
+fi
+r="${f%.pdf}"
+
+# other parameters
+v="$2"
+y="$((v+2008))"
+n="$3"
+fp="$4"
+lp="$5"
+
+# print parameters for user to check
+echo "infile=$f"
+echo "year=$y"
+echo "vol=$v"
+echo "num=$n"
+echo "firstpage=$fp"
+echo "lastpage=$lp"
+
+# make sure input file is on us letter paper
+# usf="$r-us.pdf"
+# pdfmeld -units "in" -pagesize "8.5,11" -down 0.3 "$f" "$usf"
+
+# generate a pdf file with nothing but the footer 
+texfile="$r-pagenums.tex"
+cat <<END > "$texfile"
+\documentclass{jocg}
+
+\\fancyhead{}
+\\fancyfoot[L]{\sf JoCG $v($n), $fp--$lp, $y}
+\\fancyfoot[C]{\\thepage}
+\\renewcommand{\\footrulewidth}{1pt}
+\\renewcommand{\\headrulewidth}{0pt}
+\\setcounter{page}{$fp}
+\\begin{document}
+\\ 
+END
+
+i="$fp"
+while [[ $((i++)) -lt $lp ]]; do
+  echo "\\newpage \ " >> "$texfile"
+done
+echo "\\end{document}" >> "$texfile"
+
+dvif="${texfile%.tex}.dvi"
+uspsf="${texfile%.tex}-us.ps"
+uspdff="${texfile%.tex}-us.pdf"
+latex "$texfile"
+dvips -t letter -o "$uspsf" "$dvif"
+ps2pdf "$uspsf" "$uspdff"
+
+a4psf="${texfile%.tex}-a4.ps"
+a4pdff="${texfile%.tex}-a4.pdf"
+dvips -t a4 -o "$a4psf" "$dvif"
+ps2pdf "$a4psf" "$a4pdff"
+
+usof="$r-us-numbered.pdf"
+pdfmeld -units "in" -overlay "$f,$uspdff" "$usof"
+echo "Output written to \"$usof\" - check volume, number, and page numbers"
+
+a4of="$r-a4-numbered.pdf"
+pdfmeld -units "in" -overlay "$f,$a4pdff" "$a4of"
+echo "Output written to \"$a4of\" - check volume, number, and page numbers"
+
+
+

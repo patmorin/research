@@ -1,5 +1,7 @@
 %
-% This is my article class based on the latex article class
+% The JoCG article class to be used by authors for formatting articles
+% appearing in the Journal of Computational Geometry.  The definitive
+% version of this file is at http://jocg.org/jocg.cls
 %
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{jocg} 
@@ -30,7 +32,7 @@
 \ProcessOptions
 
 % Read the article class
-\LoadClass[11pt]{article}
+\LoadClass[11pt,letterpaper]{article}
 
 % Page setup
 \setlength{\textheight}{9.250in}
@@ -42,10 +44,9 @@
 \setlength{\headheight}{0.200in}
 \setlength{\headsep}{0.4in}
 \setlength{\footskip}{0.500in}
-\setlength{\parindent}{1em}
-
 \setlength{\parskip}{.5cm}
 \setlength{\parindent}{1.25cm}
+\flushbottom
 
 % Sectioning commands
 \font\tensfb = cmssbx11
@@ -119,6 +120,9 @@
 \renewenvironment{abstract}
 {\hrule \noindent\textsc{Abstract.}}{\vskip 1em \hrule}
 
+
+%------------- Use this so pdflatex outputs US letter pages -------------
+\usepackage[letterpaper]{hyperref}
 
 %--------------------------- Headers and Footers ------------------------
 \pagestyle{fancy}

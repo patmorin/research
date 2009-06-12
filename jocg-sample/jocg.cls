@@ -9,7 +9,6 @@
  JoCG article class]
 
 \RequirePackage{fancyhdr}
-\RequirePackage[overload]{textcase}
 
 % Get rid of some article.cls options
 \DeclareOption{a4paper}{\OptionNotUsed}
@@ -129,6 +128,6 @@
 \fancyhead{}
 \fancyfoot{}
 \fancyhead[L]{\sf Journal of Computational Geometry}
-\fancyhead[R]{\texttt{jocg.org}}
+\fancyhead[R]{\texttt{\href{http://jocg.org/}{jocg.org}}}
 \renewcommand{\headrulewidth}{1pt}
 \pagestyle{fancy}

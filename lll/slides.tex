@@ -1,0 +1,366 @@
+\documentclass{beamer}
+\usepackage{amsmath}
+\usepackage[noend]{algorithmic}
+
+\mode<presentation>{
+\definecolor{cured}{rgb}{.8,0,.2}
+\usecolortheme[named=cured]{structure}
+\usetheme{split}
+}
+
+\usepackage{amsopn}
+
+\newcommand{\GG}{\mathrm{GG}}
+\newcommand{\YG}{\mathrm{YG}}
+\newcommand{\RDG}{\mathrm{RDG}}
+
+\input{pat-slides}
+
+\newcommand{\pin}{p_{\mathsf{in}}}
+\newcommand{\pout}{p_{\mathsf{out}}}
+\DeclareMathOperator{\cost}{cost}
+\DeclareMathOperator{\depth}{depth}
+
+\title{Moser's Proof of the Lov\'asz Local Lemma}
+\author{Pat Morin}
+\date{June 18, 2009 \\ SACT Seminar}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\frame
+{
+  \frametitle{STOC 2009}
+
+  \begin{center}
+    \includegraphics[height=1.3in]{moser} \\
+    Robin A. Moser
+  \end{center}
+  \begin{itemize}
+    \item PhD student at ETH Z\"urich
+    \item Winner: STOC 2009 Best Student Paper Award
+    \item Co-Winner: STOC 2009 Best Paper Award
+  \end{itemize}
+  R. A. Moser. A constructive proof of the Lov\'asz Local Lemma.
+  \emph{Proceedings of STOC 2009}, pages~343--350. ACM Press, 2009. 
+} 
+
+%\section[Outline]{}
+%\frame{\tableofcontents}
+
+%\newcommand{\or}{\vee}
+%\newcommand{\and}{\wedge}
+
+\frame
+{
+  \frametitle{$k$-CNF Satisfiability}
+  
+  \begin{dfn}[$k$-CNF formula]
+    A $k$-CNF formula is a conjunction of $m$ clauses, each of which is the
+    disjunction of $k$ (possibly negated) distinct variables in 
+    $x_1,\ldots,x_n$.
+  \end{dfn}
+
+  Example ($k=3$, $m=5$, $n=4$): 
+  \begin{eqnarray*}
+   F(x_1,\ldots,x_4) & = &
+   (\bar x_1 \vee x_2 \vee x_3) 
+   \wedge (x_1 \vee \bar x_2  \vee x_3) 
+   \wedge (\bar x_1 \vee \bar x_2 \vee \bar x_3) \\
+   & & {}\wedge (\bar x_1 \vee \bar x_3 \vee \bar x_4)
+   \wedge (\bar x_1 \vee \bar x_2 \vee \bar x_4)
+  \end{eqnarray*}
+  \textbf{Quiz:} How long is the shortest unsatisfiable $k$-CNF formula?
+}
+
+\frame
+{
+  \frametitle{$k$-CNF Satisfiability}
+
+  When is a $k$-CNF formula satisfiable? 
+
+  \begin{itemize}
+       \item NP-hard to decide, even for $k=3$ 
+       \item Easy case: $F$ has less than $2^k$ clauses
+       \item Easy case: Each variable appears in only one clause 
+       \begin{itemize}
+         \item Assign values $x_i\in \{0,1\}$ at random, so
+         \[\Pr\{F(x_1,\ldots,x_n)=1\} = (1-(1/2)^k)^{m} > 0 \]
+         \item There exists $x_1,\ldots,x_n$ such that $F(x_1,\ldots,x_n) = 1$.
+       \end{itemize}
+       \item What if each variable doesn't appear in more than $d$ clauses?
+  \end{itemize} 
+}
+
+
+\frame
+{
+  \frametitle{The Lov\'asz Local Lemma}
+
+  \begin{thm}[LLL --- Erd\"os and Lov\'asz 1975]
+    Let $S=\{E_1,\ldots,E_m\}$ be a set of events such that
+    \begin{enumerate}
+      \item for all $i\in\{1,\ldots,m\}$, $\Pr\{E_i\} \le p$ 
+      \item for all $i\in\{1,\ldots,m\}$, $E_i$ is dependent on at most $d$
+events in $S\setminus \{E_i\}$, and 
+      \item $4pd \le 1$.
+    \end{enumerate}
+    Then, $\Pr\{\bar E_1 \cap \bar E_2 \cap \cdots \cap \bar E_m\} > 0$.
+  \end{thm}
+
+  The LLL has applications in graph theory (esp. coloring), combinatorial geometry,
+boolean satisfiability, network routing theory, scheduling theory, coding
+theory, percolation theory, database theory, distributed computing, game
+theory, wireless networks, Ramsey theory, network flow,\ldots
+
+}
+
+\frame
+{
+  \frametitle{Dependence}
+
+  \begin{cond}[Limited Dependence]
+    For each $i\in\{1,\ldots,m\}$, 
+    there exists a \emph{dependent set} $S_i\subset S$ with
+    \begin{enumerate}
+      \item $|S_i| \le d$
+      \item For any $S'\subseteq S\setminus S_i\setminus \{E_i\}$, $\Pr\{ E_i | \cap S_i'\} = \Pr\{E_i\}.$ 
+    \end{enumerate}
+   \end{cond}
+}
+
+
+\frame
+{
+  \frametitle{Using the LLL on $k$-CNF}
+
+  \begin{thm}[$k$-CNF Sat]
+    Let $F$ be a $k$-CNF formula where each variable appears in
+    at most $d+1$ clauses, where $kd \le 2^{k-2}$.  Then $F$
+    is satisfiable.
+  \end{thm}
+  \begin{proof}
+    Assign $x_1,\ldots,x_n$ at random and let
+    $E_i=$``the $i$th clause of $F$ is not satisfied''
+    \begin{enumerate}
+    \item $p=\Pr\{E_i\} = (1/2)^k$
+    \item $E_i$ depends on at most $d'=kd$ other $E_j$ with $j\neq i$
+    \item $4pd' \le 1$
+  \end{enumerate}
+  So, by the LLL $\Pr\{F(x_1,\ldots,x_n)=1\} > 0$ and therefore there
+exists $x_1,\ldots,x_n$ such that $F(x_1,\ldots,x_n) = 1$.
+  \end{proof}
+}
+
+\frame
+{
+  \frametitle{Constructive LLL}
+
+  \begin{itemize}
+    \item Theorem 1 proves the existence of a satisfying assignment, but
+          doesn't explain how to find it
+    \item For long formulas, a random assignment may have only a  very 
+       small probability of working [$(1-(1/2)^{k-1}))^m$]
+    \item We may have to try (exponentially) many random assignments before
+       finding one that works
+    \item Moser's new proof solves all this
+    \begin{itemize}
+      \item The proof is constructive
+      \item The construction gives a randomized algorithm whose expected
+            running time is polynomial in the number of clauses
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Moser's Algorithm}
+
+  \noindent\textsc{Satisfy$(F=(C_1\wedge C_2\wedge\cdots\wedge C_m))$}
+  \begin{algorithmic}
+   \STATE{$x_1,\ldots,x_n \gets\mbox{ random element of }\{0,1\}^n$}
+   \FOR{$i=1\ldots, m$}
+     \IF{$C_i$ is false}
+       \STATE{\textsc{Fix$(C_i)$}}
+     \ENDIF
+   \ENDFOR
+  \end{algorithmic}
+  \vspace{1ex}
+  \noindent\textsc{Fix$(C_i)$}
+  \begin{algorithmic}
+   \STATE{Assign new random values to each of $C_i$'s $k$ variables}
+   \FOR{each $C_j$ that shares a variable with $C_i$ (including $C_i$)}
+     \IF{$C_j$ is false}
+      \STATE{\textsc{Fix($C_j$)}}
+     \ENDIF
+   \ENDFOR
+  \end{algorithmic}
+}
+
+\frame
+{
+  \frametitle{Moser's Algorithm}
+  \begin{itemize}
+    \item We want to prove that Moser's Algorithm terminates, and in
+polynomial time
+    \item Let $B=b_1,b_2,b_3,\ldots$ be a random binary string
+    \item When Moser's Algorithm needs a new random bit, it reads it from $B$
+    \item Proof Idea:
+    \begin{itemize}
+      \item Moser's Algorithm encodes (a prefix of) $B$ very efficiently
+      \item If it runs too long then the encoding violates Shannon's Theorem
+        by encoding $r$ bits of $B$ using less than $r$ bits!
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Moser's Algorithm}
+
+  \noindent\textsc{Satisfy$(F=(C_1\wedge C_2\wedge\cdots\wedge C_m))$}
+  \begin{algorithmic}
+   \STATE{$x_1,\ldots,x_n \gets b_1,\ldots,b_n$}
+   \FOR{$i=1\ldots, m$}
+     \IF{$C_i$ is false}
+       \STATE{\textsc{Fix$(C_i)$}}
+     \ENDIF
+   \ENDFOR
+  \end{algorithmic}
+  \vspace{1ex}
+  \noindent\textsc{Fix$(C_i)$}
+  \begin{algorithmic}
+   \STATE{Assign the next $k$ bits of $B$ to $C_i$'s $k$ variables}
+   \FOR{each $C_j$ that shares a variable with $C_i$ (including $C_i$)}
+     \IF{$C_j$ is false}
+      \STATE{\textsc{Fix($C_j$)}}
+     \ENDIF
+   \ENDFOR
+  \end{algorithmic}
+}
+
+\frame
+{
+  \frametitle{Tracing Moser's Algorithm}
+
+  \noindent\textsc{SatisfyE$(F=(C_1\wedge C_2\wedge\cdots\wedge C_m))$}
+  \begin{algorithmic}
+   \STATE{$x_1,\ldots,x_n \gets b_1,\ldots,b_n$}
+   \FOR{$i=1\ldots, m$}
+     \IF{$C_i$ is false}
+       \STATE{print $i$ and \textsc{FixE$(C_i)$} \COMMENT{* $\log m$ bits *}}
+     \ENDIF
+   \ENDFOR
+  \end{algorithmic}
+  \vspace{1ex}
+  \noindent\textsc{FixE$(C_i)$}
+  \begin{algorithmic}
+   \STATE{Assign the next $k$ bits of $B$ to $C_i$'s $k$ variables}
+   \STATE{$C_{i,1},\ldots,C_{i,\ell}\gets\{C_j:\mbox{$C_i$ and $C_j$ share a
+variable}\}$}
+   \FOR{$j=1,\ldots,\ell$}
+     \IF{$C_{i,j}$ is false}
+      \STATE{print $j$ and \textsc{FixE($C_{i,j}$)} \COMMENT{* $\log(kd)$ bits *}}
+     \ENDIF
+   \ENDFOR
+   \STATE{print $\phi$ \COMMENT{* $O(1)$ bits *}}
+  \end{algorithmic}
+}
+
+
+\frame
+{
+  \frametitle{Decoding Moser's Algorithm}
+
+  \noindent$\textsc{SatisfyD}(F=(C_1\wedge C_2\wedge\cdots\wedge C_m))$
+  \begin{algorithmic}
+   \STATE{$x_1,\ldots,x_n \gets b_1,\ldots,b_n$}
+   \WHILE{$i=\textsc{ReadInteger}$}
+     \STATE{$\textsc{FixD(C_i)}$}
+   \ENDWHILE
+  \end{algorithmic}
+  \vspace{1ex}
+  \noindent$\textsc{FixD}(C_i)$
+  \begin{algorithmic}
+   \STATE{record values of variables in $C_i$ \COMMENT{* $k$ bits *}}
+   \STATE{Assign the next $k$ bits of $B$ to $C_i$'s $k$ variables}
+   \STATE{$C_{i,1},\ldots,C_{i,\ell}
+        \gets\{C_j:\mbox{$C_i$ and $C_j$ share a variable}\}$}
+   \WHILE{$j\gets \textsc{ReadInteger} \ne \phi$}
+     \STATE{$\textsc{FixD}(C_{i,j})$}
+   \ENDWHILE 
+  \end{algorithmic}
+}
+
+
+\frame
+{
+  \frametitle{Tracing Moser's Algorithm}
+
+  \begin{itemize}
+    \item When \textsc{SatisfyD} completes, it has deduced all but 
+          $n$ of the bits used by Moser's Algorithm
+    \item Moser's Algorithm uses $n + sk$ bits of $B$, where $s$ is the
+          number of calls to \textsc{Fix}.
+    \item So, \textsc{SatisfyD} deduces $sk$ bits of $B$
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Bounding Moser's Algorithm}
+
+  \begin{itemize}
+    \item \textsc{SatisfyE} prints $m\log m + s(\log(dk)+O(1))$ bits.
+    \item By Shannon's Theorem, we must have
+      \[ sk \le  m\log m + s(\log(dk)+O(1)) \]
+      or
+      \[ sk - s(\log(dk)+O(1)) \le m\log m \]
+      \[ s(k - log(dk) - O(1)) \le m\log m \]
+      \[ s \le \frac{m\log m}{k - \log(dk) - O(1)} \]
+     provided that $k-\log(dk)-O(1) > 0$, i.e., $2^{k-O(1)} > dk$.
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Moser's Theorem}
+
+  \begin{thm}[Constructive $k$-CNF Sat]
+    Let $F$ be a $k$-CNF formula where each variable appears in
+    at most $d+1$ clauses, where $kd \le 2^{k-O(1)}$.  Then $F$
+    is satisfiable and there exists a randomized algorithm that 
+    finds a satisfying assignment in
+    $O\left(m + \frac{m\log m}{k - \log(dk) - O(1)}\right)$ expected time.
+  \end{thm}
+}
+
+\frame
+{
+  \frametitle{Summary}
+
+  \begin{itemize}
+    \item This gives an efficient algorithm for satisfying bounded
+      occurence $k$-CNF formulas
+    \item Moser and Tard\"os have a similar algorithm for the general LLL:
+  \end{itemize}
+  \begin{thm}[Lov\'asz and Tardos 2008]
+    Let $\mathcal{P}$ be a finite set of mutually independent random
+    variables in a probability space. Let $\mathcal{A}$ be a finite set of
+    events determined by these variables. If there exists an assignment
+    of reals $x : A \mapsto (0, 1)$ such that $\forall A \in \mathcal{A}
+    : \Pr\{A\} \le x(A) \prod_{B\in \Gamma_{\mathcal{A}}(A)}
+     (1 - x(B))$,
+    then there exists a random algorithm that assigns values to the
+    variables in $\mathcal{P}$ avoiding all the events in \mathcal{A}.
+    This algorithm resamples an event $A \in \mathcal{A}$ at most
+    an expected $x(A)/(1 - x(A))$ times before it finds such an
+    assignment. 
+%    Thus the expected total number of resampling steps is
+%    at most $\sum_{A\in\mathcal{A}} x(A)/(1-x(A))$.
+   \end{thm}
+}
+
+\end{document}
+

@@ -13,7 +13,6 @@ proxdegree.bbl : proxdegree.tex proxdegree.bib
 	latex proxdegree
 	bibtex proxdegree
 
-
 proxdegree-conf.pdf : proxdegree-conf.ps
 	ps2pdf proxdegree-conf.ps
 
@@ -24,6 +23,6 @@ proxdegree-conf.dvi : proxdegree-conf.bbl proxdegree-conf.tex empty.xml staircas
 	latex proxdegree-conf
 	latex proxdegree-conf
 
-proxdegree-conf.bbl : proxdegree-conf.tex proxdegree-conf.bib
+proxdegree-conf.bbl : proxdegree-conf.tex proxdegree.bib
 	latex proxdegree-conf
 	bibtex proxdegree-conf

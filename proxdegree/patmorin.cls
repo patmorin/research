@@ -1,10 +1,14 @@
 %
-% This is my article class based on the latex article class
+% The JoCG article class to be used by authors for formatting articles
+% appearing in the Journal of Computational Geometry.  The definitive
+% version of this file is at http://jocg.org/jocg.cls
 %
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{patmorin} 
-		[2001/11/12 v0.1a
- Pat Morin's article class]
+\ProvidesClass{jocg} 
+		[2009/05/11 v0.1a
+ JoCG article class]
+
+\RequirePackage{fancyhdr}
 
 % Get rid of some article.cls options
 \DeclareOption{a4paper}{\OptionNotUsed}
@@ -17,21 +21,8 @@
 \DeclareOption{twoside}{\OptionNotUsed}
 \DeclareOption{titlepage}{\OptionNotUsed}
 \DeclareOption{onecolumn}{\OptionNotUsed}
-
-% Use option ccfonts for concrete math fonts
-\newif\if@ccfonts
-\@ccfontsfalse
-\DeclareOption{ccfonts}{\@ccfontstrue}
-
-% Use option ccfonts for concrete math fonts
-\newif\if@charterfonts
-\@charterfontsfalse
-\DeclareOption{charterfonts}{\@charterfontstrue}
-
-% Use option lotsofwhite for lots of whitespace
-\newif\if@lotsofwhite
-\@lotsofwhitefalse
-\DeclareOption{lotsofwhite}{\@lotsofwhitetrue}
+\DeclareOption{10pt}{\OptionNotUsed}
+\DeclareOption{12pt}{\OptionNotUsed}
 
 % The default action is to pass options to article class
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
@@ -40,56 +31,42 @@
 \ProcessOptions
 
 % Read the article class
-\LoadClass{article}
-
-% Changes the fonts and get the blackboard bold font
-\usepackage{bbold}
-\if@ccfonts
-	\usepackage{concmath}
-	\usepackage{euler}
-\fi
-\if@charterfonts
-	\usepackage{charter}
-\fi
-
-% Process whitespace option
-\if@lotsofwhite
-	\setlength{\parskip}{.5cm}
-	\setlength{\parindent}{1.25cm}
-\fi
+\LoadClass[11pt,letterpaper]{article}
 
 % Page setup
-\setlength{\oddsidemargin}{0in}
-\setlength{\evensidemargin}{0in}
-\setlength{\textwidth}{6.25in}
-\setlength{\topmargin}{-.6in}
-\setlength{\headheight}{.3in}
-\setlength{\headsep}{.3in}
-\setlength{\textheight}{8.5in}
+\setlength{\textheight}{9.250in}
+\setlength{\textwidth}{6.750in}
+\setlength{\topmargin}{-0.700in}
+\setlength{\oddsidemargin}{-0.125in}
+\setlength{\evensidemargin}{-0.375in}
+\setlength{\columnsep}{2pc}
+\setlength{\headheight}{0.200in}
+\setlength{\headsep}{0.4in}
+\setlength{\footskip}{0.500in}
+\setlength{\parskip}{.5cm}
+\setlength{\parindent}{1.25cm}
+\flushbottom
 
+% Sectioning commands
+\font\tensfb = cmssbx11
+\newcommand{\@titlestyle}{\normalsize\tensfb}
+\renewcommand\section{\@startsection {section}{1}{\z@}{-3.5ex plus
+    -1ex minus -.2ex}{2.3ex plus .2ex}{\@titlestyle}}
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}{-3.25ex
+    plus -1ex minus -.2ex}{1.5ex plus .2ex}{\@titlestyle}}
+\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}{-3.25ex
+    plus -1ex minus -.2ex}{1.5ex plus .2ex}{\@titlestyle}}
+\renewcommand\paragraph{\@startsection {paragraph}{4}{\z@}{3.25ex plus
+    1ex minus .2ex}{-1em}{\@titlestyle}}
+\renewcommand\subparagraph{\@startsection
+  {subparagraph}{4}{\parindent}{3.25ex plus 1ex minus
+    .2ex}{-1em}{\@titlestyle}}
 
-\renewcommand\section{\@startsection {section}{1}{\z@}%
-                                   {-3.5ex \@plus -1ex \@minus -.2ex}%
-                                   {2.3ex \@plus.2ex}%
-                                   {\normalfont\normalsize\bfseries}}
-\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
-                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
-                                     {1.5ex \@plus .2ex}%
-                                     {\normalfont\normalsize\bfseries}}
-\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
-                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
-                                     {1.5ex \@plus .2ex}%
-                                     {\normalfont\normalsize\bfseries}}
-\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
-                                    {3.25ex \@plus1ex \@minus.2ex}%
-                                    {-1em}%
-                                    {\normalfont\normalsize\bfseries}}
-\renewcommand\subparagraph{\@startsection{subparagraph}{5}{\parindent}%
-                                       {3.25ex \@plus1ex \@minus .2ex}%
-                                       {-1em}%
-                                      {\normalfont\normalsize\bfseries}}
+% Commands for typesetting affiliations and email addresses
+\newcommand{\affil}[1]{\textit{#1}}
+\newcommand{\email}[1]{\texttt{#1}}
 
-
+% Maketitle stuff
 \renewcommand\maketitle{\par
   \begingroup
     \renewcommand\thefootnote{\@fnsymbol\c@footnote}%
@@ -97,18 +74,10 @@
     \long\def\@makefntext##1{\parindent 1em\noindent
             \hb@xt@1.8em{%
                 \hss\@textsuperscript{\normalfont\@thefnmark}}##1}%
-    \if@twocolumn
-      \ifnum \col@number=\@ne
-        \@maketitle
-      \else
-        \twocolumn[\@maketitle]%
-      \fi
-    \else
-      \newpage
-      \global\@topnum\z@   % Prevents figures from going at top of page.
-      \@maketitle
-    \fi
-    \thispagestyle{plain}\@thanks
+    \newpage
+    \global\@topnum\z@   % Prevents figures from going at top of page.
+    \@maketitle
+    \@thanks
   \endgroup
   \setcounter{footnote}{0}%
   \global\let\thanks\relax
@@ -124,35 +93,43 @@
   \global\let\and\relax
 }
 
-\newcommand{\patcomment}[1]{}
+\renewcommand{\and}{ }
+
 \def\@maketitle{%
   \newpage
   \null
-  \vskip 2em%
-  \begin{center}%
+  \newlength{\@gnat}
+  \setlength{\@gnat}{2em}
+  \addtolength{\@gnat}{-0.4in}
+  \vskip \@gnat%
+  \begin{flushleft}%
   \let \footnote \thanks
-    {\large \@title \par}%
+    {\large\sffamily\bfseries \@title   \par}%
     \vskip 1.5em%
     {
       \lineskip .5em%
-      \begin{tabular}[t]{c}%
-        \@author
-      \end{tabular}\par}%
-    \vskip 1em%
-    {\@date}%
-  \end{center}%
+      {\normalsize\itshape\@author}
+    }%
+  \end{flushleft}%
   \par
-  \vskip 1.5em}
+  \vskip 1em}
 
 
-%\renewcommand{\maketitle}
-%{
-%\begin{center}
-%{\large\MakeUppercase{\@title}} \\[1cm]
-%\@author \\[.5cm]
-%\today
-%\end{center}
-%}
-
+% Abstract
 \renewenvironment{abstract}
-{\noindent\textsc{Abstract.}}{} 
+{\hrule \noindent\textsc{Abstract.}}{\vskip 1em \hrule}
+
+
+%------------- Use this so pdflatex outputs US letter pages -------------
+\usepackage[letterpaper]{hyperref}
+
+%--------------------------- Headers and Footers ------------------------
+\pagestyle{fancy}
+\fancyhead{}
+\fancyfoot{}
+\fancyfoot[C]{-\thepage-}
+%\fancyhead[L]{\sf Journal of Computational Geometry}
+%\fancyhead[R]{\texttt{\href{http://jocg.org/}{jocg.org}}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+\pagestyle{fancy}

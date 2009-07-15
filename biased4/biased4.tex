@@ -1,9 +1,21 @@
 \documentclass{patmorin}
 
-\usepackage{pat}
+\usepackage{pat,amsopn}
+\DeclareMathOperator{\scc}{succ}
+\DeclareMathOperator{\interior}{int}
+\DeclareMathOperator{\lft}{left}
+\DeclareMathOperator{\rght}{right}
 
-\title{Biased Range Trees: 4-Sided Queries}
-\author{Pat Morin}
+\title{\MakeUppercase{Biased Range Trees: 4-Sided Queries}%
+	\thanks{This research was partly supported by NSERC, the Canada
+	Foundation for Innovation, the Ontario Innovation Trust, the
+	Ontario Ministry of Research and Innovation, the University
+	of Sydney, National ICT Australia, and the Carty Memorial
+	Foundation.}}
+\author{Pat Morin%
+	\thanks{\affil{Carleton University}, \email{morin@scs.carleton.ca}.
+	This research took place while the author was a visiting researcher
+	at the University of Sydney and National ICT Australia.}}
 
 
 \begin{document}
@@ -16,8 +28,128 @@ We describe a data structure that preprocesses $P$ and $D$ to answer
 rectangular range counting queries over $P$.  When the queries are drawn
 according to $D$, the expected query time of this data structure does
 not exceed, by more than a constant factor, the expected cost of any
+comparison tree that answers rectangular range counting queries over $P$.
+\end{abstract}
+
+
+\section{Introduction}
+
+Let $P$ be a set of $n$ points in $\R^2$ and let $D$ be a probability
+measure over the space of all axis-aligned rectangles in $\R^2$.
+We describe a data structure that preprocesses $P$ and $D$ to answer
+rectangular range counting queries over $P$.  When the queries are drawn
+according to $D$, the expected query time of this data structure does
+not exceed, by more than a constant factor, the expected cost of any
 comparison tree for answering rectangular range counting queries over $P$
 for queries drawn according to $D$.
-\end{abstract}
+
+An interesting aspect of our solution is that it makes use of two
+geometric data structuring techniques that are known to be efficient
+in practice, but that have poor worst-case behaviour.  The primary
+form of search tree used is a $k$-d tree \cite{S}, which requires
+$\Theta(\sqrt{n})$ time to answer rectangular range queries \cite{dbXX}.
+Furthermore, our solution involves lifting the points of $P$ into a point
+set in $\R^4$ and performing 4-sided range-counting queries on this lifted
+point set.  While this lifting technique is common in practice it almost
+invariably leads to (at least) extra logarithmic factors in query times.
+Nevertheless, using these two techniques, we obtain expected query times
+that are within a constant factor of the best decision tree for answer
+rectangular range queries over $P$ with the queries drawn according
+to $D$.
+
+\section{Preliminaries}
+
+\subsection{1-Dimensional Range Counting}
+
+As a subroutine, our data structures are required to solve some
+1-dimensional range counting problems.  
+
+Given a set $X$ of $n$ real numbers, the 1-sided (1-d) range counting
+problem over $X$ asks us to return the number of elements of $X$ greater
+than some query value $x_0$.  When the query value $x_0$ is given by a
+probability measure $D$ over $\R$, this problem can be solved optimally
+using biased search trees \cite{X,X,X}.  In particular, after $O(n\log n)$
+preprocessing, a biased search tree can answer a 1-sided range-counting
+query over $X$ in $O(\mu_D(T^*))$ expected time, where $T^*$ is any
+comparison tree that answers 2-sided range counting queries over $X$.
+
+The 2-sided (1-d) range counting problem over $X$ asks us to return the
+number of elements of $x\in X$ such that $x_0 \le x \le x_1$ for some query
+interval $(x_0,x_1)$.  By lifting the set $X$ onto a 2-d point set
+$X^2=\{(x,x): x\in X\}$ the 2-sided 1-d range counting problem can be
+converted to a 2-sided 2-d range counting problem.  When the query interval
+$(x_0,x_1)$ is given by a probability measure $D$ over $\R^2$, such queries
+can be answered optimally using the recently-discovered biased range trees
+\cite{dhm08}.  In particular, after $O(n\log n)$ preprocessing, a biased
+range tree can answer a 2-sided range-counting query over $X$ in
+$O(\mu_D(T^*))$ expected time, where $T^*$ is any comparison tree that
+answers 2-sided range counting queries over $X$.
+
+\subsection{2-Dimensional Range Counting}
+
+As mentioned above, biased range trees can answer 2-sided 2-d range
+counting queries in optimal expected time.  In fact, these data structures
+give somewhat more information than just the number of points of $P$ in
+the query range.  We say that a data structure \emph{locates} a number
+$x_0$ among a set $X$ of numbers if the data structure finds (a pointer
+to) the value $\scc_X(x) = \min\{ x\in X\cup \{\infty\}: x \ge x_0 \}$.
+For a query point $(x_0,y_0)$, a biased range tree locates the value of
+$x_0$ within the set
+\[
+    P_{\ge y} = \{x: \mbox{$(x,y)\in P$ and $y \ge y_0$}\} 
+\]
+and locates the value of $y_0$ within the set
+\[ 
+    P_{\ge x} = \{y : \mbox{$(x,y)\in P$ and $x \ge x_0$}\} \enspace .
+\]
+
+\section{3-Sided Queries}
+
+A three sided range query $(x_0,y_0,x_1)$ asks for all points of $S$
+contained in
+\[
+   R(x_0,y_0,x_1) = \{ (x,y)\in\R^2 
+                       : \mbox{$x_0\le x\le x_1$ and $y_0 \le y$} \} \enspace .
+\]
+To answer 3-sided range queries we lift the points of $P$ into $\R^3$
+using using the map $(x,y) \mapsto (x,y,x)$ to obtain a set $P^3$
+of points in $\R^3$.  Now, we construct a kd-tree $T$ for $P^3$.
+We call a node $v$ of $T$ a $x_0$-node, a $y_0$-node, or a $x_1$-node
+depending on whether the depth of $v$ is congruent to 0, 1, or 2 modulo
+3, respectively.
+
+Each non-leaf node $v$ of $T$ splits $r(v)$ into two parts.  If $v$ is an
+$x_0$-node or a $y_0$-node, we denote by $\lft(v)$ the child corresponding to
+smaller $x$, respectively, $y$, coordinates. For an $x_1$-node, we denote
+by $\lft(v)$, the child corresponding to the larger $z$ coordinate.  For
+any non-leaf node $v$, $\rght(v)$ denotes the child of $v$ different from
+$\lft(v)$.
+
+Consider a path $v_0,\ldots,v_k$ from the root of $T$ to the leaf $v$ that
+contains the query $(x_0,y_0,x_1)\in\interior(r(v))$.  Let $r_k=r(v_k)$
+and, for each $i\in\{1,\ldots,k-1\}$, let
+\[
+  r_i = \left\{\begin{array}{ll}
+          r(\rght(v_i)) & \mbox{if $v_{i+1}=\lft(v_i)$} \\
+          \emptyset     & \mbox{otherwise}
+        \end{array}\right.
+\]
+Observe that each non-empty $r_i$ intersects the query range
+\[
+    R=\{ (x,y,z)\in\R^3 
+          : \mbox{$x_0 \le x$, $y_0 \le y$, and $x_1 \ge z$} \}
+\]
+and that the $\interior(r_i)\cap \interior(r_j)=\emptyset$ for any $i\neq
+j$.  In particular, $r_1,\ldots,r_{k-1}$ and $r(v_k)$ form a cover of $R$
+with boxes whose interiors are disjoint.
+
+
+
+\section{4-Sided Queries}
+
+To construct a data structure for 4-sided (rectangular) range queries we
+lift the point set $P$ into $\R^4$.  Let 
+
+\section{Summary and Conclusions}
 
 \end{document}

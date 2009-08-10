@@ -56,8 +56,7 @@
     plus -1ex minus -.2ex}{1.5ex plus .2ex}{\@titlestyle}}
 \renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}{-3.25ex
     plus -1ex minus -.2ex}{1.5ex plus .2ex}{\@titlestyle}}
-\renewcommand\paragraph{\@startsection {paragraph}{4}{\z@}{3.25ex plus
-    1ex minus .2ex}{-1em}{\@titlestyle}}
+\renewcommand\paragraph{\@startsection {paragraph}{4}{\z@}{0ex}{-1em}{\@titlestyle}}
 \renewcommand\subparagraph{\@startsection
   {subparagraph}{4}{\parindent}{3.25ex plus 1ex minus
     .2ex}{-1em}{\@titlestyle}}

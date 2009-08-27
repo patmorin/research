@@ -4,7 +4,7 @@
 % version of this file is at http://jocg.org/jocg.cls
 %
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{jocg} 
+\ProvidesClass{patmorin} 
 		[2009/05/11 v0.1a
  JoCG article class]
 

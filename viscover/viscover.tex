@@ -18,22 +18,24 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-Let $S$ be a set of $n$ disjoint line segments in $\R^2$ and let $s$ be an
-element of $S$.  A well-known example shows that the subset, $V_S(s)$, of
-$\R^2$ that is weakly visible from $s$ can have complexity $\Omega(n^4)$.
+Let $S$ be a set of $n$ disjoint line segments in $\R^2$ and let $s$
+be an element of $S$.  A well-known example, due to O'Rourke and Suri
+(1984), shows that the subset, $V_S(s)$, of $\R^2$ that is weakly visible
+from $s$ can have complexity $\Omega(n^4)$.  Nevertheless, O'Rourke
+and Suri show that $V_S(s)$ can always be covered by a set $C_S(s)$
+of $O(n^2)$ triangles.
 
-In the current paper we show that $V_S(s)$ can always be covered by a set
-$C_S(s)$ of $O(n^2)$ triangles.  More importantly, the expected number
-of triangles needed to cover $V_S(s)$ for a random element $s\in S$ is
-$O(m/n)=O(n)$ where $m=O(n^2)$ is the number of edges in the visibility
-graph of $S$.
-
+In this paper we revisit the results of Suri and O'Rourke and consider
+their applications to visibility testing and counting problems.
 By storing sets of triangles in a version of efficient partition trees
-(Matou\v{s}ek 1992), we give applications of this result to preprocessing
-a segment $s\in S$ so that we can quickly determine if $s$ is visible
-from a query point $p$.  We also give applications to preprocessing $S$
-so that one can quickly estimate the number of segments in $S$ visible
-from a query point $p$.
+(Matou\v{s}ek 1992), we give applications to preprocessing a segment
+$s\in S$ so that we can quickly determine if $s$ is visible from a query
+point $p$.  We also give applications to a visibility counting problem of
+Fischer \etal\ (2008) that involves preprocessing $S$ so that one
+can quickly estimate the number of segments in $S$ visible from a query
+point $p$.  Some of our latter results rely on a new combinatorial result
+that relates the number of $S$ visible from a query point to the number
+of triangles in $\bigcup_{s\in S} C_S(s)$ that contain $p$.
 \end{abstract}
 
 \section{Introduction}
@@ -90,20 +92,21 @@ location does not yield a particularly space-efficient data structure
 for testing if a query point $p$ sees $s$, even if $s$ is a ``typical''
 (as opposed to worst-case) element of $S$
 
-The main focus of the current paper is on methods of defining $V_S(s)$
-as the union of a small number of triangles.  In particular, we revisit
-an old result of Suri and O'Rourke \cite{so84} which shows that $V_S(s)$
-can be represented as a set of $O(n^2)$ triangles whose union is $V_S(s)$.
+The main focus of the current paper is applications of a method
+of defining $V_S(s)$ as the union of a small number of triangles.
+In particular, we revisit an old result of Suri and O'Rourke \cite{so84}
+which shows that $V_S(s)$ can be represented as a set of $O(n^2)$
+triangles whose union is $V_S(s)$.
 
 In this paper we define a variant of their covering, give efficient
 algorithms for computing it, and prove additional properties of the
-covering. In particular, we define a covering $C_S(s)$ of $V_S(s)$ by
-triangles.  For a randomly chosen randomly chosen $s\in S$, the expected
-size of $C_S(s)$ is $O(n)$.  This, of course, implies (and is implied by)
+covering. In particular, we define a covering $C_S(s)$ of $V_S(s)$
+by triangles.  For a randomly chosen $s\in S$, the expected size of
+$C_S(s)$ is $O(n)$.  This, of course, implies (and is implied by)
 the fact that $|\bigcup_{s\in S} V_S(s)|=O(n^2)$.  Addtionally, if we
-define $C(S)=\bigcup_{s\in S} C_S(s)$, then we prove that the number of
-triangles of $C(S)$ containing any point $p$ is a 2-approximation to the
-number of segments of $S$ visible from $p$.
+define $C(S)=\bigcup_{s\in S} C_S(s)$, then we prove that the number
+of triangles of $C(S)$ containing any point $p$ is a 2-approximation to
+the number of segments of $S$ visible from $p$.
 
 Applications of these results include efficient data structures for testing
 if a query point is contained in $V_S(s)$ as well as efficient data
@@ -143,9 +146,9 @@ in its interior.  The first assumption can be ensured by performing a
 symbolic rotation of $S$.  The second assumption is only used to ensure
 that all visibility regions that we discuss are bounded.
 
-Define the \emph{extended visibility graph} $\EVG(S)$ is obtained
-by adding $2m$ edges and at most $2m$ vertices to $\VG(S)$ as follows
-(see \figref{vg}.b): For each (directed) edge $uv$ in $\VG(S)$, extend a
+The \emph{extended visibility graph} $\EVG(S)$ is obtained by adding
+$2m$ edges and at most $2m$ vertices to $\VG(S)$ as follows (see
+\figref{vg}.b): For each (directed) edge $uv$ in $\VG(S)$, extend a
 segment $e_{uv}$ from $v$ in the direction $\overrightarrow{uv}$ until it
 intersecting an element of $S$ at some point $w$.  If not already present,
 then add the vertex $w$ to $\EVG(S)$ and add the edge $vw$ to $\EVG(S)$.
@@ -238,17 +241,22 @@ queries in $O(\log n)$ time and approximates the visibility count up to
 an absolute error of $r$.  Another structure uses random sampling to
 obtain a data structure of size $(m^2\log^{O(1)} n)/\ell$, that has query
 time $\ell\log^{O(1)} n$, and that approximates the visibility count up to
-an absolute error of $\delta n$ for any constant $\delta > 0$.
+an absolute error of $\delta n$ for any constant $\delta > 0$.  (Note that
+$\delta$ affects the leading constants of both the query time and space
+requirements.)
 
 \subsection{New Results}
 
-The main contribution of this paper is a proof that, for any $s\in
-S$, there exists a set $C_S(s)$ of $O(m_s)$ triangles whose union is
-$V_S(s)$, where $m_s$ is the number of edges of $\EVG(S)$ incident on $s$.
-This covering has an additional property that if we take the $O(m)$
-size set $C(S)=\bigcup_{s\in S}C_S(s)$ of triangles, then the number of
-triangles containing any point $p\in\R^2$ is a 2-approximation to the
-number of segments of $s$ that are visible from $p$.
+In the current paper we revisit O'Rourke and Suri's proof that that,
+for any $s\in S$, there exists a set $C_S(s)$ of $O(m_s)$ triangles
+whose union is $V_S(s)$, where $m_s$ is the number of edges of $\EVG(S)$
+incident on $s$.  We show that this covering has the additional property
+that if we take the $O(m)$ size set $C(S)=\bigcup_{s\in S}C_S(s)$ of
+triangles, then the number of triangles containing any point $p\in\R^2$
+is a 2-approximation to the number of segments of $s$ that are visible
+from $p$.\footnote{In fact, O'Rourke and Suri's covering is
+3-approximation.  The slightly modified version we describe in this paper is a
+2-approximation.}
 
 These triangle-covering results have several applications that are
 obtained by storing the resulting triangles in a layered partition tree.
@@ -276,17 +284,17 @@ space data structure with query time $\Oe(m_s^{1/3})$.
 
 \subsubsection{Visibility Counting --- Absolute Approximation}
 
-Using random sampling of the elements in $S$ in the same manner used
-by Fischer \etal, we obtain a data structure of size $\Oe(m/n)=\Oe(n)$
-that approximates the number of segments of $S$ visible from any query
-point in time $\Oe(\sqrt{m/n})=\Oe(\sqrt{n})$ to within an absolute
-error of $\delta n$ for any constant $\delta > 0$.  That is, the data
-structure returns a value $m'_p$ that satisfies $m_p -\delta n \le m'_p
-\le m_p+\delta n$.  (Recall that $m_p$ is the number of segments of $S$
-that are actually visible from $p$.)
+Using a selective random sampling of the segments in $S$, we obtain a data
+structure of size $\Oe((cm/n)(cn)^\alpha)=\Oe(n^{1+\alpha})$ that
+approximates the number of segments of $S$ visible from any query point in
+time $\Oe(c(m/n)^{(1/2)(1-\alpha)})=\Oe(cn^{(1/2)(1-\alpha)})$.  The approximation has an additive error
+roughly $\delta n$ for any constant $\delta > 0$.  More precisely, with
+probability at least $1-n^{\Omega(\delta^2 cn/m_p)}$, the structure returns
+a value $m''_p$ such that $m_p - c/n-\delta n \le m''_p\le m_p+\delta n$.
 
 For comparison purposes, the cutting-based data structure of Fischer
-\etal\ \cite{fhjmz08,fhjmz09}, with $r=\delta n$, uses space $O((m/n)^2)$
+\etal\ \cite{fhjmz08,fhjmz09}, with $r=\delta n$, uses space
+$O((m/n)^2)$
 and has a query time of $O(\log n)$.  Using the random sampling-based
 data structure of Fischer \etal\ with $\ell=\sqrt{n}$ one obtains a
 data structure of size $(m^2\log^{O(1)} n)/\sqrt{n}$ with query time
@@ -324,7 +332,7 @@ However, our exposition, and our algorithm for computing $C(S)$ are more
 $s$-centric.  This leads to efficient output-sensitive algorithms for
 constructing it $C_S(s)$, rather than the worst-case optimal $O(n^2)$
 algorithm given by Suri and O'Rourke \cite{so84}.
-The number of triangles used in $C_S(s)$ is bounded by $O(n+m_s)$ where
+The number of triangles used in $C_S(s)$ is bounded by $O(m_s)$ where
 $m_s$ is the number of edges of $\EVG(S)$ that are incident to $s$.
 
 We will show how to cover the portion $V^+_S(s)\subseteq V_S(s)$ in the
@@ -487,11 +495,11 @@ they appear.  These $m_s$ edges can be easily extracted from $\EVG(S)$ in
 the order in which they appear and processing each edge takes $O(1)$ time.
 
 Part~2 of the lemma requires some use of a geometric range searching
-structure for answering ray-sweeping queries.  Let $q$ and $q'$ be
-two points that are visible, with $q'$ on some segment $s''\in S$.  A
+structure for answering ray-sweeping queries.  Let $q$ and $q'$ be two
+points that are visible, with $q'$ on some segment $s''\in S$.  A
 \emph{ray-sweeping query} asks to determine the first endpoint of a segment
-in $S$ that is intersected by $qq'$ as the $q'$ moves towards the left
-endpoint of $s''$.
+in $S$ that is intersected by $qq'$ as the point $q'$ moves towards the
+left endpoint of $s''$.
 
 A ray-sweeping query is an optimization problem.  It's corresponding
 decision problem is a \emph{triangle interference query}, which asks to
@@ -658,8 +666,8 @@ In this section, we consider applications of \lemref{cover} and
 applications rely on data structures for \emph{triangle inclusion
 counting}:  Given a set $T$ of triangles, we want to preprocess $T$
 into a data structure for counting the number of triangles in $T$ that
-contain a query point $p$.  The principle behind these data structures
-are well-established, but finding the relevant structures and techniques,
+contain a query point $p$.  The tools needed to perform these queries
+are well-known, but finding the relevant structures and techniques,
 and applying them correctly, can take some time.  Therefore, we review
 the data structure here and point out the relevant references.
 
@@ -719,12 +727,12 @@ yields our first result:
 \begin{thm}\thmlabel{containment}
 Let $S$ be a set of $n$ disjoint line segments and let $s\in S$
 be a special segment.  For any $m_s\le k\le m_s^2$, there exists a
-data structure of size $\Oe(k)$ that can test, in $\Oe(m_s/k)$ time,
+data structure of size $\Oe(k)$ that can test, in $\Oe(m_s/\sqrt{k})$ time,
 if any query point $p\in\R^2$ is contained in $V_S(s)$.  Furthermore,
 this data structure can be constructed in time
 \begin{enumerate}
   \item $\Oe(k)$ if we are given $\EVG(S)$ or
-  \item $\Oe(n + (m_sn)^{2/3} + k)$ time, otherwise.
+  \item $\Oe(n + (m_sn)^{2/3} + k)$ time otherwise.
 \end{enumerate}
 \end{thm}
 
@@ -773,31 +781,78 @@ structure for testing if $V_S(s)$ contains a query point $p$ that could be
 constructed in $o(n^{4/3})$ time and whose query time is $o(n^{1/3})$ would
 give a $o(n^{4/3})$ time algorithm for Hopcroft's Problem.
 
-\subsection{Visibility Counting -- Absolute Approximation}
+\subsection{Visibility Counting -- Relative Approximation}
 
 Next we consider Fischer \etal's problem of approximate visibility
 counting \cite{fhjmz08,fhjmz09}.  We want to preprocess the segments
 in $S$, so that for any query point $p$ we can quickly approximate the
-number of segments in $S$ that are visible from $p$.  The data structure
-of \thmref{containment} combined with a careful random sampling strategy
-provides a solution. 
+number of segments in $S$ that are visible from $p$.
 
-Create a Bernoulli sample $S''\subseteq S$ by choosing each element
+We begin with an easy corollary obtained by computing $C(S)$ using
+\lemref{cover-algorithm} and putting all the triangles of $C(S)$ into the
+data structure of \thmref{triangle-inclusion}.  The resulting structure
+guarantees a relative approximation the visibility count for all values
+of $m_p$:
+
+\begin{cor}\corlabel{relative}
+  Let $S$ be a set of $n$ disjoint line segments whose visibility graph
+  has $m$ edges.  There exists a data structure $D$ that can approximate
+  the number of segments of $S$ visible from any query point $p$ with
+  the following properties:
+  \begin{enumerate}
+    \item $D$ has size $\Oe(m^{1+\alpha}) = \Oe(n^{2(1+\alpha)})$,
+    \item $D$ can be constructed in time $\Oe(m^{1+\alpha}) =
+          \Oe(n^{2(1+\alpha)})$,
+    \item $D$ can perform a query in $\Oe(m^{(1/2)(1-\alpha)}) =
+          \Oe(n^{1-\alpha})$ time, and
+    \item when querying $D$ with a point $p$ that sees $m_p$ points of
+          $S$, $D$ returns a value $m'_p$ that satisfies $m_p \le m'_p
+          \le 2m_p$.
+  \end{enumerate}
+\end{cor}
+
+\subsection{Visibility Counting -- Absolute Approximation}
+
+Although \corref{relative} offers a good approximation guarantee,
+the space requirements are too large.  In the worst case, when
+$m=\Omega(n^2)$, a data structure of size $\omega(n^2)$ is required in
+order to achieve a sublinear query time.
+
+Fischer \etal\ argue that, for the computer graphics application they
+consider, a relative approximation is sufficient.  In their application,
+there is a function $f(n)$ such that, for $m_p\ll f(n)$ it is more
+efficient to run a visibility culling algorithm before rendering the
+view from $p$ but for $f(n) \ll m_p$ it is preferable to simply send all
+elements of $S$ to the graphics hardware for rendering.  For $m_p\approx
+f(n)$ neither strategy has a clear advantage.  If we define $a \ll b$
+as $a < b - \delta n$ then we see that an algorithm that can approximate
+$m_p$ with an additive error of at most $\delta n$ is sufficient for
+this application.
+
+We present two different data structures that offer this kind of
+approximation guarantee.  These two structures offer different tradeoffs
+in terms of accuracy and query time.
+
+\subsubsection{Solution 1: Sampling from $S$}
+
+The data structure of \thmref{containment} combined with a careful
+random sampling of the elements of $S$ provides our first solution.
+We create a Bernoulli sample $S''\subseteq S$ by choosing each element
 of $S$ independently with probability $(c\log n)/n$, where $c \ge 1$
 is a parameter of the data structure that controls the accuracy of
-the approximation.  For each sample $s\in S''$, construct the data
+the approximation.  For each sample $s\in S''$, we construct the data
 structure of \thmref{containment} with the value $k=m_s^{1+\alpha}$
 for some parameter $0\le\alpha \le 1$ that controls the space/query-time
 tradeoff.  If, during the construction of this data structure, it turns
-out that $m_s > 4cn$, then discard $s$ from $S''$.  Notice that
-this algorithm is effectively drawing a Bernoulli sample from the set
+out that $m_s > 4cn$, then discard $s$ from $S''$.  Notice that this
+algorithm is effectively drawing a Bernoulli sample from the set
 \[
   S' = \{ s\in S : m_s \le 4cn \}
 \]
 and that, since $2m=\sum_{s\in S} m_s \le 4n^2$, there are at most $n/c$
 elements in $S$ that are not in $S'$.
 Suppose $p$ is visible from $m_p$ elements of $S$ and $m'_p$ elements of
-$S'$.  Then
+$S'$.  Then, by the above discussion, we have
 \[
      m_p - n/c \le m'_p \le m_p  \enspace .
 \]
@@ -806,7 +861,7 @@ Let
    m''_p= (n/(c\log n))\cdot |\{s\in S'': p\in V_S(s)\}| \enspace .
 \]
 The quantity $m''_p$ is an unbiased estimator of $m'_p$ and, using
-Chernoff's bounds \cite[Appendix~A.1]{as08}, we readily establish that
+Chernoff's bounds (see \appref{absolute-a}), we readily establish that
 \[
    \Pr\{|m''_p - m'_p| \ge \delta n\} \le n^{-\Omega(\delta^2cn/m'_p)}
            \le n^{-\Omega(\delta^2cn/m_p)}
@@ -818,24 +873,24 @@ for any $\delta > 0$. Combining this with the previous equation gives
 This establishes the accuracy of the data structure.  What remains is to
 analyze the query time, space, and construction time.
 
-\noindent\textbf{Query Time.} A query computes $m''_s$ by performing
+\noindent\textbf{Query time.} A query computes $m''_s$ by performing
 a query in each of the data structures built on the elements of $S''$.
-The expected contribution of an element $s\in S$ to the query time is
+The expected contribution of an element $s\in S'$ to the query time is
 therefore at most
 \[
     \left(\frac{c\log n}{n}\right)\cdot\Oe\left(m_s^{(1/2)(1-\alpha)}\right)
 \]
 since it contributes $\Oe(m_s/\sqrt{k})=\Oe(m_s^{(1/2)(1-\alpha)})$ to the
-query time if it is chosen to take part in $S'$ and it contributes
+query time if it is chosen to take part in $S''$ and it contributes
 nothing otherwise.  Summing this over all $s$, we get a total expected query
 time of at most
 \[
      \left(\frac{c\log n}{n}\right)
-         \times\sum_{s\in S}\Oe\left(m_s^{(1/2)(1-\alpha)}\right)
+         \times\sum_{s\in S'}\Oe\left(m_s^{(1/2)(1-\alpha)}\right)
      = \Oe(c(m/n)^{(1/2)(1-\alpha)})
 \]
 where the last step follows from the fact that $f(x)=x^{(1/2)(1-\alpha)}$
-is a concave function and that $\sum_{s\in S} = O(m)$.
+is a concave function and that $\sum_{s\in S'} = O(m)$.
 
 \noindent\textbf{Space.} 
 Arguing as above, the expected amount of space that an element $s\in S'$
@@ -846,41 +901,43 @@ contributes to this data structure is
 Therefore, the total expected amount of space used by the structure is
 \begin{equation}
     \left(\frac{c\log n}{n}\right)\cdot \sum_{s\in S'}\Oe\left(m_s^{1+\alpha}\right)
-     = \Oe((m/n)(cn)^\alpha) \eqlabel{space-convex}
+     = \Oe((cm/n)(cn)^\alpha) \eqlabel{space-convex}
 \end{equation}
 where the last step follows by maximizing the sum $\sum_{s\in
 S'}m_s^{1+\alpha}$ using the facts that $\sum_{s\in S'} = O(m)$ and that
 any individual $s\in S'$ has $m_s \le 4cn$.
 
-\noindent\textbf{Preprocessing Time.} 
+\noindent\textbf{Preprocessing time.} 
 The preprocessing phase requires computing $C_S(s)$ for each sample element
 $s\in S''$ and constructing a layered partition tree for the elements of
 $C_S(s)$.  Constructing the partition tree takes $\Oe(m_s^{1+\alpha})$
 time, so, as above, the total expected cost of constructing the partition
-trees for all elements in $S''$ is $\Oe(c(m/n)(n/\delta)^\alpha)$.
+trees for all elements in $S''$ is $\Oe((cm/n)(cn)^\alpha)$.
 
-Computing $C_S(s)$, using \lemref{cover-algorithm} takes $\Oe((m_sn)^{2/3})$
-time. Since $f(x) = (xn)^{2/3}$ is a concave function, we can compute the
-total expected time to compute $C_S(s)$ for each $s\in S''$ as
+Computing $C_S(s)$, using \lemref{cover-algorithm} takes
+$\Oe((m_sn)^{2/3})$ time. Since $f(x) = (xn)^{2/3}$ is a concave function,
+the total expected time to compute $C_S(s)$ for each $s\in S''$ as
 $\Oe(cm^{2/3})=\Oe(cn^{4/3})$.
 
 \begin{thm}\thmlabel{absolute-a}
-  Let $S$ be a set of $n$ disjoint line segments and let $c>1$, $0 <
-  \alpha < 1$, and $\delta > 0$ be real valued parameters.  There exists
-  a data structure $D$ that can approximate the number of segments of $S$
-  visible from any query point $p$ with the following properties:
+  Let $S$ be a set of $n$ disjoint line segments whose visibility
+  graph has $m$ edges and let $c>1$ and $0 < \alpha < 1$ be real valued
+  parameters.  There exists a data structure $D$ that can approximate
+  the number of segments of $S$ visible from any query point $p$ with
+  the following properties:
   \begin{enumerate}
-    \item $D$ has expected size $\Oe((m/n)(cn)^{\alpha}) =
-          \Oe(n(cn)^\alpha)$,
+    \item $D$ has expected size $\Oe((cm/n)(cn)^{\alpha}) =
+          \Oe((cn)^{1+\alpha})$,
     \item $D$ can be constructed in 
-          $\Oe(m^{2/3} + (m/n)(cn)^{\alpha}) = \Oe(n^{4/3} + n(cn)^\alpha)$
+          $\Oe(cm^{2/3} + (cm/n)(cn)^{\alpha}) = \Oe(cn^{4/3} + (cn)^{1+\alpha})$
           expected time,
     \item $D$ can perform a query in $\Oe(c(m/n)^{(1/2)(1-\alpha)}) =
-          \Oe(cn^{(1/2)(1-\alpha)})$, and
-    \item for any $\delta > 0$, a query for a point $p$ that sees $m_p$
-          points of $S$, $D$ returns a value $m''_p$ that satisifies 
-          $m_p - n/c - \delta n \le m''_p \le m_p + \delta n$ with 
-          probability at least $1-n^{-\Omega(\delta^2 cn/m_p)}$.
+          \Oe(cn^{(1/2)(1-\alpha)})$ expected time, and
+    \item for any $\delta > 0$, when querying $D$ with a query for a
+          point $p$ that sees $m_p$ points of $S$, $D$ returns a value
+          $m''_p$ that satisfies $m_p - n/c - \delta n \le m''_p \le m_p
+          + \delta n$ with probability at least $1-n^{-\Omega(\delta^2
+          cn/m_p)}$.
   \end{enumerate}
 \end{thm}
 
@@ -888,7 +945,7 @@ $\Oe(cm^{2/3})=\Oe(cn^{4/3})$.
 a $c=c(\delta)$ such that taking $\alpha = 4/3$ gives a data
 structure of size $\Oe((m/n)n^{1/3})=\Oe(n^{4/3})$ with query time
 $\Oe((m/n)^{1/3})=\Oe(n^{1/3})$ and the structure approximates $m_p$
-for any $p$ to with an absolute error of at most $\delta n$ with high
+for any $p$ with an absolute error of at most $\delta n$ with high
 probability.
 
 As the above example shows, the structure of \thmref{absolute-a} is quite
@@ -898,41 +955,125 @@ This is because, to obtain meaningful error bounds, we require
 $c=\Omega(1/\delta)$ and the running time of the query algorithm grows
 linearly with $c$.
 
-\subsection{Relative Approximation}
+\subsection{Solution 2: Sampling $C(S)$}
 
-Next we consider a different random sampling strategy.  Rather than
-sample segments of $S$, we instead sample triangles of $C(S)$ and use
-\lemref{count} to bound the quality of the approximation.  This results
-in a more efficient space/accuracy tradeoff than that provided by
-\lemref{absoluste-a}.  The cost of this savings in space is that we
-obtain a relative approximation bound when $m_p$ is large and an absolute
-approximation bound when $m_p$ is small.
+Next we consider a different data structure that is also based on
+random sampling. Rather than sample segments of $S$, we instead sample
+triangles of $C(S)$ and use \lemref{count} to bound the quality of the
+approximation.  This results in a more efficient space/accuracy tradeoff
+than that provided by \thmref{absolute-a}.  The cost of this savings
+in space is that we obtain a relative approximation bound when $m_p$
+is large and an absolute approximation bound when $m_p$ is small.
 
 Consider the set $C(S)$ of triangles described in \lemref{count}.
-For any point $p\in\R^2$, the number of triangles $m'_p$ in $C(S)$ that
-contain $p$ is a 2-approximation of the number of segments $m_p$ in $S$
+For any point $p\in\R^2$, the number, $m'_p$, of triangles in $C(S)$ that
+contain $p$ is a 2-approximation of the number, $m_p$,  of segments in $S$
 that are visible from $p$.  In particular
 \begin{equation}
    m_p \le m'_p \le 2m_p \enspace . \eqlabel{mpmp}
 \end{equation}
 
-Create a Bernoulli sample $C''(S)$ of $C(S)$ by sampling each
-triangle in $C(S)$ with probability $(c\log n)/ n$.  Using Chernoff's
-bounds, we find that the number of triangles in $C''(S)$ is at
-most $ac(m/n)\log n$ with probability at least $1-n^{-\Omega(a)}$,
-for any constant $a>1$.  This concentration result ensures that,
-if we put the triangles of $C''(S)$ into the data structure of
-\thmref{triangle-inclusion}, with $k=(cm/n)^{1+\alpha}$, then we obtain a
-stucture with expected size $\Oe((cm/n)^{1+\alpha})$ and expected query
-time $\Oe((cm/n)^{(1/2)(1-\alpha)})$.\footnote{Actually, both the space
-and query time bound hold with probability $1-n^{-\Omega(t)}$ where $t$
-is the constant hidden in the $\Oe$ notation.}
+Our strategy is to approximate $m'_p$ by randomly sampling elements of
+$C(S)$.  The easiest way to proceed would be to select a Bernoulli sample
+by sampling each element of $C(S)$ independently with probability $(c\log
+n)/n$.  Unfortunately, this would require enumerating the elements of
+$C(S)$, of which there are $\Theta(m)$, yielding a construction time that
+is $\Omega(n^2)$ in the worst case.  Instead, we use a different sampling
+strategy based on the rejection method that avoids computing $C(S)$.
 
-Let
+\subsection{Sampling $C(S)$}
+
+Our goal is to obtain a random multiset $C''(S)\subseteq C(S)$ of size
+roughly $c(m/n)\log n$.  To achieve this, we repeat the following
+procedure $4cn\log n$ times:  We select two points $u$ and $v$ at random,
+with replacement, from the $2n$ endpoints of $S$.  Note that there are
+$4n^2$ ways of doing this.  Next, using $O(1)$ ray sweeping queries,
+we determine if $q$ is a vertex of some triangle $\Delta\in C(S)$ that
+has an edge collinear with $\overrightarrow{uv}$ and that lies to the
+left of $\overrightarrow{uv}$ (see \figref{uv-sample}).  Note that,
+for any $\Delta\in C(S)$, there is exactly one pair $(u,v)$ for which
+this is true.\footnote{The pair $(u,v)$ generates the triangle $\Delta$
+precisely if $u$ is below $v$ and $v$ is the right endpoint of its
+segment or $u$ is above $v$ and $v$ is the left endpoint of its segment.}
+Therefore, if this test is affirmative then $\Delta$ is an element drawn
+uniformly at random from $C(S)$ and we add it to our sample $C''(S)$.
+The probability that we increase the size of $C''(S)$ this way is 
+$m_S/(4n^2)$, where $m_S=|C(S)|=O(m)$.
+
+\begin{figure}
+  \begin{center}
+    \begin{tabular}{cc}
+      \includegraphics{uv-sample-a} &
+      \includegraphics{uv-sample-b} \\
+    \end{tabular}
+  \end{center}
+  \caption{The two cases in which the ordered pair $(u,v)$ generates the
+           triangle $\Delta$.}
+  \figlabel{uv-sample}
+\end{figure}
+
+Note that the sample $C''(S)$ that we obtain this way is not a Bernoulli
+sample of $C(S)$ (it may contain duplicates) nor is it a random sample from
+${C(S)\choose (m/n)c\log n}$ (its size is not fixed) nor is it a random
+sample from $(C(S))^{c(m/n)\log n}$ (its size is not fixed).  In fact,
+$C''(S)$ is equivalent to taking a random element of $(C(S))^{2cn\log n}$
+and then discarding each element independently with probability $1-
+|C(S)|/(4n^2)$.  
+
+\noindent\textbf{Space, preprocessing time, and query time.}
+To compute $C''(S)$ efficiently we use the ray-sweeping data structure
+described in the proof of \lemref{cover-algorithm}.  Each sampling
+step requires $O(1)$ ray-sweeping queries, which can be done in
+$\Oe(n/\sqrt{\ell})$ time after $\Oe(\ell)$ preprocessing.  Thus, the total
+expected time required to build the ray-sweeping data structure and
+perform $4cn\log n$ sampling steps is
 \[
-   m''_p= (n/c\log n)\cdot|\{\Delta\in C'(S): p\in \Delta\}| \enspace .
+    \Oe(\ell + (cn\log n)(n/\sqrt{\ell})
+       = \Oe(\ell + cn^2/\sqrt{\ell})
+       = \Oe(c^{2/3}n^{4/3}) \enspace .
 \]
-Then $m''_p$ is an unbiased estimator of $m'_p$ that satisfies
+for $\ell=c^{2/3}n^{4/3}$. 
+
+Each sampling step adds an element to $C''(S)$ with probability $m_S/(4n^2)$.
+Therefore, the number of samples in $C''(S)$ is a binomial random
+variable with parameters $4cn\log n$ and $m_S/(4n^2)$.  The expected
+size of $C''(S)$ is therefore $c(m_S/n)\log n$. Using Chernoff's
+Bounds, we find that the probability that the size of $C''(S)$
+exceeds $ac(m_S/n)\log n$ is at most $n^{-\Omega(a)}$ for any $a>1$.
+This concentration result ensures that when building the data structure
+of \thmref{triangle-inclusion} on the elements of $C''(S)$ the expected
+size, preprocessing time, and query time of the resulting structure are
+$\Oe(k)$, $\Oe(k)$, and $\Oe((m/n)/\sqrt{k})$, respectively, for any
+$m/n\le k\le (m/n)^2$.
+
+To summarize, for any $k$ with $m/n \le k \le (m/n)^2$, the above
+sampling procedure runs in $\Oe(c^{2/3}n^{4/3} + k)$ expected time and
+produces a data structure of $\Oe(k)$ expected size, that can answer
+queries in $\Oe((m/n)/\sqrt{k})$ expected time.  All that remains is to
+calibrate and check the accuracy of the results provided by the data
+structure.
+
+\noindent\textbf{Estimating $m'_p$}.
+Recall that our goal is to estimate $m'_p$, the number of elements of $C(S)$
+that contain the query point $p$, as $m'_p$ is a 2-approximation to the
+number of segments of $S$ visible from $p$.  Let
+\[
+    m''_p = (n/(c\log n))\cdot |\{ \Delta\in C''(S) : p\in \Delta\}| \enspace .
+\]
+(Note that computing $m''_p$ does not require knowing the value
+$m_S=|C(S)|$.)  Each step of the sampling procedure finds an element
+$\Delta\in C(S)$ such that $p\in\Delta$ with probability exactly $m'_p
+/ (4n^2)$.  Since the sampling procedure runs for $4cn\log n$ steps, this
+implies that the number of triangles in $C''(S)$ that contain $p$ is a
+binomial random variable with parameters $4cn\log n$ and $m'_p/(4n^2)$.
+Therefore,
+\[
+    \E[m''_p] = (n/(c\log n))(4cn\log n)(m'_p/4n^2) = m'_p \enspace .
+\]
+That is, $m''_p$ is an unbiased estimator of $m'_p$.  Furthermore, applying
+Chernoff's bounds to the underlying binomial random variable (see
+\appref{absolute-b}), 
+we find that
 \[
    \Pr\{|m''_p - m'_p| \ge \delta n\} \le n^{-\Omega(\delta^2cn/m_p)}
 \]
@@ -941,81 +1082,71 @@ for any $\delta > 0$.  Combining this with \eqref{mpmp} we obtain
    \Pr\{m_p-\delta n \le m''_p \le 2m_p+\delta n\} 
      \ge 1-n^{-\Omega(\delta^2 cn/m_p)}  \enspace .
 \]
-This gives our second result on approximate visibility counting:
+This establishes the accuracy of the data structure and completes the proof
+our second theorem:
 
 \begin{thm}\thmlabel{absolute-b}
-  Let $S$ be a set of $n$ disjoint line segments and let $c>1$, $0 <
-  \alpha < 1$, and $\delta > 0$ be real valued parameters.  There exists
-  a data structure $D$ that can approximate the number of segments of $S$
-  visible from any query point $p$ with the following properties:
+  Let $S$ be a set of $n$ disjoint line segments whose visibility
+  graph has $m$ edges and let $c>1$ and $0 < \alpha < 1$ be real valued
+  parameters.  There exists a data structure $D$ that can approximate
+  the number of segments of $S$ visible from any query point $p$ with
+  the following properties:
   \begin{enumerate}
     \item $D$ has expected size $\Oe((cm/n)^{1+\alpha}) =
-          \Oe((cn)^{1+\alpha)}$,
+          \Oe((cn)^{1+\alpha)})$,
     \item $D$ can be constructed in time
-          $\Oe(m + (cn)^{1+\alpha)})$,
+          $\Oe(c^{2/3}n^{4/3} + (cn)^{1+\alpha})$,
     \item $D$ can perform a query in $\Oe((cm/n)^{(1/2)(1-\alpha)}) =
-          \Oe((cn)^{(1/2)(1-\alpha)})$, and
-    \item for any $\delta > 0$, a query for a point $p$ that sees $m_p$
-          points of $S$, $D$ returns a value $m''_p$ that satisifies 
-          $m_p - \delta n \le m''_p \le 2m_p + \delta n$ with 
-          probability at least $1-n^{-\Omega(\delta^2 cn/m_p)}$.
+          \Oe((cn)^{(1/2)(1-\alpha)})$ time, and
+    \item for any $\delta > 0$, when querying $D$ with a point $p$
+          that sees $m_p$ points of $S$, $D$ returns a value $m''_p$
+          that satisfies $m_p - \delta n \le m''_p \le 2m_p + \delta n$
+          with probability at least $1-n^{-\Omega(\delta^2 cn/m_p)}$.
   \end{enumerate}
 \end{thm}
 
-\begin{proof}
-The only part of the theorem not already proven above is Part~2.
-A construction time of $\Oe(m + (cn)^{1+\alpha)})$ is easy to achieve
-since we can use the algorithm of Suri and XXX \cite{} to construct
-$\EVG(S)$, in $O(n\log n + m) = \Oe(m)$ time, after which we can
-construct $C(S)$ in $O(m)$ time using Part~1 of \lemref{construction}
-and then explicitly compute a Bernoulli sample of the triangles in $C(S)$.
-
-The running time can be improved slightly as follows.
-Observe that each edge of $\EVG(S)$ contributes 
-To improve this running time, we can 
-\end{proof}
-
-
-Note that if we take the value $c= n/\log n$ then every triangle of $C(S)$
-appears in the sample $S'$.  This gives a data structure that guarantees a
-relative approximation for all values of $m_p$:
-
-\begin{cor}
-  Let $S$ be a set of $n$ disjoint line segments and let $c>1$, $0 <
-  \alpha < 1$, and $\delta > 0$ be real valued parameters.  There exists
-  a data structure $D$ that can approximate the number of segments of $S$
-  visible from any query point $p$ with the following properties:
-  \begin{enumerate}
-    \item $D$ has size $\Oe(m^{1+\alpha})$,
-    \item $D$ can be constructed in time $\Oe(m^{1+\alpha})$,
-    \item $D$ can perform a query in $\Oe(m^{(1/2)(1-\alpha)})$, and
-    \item for a point $p$ that sees $m_p$
-          points of $S$, $D$ returns a value $m'_p$ that satisifies 
-          $m_p \le m'_p \le 2m_p$.
-  \end{enumerate}
-\end{cor}
+\noindent\textbf{Example.}  Taking $c=dn^{1/3}$, for a large constant $d$,
+and $\alpha=0$, we obtain a data structure of size $\Oe(n^{4/3})$ that can
+be constructed in time $\Oe(n^{14/9})$ and that can, in $\Oe(n^{2/3})$
+time, effectively distinguish between viewpoints $p$ where $m_p \ll
+n^{2/3}$ and viewpoints $p$ where $m_p \gg n^{2/3}$.
 
 \section{Summary and Conclusions}
 \seclabel{conclusions}
 
-We have described an algorithm for covering visibility regions with
-triangles that allows several visibility testing and counting problems
-to be solved using geometric range searching data structures.  These new
-solutions to these problems improve considerably on the space requirements
-of previous results and still provide efficient query times.
+We have revisited an old algorithm of O'Rourke and Suri for covering a
+visibility region with triangles.  By modifying the covering slightly,
+giving an output-sensitive algorithm for its construction, and proving
+additional properties of the resulting covering, we have shown that
+this covering has several applications to Fischer \etal's problem of
+approximate visibility counting.  The resulting data structures offer
+a better space/preprocessing/query time tradeoff than those of Fischer
+\etal.
 
 Many open questions remain.  The data structure for testing if a point is
-in $V_S(s)$ for a segment $S$ (\thmref{containment}) is near-optimal,
-at least assuming an $\Omega(n^{4/3})$ lower-bound for Hopcroft's
-Problem.  However, it is difficult to say if the data structures for
-approximate visibility counting are close to optimal.  Our solutions
-reduce visibility counting to the problem of computing the depth of a
-query point in an arrangement of $O((m/n)\log n)$ (\thmref{absolute-a}
-and \thmref{absolute-b}) or $O(m)$ (\thmref{relative}) triangles.
-In both cases, it would be sufficient to give a relative approximation
-for the depth of the query point.  Unfortunately, without some additional
-assumptions (such as fatness) about the triangles, there is currently
-no good solution to this problem.
+in $V_S(s)$ for a segment $S$ (\thmref{containment}) is near-optimal, at
+least assuming an $\Omega(n^{4/3})$ lower-bound for Hopcroft's Problem.
+However, it is difficult to say if the data structures for approximate
+visibility counting are close to optimal.  Our solutions reduce visibility
+counting to the problem of computing the depth of a query point in an
+arrangement of $O((m/n)\log n)$ (\thmref{absolute-a} and
+\thmref{absolute-b}) or $O(m)$ (\corref{relative}) triangles.  In both
+cases, it would be sufficient to give a relative approximation for the
+depth of the query point.  Unfortunately, without some additional
+assumptions (such as fatness) about the triangles, there is currently no
+good solution to this problem.
+
+The results in the current paper consider the problem of \emph{planar}
+visibility counting, where $S$ is a set of disjoint line segments in
+$\R^2$.  Of course, modern virtual environments are often 3-dimensional.
+Many of these environments are just barely 3-dimensional in the sense
+that they consist of a constant number of 2-dimensional layers that can
+be handled using the data structures presented in the current paper.
+However, ultimately we would like to develop data structures that store
+a set $S$ of disjoint triangles in $\R^3$ and can approximately count
+the number of elements of $S$ (at least partly) visible from a query
+point $p\in \R^3$.
+
 
 \section*{Acknowledgements}
 
@@ -1029,31 +1160,62 @@ and funding provided by both institutions.
 
 \appendix
 
-\section{Using Chernoff's Bounds}
+\section{Accuracy Bound for \thmref{absolute-a}}
+\applabel{absolute-a}
 
-Let $B$ be the number of samples visible from $p$, let $x=m'_p$ be the
-number of segments in $S'$ visible from $p$, and let $t=(c\log n)(\delta
-n)$.  Then $B$ is a binomial$(x,t)$ random variable with expectation
-$\mu = xt$.  Then $|m''_p-m'_p|\ge \delta n$ if and only if $|B-\mu|\ge
-\delta t n$.  
+In this appendix, we derive the error bound of the data structure of
+\thmref{absolute-a}.  To do this, we will use a version of Chernoff Bounds
+for binomial random variables \cite[Appendix~A.1]{as08} which states
+that, for a binomial random variable $B$ with mean $\mu$, 
+\begin{equation}  
+  \Pr\{|B-\mu| \ge \tau\mu\} 
+     \le \exp(-\Omega(\tau^2\mu)) \enspace .
+  \eqlabel{chernoff}
+\end{equation}
+for any $\tau > 0$.
 
-We will apply the Chernoff Bound $\Pr\{|B-\mu| \ge \tau\mu\} \le
-\exp(-\Omega(\tau^2\mu))$.  For this, we set $\tau = \delta t n/\mu$ and we
+Let $B$ be the number of samples in $S''$ visible from $p$, let $x=m'_p$
+be the number of segments in $S'$ visible from $p$, and let $t=(c\log
+n)/n$.  Then $B$ is a binomial$(x,t)$ random variable with expectation
+$\mu = xt$.  We have that $|m''_p-m'_p|\ge \delta n$ if and only if
+$|B-\mu|\ge t\delta n$.  Taking $\tau = t\delta n/\mu$ and applying
+\eqref{chernoff} we obtain
+
+\begin{eqnarray*}
+   \Pr\{ |m''_p - m'_p| \ge \delta n \} 
+   & = & \Pr\{ |B-\mu| \ge t \delta  n \} \\
+   & \le & \exp(-\Omega(\left(t \delta  n /\mu\right)^2 \mu)) \\
+   &  = & \exp(-\Omega((t \delta  n)^2/\mu)) \\
+   &  = & \exp(-\Omega((\delta n)^2 t/x)) \\
+   &  = & \exp(-\Omega((\delta^2 cn\log n)/x)) \\
+   &  = & n^{-\Omega(\delta^2 cn/x))} \\
+   &  = & n^{-\Omega(\delta^2 cn/m'_p))} \\
+   &  = & n^{-\Omega(\delta^2 cn/m_p))} \enspace ,
+\end{eqnarray*}
+as required.
+
+\section{Accuracy Bound for \thmref{absolute-b}}
+\applabel{absolute-b}
+
+Let $B$ be the number of sample triangles in $C''(S)$ that contain $p$,
+let $x=m'_p$ be the number of triangles in $C(S)$ that contain $p$, and
+let $t=x / (4n^{2})$.  Then $B$ is a binomial$(4cn\log n,t)$ random
+variable with expected value $\mu = 4tc\log n = (cx\log n) / n$.
+
+We have that $|m''_p-m'_p|\ge \delta n$ if and only if $|B-\mu|\ge \delta c
+\log n$.  Taking $\tau = (\delta c\log n)/\mu$ and applying
+\eqref{chernoff} we
 obtain
 \begin{eqnarray*}
-   \Pr\{ |m''_p - m'_p| \ge \delta tn \} 
-   & = & \Pr\{ |B-\mu| \ge \delta t n \} \\
-   & \le & \exp(-\Omega(\left(\delta t n /\mu\right)^2 \mu)) \\
-   &  = & \exp(-\Omega((\delta t n)^2/\mu)) \\
-   &  = & \exp(-\Omega((\delta n)^2t/x)) \\
-   &  = & \exp(-\Omega(\delta nc\log n/x)) \\
-   &  = & n^{-\Omega(\delta nc/x))} \\
-   &  = & n^{-\Omega(\delta c)} \\
-   &  = & n^{-\Omega(c')} \\
+  \Pr\{ |m''_p - m'_p| \ge \delta n \} 
+   & = & \Pr\{ |B-\mu| \ge \delta c \log n  \} \\
+   & = & \exp(-\Omega(((\delta c\log n) / \mu)^2\mu)) \\
+   & = & \exp(-\Omega((\delta c\log n)^2/\mu)) \\
+   & = & \exp(-\Omega(\delta^2(cn\log n)/x)) \\
+   & = & n^{-\Omega(\delta^2cn/x))} \\
+   & = & n^{-\Omega(\delta^2cn/m'_p))} \\
+   & = & n^{-\Omega(\delta^2cn/m_p))}  \enspace ,
 \end{eqnarray*}
-for $c=c'/\delta$.
-
-This yields a sample size of $\Theta(\delta^{-2}\log n)$ and an additive
-error of at most $\delta n$.
+as required.
 
 \end{document}

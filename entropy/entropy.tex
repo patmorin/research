@@ -545,6 +545,22 @@ where the last inequality follows from Jensen's Inequality \cite{j06}
 and concavity of the logarithm.
 \end{proof}
 
+The proof of \lemref{lower-bound} implies an important property of
+linear decision trees that we will make use of later: Without
+increasing the cost by very much, any linear decision tree can be
+refined into a linear decision tree whose leaves have regions that are
+triangles.
+
+\begin{cor}\corlabel{triangles}
+Let $T^*$ be any linear decision tree that solves a classification
+problem $\mathcal{P}$.  Then there exists a linear
+decision tree $T'$ that solves $\mathcal{P}$ and such that, for every leaf
+$\ell$ of $T'$, $r(\ell)$ is a triangle and 
+\[
+     \mu_D(T^*) + \log \mu_D(T^*) \le \mu_D(T') \enspace .
+\]
+\end{cor}
+
 The remainder of our argument involves carefully piecing together
 subsets of the nodes in $T$ and applying 
 \lemref{lower-bound} to these subsets.  By doing this carefully, we
@@ -642,7 +658,6 @@ $2^{\alpha i}$ remaining elements in group $G_{i,t_i}$.
 We now have all the tools we need to prove our lower bound.
 
 \begin{thm}\thmlabel{lower-bound}
-Let $\epsilon > 0$ be an arbitrarily small constant.
 Any linear decision tree $T'$ that solves the problem of testing 
 if any query point 
 $p\in\R^2$ is contained in $P$ has
@@ -714,22 +729,6 @@ we obtain
 & \ge & H-\blah + \alpha H - H - \log H - 2 - \log\mu \\
 & \ge & \alpha H-\blah - \log H - \log \mu - 2 \enspace . \\
 & \ge & \alpha H-\blah - 2\log H - 2 \enspace . \\
-\comment{
-&=&XXXXXXXXXXXXXXXXXXXXXXx \\
-& = & \sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
-	\sum_{v\in G_{i,j}}\Pr(v)(\alpha i  -1 -\log i) 
-        - \log\mu \\
-\comment{
-& \ge & \frac{1}{4}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
-	\sum_{v\in G_{i,j}}\Pr(v)(i/4 - 3) \\
-& \ge & \left(\frac{1}{24}\sum_{i=1}^{\infty}\sum_{j=1}^{t_i-1}
-	\sum_{v\in G_{i,j}}\Pr(v)\log (1/\Pr(v))\right)-4 \\
-}
-& \ge & H - \alpha\blah - O(1) - 2\log\mu \enspace ,
-where the last inequality follows from \lemref{garbage} and by setting
-$\alpha = 1-\delta$ for a sufficiently small constant
-$\delta=\delta(\epsilon) > 0$.
-}
 \end{eqnarray*}
 Setting $\alpha=1-1/H^{1/3}$, and rearranging terms
 we obtain
@@ -739,18 +738,137 @@ we obtain
 completing the proof.
 \end{proof}
 
+\thmref{lower-bound} has implications about Steiner triangulations and
+entropy.  The following result will be used later to show the
+optimality of data structures for planar subdivisions.
+
+\begin{lem}\lemlabel{min-entropy}
+Let $P$ be a convex $n$-gon, let $D$ be a probability measure over
+the interior of $P$ and let $T=T(P,D)$ be a triangle tree of $P$ and
+$D$.  Then, for any partition $\Delta$ of $P$ into
+triangles, we have
+\[
+  \sum_{t\in \Delta} \Pr(t)\log(1/\Pr(t)) \ge \mu_D(T) - O((\mu_D(T))^{2/3}
+\]
+\end{lem}
+
+\begin{proof}
+Let $X=\sum_{t\in \Delta} \Pr(t)\log(1/\Pr(t))$.  Then,
+by the result of Arya \etal\ \cite{ammw07} there exists a linear
+decision tree $T'$ for point location in $P$ such that 
+$\mu_D(T') = X + O(X^{1/2})$.  However, \thmref{lower-bound} implies
+that
+\[
+    \mu_D(T') \ge \mu_D(T) - O((\mu_D(T))^{2/3})
+\]
+so that
+\[
+    X+O(X^{1/2}) \ge \mu_D(T) - O((\mu_D(T))^{2/3})
+\]
+and
+\[
+    X \ge \mu_D(T) - O((\mu_D(T))^{2/3}) \enspace ,
+\]
+as required.
+\end{proof}
+
 \section{Convex Subdivisions}
 \seclabel{subdivisions}
 
-In this section we consider the problem of point location in convex
-subdivisions. Our data structure is simple.  For each internal face
+In this section we consider the problem of point location in a convex
+subdivision $G=(V,E,F)$ with vertex set $V$, edge set $E$ and the set
+of faces $F$. Our data structure is simple.  For each internal face
 $F_i$ of the convex subdivision we triangulate the interior of $F_i$
 using the internal edges of the triangles of a triangle tree
 $T_i=(F_i,D_{|F_i})$ for the polygon $F_i$ and the distribution
 $D_{|F_i}$. For the outer face, we do the same but keep only the
-external edges of the triangles.  Next, we preprocess the resulting
-triangulation using some linear-space distribution-sensitive point location
-data structure for triangulations \cite{ammw07,i01}.
+external edges of the triangles.  If we define $H$ as the entropy of
+the resulting triangulation then, by using the data structure of Arya
+\etal\ \cite{ammw07}, we obtain a point location structure $T$ whose
+expected query time $\mu_D(T)=H + O(H^{1/2})$.
+
+We would now like to compare $\mu_D(T)$ with $\mu_D(T')$ where $T'$ is
+any linear decision tree for point location in $G$.  Let $Y =
+\mu_D(T')$.  Then, by \corref{triangles}, there is a triangulation of
+$\R^2$ into triangles $t_1,\ldots,t_m$ such that the entropy of the
+distribution of query points over the triangles $t_1,\ldots,t_m$ is at
+most $Y+\log Y$.  Notice that each triangle $t_i$ intersects the
+interior of only one face of $G$ (otherwise $T'$ fails to correctly
+answer all point location queries in $G$).  Therefore, we have
+\begin{eqnarray*}
+  Y+\log Y & \ge & \sum_{i=1}^m \Pr(t_i)\log(1/\Pr(t_i)) \\
+   & = & \sum_{i=1}^f \Pr(F_i)
+        \cdot\sum_{t\subseteq F_i} \Pr(t\mid F_i)\log(1/\Pr(t)) \\
+\end{eqnarray*}
+
+Now, consider an optimal linear decision tree $T'$ for point location
+in $G$ under query distribution $D$.  Notice that, for each leaf
+$\ell$ of $T'$, $r(\ell)$ is completely contained in one of the faces
+of $G$.  Furthermore, by \corref{triangles}, there exists a linear
+decision tree $T''$ for point location in $G$, whose leaves have
+regions that are triangles, and such that $\mu_{D}(T') +
+\log(\mu_D(T')) \le \mu_D(T'')$.
+
+The question we now need to answer is: How does $\mu_D(T'')$ compare
+to $\mu_D(T)$?  To answer this question, observe that $T''$ induces a
+triangulation of each face of $G$. For each face $F_i$ of $G$, let
+$\Delta_i$ denote the set of triangles in the triangulation of $F_i$
+and let 
+\[
+   H_i=\sum_{t\in\Delta_i} \Pr(t\mid F_i)\log(1/\Pr(t\mid F_i)) \enspace .
+\]
+By Shannon's Theorem, $H_i$ is a lower bound for the expected cost of
+searching in $T''$ under the distribution $D_{|F_i}$.  In other words,
+\[
+    \mu_D(T'') = \sum_{i=1}^f \Pr(F_i)\mu_{D_{|F_i}}(T'') \ge \sum_{i=1}^f \Pr(F_i)H_i \enspace .
+\]
+Now, consider the triangles in the triangle tree $T_i$, whose nodes
+also induce a triangulation $\Delta(T_i)$ of $F_i$.  
+By \lemref{min-entropy} we have
+\[
+    (1-o(1))\mu_{D_{F_i}}(T_i) \le H_i \enspace .
+\]
+Finally, stringing this all together we obtain
+\begin{eqnarray*}
+  H &=& \sum_{i=1}^f\sum_{v\in T_i} \Pr(v)\log(1/\Pr(v)) \\
+    &=& \sum_{i=1}^f\Pr(F_i)\times 
+        \sum_{v\in T_i} \Pr(v\mid F_i)\log(1/\Pr(v)) \\
+    &=& \sum_{i=1}^f\Pr(F_i)\times \sum_{v\in T_i} \Pr(v\mid F_i)\log(1/\Pr(v)) \\
+\end{eqnarray*}
+
+Informally, we
+claim that the entropy of $\Delta(T_i)$ is not much more than $H_i$.
+If it were, then, by the result of Arya \etal\ \cite{ammw07} then
+there would be a linear decision tree with smaller expected cost than
+that of $T_i$
+
+
+.  These make a
+triangulation of $T_i$.
+
+
+
+
+By the result of Arya \etal\ \cite{ammw07}, it 
+
+\[
+    H_x
+\]
+
+
+
+Thus, for each face
+$F_i$ of $G$, we have $\mu_{D_{|F_i}}(T)$
+
+$T$ induces a convex decomposition
+
+
+  Thus, for each face
+of $G$ there is a set of regions in 
+
+By \corref{triangles}, we may assume that each leaf of $T$
+
+\cite{ammw07,i01}.
 
 We have three lower bounds on the expected query time of any linear
 classification tree for point location.  The first lower bound follows
@@ -796,7 +914,7 @@ structure has an expected query time of
 & \le & O(1)+O(1)\times(B_1 + B_2) \\
 & \le & O(1)\times \max\{B_1, B_2,B_3\} \enspace .
 \end{eqnarray*}
-This completes the proof of our main result:
+This completes the proof of our next result:
 
 \begin{thm}
 Given a convex subdivision $G$ with $n$ vertices and a probability measure

@@ -1,0 +1,103 @@
+\documentclass{patmorin}
+\usepackage{pat}
+
+\title{Point Location in Disconnected Planar Subdivisions}
+
+\author{Prosenjit~Bose, 
+	Karim~Dou\"{\i}eb, 
+	Vida~Dujmovi\'c, 
+	Jamie~King, and 
+	Pat~Morin}
+
+
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+$G$ is a planar subdivision $D$ is a probability measure over $\R^2$.
+
+After a bunch of other papers, Collette \etal\ gave an $O(n)$ space data
+structure that preprocesses a connected planar subdivision $G$ and a
+probability measure $D$ over $\R^2$ such that a point location query in
+$G$ can be answered in $O(H)$ expected time using.  The expected number
+of point-line comparisons needed to answer a query is $H + O(H^{2/3}+1)$.
+Here $H$ is a lower-bound on the expected time required by any linear
+decision tree for answering queries on $G$ that are drawn according
+to $D$. Their work leaves open the problem of what to do when $G$
+is disconnected.
+
+
+\section{Review}
+
+Collette \etal\ show that, up to a lower-order term, the expected
+number of comparisons performed by the optimal decision tree for point
+location in $G$ is equal to the entropy of the minimum-entropy Steiner
+triangulation of $G$.  Thus, our goal is to find a near-minimum entropy
+Steiner triangulation of $G$.
+
+The first tool we use is simplicial partitions, from the field of geometric
+range searching: 
+
+\begin{thm}[Matou\v{s}ek 1991]\thmlabel{point-partition}
+Let $S$ be a set of $n$ points in $\R^2$. There exists a constant
+$c$ such that, for any $1\le r \le n$, there exists a sequence
+$\langle \Delta_1,\ldots,\Delta_r\rangle$ of triangles such that
+  \begin{enumerate}
+    \item $S\subseteq \bigcup_{i=1}^r \Delta_i$,
+  
+    \item $\left|\Delta_i \cap S\setminus
+    \left(\bigcup_{j=1}^{i-1}\Delta_j\right)\right| \le 2n/r$, and
+  
+    \item For any line $\ell$, there are at most $cr^{1/2}$ elements of
+  $\{\Delta_1,\ldots,\Delta_r\}$ that intersect $i$.
+  \end{enumerate}
+\end{thm}
+
+Note that Part~2 of \thmref{point-partition} is not the original
+statement of the theorem, but follows from Matou\v{s}ek's proof \cite{m91}.
+Restating \thmref{point-partition} in terms of probability distributions,
+we have:
+
+\begin{thm}\thmlabel{prob-partition}
+Let $S$ be a set of $n$ points in $\R^2$. There exists a constant
+$c$ such that, for any $1\le r \le n$, there exists a sequence
+$\langle \Delta_1,\ldots,\Delta_r\rangle$ of triangles such that
+  \begin{enumerate}
+    \item $\Pr\{\bigcup_{i=1}^r \Delta_i\} = 1$,
+  
+    \item $\Pr\left\{\Delta_i \cap S\setminus
+    \left(\bigcup_{j=1}^{i-1}\Delta_j\right)\right\} \le 2/r$, and
+  
+    \item For any line $\ell$, there are at most $cr^{1/2}$ elements of
+    $\{\Delta_1,\ldots,\Delta_r\}$ that intersect $i$.
+  \end{enumerate}
+\end{thm}
+
+(Someone needs to prove this, or something close, as well as give an
+algorithmic version.  Sampling from $D$ and then applying
+\thmref{point-partition} should do it.)
+
+We use \thmref{prob-partition} as follows.  We find the set of
+triangles $\Delta=\{\Delta_1,\ldots,\Delta_r\}$.  We construct the
+arrangement of triangles in $\Delta$ and triangulate its faces to obtain
+a triangulation $A$.  Next, for each face $F$ of $A$ that intersects
+some vertex or edge of $G$, we recursively apply the same procedure
+on the distribution $D_{|F}$.  We stop this recursion when a face $F$
+is empty or when the level of recursion exceeds $\log_{\alpha r} n$.
+
+This construction defines a tree $T=T(S,D)$ in which each node has
+$O(r^2)$ children.  Each node $v$ of $T$ is associated with a triangle
+$\Delta(v)$.  We call $v$ a \emph{terminal node} if $\Delta(v)$ does not
+intersect any edge or vertex of $G$.  Note that every terminal node is a
+leaf of $T$ but, since we limit the depth of recursion to $\log_{\alpha r}
+n$, not every leaf is a terminal node.
+
+The number of nodes in $T$ is $(O(r^2))^{\log_{\alpha r} n} =
+O(n^{2\alpha+\epsilon})$, where $\epsilon$ is a decreasing function of $r$.
+
+
+\bibliographystyle{plain}
+\bibliography{entropy3}
+\end{document}

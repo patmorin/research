@@ -1,7 +1,7 @@
 \documentclass{patmorin}
 \usepackage{pat}
 
-\title{Point Location in Disconnected Planar Subdivisions}
+\title{\MakeUppercase{Point Location in Disconnected Planar Subdivisions}}
 
 \author{Prosenjit~Bose, 
 	Karim~Dou\"{\i}eb, 
@@ -16,29 +16,23 @@
 
 \section{Introduction}
 
-$G$ is a planar subdivision $D$ is a probability measure over $\R^2$.
 
-After a bunch of other papers, Collette \etal\ gave an $O(n)$ space data
-structure that preprocesses a connected planar subdivision $G$ and a
-probability measure $D$ over $\R^2$ such that a point location query in
-$G$ can be answered in $O(H)$ expected time using.  The expected number
-of point-line comparisons needed to answer a query is $H + O(H^{2/3}+1)$.
-Here $H$ is a lower-bound on the expected time required by any linear
-decision tree for answering queries on $G$ that are drawn according
-to $D$. Their work leaves open the problem of what to do when $G$
-is disconnected.
+Collette \etal\ gave an $O(n)$ space data structure that preprocesses
+a connected planar subdivision $G$ and a probability measure $D$ over
+$\R^2$ such that a point location query in $G$ can be answered in $O(H)$
+expected time using.  The expected number of point-line comparisons needed
+to answer a query is $H + O(H^{2/3}+1)$.  Here $H$ is a lower-bound on
+the expected time required by any linear decision tree for answering
+queries on $G$ that are drawn according to $D$. Their work leaves open
+the problem of what to do when $G$ is disconnected.
 
 
-\section{Review}
+\section{The Data Structure}
+\seclabel{data-structure}
 
-Collette \etal\ show that, up to a lower-order term, the expected
-number of comparisons performed by the optimal decision tree for point
-location in $G$ is equal to the entropy of the minimum-entropy Steiner
-triangulation of $G$.  Thus, our goal is to find a near-minimum entropy
-Steiner triangulation of $G$.
-
-The first tool we use is simplicial partitions, from the field of geometric
-range searching: 
+In this section we describe our data structure for searching in
+disconnected planar subdivisions.  The first tool we use is simplicial
+partitions, from the field of geometric range searching:
 
 \begin{thm}[Matou\v{s}ek 1991]\thmlabel{point-partition}
 Let $S$ be a set of $n$ points in $\R^2$. There exists a constant
@@ -51,12 +45,13 @@ $\langle \Delta_1,\ldots,\Delta_r\rangle$ of triangles such that
     \left(\bigcup_{j=1}^{i-1}\Delta_j\right)\right| \le 2n/r$, and
   
     \item For any line $\ell$, there are at most $cr^{1/2}$ elements of
-  $\{\Delta_1,\ldots,\Delta_r\}$ that intersect $i$.
+  $\{\Delta_1,\ldots,\Delta_r\}$ that intersect $\ell$.
   \end{enumerate}
 \end{thm}
 
 Note that Part~2 of \thmref{point-partition} is not the original
-statement of the theorem, but follows from Matou\v{s}ek's proof \cite{m91}.
+statement of the theorem, but follows from Matou\v{s}ek's construction
+of $\Delta_1,\ldots,\Delta_r$ \cite{m91}.
 Restating \thmref{point-partition} in terms of probability distributions,
 we have:
 
@@ -71,7 +66,7 @@ $\langle \Delta_1,\ldots,\Delta_r\rangle$ of triangles such that
     \left(\bigcup_{j=1}^{i-1}\Delta_j\right)\right\} \le 2/r$, and
   
     \item For any line $\ell$, there are at most $cr^{1/2}$ elements of
-    $\{\Delta_1,\ldots,\Delta_r\}$ that intersect $i$.
+    $\{\Delta_1,\ldots,\Delta_r\}$ that intersect $\ell$.
   \end{enumerate}
 \end{thm}
 
@@ -79,23 +74,89 @@ $\langle \Delta_1,\ldots,\Delta_r\rangle$ of triangles such that
 algorithmic version.  Sampling from $D$ and then applying
 \thmref{point-partition} should do it.)
 
-We use \thmref{prob-partition} as follows.  We find the set of
-triangles $\Delta=\{\Delta_1,\ldots,\Delta_r\}$.  We construct the
-arrangement of triangles in $\Delta$ and triangulate its faces to obtain
-a triangulation $A$.  Next, for each face $F$ of $A$ that intersects
-some vertex or edge of $G$, we recursively apply the same procedure
-on the distribution $D_{|F}$.  We stop this recursion when a face $F$
-is empty or when the level of recursion exceeds $\log_{\alpha r} n$.
+We use \thmref{prob-partition} to recursively construct a
+\emph{partition tree} $T$.  Let $\alpha > 0$ be a constant that will
+specified below.  At the root of $T$, we find the set of triangles
+$\Delta=\{\Delta_1,\ldots,\Delta_r\}$ and construct the arrangement of
+triangles in $\Delta$ and triangulate its faces to obtain a triangulation
+$A$. The exact method we use to triangulate the faces of the arrangement
+will be discussed in the next section.  This triangulation is stored at
+the root of the tree.
+
+Next, each face $F$ of $A$ becomes a child of the root of $T$.  If $F$
+does not intersect any edge or vertex of $G$ then we call $F$ a
+\emph{terminal leaf} and label $F$ with the face of $G$ that contains it.
+If the current depth of recursion is greater than $\lfloor\log_{\alpha r}
+n\rfloor$ then $F$ becomes a \emph{non-terminal leaf} of $T$.  Otherwise
+($F$ intersects an edge or vertex of $G$ and its depth is small),
+we recursively apply the same procedure on the distribution $D_{|F}$
+to obtain a partition tree that becomes a child of the root.
 
 This construction defines a tree $T=T(S,D)$ in which each node has
-$O(r^2)$ children.  Each node $v$ of $T$ is associated with a triangle
-$\Delta(v)$.  We call $v$ a \emph{terminal node} if $\Delta(v)$ does not
-intersect any edge or vertex of $G$.  Note that every terminal node is a
-leaf of $T$ but, since we limit the depth of recursion to $\log_{\alpha r}
-n$, not every leaf is a terminal node.
-
+$O(r^2)$ children and whose height is at most $\log_{\alpha r} n$.
 The number of nodes in $T$ is $(O(r^2))^{\log_{\alpha r} n} =
-O(n^{2\alpha+\epsilon})$, where $\epsilon$ is a decreasing function of $r$.
+O(n^{2\alpha+\epsilon})$, where $\epsilon$ is a decreasing function
+of $r$.  Note that, for $\alpha < 1/2$ and sufficiently large $r$,
+the size of $T$ is $o(n)$.
+
+In addition to the tree $T$ we construct a backup data structure $T'$ that
+can answer point location queries in $G$ in $O(\log n)$ worst-case time.
+
+To answer a query, $T$ and $T'$ are used as follows.  We search in $T$
+for the query point. If this search ends at a terminal leaf $F$ of $T$
+then we report the label at $F$ and the query is complete.  Otherwise we
+use $T'$ to answer the query in $O(\log n)$ time.
+
+\section{Analysis}
+\seclabel{analysis}
+
+Collette \etal\ \cite{cdilm08,cdilm09} show that, up to a lower-order
+term, the expected number of comparisons performed by the optimal
+decision tree for point location in $G$ is equal to the entropy of the
+minimum-entropy Steiner triangulation of $G$.
+
+\begin{thm}[Collette \etal\ 2008]
+Let $G$ be a planar subdivision and let $D$ be a probability measure
+over $\R^2$.  Let $T^*$ be a  minimum-entropy Steiner triangulation of
+$G$ and let $H^*$ be the entropy of $T^*$.  Then any linear decision tree
+for point location in $G$ has expected cost at least $H^*-O(\log H^*)$.
+\end{thm}
+
+Thus, our goal is to prove that our query time approximates the entropy
+of the minimum entropy Steiner triangulation of $G$.  We will do this
+by an argument similar to that used by Dujmovi\'c \etal\ \cite{dhm09}
+in the context of orthogonal range searching.
+
+An $i$-set of a rooted tree $T$ is a set of vertices in $T$ all of
+which are at distance at most $i$ from the root of $T$ and in which
+no vertex in the set is the ancestor of any other vertex in the set.
+Note that if $T$ is a partition tree defined in \secref{data-structure}
+then an $i$-set of $T$ is a set of disjoint triangles.
+
+\begin{lem}
+Let $T$ be the partition tree defined in \secref{data-structure}
+and let $V$ be an $i$-set of $T$.  Then, the number of elements of
+$V$ intersected by any line $\ell$ is $O(|V|^{1/2+\epsilon})$, where
+$\epsilon$ is a decreasing function of $r$.
+\end{lem}
+
+\begin{proof}
+Use the ``Shoot a ray take a walk'' triangulation of the faces of $A$.
+\end{proof}
+
+We say that a set of regions $X=\{X_1,\ldots,X_m\}$, $X_i\subseteq\R^2$,
+is in $k$-general position if there is no line that intersects $k$
+elements of $X$.
+
+\begin{lem}
+Let $T$ be the partition tree defined in \secref{data-structure} and let $V$ be an $i$-set of $T$.
+Let $V$ be a subset of the nodes of $T$ such that no node no node in $V$
+is the ancestor of any other node and that all nodes in $V$ have depth
+at most $i$.  Then $V$ contains a subset $V'\subseteq V$ that is in $k$-general position and has size at least $V'/Q$.
+\end{lem}
+
+\begin{proof}
+\end{proof}
 
 
 \bibliographystyle{plain}

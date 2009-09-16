@@ -5,7 +5,7 @@
 %
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{jocg} 
-		[2009/05/11 v0.1a
+		[2009/05/11 v0.1b
  JoCG article class]
 
 \RequirePackage{fancyhdr}
@@ -122,6 +122,9 @@
 
 %------------- Use this so pdflatex outputs US letter pages -------------
 \usepackage[letterpaper]{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue,  anchorcolor=blue,  
+citecolor=blue, filecolor=blue, menucolor=blue, pagecolor=blue,  
+urlcolor=blue, hyperfootnotes=false} 
 
 %--------------------------- Headers and Footers ------------------------
 \pagestyle{fancy}

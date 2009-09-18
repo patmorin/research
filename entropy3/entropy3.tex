@@ -1,5 +1,5 @@
 \documentclass{patmorin}
-\usepackage{pat}
+\usepackage{pat,graphicx}
 
 \title{\MakeUppercase{Point Location in Disconnected Planar Subdivisions}}
 
@@ -14,17 +14,29 @@
 \begin{document}
 \maketitle
 
+\begin{abstract}
+Let $G$ be a (possibly disconnected) planar subdivision and let $D$
+be a probability measure over $\R^2$.  The current paper shows how to
+preprocess $(P,D)$ into an $O(n)$ size data structure that can answer
+planar point location queries over $G$.  The expected query time of this
+data structure, for a query point drawn according to $D$, is $O(H+1)$,
+where $H$ is a lower bound on the expected query time of any linear
+decision tree for point location in $G$.
+This extends the results of Collette \etal\ from connected planar
+subdivisions to disconnected planar subdivisions.
+\end{abstract}
+
 \section{Introduction}
 
 
 Collette \etal\ gave an $O(n)$ space data structure that preprocesses
-a connected planar subdivision $G$ and a probability measure $D$ over
-$\R^2$ such that a point location query in $G$ can be answered in $O(H)$
-expected time using.  The expected number of point-line comparisons needed
-to answer a query is $H + O(H^{2/3}+1)$.  Here $H$ is a lower-bound on
-the expected time required by any linear decision tree for answering
-queries on $G$ that are drawn according to $D$. Their work leaves open
-the problem of what to do when $G$ is disconnected.
+a connected planar subdivision $G$ and a probability measure $D$
+over $\R^2$ such that a point location query in $G$ can be answered
+in $O(H)$ expected time using.  The expected number of point-line
+comparisons needed to answer a query is $H + O(H^{2/3}+1)$.  Here $H$
+is a lower-bound on the expected time required by any linear decision
+tree for answering queries on $G$ that are drawn according to $D$. Their
+work leaves open the problem of what to do when $G$ is disconnected.
 
 
 \section{The Data Structure}
@@ -49,7 +61,7 @@ $\langle \Delta_1,\ldots,\Delta_r\rangle$ of triangles such that
   \end{enumerate}
 \end{thm}
 
-Note that Part~2 of \thmref{point-partition} is not the original
+Note that Part~2 of \thmref{point-partition} is not in the original
 statement of the theorem, but follows from Matou\v{s}ek's construction
 of $\Delta_1,\ldots,\Delta_r$ \cite{m91}.
 Restating \thmref{point-partition} in terms of probability distributions,
@@ -70,18 +82,37 @@ $\langle \Delta_1,\ldots,\Delta_r\rangle$ of triangles such that
   \end{enumerate}
 \end{thm}
 
-(Someone needs to prove this, or something close, as well as give an
+(We need to prove this, or something similar, as well as give an
 algorithmic version.  Sampling from $D$ and then applying
 \thmref{point-partition} should do it.)
 
-We use \thmref{prob-partition} to recursively construct a
-\emph{partition tree} $T$.  Let $\alpha > 0$ be a constant that will
-specified below.  At the root of $T$, we find the set of triangles
-$\Delta=\{\Delta_1,\ldots,\Delta_r\}$ and construct the arrangement of
-triangles in $\Delta$ and triangulate its faces to obtain a triangulation
-$A$. The exact method we use to triangulate the faces of the arrangement
-will be discussed in the next section.  This triangulation is stored at
-the root of the tree.
+Assume, without loss of generality, that all vertices of $G$ and the support
+of $D$ are contained in the unit square $[0,1]^2$.  This can easily be
+justified by scaling, translation, and performing 4 point-line comparisons
+involving the query point before using the data structure to answer a query.
+
+We use \thmref{prob-partition} to recursively construct a \emph{partition
+tree} $T$.  Let $\alpha > 0$ be a constant that will be specified
+below.  Refer to \figref{simp-part}. At the root of $T$, we find the
+set of triangles $\Delta=\{\Delta_1,\ldots,\Delta_r\}$ and construct
+the arrangement of triangles in $\Delta$.  We then compute a Steiner
+triangulation of this arrangement in order to obtain a triangulation
+$A$. The exact nature of the Steiner triangulation $A$ will be discussed
+in the next section.  The triangulation $A$ is stored at the root of
+$T$.
+
+\begin{figure}
+  \begin{center}
+    \begin{tabular}{cc}
+      \includegraphics{simp-part} & \includegraphics{simp-part-triang} \\
+      (a) & (b)
+    \end{tabular}
+  \end{center}
+  \caption{The triangles of a simplicial partition (a) form an arrangement of
+    triangles and the faces of this arrangement are (Steiner) triangulated
+    to form a Steiner triangulation $A$ (b).}
+  \figlabel{simp-part}
+\end{figure}
 
 Next, each face $F$ of $A$ becomes a child of the root of $T$.  If $F$
 does not intersect any edge or vertex of $G$ then we call $F$ a
@@ -102,7 +133,7 @@ the size of $T$ is $o(n)$.
 In addition to the tree $T$ we construct a backup data structure $T'$ that
 can answer point location queries in $G$ in $O(\log n)$ worst-case time.
 
-To answer a query, $T$ and $T'$ are used as follows.  We search in $T$
+To answer a query, $T$ and $T'$ are used as follows:  We search in $T$
 for the query point. If this search ends at a terminal leaf $F$ of $T$
 then we report the label at $F$ and the query is complete.  Otherwise we
 use $T'$ to answer the query in $O(\log n)$ time.
@@ -134,13 +165,53 @@ Note that if $T$ is a partition tree defined in \secref{data-structure}
 then an $i$-set of $T$ is a set of disjoint triangles.
 
 \begin{lem}
-Let $T$ be the partition tree defined in \secref{data-structure}
-and let $V$ be an $i$-set of $T$.  Then, the number of elements of
-$V$ intersected by any line $\ell$ is $O(|V|^{1/2+\epsilon})$, where
+Let $T$ be the partition tree defined in \secref{data-structure}.
+The number of nodes of $T$ whose depth is at most $i$ that are
+by any line $\ell$ is $O(r^{(i/2)+\epsilon})$, where
 $\epsilon$ is a decreasing function of $r$.
 \end{lem}
 
 \begin{proof}
+  To prove this, we need to describe how the arrangement of triangles
+  obtained from \thmref{prob-partition} is triangulated.  Let $\Delta$
+  be the set of $r$ triangles obtained from \thmref{prob-partition}
+  and let $\mathcal{V}$ be set of $3r+4$ points that make up the vertices
+  of the triangles in $\Delta$ plus the vertices of square $\Box$ that contains all triangles in $\Delta$.  A classic result of Haussler and Welzl
+  \cite{hwXX} proves that $V$ has a spanning tree $T(V)$ such that any
+  line crosses $O(r^{1/2})$ edges of $T$.
+
+  Consider the line segment arrangement $L$ consisting of the union of the
+  edges in $T(V)$, the triangles in $\Delta$, and the edges of $\Box$.
+  Note that any line $\ell$  intersects $O(r^{1/2})$ edges of the
+  arrangement $L$; $O(r^{1/2})$ of these intersections are generated
+  by edges corresponding to edges of $T(V)$ and and $O(r^{1/2})$
+  are generated by edges of triangles in $\Delta$.  What remains is
+  to show how to triangulate the faces of $L$ without introducing too
+  many crossings.
+
+  By construction, each face $F$ of $L$, except the outer face, is
+  a (weakly) simple polygon having $O(r)$ vertices and edges on its
+  boundary.  By a result of Hershberger and Suri \cite{hs95}, there exists
+  a Steiner triangulation of $A(F)$ using $O(r)$ vertices such that the
+  any chord of $F$ intersects at most $O(\log r)$ edges of $A(F)$. We
+  therefore triangulate the arrangement $L$ by triangulating each of
+  its faces in this way.  This gives a Steiner triangulation $A$ of $L$
+  in which any line intersects at most $O(r^{1/2}\log r)$ edges of $A$.
+
+  Now, consider any line $\ell$. By the above, the number of elements of nodes $x(\ell,i)$ of $T$ at level $i$ that intersect $\ell$ is given by the recurrence \[
+     x(\ell, i)\le \begin\left\{ (cr^{1/2}\log r)\cdot x(\ell, i-1)$, 
+
+
+$O(r^{1/2}\log r)^i= O(r^{(i/2)+\epsilon})$.
+  
+
+
+
+Each face of $\mathcal{A}$ is a polygon, possibly with holes, that has complexity $O(r)$.
+
+Consider
+
+
 Use the ``Shoot a ray take a walk'' triangulation of the faces of $A$.
 \end{proof}
 

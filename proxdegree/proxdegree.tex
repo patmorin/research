@@ -4,7 +4,7 @@
 \usepackage[mathlines]{lineno}
 \linenumbers
 
-\include{pat}
+\usepackage{pat}
 
 \newcommand{\RR}{\mathbb{R}}
 \newcommand{\D}{\mathbb{D}}
@@ -47,7 +47,7 @@ of $n$ points in $\R^2$ and an edge exists between two nodes if and only if
 the distance between them is at most $r$.  Depending on the value of $r$,
 which represents the transmission range of the wireless transmitters, the
 network can be anything ranging from a set of isolated vertices to the
-complete graph.
+complete graph.  The unit disk graph is also the basic model of continuum percolation theory \cite{mr96}.
 
 The lack of centralized management and organization that occurs in ad-hoc
 networks means that individual nodes in the network typically only have
@@ -57,23 +57,25 @@ the combination of complete lack of organization and the unit disk graph
 topology is too unwieldy.
 
 One approach to taming ad-hoc networks has been to compute the
-intersection of the unit disk graph with some ``nice'' proximity graph.
-If the right proximity graph is chosen, the resulting graph will
-remain connected (if the original unit disk graph is connected) and will
-inherit some of the nice properties of the proximity graph.   Ideally, the
-intersection can be computed locally, so that individual nodes can locally
-determine which of their incident edges belong to the intersection.
-
+intersection of the unit disk graph with some ``nice'' proximity graph,
+where the intersection of two graphs $G_1=(V,E_1)$ and $G_2=(V,E_2)$ is
+the graph $(V,E_1\cap E_2)$.  If the right proximity graph is chosen,
+the resulting graph will remain connected (if the original unit disk
+graph is connected) and will inherit some of the nice properties of the
+proximity graph.   Ideally, the intersection can be computed locally,
+so that individual nodes can locally determine which of their incident
+edges belong to the intersection.
 
 One such approach computes the intersection of the unit disk graph with
 the Gabriel graph \cite{gs69}.  The Gabriel graph contain an edge between
-two points $u$ and $v$ if and only if the disk whose diameter is $uv$
-contains no points other than $u$ and $v$ (see \figref{gabrieldef}).  The
-Gabriel graph is planar and therefore has only a linear number of edges.
-Algorithms for routing on planar graphs can be applied to the resulting
-graph or, more commonly, these algorithms can be used for recovery when
-routing heuristics fail.  A number of routing algorithms and protocols
-have been proposed based on this strategy \cite{bfno03,bmsu01,kk00}.
+two points $u$ and $v$ if and only if the disk whose diameter is $\|uv\|$
+and that contains $u$ and $v$ on its boundary contains no points other
+than $u$ and $v$ (see \figref{gabrieldef}).  The Gabriel graph is planar
+and therefore has only a linear number of edges.  Algorithms for routing
+on planar graphs can be applied to the resulting graph or, more commonly,
+these algorithms can be used for recovery when routing heuristics fail.
+A number of routing algorithms and protocols have been proposed based
+on this strategy \cite{bfno03,bmsu01,kk00}.
 
 \begin{figure}
 \begin{center}{\includegraphics[scale=0.7]{gabrieldef}}\end{center}
@@ -85,21 +87,21 @@ as its diameter.}
 
 Another suggested approach uses the Yao graph \cite{y82}. Refer to
 \figref{yaodef}. Let $p$ be a positive integer, let $\theta=2\pi/p$,
-and let $u$ be a point in $\R^2$.  The $i$-cone of $u$ is the set of all
-points $w\in\R^2$ such that $\angle quw \in [(i-1)\theta,i\theta)$, where
-$q = u+(1,0)$.  The \emph{$\theta$-Yao graph} contains an edge from $u$
-to the nearest point in each of $u$'s $i$-cones, for $i=1,\ldots,p$.
-For any constant $p\ge 6$, the $\theta$-Yao graph has at most $pn$
-edges and is a \emph{spanner}; for any two vertices $u$ and $v$, the
-$\theta$-Yao graph contains a path whose Euclidean length is at most
-$t\cdot\|uv\|$, where $\|uv\|$ denotes the Euclidean distance between $u$
-and $v$ and $t=1/(1-2\sin(\theta/2))$ is called the \emph{stretch factor}.
-When applied in the context of unit disk graphs, if there is a path of
-Euclidean length $\|uv\|_U$ in the original unit disk graph, then there
-is a path of length at most $t\cdot\|uv\|_U$ in the intersection of
-the unit disk graph and the $\theta$-Yao graph.  Routing strategies
-based on the Yao graph attempt to find power-efficient routing paths
-\cite{glsv02,lwy01,wlbw01,svz07}.
+and let $u$ be a point in $\R^2$.  The $i$-cone of $u$ is the
+set of all points $w\in\R^2$ such that the angle $\angle quw \in
+[(i-1)\theta,i\theta)$, where $q = u+(1,0)$.  The \emph{$\theta$-Yao
+graph} contains an edge from $u$ to the nearest point in each of
+$u$'s $i$-cones, for $i=1,\ldots,p$.  For any constant $p\ge 6$, the
+$\theta$-Yao graph has at most $pn$ edges and is a \emph{spanner}; for
+any two vertices $u$ and $v$, the $\theta$-Yao graph contains a path
+whose Euclidean length is at most $t\cdot\|uv\|$, where $\|uv\|$ denotes
+the Euclidean distance between $u$ and $v$ and $t=1/(1-2\sin(\theta/2))$
+is called the \emph{stretch factor}.  When applied in the context of
+unit disk graphs, if there is a path of Euclidean length $\|uv\|_U$ in
+the original unit disk graph, then there is a path of length at most
+$t\cdot\|uv\|_U$ in the intersection of the unit disk graph and the
+$\theta$-Yao graph.  Routing strategies based on the Yao graph attempt
+to find power-efficient routing paths \cite{glsv02,lwy01,wlbw01,svz07}.
 
 \begin{figure}
 \begin{center}{\includegraphics{yaodef}}\end{center}
@@ -169,7 +171,7 @@ maximum degree grows as $\Theta(\log n /\log \log n)$ does not imply that the
 probability of obtaining such large maximum degrees tends to one. We
 show it does.
 
-\item We deal with a fixed sample size model on a compact set, not the
+\item We deal with a fixed sample size model on a unit square, not the
 Poisson model on the entire plane.
 
 \item Our proofs are different.
@@ -234,13 +236,11 @@ for all $c < 1/12$.
 \end{thm}
 
 \begin{proof}
-We start with a technical construction of a region
-and then a point configuration.
-Given an integer $k$ and positive number $r$.
-Define the angle $\xi = 2\pi / (3k)$,
-and partition the plane into $3k$ sectors
-of angle $\xi$ each, with center at the origin.
-We refer to \figref{pearldef} for further explanations.
+We start with a technical construction of a region and then a point
+configuration.  This construction is parameterized by an integer $k$
+and a positive number $r$.  Define the angle $\xi = 2\pi / (3k)$, and
+partition the plane into $3k$ sectors of angle $\xi$ each, with center
+at the origin.  We refer to \figref{pearldef} for further explanations.
 
 \begin{figure}[htbp]
 \begin{center}\includegraphics{pearldef}\end{center}
@@ -248,31 +248,23 @@ We refer to \figref{pearldef} for further explanations.
 \figlabel{pearldef}
 \end{figure}
 
-Draw two concentric circles of radii $r$ and $R$
-with $R > r$, so that $r = R \cos \xi$.
-If the sectors are numbered $C_1, C_2, \ldots, C_{3k}$
-(clockwise)
-and the circles are $S_r$ and $S_R$, then we
-mark $k$ regions (shown in darker color in \figref{pearldef}). These regions are of the form
-$(S_R - S_r) \cap (C_{3i+1} \cup C_{3i+2})$ for
-$0 \le i \le k-1$. 
-Call these regions pearl regions
-and denote them by $P_1 , \ldots, P_k$.
-Any circle with
-its diameter being the segment linking the origin with
-any point in a pearl region totally avoids any other
-pearl region. To see this, refer to \figref{pearldef}
-and recall that $r = R \cos \xi$.
+Draw two concentric circles, both centered at the origin, of radii $r$
+and $R$ with $R > r$, so that $r = R \cos \xi$.  If the sectors are
+numbered $C_1, C_2, \ldots, C_{3k}$ (clockwise) and the circles are
+$S_r$ and $S_R$, then we mark $k$ regions (shown in darker color in
+\figref{pearldef}). These regions are of the form $(S_R \setminus S_r) \cap
+(C_{3i+1} \cup C_{3i+2})$ for $0 \le i \le k-1$.  Call these regions
+pearl regions and denote them by $P_1 , \ldots, P_k$.  Any circle with
+its diameter being the segment linking the origin with any point in a
+pearl region totally avoids any other pearl region. To see this, refer
+to \figref{pearldef} and recall that $r = R \cos \xi$.
 
-Assume we are given $m$ points in the plane,
-$x_1,\ldots,x_m$ and a center $x$.
-If $x+A$ denotes the translate of a set $A$ by $x$,
-then we call $x$ a {\it tiara} for $x_1 , \ldots , x_m$
-if exactly $k$ of the points $x_i$ fall in $x+S_R$,
-and if each set $x+P_j$ covers exactly one of
-these $x_i$'s.
-If we construct the Gabriel graph for $x,x_1,\ldots,x_m$,
-then the degree of the vertex at $x$ is at least $k$
+Assume we are given $m$ points in the plane, $x_1,\ldots,x_m$ and a
+center $x$.  If $x+A$ denotes the translate of a set $A$ by $x$, then we
+call $x$ a \emph{$(k,r)$-tiara} for $x_1 , \ldots , x_m$ if exactly $k$
+of the points $x_i$ fall in $x+S_R$, and if each set $x+P_j$ covers
+exactly one of these $x_i$'s.  If we construct the Gabriel graph for
+$x,x_1,\ldots,x_m$, then the degree of the vertex at $x$ is at least $k$
 if $x$ is a $(k,r)$ tiara for $x_1,\ldots,x_m$.
 
 The above construction and definitions are
@@ -297,15 +289,15 @@ of $x+P_j$, we have in particular,
 \[
 \begin{aligned}
 \PROB \{ X_1 ~\hbox{\rm is a jewel} | X_1 = x \}
-&=  {(n-1)! \over (n-1-k)!} \prod_{j=1}^k p \times \left( 1 - \pi R^2 \right)^{n-1-k} \\
-&=  {(n-1)! \over (n-1-k)!} \prod_{j=1}^k p \times \left( 1 - \pi/n\cos^2\xi \right)^{n-1-k} \\
-&\ge  {(n-1)! \over (n-1-k)!} \prod_{j=1}^k p \times \left( 1 - 2\pi/n \right)^{n-1-k} & \mbox{[since $\xi \le 2\pi/9 < \pi/4$]} \\
+&=  {(n-1)! \over (n-1-k)!}\times p^k\times \left( 1 - \pi R^2 \right)^{n-1-k} \\
+&=  {(n-1)! \over (n-1-k)!} \times p^k\times  \left( 1 - \pi/n\cos^2\xi \right)^{n-1-k} \\
+&\ge  {(n-1)! \over (n-1-k)!} \times p^k\times \left( 1 - 2\pi/n \right)^{n-1-k} & \mbox{[since $\xi \le 2\pi/9 < \pi/4$]} \\
  &\ge  (n-k)^k p^k (1-2\pi/n)^n \\
 &\ge  (n-k)^k p^k (1/3)^{2\pi} \enspace . 
 \end{aligned}
 \]
 As $k \ge 3$, we have $\xi \le 2\pi/9 < 1$, so that
-$\tan \xi = \sin \xi / \cos \xi \ge \xi$.
+$\tan \xi \ge \xi$.
 %and $\tan \xi \le \xi / (1-\xi^2/2) \le 2 \xi$.
 Therefore, 
 \[
@@ -414,8 +406,8 @@ Therefore,
 	   = 0
 \]
 for all $c < 1/12$.
-By Poissonization, or by
-tighter bounding above, the constant $1/12$ can be improved.
+%By Poissonization, or by
+%tighter bounding above, the constant $1/12$ can be improved.
 \end{proof}
 
 
@@ -440,50 +432,44 @@ for all $c > 1$.
 \end{thm}
 
 \begin{proof}
-%We give an argument for the upper bound that is fundamentally
-%different from the one given in Bern et al (1992) for Delaunay
-%triangulations.
-At a point $x$, partition the space into $k$ equal
-sectors of angle $2\pi/k$ each, where $k = \lceil \sqrt{\log n} \rceil$.
-Within each sector, we color the point nearest to $x$ 
-red if its distance is less than $r = 3 \sqrt{\log n\, /n}$.
-If a sector has a red point $y$, consider the perpendicular
-line at $y$ to the segment $(y,x)$. Call this
-line the separator. All points
-in the same sector but at the same side as $x$ of the separator
-are colored blue. In \figref{wedgedef}, these are precisely the points that
-fall in the shaded wedge.
-Finally, among all points, color those yellow that are
-Gabriel neighbors and that are at least $r$ away from $x$.
-We first claim that each Gabriel graph neighbor of $x$
-is colored red, blue or yellow.
-Indeed, any point $y$ excludes all points at the
-other side of the separator---the side that does not contain $x$.
-Thus, if there is a red point in the sector, only blue points
-can possibly be Gabriel neighbors of $x$.
+At a point $x$, partition the space into $k$ equal sectors each having
+their apex at $x$ and of angle $2\pi/k$ each, where $k = \lceil \sqrt{\log
+n} \rceil$.  Within each sector, we color the point nearest to $x$ red.
+If a sector has a red point $y$, consider the perpendicular line at
+$y$ to the segment $(y,x)$ and call this line the \emph{separator}.
+All points in the same sector, on the same side of the separator as $x$
+are colored blue.  In \figref{wedgedef}, these are precisely the points
+that fall in the shaded wedge.
 
+We first claim that each Gabriel graph neighbor of $x$ is colored red
+or blue.  Indeed, any point $y$ excludes all points at the other side
+of the separator---the side that does not contain $x$.  Thus, if there
+is a red point in the sector, only blue points can possibly be Gabriel
+neighbors of $x$.  Let $r = 3\sqrt{\log n\,/n}$ and recolor any (blue or red)
+point $z$ to be yellow if it is a Gabriel neighbour of $x$ and $\|xz\|
+> r$.
+
+\Figref{gabriel-exclude} shows several points with their separators.
+No point in the shaded area can be a Gabriel neighbor of the point $x$ at the
+origin. Note that for every point in the shaded area, the Gabriel circle
+through the origin contains another point.
+\Figref{wedge}
+shows several sectors and red points, together
+with the wedges in which blue points must
+fall. The angle of each sector is $\theta = 2\pi / k$.
 
 \begin{figure}
-\begin{center}\includegraphics{wedgedef}\end{center}
+\begin{center}\includegraphics{wedgedef-inkscape}\end{center}
 \caption{The definition of a wedge}
 \figlabel{wedgedef}
 \end{figure}
 
-\Figref{gabriel-exclude} shows several points with their separators.
-No point in the shaded area can be a Gabriel neighbor of the point at the
-origin. Note that for every point in the shaded area, the Gabriel circle
-through the origin contains another point.
 
 \begin{figure}
 \begin{center}\includegraphics[scale=0.5]{gabriel-exclude}\end{center}
 \caption{Several points and their separators}
 \figlabel{gabriel-exclude}
 \end{figure}
-
-\Figref{wedge}
-shows several sectors and red points, together
-with the wedges in which blue points must
-fall. The angle of each sector is $\theta = 2\pi / k$.
 
 \begin{figure}
   \begin{center}
@@ -493,17 +479,19 @@ fall. The angle of each sector is $\theta = 2\pi / k$.
   \figlabel{wedge}
 \end{figure}
 
-Let $N_r , N_b, N_y$ be the total number of red, blue and yellow
-points respectively.
-Clearly, $N_r \le k = o(\log n /\log \log n)$.
+Let $N_r$, $N_b$, and $N_y$ be the total number of red, blue, and yellow points,
+respectively.  
+Recall that $k=\lceil\sqrt{\log n}\rceil=o(\log n/\log\log n)$, so
+$N_r \le k = o(\log n /\log \log n)$.
 Also, conditioning on $X_1 = x$,
 \[
 \begin{aligned}
 \EXP [N_y | X_1 = x] 
 &= n \PROB \{ X_2 ~\hbox{\rm is a Gabriel neighbor of}~ X_1 , \| X_2 - X_1 \| \ge r | X_1 = x \} \cr
-&\le n (1-r^2/4)^{n-1} \cr
+&\le n (1-\pi(r/2)^2/\pi)^{n-1} \cr
 &\quad \hbox{\rm (because at least a $1/\pi$ fraction} \cr
 &\quad \hbox{\rm of the Gabriel circle through $x$ and $X_2$ falls in the unit square)} \cr
+&\le n (1-r^2/4)^{n-1} \cr
 &\le n e^{-9(n-1) \log n / (4 n)} \cr
 &\sim n^{1-9/4} \cr
 &\to 0~. \cr
@@ -528,9 +516,9 @@ than
 \]
 Given $X_1 = x$ and the collection of red points,
 the $n-1-N_r$ other points are uniformly distributed
-on the unit square minus the $N_r$ circular
-sectors just inside the wedges, and minus 
-circular sectors of radius $r$ defined when no
+on the unit square but not in any of the $N_r$ circular
+sectors just inside the wedges, and not in 
+any circular sectors of radius $r$ defined when no
 red point is present in the sector. Call the density $f$
 and its support set $S$. Clearly, 
 $1 \le f 
@@ -558,9 +546,9 @@ and letting $\PROB$ denote the conditional probability,
 We set $l = \lceil c \log n / \log \log n \rceil$ for a constant $c$
 and note that $np/l = o(1)$.
 By the union bound, 
-the probability that for one of the $n$ data points,
-the number of blue color points in the wedge collection
-for that point is greater than or equal to $l$ does not
+the probability that there exists a point $x$
+for which the number of blue points in the wedge collection
+for $x$ is greater than or equal to $l$ does not
 exceed 
 \[
 n \times {(npe/l)^l \over (1-np/l)} ~. 
@@ -570,7 +558,7 @@ large enough not more than
 \[
 2n (3600/l)^l~.
 \]
-This tends to zero when $c > 1$.
+By \eqref{eq:central}, this tends to zero when $c > 1$.
 
 The probability that for one of the data points,
 $N_y > 0$ is not more than
@@ -598,21 +586,22 @@ only depending upon $d$ such that
 \]
 
 \paragraph{Edge lengths.}
-The results on $N_y$ in the proof above
-show that the expected number of Gabriel
-edges of length at least $3 \sqrt{\log n \,/n}$
-is $o(1)$. Hence, the probability that the maximum edge
-length exceeds $3 \sqrt{\log n \,/n}$ tends to zero.
-In $\RR^d$, the maximum edge length is
-easily shown to be $O((\log n \,/n)^{1/d})$ in
-probability.
-In contrast, one can show that if $E_i$ is the
-maximum edge length among the Gabriel edges incident to $X_i$,
-then $(1/n) \sum_{i=1}^n \EXP[E_i]= O(n^{-1/d})$,
-and that if 
-$F_i$ is the
-minimal edge length among the Gabriel edges incident to $X_i$,
-then $(1/n) \sum_{i=1}^n \EXP[F_i]= \Omega (n^{-1/d})$. 
+The results on $N_y$ in the proof above show that the expected number of
+Gabriel edges of length at least $3 \sqrt{\log n \,/n}$ is $o(1)$. Hence,
+the probability that the maximum edge length exceeds $3 \sqrt{\log n
+\,/n}$ tends to zero.  Bounds on sums of functions of the edges lengths
+of random Gabriel graphs are given by Penrose and Yukich \cite{py03}.
+%In $\RR^d$, the maximum edge length is
+%easily shown to be $O((\log n \,/n)^{1/d})$ in
+%probability.
+%In contrast, one can show that if $E_i$ is the
+%maximum edge length among the Gabriel edges incident to $X_i$,
+%then $(1/n) \sum_{i=1}^n \EXP[E_i]= O(n^{-1/d})$,
+%and that if 
+%$F_i$ is the
+%minimal edge length among the Gabriel edges incident to $X_i$,
+%then $(1/n) \sum_{i=1}^n \EXP[F_i]= \Omega (n^{-1/d})$. 
+
 
 \section{Yao Graphs}
 \seclabel{yao}
@@ -776,7 +765,7 @@ Obviously $\EXP[Y_i]=1/i$, so
    \EXP[M] = \EXP\left[\sum_{i=1}^m Y_i\right] = \sum_{1=1}^m 1/i \enspace .
 \]
 The inequality $\log m \le \EXP[M]\le \log m + 1$ is then obtained by
-bounding the above Harmonic sum using the integral $\int_{1}^{n}(1/x)dx$
+bounding the above harmonic sum using the integral $\int_{1}^{m}(1/x)dx$
 (see, e.g., Cormen et al \cite[Appendix A.2]{clrs06}).
 
 To prove the second part of the lemma, we use the fact that the random
@@ -784,11 +773,12 @@ variables $Y_1,\ldots,Y_m$ are independent \cite{d88,g78}.  The result
 then follows immediately from \lemref{chernoff}.
 \end{proof}
 
-Unfortunately, the points we consider will not always be drawn from a
-rectangle.  A \emph{$t$-shape} is a closed maximal subset of $\RR^2$ that
-is bounded by the $\mathrm x$- and $\mathrm y$-axes and a $\mathrm
-y$-monotone polygonal path consisting of at most $t$ edges.  See
-\figref{t-shape}.a.
+Unfortunately, the points we consider will not always be drawn
+from a rectangle.  A \emph{$t$-shape} is a closed maximal subset
+of $\RR^2$ that is bounded by the $\mathrm x$- and $\mathrm y$-axes
+and a $\mathrm y$-monotone polygonal path consisting of at most $t$
+edges (a piecewise linear function of $y$ having at most $t$ pieces).
+See \figref{t-shape}.a.
 
 \begin{figure}
   \begin{center}
@@ -822,15 +812,15 @@ $S'$ to obtain points uniformly distributed in $S$.}
 \end{lem}
 
 \begin{proof}
-Cover $S$ with at most $t$ rectangles $R_1,\ldots,R_\ell$ whose total area
-is twice the area of $S$, as shown in \figref{t-shape}.b.  Let
-$S'=\bigcup_{i=1}^\ell R_i$ be the resulting subset of $\RR^2$.  Generate
-points $Z=\{Z_1,\ldots,Z_m\}$ uniformly and independently in $S'$.  For each
-point $Z_i$ in $R_j$, if $Z_i\in S$ then set $X_i=Z_i$.  Otherwise, set
-$X_i$ to be the reflection of $Z_i$ through the center of $R_j$.  Observe
-that $X_1,\ldots,X_m$ are uniformly distributed in $S$.  Furthermore, if
-$X_i\in R_j$ is minimal with respect to $X_1,\ldots,X_m$, then $Z_i$ is either
-maximal or minimal with respect to $Z \cap R_j$.
+Cover $S$ with at most $t$ rectangles $R_1,\ldots,R_\ell$, $\ell\le t$
+whose total area is twice the area of $S$, as shown in \figref{t-shape}.b.
+Let $S'=\bigcup_{i=1}^\ell R_i$ be the resulting subset of $\RR^2$.
+Generate points $Z=\{Z_1,\ldots,Z_m\}$ uniformly and independently in
+$S'$.  For each point $Z_i$ in $R_j$, if $Z_i\in S$ then set $X_i=Z_i$.
+Otherwise, set $X_i$ to be the reflection of $Z_i$ through the center
+of $R_j$.  Observe that $X_1,\ldots,X_m$ are uniformly distributed in $S$.
+Furthermore, if $X_i\in R_j$ is minimal with respect to $X_1,\ldots,X_m$,
+then $Z_i$ is either maximal or minimal with respect to $Z \cap R_j$.
 
 Therefore, if $M_j$ denotes the number of minimal elements of $X$ contained
 in $R_j$, then, by the first part of \lemref{maxima}, $\EXP[M_j]\le
@@ -891,33 +881,38 @@ let $k=(c\log n)/(\log\log n)$.  By the second part of
   \begin{aligned}
     \PROB\left\{N'> k|N\le 2d\log n\right\}  
     & = \PROB\left\{N'> \frac{c\log n}{4(v+1)(\log\log n)}\cdot(4(v+1)) |N\le 2d\log n\right\} \\
-    & \le4\left
-         (\frac{\exp\left(\frac{c\log n}{4(v+1)(\log\log n)}-1\right)}
-          {\left(\frac{c\log n}{4(v+1)(\log\log n)}\right)^
-           \frac{c\log n}{4(v+1)(\log\log n)}}
-         \right)^{\log(2d\log n)} \\
-    & \le4\left
-         (\frac{\exp\left(\frac{c\log n}{4(v+1)(\log\log n)}-1\right)}
-          {\left(\frac{c\log n}{4(v+1)(\log\log n)}\right)^
-           \frac{c\log n}{4(v+1)(\log\log n)}}
-         \right)^{\log\log n} \\
-    & \le4\left
-         (\frac{\exp\left(\frac{c\log n}{4(v+1)(\log\log n)}\right)}
-          {\left(\frac{c\log n}{4(v+1)(\log\log n)}\right)^
-           \frac{c\log n}{4(v+1)(\log\log n)}}
-         \right)^{\log\log n} \\
-    & \le
-         4\left(\frac{\exp\left(\frac{c\log n}{4(v+1)}\right)}
-          {\left(\frac{c\log n}{4(v+1)(\log\log n)}\right)^{\frac{c\log
-n}{4(v+1)}}} \right) \\
-    & \le
-         4\left(\frac{\exp\left(\frac{c\log n}{4(v+1)}\right)}
-          {\left(\frac{c\log n}{4(v+1)}\right)^{\frac{c\log n}{4(v+1)}}} \right) \\
-    & \le \frac{n^{o(1)}}{\Omega(n^{c/4-\epsilon})} \\
-    & =  O(n^{-c/4 + \epsilon}) 
- \end{aligned} 
+    & \le 4(f(n)/ g(n))^{\log(2d\log n)} \\
+    & \le 4(f(n)/ g(n))^{\log\log n}
+  \end{aligned}
 \]
-for any $\epsilon > 0$.  Unconditioning, we obtain
+where
+\[
+  \begin{aligned}
+   f(n)^{\log\log n}
+    & = \exp\left(\frac{c\log n}{4(v+1)(\log\log n)}-1\right)^{\log\log n} \\
+    & \le \exp\left(\frac{c\log n}{4(v+1)}-1\right) \\
+    & = n^{o(1)}
+  \end{aligned}
+\]
+and 
+\[
+  \begin{aligned}
+   g(n)^{\log\log n}
+    & = \left( 
+          \left(\frac{c\log n}{4(v+1)(\log\log n)}\right)^
+           {\frac{c\log n}{4(v+1)(\log\log n)}}
+        \right)^{\log \log n} \\
+    & = \left(\frac{c\log n}{4(v+1)(\log\log n)}\right)^
+           {\frac{c\log n}{4(v+1)}} \\
+    & = \Omega(n^{c/4-\epsilon})
+  \end{aligned}
+\]
+for any $\epsilon > 0$.  Putting this all together, we obtain
+\[
+    \PROB\left\{N'> k|N\le 2d\log n\right\}  
+     \le n^{o(1)}/\Omega(n^{c/4-\epsilon}) = O(n^{-c/4+\epsilon}) \enspace.
+\]
+Unconditioning, we obtain
 \[
    \PROB\{N' > k\} = O(n^{-c/4+\epsilon} + n^{d(1-\log 4)}) \enspace .
 \]

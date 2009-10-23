@@ -47,11 +47,19 @@ since $r_i(1-r_i) \le 1/4$, we have that $\Pr(w') \le (1/4)^n =
 
 \begin{clm}
 Let $W_k$ be the subset of $W$ consisting of walks whose head is of
-length at most $k$.  Then $\Pr(W_k) \le k^2 / \exp(\Omega(n^2/k))$.
+length at most $k$.  Then $\Pr(W_k) \le k^2 2^{k-2n} / \exp(\Omega(n^2/k))$.
 \end{clm}
 
 \begin{proof}
-Chernoff's Bounds on the binomial distribution show that, for a 
+Partition $W_k$ into classes $W_{k,1},\ldots,W_{k,t}$ where each class has
+the same head so that
+\[
+  \Pr(W_k) = \sum_{i=1}^t \Pr(W_{k,i}) \le t(1/2)^{2n} \enspace ,
+\]
+where the inequality follows from Claim~\ref{claim:one}.  Therefore, we
+can complete the proof by upper bounding $t$, the number of such classes.
+We do this using Chernoff's bounds.
+Chernoff's Bounds show that, for a 
 vector $V$ chosen uniformly at random from $\{-1,1\}^{k'}$ with $k' \le k$,
 \[
    \Pr\{|\Sigma V| \ge \epsilon k\} \le \exp({-\Omega(\epsilon^2 k)}) \enspace .
@@ -67,31 +75,20 @@ this means that the number of $V$ with $|\Sigma V| \ge n$ is at most
   \label{eq:counting}
 \end{equation}
 
-Partition $W_k$ into classes $W_{k,1},\ldots,W_{k,t}$ where each class has
-the same head so that
-\[
-  \Pr(W_k) = \sum_{i=1}^t \Pr(W_{k,i}) \le t(1/2)^{2n} \enspace ,
-\]
-where the inequality follows from Claim~\ref{claim:one}.
-Therefore, we can complete the proof by upper bounding 
-$t$, the number of such classes.
-
 The head of any class $W_{k,i}$ maps to a vector $V=v_1,\ldots,v_{k'}$,
 with $k'\le k$, $\left|\sum_{i=1}^{k''} v_i \right| \ge n$, and
 $\left|\sum_{i=k''}^{k'} v_i \right| \ge n$ where $k'' \le k'$ ($k''$
 is the first time at which the walk visits $n$).
 
 Therefore, by (\ref{eq:counting}), the number of such classes is at most
-\[
-  \sum_{k'=1}^{k}\sum_{k''=1}^{k'} 
+\begin{eqnarray*}
+  t & \le & \sum_{k'=1}^{k}\sum_{k''=1}^{k'} 
      \left(\frac{2^{k''}}{\exp({\Omega(n^2/k)}})\right)
-     \left(\frac{2^{k'-k''}}{\exp({\Omega(n^2/k)}})\right)
-   \le 2^{k'}/\exp({\Omega(n^2/k)})
-\]
-
-(2^{k'}/e^{\Omega(n^2/k)})^2
-  \le k^2 4^{k}/e^{\Omega(n^2/k)} \enspace ,
-\]
+     \left(\frac{2^{k'-k''}}{\exp({\Omega(n^2/k)}})\right) \\
+   & \le & \sum_{k'=1}^{k}\sum_{k''=1}^{k'} 2^{k'}/\exp({\Omega(n^2/k)}) \\
+   & \le & k^2 2^{k'}/\exp({\Omega(n^2/k)}) \\
+   & \le & k^2 2^{k}/\exp({\Omega(n^2/k)}) \enspace .
+\end{eqnarray*}
 \end{proof}
 
 We are now ready to prove the main result of this section.  Let $h(i,j)$ denote the expected number of steps for a walk that starts at position $i$ to reach position $j$.

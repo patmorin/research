@@ -1,0 +1,305 @@
+\documentclass [letterpaper] {article}
+%fleqn: left alignment of the equations
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{paralist}
+%\usepackage [noend] {algorithmic}
+%\usepackage{setspace}
+\usepackage [letterpaper] {geometry}
+\usepackage{indentfirst}
+\usepackage[pdftex]{color, graphicx}
+\usepackage{subfigure}
+\usepackage{supertabular}
+\usepackage{multirow}
+\usepackage[normalem]{ulem}
+
+%\newcommand{\note}[1]{$\spadesuit$\marginpar{$\spadesuit$ #1}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\etal}{\emph{et al}}
+
+\newcommand{\cw}{\mathrm{cw}}
+\newcommand{\ccw}{\mathrm{ccw}}
+
+\newcommand{\brc}{\textsc{Biased-Random-Compass}}
+
+\newtheorem{theorem}{Theorem}%[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{lemma}{Lemma}%[section]
+\newtheorem{notation}{Notation}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{claim}{Claim}
+\newtheorem{corollary}{Corollary}
+
+\title{Biased Random Compass for Online Routing}
+\author{Dan Chen \and Pat Morin}
+%\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+\label{sec:intro}
+
+In recent years, motivated primarily by the proliferation of wireless networks and GPS devices, much research has been done on routing algorithms for geometric networks \cite{gior03}.  In this research a network is modelled as a geometric graph $G=(V,E)$ whose vertex set $V$ is a set of points in $\R^2$. We say that a routing algorithm $\mathcal{A}$ \emph{works} for $G$ if, for any pair of vertices $s,t\in V$, the algorithm always find a path from $s$ to $t$ in a finite number of steps.
+
+The research on geometric routing algorithms largely focuses on utilizing geometric properties of a class of geometric graphs to reduce the complexity of, and information required by, routing algorithms.  For example, when $G$ is the unit disk graph of the points in $V$, then an algorithm, called \textsc{Face-1}, of Bose \etal\ \cite{bose01} works and requires no preprocessing of $G$ or additional state information at the vertices of $G$ and requires only a constant size header associated with each packet.
+
+A particularly interesting and restricted class of routing algorithms are so-called oblivious routing algorithms.  An \emph{oblivious} routing algorithm is one in which the decision about the next edge on the route to $t$ for a packet currently located at node $v$ is made based only on $v$, $t$, and the neighbourhood, $N(v)$, of $v$.\footnote{More precisely, a deterministic oblivious routing algorithm is a function $f:\R^2\times\R^2\times(\R^2)^+\rightarrow \R^2$ that satisfies $f(v,t,N) \in N$ and $f(t,t,N) = t$ for all inputs.}  In particular, an oblivious algorithm does does not make use of information obtained in previous routing steps and can not use any global information about $G$.
+
+Bose and Morin \cite{bose04} showed that if $G$ is Delaunay triangulation or a regular triangulation then deterministic oblivious routing algorithms named \textsc{Greedy} and \textsc{Compass}, respectively, guarantee delivery of a packet between any source-destination pair.  Bose \etal\ \cite{bose02} later proved a stronger result showing that a deterministic oblivious routing algorithm named \textsc{Greedy-Compass} works for any convex subdivision $G$.
+
+Oblivious routing algorithms are so simple, elegant, and practical that researchers have spent considerable effort designing geometric embeddings of graphs so that oblivious routing algorithms can be applied to the resulting embeddings.  A famous example in this vein is due to Leighton and Moitra \cite{lm08} who proved that every 3-connected planar graph $\tilde G$ admits an embedding $G$ in $\R^2$ such that \textsc{Greedy} works on $G$.  The combination of the embedding and routing algorithm represents a form of \emph{compact routing} \cite{l94}.
+
+Bose \etal\ also showed that deterministic oblivious routing algorithm are, however, inherently limited. There exists 17 convex subdivisions $G_1,\ldots,G_{17}$ each with 17 vertices such that any deterministic oblivious routing algorithm does not work for at least one of these subdivisions.  Thus, convex subdivisions form a class of geometric graphs that are too rich for deterministic oblivious routing algorithms \cite{bose02}.
+
+The authors \cite{bose02,bose04} did, however, observe that, if randomization is allowed, then an oblivious algorithm, named \textsc{RandomCompass}, that uses one random bit per step works for any convex subdivision. They did not analyze the efficiency of \textsc{Random-Compass} except to note that, for some convex subdivisions $G$, and some pairs $s,t\in V$, the expected number of steps taken by \textsc{Random-Compass} when routing from $s$ to $t$ is $\Omega(|V|^2)$.   Note that this is in contrast to deterministic oblivious routing algorithms where any route has length at most $|V|-1$ (otherwise the route contains a cycle that must repeat forever since the algorithm is oblivious and deterministic).
+
+In the current paper, we show that a simple variant of \textsc{RandomCompass} called \textsc{Biased-Random-Compass} not only works for any convex subdivision $G$, but finds a path between any pair of vertices $s,t\in V$ of expected length $O(n)$.  Thus, \textsc{Biased-Random-Compass} is a practical randomized oblivious routing algorithm that works efficiently for any convex subdivision.
+
+The remainder of the paper is organized as follows: In \ref{sec:algorithms} we describe \textsc{Random-Compass} and \textsc{Biased-Random-Compass} algorithms.  In Section~\ref{sec:properties}, we prove some properties of a directed graph $G'$ induced by the Section~\textsc{BiasedRandomCompass} algorithm.  In Section~\ref{sec:analysis} we prove our main theorem, namely that \textsc{BiasedRandomCompass} works and that the expected number of steps required to reach the destination is $O(n)$.
+
+
+
+\section{{\sc RandomCompass} and {\sc BiasedRandomCompass}}
+\label{sec:algorithms}
+
+Let $G=(V,E)$ be a convex subdivision and fix a destination vertex $t\in V$.  For a vertex $v\in V$, $v\neq t$, consider the line segment $vt$.  If $vt$ does not contain some edge $vw\in E$ then $vt$ intersects the interior of some face $f$ of $G$ that is incident on $v$.  Define $\ccw(v)$ and $\cw(v)$ be the neighbours of $v$ on $f$ in the clockwise and counterclockwise directions, respectively (see Figure~\ref{fig:cwccw}.)  In the degenerate case where $vt$ contain some edge $vw$ we use the convention that $\cw(v)=\ccw(v)=w$.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics{pics/cwccw.pdf}
+  \caption{Definition of $\mathrm{cw}(v)$ and $\mathrm{ccw}(v)$}
+  \label{fig:cwccw}
+\end{figure}
+
+The \textsc{Random-Compass} algorithm \cite{bose04,bose02} works as follows:  When a packet is situated at a node $v$ and its final destination is $t$, the packet is forwarded to exactly one of $\cw(v)$ or $\ccw(v)$ with equal probability.  Bose \etal\ show that, with probability 1, \textsc{Random-Compass} reaches $t$ in a finite number of steps.  However, in case where $G$ is a regular convex $n$-gon and the source vertex $s$ and the destination vertex $t$ are antipodal, \textsc{Random-Compass} takes a simple random walk on the vertices of $G$ and will not reach $t$ until its distance from its starting location $s$ exceeds $n/2$.  A well-known result on random walks is that the expected time for this to happen is $\Theta(n^2)$.
+
+Motivated by the above, we consider the following \textsc{Biased-Random-Compass} algorithm: When a packet is situated at a node $v$ and its final destination is $t$, the packet is forwarded to $\cw(v)$ with probability $1/3$ otherwise (with probability $2/3$) it is forwarded to $\ccw(v)$.  The remainder of this paper is dedicated to proving that the expected number of steps taken by \textsc{Biased-Random-Compass} before it reaches its target is $O(n)$.
+
+
+
+\section{The Directed Graph $G'$}
+\label{sec:properties}
+\label{sec:graph}
+
+Let $G'=(V,E')$ be the directed graph derived from $G$ by setting
+\[
+   E' = \{ vw : \mbox{$v\in V$ and $w\in\{\cw(v),\ccw(v)\}$} \} \enspace .
+\]
+Note that any route taken by \brc\ is restricted to travelling on the directed edges of $G'$.  In this section we consider some properties of $G'$ that will allow us to prove our main result.
+
+\begin{claim}
+\label{claim:contain}
+Any simple directed cycle in $G'$ contains $t$ in its interior.
+\end{claim}
+
+\begin{proof}
+The destination vertex $t$ can not be on any cycle, because all the edges adjacent to $t$ are directed towards $t$. Suppose by way of contradiction that $t$ is exterior to some directed cycle $C$. Assume, without loss of generality that $C$ is directed clockwise.  Label the vertices of $C$ $x_1,\ldots,x_k$ in order and select a vertex $x_i$
+such that (see Figure~\ref{fig:contain})
+\begin{enumerate}
+\item the line $\ell$ through $x_i$ and $t$ is locally tangent to $C$ at $x_i$, and 
+\item the angles, measured counterclockwise, at $x_i$ satisfy $\angle tx_{i}x_{i+1} > \angle tx_{i}x_{i-1}$.
+\end{enumerate}
+The existence of such a vertex is easily established using the assumption that $t$ is outside of $C$.
+Since $G$ is a convex subdivision, there must be an edge $x_{i}y \in G$ not contained in the halfspace bounded by $\ell$ and containing $C$.  But then $x_{i+1}\not\in\{\cw(x_i),\ccw(x_i)\}$ contradicting the assumption that $x_i x_{i+1}$ is an edge of $G'$. 
+\end{proof}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.5\textwidth]{pics/contain.pdf}
+  \caption{$C$ does not contain $t$}
+  \label{fig:contain}
+\end{figure}
+
+\begin{claim}
+\label{claim:convex}
+   Any simple cycle in $G'$ is convex.
+\end{claim}
+
+\begin{proof}
+%Suppose, by way of contradiction, that $G'$ contains a simple cycle that is not convex. Let $x_{i}$ be a reflex vertex of $C$ (see Figure~\ref{fig:convex}). Since $G$ is a convex subdivision, there must be a path in $G$ from $x_{i}$ whose internal vertices are inside $C$ and that leads to another vertex $x_{k}$ on $C$.
+%
+%This path splits $C$ and its interior into two regions. 
+%
+%Then the directed edge from the region containing $t$ to a vertex not in that region can not exist. For example, as shown in Figure~\ref{fig:convex}, if $t$ is in the left region, directed edge $x_{i}x_{i+1}$ can not exist in $G'$ (see Figure~\ref{fig:convexleft}). If $t$ is in the right region, directed edge $x_{k}x_{k+1}$ can not exist in $G'$ (see Figure~\ref{fig:convexright}). Therefore, $C$ must be convex.
+%
+BROKEN - fix
+\end{proof}
+
+%\begin{figure}[ht]
+%  \centering
+%  \subfigure[]{\label{fig:convexleft}
+%    \includegraphics[width=0.35\textwidth]{pics/convex1.pdf}
+%  }
+%  \hspace{10mm}
+%  \subfigure[]{\label{fig:convexright}
+%    \includegraphics[width=0.35\textwidth]{pics/convex2.pdf}
+%  }
+%  \caption{$C$ is not convex}
+%  \label{fig:convex}
+%\end{figure}
+
+\begin{lemma}
+\label{lemma:disjoint}
+  Any two simple  cycles in $G'$ can not share any vertices.
+\end{lemma}
+
+\begin{proof}
+Suppose two simple cycles $A$ and $B$ in $G'$ share one or more vertices (see Figure~\ref{fig:share}). Without loss of generality, assume that cycle A is directed clockwise and label its vertices $x_1,\ldots,x_k$ in order.  Let $x_i$ be a vertex that is part of $A$ and part of $B$ but such that $x_{i+1}$ is not in $B$.Let $y$ be the successor of $x_i$ in $B$.  Without loss of generality, we may assume that $y$ is in the interior of $A$ (otherwise reverse the roles of $A$ and $B$).  Since $A$ is convex (Claim~\ref{claim:convex}) and contains $t$ (Claim~\ref{claim:contain}), $x_{i+1} = \ccw(x_i)$.  But since $B$ is also convex and contains $t$ the existence of the edge $x_iy$ in $G$ implies that $\ccw(x_i)\neq x_{i+1}$, a contradiction that completes the proof.
+\end{proof}
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[width=0.38\textwidth]{pics/sharetwo.pdf}
+  \caption{Two cycles share vertices}
+  \label{fig:share}
+\end{figure}
+
+
+\section{The Time Complexity of the Biased Algorithm}
+\label{sec:algo}
+\label{sec:analysis}
+
+In this section, we prove an upper bound on the expected number of steps required for \textsc{Biased-Random-Compass} to reach its destination.  Our argument makes use of a result from probability theory which we now review.  
+
+Let $T$ be a positive, integral, finite random variable and let $X=\langle X_1,X_2,\ldots\rangle$ be an infinite sequence of random variables.  We call $T$ a \emph{stopping time} for $X$ if the event that $T = n$ is determined by the outcome of the random variable $X_{1}, \ldots, X_{n}$.  We then have the following result for stopping times \cite[Chapter 6]{Ross01}:
+
+\begin{theorem}[Wald's Equation for Stopping Times]
+\label{thm:wald}
+Let $X=\langle X_{1},X_{2},\ldots\rangle$ be independent and identically distributed random variables with $\mathrm{E}[|X_{i}|] < \infty$, and let $T$ be a stopping time for $X$ with $\mathrm{E}[T] < \infty$. Then
+\[ \mathrm{E}\left[ \sum_{i=1}^{T}X_{i} \right] = \mathrm{E}[T]\cdot\mathrm{E}[X]. \]
+\end{theorem}
+
+Next we define a labelling of the vertices of $G'$ that allows us to quantify the progress of \textsc{Biased-Random-Compass}.
+Consider the strongly connected components $V_0(=\{t\}),V_1,\ldots,V_k$ of $G'$ and order these components so that if $G'$ contains an edge $vw$ with $v\in C_i$ and $w\in C_j$ then $i > j$.  That this ordering exists follows from the fact that the ordering condition defines a directed acyclic graph over $V_0,\ldots,V_k$ with one sink $V_0$. 
+
+%We know that simple cycles in $G'$ are disjoint, and all contain $t$, therefore, these cycles in $G'$ are nested. We can number the vertices of $G'$ by their \emph{pseudo-distance} to $t$ so that
+%\begin{itemize}
+%\item [(a)] all vertices in a cycle (strongly connected component) have the same number;
+%\item [(b)] different strongly connected components have different numbers;
+%\item [(c)] every path from any vertex $s$ to $t$ sees a non-increasing sequence of numbers.
+%\end{itemize}
+
+%This can be done by a bread first search of the graph $\widetilde{G'}$ whose vertices are the strongly connected components of $G'$ and in which the edge $uv$ is present if and only if $G'$ has a directed edge from a vertex in $u$ to a vertex in $v$.
+%\begin{figure}[ht]
+%  \centering
+%  \includegraphics[width=0.45\textwidth]{pics/sccedge.pdf}
+%  \caption{An edge in $\widetilde{G'}$}
+%  \label{fig:sccedge}
+%\end{figure}
+This numbering partitions the vertices of $G'$ into $j$ classes $V_{0} = \{t\}, V_{1}, \ldots, V_{j}$ according to their pseudo-distances to $t$. 
+
+Note that any path in $G'$ from some vertex $s$ to $t$ visits the strongly connected components in reverse order.  That is the path visits a sequence of components $V_{i_1},\ldots,V_{i_r}=V_0$ and $i_j > i_{j+1}$ for all $j\in\{1,\ldots,r-1\}$.  Our strategy is to show that the expected time \brc\ spends at the vertices $V_{i}$ is bounded by $O(|V_{i}|)$. Therefore, the total expected time spent by \brc\ before reaching $t$ is $O(n)$.  
+
+Each strongly connectec component $V_i$ is one of three types:
+\begin{enumerate}
+\item $V_i$ is a (doubly-directed) path,
+\item $V_i$ contains a single simple cycle, or
+\item $V_i$ is a singleton set.
+\end{enumerate}
+
+That these three possibilities are exhaustive follows from Lemma~\ref{lemma:disjoint}. In particular, no $V_i$ contains more than a single simple cycle. Next we consider each of the three cases, starting with the easiest first.
+
+\noindent\textbf{Case 3:} If $V_i=\{v\}$ is a singleton set then, by definition, both $\cw(v)$ and $\ccw(v)$ are not in $V_i$ so \brc\ spends at most one step in $V_i$.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{pics/doublechain.pdf}
+  \caption{A chain of doubly directed edges}
+  \label{fig:doublechain}
+\end{figure}
+
+\noindent\textbf{Case 1:} Refer to Figure~\ref{fig:doublechain}. Suppose there are $k$ vertices in the chain of doubly directed edges, and $V_{i} = \{v_{1}, \ldots, v_{k}\}$. If the packet goes clockwise $k$ more times than counterclockwise, then the packet will leave the chain and never come back. 
+
+We will first prove that the expected time to leave $V_{i}$ is finite and then use this property to obtain a tighter bound. Suppose the packet goes clockwise (to $\mathrm{ccw}(v)$) with probability $p=\frac{2}{3}$ and counterclockwise (to $\mathrm{cw}(v)$) with probability $1-p=\frac{1}{3}$. Let $r$ and $l$ be the number of steps to the clockwise and counterclockwise directions respectively after $c3k$ steps. After $c3k$ steps,
+\begin{eqnarray}
+  \label{eq:leave}
+  \Pr[r-l \leq k-1] &=& \Pr\left[l \geq \frac{c3k - k + 1}{2}\right] \nonumber \\
+  &=& \Pr\left[l \geq \frac{c3k - k + 1}{c2k}ck\right]\nonumber \\
+  &=& \Pr\left[l \geq \frac{c3k - k + 1}{c2k}\mathrm{E}[l]\right]\nonumber \\
+  &\leq& \frac{c2k}{c3k - k + 1} \, (\textrm{Markov's inequality})\nonumber \\
+  &=& \frac{2}{3} - \epsilon \, (\textrm{where } \epsilon \textrm{ is a positive number})\nonumber
+\end{eqnarray}
+
+Define a round as $c3k$ steps. The probability that the packet leaves the chain in each round is then greater than $(\frac{1}{3} + \epsilon)$. The expected number of rounds required to leave the chain is therefore less than 
+\[  \sum_{i=1}^{\infty}i\frac{1}{3}\left(\frac{2}{3}\right)^{i-1} =  \frac{1}{3}\frac{1}{(1-\frac{2}{3})^{2}} = 3.\]
+Hence, the total expected number of steps to leave the doubly directed chain is less than $c9k$.
+
+Now that we know that the expected time to leave the chain is finite. We can use the Wald's Equation to get a tighter bound on the expected time. Let
+\[
+X_{i} = \left\{
+    \begin{array}{rl}
+      1 & \textrm{if the packet goes clockwise at the $i$-th step}\\
+      -1 & \textrm{if the packet goes counterclockwise at the $i$-th step}
+    \end{array} \right.
+\]
+and 
+\[ T = \min\left\{i : \sum_{j=1}^{i}X_{j} = k \right\}.\]
+We know that $\mathrm{E}[T] < c9k$, so by Wald's Equation,
+\begin{eqnarray}
+  \mathrm{E}\left[\sum_{j=1}^{T}X_{j}\right] &=& \mathrm{E}[T] \cdot \mathrm{E}[X_{i}] \nonumber \\
+  k  &=& \mathrm{E}[T] \cdot \left( \frac{2}{3} \cdot 1 + \frac{1}{3} \cdot -1 \right) \nonumber \\
+  \mathrm{E}[T]&=& 3k \nonumber
+\end{eqnarray}
+In other words, the expected time to leave the chain is $3k$, i.e. $3|V_{i}|$.
+
+Case 2: if the cycle consists of only singly directed edges, the probability of leaving the cycle at any node is at least $\frac{1}{3}$. Therefore, the expected number of steps in the cycle is at most
+  \[ \sum_{i=1}^{\infty}i\frac{1}{3}\left(\frac{2}{3}\right)^{i-1} = 3 \leq |V_{i}|. \]
+
+If some parts of the cycle are doubly directed edges, we have the following claim.
+
+\begin{claim}
+\label{claim:threeincycle}
+   Any simple cycle in $G'$ contains at least $3$ singly directed edges.
+\end{claim}
+
+\begin{proof}
+  This claim is true when all edges are singly directed since any simple cycle contain at least $3$ edges. Suppose there is only one singly directed edge and the remaining are doubly directed edges in a cycle $C$ (see Figure~\ref{fig:cycleone}).
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.23\textwidth]{pics/cycleone.pdf}
+  \caption{A cycle with one singly directed edge}
+  \label{fig:cycleone}
+\end{figure}
+Let $x_{n}$ be the head of the singly directed edge. There must be an edge $x_{n}y \in G$ contained in $C$. There can not be any other edge with one end on $C$ and the other end in $C$, because all other edges are doubly connected. If $x_{n}y$ exists $G$ can not be a convex subdivision. Therefore, there are at least two singly directed edges in $C$.
+
+If there are two singly directed edges and the remaining are doubly directed in cycle $C$, they are either adjacent or separated. 
+\begin{figure}[ht]
+  \centering
+  \subfigure[]{\label{fig:cycletwoa}
+    \includegraphics[width=0.33\textwidth]{pics/cycletwoa.pdf}
+  }
+  \hspace{10mm}
+  \subfigure[]{\label{fig:cycletwos}
+    \includegraphics[width=0.35\textwidth]{pics/cycletwos.pdf}
+  }
+  \caption{Cycles with two singly directed edges}
+  \label{fig:cycletwo}
+\end{figure}
+If they are adjacent (see Figure~\ref{fig:cycletwoa}), let $x_{n}$ and $x_{n+1}$ be the heads of the two singly directed edges. There must be two edges $x_{n}y, x_{n+1}z \in G$ contained in $C$. There can not be any other edge with one end on $C$ and the other end in $C$ for the same reason as before. Hence, $G$ can not be a convex subdivision.
+
+If the two singly directed edges are separated (see Figure~\ref{fig:cycletwos}), let $x_{n}$ and $x_{m}$ be the heads of the two edges. Similarly, there must be two edges $x_{n}y, x_{m}z \in G$ contained in $C$, and there can not be any other edge with one end on $C$ and the other end in $C$. Vertices $x_{n}$, $y$, $z$, and $x_{m}$ can not be collinear, otherwise, edges $x_{n}x_{n+1}$ and/or $x_{m}x_{m+1}$ can not be doubly directed. Hence, $G$ can not be a convex subdivision.
+
+Therefore, there are at least $3$ singly directed edges in a cycle. 
+\end{proof}
+
+Suppose cycle $C$ contains $\ell$ doubly directed edge chains $h_{1}, \ldots, h_{\ell}$ $(\ell \geq 3)$, then it contains at least $\ell$ singly directed edges. The probability that a packet goes back to $h_{1}$ after leaving it is at most $p = \left(\frac{2}{3}\right)^{\ell}$. Suppose $v$ is in $h_{1}$, the expected number of times that the packet visits $h_{1}$ is no more than
+\[\sum_{i=0}^{\infty}(i+1)(1-p)p^{i} = \frac{1}{1-p}.\]
+Let $T$ be the number of times the packet visits $h_{1}$, and $N_{i}$ be the number of steps taken in $h_{1}$ before leaving it at the $i$-th visit. According to Wald's equation and the discussion above,
+\[\mathrm{E}\left[ \sum_{i=1}^{T}N_{i} \right] = \mathrm{E}[T] \cdot \mathrm{E}[N] \leq \frac{1}{1-p} \cdot 3|h_{1}| \leq \left( 1 - \left(\frac{2}{3}\right)^{3} \right)^{-1} \cdot 3|h_{1}| < 4.264|h_{1}|.\]
+Since $v$ is in $h_{1}$, the packet will not visit any other chain more often, then the expected number of times that the packet visits $h_{i}$ for $1 \leq i \leq \ell$ is no more than $(1-p)^{-1}$. The expected total time spent in $h_{i}$ is then no more than $4.264|h_{i}|$. Therefore, the expected total time spent in $C$ is no more than
+\[ 4.264|C| \leq 4.264|V_{i}|. \]
+
+
+\begin{theorem}
+\label{thm:timecomp}
+  Let $G$ be a convex subdivision of $n$ vertices. The expected execute time of the {\sc biased-random-compass} algorithm on $G$ is less than $4.264n$.
+\end{theorem}
+
+
+\bibliographystyle{plain}
+\bibliography{randcps}
+\end{document}

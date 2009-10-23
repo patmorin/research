@@ -1,0 +1,164 @@
+\documentclass{article}
+\usepackage{amsthm}
+
+\newtheorem{clm}{Claim}
+\newtheorem{lem}{Lemma}
+\newcommand{\E}{\mathrm{E}\,}
+
+\begin{document}
+
+
+A \emph{walk} on $\{-n,\ldots,n\}$ is a sequence $\langle
+w_1,\ldots,w_k\rangle$ where each $w_i\in\{-n,\ldots,n\}$ and
+$|w_i-w_{i+1}| = 1$ for all $i\in\{1,\ldots,k-1\}$.  Note that
+there is an injective mapping from walks of length $k$ onto vectors
+in $\{-1,1\}^{k-1}$, where $\langle w_1,\ldots,w_k\rangle$ maps
+to $\langle w_2-w_1,w_3-w_2,\ldots,w_k-w_{k-1}\rangle$.
+
+We want to study a random walk on $\{-n,\ldots,n\}$ defined by a vector
+of probabilities $R=(r_{-n},\ldots,r_n)$ with $r_{-n} = 1$, $r_n = 0$,
+and $0< r_i < 1$, for all $i \in \{-n+1,...,n-1\}$. When at location $i$,
+the walk moves ``right'' to $i+1$ with probability $r_i$.  Otherwise (with
+probability $1-r_i$) the walk moves ``left'' to position $i-1$.
+
+Let $W$ be the set of all walks on $\{-n,\ldots,n\}$ that include both $n$
+and $-n$ visiting $n$ first and ending at the first visit to $-n$.
+That is, an element in $W$ is a walk $\langle w_1,\ldots,w_k\rangle$
+that includes both $n$ and $-n$ and $w_k = -n$ and $w_i\neq -n$.
+for all $i\in\{1,\ldots,k-1\}$.
+
+Define the \emph{head} of a walk in $w\in W$ as the shortest prefix of $w$ that
+includes $n$ followed by a return to 0. That is, the head of $w$ is the
+shortest prefix $w_1,\ldots,w_i$ such that $w_i=0$ and $w_j = n$ for some
+$j\in\{1,\ldots,i-1\}$.
+
+\begin{clm}\label{claim:one}
+Let $W'$ be the set of all walks in $W$ that share some common head $w'$.
+Then $\Pr(W') \le (1/2)^{2n}$.
+\end{clm}
+
+\begin{proof}
+Observe that $\Pr(w')$ is the product of $|w|$ factors and these factors
+include $r_i$ and $1-r_i$ for all $i\in\{0,\ldots,n-1\}$.  Therefore,
+since $r_i(1-r_i) \le 1/4$, we have that $\Pr(w') \le (1/4)^n =
+(1/2)^{2n}$, as required.
+\end{proof}
+
+
+\begin{clm}
+Let $W_k$ be the subset of $W$ consisting of walks whose head is of
+length at most $k$.  Then $\Pr(W_k) \le k^2 / \exp(\Omega(n^2/k))$.
+\end{clm}
+
+\begin{proof}
+Chernoff's Bounds on the binomial distribution show that, for a 
+vector $V$ chosen uniformly at random from $\{-1,1\}^{k'}$ with $k' \le k$,
+\[
+   \Pr\{|\Sigma V| \ge \epsilon k\} \le \exp({-\Omega(\epsilon^2 k)}) \enspace .
+\]
+Applying this bound with $\epsilon = n/k$ we obtain
+\[
+   \Pr\{|\Sigma V| \ge n\} \le \exp({-\Omega(n^2/k)}) \enspace .
+\]
+Since $V$ is chosen uniformly at random from $2^{k'}$ possibilities,
+this means that the number of $V$ with $|\Sigma V| \ge n$ is at most
+\begin{equation}
+  2^{k'}/\exp({\Omega(n^2/k)}) \enspace.
+  \label{eq:counting}
+\end{equation}
+
+Partition $W_k$ into classes $W_{k,1},\ldots,W_{k,t}$ where each class has
+the same head so that
+\[
+  \Pr(W_k) = \sum_{i=1}^t \Pr(W_{k,i}) \le t(1/2)^{2n} \enspace ,
+\]
+where the inequality follows from Claim~\ref{claim:one}.
+Therefore, we can complete the proof by upper bounding 
+$t$, the number of such classes.
+
+The head of any class $W_{k,i}$ maps to a vector $V=v_1,\ldots,v_{k'}$,
+with $k'\le k$, $\left|\sum_{i=1}^{k''} v_i \right| \ge n$, and
+$\left|\sum_{i=k''}^{k'} v_i \right| \ge n$ where $k'' \le k'$ ($k''$
+is the first time at which the walk visits $n$).
+
+Therefore, by (\ref{eq:counting}), the number of such classes is at most
+\[
+  \sum_{k'=1}^{k}\sum_{k''=1}^{k'} 
+     \left(\frac{2^{k''}}{\exp({\Omega(n^2/k)}})\right)
+     \left(\frac{2^{k'-k''}}{\exp({\Omega(n^2/k)}})\right)
+   \le 2^{k'}/\exp({\Omega(n^2/k)})
+\]
+
+(2^{k'}/e^{\Omega(n^2/k)})^2
+  \le k^2 4^{k}/e^{\Omega(n^2/k)} \enspace ,
+\]
+\end{proof}
+
+We are now ready to prove the main result of this section.  Let $h(i,j)$ denote the expected number of steps for a walk that starts at position $i$ to reach position $j$.
+
+\begin{lem}
+For any choice of $R$, $\max\{h(0,-n), h(0,n)\} = \Omega(n^2)$.
+\end{lem}
+
+\begin{proof}
+Suppose, without loss of generality, that, with probability at least $1/2$, the
+walk reaches $n$ before reaching $-n$.
+
+
+
+\end{proof}
+
+
+
+
+
+
+%
+%Let $h(i,j)$ denote the expected number of steps for a walk that starts at position $i$ to reach position $j$.
+%
+%\begin{clm}
+%For any choice of $R$, $\max\{h(0,-n), h(0,n)\} = \Omega(n^2)$
+%\end{clm}
+%
+%\begin{proof}
+%Assume, without loss of generality, that with probability
+%at least $1/2$, the walk reaches $n$ before reaching $-n$.  Then
+%\[
+%    h(0, -n) \ge (1/2)(h(0,n) + h(n,0)) \enspace .
+%\]
+%
+%Let $S_k$ be the set of all walks $\langle w_1,\ldots,w_k\rangle$ on
+%$\{-n,\ldots,n\}$ where $w_1 = 0$, $w_k=n$ and $w_i\in\{1,\ldots,n-1\}$ for any
+%$i\in\{1,\ldots,k-1\}$.  From the theory of Markov processes, we have
+%\[
+%   \sum_{k=n}^\infty \sum_{\vec{w}\in S_k} k(1/2)^k = \Omega(n^2)
+%\]
+%\cite{X,Y}.
+%
+%For some walk $\overrightarrow w$ in $S_k$, let $\overleftarrow w$ denote the reversal of $w$.  Note that the probability of $\overrightarrow w$ is given by
+%\[
+%  \Pr\{\overrightarrow{w}\} = \prod_{i=1}^{k-1} x_i
+%\]
+%where $x_i = r_i$ or $x_i=(1-r_i)$, depending on wether $w_{i+1}=w_i+1$ or $w_{i+1} = w_i -1$, respectively.  On the other hand, for the reverse walk $\overleftarrow{w}$ we have    
+%\[
+%  \Pr\{\overleftarrow{w}\} = \prod_{i=1}^{k-1} (1-x_i)
+%\]
+%Finally, note that
+%\[
+%   h(0,n) + h(n,0) \ge 
+%    \sum_{k=n}^\infty \sum_{\overrightarrow{w}\in S_k}  
+%      k(\Pr(\overrightarrow{w} + \Pr(\overleftarrow{w}))
+%\]
+%
+%
+%Consider a fair version of the random walk, in which $r_i=1/2$ for all
+%$i\in\{-n+1,\ldots,n-1\}$.  It is well-know that, for this model,
+%$\E[\min\{h(0,-n),h(0,n)\}]=\Omega(n^2)$ \cite{something}.
+%
+%
+%
+%Suppose, without loss of generality that, with probability at least $1/2$, the walk reaches $n$ before reaching $j$
+%\end{proof}
+%
+\end{document}
+

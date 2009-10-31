@@ -21,16 +21,36 @@ and $0< r_i < 1$, for all $i \in \{-n+1,...,n-1\}$. When at location $i$,
 the walk moves ``right'' to $i+1$ with probability $r_i$.  Otherwise (with
 probability $1-r_i$) the walk moves ``left'' to position $i-1$.
 
-Let $W$ be the set of all walks on $\{-n,\ldots,n\}$ that include both $n$
-and $-n$ visiting $n$ first and ending at the first visit to $-n$.
-That is, an element in $W$ is a walk $\langle w_1,\ldots,w_k\rangle$
-that includes both $n$ and $-n$ and $w_k = -n$ and $w_i\neq -n$.
-for all $i\in\{1,\ldots,k-1\}$.
+Let $W$ be the set of all walks on $\{-n,\ldots,n\}$ that start at
+0, include both $n$ and $-n$, visiting $n$ first and ending at the
+first visit to $-n$.  That is, an element in $W$ is a walk $\langle
+w_1,\ldots,w_k\rangle$ where $w_1=0$, $w_k = -n$, $w_i = n$ for some
+$i\in\{2,\ldots,k-1\}$ and $w_i\neq -n$ for any $i\in\{1,\ldots,k-1\}$.
 
-Define the \emph{head} of a walk in $w\in W$ as the shortest prefix of $w$ that
-includes $n$ followed by a return to 0. That is, the head of $w$ is the
-shortest prefix $w_1,\ldots,w_i$ such that $w_i=0$ and $w_j = n$ for some
-$j\in\{1,\ldots,i-1\}$.
+Define the \emph{head} of a walk in $w\in W$ as the shortest prefix
+of $w$ that includes $n$ followed by a return to 0. That is, the head
+of $w$ is the shortest prefix $\langle w_1,\ldots,w_i\rangle$ of $w$
+such that $w_i=0$ and $w_j = n$ for some $j\in\{1,\ldots,i-1\}$.
+
+\begin{clm}
+Let $W_{\le k}$ be the subset of $W$ consisting of walks whose head is of
+length at most $k$.  Then $\Pr(W_k) \le k^2 e^{-\Omega(n^2/k)}$.
+\end{clm}
+
+\begin{proof}
+If we could show that $\Pr(w) \le 2^{-k}$ when $w$ is a head of length $k$, then we have:
+\[
+  \Pr(W_{\le k}) 
+  = \sum_{j=1}^k\sum_{w\in W_{j}} 2^{-j}
+  = \sum_{j=1}^k|W_{j}| 2^{-j}
+  \le \sum_{j=1}^k 2^je^{-\Omega(n^2/k)}2^{-j}
+  = ke^{-\Omega(n^2/k)} \enspace .
+\]
+The only sticky situation we have is when $w$ uses the edge $(n-1,n)$ a lot.
+\end{proof}
+
+
+
 
 \begin{clm}\label{claim:one}
 Let $W'$ be the set of all walks in $W$ that share some common head $w'$.
@@ -47,31 +67,32 @@ since $r_i(1-r_i) \le 1/4$, we have that $\Pr(w') \le (1/4)^n =
 
 \begin{clm}
 Let $W_k$ be the subset of $W$ consisting of walks whose head is of
-length at most $k$.  Then $\Pr(W_k) \le k^2 2^{k-2n} / \exp(\Omega(n^2/k))$.
+length at most $k$.  Then $\Pr(W_k) \le k^2 2^{k-2n}e^{-\Omega(n^2/k)}$.
 \end{clm}
 
 \begin{proof}
 Partition $W_k$ into classes $W_{k,1},\ldots,W_{k,t}$ where each class has
 the same head so that
-\[
+\begin{equation}
   \Pr(W_k) = \sum_{i=1}^t \Pr(W_{k,i}) \le t(1/2)^{2n} \enspace ,
-\]
+  \label{eq:prob-a}
+\end{equation}
 where the inequality follows from Claim~\ref{claim:one}.  Therefore, we
-can complete the proof by upper bounding $t$, the number of such classes.
+can complete the proof by upper bounding $t$, the number of heads of length at most $k$.
 We do this using Chernoff's bounds.
 Chernoff's Bounds show that, for a 
 vector $V$ chosen uniformly at random from $\{-1,1\}^{k'}$ with $k' \le k$,
 \[
-   \Pr\{|\Sigma V| \ge \epsilon k\} \le \exp({-\Omega(\epsilon^2 k)}) \enspace .
+   \Pr\{|\Sigma V| \ge \epsilon k\} \le e^{-\Omega(\epsilon^2 k)} \enspace .
 \]
 Applying this bound with $\epsilon = n/k$ we obtain
 \[
-   \Pr\{|\Sigma V| \ge n\} \le \exp({-\Omega(n^2/k)}) \enspace .
+   \Pr\{|\Sigma V| \ge n\} \le e^{-\Omega(n^2/k)} \enspace .
 \]
 Since $V$ is chosen uniformly at random from $2^{k'}$ possibilities,
 this means that the number of $V$ with $|\Sigma V| \ge n$ is at most
 \begin{equation}
-  2^{k'}/\exp({\Omega(n^2/k)}) \enspace.
+  2^{k'}e^{-\Omega(n^2/k)} \enspace.
   \label{eq:counting}
 \end{equation}
 
@@ -83,12 +104,13 @@ is the first time at which the walk visits $n$).
 Therefore, by (\ref{eq:counting}), the number of such classes is at most
 \begin{eqnarray*}
   t & \le & \sum_{k'=1}^{k}\sum_{k''=1}^{k'} 
-     \left(\frac{2^{k''}}{\exp({\Omega(n^2/k)}})\right)
-     \left(\frac{2^{k'-k''}}{\exp({\Omega(n^2/k)}})\right) \\
-   & \le & \sum_{k'=1}^{k}\sum_{k''=1}^{k'} 2^{k'}/\exp({\Omega(n^2/k)}) \\
-   & \le & k^2 2^{k'}/\exp({\Omega(n^2/k)}) \\
-   & \le & k^2 2^{k}/\exp({\Omega(n^2/k)}) \enspace .
+     \left(2^{k''}e^{-\Omega(n^2/k)}\right)
+     \left(2^{k'-k''}e^{-\Omega(n^2/k)}\right) \\
+   & \le & \sum_{k'=1}^{k}\sum_{k''=1}^{k'} 2^{k'}e^{-\Omega(n^2/k)} \\
+   & \le & k^2 2^{k'}e^{-\Omega(n^2/k)} \\
+   & \le & k^2 2^{k}e^{-\Omega(n^2/k)} \enspace ,
 \end{eqnarray*}
+so the claim follows from (\ref{eq:prob-a}).
 \end{proof}
 
 We are now ready to prove the main result of this section.  Let $h(i,j)$ denote the expected number of steps for a walk that starts at position $i$ to reach position $j$.
@@ -98,8 +120,19 @@ For any choice of $R$, $\max\{h(0,-n), h(0,n)\} = \Omega(n^2)$.
 \end{lem}
 
 \begin{proof}
+Without loss of generality (by symmetry), assume that every walk is a
+walk in $W$.  If $\max\{h(0,-n), h(0,n)\}=k/2$ then, with probability at
+least $1/2$, the walk has length at most $k$.  In particular, the walk has
+a head of length at most $k$. By Claim~\ref{clm:two}, we therefore have
+\[
+   1/2 \le \Pr(W_k) \le k^2 2^{k-2n}e^{-\Omega(n^2/k)}
+\]
+or
+\[  -1 \le 2\log k + k - 2n - (n^2/k)\log(e) \]
+\[ (n^2/k)\log(e) +  2n - 1 \le 2\log k + k  \]
+
 Suppose, without loss of generality, that, with probability at least $1/2$, the
-walk reaches $n$ before reaching $-n$.
+walk reaches $n$ before reaching $-n$.  Then $\max\{h(0,n), h(0,n)\} = \Omega(n^2)$.
 
 
 

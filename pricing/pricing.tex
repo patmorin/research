@@ -1,8 +1,8 @@
 \documentclass[lotsofwhite]{patmorin}
-\usepackage{amsmath,graphicx}
-\listfiles
-
-\input{pat}
+\usepackage{amsthm,amsfonts,amsmath,graphicx}
+\usepackage{pat}
+\usepackage[mathlines]{lineno}
+\linenumbers
 
 \title{\MakeUppercase{Algorithms for Marketing-Mix Optimization}}
 \author{Joachim Gudmundsson%
@@ -42,7 +42,7 @@ particular, it is a method of inferring an individual's or a group's
 preferences based on their past choices.  The \emph{marketing mix}
 \cite{kpkl05} of a product consists of the 4 Ps: Product, price, place, and
 promotion.  In the current paper, we present algorithms for optimizing the
-first two of these by using data about consumer's preferences.  That is, we
+first two of these by using data about consumers' preferences.  That is, we
 show how, given data on consumer preferences, to efficiently choose a
 product and a price for that product in order to maximize profit.
 
@@ -67,27 +67,18 @@ and $q_j \ge q_{i,j}$ for all $j\in\{1,\ldots,d\}$.  The customer $C_i$
 will \emph{purchase} the product if it has the minimum price among all
 available products that $C_i$ considers.
 
-We consider markets that are \emph{saturated}.  That is, for every customer
-$C_i$ there is an existing product that satisfies $C_i$'s
+We consider markets that are \emph{saturated}.  That is, for every
+customer $C_i$ there is an existing product that satisfies $C_i$'s
 requirements and among all products that satisfy $C_i$'s requirements,
-$C_i$ will choose the least expensive product.  From the point of view of a
-manufacturer introducing one or more new products, this means that all
-customers are \emph{Pareto optimal}, i.e., there are no two customers $C_i$
-and $C_j$ such that $q_{i,k} > q_{j,k}$ for all $k\in\{1,\ldots,d\}$ and
-$p_i < p_j$.  
-
-This is because no customer will every purchase a product that is not
-Pareto optimal, since there is a lower-priced. Therefore, every customer $C_i$ can be replaced with the
+$C_i$ will choose the least expensive product.  From the point of
+view of a manufacturer introducing one or more new products, this
+means that all customers are \emph{Pareto optimal}, i.e., there are
+no two customers $C_i$ and $C_j$ such that $q_{i,k} > q_{j,k}$ for all
+$k\in\{1,\ldots,d\}$ and $p_i < p_j$.  This is because no customer will
+every purchase a product that is not Pareto optimal, since there is a
+lower-priced alternative that also satisfies all their minimum quality
+requirements. Therefore, every customer $C_i$ can be replaced with the
 (Pareto optimal) product that they purchase.
-
-, in a saturated market, every customer $C_i$ will already
-purchase a product.
-
-
-purchase the same product, namely the lowest-priced product that satisfies
-$C_i$'s (and therefore also $C_j$'s) requirements.  When modelling a
-saturated market, there is no need to explicitly consider existing products
-since these can be encoded into the customers themselves.
 
 As an example, consider a market for computers in which an example customer
 $C_i$ may be looking for a computer with a minimum of 8 GB of RAM, a CPU
@@ -111,10 +102,10 @@ The \emph{profit per unit sold} of $P$ is therefore
    \ppu(P) = p-\cost(P) \enspace .
 \]
 In this paper we consider algorithms that a manufacturer can use when
-choosing a new product to introduce into an existing saturated market
+planning a new product to introduce into an existing saturated market
 with the goal being to maximize the profit obtained.  More precisely,
 given a Pareto-optimal \emph{market} of customers $M=\{C_1,\ldots,C_n\}$,
-each have $d$ qualities, the $\textsc{ProductDesign}(d)$ problem is to
+each having $d$ qualities, the $\textsc{ProductDesign}(d)$ problem is to
 find a product $P^*\in\R^{d+1}$ such that
 \[
   \val(P^*) = \ppu(P^*)
@@ -123,86 +114,59 @@ find a product $P^*\in\R^{d+1}$ such that
 \]
 is maximized.  
 
-The term \emph{marketing-mix} is probably the most famous phrase in
+The term \emph{marketing mix} is probably the most famous phrase in
 marketing. Not surprisingly, economists and market researchers have
-considered methods of optimizing the marketing mix in various
-scenarios.  
+considered methods of optimizing the marketing mix in various scenarios.
+As there are many different models of the problem, it is difficult to
+compare algorithms.  
 
-One of the first to consider this problem modeled...
-
-A process related to the problem we study is the quality function
-deployment (QFD) process that involves ranking customer preferences,
-rating competitors, and using this information to modify the features of a
-product in to capture as many new customers as possible while satisfying
-budget constraints.  QFD is used successfully by many manufacturers
-including Ford, Mazda, Xerox, Kodak, IBM, and Procter and Gamble
-\cite{jebb et al 1992}.
-
-veloped the concept in the United States. The ASI
-                                                     uses a basic
-                                                     four-matrix
-                                                     method developed
-                                                     by Macabe, a
-                                                     Japanese reliability
-                                                     engineer. GOALrQPC
-                                                     advocates a multiple
-                                                     matrix method
-                                                     developed by Akao
-                                                     and incorporates
-                                                     many disciplines in
-                                                     a less structured
-                                                     format consisting of
-                                                     a matrix of matrices.
-                                             QFD is  Akao, 1990 has
-                                             collected into a book
-                                             the multiple
-used successfully by manufacturers of electronics,   matrix applications
-from many Japanese practitioners appliances, clothing, and construction
-equipment, by Žsee also Day, 1993..  firms like General Motors, Ford,
-Mazda, Motorola,       We should make clear that QFD is concerned Xerox,
-Kodak, IBM, Procter and Gamble, Hewlett-      mostly with the proccess
-of improving an existing Packard, and AT & T Žsee Jebb et al., 1992..
-product so that it captures customer expectations. In
-                                                     this sense, QFD
-                                                     is concerned with
-                                                     the development of
-                                                     products that are
-                                                     ‘‘best-in-class’’,
-                                                     i.e., they are
-                                                     superior to any
-                                                     known existing
-                                                     product in a particu-
+Most models of marketing-mix problems involve a constant number of
+real-valued input parameters.  This sometimes leads to problems where
+the optimal solution is one of a constant number of possible closed forms
+(see, e.g., Thomson and Teng's optimal constant price model \cite{tt84}).
+In other cases, a closed form is not achievable, but a (sometimes
+approximate) solution can be obtained using numerical optimization
+techniques (see, e.g., Balanchandran and Gensch \cite{bg74}, Thomson and
+Teng \cite{tt84}, Naik \etal\ \cite{nrw04}, Deal \cite{d79}, Erickson
+\cite{e91}).  In all cases, it is expected that the model parameters
+are derived from real-world data, such as surveys or sales figures,
+and involves fitting of the model parameters to the available data.
 
 
+%The second type of model, which is also the type of model considered in
+%the current paper, involves a variable and large number of parameters,
+%each of which is a measure of real-world data point.  One such result
+%by Bhattacharya \cite{bXX}, considers optimizing an objective function
+%within the context of the media (advertising) marketing mix.  Here, the
+%product is fixed and one wants to allocate an advertising budget over
+%several media (radio, television, magazine, internet,\ldots) in order
+%to maximize profit.  Here each media type defines a demand curve where
+%more advertising implies higher demand and the total demand is the sum
+%of demands generated by all media types.  He implements an optimization
+%algorithm as a SAS macro that can be used to obtain a ``close to'' global
+%solution by evaluating the objective function at each point of a regular
+%grid.  This algorithm uses $O(r^n)$ evaluations, where $1/r$ represents
+%the granularity of the sampling and $n$ is the number of media variables.
 
-Bhattacharya \cite{bXX} considers optimizing an objective function within
-the context of the media (advertising) marketing mix.  Here, the product
-is fixed and one wants to allocate an advertising budget over several
-media (radio, television, magazine,\ldots) in order to maximize profit.
-Here each media type defines a demand curve where more advertising implies
-higher demand and the total demand is the sum of demands generated by
-all media types.  He implements an optimization algorithm as a SAS macro
-that can be used to obtain a ``close to'' global solution by evaluating
-the objective function at each point of a regular grid.  This algorithm
-uses $O(r^d)$ evaluations, where $1/r$ represents the granularity of
-the sampling and $d$ is the number of media variables.
+The work in the current paper is different from this previous work in
+several ways.  For one, it is one of the few works that deals primarily
+with the first two P's, product and pricing.  Most existing literature
+focuses on the marketing P's, namely place and promotion, and to a lesser
+extent, pricing of an existing product.  Secondly, it deals directly
+with data about individual consumers rather than aggregating this data
+so that it fits a particular model of consumer behaviour.
 
-
-
-
-
-
-
-
-
-
-assume that the relationship between the  Bhattacharya considers a marketing mix optimization
-problem arising in the media industry and argues that it is  
-
-
-To the best of our knowledge, this is the first time a
-problem like this has been considered from an algorithmic perspective.
-
+We believe that this models very well what happens in online shopping
+for high cost products such as computers, cameras, and televisions.
+In such markets, savvy consumers have good data available about both the
+specifications and the cost of all available products so that marketing
+efforts are (arguably) less important than the quality and prices of the
+products. On the other hand, online sellers such as Amazon have large
+amounts of data about users' past purchases and can use this data as input
+to the problem.  In particular, these sellers know the specifications
+$q_{i,1},\ldots,q_{i,d}$ and prices $p_i$ of huge quantities of items
+sold and can use this data to advise a manufacturer that is designing
+a new product.
 
 In the remainder of the paper we give an $O(n\log n)$ time algorithm for
 $\textsc{ProductDesign}(1)$ (\secref{1-d}), and $O(n(\log n)^{d+1})$ time
@@ -315,24 +279,27 @@ quality $q$ for the remainder of the algorithm's execution.
 
 Let the customers be labelled $(p_1,q_1),\ldots,(p_n,q_n)$ in decreasing
 order of $p_i$, so that $p_{i+1} \le p_i$ for all $i\in\{1,\ldots,n-1\}$.
-At any point in the sweep algorithm, there is a current price $p$, which
-starts at $p=\infty$ and takes on the values $p_1,\ldots,p_n$,
-successively, during the execution of the algorithm.  At all times, the
+At any point in the sweep algorithm, there is a current price $p$,
+which starts at $p=\infty$ and decreases during the execution of
+the algorithm.  At the start of the algorithm the algorithm's event
+queue $Q$, which is represented as a balanced binary search tree, is
+initialized to contain the values $p_n,\ldots, p_1$.  At all times, the
 algorithm maintains a list $L$ of qualities $q_1^* > q_2^* > \cdots >
 q_m^*$ such that $\val(p,q_1^*) > \val(p,q_2^*) >\cdots>\val(p,q_m^*)$.
-The quality $q_1^*$ is the optimal quality for the current price, $p$.  By
-the time the algorithm terminates, the quality of the globally-optimal
-solution will have appeared as the first element in $L$.
+The quality $q_1^*$ is the optimal quality for the current price, $p$.
+By the time the algorithm terminates, the quality of the globally-optimal
+solution will have appeared as the first element in $L$.  To complete
+the description of the algorithm, all that remains is to show how $L$
+and $Q$ are updated during the processing of events in the event queue.
 
-To complete the description of the algorithm, all that remains is to
-show how $L$ is updated during the processing of a sweep line event.
-For this, the algorithm uses an auxiliary structure $D$ to efficiently
-identify items in $L$ that need to updated.  Consider a consecutive
-pair of the elements $q^*_i$ and $q^*_{i+1}$ in $L$.  When $q^*_i$ and
-$q^*_{i+1}$ became adjacent in $L$, it was at some price $p=p_t$ such
-that $\val(p_t,q^*_i)>\val(p_t,q^*_{i+1})$.  Let $a_i$ and $a_{i+1}$
-be the number of customers who would consider $(p_t,q^*_i)$ and
-$(p_t,q^*_{i+1})$, respectively. Then,
+There are two kinds of events in the event queue.  \emph{Insertions}
+occur at the values $p_1,\ldots,p_n$.  \emph{Deletions}, which we describe
+next, occur when the relative order of two adjacent items in $L$ changes.
+Consider a consecutive pair of the elements $q^*_i$ and $q^*_{i+1}$
+in $L$.  When $q^*_i$ and $q^*_{i+1}$ became adjacent in $L$, it was
+at some price $p=p_t$ such that $\val(p_t,q^*_i)>\val(p_t,q^*_{i+1})$.
+Let $a_i$ and $a_{i+1}$ be the number of customers who would consider
+$(p_t,q^*_i)$ and $(p_t,q^*_{i+1})$, respectively. Then,
 \[
   \val(p_t,q^*_i) = (p_t-q^*_i)a_i
 \]
@@ -349,52 +316,42 @@ and
 \[
   \val(p_{t'},q^*_{i+1}) = (p_{t'}-q^*_{i+1})(a_{i+1}+t'-t) \enspace .
 \]
-We are interested in identifying when the inequality
-$\val(p_{t'},q^*_i) > \val(p_{t'},q^*_{i+1})$ changes to 
-$\val(p_{t'},q^*_i) \le \val(p_{t'},q^*_{i+1})$.  That is, we need to
-identify all indices $i$ for which, 
-\begin{equation}
-  (p_{t'}-q^*_i)(a_i+t'-t) \le (p_{t'}-q^*_{i+1})(a_{i+1}+t'-t)  \enspace ,
+We are interested in identifying the price $p_{t'}$ where the
+inequality $\val(p_{t'},q^*_i) > \val(p_{t'},q^*_{i+1})$ changes to
+$\val(p_{t'},q^*_i) \le \val(p_{t'},q^*_{i+1})$.  When this happens,
+$q_i^*$ can be safely discarded from $L$ since, by \lemref{monotone},
+$\val(p,q^*_i)$ will never again exceed $\val(p,q^*_{i+1})$ for the
+remainder of the sweep.  The value $p_{t'}$ is a deletion event.
+
+Note that \lemref{monotone} also allows for binary search on the value
+$p_{t'}$.  In particular, the interval $[p_j,p_{j+1}]$ containing $p_{t'}$ can be found in $O(\log n)$ time, after which the value of $p_{t'}$ can be obtained by solving the linear equation
+\[  (p_{t'}-q^*_i)(a_i+t'-t) \le (p_{t'}-q^*_{i+1})(a_{i+1}+t'-t)  \enspace ,
     \eqlabel{halfplane}
-\end{equation}
-at which point $q^*_i$ should be removed from $L$.  Observe that
-the values of $a_i$, $a_{i+1}$, $q^*_i$, $q^*_{i+1}$, and $t$ are all
-fixed at the time $q^*_i$ and $q^*_{i+1}$ become adjacent in $L$ and
-the only values that change are those of $p_{t'}$ and $t'$.  Thus,
-\eqref{halfplane} defines a halfplane in the plane with axes
-$p_{t'}$ and $t'$.
+\]
+for $t'$.  (The equation is linear because the values $a_i$ and $a_{i+1}$
+are constant in the interval $(p_j,p_{j+1})$.) Thus, whenever two new
+elements become adjacent in $L$, we can add the appropriate deletion
+event to $Q$ in $O(\log n)$ time.
 
-The auxiliary data structure $D$ used by the algorithm must therefore be
-able to store halfplanes and handle insertions, deletions, and queries
-of the form ``Given a point $(x,y)$ return all halfplanes that contain
-$(x,y)$.'' There are several data structures that solve this problem,
-but the most suitable for the current application is the recent dynamic
-convex hull data structure of Brodal and Jacob \cite{bj02}.\footnote{This
-data structure is infamously complicated.  It's use in our application
-can, however, be replaced with a much simpler semi-dynamic data structure
-\cite{ds91}.  So as not to distract from the problem at hand, we defer
-the discussion on how to do this until \secref{conclusion}.}  Their
-data structure allows for the insertion and deletion of halfplanes in
-$O(\log n)$ time.  Given a query point $(x,y)$, the data structure is
-able to, in $O(\log n)$ time, find a single halfplane (if one exists)
-that contains $(x,y)$.
+When processing an insertion event $p_i$, we remove from the tail of $L$
+all values $q_j^*$ such that $\val(p_i,q_j^*) \le \val(p_i,q_i)$ and
+then append $q_i$ onto $L$.  While deleting the elements of $L$, we also
+remove all the associated deletion events from $Q$.  Appending $q_i$ to
+$L$ causes at most one new pair of elements in $L$ to become adjacent,
+so we add the appropriate deletion event to $Q$ as described above.
+The time to process the event $p_i$ is there $O((k_i+1)\log n)$, where $k_i$ is
+the number of elements that are deleted from $L$.
 
-The data structure $D$ is used as follows.  When the sweep line is
-advanced to a new price $p_{t'}$, the value $q_{t'}$ is appended to
-$L$ and the halfplane defined by $q_{t'}$ and its predecessor in $L$
-is inserted into $D$.  Next, the data structure $D$ is repeatedly
-queried with the point $(p_{t'},t')$.  This returns a halfplane
-$h$ (if any exists) that corresponds to a pair of consecutive
-elements $(q_i^*,q_{i+1}^*)$ such that $\val(p_{t'},q_i^*) \le
-\val(p_{t'},q_{i+1}^*)$.  The halfplane $h$ is then deleted from $D$,
-$q_{i}$ is deleted from $L$, and a new halfplane corresponding to the
-(now adjacent) elements $q_{i-1}$ and $q_{i+1}$ is inserted into $D$.
-This process is repeated until querying $D$ with the value $(p_{t'},t')$
-returns no result.
+When processing a deletion event that deletes $q_i^*$ from $L$, we
+simply delete $q_i^*$ from $L$ and its (at most two) associated deletion
+events from $Q$.  This may cause a new pair of elements, $q_{i-1}^*$
+and $q_{i+1}^*$, in $L$ to become adjacent, so we add the appropriate
+deletion event to $Q$. In this way, a deletion event can be processed
+in $O(\log n)$ time.
 
-Note that, after all the processing associated with updating the price
-$p_{t'}$, the first element, $q_1$, in $L$ is the value that maximizes
-$\val(q_1,p_{t'})$. Thus, the algorithm need only keep track, throughout
+Note that, after all the processing associated with an event $p_t$ is
+complete, the first element, $q_1^*$, in $L$ is the value that maximizes
+$\val(p_{t},q_1^*)$. Thus, the algorithm need only keep track, throughout
 its execution, of the highest profit obtained from the first element of
 $L$, and output this value at the end of its execution.  This completes
 the description of the algorithm.
@@ -411,17 +368,14 @@ the description of the algorithm.
   ensures that the optimal solution appears at some point as the first
   element of the list $L$.
 
-  The running time of the algorithm can be bounded as follows: Presorting
-  the customers by decreasing order of price can be done in $O(n\log n)$
-  time using any $O(n\log n)$ time sorting algorithm. Each sweep line
-  event involves 1 insertion into $D$ plus some number $k$ of deletions,
-  and insertions, and $k+1$ queries.  Note that each deletion in $D$
-  corresponds to a deletion in $L$, and each element of $q_1,\ldots,q_n$
-  is inserted into $L$ at most once.  Therefore, the total number of such
-  deletions during the entire execution of the algorithm does not exceed
-  $n$, and each such insertion/deletion pair takes $O(\log n)$ time.
-  Since there are $n$ events, we conclude that the total running time
-  of the algorithm is $O(n\log n)$, as claimed.
+  The running time of the algorithm can be bounded as follows:
+  The total number of deletion events processed is at most $n$,
+  since each such event removes some value $q_i$ from $L$ for some
+  $i\in\{1,\ldots,n\}$. Thus, the cost of processing all deletion events
+  is $O(n\log n)$.  Similarly, $\sum_{i=1}^n k_i \le n$ since $k_i$
+  is the number of elements deleted from $L$ during the processing of
+  $p_i$. Thus, the time required to handle all insertion events, and
+  therefore the running time of the entire algorithm, is $O(n\log n)$
 \end{proof}
 
 The following theorem shows that a running time of $\Omega(n\log n)$
@@ -560,7 +514,7 @@ following result:
 
 \begin{thm}
   For any $\eps >0$, there exists an $O(\eps^{-3}n(\log n)^2)$ time
-  (high-probability) Monte-Carlo $(1-\eps)$-approximation algorithm for
+  high-probability Monte-Carlo $(1-\eps)$-approximation algorithm for
   $\textsc{ProductDesign}(2)$.
 \end{thm}
 
@@ -608,11 +562,11 @@ geometry result.
   are translates (without scaling) of a regular simplex.  Suppose that
   the total complexity of $A(\Delta)$ is $m$.  Then, by the pigeonhole
   principle, there is some element $T$ in $\Delta$ that is involved
-  in $m/n$ features of $A(\Delta)$.  Note that this implies that $T$
+  in $m/n$ features of $A(\Delta)$.  (Note that this implies that $T$
   intersects all the elements of a set $\Delta'\subseteq\Delta$ with
   $|\Delta'|=\Omega((m/n)^{1/(d-1)})$, since otherwise there are not
   enough elements in $\Delta'$ to generate $m/n$ features on the surface
-  of $\Delta$.
+  of $\Delta$.)
 
   Observe that, since the elements of $\Delta'$ are all unit size and
   they all intersect $T$, that they are all contained in a ball of
@@ -625,7 +579,7 @@ geometry result.
   Now, for the case where the elements of $\Delta$ are homothets
   (translations and scalings) of a regular simplex, we proceed as follows.
   Assume, by way of contradiction, that $|A(\Delta)| > rn$ for some $r$
-  to be defined later.  Label the elements of $\Delta$ $T_1,\ldots,T_n$
+  to be defined later.  Label the elements of $\Delta$ as $T_1,\ldots,T_n$
   in increasing order of size and consider the smallest element $T_i$ such
   that $T_i$ contributes at least $r$ features to $A(\{T_i,\ldots,T_n\})$.
   Such a $T_i$ is guaranteed to exist, since otherwise $|A(\Delta)|\le
@@ -634,22 +588,22 @@ geometry result.
   Now, $T_i$ intersects all the elements in some set $\Delta'\subseteq
   \{T_{i+1},\ldots,T_n\}$ with $|\Delta'| = \Omega(r^{1/(d-1)})$.
   Shrink each element $T'$ in $\Delta'$ so as to obtain an element
-  $T''$ such that (a)~the size of $T''$ is equal to the size of $T$ and
+  $T''$ such that (a)~the size of $T''$ is equal to the size of $T_i$ and
   (b)~$T'' \subseteq T'$.  Call the resulting set of shrunken elements
   $\Delta''$.  Condition~(a) and the packing argument above imply that
   there is a point $p\in\R^d$ that is contained in $\Omega(r^{1/(d-1)})$
   elements of $\Delta''$.  Condition~(b) implies that $p$ is contained in
   $\Omega(r^{1/(d-1)})$ elements of $\Delta'$ and hence also $\Delta$.
-  Therefore, we conclude, as before that $r \le O(k^{d-1})$.  Thus,
+  Therefore, we conclude, as before, that $r \le O(k^{d-1})$.  Thus,
   for a sufficiently large constant $c$, setting $r=ck^{d-1}$ yields a
-  contradiction to the assumption that $|A(C)| > rn$.  We conclude that
-  $|A(C)| = O(nk^{d-1})$, as required.
+  contradiction to the assumption that $|A(\Delta)| > rn$.  We conclude that
+  $|A(\Delta)| = O(nk^{d-1})$, as required.
 \end{proof}
 
 \paragraph{Remark.} The proof of \lemref{arrangement} makes almost no use
 of the assumption that the elements of $\Delta$ are regular simplices other
 than using the property that their volume is related to their diameter.
-Thus, a version of this lemma holds for collections of \emph{fat} objects,
+Thus, a version of this lemma holds for collections of \emph{fat} homothets,
 a result that will probably be of independent interest.
 
 \paragraph{Remark.} \lemref{arrangement} is somewhat surprising, since the
@@ -660,7 +614,7 @@ complexity of the first $k$ levels to that of the boundary of the union
 (the 0-level).
 
 \begin{lem}\lemlabel{arrangement-construct}
-  Let $\Delta$ be a set of $n$ homothets of the regular simplex in
+  Let $\Delta$ be a set of $n$ homothets of a regular simplex in
   $\R^d$ such that no point of $\R^d$ is contained in more than $k$
   simplices of $\Delta$.  Then the arrangement $A(\Delta)$ of $\Delta$
   can be computed in $O(n(k^{d-1}+(\log n)^{d}))$ time.
@@ -668,7 +622,7 @@ complexity of the first $k$ levels to that of the boundary of the union
 
 \begin{proof}
   Computing the arrangement $A(\Delta)$ can be done in the following way.
-  Sort the elements of $\Delta$ by decreasing size and construct $A(C)$
+  Sort the elements of $\Delta$ by decreasing size and construct $A(\Delta)$
   incrementally by inserting the elements one by one.  When inserting
   an element $T$, use a data structure (described below) to retrieve
   the elements of $\Delta$ that intersect $T$ and discard the elements
@@ -687,38 +641,48 @@ complexity of the first $k$ levels to that of the boundary of the union
   n)^{d})$ time and can answer queries in $O(x + (\log n)^{d})$ time,
   where $x$ is the size of the output.  This data structure will be
   constructed once and queried $n$ times.  The total size of the outputs
-  over all $n$ queries will be the $O(|A(C)|)=O(nk^{d-1})$.
+  over all $n$ queries will be the $O(|A(\Delta)|)=O(nk^{d-1})$.
 
-  Since the elements of $\Delta$ are homothets, each element of $\Delta$
-  can be described concisely by the lexicographically smallest of its
-  coordinates and one real number describing its size. In this way,
-  each element of $\Delta$ can be represented as a point in $\R^{d+1}$
-  and thus $\Delta$ can be represented as a set $\Delta'\subseteq\R^{d+1}$
-  of $n$ points .
+  Refer to \figref{construction}.
+  Suppose that every element $T\in\Delta$ is a homothet of the
+  regular simplex $V$ whose vertices are $v_1,\ldots,v_{d+1}$ and let
+  $n_1,\ldots,n_{d+1}$ be the inner normals of the faces of $V$ where
+  $n_i$ is the face opposite (not incident on) vertex $v_i$.  For any
+  $T\in\Delta$, let $t_i$ be the image of $v_i$ under the homothetic
+  transformation that takes $V$ onto $T$.  Observe that, if $h$ is a
+  halfspace of $\R^d$ with inner normal $n_i$,  then $h$ intersects $T$
+  if and only if $h$ contains $t_i$.  Furthermore, every simplex $T\in
+  \Delta$ is the intersection of $d$ halfspaces $h^T_1,\ldots,h^T_{d+1}$
+  where the inner normal of $h^t_i$ is $n_i$.  Therefore, a simplex $T\in\Delta$
+  intersects a simplex $T'\in\Delta$ if and only if $h^T_i$ contains $t'_i$
+  for all $i\in\{1,\ldots,d+1\}$.
 
-  Observe that, given a half space $h$ in $\R^d$, the set of elements of
-  $\Delta$ intersected by $h$ is given by the set of points of $\Delta'$
-  contained in some halfspace $h'=f(h)$ in $\R^{d+1}$.  Furthermore,
-  the transformation $f$ preserves parallel halfspaces.  That is,
-  if $h_1,h_2\subseteq{\R^d}$ are halfspaces that have the same inner
-  normal then $f(h_1)$ and $f(h_2)$ also have the same inner normal.
+  \begin{figure}
+    \begin{center}
+      \begin{tabular}{ccc}
+        \includegraphics{construction-a} & 
+        \includegraphics{construction-b} & 
+        \includegraphics{construction-c} \\
+        The simplex $V$ & 
+        $T$ intersects $T'$ & 
+        $T$ does not intersect $T'$  ($t'_3 \not\in h^T_3$)
+      \end{tabular}
+    \end{center}
+    \caption{The simplex $T\in \Delta$ intersects $T'\in\Delta$ if and
+      only if $h^{T_i}$ contains $t'_i$ for all $i\in\{1,\ldots,d\}$.}
+    \figlabel{construction}
+  \end{figure}
 
-  Now, observe that any simplex $T\in\Delta$ can be expressed as the
-  intersection of $d$ closed halfspaces, all of whose inner normals are
-  taken from the set of $N=\{n_1,\ldots,n_{d+1}\}\subset \Sp^{d-1}$ of
-  inner normals of the facets of a regular simplex.  Let $f(n_i)\in\Sp^d$
-  denote the inner normal of a halfspace $f(h)$, where $h\subset\R^d$
-  is a halfspace whose inner normal is $n_i$.
-
-  The data structure for storing $\Delta'$ is a $d+1$ layer range tree
-  \cite{b75} in which the $i$th layer, for $i\in\{1,\ldots,d+1\}$,
-  stores its points ordered by their projection onto $f(n_i)$.  In this
-  way, the range tree can return the set of all simplices in $\Delta$ that
-  intersect $T$.  The size of this range tree is $O(n(\log n)^{d})$
-  and it can answer queries in time $O(x+n(\log n)^{d})$ where $x$
-  is the size of the query result.  Since each simplex in $\Delta$
-  is passed as a query to this data structure exactly once, the total
-  sizes of outputs over all $n$ queries is equal to the number of
+  This implies that the elements of $\Delta$ can be stored in a
+  $(d+1)$-layer range tree \cite{b75}.  The $i$th layer of this tree,
+  for $i\in\{1,\ldots,d+1\}$, stores elements of $\Delta$ ordered by
+  the projection of $t_i$ onto $n_i$.  In this way, the range tree can
+  return the set of all simplices in $\Delta$ that intersect a query
+  simplex $T\in\Delta$.  The size of this range tree is $O(n(\log
+  n)^{d})$ and it can answer queries in time $O(x+n(\log n)^{d})$
+  where $x$ is the size of the query result.  Since each simplex in
+  $\Delta$ is passed as a query to this data structure exactly once, the
+  total sizes of outputs over all $n$ queries is equal to the number of
   pairs $T_1,\ldots,T_2\in\Delta$ such that $T_1\cap T_2\neq\emptyset$.
   But the number of such pairs is certainly a lower bound on $|A(\Delta)|$
   so it must be at most $O(nk^{d-1})$.  This completes the proof.
@@ -745,7 +709,7 @@ do this we obtain the following result:
 
 \begin{thm}
   For any $\eps >0$, there exists an $O(\eps^{-(2d+1)}n(\log n)^d + n(\log
-  n)^{d+1})$ time (high-probability) Monte-Carlo $(1-\eps)$-approximation
+  n)^{d+1})$ time high-probability Monte-Carlo $(1-\eps)$-approximation
   algorithm for $\textsc{ProductDesign}(d)$.
 \end{thm}
 
@@ -765,15 +729,6 @@ objects in $\R^d$ has complexity $O(nk^{d-1})$ where $k$ is the maximum
 number of objects that contain any given point. We expect that this result,
 and the algorithm for approximate depth that arise from it \cite{ah08},
 will find other applications.
-
-Our exact algorithm for the case $d=2$ uses the recent dynamic convex
-hull data structure of Brodal and Jacob \cite{bj02}, which is quite
-complicated.  We observe that the use of this structure can be avoided
-by using the (much simpler) semi-dynamic data structure of Dobkin and Suri
-\cite{ds91}.  To use this structure, we need to specify, each time a point is
-inserted, the time at which that point will be deleted.  In our case,
-\lemref{monotone} implies that this deletion time can be computed by a
-binary search on $p_t,\ldots,p_n$ using \eqref{halfplane}.
 
 An exact near-linear time algorithm for the case $d=2$ seems to be out of
 reach.  It appears as if this problem requires (at least) a solution to the

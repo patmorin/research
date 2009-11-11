@@ -23,6 +23,7 @@
 \newtheorem{lemma}{Lemma}%[section]
 \newtheorem{notation}{Notation}[section]
 \newtheorem{proposition}{Proposition}[section]
+\newtheorem{op}{Open Problem}
 \newtheorem{claim}{Claim}
 \newtheorem{corollary}{Corollary}
 
@@ -30,11 +31,15 @@
 \newcommand{\EXP}{\mathrm{E}}
 \newcommand{\PROB}{\Pr}
 \newcommand{\R}{\mathbb{R}}
+\newcommand{\Sp}{\mathbb{S}}
 \newcommand{\etal}{\emph{et al}}
+\newcommand{\ccw}{\mathrm{ccw}}
+\newcommand{\cw}{\mathrm{cw}}
 
 \title{\MakeUppercase{Oblivious Routing in Convex Subdivisions: \newline 
        Random Walks are Optimal}}
-\author{Dan Chen, Luc Devroye, Vida Dujmovi\'c, and Pat Morin}
+\author{\ }
+%\author{Dan Chen, Luc Devroye, Vida Dujmovi\'c, and Pat Morin}
 
 \begin{document}
 \maketitle
@@ -50,9 +55,8 @@ $\mathcal{A}$ takes $\Omega(n^2)$ expected time to route a message between
 some pair of vertices.  Since this lower bound is matched by a random walk,
 this result implies that the geometric information available in convex
 subdivisions is not helpful for this class of routing algorithms.
-
-We also show that there exists triangulations for which the
-\textsc{Random-Compass} algorithm proposed by Bose \etal\ (XXXX,YYYY)
+The current paper also shows the existence of triangulations for which the
+\textsc{Random-Compass} algorithm proposed by Bose \etal\ (2002,2004)
 requires $2^{\Omega(n)}$ time to route between some pair of vertices.
 
 
@@ -63,32 +67,41 @@ requires $2^{\Omega(n)}$ time to route between some pair of vertices.
 
 In recent years, motivated primarily by the proliferation of wireless networks and GPS devices, much research has been done on routing algorithms for geometric networks \cite{gior03}.  In this research a network is modelled as a geometric graph $G=(V,E)$ whose vertex set $V$ is a set of points in $\R^2$. We say that a routing algorithm $\mathcal{A}$ \emph{works} for $G$ if, for any pair of vertices $s,t\in V$, the algorithm always find a path from $s$ to $t$ in a finite number of steps.
 
-The research on geometric routing algorithms largely focuses on utilizing geometric properties of a class of geometric graphs to reduce the complexity of, and information required by, routing algorithms.  For example, when $G$ is the unit disk graph of the points in $V$, then an algorithm, called \textsc{Face-1}, of Bose \etal\ \cite{bose01} works and requires no preprocessing of $G$ or additional state information at the vertices of $G$ and requires only a constant size header associated with each packet.
+The research on geometric routing algorithms largely focuses on utilizing geometric properties of a class of geometric graphs to reduce the complexity of, and information required by, routing algorithms.  For example, when $G$ is the unit disk graph\footnote{The \emph{unit disk graph} of a point set $V$ contains the edge $uv$ if and only if the Euclidean distance between $u$ and $v$ is at most 1.} of the points in $V$, then an algorithm, called \textsc{Face-1}, of Bose \etal\ \cite{bose01} (see also Karp and Kung \cite{kk00}) works for $G$ and requires no preprocessing of $G$ or additional state information at the vertices of $G$ and requires only a constant size header associated with each packet.
 
-A particularly interesting and restricted class of routing algorithms are so-called oblivious routing algorithms.  An \emph{oblivious} routing algorithm is one in which the decision about the next edge on the route to $t$ for a packet currently located at node $v$ is made based only on $v$, $t$, and the neighbourhood, $N(v)$, of $v$.\footnote{More precisely, a deterministic oblivious routing algorithm is a function $f:\R^2\times\R^2\times(\R^2)^+\rightarrow \R^2$ that satisfies $f(v,t,N) \in N$ and $f(t,t,N) = t$ for all inputs.}  In particular, an oblivious algorithm does not make use of information obtained in previous routing steps and can not use any global information about $G$.
+A particularly interesting and restricted class of routing algorithms are so-called oblivious routing algorithms.  An \emph{oblivious} routing algorithm is one in which the decision about the next edge on the route to $t$ for a packet currently located at node $v$ is based only on $v$, $t$, and the neighbourhood, $N(v)$, of $v$.\footnote{More precisely, a deterministic oblivious routing algorithm is a function $f:\R^2\times\R^2\times(\R^2)^+\rightarrow \R^2$ that satisfies $f(v,t,N) \in N$ and $f(t,t,N) = t$ for all inputs.}  In particular, an oblivious algorithm does not make use of information obtained in previous routing steps and can not use any global information about $G$.
 
-Bose and Morin \cite{bose04} showed that if $G$ is Delaunay triangulation or a regular triangulation then deterministic oblivious routing algorithms named \textsc{Greedy} and \textsc{Compass}, respectively, guarantee delivery of a packet between any source-destination pair.  Bose \etal\ \cite{bose02} later proved a stronger result showing that a deterministic oblivious routing algorithm named \textsc{Greedy-Compass} works for any triangulation $G$.
+Bose and Morin \cite{bose04} show that if $G$ is Delaunay triangulation\footnote{A \emph{triangulation} is a geometric graph all of whose faces, except the outer face are triangles, and whose outer face is the complement of a triangle. Delaunay triangulations and regular triangulations are special types of triangulations. For details, consult \cite{obs92}.} or a regular triangulation then deterministic oblivious routing algorithms named \textsc{Greedy} and \textsc{Compass}, respectively, work for $G$. Bose \etal\ \cite{bose02} subsequently show a stronger result; a deterministic oblivious routing algorithm named \textsc{Greedy-Compass} works for any triangulation $G$.
 
 Oblivious routing algorithms are so simple, elegant, and practical that researchers have spent considerable effort designing geometric embeddings of graphs so that oblivious routing algorithms can be applied to the resulting embeddings.  A famous example in this vein is due to Leighton and Moitra \cite{lm08} who proved that every 3-connected planar graph $\tilde G$ admits an embedding $G$ in $\R^2$ such that \textsc{Greedy} works on $G$.  The combination of the embedding and routing algorithm represents a form of \emph{compact routing} \cite{l94}.
 
-Bose \etal\ also showed that deterministic oblivious routing algorithm are, however, inherently limited. There exists 17 convex subdivisions $G_1,\ldots,G_{17}$ each with 17 vertices such that any deterministic oblivious routing algorithm does not work for at least one of these subdivisions.  Thus, convex subdivisions form a class of geometric graphs that are too rich for deterministic oblivious routing algorithms \cite{bose02}.
+Unfortunately, oblivious routing algorithms have severe limitations.  Bose \etal\ also show that there exists 17 convex subdivisions\footnote{A \emph{convex subdivision} is a geometric graph all of whose faces, except the outer face are convex polygons, and whose outer face is the complement of a convex polygon.} $G_1,\ldots,G_{17}$ each with 17 vertices such that any deterministic oblivious routing algorithm does not work for at least one of these subdivisions.  Thus, convex subdivisions form a class of geometric graphs that are too rich for deterministic oblivious routing algorithms \cite{bose02}.  
 
-The authors \cite{bose02,bose04} did, however, observe that, if randomization is allowed, then an oblivious algorithm, named \textsc{RandomCompass}, that uses one random bit per step works for any convex subdivision. They did not analyze the efficiency of \textsc{Random-Compass} except to note that, for some convex subdivisions $G$, and some pairs $s,t\in V$, the expected number of steps taken by \textsc{Random-Compass} when routing from $s$ to $t$ is $\Omega(|V|^2)$.
+The same authors \cite{bose02,bose04} observe that, if randomization is allowed, then an oblivious algorithm, named \textsc{RandomCompass}, that uses one random bit per step works for any convex subdivision. They did not analyze the efficiency of \textsc{Random-Compass} except to note that, for some convex subdivisions $G$, and some pairs $s,t\in V$, the expected number of steps taken by \textsc{Random-Compass} when routing from $s$ to $t$ is $\Omega(|V|^2)$.
 
-Observe that, by the theory of random walks \cite{X}, the expected time required for a random walk on $G$ to travel from a particular to vertex $s$ to a particular vertex $t$ is $O(n^2)$.  Therefore, a random walk is as efficient, in the worst case, as \textsc{Random-Compass} algorithm. Nevertheless, one might expect that \textsc{Random-Compass} is more likely to find short routes, since it uses geometry to find a route that is specifically directed towards the target vertex $t$.  Thus, we might intuit that \textsc{Random-Compass} is a heuristic that is usually better than a random walk and never much worse.
+Observe that, by the theory of random walks (c.f. \cite[Theorem~6.6]{mr95}), the expected time required for a random walk on $G$ to travel from a particular vertex $s$ to a particular vertex $t$ is $O(n^2)$.  Therefore, a random walk is at least as efficient, in the worst case, as the \textsc{Random-Compass} algorithm. Nevertheless, one might expect that \textsc{Random-Compass} is more likely to find short routes, since it uses geometry to find a route that is specifically directed towards the target vertex $t$.  Thus, we might intuit that \textsc{Random-Compass} is a heuristic that is usually better than a random walk and never much worse.
 
 In the current paper, we show that this intuition about \textsc{Random-Compass} could not be further from the truth.  Indeed, for any $n>0$, there exists a convex subdivision (in fact, a triangulation) $G$ with $n$ vertices and having two vertices $s$ and $t$ such that the expected number of steps taken by \textsc{Random-Compass} when routing from $s$ to $t$ is $2^{\Omega(n)}$.
 
-Next we study whether \emph{any} randomized oblivious routing algorithm for convex subdivisions can outperform a random walk.  We show that, for any randomized oblivious routing algorithm $\mathcal{A}$ and any $n$, there exists a convex subdivision $G$ of size $n$ and a pair of vertex $s,t\in V(G)$ such that the expected number of steps taken by $\mathcal{A}$ when routing from $s$ to $t$ is $\Omega(n^2)$.  Therefore, at least in the worst-case, no algorithm significantly outperforms a random walk.
+Next we study whether \emph{any} randomized oblivious routing algorithm for convex subdivisions can outperform a random walk.  We show that, for any randomized oblivious routing algorithm $\mathcal{A}$ and any $n$, there exists a convex subdivision $G=G(\mathcal{A})=(V,E)$ of size $n$ and a pair of vertices $s,t\in V$ such that the expected number of steps taken by $\mathcal{A}$ when routing from $s$ to $t$ is $\Omega(n^2)$.  Therefore, at least in the worst-case, no algorithm significantly outperforms a random walk.
 
 \section{A Bad Example for Random-Compass}
 
-Figure~\ref{fig:bad-unbiased} shows an example of a triangulation that is
-bad for the \textsc{Random-Compass} algorithm.  It's vertex set has size
-$n=4k+1$ that are organized as a central vertex $t$ and four paths leading
-from the outer face to $t$.  The space between these paths is triangulated
-so that, at any point, \textsc{Random-Compass} chooses between an edge
-that leads one step closer to $t$ or that returns to the outer face.
+The \textsc{Random-Compass} algorithm works by using a coin toss to select among the (at most two) neighbours $\ccw(v)$ and $\cw(v)$ of the current node $v$ that make the minimum and maximum angle, respectively, with the segment $vt$ (see Figure~\ref{fig:random-compass}.a). When applied on a convex subdivision $G=(V,E)$, Bose \etal\ show that, in the directed graph $G'$ that contains the edges $(v,\cw_t(v))$ and $(v,\ccw_t(v))$ for all $v\in V$, there exists at least one directed path $P(v,t)$ from every vertex $v$ to $t$ (see Figure~\ref{fig:random-compass}.b).  This, and Wald's Equation, immediately imply that the expected time to reach $t$ from any vertex is at most $2^{n}$; from any vertex $v$, \textsc{Random-Compass} has probability at least $1/2^{|P(v,t)|}\ge 1/2^{n-1}$ of reaching $t$ by following $P(v,t)$, and the expected number of steps it takes on $P(v,t)$ before falling off of it is at most 2.
+
+\begin{figure}
+  \begin{center}
+    \begin{tabular}{cc}
+    \includegraphics{pics/random-compass} &
+    \includegraphics{pics/aux-graph} \\
+    (a) & (b)
+    \end{tabular}
+  \end{center}
+  \caption{The \textsc{Random-Compass} algorithm chooses the next vertex at random among $\ccw_t(v)$ and $\cw_t(v)$.}
+  \label{fig:random-compass}
+\end{figure}
+
+The example in Figure~\ref{fig:bad-unbiased} shows that the above analysis of \textsc{Random-Compass}, although very coarse, is about the best one can do. It shows a geometric graph $G$ whose vertex set has size $n=4k+1$ and whose vertices are organized as a central vertex $t$ and four paths leading from the outer face to $t$.  The space between these paths is triangulated so that, at any point, \textsc{Random-Compass} chooses between an edge that leads one step closer to $t$ or that returns to the outer face.
 
 \begin{figure}
   \begin{center}
@@ -99,40 +112,34 @@ that leads one step closer to $t$ or that returns to the outer face.
   \label{fig:bad-unbiased}
 \end{figure}
 
-If denote by $T_i$ the expected number of steps required by \textsc{Random-Compass} to reach $t$ given that it is currently $i$ steps from $t$, we see that 
+If we consider the directed graph $G'$ defined above, then we see that, at any point the packet is at some distance $i$ from $t$ and that, it can, with equal probability move to a vertex  of distance $i-1$ or move to a vertex (on the outer face) of distance $k$.  If we denote by $T_i$ the expected number of steps required by \textsc{Random-Compass} to reach $t$ given that it is currently at distance $i$ from $t$, we see that 
 \[ 
-   T_1=1 \enspace ,
+  T_i = \left\{ \begin{array}{ll}
+          0 & \mbox{for $i=0$} \\
+          (1/2)T_{i-1} + (1/2)T_k & \mbox{for $i\in\{1,\ldots,k\}$} 
+        \end{array}\right.
 \]
-and 
-\[
-  T_i = 1 + (1/2)T_{i-1} + (1/2)T_k
-\]
-for $i \in \{2,\ldots, k\}$.  So 
+Expanding the value of $T_k$ gives
 \begin{eqnarray*}
   T_k & = & 1 + (1/2)T_k + (1/2)T_{k-1} \\
       & = & 1 + (1/2)T_k + 1/2 + (1/4)T_{k} + (1/4)T_{k-2} \\
       & = & 1 + (1/2)T_k + 1/2 + (1/4)T_{k} + (1/4)
-              + \cdots  + (1/2^{k-1}) + (1/2^{k})T_{k} + (1/2^{k})T_1 \\
-      & = & 2-1/2^{k} + (1-1/2^k)T_k \enspace .
+              + \cdots  + (1/2^{k-1}) + (1/2^{k})T_{k} + (1/2^{k})T_0 \\
+      & = & 2-1/2^{k} + (1-1/2^k)T_k \enspace ,
 \end{eqnarray*}
 and rewriting this gives $T_k = 2^k(2-1/2^{k}) = \Omega(2^{n/4})$.  This proves:
 
-\begin{theorem}
+\begin{theorem}\label{theorem:random-compass}
 For any $n>1$, there exists a triangulation $G$ having two vertices $s$ and $t$ such that the expected number of steps taken by $\textsc{Random-Compass}$ when routing from $s$ to $t$ is $2^{\Omega(n)}$.
 \end{theorem}
 
-Note that the base in the exponent can be improved by using a
-construction with 3 paths instead of 4.  In this case, the lower
-bound becomes $\Omega(2^{n/3})$.  Furthermore, the lower bound on
-Theorem~\ref{theorem:random-compass} holds for all but 5 choices of
-the source vertex $s$ since, for any vertex $s$ not adjacent to $t$,
-the expected time to route from $s$ to $t$ is at least $(1/2)T_k$.
+Note that the base in the exponent can be improved by using a construction with 3 paths instead of 4.  In this case, the lower bound becomes $\Omega(2^{n/3})$.  Furthermore, up to a factor of 2, the lower bound on Theorem~\ref{theorem:random-compass} holds for all choices of the source vertex $s$ since, for any vertex $s\neq t$, the expected time to route from $s$ to $t$ is at least $(1/2)T_k$.
 
 \section{A Lower Bound for Any Algorithm}
 
-In this section, we develop an $\Omega(n^2)$ lower bound for any randomized oblivious routing algorithm $\mathcal{A}$.  The outline of the lower bound is as follows:  We start with a lemma about Markov chains whose transition graphs are paths. We show that, when starting at the midpoint of the path, there is at most one endpoint of the path that can be reached in subquadratic expected time.  This lemma is relevant since, if $\mathcal{A}$ finds itself in the interior of a path of degree 2 vertices in $G$, it will behave a like such a Markov chain until it reaches one of the endpoints of the path.
+In this section we develop an $\Omega(n^2)$ lower bound for routing on convex subdivisions using any randomized oblivious routing algorithm $\mathcal{A}$.  The outline of the lower bound is as follows:  We start with a lemma about Markov chains whose transition graphs are paths. We show that, when starting at the midpoint of the path, there is at most one endpoint of the path that can be reached in subquadratic expected time.  This lemma is relevant since, if $\mathcal{A}$ finds itself in the interior of a path of degree 2 vertices in $G$, it will behave a like such a Markov chain until it reaches one of the endpoints of this path.
 
-Next, we observe how $\mathcal{A}$ behaves on certain paths of degree 2 vertices and show that, because $\mathcal{A}$ can only reach one endpoint of any path in subquadratic time, that we can always find a constant-sized subset of these paths that can be pieced together to obtain a convex subdivision in which $\mathcal{A}$ takes at least quadratic expected time to route from some vertex $s$ to some vertex $t$.
+Next, we observe how $\mathcal{A}$ behaves on certain paths of degree 2 vertices and show that, because $\mathcal{A}$ can only reach one endpoint of any path in subquadratic time, that we can always find a subset of these paths that can be pieced together to form a convex subdivision in which $\mathcal{A}$ takes at least quadratic expected time to route from some vertex $s$ to some vertex $t$.
 
 \subsection{Markov Chains}
 \label{sec:markov}
@@ -235,8 +242,11 @@ Furthermore, $\EXP \{ T^-_{2, 2} \}  =2$.
 
 With these calculations out of the way,  we note that
 \[
-\EXP \{ T_{i,i+1} \} = 1 + P_i \times \EXP \{ T^-_{i, i} \},
-\EXP \{ T_{i,i-1} \} = 1 + Q_i \times \EXP \{ T^+_{i, i} \}.
+\EXP \{ T_{i,i+1} \} = 1 + P_i \times \EXP \{ T^-_{i, i} \} \enspace ,
+\]
+and
+\[
+\EXP \{ T_{i,i-1} \} = 1 + Q_i \times \EXP \{ T^+_{i, i} \} \enspace .
 \]
 Clearly,
 \[
@@ -251,7 +261,7 @@ Clearly,
 &\ge 2(n-1) + 4\sum_{i=2}^{n-1} \sum_{j=2}^i \sqrt{ \prod_{k=j}^i P_k \times \prod_{k=j}^i Q_k } \\
 &\qquad \hbox{\rm (by the arithmetic-geometric mean ineqality)} \\
 &= 2(n-1) + 4\sum_{i=2}^{n-1} \sum_{j=2}^i  1 \\
-&\qquad \hbox{\rm (by part (i), as $P_iQ_i = 1$ for all $i$ in our range)} \\
+&\qquad \hbox{\rm (since $P_iQ_i = 1$ for all $i$ in our range)} \\
 &= 2(n-1) + 4\sum_{i=1}^{n-1} (i-1) \\
 &= 2(n-1) + 2 n (n-1) - 4 (n-1) \\
 &= 2(n-1)^2,\\
@@ -260,16 +270,16 @@ Clearly,
 which concludes the proof.
 \end{proof}
 
-Next we present a simple corollary of \ref{lemma:backandforth} that is used in our lower bound.
+Next we present a simple corollary of Lemma~\ref{lemma:backandforth} that is used in our lower bound.
 
-\begin{cor}
+\begin{corollary}\label{cor:markov}
 Consider a random walk with reflecting barriers on $\{ -n, \ldots, n \}$,
 $n > 0$. In this chain,
 \[
 \max \left( \EXP \{ T_{0,n} \} , \EXP \{ T_{0,-n} \} \right)
  \ge  {2 \over 3} \, n^2.
 \]
-\end{cor}
+\end{corollary}
 
 \begin{proof}
 We prove this by contradiction. Set $c = 2/3$. Assume that
@@ -312,71 +322,130 @@ Thus,
 which contradicts our assumption.
 \end{proof}
 
-We note that Moon's identity \cite{X} implies that $\EXP \{ T_{0,n} \} = \EXP \{ T_{0,-n} \} = 3n^2$
-for the standard random walk, which is conjectured to be best possible.
-The lower bound in the above corollary thus seems to be off by a factor $9/2$.
+%We note that Moon's identity \cite{X} implies that $\EXP \{ T_{0,n} \} = \EXP \{ T_{0,-n} \} = 3n^2$
+%for the standard random walk, which is conjectured to be best possible.
+%The lower bound in the above corollary thus seems to be off by a factor $9/2$.
 
 \subsection{The Lower Bound}
 \label{sec:bound}
 
-Let $t$ be the origin and 
-let $A=a_1,\ldots a_k$ be a chain of $k-1$ edges in a line such that $a_{k}$ is closer to $t$ and $a_{1}a_{k}t$ is a left turn with $\angle a_{1}a_{k}t$ greater than $150$ degrees. Let $B$ be a chain of $k-1$ edges in a line such that $b_{k}$ is closer to $t$ and $b_{1}b_{k}t$ is a right turn with $\angle b_{1}b_{k}t$ greater than $150$ degrees. Let $C_{A}$ be auxiliary circle of $A$. Each point on $C_{A}$ represents a direction of $A$ (as shown in Figure~\ref{fig:acircle}). If it takes $\Omega (k^{2})$ time to reach $a_{k}$ from $a_{1}$ in any direction we color the corresponding point on $C_{A}$ black, otherwise, we color the corresponding point blue.
-\begin{figure}[ht]
-  \centering
-  \includegraphics[width=0.6\textwidth]{pics/achaincircle.pdf}
-  \caption{Chain $A$ and its auxiliary circle}
-  \label{fig:acircle}
-\end{figure}
-Let $C_{B}$ be the auxiliary circle for $B$ (as shown in Figure~\ref{fig:bcircle}), and if it takes $\Omega (k^{2})$ time to reach $b_{k}$ from $b_{1}$ in any direction we color the corresponding point on $C_{B}$ black, otherwise, we color the corresponding point blue.
-\begin{figure}[ht]
-  \centering
-  \includegraphics[width=0.6\textwidth]{pics/bchaincircle.pdf}
-  \caption{Chain $B$ and its auxiliary circle}
-  \label{fig:bcircle}
-\end{figure}
-Let $C_{o}$ be the overlap of the $C_{A}$ and $C_{B}$ and the black points on any circle will override blue ones when overlapping.
+Let $\mathcal{A}$ be a randomized oblivious routing algorithm.  Let $k$
+be an even integer, let $t$ be the origin, and let $A=a_1,\ldots a_k$ be
+a path of $k$ collinear vertices such that $a_{k}$ is closer to $t$ than
+any of $a_1,\ldots,a_{k-1}$ and $a_{1}a_{k}t$ is a left turn with $\angle
+a_{1}a_{k}t$ greater than $150^\circ$ degrees but less than $180^\circ$ (see Figure~\ref{fig:ab}.a). Let
+$B=b_1,\ldots,b_k$ be the reflection of $A$ through the line parallel
+to $A$ that contains $t$ (see Figure~\ref{fig:ab}.b).  Let $A_\alpha$,
+respectively, $B_\alpha$, denote the path $A$, respectively, $B$,
+rotated by an angle of $\alpha$ about the origin, $t$.
 
-\begin{lemma}
-  \label{lem:1blue}
-  If there is a blue point on $C_{o}$, there exists a convex subdivision on which any oblivious routing algorithm will take $\Omega (n^{2})$ time.
-\end{lemma}
+\begin{figure}
+  \begin{center}
+    \begin{tabular}{cc}
+      \includegraphics{pics/achain} &
+      \includegraphics{pics/bchain} \\
+      (a) & (b)
+    \end{tabular}
+  \end{center}
+  \caption{The chains $A$ and $B$.}
+  \label{fig:ab}
+\end{figure}
+
+Define the \emph{color} of a path $A(\alpha)=a_1',\ldots,a_k'$ as
+follows: Imagine running $\mathcal{A}$ on the graph consisting of $A'$
+and the isolated vertex $t$, starting at $a_{k/2}'$.  If $\mathcal{A}$
+takes $\Omega (k^{2})$ expected time to reach $a_k'$ then color
+$A(\alpha)$ \emph{blue}, otherwise color $A(\alpha)$ \emph{red}.
+Note that Corollary~\ref{cor:markov} implies that, if $A(\alpha)$ is red,
+then $\mathcal{A}$ takes $\Omega(k^2)$ expected time to reach $a_1$
+starting at $a_{k/2}$.
+
+Intuitively, a path is red (getting hotter --- closer to $t$) if $\mathcal{A}$ could move quickly from $a_{k/2}$ to $a_k$ it is blue (getting cooler --- further from $t$) if $\mathcal{A}$ could move quickly to $a_1$.  Define the color (red or blue) of a path $B(\alpha)$ in the same way.
+
+\begin{lemma}\label{lem:2blue}
+If there exists $\alpha$ such that $A(\alpha)$ and $B(\alpha)$ are both blue, then there exists a convex subdivision $G=(V,E)$ with $|V|=2k+1$ with vertices $s,t\in V$ such that $\mathcal{A}$ takes $\Omega(k^2)$ steps when routing from $s$ to $t$.  
+\end{lemma} 
 
 \begin{proof}
-  The blue point on $C_{o}$ corresponds two blue points at the same place on $C_{A}$ and $C_{B}$. Let $k = \frac{n}{2}$. We can have an arrangement of two chains $A$ and $B$ according to the two blue points by connecting $a_{\frac{n}{2}}t$, $b_{\frac{n}{2}}t$, and $a_{1}b_{1}$, like the one shown in Figure~\ref{fig:1blue}.
-\begin{figure}[ht]
-  \centering
-  \includegraphics[width=0.35\textwidth]{pics/1blue.pdf}
-  \caption{Two chains corresponding to the blue point }
-  \label{fig:1blue}
-\end{figure}
-We know that it takes $\Omega (n^{2})$ time to reach $a_{\frac{n}{2}}$ from $a_{1}$. If we let $a_{1}$ be $s$, the algorithm will need $\Omega (n^{2})$ time to reach $t$.
+Let $A'=A(\alpha)=a_1',\ldots,a_k'$ and $B'=B(\alpha)=b_1',\ldots,b_k'$.  The convex subdivision $G$ consists of $A'$ and $B'$ as well as the edges $a_1'b_1'$, $a_k't$ and $b_k't$ (see Figure~\ref{fig:2blue}).  Since $A(\alpha)$ and $B(\alpha)$ both blue, applying $\mathcal{A}$ to route from $a_{k/2}'$ to $t$ will require $\Omega(k^2)$ expected steps.
 \end{proof}
+
+\begin{figure}
+  \centering
+  \includegraphics{pics/2blue.pdf}
+  \caption{Two blue chains $A(\alpha)$ and $B(\alpha)$.}
+  \label{fig:2blue}
+\end{figure}
+
+\begin{lemma}\label{lem:2red}
+If there exists $\alpha$ such that $C_A(\alpha)$ and $C_B(180+\alpha)$ are both red, then there exists a convex subdivision $G=(V,E)$ with $|V|=2k+1$ with vertices $s,t\in V$ such that $\mathcal{A}$ takes $\Omega(k^2)$ steps when routing from $s$ to $t$.  
+\end{lemma} 
+
+\begin{proof}
+Let $A'=A(\alpha)=a_1',\ldots,a_k'$ and $B'=B(180+\alpha)=b_1',\ldots,b_k'$.  The convex subdivision $G$ consists of $A'$ and $B'$ as well as the edges $a_k'b_k'$, $a_1't$ and $b_1't$ (see Figure~\ref{fig:2red}).  Since $C_A(\alpha)$ and $C_B(180+\alpha)$ are red, applying $\mathcal{A}$ to route from $a_{k/2}'$ to $t$ will require $\Omega(k^2)$ expected steps.
+\end{proof}
+
+\begin{figure}
+  \centering
+  \includegraphics{pics/2red.pdf}
+  \caption{Two red chains $A(\alpha)$ and $B(180+\alpha)$.}
+  \label{fig:2red}
+\end{figure}
 
 \begin{theorem}
   \label{thm:quadratic}
-  Any oblivious routing algorithm requires $\Omega (n^{2})$ time on convex subdivisions.
+  For any
+  oblivious routing algorithm $\mathcal{A}$,
+  there exists a convex subdivision $G=(V,E)$ with $|V|=O(k)$ with vertices $s,t\in V$ such that $\mathcal{A}$ takes $\Omega(k^2)$ steps when routing from $s$ to $t$.
 \end{theorem}
 
 \begin{proof}
-  If there is a blue point on $C_{o}$, the algorithm requires $\Omega (n^{2})$ time according to Lemma~~\ref{lem:1blue}. If there is no blue point on $C_{o}$, the whole $C_{o}$ has to be black, then there will be three black points on $C_{o}$ which have equal distance to each other.
 
-  Let $X$, $Y$, and $Z$ be three chains of edges corresponding to the three black points, then the angle between any two of them must equal to $120^{\circ}$. There are two possibilities ($A$ or $B$) for each of the three chains as shown in 
-Figure~\ref{fig:3black}.
+If either of Lemma~\ref{lem:2blue} or Lemma~\ref{lem:2red} apply then the proof
+is complete.  Otherwise, observe that the exclusion of these two lemmata implies that for any $\alpha$, the colors of $A(\alpha)$ and $B(\alpha)$ are different.
+In particular, one of them is colored blue.  More specifically, there exists 3 blue chains $X=x_1,\ldots,x_k$, $Y=y_1,\ldots,y_k$, and $Z=z_1,\ldots,z_k$ where $X\in\{A(0),B(0)\}$, $Y\in\{A(120),B(120)\}$ and $Z\in\{A(240),B(240)\}$.
+
+In this case, we take $G$ to be the graph containing $X$, $Y$, and $Z$,
+as well as the edges $x_1y_1$, $y_1z_1$, $z_1x_1$, $x_ky_k$, $y_kz_k$,
+$z_kx_k$, $x_kt$, $y_kt$, $z_kt$ (see Figure~\ref{fig:3blue}).  Because
+$X$, $Y$, and $Z$ are all blue, the expected number of steps required
+to route from $x_{k/2}$ to $t$ using $\mathcal{A}$ is $\Omega(k^2)$.
+
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.35\textwidth]{pics/3black.pdf}
-  \caption{Three chains corresponding to the three black points}
-  \label{fig:3black}
+  \includegraphics{pics/3blue.pdf}
+  \caption{Three blue chains}
+  \label{fig:3blue}
 \end{figure}
-Let $k = \frac{n}{3}$. We now show that $t$ is always contained in $\triangle x_{\frac{n}{3}}y_{\frac{n}{3}}z_{\frac{n}{3}}$ no matter if $A$ or $B$ is used for any of the three chains. 
 
-Since the angle between $Y$ and $Z$ is $120^{\circ}$, $\angle y^{a}_{\frac{n}{3}}tz^{a}_{\frac{n}{3}} = \angle y^{b}_{\frac{n}{3}}tz^{b}_{\frac{n}{3}} = 120^{\circ}$. Hence, $y^{a}_{\frac{n}{3}}tz^{a}_{\frac{n}{3}}$ and $y^{b}_{\frac{n}{3}}tz^{b}_{\frac{n}{3}}$ are all right turns. According to the definition of $A$ and $B$, $0 < \angle y^{a}_{\frac{n}{3}}ty^{b}_{\frac{n}{3}} = \angle z^{a}_{\frac{n}{3}}tz^{b}_{\frac{n}{3}} < 60^{\circ}$, then $120^{\circ} < \angle y^{b}_{\frac{n}{3}}tz^{a}_{\frac{n}{3}} < 180^{\circ}$ and $60^{\circ} < \angle y^{a}_{\frac{n}{3}}tz^{b}_{\frac{n}{3}} < 120^{\circ}$. In other words, $y_{\frac{n}{3}}tz_{\frac{n}{3}}$ is always a right turn.
-
-With the same argument, $x_{\frac{n}{3}}ty_{\frac{n}{3}}$ and $z_{\frac{n}{3}}tx_{\frac{n}{3}}$ are also right turns. Therefore $t$ is inside $\triangle x_{\frac{n}{3}}y_{\frac{n}{3}}z_{\frac{n}{3}}$. By adding edges $x_{1}y_{1}$, $y_{1}z_{1}$, $x_{1}z_{1}$, $x_{\frac{n}{3}}y_{\frac{n}{3}}$, $y_{\frac{n}{3}}z_{\frac{n}{3}}$, $x_{\frac{n}{3}}z_{\frac{n}{3}}$, $x_{\frac{n}{3}}t$, $y_{\frac{n}{3}}t$, and $x_{\frac{n}{3}}t$, we have convex subdivision. Since the three points on $C_{o}$ are black, it takes  $\Omega (n^{2})$ time to reach $x_{\frac{n}{3}}$ from $x_{1}$. If we let $x_{1}$ be $s$, any oblivious algorithm needs $\Omega (n^{2})$ time to reach $t$.
-
-
-
+All that remains is to verify that $G$ is indeed a convex subdivision.  This is
+readily established using the fact that the angles $\angle x_k t x_1$, $\angle y_k t y_1$, and $\angle z_k t z_1$, are all between 150 and 180 degrees.
+%
+%
+%.
+%Since the angle between $Y$ and $Z$ is $120^{\circ}$, $\angle y^{a}_{k}tz^{a}_{k} = \angle y^{b}_{k}tz^{b}_{k} = 120^{\circ}$. Hence, $y^{a}_{k}tz^{a}_{k}$ and $y^{b}_{k}tz^{b}_{k}$ are all right turns. According to the definition of $A$ and $B$, $0 < \angle y^{a}_{k}ty^{b}_{k} = \angle z^{a}_{k}tz^{b}_{k} < 60^{\circ}$, then $120^{\circ} < \angle y^{b}_{k}tz^{a}_{k} < 180^{\circ}$ and $60^{\circ} < \angle y^{a}_{k}tz^{b}_{k} < 120^{\circ}$. In other words, $y_{k}tz_{k}$ is always a right turn.
+%
+%With the same argument, $x_{k}ty_{k}$ and $z_{k}tx_{k}$ are also right turns. Therefore $t$ is inside $\triangle x_{k}y_{k}z_{k}$. By adding edges $x_{1}y_{1}$, $y_{1}z_{1}$, $x_{1}z_{1}$, $x_{k}y_{k}$, $y_{k}z_{k}$, $x_{k}z_{k}$, $x_{k}t$, $y_{k}t$, and $x_{k}t$, we have convex subdivision. Since the three points on $C_{o}$ are black, it takes  $\Omega (n^{2})$ time to reach $x_{k}$ from $x_{1}$. If we let $x_{1}$ be $s$, any oblivious algorithm needs $\Omega (n^{2})$ time to reach $t$.
+%
+%
+%
 \end{proof}
+
+\section{Conclusions}
+
+We have shown that the \textsc{Random-Compass} algorithm takes exponential
+expected time to route on some convex subdivisions and that any randomized
+oblivious routing algorithm takes at least quadratic time to route on some
+subdivisions.  We conclude with two open problems:
+
+\begin{op}
+The current upper bound for the expected time required by \textsc{Random-Compass} on convex subdivisions is $O(2^n)$ and the lower bound is $\Omega(2^{n/3})$.  Close this gap.
+\end{op}
+
+\begin{op}
+A random walk on $G$ routes any message in $O(n^2)$ expected time but requires $O(\log d)$ random bits when located at a vertex of degree $d$.  Is there a randomized oblivious routing algorithm for routing on convex subdivisions that uses $O(1)$ random bits per step and that routes any message in $O(n^2)$ expected time?
+\end{op}
+
 
 
 

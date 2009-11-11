@@ -8,7 +8,8 @@
 %\usepackage{setspace}
 %\usepackage [letterpaper] {geometry}
 %\usepackage{indentfirst}
-\usepackage[pdftex]{color, graphicx}
+%\usepackage[pdftex]{color}
+\usepackage{graphicx}
 %\usepackage{subfigure}
 %\usepackage{supertabular}
 %\usepackage{multirow}
@@ -36,7 +37,7 @@
 \newcommand{\ccw}{\mathrm{ccw}}
 \newcommand{\cw}{\mathrm{cw}}
 
-\title{\MakeUppercase{Oblivious Routing in Convex Subdivisions: \newline 
+\title{\MakeUppercase{Memoryless Routing in Convex Subdivisions: \newline 
        Random Walks are Optimal}}
 \author{\ }
 %\author{Dan Chen, Luc Devroye, Vida Dujmovi\'c, and Pat Morin}
@@ -45,11 +46,11 @@
 \maketitle
 
 \begin{abstract}
-An \emph{oblivious} routing algorithm is one in which the decision about
+An \emph{memoryless} routing algorithm is one in which the decision about
 the next edge on the route to a vertex $t$ for a packet currently located
 at vertex $v$ is made based only on $v$, $t$, and the neighbourhood,
 $N(v)$, of $v$.  The current paper explores the limitations of such
-algorithms by showing that, for any (randomized) oblivious routing
+algorithms by showing that, for any (randomized) memoryless routing
 algorithm $\mathcal{A}$, there exists a convex subdivision on which
 $\mathcal{A}$ takes $\Omega(n^2)$ expected time to route a message between
 some pair of vertices.  Since this lower bound is matched by a random walk,
@@ -67,27 +68,27 @@ requires $2^{\Omega(n)}$ time to route between some pair of vertices.
 
 In recent years, motivated primarily by the proliferation of wireless networks and GPS devices, much research has been done on routing algorithms for geometric networks \cite{gior03}.  In this research a network is modelled as a geometric graph $G=(V,E)$ whose vertex set $V$ is a set of points in $\R^2$. We say that a routing algorithm $\mathcal{A}$ \emph{works} for $G$ if, for any pair of vertices $s,t\in V$, the algorithm always find a path from $s$ to $t$ in a finite number of steps.
 
-The research on geometric routing algorithms largely focuses on utilizing geometric properties of a class of geometric graphs to reduce the complexity of, and information required by, routing algorithms.  For example, when $G$ is the unit disk graph\footnote{The \emph{unit disk graph} of a point set $V$ contains the edge $uv$ if and only if the Euclidean distance between $u$ and $v$ is at most 1.} of the points in $V$, then an algorithm, called \textsc{Face-1}, of Bose \etal\ \cite{bose01} (see also Karp and Kung \cite{kk00}) works for $G$ and requires no preprocessing of $G$ or additional state information at the vertices of $G$ and requires only a constant size header associated with each packet.
+The research on geometric routing algorithms largely focuses on utilizing geometric properties of a class of geometric graphs to reduce the complexity of, and information required by, routing algorithms.  For example, when $G$ is the unit disk graph\footnote{The \emph{unit disk graph} of a point set $V$ contains the edge $uv$ if and only if the Euclidean distance between $u$ and $v$ is at most 1.} of the points in $V$, then an algorithm, called \textsc{Face-1}, of Bose \etal\ \cite{bose01} (see also Karp and Kung \cite{kk00}) works for $G$ and requires no preprocessing of $G$ or additional state information at the vertices of $G$ and requires only a constant size header associated with each packet.  An extremely general result in this vein, based on logspace construction of universal exploration sequences, show that, using a header containing only $O(\log n)$ bits, one can visit all the vertices of any graph (and hence reach $t$) in a polynomial number of steps \cite{b08}.
 
-A particularly interesting and restricted class of routing algorithms are so-called oblivious routing algorithms.  An \emph{oblivious} routing algorithm is one in which the decision about the next edge on the route to $t$ for a packet currently located at node $v$ is based only on $v$, $t$, and the neighbourhood, $N(v)$, of $v$.\footnote{More precisely, a deterministic oblivious routing algorithm is a function $f:\R^2\times\R^2\times(\R^2)^+\rightarrow \R^2$ that satisfies $f(v,t,N) \in N$ and $f(t,t,N) = t$ for all inputs.}  In particular, an oblivious algorithm does not make use of information obtained in previous routing steps and can not use any global information about $G$.
+A particularly interesting and restricted class of routing algorithms are so-called memoryless routing algorithms.  A \emph{memoryless} routing algorithm is one in which the decision about the next edge on the route to $t$ for a packet currently located at node $v$ is based only on $v$, $t$, and the neighbourhood, $N(v)$, of $v$.\footnote{More precisely, a deterministic memoryless routing algorithm is a function $f:\R^2\times\R^2\times(\R^2)^+\rightarrow \R^2$ that satisfies $f(v,t,N) \in N$ and $f(t,t,N) = t$ for all inputs.}  In particular, an memoryless algorithm does not make use of information obtained in previous routing steps and can not use any global information about $G$.  Note that a deterministic memoryless algorithm that works for $G$ can not visit any node more than once within a single routing path since this would cause the algorithm to loop forever.
 
-Bose and Morin \cite{bose04} show that if $G$ is Delaunay triangulation\footnote{A \emph{triangulation} is a geometric graph all of whose faces, except the outer face are triangles, and whose outer face is the complement of a triangle. Delaunay triangulations and regular triangulations are special types of triangulations. For details, consult \cite{obs92}.} or a regular triangulation then deterministic oblivious routing algorithms named \textsc{Greedy} and \textsc{Compass}, respectively, work for $G$. Bose \etal\ \cite{bose02} subsequently show a stronger result; a deterministic oblivious routing algorithm named \textsc{Greedy-Compass} works for any triangulation $G$.
+Bose and Morin \cite{bose04} show that if $G$ is Delaunay triangulation\footnote{A \emph{triangulation} is a geometric graph all of whose faces, except the outer face are triangles, and whose outer face is the complement of a triangle. Delaunay triangulations and regular triangulations are special types of triangulations. For details, consult \cite{obs92}.} or a regular triangulation then deterministic memoryless routing algorithms named \textsc{Greedy} and \textsc{Compass}, respectively, work for $G$. Bose \etal\ \cite{bose02} subsequently show a stronger result; a deterministic memoryless routing algorithm named \textsc{Greedy-Compass} works for any triangulation $G$.
 
-Oblivious routing algorithms are so simple, elegant, and practical that researchers have spent considerable effort designing geometric embeddings of graphs so that oblivious routing algorithms can be applied to the resulting embeddings.  A famous example in this vein is due to Leighton and Moitra \cite{lm08} who proved that every 3-connected planar graph $\tilde G$ admits an embedding $G$ in $\R^2$ such that \textsc{Greedy} works on $G$.  The combination of the embedding and routing algorithm represents a form of \emph{compact routing} \cite{l94}.
+Memoryless routing algorithms are so simple, elegant, and practical that researchers have spent considerable effort designing geometric embeddings of graphs so that memoryless routing algorithms can be applied to the resulting embeddings.  A famous example in this vein is due to Leighton and Moitra \cite{lm08} who prove that every 3-connected planar graph $\tilde G$ admits an embedding $G$ in $\R^2$ such that \textsc{Greedy} works on $G$.  The combination of the embedding and routing algorithm represents a form of \emph{compact routing} \cite{l94}.
 
-Unfortunately, oblivious routing algorithms have severe limitations.  Bose \etal\ also show that there exists 17 convex subdivisions\footnote{A \emph{convex subdivision} is a geometric graph all of whose faces, except the outer face are convex polygons, and whose outer face is the complement of a convex polygon.} $G_1,\ldots,G_{17}$ each with 17 vertices such that any deterministic oblivious routing algorithm does not work for at least one of these subdivisions.  Thus, convex subdivisions form a class of geometric graphs that are too rich for deterministic oblivious routing algorithms \cite{bose02}.  
+Unfortunately, deterministic memoryless routing algorithms have severe limitations.  Bose \etal\ \cite[Theorem~2]{bose04} show that there exists 17 convex subdivisions\footnote{A \emph{convex subdivision} is a geometric graph all of whose faces, except the outer face are convex polygons, and whose outer face is the complement of a convex polygon.} $G_1,\ldots,G_{17}$ each with 17 vertices such that any deterministic memoryless routing algorithm does not work for at least one of these subdivisions.  Thus, convex subdivisions form a class of geometric graphs that are too rich for deterministic memoryless routing algorithms \cite{bose02}.
 
-The same authors \cite{bose02,bose04} observe that, if randomization is allowed, then an oblivious algorithm, named \textsc{RandomCompass}, that uses one random bit per step works for any convex subdivision. They did not analyze the efficiency of \textsc{Random-Compass} except to note that, for some convex subdivisions $G$, and some pairs $s,t\in V$, the expected number of steps taken by \textsc{Random-Compass} when routing from $s$ to $t$ is $\Omega(|V|^2)$.
+The same authors \cite{bose02,bose04} observe that randomization can be used to overcome this limitation.  A \emph{randomized memoryless} routing algorithm is one in which the decision about the next edge on the route to $t$ for a packet currently located at node $v$ is based only on $v$, $t$, the neighbourhood, $N(v)$, of $v$, and a sequence $B$ of fresh random bits.\footnote{More precisely, a randomized memoryless routing algorithm is a function $f:\R^2\times\R^2\times(\R^2)^+\times\{0,1\}^\infty\rightarrow \R^2$ that satisfies $f(v,t,N,B) \in N$ and $f(t,t,N,B) = t$ for all inputs.  The final argument $B$ is a sequence of random bits that are chosen fresh for each step taken by the routing algorithm.} A randomized memoryless algorithm, named \textsc{Random-Compass}, that uses one random bit per step works for any convex subdivision. They do not analyze the efficiency of \textsc{Random-Compass} except to note that, for some convex subdivisions $G$, and some pairs $s,t\in V$, the expected number of steps taken by \textsc{Random-Compass} when routing from $s$ to $t$ is $\Omega(|V|^2)$.  
 
 Observe that, by the theory of random walks (c.f. \cite[Theorem~6.6]{mr95}), the expected time required for a random walk on $G$ to travel from a particular vertex $s$ to a particular vertex $t$ is $O(n^2)$.  Therefore, a random walk is at least as efficient, in the worst case, as the \textsc{Random-Compass} algorithm. Nevertheless, one might expect that \textsc{Random-Compass} is more likely to find short routes, since it uses geometry to find a route that is specifically directed towards the target vertex $t$.  Thus, we might intuit that \textsc{Random-Compass} is a heuristic that is usually better than a random walk and never much worse.
 
-In the current paper, we show that this intuition about \textsc{Random-Compass} could not be further from the truth.  Indeed, for any $n>0$, there exists a convex subdivision (in fact, a triangulation) $G$ with $n$ vertices and having two vertices $s$ and $t$ such that the expected number of steps taken by \textsc{Random-Compass} when routing from $s$ to $t$ is $2^{\Omega(n)}$.
+In the current paper, we show that this intuition about \textsc{Random-Compass} could not be further from the truth.  Indeed, for any $n>0$, there exists a convex subdivision (in fact, a triangulation) $G$ with $n$ vertices and having two vertices $s$ and $t$ such that the expected number of steps taken by \textsc{Random-Compass} when routing from $s$ to $t$ is $2^{\Omega(n)}$. This triangulation has diameter 3.
 
-Next we study whether \emph{any} randomized oblivious routing algorithm for convex subdivisions can outperform a random walk.  We show that, for any randomized oblivious routing algorithm $\mathcal{A}$ and any $n$, there exists a convex subdivision $G=G(\mathcal{A})=(V,E)$ of size $n$ and a pair of vertices $s,t\in V$ such that the expected number of steps taken by $\mathcal{A}$ when routing from $s$ to $t$ is $\Omega(n^2)$.  Therefore, at least in the worst-case, no algorithm significantly outperforms a random walk.
+Next we study whether \emph{any} randomized memoryless routing algorithm for convex subdivisions can outperform a random walk.  We show that, for any randomized memoryless routing algorithm $\mathcal{A}$ and any $n$, there exists a convex subdivision $G=G(\mathcal{A})=(V,E)$ of size $n$ and a pair of vertices $s,t\in V$ such that the expected number of steps taken by $\mathcal{A}$ when routing from $s$ to $t$ is $\Omega(n^2)$.  Therefore, at least in the worst-case, no algorithm significantly outperforms a random walk.
 
 \section{A Bad Example for Random-Compass}
 
-The \textsc{Random-Compass} algorithm works by using a coin toss to select among the (at most two) neighbours $\ccw(v)$ and $\cw(v)$ of the current node $v$ that make the minimum and maximum angle, respectively, with the segment $vt$ (see Figure~\ref{fig:random-compass}.a). When applied on a convex subdivision $G=(V,E)$, Bose \etal\ show that, in the directed graph $G'$ that contains the edges $(v,\cw_t(v))$ and $(v,\ccw_t(v))$ for all $v\in V$, there exists at least one directed path $P(v,t)$ from every vertex $v$ to $t$ (see Figure~\ref{fig:random-compass}.b).  This, and Wald's Equation, immediately imply that the expected time to reach $t$ from any vertex is at most $2^{n}$; from any vertex $v$, \textsc{Random-Compass} has probability at least $1/2^{|P(v,t)|}\ge 1/2^{n-1}$ of reaching $t$ by following $P(v,t)$, and the expected number of steps it takes on $P(v,t)$ before falling off of it is at most 2.
+The \textsc{Random-Compass} algorithm works by using a coin toss to select among the (at most two) neighbours $\ccw(v)$ and $\cw(v)$ of the current node $v$ that make the minimum and maximum angle, respectively, with the segment $vt$ (see Figure~\ref{fig:random-compass}.a). When applied on a convex subdivision $G=(V,E)$, Bose \etal\ show that, in the directed graph $G'$ that contains the edges $(v,\cw_t(v))$ and $(v,\ccw_t(v))$ for all $v\in V$, there exists at least one directed path $P(v,t)$ from every vertex $v$ to $t$ (see Figure~\ref{fig:random-compass}.b).  This, and Wald's Equation, immediately imply that the expected time to reach $t$ from any vertex is at most $2^{n}$; from any vertex $v$, \textsc{Random-Compass} has probability at least $1/2^{|P(v,t)|}\ge 1/2^{n-1}$ of reaching $t$ by following $P(v,t)$, and the expected number of steps it takes on $P(v,t)$ before falling off $P(v,t)$ is at most 2.
 
 \begin{figure}
   \begin{center}
@@ -137,7 +138,7 @@ Note that the base in the exponent can be improved by using a construction with 
 
 \section{A Lower Bound for Any Algorithm}
 
-In this section we develop an $\Omega(n^2)$ lower bound for routing on convex subdivisions using any randomized oblivious routing algorithm $\mathcal{A}$.  The outline of the lower bound is as follows:  We start with a lemma about Markov chains whose transition graphs are paths. We show that, when starting at the midpoint of the path, there is at most one endpoint of the path that can be reached in subquadratic expected time.  This lemma is relevant since, if $\mathcal{A}$ finds itself in the interior of a path of degree 2 vertices in $G$, it will behave a like such a Markov chain until it reaches one of the endpoints of this path.
+In this section we develop an $\Omega(n^2)$ lower bound for routing on convex subdivisions using any randomized memoryless routing algorithm $\mathcal{A}$.  The outline of the lower bound is as follows:  We start with a lemma about Markov chains whose transition graphs are paths. We show that, when starting at the midpoint of the path, there is at most one endpoint of the path that can be reached in subquadratic expected time.  This lemma is relevant since, if $\mathcal{A}$ finds itself in the interior of a path of degree 2 vertices in $G$, it will behave a like such a Markov chain until it reaches one of the endpoints of this path.
 
 Next, we observe how $\mathcal{A}$ behaves on certain paths of degree 2 vertices and show that, because $\mathcal{A}$ can only reach one endpoint of any path in subquadratic time, that we can always find a subset of these paths that can be pieced together to form a convex subdivision in which $\mathcal{A}$ takes at least quadratic expected time to route from some vertex $s$ to some vertex $t$.
 
@@ -166,9 +167,9 @@ T_{i,j} = \min \{ t > 0: X_t = j | X_0 = i \}.
 \]
 For a standard random walk, it is known that
 \[
-\EXP \{ T_{i,j} \} = (j-i)^2, j \not= i, 1 \le j,i \le n.
+\EXP \{ T_{i,j} \} = (j-i)^2, j \not= i, 1 \le j,i \le n
 \]
-The standard random walk is in fact the best possible chain in the following sense:
+\cite{m73}.  The standard random walk is in fact the best possible chain in the following sense:
 
 \begin{lemma}\label{lemma:backandforth}
 For any vector of probabilities $\pi$, and any $n > 1$,
@@ -329,7 +330,7 @@ which contradicts our assumption.
 \subsection{The Lower Bound}
 \label{sec:bound}
 
-Let $\mathcal{A}$ be a randomized oblivious routing algorithm.  Let $k$
+Let $\mathcal{A}$ be a randomized memoryless routing algorithm.  Let $k$
 be an even integer, let $t$ be the origin, and let $A=a_1,\ldots a_k$ be
 a path of $k$ collinear vertices such that $a_{k}$ is closer to $t$ than
 any of $a_1,\ldots,a_{k-1}$ and $a_{1}a_{k}t$ is a left turn with $\angle
@@ -396,7 +397,7 @@ Let $A'=A(\alpha)=a_1',\ldots,a_k'$ and $B'=B(180+\alpha)=b_1',\ldots,b_k'$.  Th
 \begin{theorem}
   \label{thm:quadratic}
   For any
-  oblivious routing algorithm $\mathcal{A}$,
+  memoryless routing algorithm $\mathcal{A}$,
   there exists a convex subdivision $G=(V,E)$ with $|V|=O(k)$ with vertices $s,t\in V$ such that $\mathcal{A}$ takes $\Omega(k^2)$ steps when routing from $s$ to $t$.
 \end{theorem}
 
@@ -426,7 +427,7 @@ readily established using the fact that the angles $\angle x_k t x_1$, $\angle y
 %.
 %Since the angle between $Y$ and $Z$ is $120^{\circ}$, $\angle y^{a}_{k}tz^{a}_{k} = \angle y^{b}_{k}tz^{b}_{k} = 120^{\circ}$. Hence, $y^{a}_{k}tz^{a}_{k}$ and $y^{b}_{k}tz^{b}_{k}$ are all right turns. According to the definition of $A$ and $B$, $0 < \angle y^{a}_{k}ty^{b}_{k} = \angle z^{a}_{k}tz^{b}_{k} < 60^{\circ}$, then $120^{\circ} < \angle y^{b}_{k}tz^{a}_{k} < 180^{\circ}$ and $60^{\circ} < \angle y^{a}_{k}tz^{b}_{k} < 120^{\circ}$. In other words, $y_{k}tz_{k}$ is always a right turn.
 %
-%With the same argument, $x_{k}ty_{k}$ and $z_{k}tx_{k}$ are also right turns. Therefore $t$ is inside $\triangle x_{k}y_{k}z_{k}$. By adding edges $x_{1}y_{1}$, $y_{1}z_{1}$, $x_{1}z_{1}$, $x_{k}y_{k}$, $y_{k}z_{k}$, $x_{k}z_{k}$, $x_{k}t$, $y_{k}t$, and $x_{k}t$, we have convex subdivision. Since the three points on $C_{o}$ are black, it takes  $\Omega (n^{2})$ time to reach $x_{k}$ from $x_{1}$. If we let $x_{1}$ be $s$, any oblivious algorithm needs $\Omega (n^{2})$ time to reach $t$.
+%With the same argument, $x_{k}ty_{k}$ and $z_{k}tx_{k}$ are also right turns. Therefore $t$ is inside $\triangle x_{k}y_{k}z_{k}$. By adding edges $x_{1}y_{1}$, $y_{1}z_{1}$, $x_{1}z_{1}$, $x_{k}y_{k}$, $y_{k}z_{k}$, $x_{k}z_{k}$, $x_{k}t$, $y_{k}t$, and $x_{k}t$, we have convex subdivision. Since the three points on $C_{o}$ are black, it takes  $\Omega (n^{2})$ time to reach $x_{k}$ from $x_{1}$. If we let $x_{1}$ be $s$, any memoryless algorithm needs $\Omega (n^{2})$ time to reach $t$.
 %
 %
 %
@@ -436,7 +437,7 @@ readily established using the fact that the angles $\angle x_k t x_1$, $\angle y
 
 We have shown that the \textsc{Random-Compass} algorithm takes exponential
 expected time to route on some convex subdivisions and that any randomized
-oblivious routing algorithm takes at least quadratic time to route on some
+memoryless routing algorithm takes at least quadratic time to route on some
 subdivisions.  We conclude with two open problems:
 
 \begin{op}
@@ -444,7 +445,7 @@ The current upper bound for the expected time required by \textsc{Random-Compass
 \end{op}
 
 \begin{op}
-A random walk on $G$ routes any message in $O(n^2)$ expected time but requires $O(\log d)$ random bits when located at a vertex of degree $d$.  Is there a randomized oblivious routing algorithm for routing on convex subdivisions that uses $O(1)$ random bits per step and that routes any message in $O(n^2)$ expected time?
+A random walk on $G$ routes any message in $O(n^2)$ expected time but requires $O(\log d)$ random bits when located at a vertex of degree $d$.  Is there a randomized memoryless routing algorithm for routing on convex subdivisions that uses $O(1)$ random bits per step and that routes any message in $O(n^2)$ expected time?
 \end{op}
 
 

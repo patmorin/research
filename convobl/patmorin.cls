@@ -6,7 +6,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{patmorin} 
 		[2009/05/11 v0.1a
- JoCG article class]
+ Pat Morin's article class]
 
 \RequirePackage{fancyhdr}
 
@@ -122,6 +122,12 @@
 
 %------------- Use this so pdflatex outputs US letter pages -------------
 \usepackage[letterpaper]{hyperref}
+\usepackage[dvipsnames]{color}
+\definecolor{linkblue}{named}{MidnightBlue}
+\hypersetup{colorlinks=true, linkcolor=linkblue,  anchorcolor=linkblue,
+	citecolor=linkblue, filecolor=linkblue, menucolor=linkblue,
+	pagecolor=linkblue, urlcolor=linkblue} 
+
 
 %--------------------------- Headers and Footers ------------------------
 \pagestyle{fancy}

@@ -15,7 +15,8 @@
 %\usepackage{multirow}
 %\usepackage[normalem]{ulem}
 \usepackage[mathlines]{lineno}
-\linenumbers
+%\linenumbers
+\listfiles
 
 %\newcommand{\note}[1]{$\spadesuit$\marginpar{$\spadesuit$ #1}}
 
@@ -39,28 +40,27 @@
 
 \title{\MakeUppercase{Memoryless Routing in Convex Subdivisions: \newline 
        Random Walks are Optimal}}
-\author{\ }
-%\author{Dan Chen, Luc Devroye, Vida Dujmovi\'c, and Pat Morin}
+%\author{\ }
+\author{Dan Chen, Luc Devroye, Vida Dujmovi\'c, and Pat Morin}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-An \emph{memoryless} routing algorithm is one in which the decision about
-the next edge on the route to a vertex $t$ for a packet currently located
-at vertex $v$ is made based only on $v$, $t$, and the neighbourhood,
-$N(v)$, of $v$.  The current paper explores the limitations of such
-algorithms by showing that, for any (randomized) memoryless routing
-algorithm $\mathcal{A}$, there exists a convex subdivision on which
-$\mathcal{A}$ takes $\Omega(n^2)$ expected time to route a message between
-some pair of vertices.  Since this lower bound is matched by a random walk,
-this result implies that the geometric information available in convex
-subdivisions is not helpful for this class of routing algorithms.
-The current paper also shows the existence of triangulations for which the
-\textsc{Random-Compass} algorithm proposed by Bose \etal\ (2002,2004)
-requires $2^{\Omega(n)}$ time to route between some pair of vertices.
-
-
+A \emph{memoryless} routing algorithm is one in which the decision
+about the next edge on the route to a vertex $t$ for a packet currently
+located at vertex $v$ is made based only on the coordinates of $v$, $t$,
+and the neighbourhood, $N(v)$, of $v$.  The current paper explores the
+limitations of such algorithms by showing that, for any (randomized)
+memoryless routing algorithm $\mathcal{A}$, there exists a convex
+subdivision on which $\mathcal{A}$ takes $\Omega(n^2)$ expected
+time to route a message between some pair of vertices.  Since this
+lower bound is matched by a random walk, this result implies that the
+geometric information available in convex subdivisions is not helpful
+for this class of routing algorithms.  The current paper also shows
+the existence of triangulations for which the \textsc{Random-Compass}
+algorithm proposed by Bose \etal\ (2002,2004) requires $2^{\Omega(n)}$
+time to route between some pair of vertices.
 \end{abstract}
 
 \section{Introduction}
@@ -68,17 +68,19 @@ requires $2^{\Omega(n)}$ time to route between some pair of vertices.
 
 In recent years, motivated primarily by the proliferation of wireless networks and GPS devices, much research has been done on routing algorithms for geometric networks \cite{gior03}.  In this research a network is modelled as a geometric graph $G=(V,E)$ whose vertex set $V$ is a set of points in $\R^2$. We say that a routing algorithm $\mathcal{A}$ \emph{works} for $G$ if, for any pair of vertices $s,t\in V$, the algorithm always find a path from $s$ to $t$ in a finite number of steps.
 
-The research on geometric routing algorithms largely focuses on utilizing geometric properties of a class of geometric graphs to reduce the complexity of, and information required by, routing algorithms.  For example, when $G$ is the unit disk graph\footnote{The \emph{unit disk graph} of a point set $V$ contains the edge $uv$ if and only if the Euclidean distance between $u$ and $v$ is at most 1.} of the points in $V$, then an algorithm, called \textsc{Face-1}, of Bose \etal\ \cite{bose01} (see also Karp and Kung \cite{kk00}) works for $G$ and requires no preprocessing of $G$ or additional state information at the vertices of $G$ and requires only a constant size header associated with each packet.  An extremely general result in this vein, based on logspace construction of universal exploration sequences, show that, using a header containing only $O(\log n)$ bits, one can visit all the vertices of any graph (and hence reach $t$) in a polynomial number of steps \cite{b08}.
+The research on geometric routing algorithms largely focuses on utilizing geometric properties of a class of geometric graphs to reduce the complexity of, and information required by, routing algorithms.  For example, when $G$ is the unit disk graph\footnote{The \emph{unit disk graph} of a point set $V$ contains the edge $uv$ if and only if the Euclidean distance between $u$ and $v$ is at most 1.} of the points in $V$, then an algorithm, called \textsc{Face-1}, of Bose \etal\ \cite{bose01} (see also Karp and Kung \cite{kk00}) works for $G$ and requires no preprocessing of $G$ or additional state information at the vertices of $G$ and requires only a constant size header associated with each packet.  An extremely general result in this vein, based on logspace construction of universal exploration sequences, shows that, using a header containing only $O(\log n)$ bits, one can visit all the vertices of any graph (and hence reach $t$) in a polynomial number of steps \cite{b08}.
 
-A particularly interesting and restricted class of routing algorithms are so-called memoryless routing algorithms.  A \emph{memoryless} routing algorithm is one in which the decision about the next edge on the route to $t$ for a packet currently located at node $v$ is based only on $v$, $t$, and the neighbourhood, $N(v)$, of $v$.\footnote{More precisely, a deterministic memoryless routing algorithm is a function $f:\R^2\times\R^2\times(\R^2)^+\rightarrow \R^2$ that satisfies $f(v,t,N) \in N$ and $f(t,t,N) = t$ for all inputs.}  In particular, an memoryless algorithm does not make use of information obtained in previous routing steps and can not use any global information about $G$.  Note that a deterministic memoryless algorithm that works for $G$ can not visit any node more than once within a single routing path since this would cause the algorithm to loop forever.
+A particularly interesting and restricted class of routing algorithms are so-called memoryless routing algorithms.  A \emph{memoryless} routing algorithm is one in which the decision about the next edge on the route to $t$ for a packet currently located at node $v$ is based only on the coordinates of $v$, $t$, and the neighbourhood, $N(v)$, of $v$. More precisely, a deterministic memoryless routing algorithm is a function $f:\R^2\times\R^2\times(\R^2)^+\rightarrow \R^2$ that satisfies $f(v,t,N(v)) \in N(v)$ and $f(t,t,N(t)) = t$ for all inputs.
 
-Bose and Morin \cite{bose04} show that if $G$ is Delaunay triangulation\footnote{A \emph{triangulation} is a geometric graph all of whose faces, except the outer face are triangles, and whose outer face is the complement of a triangle. Delaunay triangulations and regular triangulations are special types of triangulations. For details, consult \cite{obs92}.} or a regular triangulation then deterministic memoryless routing algorithms named \textsc{Greedy} and \textsc{Compass}, respectively, work for $G$. Bose \etal\ \cite{bose02} subsequently show a stronger result; a deterministic memoryless routing algorithm named \textsc{Greedy-Compass} works for any triangulation $G$.
+Note that a memoryless routing algorithm makes each routing step without using information obtained in previous routing steps and without any global information about $G$.  Memoryless algorithms are different from \emph{oblivious} routing algorithm \cite[Section~4.2]{mr95} which select a path from $s$ to $t$ having total knowledge of $G$ (but without knowledge of other source/destination pairs).
+ 
+Bose and Morin \cite{bose04} show that if $G$ is Delaunay triangulation\footnote{A \emph{triangulation} is a geometric graph all of whose faces, except the outer face, are triangles, and whose outer face is the complement of a triangle. Delaunay triangulations and regular triangulations are special types of triangulations. For details, consult \cite{obs92}.} or a regular triangulation then deterministic memoryless routing algorithms, named \textsc{Greedy} and \textsc{Compass}, respectively, work for $G$. Bose \etal\ \cite{bose02} subsequently show a stronger result; a deterministic memoryless routing algorithm, named \textsc{Greedy-Compass}, works for any triangulation $G$.
 
 Memoryless routing algorithms are so simple, elegant, and practical that researchers have spent considerable effort designing geometric embeddings of graphs so that memoryless routing algorithms can be applied to the resulting embeddings.  A famous example in this vein is due to Leighton and Moitra \cite{lm08} who prove that every 3-connected planar graph $\tilde G$ admits an embedding $G$ in $\R^2$ such that \textsc{Greedy} works on $G$.  The combination of the embedding and routing algorithm represents a form of \emph{compact routing} \cite{l94}.
 
-Unfortunately, deterministic memoryless routing algorithms have severe limitations.  Bose \etal\ \cite[Theorem~2]{bose04} show that there exists 17 convex subdivisions\footnote{A \emph{convex subdivision} is a geometric graph all of whose faces, except the outer face are convex polygons, and whose outer face is the complement of a convex polygon.} $G_1,\ldots,G_{17}$ each with 17 vertices such that any deterministic memoryless routing algorithm does not work for at least one of these subdivisions.  Thus, convex subdivisions form a class of geometric graphs that are too rich for deterministic memoryless routing algorithms \cite{bose02}.
+Unfortunately, deterministic memoryless routing algorithms have severe limitations.  These stem from the fact that these algorithms can not visit the same vertex more than once without looping forever.  Bose \etal\ \cite[Theorem~2]{bose04} show that there exists 17 convex subdivisions\footnote{A \emph{convex subdivision} is a geometric graph all of whose faces, except the outer face, are convex polygons, and whose outer face is the complement of a convex polygon.}, $G_1,\ldots,G_{17}$, each with 17 vertices such that any deterministic memoryless routing algorithm does not work for at least one of these subdivisions.  Thus, convex subdivisions form a class of geometric graphs that are too rich for deterministic memoryless routing algorithms \cite{bose02}.
 
-The same authors \cite{bose02,bose04} observe that randomization can be used to overcome this limitation.  A \emph{randomized memoryless} routing algorithm is one in which the decision about the next edge on the route to $t$ for a packet currently located at node $v$ is based only on $v$, $t$, the neighbourhood, $N(v)$, of $v$, and a sequence $B$ of fresh random bits.\footnote{More precisely, a randomized memoryless routing algorithm is a function $f:\R^2\times\R^2\times(\R^2)^+\times\{0,1\}^\infty\rightarrow \R^2$ that satisfies $f(v,t,N,B) \in N$ and $f(t,t,N,B) = t$ for all inputs.  The final argument $B$ is a sequence of random bits that are chosen fresh for each step taken by the routing algorithm.} A randomized memoryless algorithm, named \textsc{Random-Compass}, that uses one random bit per step works for any convex subdivision. They do not analyze the efficiency of \textsc{Random-Compass} except to note that, for some convex subdivisions $G$, and some pairs $s,t\in V$, the expected number of steps taken by \textsc{Random-Compass} when routing from $s$ to $t$ is $\Omega(|V|^2)$.  
+The same authors \cite{bose02,bose04} observe that randomization can be used to overcome this limitation.  A \emph{randomized memoryless} routing algorithm is one in which the decision about the next edge on the route to $t$ for a packet currently located at node $v$ is based only on $v$, $t$, the neighbourhood, $N(v)$, of $v$, and a sequence $B$ of fresh random bits.  More precisely, a randomized memoryless routing algorithm is defined by a function $f:\R^2\times\R^2\times(\R^2)^+\times\{0,1\}^\infty\rightarrow \R^2$ that satisfies $f(v,t,N(v),B) \in N(v)$ and $f(t,t,N(v),B) = t$ for all inputs.  The final argument $B$ is a sequence of random bits that are chosen fresh for each step taken by the routing algorithm. Bose \etal\ describe a randomized memoryless algorithm, named \textsc{Random-Compass}, that uses one random bit per step works for any convex subdivision. They do not analyze the efficiency of \textsc{Random-Compass} except to note that, for some convex subdivisions $G$, and some pairs $s,t\in V$, the expected number of steps taken by \textsc{Random-Compass} when routing from $s$ to $t$ is $\Omega(|V|^2)$.  
 
 Observe that, by the theory of random walks (c.f. \cite[Theorem~6.6]{mr95}), the expected time required for a random walk on $G$ to travel from a particular vertex $s$ to a particular vertex $t$ is $O(n^2)$.  Therefore, a random walk is at least as efficient, in the worst case, as the \textsc{Random-Compass} algorithm. Nevertheless, one might expect that \textsc{Random-Compass} is more likely to find short routes, since it uses geometry to find a route that is specifically directed towards the target vertex $t$.  Thus, we might intuit that \textsc{Random-Compass} is a heuristic that is usually better than a random walk and never much worse.
 
@@ -88,7 +90,7 @@ Next we study whether \emph{any} randomized memoryless routing algorithm for con
 
 \section{A Bad Example for Random-Compass}
 
-The \textsc{Random-Compass} algorithm works by using a coin toss to select among the (at most two) neighbours $\ccw(v)$ and $\cw(v)$ of the current node $v$ that make the minimum and maximum angle, respectively, with the segment $vt$ (see Figure~\ref{fig:random-compass}.a). When applied on a convex subdivision $G=(V,E)$, Bose \etal\ show that, in the directed graph $G'$ that contains the edges $(v,\cw_t(v))$ and $(v,\ccw_t(v))$ for all $v\in V$, there exists at least one directed path $P(v,t)$ from every vertex $v$ to $t$ (see Figure~\ref{fig:random-compass}.b).  This, and Wald's Equation, immediately imply that the expected time to reach $t$ from any vertex is at most $2^{n}$; from any vertex $v$, \textsc{Random-Compass} has probability at least $1/2^{|P(v,t)|}\ge 1/2^{n-1}$ of reaching $t$ by following $P(v,t)$, and the expected number of steps it takes on $P(v,t)$ before falling off $P(v,t)$ is at most 2.
+The \textsc{Random-Compass} algorithm works by using a coin toss to select among the (at most two) neighbours $\ccw_t(v)$ and $\cw_t(v)$ of the current node $v$ that make the minimum and maximum angle, respectively, with the segment $vt$ (see Figure~\ref{fig:random-compass}.a). When applied on a convex subdivision $G=(V,E)$, Bose \etal\ show that, in the directed graph $G'$ that contains the edges $(v,\cw_t(v))$ and $(v,\ccw_t(v))$ for all $v\in V$, there exists at least one directed path $P(v,t)$ from every vertex $v$ to $t$ (see Figure~\ref{fig:random-compass}.b).  This, and Wald's Equation, immediately imply that the expected time to reach $t$ from any vertex is at most $2^{n}$; from any vertex $v$, \textsc{Random-Compass} has probability at least $1/2^{|P(v,t)|}\ge 1/2^{n-1}$ of reaching $t$ by following $P(v,t)$, and the expected number of steps it takes on $P(v,t)$ before falling off $P(v,t)$ is at most 2.
 
 \begin{figure}
   \begin{center}
@@ -113,7 +115,7 @@ The example in Figure~\ref{fig:bad-unbiased} shows that the above analysis of \t
   \label{fig:bad-unbiased}
 \end{figure}
 
-If we consider the directed graph $G'$ defined above, then we see that, at any point the packet is at some distance $i$ from $t$ and that, it can, with equal probability move to a vertex  of distance $i-1$ or move to a vertex (on the outer face) of distance $k$.  If we denote by $T_i$ the expected number of steps required by \textsc{Random-Compass} to reach $t$ given that it is currently at distance $i$ from $t$, we see that 
+If we consider the directed graph $G'$ defined above, then we see that, at any point the packet is at some distance $i$ from $t$ and that, it can, with equal probability, move to a vertex  of distance $i-1$ or move to a vertex (on the outer face) of distance $k$.  If we denote by $T_i$ the expected number of steps required by \textsc{Random-Compass} to reach $t$ given that it is currently at distance $i$ from $t$, we see that 
 \[ 
   T_i = \left\{ \begin{array}{ll}
           0 & \mbox{for $i=0$} \\
@@ -138,7 +140,7 @@ Note that the base in the exponent can be improved by using a construction with 
 
 \section{A Lower Bound for Any Algorithm}
 
-In this section we develop an $\Omega(n^2)$ lower bound for routing on convex subdivisions using any randomized memoryless routing algorithm $\mathcal{A}$.  The outline of the lower bound is as follows:  We start with a lemma about Markov chains whose transition graphs are paths. We show that, when starting at the midpoint of the path, there is at most one endpoint of the path that can be reached in subquadratic expected time.  This lemma is relevant since, if $\mathcal{A}$ finds itself in the interior of a path of degree 2 vertices in $G$, it will behave a like such a Markov chain until it reaches one of the endpoints of this path.
+In this section we develop an $\Omega(n^2)$ lower bound for routing on convex subdivisions using any randomized memoryless routing algorithm $\mathcal{A}$.  The outline of the lower bound is as follows:  We start with a lemma about Markov chains whose transition graphs are paths. We show that, when starting at the midpoint of the path, there is at most one endpoint of the path that can be reached in subquadratic expected time.  This lemma is relevant since, if $\mathcal{A}$ finds itself in the interior of a path of degree 2 vertices in $G$, it will behave like such a Markov chain until it reaches one of the endpoints of this path.
 
 Next, we observe how $\mathcal{A}$ behaves on certain paths of degree 2 vertices and show that, because $\mathcal{A}$ can only reach one endpoint of any path in subquadratic time, that we can always find a subset of these paths that can be pieced together to form a convex subdivision in which $\mathcal{A}$ takes at least quadratic expected time to route from some vertex $s$ to some vertex $t$.
 
@@ -333,11 +335,11 @@ which contradicts our assumption.
 Let $\mathcal{A}$ be a randomized memoryless routing algorithm.  Let $k$
 be an even integer, let $t$ be the origin, and let $A=a_1,\ldots a_k$ be
 a path of $k$ collinear vertices such that $a_{k}$ is closer to $t$ than
-any of $a_1,\ldots,a_{k-1}$ and $a_{1}a_{k}t$ is a left turn with $\angle
+any of $a_1,\ldots,a_{k-1}$ and the three points $a_{1},a_{k},t$ make a left turn with $\angle
 a_{1}a_{k}t$ greater than $150^\circ$ degrees but less than $180^\circ$ (see Figure~\ref{fig:ab}.a). Let
 $B=b_1,\ldots,b_k$ be the reflection of $A$ through the line parallel
-to $A$ that contains $t$ (see Figure~\ref{fig:ab}.b).  Let $A_\alpha$,
-respectively, $B_\alpha$, denote the path $A$, respectively, $B$,
+to $A$ that contains $t$ (see Figure~\ref{fig:ab}.b).  Let $A(\alpha)$,
+respectively, $B(\alpha)$, denote the path $A$, respectively, $B$,
 rotated by an angle of $\alpha$ about the origin, $t$.
 
 \begin{figure}
@@ -396,18 +398,16 @@ Let $A'=A(\alpha)=a_1',\ldots,a_k'$ and $B'=B(180+\alpha)=b_1',\ldots,b_k'$.  Th
 
 \begin{theorem}
   \label{thm:quadratic}
-  For any
+  For any integer $k> 0$ and any 
   memoryless routing algorithm $\mathcal{A}$,
-  there exists a convex subdivision $G=(V,E)$ with $|V|=O(k)$ with vertices $s,t\in V$ such that $\mathcal{A}$ takes $\Omega(k^2)$ steps when routing from $s$ to $t$.
+  there exists a convex subdivision $G=(V,E)$ with $|V|=\Theta(k)$ having vertices $s,t\in V$ such that $\mathcal{A}$ takes $\Omega(k^2)$ steps when routing from $s$ to $t$.
 \end{theorem}
 
 \begin{proof}
+If either of Lemma~\ref{lem:2blue} or Lemma~\ref{lem:2red} apply to $\mathcal{A}$ then the proof is complete.  Otherwise, observe that the exclusion of these two lemmata implies that, for any $\alpha$, at least one of $A(\alpha)$ and $B(\alpha)$ is blue.  To see this, note that if $A(\alpha)$ is red, then (the exclusion of) Lemma~\ref{lem:2red} implies that $B(\alpha+180)$ is blue, so (the exclusion of) Lemma~\ref{lem:2blue} implies that $A(\alpha+180)$ is red, so (the exclusion of) Lemma~\ref{lem:2red} implies that $B(\alpha)$ is blue.
 
-If either of Lemma~\ref{lem:2blue} or Lemma~\ref{lem:2red} apply then the proof
-is complete.  Otherwise, observe that the exclusion of these two lemmata implies that for any $\alpha$, the colors of $A(\alpha)$ and $B(\alpha)$ are different.
-In particular, one of them is colored blue.  More specifically, there exists 3 blue chains $X=x_1,\ldots,x_k$, $Y=y_1,\ldots,y_k$, and $Z=z_1,\ldots,z_k$ where $X\in\{A(0),B(0)\}$, $Y\in\{A(120),B(120)\}$ and $Z\in\{A(240),B(240)\}$.
-
-In this case, we take $G$ to be the graph containing $X$, $Y$, and $Z$,
+Therefore, there exists 3 blue chains $X=x_1,\ldots,x_k$, $Y=y_1,\ldots,y_k$, and $Z=z_1,\ldots,z_k$ where $X\in\{A(0),B(0)\}$, $Y\in\{A(120),B(120)\}$ and $Z\in\{A(240),B(240)\}$.
+We can then take $G$ to be the graph containing $X$, $Y$, and $Z$,
 as well as the edges $x_1y_1$, $y_1z_1$, $z_1x_1$, $x_ky_k$, $y_kz_k$,
 $z_kx_k$, $x_kt$, $y_kt$, $z_kt$ (see Figure~\ref{fig:3blue}).  Because
 $X$, $Y$, and $Z$ are all blue, the expected number of steps required
@@ -421,7 +421,7 @@ to route from $x_{k/2}$ to $t$ using $\mathcal{A}$ is $\Omega(k^2)$.
 \end{figure}
 
 All that remains is to verify that $G$ is indeed a convex subdivision.  This is
-readily established using the fact that the angles $\angle x_k t x_1$, $\angle y_k t y_1$, and $\angle z_k t z_1$, are all between 150 and 180 degrees.
+readily established using the fact that the angles $\angle x_1 x_k t$, $\angle y_1 y_k t$, and $\angle z_1 z_k t$, are all between 150 and 180 degrees.
 %
 %
 %.
@@ -438,7 +438,7 @@ readily established using the fact that the angles $\angle x_k t x_1$, $\angle y
 We have shown that the \textsc{Random-Compass} algorithm takes exponential
 expected time to route on some convex subdivisions and that any randomized
 memoryless routing algorithm takes at least quadratic time to route on some
-subdivisions.  We conclude with two open problems:
+convex subdivisions.  We conclude with two open problems:
 
 \begin{op}
 The current upper bound for the expected time required by \textsc{Random-Compass} on convex subdivisions is $O(2^n)$ and the lower bound is $\Omega(2^{n/3})$.  Close this gap.

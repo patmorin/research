@@ -1,9 +1,10 @@
-\documentclass[lotsofwhite]{patmorin}
+\documentclass{patmorin}
 \usepackage{amsthm,amsopn}
 \usepackage[noend]{algorithmic}
+\usepackage{pat}
 
 \newcommand{\bigrand}{\textsc{BigRand}}
-\newcommand{\E}{\mathrm{E}}
+%\newcommand{\E}{\mathrm{E}}
 \newcommand{\A}{\mathcal{A}}
 \newcommand{\note}[1]{\enspace\enspace\hfill{\mbox{[#1]}}}
 \DeclareMathOperator{\sign}{sign}
@@ -11,7 +12,7 @@
 \DeclareMathOperator{\reset}{reset}
 \DeclareMathOperator{\var}{var}
 
-\input{pat}
+%\input{pat}
 
 \title{\MakeUppercase{Randomized Rendez-Vous with Limited Memory}}
 \author{Evangelos Kranakis \and
@@ -22,76 +23,95 @@
 \maketitle
 \begin{abstract}
 We present a tradeoff between the expected time for two identical
-agents to rendez-vous on a synchronous, anonymous, oriented
-ring and the memory requirements of the agents. In particular, we show 
-there exists a $2t$ state agent, which
-can achieve rendez-vous on an $n$ node ring in expected time
-$O( n^2/2^{t} + 2^{t} )$ and that any $t/2$ state agent
-requires expected time $\Omega( n^2/2^t )$. 
-As a corollary we observe that $\Theta(\log \log n)$ bits of
-memory are necessary and 
-sufficient to achieve rendez-vous in linear time. 
+agents to rendez-vous on a synchronous, anonymous, oriented ring and
+the memory requirements of the agents. In particular, we show  there
+exists a $2t$ state agent, which can achieve rendez-vous on an $n$
+node ring in expected time $O( n^2/2^{t} + 2^{t} )$ and that any $t/2$
+state agent requires expected time $\Omega( n^2/2^t )$. As a corollary
+we observe that $\Theta(\log \log n)$ bits of memory are necessary and
+sufficient to achieve rendez-vous in linear time.
 \end{abstract}
 
 \section{Introduction}
 \seclabel{intro}
 
-The problem of {\em rendez-vous} (the gathering of agents widely
-dispersed in some domain at a common place and time) has been studied
-under many guises and in many settings
+The problem of {\em rendez-vous} (the gathering of agents
+widely dispersed in some domain at a common place and
+time) has been studied under many guises and in many settings
 \cite{alpernGal03,Marco,dessmark,dobrev,fkkss,fkklss,gakra,kowalski1,
-kowalski2,kkss,markou,RoyDudek,sawchuk04,Yamashita,yu}.  (See
-Reference \cite{kkr} for a survey of recent results.) In this paper we
-consider the problem of autonomous mobile software agents gathering in
-a distributed network. This is a fundamental operation useful in such
-applications as web-crawling, distributed search, meeting scheduling,
-etc. In particular, we study the problem of two identical agents
-attempting to rendez-vous on a synchronous anonymous ring.
+kowalski2,kkss,markou,RoyDudek,sawchuk04,Yamashita,yu}.  (See Reference
+\cite{kkr} for a survey of recent results.) In this paper we consider the
+problem of autonomous mobile software agents gathering in a distributed
+network. This is a fundamental operation useful in such applications as
+web-crawling, distributed search, meeting scheduling, etc. In particular,
+we study the problem of two identical agents attempting to rendez-vous
+on a synchronous anonymous ring.
+
+Network rendez-vous problems have many different parameters, including
+the topology of the underlying network, the agents' knowledge (if any) of
+the network, labellings (if any) of the edges and vertices of the network,
+the capabilities of the agents (unlimited memory, access to random bits,
+the ability to clone, the ability to leave messages at vertices), the
+types of agents (identical or not), the synchrony of the agents, and
+the reliability of the agents. 
 
 We consider the standard model of a synchronous anonymous oriented
-$n$-node ring \cite{santoro}. The nodes are assumed to have no
-identities, the computation proceeds in synchronous steps and the
-edges of the ring are labelled {\tt clockwise} and {\tt
-counterclockwise} in a consistent fashion.  We model the agents as
-identical probabilistic finite automata $A = \langle S, \delta, s_0
-\rangle$ where
-$S$ is the set of states of the automata including $s_0$ the initial
-state and the special state ${\tt halt}$, and $\delta:S \times C
-\times P \to S \times M$ where $C = \{ H, T \}$ represents a random
-coin flip, $P = \{ \tt present, notpresent \}$ represents a predicate
-indicating the presence of the other agent at a node, and $M = \{ -1,
-0, +1 \}$ represents the potential moves the agent may make, $+1$
-representing clockwise, $-1$ counterclockwise and $0$ stay at the
-current node.  During each synchronous step, depending upon its
-current state, the answer to a query for the presence of the other
-agent, and the value of an independent random coin flip with
-probability of $\tt heads$ equal to $1/2$, the agent uses $\delta$ in
-order to change its state and either move across the edge labelled $\tt
-clockwise$, move across the edge labelled $\tt counterclockwise$ or
-stay at the current node. We assume that the
-agent halts once it detects the presence of the other agent at a node.
-Rendezvous occurs when both agents halt on the same node.  The
-complexity measures  we are interested in are the expected time (the
-number of synchronous steps) to rendez-vous (where the expectation is
-taken over all sequences of coin flips of the two agents) and the size
-($|S|$) or memory requirement ($\log_2 |S|$) of the agents.  
+$n$-node ring \cite{santoro}. The nodes are assumed to have no identities,
+the computation proceeds in synchronous steps and the edges of the ring
+are labelled {\tt clockwise} and {\tt counterclockwise} in a consistent
+fashion.  We model the agents as identical probabilistic finite automata
+$A = \langle S, \delta, s_0 \rangle$ where $S$ is the set of states of
+the automata including $s_0$ the initial state and the special state ${\tt
+halt}$, and $\delta:S \times C \times P \to S \times M$ where $C = \{ H,
+T \}$ represents a random coin flip, $P = \{ \tt present, notpresent \}$
+represents a predicate indicating the presence of the other agent at a
+node, and $M = \{ -1, 0, +1 \}$ represents the potential moves the agent
+may make, $+1$ representing clockwise, $-1$ counterclockwise and $0$
+stay at the current node.  During each synchronous step, depending upon
+its current state, the answer to a query for the presence of the other
+agent, and the value of an independent random coin flip with probability
+of $\tt heads$ equal to $1/2$, the agent uses $\delta$ in order to change
+its state and either move across the edge labelled $\tt clockwise$, move
+across the edge labelled $\tt counterclockwise$ or stay at the current
+node. We assume that the agent halts once it detects the presence of
+the other agent at a node.  Rendezvous occurs when both agents halt on
+the same node.  The complexity measures  we are interested in are the
+expected time (the number of synchronous steps) to rendez-vous (where the
+expectation is taken over all sequences of coin flips of the two agents)
+and the size ($|S|$) or memory requirement ($\log_2 |S|$) of the agents.
 
 A number of researchers have observed that using random walks one can
-design $O(1)$ state agents that will rendez-vous in polynomial number
-steps on any network \cite{coppersmith}. For the ring the expected
+design $O(1)$ state agents that will rendez-vous in polynomial $O(n^3)$
+number steps on any network \cite{coppersmith}. For the ring the expected
 time for two random walks to meet is easily shown to be $O(n^2)$. (See
-Reference~\cite{kk} for an example proof of this fact.) This expected time bound
-can be improved by considering the following strategy.  Repeat the
-following until rendez-vous is achieved: flip a fair coin and walk
-$n/2$ steps clockwise if the result is heads, $n/2$ steps
-counterclockwise if the result is tails.  If the two agents choose
-different directions (which they do with probability 1/2) then they
-will rendez-vous (at least in the case where they start at an even
-distance apart).  It is easy to see that the expected time until
-rendez-vous in this case is $O(n)$. Alpern refers to this strategy as
-Coin Half Tour and studies it in detail \cite{alpern95}.  Note that
-the agents are required to count up to $n/2$ and thus require $\Omega(n)$
-states or $\Omega(\log n)$ bits of memory to perform this algorithm. 
+Reference~\cite{kk} for an example proof of this fact.)
+
+This expected time bound can be improved by considering the following
+strategy.  Repeat the following until rendez-vous is achieved: flip a
+fair coin and walk $n/2$ steps clockwise if the result is heads, $n/2$
+steps counterclockwise if the result is tails.  If the two agents choose
+different directions (which they do with probability 1/2) then they will
+rendez-vous (at least in the case where they start at an even distance
+apart).  The expected time to rendez-vous in this case satisfies 
+\[
+  T \le (1/2)(n/2) + (1/2)(n/2+T)
+\]
+and is therefore at most $3n/2$.  Alpern refers to this strategy
+as \emph{Coin Half Tour} and studies it in detail \cite{alpern95}.
+A variant of Coin Half Tour, in which each agent either travels $n-1$
+steps in the same direction or remains stationary for $n-1$ time units,
+was studied by Alpern \etal\ \cite{abe99}.  With an appropriately chosen
+probability of remaining stationary, this strategy achieves an expected
+meeting time, for odd $n$, of $n-\Theta(1)$. The case for even values
+of $n$ is complicated by the fact that the agents may pass each other
+without meeting. In this case, the agents can still rendez-vous in
+$1.254122768n + O(1)$ expected time.  A generalization of the above
+strategy, in which each agent either searches exhaustively for $2n$
+steps or waits for $2n$ steps, allows two agents to rendez-vous in any
+$n$ vertex graph \cite[Section~4]{abe99}in expected time at most $4n$.
+
+Note that these strategies require the agent to count up to at least $n/2$
+and thus require $\Omega(n)$ states or $\Omega(\log n)$ bits of memory.
 The main result of this paper is that this memory requirement can be
 reduced to $O(\log\log n)$ bits while still achieving rendez-vous in
 $O(n)$ expected time, and this is optimal.
@@ -754,6 +774,21 @@ of the number of states $t$ available to the agents, our upper and
 lower bounds differ by a factor of 4.  We believe that the upper bound
 is tight and this gap is an artifact of the lower bound proof.
 Closing the gap remains an open problem.
+
+The current paper studies symmetric rendez-vous with limited memory
+when the underlying graph is a ring. Another possibility is to consider
+rendez-vous with limited memory in other graphs.  Possibilities include
+rendez-vous an on $n$-vertex torus or, more generally, on any $n$-vertex
+vertex-transitive graph.\footnote{A vertex-transitive graph is a graph
+such that, for any pair of vertices $u$ and $w$, there is an isometry that
+maps $u$ onto $w$ \cite[Chapter~15]{alpernGal03}.} With complete knowledge
+of the underlying graph and unlimited memory, rendezvous can be achieved
+in $O(n)$ expected time for any graph \cite[Section~15.2]{alpernGal03}.
+On the other hand, if both agents take a random walk (which requires
+no memory and no knowledge of the underlying graph) then their
+expected meeting time is $O(n^3)$ and this is tight for some graphs
+\cite{coppersmith}.
+
 
 %To close
 %this gap, there are two locations in the lower bound proof that need

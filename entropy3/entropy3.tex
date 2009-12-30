@@ -146,10 +146,73 @@ $\langle \Delta_1,\ldots,\Delta_r\rangle$ of triangles such that
   in $O(1)$ time.
 \end{thm}
 
-\begin{proof}
-Take a sample of size $O(n^{\delta}\log n)$ and apply \thmref{point-partition} to the sample?
-\end{proof}
+% Luc's definitions
+\def\isdef{\buildrel {\rm def} \over =}
+\def\PROB{\Pr}
 
+\begin{proof}
+We will draw an i.i.d. sample of $n = \lceil 256r^3\ln r \rceil$
+points from $D$ to form a set $S$.  We use the algorithm from Theorem
+1 to build a sequence $\langle \Delta_1, \ldots, \Delta_r \rangle$
+of triangles satisfying the conditions of Theorem 1.  If necessary we
+replace $\Delta_r$ with a triangle that contains the support of $D$
+to ensure condition (1) of this theorem is satisfied.  Condition (3) of
+this theorem is the same as condition (3) of Theorem 1 and is therefore
+trivially satisfied, though it may be necessary to add 1 to the constant
+$c$ due to the replacement of $\Delta_r$.
+
+We will prove that, with probability at least $1/2$, the partition
+$\langle \Delta_1, \ldots, \Delta_r \rangle$ also satisfies condition
+(2) of this theorem.  Our oracles allow us to check in constant time
+whether this condition is satisfied; we repeat the process until we
+obtain a partition that does.  The runtime for this algorithm will then be
+geometrically distributed with constant expectation for any constant $r$.
+
+To denote the incremental differences between the triangles we use
+$$\Delta_i^* = \Delta_i - \bigcup_{j=1}^{i-1} \Delta_j ~.$$  We will
+use $D_n(A)$ to denote the empirical measure of a set $A$:
+\[
+D_n (A) \isdef {{|S\cap A|} \over n}
+~.
+\]  
+We have
+\[
+\sup_{1 \le i \le r} D_n(\Delta_i^*) \le { 2 \over r }~.
+\]
+Now,
+\begin{eqnarray*}
+\PROB \left\{ \sup_{1 \le i \le r} D ( \Delta^*_i ) > {3 \over r} \right\}
+&=& \PROB \left\{ \cup_{1 \le i \le r} \left[ D ( \Delta^*_i ) - D_n(\Delta_i^*)  >  {3 \over r} - D_n(\Delta_i^*) \right] \right\} \cr
+&\le& \PROB \left\{ \cup_{1 \le i \le r} \left[ D ( \Delta^*_i ) - D_n(\Delta_i^*)  > {3 \over r} - {2 \over r}  \right] \right\} \cr
+&=& \PROB \left\{ \sup_{1 \le i \le r} \left(  D ( \Delta^*_i ) - D_n(\Delta_i^*) \right) > {1 \over r} \right\} \cr
+&=& \PROB \left\{ \sup_{A \in {\cal A}} \left( D ( A ) - D_n ( A ) \right)  > {1 \over r} \right\} \cr
+\end{eqnarray*}
+where $\cal A$ are sets formed by taking a closed triangle and subtracting
+$r-1$  (possibly empty) triangles from it.
+The class $\cal A$ for $r=1$ is the class of all triangles.
+It has Vapnik-Chervonenkis dimension at most 7. 
+By Sauer's  lemma 
+\cite{s72}\cite[Pages~28--29]{dl01},
+the number of subsets of an $n$-point set that can be obtained by intersections
+with sets from $\cal A$ does not exceed $(n+1)^7$.
+Assume now general $r$. Then the number of subsets of an $n$-point set that can be obtained by intersections
+with sets from $\cal A$ does not exceed $(n+1)^{7r}$,
+by a simple combinatorial argument.
+Then, by a version of the Vapnik-Chervonenkis Inequality 
+\cite{vc71} shown by Devroye \cite{d82},
+$$
+\PROB \left\{ \sup_{A \in {\cal A}} \left| D ( A ) - D_n ( A ) \right|  \ge t \right\}
+\le 4 e^{4t+4t^2} \left( n^2 + 1 \right)^{7r}  e^{-2nt^2}, ~t > 0.
+$$
+Thus, 
+\begin{eqnarray*}
+\PROB \left\{ \sup_{1 \le i \le r} D ( \Delta^*_i )  > {3 \over r} \right\}
+&\le& 4 e^{4/r + 4/r^2} \left( n^2 + 1 \right)^{7r}  e^{-2n/r^2} \\
+&\le& 2^{2+7r}  e^{8}  n^{14r}  e^{-2n/r^2} \\
+&\le& \exp \left( 31r\ln n - \frac{2n}{r^2} \right)  ~.
+\end{eqnarray*}
+Since we have $n=\lceil 256r^3\ln r \rceil$, this upper bound is less than $1/2$, as desired.  This concludes the proof.
+\end{proof}
 
 Assume, without loss of generality, that all vertices of $G$ and the support
 of $D$ are contained in the unit square $[0,1]^2$.  This can easily be

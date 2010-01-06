@@ -1,5 +1,7 @@
 \documentclass{patmorin}
 \usepackage{pat,graphicx,amsmath}
+\usepackage[mathlines]{lineno}
+\linenumbers
 
 \newcommand{\depth}{\mathrm{depth}}
 
@@ -46,17 +48,17 @@ models of computation \cite{c06,cp09,p06}.
 The most recent work in the distribution-sensitive setting is by
 Collette \etal\ \cite{cdilm08} who give an $O(n)$ space data structure
 that preprocesses a connected planar subdivision $G$ and a probability
-measure $D$ over $\R^2$ such that a point location query in $G$ can
-be answered in $O(H+1)$ expected time.  Here $H$ is a lower-bound on
-the expected time required by any linear decision tree for answering
-queries on $G$ that are drawn according to $D$.  The expected number of
-point-line comparisons needed to answer a query using their data structure
-$H + O(H^{2/3}+1)$.  Their work, which generalizes (and uses) a similar
-result for triangulations \cite{ammw07}, leaves open the problem of what
-to do when $G$ is disconnected. Disconnected planar subdivisions occur
-quite frequently in areas like geographic information systems and 
-cartography, where disconnected regions occur naturally. (See
-\figref{falklands} for an example).
+measure $D$ over $\R^2$ such that a point location query in $G$ can be
+answered in $O(H+1)$ expected time.  Here $H$ is a lower-bound on the
+expected time required by any linear decision tree for answering queries
+on $G$ that are drawn according to $D$.  The expected number of point-line
+comparisons needed to answer a query using their data structure is $H +
+O(H^{2/3}+1)$.  Their work, which generalizes (and uses) a similar result
+for triangulations \cite{ammw07}, leaves open the problem of what to do
+when $G$ is disconnected. Disconnected planar subdivisions occur quite
+frequently in areas like geographic information systems and cartography,
+where disconnected regions occur naturally. (See \figref{falklands}
+for example).
 
 \begin{figure}
   \begin{center}\includegraphics[width=5in]{falklands}\end{center}
@@ -68,7 +70,7 @@ cartography.}
 In the current paper we show that, for a (possibly disconnected)
 planar subdivision $G$, a very different approach can be used to obtain
 an expected query time of $O(H+1)$. Essentially, the problem can be
-solved by building an $o(n)$-sized data structure for answering the
+solved by building a $o(n)$-sized data structure for answering the
 easy-to-answer queries efficiently and passing all other (hard-to-answer)
 queries on to any of the classic $O(n)$ space $O(\log n)$ query time
 data structures for planar point location. As a corollary, we obtain
@@ -79,12 +81,13 @@ $o(n)$ bits.
 
 \section{Preliminaries}
 
-Throughout this paper, we assume an underlying probability measure $D$
-over $\R^2$.  All expectations and probabilities are (implicitly) with
-respect to $D$.  For any subset $X\subseteq\R^2$, $\Pr(X)$ refers to
-$D(X)$.  We use the notation $D_{|X}$ to denote the distribution $D$ conditioned on $F$, i.e., $D_{|X}(Y)=\Pr(Y\mid X)=\Pr(X\cap Y)/\Pr(X)$ for all $Y\subseteq\R^2$.
-If $\Delta$ is a partition of $\R^2$, then the \emph{entropy}
-of $\Delta$, denoted $H(\Delta)$ is
+Throughout this paper, we assume an underlying probability measure
+$D$ over $\R^2$.  All expectations and probabilities are (implicitly)
+with respect to $D$.  For any subset $X\subseteq\R^2$, $\Pr(X)$ refers
+to $D(X)$.  We use the notation $D_{|X}$ to denote the distribution $D$
+conditioned on $X$, i.e., $D_{|X}(Y)=\Pr(Y\mid X)=\Pr(X\cap Y)/\Pr(X)$
+for all $Y\subseteq\R^2$.  If $\Delta$ is a partition of $\R^2$, then
+the \emph{entropy} of $\Delta$, denoted $H(\Delta)$ is
 \[
     H(\Delta) = \sum_{t\in \Delta} \Pr(t)\log(1/\Pr(t)) \enspace .
 \]
@@ -111,14 +114,14 @@ is drawn according to the probability measure $D$.
 \section{The Data Structure}
 \seclabel{data-structure}
 
-In this section we describe our data structure for searching in disconnected
-planar subdivisions.  The first tool we use is simplicial partitions,
-from the field of geometric range searching:
+In this section we describe our data structure for point location in
+disconnected planar subdivisions.  The first tool we use is simplicial
+partitions, from the field of geometric range searching:
 
-\begin{thm}[Matou\v{s}ek 1991]\thmlabel{point-partition}
-Let $S$ be a set of $m$ points in $\R^2$. There exists a constant
-$c$ such that, for any $1\le r \le n$, there exists a sequence
-$\langle \Delta_1,\ldots,\Delta_r\rangle$ of triangles such that
+\begin{thm}[Matou\v{s}ek 1992]\thmlabel{point-partition}
+There exists a universal constant $c$ such that, for any set $S$ of $m$
+points in $\R^2$ and any $r\in\{1,\ldots,m\}$, there exists a sequence
+$\langle \Delta_1,\ldots,\Delta_r\rangle$ of closed triangles such that
   \begin{enumerate}
     \item $S\subseteq \bigcup_{i=1}^r \Delta_i$,
   
@@ -126,7 +129,7 @@ $\langle \Delta_1,\ldots,\Delta_r\rangle$ of triangles such that
     \left(\bigcup_{j=1}^{i-1}\Delta_j\right)\right| \le 2m/r$, and
   
     \item For any line $\ell$, there are at most $cr^{1/2}$ elements of
-  $\{\Delta_1,\ldots,\Delta_r\}$ that intersect $\ell$.
+  $\{\Delta_1,\ldots,\Delta_r\}$ whose interiors intersect $\ell$.
   \end{enumerate}
   The sequence of triangles $\Delta_1,\ldots,\Delta_r$ can be computed
   in $O(m)$ time.
@@ -134,22 +137,22 @@ $\langle \Delta_1,\ldots,\Delta_r\rangle$ of triangles such that
 
 Note that Part~2 of \thmref{point-partition} is not in the original
 statement of the theorem, but follows from Matou\v{s}ek's construction
-of $\Delta_1,\ldots,\Delta_r$ \cite{m91}.
+of $\Delta_1,\ldots,\Delta_r$ \cite{m92}.
 Restating \thmref{point-partition} in terms of probability distributions,
 we have:
 
 \begin{thm}\thmlabel{prob-partition}
-Let $D$ be a probability measure over $\R^2$. There exists a constant
-$c$ such that, for any constant $r>1$, there exists a sequence
-$\langle \Delta_1,\ldots,\Delta_r\rangle$ of triangles such that
+There exists a universal
+constant $c$ such that, for any probability measure $D$ over $\R^2$ and any constant integer $r>1$, there exists a sequence
+$\langle \Delta_1,\ldots,\Delta_r\rangle$ of closed triangles such that
   \begin{enumerate}
-    \item $\Pr\{\bigcup_{i=1}^r \Delta_i\} = 1$,
+    \item $\Pr\left\{\bigcup_{i=1}^r \Delta_i\right\} = 1$,
   
     \item $\Pr\left\{\Delta_i \setminus
     \left(\bigcup_{j=1}^{i-1}\Delta_j\right)\right\} \le 3/r$, and
   
     \item For any line $\ell$, there are at most $cr^{1/2}$ elements of
-    $\{\Delta_1,\ldots,\Delta_r\}$ that intersect $\ell$.
+    $\{\Delta_1,\ldots,\Delta_r\}$ whose interiors intersect $\ell$.
   \end{enumerate}
   The sequence $\Delta_1,\ldots,\Delta_r$ of triangles can be computed
   in $O(1)$ time.
@@ -178,13 +181,14 @@ obtain a partition that does.  The runtime for this algorithm will then be
 geometrically distributed with constant expectation for any constant $r$.
 
 To denote the incremental differences between the triangles we use
-$$\Delta_i^* = \Delta_i - \bigcup_{j=1}^{i-1} \Delta_j ~.$$  We will
+$$\Delta_i^* = \Delta_i \setminus \bigcup_{j=1}^{i-1} \Delta_j ~.$$  We will
 use $D_m(A)$ to denote the empirical measure of a set $A$:
 \[
 D_m (A) \isdef {{|S\cap A|} \over m}
 ~.
 \]  
-We have
+By condition~(2) of \thmref{point-partition},
+we have
 \[
 \sup_{1 \le i \le r} D_m(\Delta_i^*) \le { 2 \over r }~.
 \]
@@ -194,10 +198,10 @@ Now,
 &=& \PROB \left\{ \cup_{1 \le i \le r} \left[ D ( \Delta^*_i ) - D_m(\Delta_i^*)  >  {3 \over r} - D_m(\Delta_i^*) \right] \right\} \cr
 &\le& \PROB \left\{ \cup_{1 \le i \le r} \left[ D ( \Delta^*_i ) - D_m(\Delta_i^*)  > {3 \over r} - {2 \over r}  \right] \right\} \cr
 &=& \PROB \left\{ \sup_{1 \le i \le r} \left(  D ( \Delta^*_i ) - D_m(\Delta_i^*) \right) > {1 \over r} \right\} \cr
-&=& \PROB \left\{ \sup_{A \in {\cal A}} \left( D ( A ) - D_m ( A ) \right)  > {1 \over r} \right\} \cr
+&\le& \PROB \left\{ \sup_{A \in {\cal A}} \left( D ( A ) - D_m ( A ) \right)  > {1 \over r} \right\} \cr
 \end{eqnarray*}
 where $\cal A$ are sets formed by taking a closed triangle and subtracting
-$r-1$  (possibly empty) triangles from it.
+at most $r-1$  closed triangles from it.
 The class $\cal A$ for $r=1$ is the class of all triangles.
 It has Vapnik-Chervonenkis dimension at most 7. 
 By Sauer's  lemma 
@@ -211,9 +215,9 @@ Then, by a version of the Vapnik-Chervonenkis Inequality
 \cite{vc71} shown by Devroye \cite{d82},
 $$
 \PROB \left\{ \sup_{A \in {\cal A}} \left| D ( A ) - D_m ( A ) \right|  \ge t \right\}
-\le 4 e^{4t+4t^2} \left( m^2 + 1 \right)^{7r}  e^{-2mt^2}, ~t > 0.
+\le 4 e^{4t+4t^2} \left( m^2 + 1 \right)^{7r}  e^{-2mt^2} \enspace , 
 $$
-Thus, 
+for any $t > 0$.  Thus, 
 \begin{eqnarray*}
 \PROB \left\{ \sup_{1 \le i \le r} D ( \Delta^*_i )  > {3 \over r} \right\}
 &\le& 4 e^{4/r + 4/r^2} \left( m^2 + 1 \right)^{7r}  e^{-2m/r^2} \\
@@ -225,18 +229,17 @@ Since we have $m=\lceil 256r^3\ln r \rceil$, this upper bound is less than $1/2$
 
 Assume, without loss of generality, that all vertices of $G$ and the support
 of $D$ are contained in the unit square $[0,1]^2$.  This can easily be
-justified by scaling, translation, and performing 4 point-line comparisons
-involving the query point before using the data structure to answer a query.
+justified by scaling and translation, so that $G$ is contained in $[0,1]^2$, and performing 4 point-line comparisons
+to check that the the query point is in $[0,1]^2$ before using the data structure to answer a query.
 
 We use \thmref{prob-partition} to recursively construct a \emph{partition
-tree} $T$.  Let $\alpha > 0$ be a constant that will be specified
-below.  Refer to \figref{simp-part}. At the root of $T$, we find the
-sequence of triangles $\Delta=\langle\Delta_1,\ldots,\Delta_r\rangle$ and construct
+tree} $T$.  Let $\alpha > 0$ be a constant that will be specified below.
+Refer to \figref{simp-part}. At the root of $T$, we find the sequence of
+triangles $\Delta=\langle\Delta_1,\ldots,\Delta_r\rangle$ and construct
 the arrangement of triangles in $\Delta$.  We then compute a Steiner
 triangulation of this arrangement in order to obtain a triangulation
 $A$. The exact nature of the Steiner triangulation $A$ will be discussed
-in the next section.  The triangulation $A$ is stored at the root of
-$T$.
+in the next section.  The triangulation $A$ is stored at the root of $T$.
 
 \begin{figure}
   \begin{center}
@@ -251,28 +254,28 @@ $T$.
   \figlabel{simp-part}
 \end{figure}
 
-Next, each face $F$ of $A$ becomes a child of the root of $T$.  If $F$
-does not intersect any edge or vertex of $G$ then we call $F$ a
+Next, each face $F$ of $A$ becomes a child of the root of $T$.  If the
+interior of $F$ is contained in a single face of $G$ then we call $F$ a
 \emph{terminal leaf} and label $F$ with the face of $G$ that contains it.
-If the current depth of recursion is greater than $\lfloor\log_{\alpha r}
+If the current depth of recursion is greater than $\lfloor\alpha \log_{r}
 n\rfloor$ then $F$ becomes a \emph{non-terminal leaf} of $T$.  Otherwise
-($F$ intersects an edge or vertex of $G$ and its depth is small),
+($F$ intersects two or more faces of $G$ and its depth is small),
 we recursively apply the same procedure on the distribution $D_{|F}$
 to obtain a partition tree that becomes a child of the root.
 
 This construction defines a tree $T=T(S,D)$ in which each node has
 $O(r^2)$ children and whose height is at most $\log_{\alpha r} n$.
-The number of nodes in $T$ is $(O(r^2))^{\log_{\alpha r} n} =
+The number of nodes in $T$ is $(O(r^2))^{\alpha \log_{r} n} =
 O(n^{2\alpha+\epsilon})$, where $\epsilon>0$ is a decreasing function
 of $r$.  Note that, for $\alpha < 1/2$ and sufficiently large $r$,
 the size of $T$ is $o(n)$.
 
 In addition to the tree $T$ we construct a backup data structure $T'$ that
 can answer point location queries in $G$ in $O(\log n)$ worst-case time.
-To answer a query, $T$ and $T'$ are used as follows:  We search in $T$
-for the query point. If this search ends at a terminal leaf $F$ of $T$
-then we report the label at $F$ and the query is complete.  Otherwise we
-use $T'$ to answer the query in $O(\log n)$ time.
+To answer a query, $T$ and $T'$ are used as follows:  We search top-down
+in $T$ for the query point. If this search ends at a terminal leaf
+$F$ of $T$ then we report the label at $F$ and the query is complete.
+Otherwise we use $T'$ to answer the query in $O(\log n)$ time.
 
 \section{Analysis}
 \seclabel{analysis}
@@ -306,10 +309,11 @@ that the partition tree $T$ has small \emph{visiting number} \cite{hw87}.
   obtained from \thmref{prob-partition} is triangulated.  Let $\Delta$
   be the set of $r$ triangles obtained from \thmref{prob-partition} and
   let $\mathcal{V}$ be set of $3r+4$ points that make up the vertices
-  of the triangles in $\Delta$ plus the vertices of a square $\Box$ that
-  contains all triangles in $\Delta$.  A classic result of Haussler and
-  Welzl \cite{hw87} proves that $V$ has a spanning tree $T(V)$ such that
-  any line crosses $O(r^{1/2})$ edges of $T$. 
+  of the triangles in $\Delta$ plus the vertices of a square $\Box$
+  that contains all triangles in $\Delta$.  A classic result of Haussler
+  and Welzl \cite{hw87} proves that $V$ has a spanning tree $T(V)$ such
+  that any line crosses $O(r^{1/2})$ edges of $T$, and this spanning
+  tree can be constructed efficiently \cite{cw89}.
 
   Consider the line segment arrangement $L$ consisting of the union of the
   edges in $T(V)$, the triangles in $\Delta$, and the edges of $\Box$.
@@ -344,13 +348,14 @@ which resolves to $(cr^{1/2}\log r)^i= O(r^{i(1/2+\epsilon)})$ for
 $r>(c\log r)^{1/\epsilon}$.
 \end{proof}
 
-An $i$-set of a rooted tree $T$ is a set of vertices in $T$ all of
-which are at distance at most $i$ from the root of $T$ and in which
+An \emph{$i$-set} of a rooted tree $T$ is a set of vertices in $T$ all
+of which are at distance at most $i$ from the root of $T$ and in which
 no vertex in the set is the ancestor of any other vertex in the set.
 Note that if $T$ is a partition tree defined in \secref{data-structure}
-then an $i$-set of $T$ is a set of disjoint triangles.  We say that a set
-of regions $X=\{X_1,\ldots,X_m\}$, $X_i\subseteq\R^2$, is in $k$-general
-position if there is no line that intersects $k$ or more elements of $X$.
+then an $i$-set of $T$ is a set of disjoint triangles.  We say that
+a set of regions $X=\{X_1,\ldots,X_m\}$, $X_i\subseteq\R^2$, is in
+\emph{$k$-general position} if there is no line that intersects $k$
+or more elements of $X$.
 
 \begin{lem}\lemlabel{independent}
   Let $\epsilon > 0$, let $T$ be the partition tree defined in
@@ -368,7 +373,7 @@ position if there is no line that intersects $k$ or more elements of $X$.
   \[
      \Pr\left\{
         \mbox{$V'$ is in $k$-general position 
-          and $|V'|=\Omega(|V|/r^{i(1/2+\epsilon+2/k)})$}
+          and $|V'|=\Omega(|V|/r^{i(1/2+\epsilon+\delta)})$}
       \right\} > 0 \enspace ,
   \]
   thus proving the existence of a set $V'$ satisfying the conditions of
@@ -388,7 +393,7 @@ position if there is no line that intersects $k$ or more elements of $X$.
   lines such that $V'$ is in $k$-general position if and only if no line
   in $L$ intersects $k$ or more elements of $V'$.   The probability that
   any line in $L$ intersects more than $k$ elements of $V'$ is therefore
-  at most $O(r^{2i}c^kr^{-ki\delta})=O(c^kr^{i(2-k\delta)}=o(1)$ for any
+  at most $O(r^{2i}c^kr^{-ki\delta})=O(c^kr^{i(2-k\delta)})=o(1)$ for any
   constant $\delta > 2/k$.
 
   The above argument shows that the nodes in $V'$ are quite likely
@@ -403,7 +408,8 @@ position if there is no line that intersects $k$ or more elements of $X$.
           and $|V'|=\Omega(|V|/r^{i(1/2+\epsilon+\delta)})$}
       \right\} \ge 1- (o(1) + 1/2) > 0 \enspace .
   \]
-  Setting $\delta$ sufficiently close to $2/k$ completes the proof.
+  Setting $\delta$ sufficiently close to (but larger than) $2/k$ completes
+  the proof.
 \end{proof}
 
 We are now ready to show that the search time in our data structure is
@@ -446,9 +452,9 @@ a lower bound on the entropy of any Steiner triangulation of $G$.
   Now, consider any Steiner triangulation $\Delta^*$ of $G$ and let
   $t$ be a triangle in $\Delta^*$.  Note that $t$ cannot contain any
   triangle in $L'$ since each element in $L'$ is non-terminal in $T$
-  and therefore intersects at least two faces of $G$.  Therefore,
-  any subgroup $G_{i,j}$ intersected by $t$ must intersect one of
-  $t$'s three edges. Since each $G_{i,j}$ is in $k$-general position,
+  and therefore its interior intersects at least two faces of $G$.
+  Therefore, any subgroup $G_{i,j}$ intersected by $t$ must intersect one
+  of $t$'s three edges. Since each $G_{i,j}$ is in $k$-general position,
   this means that $t$ intersects at most $3k$ elements of $G_{i,j}$.
   It follows \cite[Lemma~3]{cdilm09} that
   \[
@@ -501,7 +507,7 @@ a lower bound on the entropy of any Steiner triangulation of $G$.
      \sum_{t\in L} \Pr(t)O(\depth_T(t)) = \sum_{t\in L}\Pr(t)O(\log(1/\Pr(t))) = O(H(L)) \enspace .
   \]
   On the other hand, by \lemref{lower-bound} and \thmref{triangulation},
-  the expected time required by an linear decision tree for answering
+  the expected time required by any linear decision tree for answering
   queries in $G$ is
   \[
       H^* = \Omega(H(L) - 1) \enspace ,

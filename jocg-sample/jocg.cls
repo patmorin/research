@@ -5,7 +5,7 @@
 %
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{jocg} 
-		[2009/05/11 v0.1b
+		[2010/01/05 v0.1c
  JoCG article class]
 
 \RequirePackage{fancyhdr}
@@ -23,6 +23,11 @@
 \DeclareOption{onecolumn}{\OptionNotUsed}
 \DeclareOption{10pt}{\OptionNotUsed}
 \DeclareOption{12pt}{\OptionNotUsed}
+
+% Use option draft to get page numbers
+\newif\if@draft
+\@draftfalse
+\DeclareOption{draft}{\@drafttrue}
 
 % The default action is to pass options to article class
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
@@ -134,5 +139,10 @@ urlcolor=linkblue}
 \fancyfoot{}
 \fancyhead[L]{\sf Journal of Computational Geometry}
 \fancyhead[R]{\texttt{\href{http://jocg.org/}{jocg.org}}}
+\if@draft
+  \fancyfoot[L]{\sf DRAFT \today}
+  \fancyfoot[C]{\thepage}
+  \fancyfoot[R]{}
+\fi
 \renewcommand{\headrulewidth}{1pt}
 \pagestyle{fancy}

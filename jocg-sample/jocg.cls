@@ -143,6 +143,7 @@ urlcolor=linkblue}
   \fancyfoot[L]{\sf DRAFT \today}
   \fancyfoot[C]{\thepage}
   \fancyfoot[R]{}
+  \renewcommand{\footrulewidth}{1pt}
 \fi
 \renewcommand{\headrulewidth}{1pt}
 \pagestyle{fancy}

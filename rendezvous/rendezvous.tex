@@ -1,8 +1,7 @@
 \documentclass[acmtoalg]{acmtrans2m}
 \let\orgsetcounter\setcounter  % workaround for broken acmtrans2m
-\usepackage{amsopn}
+\usepackage{amsopn,algorithmic}
 \usepackage{pat}
-\usepackage{algorithmic}
 
 \newcommand{\bigrand}{\textsc{BigRand}}
 \newcommand{\A}{\mathcal{A}}
@@ -108,6 +107,15 @@ expected time (the number of synchronous steps) to rendez-vous (where the
 expectation is taken over all sequences of coin flips of the two agents)
 and the size ($|S|$) or memory requirement ($\log_2 |S|$) of the agents.
 
+We assume for simplicity that $n$, the size of the ring is an even number
+and that the two agents start an even distance apart. This avoids the
+possibility that the two agents simultaneously cross the same edge in
+opposite directions without achieving a rendez-vous.  This assumption
+does not significantly affect our (asymptotic) results.  We can achieve
+a similar rendez-vous time without this assumption by having agents use
+a coin periodically to determine whether they should pause, for one unit
+of time, at their currently location.
+
 \subsection{Related Work and New Results}
 
 A number of researchers have observed that using random walks one can
@@ -130,12 +138,12 @@ and is therefore at most $3n/2$.  Alpern refers to this strategy
 as \emph{Coin Half Tour} and studies it in detail \cite{alpern95}.
 A variant of Coin Half Tour, in which each agent either travels $n-1$
 steps in the same direction or remains stationary for $n-1$ time units,
-was studied by Alpern \etal\ \cite{abe99}.  With an appropriately chosen
-probability of remaining stationary, this strategy achieves an expected
-meeting time, for odd $n$, of $n-\Theta(1)$. The case for even values
-of $n$ is complicated by the fact that the agents may pass each other
-without meeting. In this case, the agents can still rendez-vous in
-$1.254122768n + O(1)$ expected time.  A generalization of the above
+was studied by Alpern \etal\ \cite{abe99}.  When the agents have uniformly
+distributed starting positions this strategy achieves an expected meeting
+time, for odd $n$, of $n-\Theta(1)$. The case for even values of $n$
+is complicated by the fact that the agents are more likely to pass each
+other without meeting. In this case, the agents can still rendez-vous
+in $1.254122768n + O(1)$ expected time.  A generalization of the above
 strategy, in which each agent either searches exhaustively for $2n$
 steps or waits for $2n$ steps, allows two agents to rendez-vous in any
 $n$ vertex graph in expected time at most $4n$ \cite[Section~4]{abe99}.
@@ -156,8 +164,9 @@ to achieve rendez-vous in linear time.
 
 A preliminary version of these results was presented at the 8th
 Latin American Theoretical Informatics Conference (LATIN~2008)
-\cite{latin}. Section 2 contains some preliminary results, section 3
-our upper bound and section 4 the lower bound.
+\cite{latin}. \Secref{prelim} contains some preliminary results,
+\secref{upper-bound} our upper bound and \secref{lower-bound} the
+lower bound.
 
 
 \section{Preliminaries}
@@ -208,7 +217,9 @@ for expectation}:
 whenever $T$ is a stopping time for $X_1,X_2,X_3,\ldots$  Similarly,
 we can derive a version of \emph{Wald's Equation for variance} by considering 
 the martingale 
-$Q_i=\left(\sum_{j=1}^i (X_j-\E[X]\right)^2 - i\cdot\var(X)$ 
+\[
+   Q_i=\left(\sum_{j=1}^i (X_j-\E[X]\right)^2 - i\cdot\var(X)
+\]
 to obtain
 \begin{equation}
     \var\left(\sum_{i=1}^T X_i\right) = \E\left[\left(\sum_{i=1}^T (X_i-\E[X_i])\right)^2 \right] =
@@ -457,25 +468,24 @@ completes the proof.
 
 \section{The Rendez-Vous Algorithm}
 \seclabel{algorithm}
+\seclabel{upper-bound}
 
-Consider the following algorithm used by an agent to make a random
-walk on a ring.  The agent repeatedly performs the following steps:
-(1)~toss a coin to determine a direction
-$d\in\{\mbox{{\tt clockwise}},\mbox{{\tt counterclockwise}}\}$ then (2)~run
-algorithm $\bigrand(t)$ replacing each increment of the variable
-$Y$ with a step in direction $d$.  By using  $t$ states for 
-a clockwise counter and $t$ states for a counterclockwise counter this algorithm
-can be implemented by a $2t$ state finite automata. (Or using 
-one bit to remember the
-direction $d$ and $\log t$ bits to keep track of the counter $C$ in the
-$\bigrand$ algorithm, it can be implemented by an agent
-having only $1+\log_2 t$ bits of memory.) 
+Consider the following algorithm used by an agent to make a random walk
+on a ring.  The agent repeatedly performs the following steps: (1)~toss
+a coin to determine a direction $d\in\{\mbox{{\tt clockwise}},\mbox{{\tt
+counterclockwise}}\}$ then (2)~run algorithm $\bigrand(t)$ replacing
+each increment of the variable $Y$ with a step in direction $d$.
+By using $t$ states for a clockwise counter and $t$ states for a
+counterclockwise counter this algorithm can be implemented by a $2t$
+state finite automata. (Or using one bit to remember the direction $d$
+and $\log t$ bits to keep track of the counter $C$ in the $\bigrand$
+algorithm, it can be implemented by an agent having only $1+\log_2 t$
+bits of memory.)
 
-We call $m$ iterations of the above algorithm a \emph{round}.
-Together, \lemref{walk} and \lemref{counter} imply that, during a
-round, with probability at least $\kappa$, an agent will travel a
-distance of at least $\beta 2^t \sqrt{m}$ from its starting
-location.  Set
+We call $m$ iterations of the above algorithm a \emph{round}.  Together,
+\lemref{walk} and \lemref{counter} imply that, during a round, with
+probability at least $\kappa$, an agent will travel a distance of at
+least $\beta 2^t \sqrt{m}$ from its starting location.  Set
 \[
    m= \left\lceil \frac{n^2}{\beta^2 2^{2t}} \right\rceil 
 \]
@@ -610,7 +620,6 @@ is traversed during a round.  The
 \[
    \reset(\A) = \sum_e f(e) = \E[R] \enspace .
 \]
-
 The \emph{bias} of a well-behaved algorithm $\A$ is defined as
 \[
     \bias(\A) = \sum_{e} f(e)\cdot\ell(e) \enspace ,
@@ -694,7 +703,7 @@ and observe that this is equivalent to
 The random variable $T$ is a \emph{stopping time} for the martingale
 $Q_1,Q_2,\ldots$.  Furthermore,
 \begin{eqnarray*}
-  \E[|Q_{i+1}-Q_i|\mid X_1,\ldots,X_i] 
+  \E[|Q_{i+1}-Q_i|\mid X_1,\ldots,X_i]  
     & = & \E\left[\left|S_{i+1}^2-(i+1)\E[X^2] 
                   - S_i^2 + i\E[X^2]  \right| \mid X_1,\ldots,X_i \right] \\
     & = & \E\left[\left|S_{i+1}^2 - S_i^2 - \E[X^2] \right| 
@@ -819,6 +828,13 @@ On the other hand, if both agents take a random walk (which requires
 no memory and no knowledge of the underlying graph) then their
 expected meeting time is $O(n^3)$ and this is tight for some graphs
 \cite{coppersmith}.
+
+Another possibility is to consider the effects of memory limitations on
+randomized algorithms for the rendezvous of multiple (greater than two)
+agents on an $n$ node ring.  In particular, what is the expected time
+required for $k$ identical agents, each having $t$ states, to achieve
+rendez-vous on a synchronous, anonymous, oriented $n$ node ring?
+
 
 
 %To close

@@ -1,7 +1,8 @@
 \documentclass{patmorin}
 \usepackage{pat,graphicx,amsmath}
 \usepackage[mathlines]{lineno}
-\linenumbers
+%\linenumbers
+\listfiles
 
 \newcommand{\depth}{\mathrm{depth}}
 
@@ -11,7 +12,7 @@
         Luc~Devroye,
 	Karim~Dou\"{\i}eb, 
 	Vida~Dujmovi\'c, 
-	Jamie~King, and 
+	James~King, and 
 	Pat~Morin}
 
 \begin{document}
@@ -91,7 +92,7 @@ the \emph{entropy} of $\Delta$, denoted $H(\Delta)$ is
 \[
     H(\Delta) = \sum_{t\in \Delta} \Pr(t)\log(1/\Pr(t)) \enspace .
 \]
-The probability measure $D$ is used as an input in our algorithms.
+The probability measure $D$ is used as an input to our algorithms.
 We assume that the algorithm has access to $D$ through two oracles.
 The first oracle allows, for any triangle $t$, to determine $\Pr(t)$
 in constant time.  The second oracle, for any triangle $t$, allows the
@@ -103,7 +104,7 @@ inequality $a_vx + b_vy + c_v > 0$, and each leaf $\ell$ is labelled
 with a face of $G$.  A query point $p=(x,y)$ follows a root-to-leaf path,
 proceeding to the left child of $v$ if it satisfies the inequality and the
 right child of $v$ if it does not.  A linear decision tree is \emph{for
-point location in $G$} if, for every $p\in\R^2$ the path for $p$ ends a
+point location in $G$} if, for every $p\in\R^2$ the path for $p$ ends at a
 leaf labelled with the face of $G$ that contains $p$. In the case where
 $p$ lies on an edge or vertex of $G$, the label can be any of the faces
 of $G$ incident on that edge or vertex.  The \emph{(expected) cost} of a
@@ -143,7 +144,8 @@ we have:
 
 \begin{thm}\thmlabel{prob-partition}
 There exists a universal
-constant $c$ such that, for any probability measure $D$ over $\R^2$ and any constant integer $r>1$, there exists a sequence
+constant $c$ such that, for any probability measure $D$ over $\R^2$ and any 
+integer $r\ge 1$, there exists a sequence
 $\langle \Delta_1,\ldots,\Delta_r\rangle$ of closed triangles such that
   \begin{enumerate}
     \item $\Pr\left\{\bigcup_{i=1}^r \Delta_i\right\} = 1$,
@@ -155,7 +157,7 @@ $\langle \Delta_1,\ldots,\Delta_r\rangle$ of closed triangles such that
     $\{\Delta_1,\ldots,\Delta_r\}$ whose interiors intersect $\ell$.
   \end{enumerate}
   The sequence $\Delta_1,\ldots,\Delta_r$ of triangles can be computed
-  in $O(1)$ time.
+  in $O(r^3\log r)$ time.
 \end{thm}
 
 % Luc's definitions
@@ -163,6 +165,7 @@ $\langle \Delta_1,\ldots,\Delta_r\rangle$ of closed triangles such that
 \def\PROB{\Pr}
 
 \begin{proof}
+Assume that $r \ge 2$, otherwise the theorem is trivial.
 We will draw an i.i.d.\ sample of $m = \lceil 256r^3\ln r \rceil$
 points from $D$ to form a set $S$.  We use the algorithm from Theorem
 1 to build a sequence $\langle \Delta_1, \ldots, \Delta_r \rangle$
@@ -173,11 +176,11 @@ this theorem is the same as condition (3) of Theorem 1 and is therefore
 trivially satisfied, though it may be necessary to add 1 to the constant
 $c$ due to the replacement of $\Delta_r$.
 
-We will prove that, with probability at least $1/2$, the sequence
-$\langle \Delta_1, \ldots, \Delta_r \rangle$ also satisfies condition
-(2) of this theorem.  Our oracles allow us to check in constant time
-whether this condition is satisfied; we repeat the process until we
-obtain a partition that does.  The runtime for this algorithm will then be
+We will prove that, with probability at least $1/2$, the sequence $\langle
+\Delta_1, \ldots, \Delta_r \rangle$ also satisfies condition~(2) of
+this theorem.  Our oracles allow us to check in constant time whether
+this condition is satisfied; we repeat the process until we obtain
+a partition that does.  The runtime for this algorithm will then be
 geometrically distributed with constant expectation for any constant $r$.
 
 To denote the incremental differences between the triangles we use
@@ -239,23 +242,51 @@ We use \thmref{prob-partition} to recursively construct a \emph{partition
 tree} $T$.  Let $\alpha > 0$ be a constant that will be specified below.
 Refer to \figref{simp-part}. At the root of $T$, we find the sequence of
 triangles $\Delta=\langle\Delta_1,\ldots,\Delta_r\rangle$ and construct
-the arrangement of triangles in $\Delta$.  We then compute a Steiner
-triangulation of this arrangement in order to obtain a triangulation
-$A$. The exact nature of the Steiner triangulation $A$ will be discussed
-in the next section.  The triangulation $A$ is stored at the root of $T$.
+the arrangement of triangles in $\Delta$.  
 
 \begin{figure}
   \begin{center}
-    \begin{tabular}{cc}
-      \includegraphics{simp-part} & \includegraphics{simp-part-triang} \\
-      (a) & (b)
+    \begin{tabular}{ccc}
+      \includegraphics[scale=0.77]{simp-part} &
+      \includegraphics[scale=0.77]{simp-part-tree} &
+      \includegraphics[scale=0.77]{simp-part-triang} \\
+      (a) & (b) & (c) \\
     \end{tabular}
   \end{center}
-  \caption{The triangles of a simplicial partition (a) form an arrangement of
-    triangles and the faces of this arrangement are (Steiner) triangulated
-    to form a Steiner triangulation $A$ (b).}
+  \caption{The triangles of a simplicial partition (a) form an
+    arrangement of triangles to which (b) a spanning tree is added, and
+    (c) the faces of the resulting connected subdivision are (Steiner)
+    triangulated to form a Steiner triangulation $A$.}
   \figlabel{simp-part}
 \end{figure}
+
+Next, we describe how to triangulate this arrangement while maintaining
+the properties of \thmref{prob-partition}. Let $\mathcal{V}$ be set of
+$3r+4$ points that make up the vertices of the triangles in $\Delta$ plus
+the vertices of a square $\Box$ that contains all triangles in $\Delta$.
+A classic result of Haussler and Welzl \cite{hw87} proves that $V$ has
+a spanning tree $T(V)$ such that any line crosses $O(r^{1/2})$ edges of
+$T(V)$, and this spanning tree can be constructed efficiently \cite{cw89}.
+(See \figref{simp-part}.b.)
+
+Consider the line segment arrangement $L$ consisting of the union of
+the edges in $T(V)$, the triangles in $\Delta$, and the edges of $\Box$.
+Note that any line $\ell$  intersects $O(r^{1/2})$ edges of the
+arrangement $L$; $O(r^{1/2})$ of these intersections are generated by
+edges corresponding to edges of $T(V)$ and $O(r^{1/2})$ are generated
+by edges of triangles in $\Delta$.  What remains is to show how to
+triangulate the faces of $L$ without introducing too many crossings.
+
+By construction, each face $F$ of $L$, except the outer face, is a
+(weakly) simple polygon having $O(r)$ vertices and edges on its boundary.
+By a result of Hershberger and Suri \cite{hs95}, there exists a Steiner
+triangulation, $A(F)$, of $F$ using $O(r)$ vertices such that any chord
+of $F$ intersects $O(\log r)$ edges of $A(F)$. We therefore triangulate
+the arrangement $L$ by triangulating each of its faces in this way.
+This gives a Steiner triangulation $A$ of $L$ in which any line intersects
+$O(r^{1/2}\log r)$ edges of $A$.
+(See \figref{simp-part}.c.)
+
 
 Next, each face $F$ of $A$ becomes a child of the root of $T$.  If the
 interior of $F$ is contained in a single face of $G$ then we call $F$ a
@@ -266,12 +297,13 @@ n\rfloor$ then $F$ becomes a \emph{non-terminal leaf} of $T$.  Otherwise
 we recursively apply the same procedure on the distribution $D_{|F}$
 to obtain a partition tree that becomes a child of the root.
 
-This construction defines a tree $T=T(S,D)$ in which each node has
-$O(r^2)$ children and whose height is at most $\log_{\alpha r} n$.
-The number of nodes in $T$ is $(O(r^2))^{\alpha \log_{r} n} =
-O(n^{2\alpha+\epsilon})$, where $\epsilon>0$ is a decreasing function
-of $r$.  Note that, for $\alpha < 1/2$ and sufficiently large $r$,
-the size of $T$ is $o(n)$.
+This construction defines a tree $T=T(G,D)$ in which
+each node has $O(r^2)$ children and whose height is at most
+$\alpha\log_{r} n$.  The number of nodes of $T$ at level $i$ is most
+$(O(r^2))^i=O(r^{i(2+\epsilon)})$ and therefore the total number of nodes
+in $T$ is $(O(r^2))^{\alpha \log_{r} n+1} = O(n^{2\alpha+\epsilon})$, where
+$\epsilon>0$ is a decreasing function of $r$.  Note that, for $\alpha <
+1/2$ and sufficiently large $r$, the size of $T$ is $o(n)$.
 
 In addition to the tree $T$ we construct a backup data structure $T'$ that
 can answer point location queries in $G$ in $O(\log n)$ worst-case time.
@@ -308,35 +340,10 @@ that the partition tree $T$ has small \emph{visiting number} \cite{hw87}.
 \end{lem}
 
 \begin{proof}
-  To prove this, we need to describe how the arrangement of triangles
-  obtained from \thmref{prob-partition} is triangulated.  Let $\Delta$
-  be the set of $r$ triangles obtained from \thmref{prob-partition} and
-  let $\mathcal{V}$ be set of $3r+4$ points that make up the vertices
-  of the triangles in $\Delta$ plus the vertices of a square $\Box$
-  that contains all triangles in $\Delta$.  A classic result of Haussler
-  and Welzl \cite{hw87} proves that $V$ has a spanning tree $T(V)$ such
-  that any line crosses $O(r^{1/2})$ edges of $T$, and this spanning
-  tree can be constructed efficiently \cite{cw89}.
-
-  Consider the line segment arrangement $L$ consisting of the union of the
-  edges in $T(V)$, the triangles in $\Delta$, and the edges of $\Box$.
-  Note that any line $\ell$  intersects $O(r^{1/2})$ edges of the
-  arrangement $L$; $O(r^{1/2})$ of these intersections are generated by
-  edges corresponding to edges of $T(V)$ and $O(r^{1/2})$ are generated
-  by edges of triangles in $\Delta$.  What remains is to show how to
-  triangulate the faces of $L$ without introducing too many crossings.
-
-  By construction, each face $F$ of $L$, except the outer face, is a
-  (weakly) simple polygon having $O(r)$ vertices and edges on its
-  boundary.  By a result of Hershberger and Suri \cite{hs95}, there
-  exists a Steiner triangulation of $A(F)$ using $O(r)$ vertices such
-  that any chord of $F$ intersects $O(\log r)$ edges of $A(F)$. We
-  therefore triangulate the arrangement $L$ by triangulating each of
-  its faces in this way.  This gives a Steiner triangulation $A$ of $L$
-  in which any line intersects $O(r^{1/2}\log r)$ edges of $A$.
-
-  Now, consider any line $\ell$. By the above, the number of nodes
-  $x(i)$ of $T$ at level $i$ that intersect $\ell$ is given by
+  Recall that each node of $T$ corresponds to a triangle and $T$ has
+  the property that the number of children of any node intersected by
+  any particular line $\ell$ is $O(r^{1/2}\log r)$. Therefore, the number
+  of nodes $x(i)$ of $T$ at level $i$ that intersect $\ell$ is given by
   the recurrence
   \[
      x(i)\le 
@@ -365,13 +372,13 @@ or more elements of $X$.
   \secref{data-structure} using a value $r>(c\log r)^{1/\epsilon}$ for
   some (sufficiently large) constant $c$, and let $V$ be an $i$-set of
   $T$.  Then $V$ contains a subset $V'\subseteq V$ that is in $k$-general
-  position and has size $\Omega(|V|/r^{i(1/2+\epsilon + 2/k)})$.
+  position and has size $\Omega(|V|/r^{i(1/2+\epsilon + 4/k)})$.
 \end{lem}
 
 \begin{proof}
   We will prove the lemma using the probabilistic method \cite{as08}.
   Let $V'$ be a Bernoulli sample of $V$ where each element is selected
-  independently with probability $p=r^{-i(1/2+\epsilon+\delta)}$, where $\delta$ is a constant with $\delta > 2/k$.
+  independently with probability $p=r^{-i(1/2+\epsilon+\delta)}$, where $\delta$ is a constant with $\delta > 4/k$.
   We will show that
   \[
      \Pr\left\{
@@ -392,12 +399,12 @@ or more elements of $X$.
     = c^kr^{ki(1/2+\epsilon)-ki(1/2+\epsilon+\delta)}
     = c^kr^{-ki\delta}
   \]
-  The nodes in $V$ define a \emph{test set} $L$ of $O(|V|^2)=O(r^{2i})$
+  The nodes in $V$ define a \emph{test set} $L$ of $O(|V|^2)=O(r^{i(4+\epsilon)})$
   lines such that $V'$ is in $k$-general position if and only if no line
   in $L$ intersects $k$ or more elements of $V'$.   The probability that
   any line in $L$ intersects more than $k$ elements of $V'$ is therefore
-  at most $O(r^{2i}c^kr^{-ki\delta})=O(c^kr^{i(2-k\delta)})=o(1)$ for any
-  constant $\delta > 2/k$.
+  at most $O(r^{i(4+\epsilon)}c^kr^{-ki\delta})=O(c^kr^{i(4+\epsilon-k\delta)})=o(1)$ for any
+  constant $\delta > 4/k+\epsilon$.
 
   The above argument shows that the nodes in $V'$ are quite likely
   to be in $k$-general position.  To see that $V'$ is sufficiently
@@ -411,12 +418,15 @@ or more elements of $X$.
           and $|V'|=\Omega(|V|/r^{i(1/2+\epsilon+\delta)})$}
       \right\} \ge 1- (o(1) + 1/2) > 0 \enspace .
   \]
-  Setting $\delta$ sufficiently close to (but larger than) $2/k$ completes
-  the proof.
+  Setting $\delta$ sufficiently close to (but larger than) $4/k+\epsilon$
+  completes the proof.
 \end{proof}
 
-We are now ready to show that the search time in our data structure is
-a lower bound on the entropy of any Steiner triangulation of $G$.
+We are now ready to show that the search time in our data structure
+is a lower bound on the entropy of any Steiner triangulation of $G$.
+Recall that, by \thmref{triangulation}, the entropy of a minimum entropy
+Steiner triangulation of $G$ is a lower bound on the expected cost of
+any linear decision tree for point location in $G$.
 
 \begin{lem}\lemlabel{lower-bound}
   Let $T$ be the partition tree defined in \secref{data-structure},
@@ -449,8 +459,8 @@ a lower bound on the entropy of any Steiner triangulation of $G$.
   G_{i}$ that is in $k$-general position and has size $2^{\gamma i}$,
   stopping the process once the size of $G_i$ drops below $2^{\beta
   i}$. This works provided that we choose $\beta$, $k$, and $r$ so
-  that $\beta > ((\log r)/(\log r - 1))(1/2+\epsilon+2/k)$ and set
-  $\gamma=\beta - ((\log r)/(\log r - 1))(1/2+\epsilon+2/k)$.
+  that $\beta > ((\log r)/(\log r - 1))(1/2+\epsilon+4/k)$ and set
+  $\gamma=\beta - ((\log r)/(\log r - 1))(1/2+\epsilon+4/k)$.
 
   Now, consider any Steiner triangulation $\Delta^*$ of $G$ and let
   $t$ be a triangle in $\Delta^*$.  Note that $t$ cannot contain any

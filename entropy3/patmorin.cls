@@ -34,16 +34,15 @@
 \LoadClass[11pt,letterpaper]{article}
 
 % Page setup
-\setlength{\textheight}{9.250in}
-\setlength{\textwidth}{6.750in}
-\setlength{\topmargin}{-0.700in}
-\setlength{\oddsidemargin}{-0.125in}
-\setlength{\evensidemargin}{-0.375in}
-\setlength{\columnsep}{2pc}
+\setlength{\textheight}{8.5in}
+\setlength{\textwidth}{6in}
+\setlength{\topmargin}{-0.375in}
+\setlength{\oddsidemargin}{.25in}
+\setlength{\evensidemargin}{.25in}
 \setlength{\headheight}{0.200in}
 \setlength{\headsep}{0.4in}
 \setlength{\footskip}{0.500in}
-\setlength{\parskip}{.5cm}
+\setlength{\parskip}{1ex}
 \setlength{\parindent}{1.25cm}
 \flushbottom
 
@@ -121,12 +120,12 @@
 
 
 %------------- Use this so pdflatex outputs US letter pages -------------
-\usepackage[letterpaper]{hyperref}
-\usepackage[dvipsnames]{color}
-\definecolor{linkblue}{named}{MidnightBlue}
-\hypersetup{colorlinks=true, linkcolor=linkblue,  anchorcolor=linkblue,
-	citecolor=linkblue, filecolor=linkblue, menucolor=linkblue,
-	urlcolor=linkblue} 
+%\usepackage[letterpaper]{hyperref}
+%\usepackage[dvipsnames]{color}
+%\definecolor{linkblue}{named}{MidnightBlue}
+%\hypersetup{colorlinks=true, linkcolor=linkblue,  anchorcolor=linkblue,
+%	citecolor=linkblue, filecolor=linkblue, menucolor=linkblue,
+%	urlcolor=linkblue} 
 
 
 %--------------------------- Headers and Footers ------------------------

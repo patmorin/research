@@ -1,0 +1,413 @@
+\documentclass{patmorin}
+\usepackage{pat,graphicx,amsmath}
+\usepackage[mathlines]{lineno}
+\linenumbers
+\listfiles
+
+\newcommand{\depth}{\mathrm{depth}}
+
+\title{\MakeUppercase{Working Title: Distribution-Sensitive Everything}}
+
+\author{Prosenjit~Bose, 
+        Luc~Devroye,
+	Karim~Dou\"{\i}eb, 
+	Vida~Dujmovi\'c, 
+	James~King, and 
+	Pat~Morin}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Let $\mathcal{P}:\R^d\rightarrow\{1,\ldots,k\}$ be a query problem over
+$\R^d$ for which there exists a data structure $\mathcal{S}$ that can
+compute $P(q)$ in $O(\log n)$ time for any query point $q$.  Let $D$ be
+a probability measure over $\R^d$ representing a distribution of queries.
+We describe a data structure $T=T(\mathcal{P},D)$ of size $o(n)$ that can
+be used as a filter that quickly computes $\mathcal{P}(q)$ for some query
+values in $\R^d$ and relies on $\mathcal{S}$ for the remaining queries.
+With this filter, the expected query time for a point drawn according
+to $D$ is $O(1+ H^*)$, where $H^*$ is a lower-bound on the expected cost
+of any linear decision tree that solves $\mathcal{P}$.
+
+This result has many applications, including distribution-sensitive data
+structures for point location in 2-d, point-in-polytope testing in 3-d,
+nearest-neighbour queries in $\R^d$, point-location in arrangements of
+hyperplanes in $\R^d$, and many other geometric problems that can be
+solved in the linear-decision tree model.
+\end{abstract}
+
+\section{Introduction}
+
+Let $\mathcal{P}:\R^d\rightarrow\{1,\ldots,k\}$ be a query problem over
+$\R^d$ for which there exists a data structure $\mathcal{S}$ that can
+compute $P(q)$ in $O(\log n)$ time for any query point $q$.  Let $D$ be
+a probability measure over $\R^d$ representing a distribution of queries.
+We describe a data structure $T=T(\mathcal{P},D)$ of size $o(n)$ that can
+be used as a filter that quickly computes $\mathcal{P}(q)$ for some query
+values in $\R^d$ and relies on $\mathcal{S}$ for the remaining queries.
+With this filter, the expected query time for a point drawn according
+to $D$ is $O(1+ H^*)$, where $H^*$ is a lower-bound on the expected cost
+of any linear decision tree that solves $\mathcal{P}$.
+
+
+The remainder of this paper is organized as follows: \Secref{prelim}
+presents some preliminary definitions and results. \Secref{filter}
+presents the data structure and algorithms for constructing it.
+\Secref{applications} presents some of the geometric applications of this
+data structure.  Finally, \secref{conclusions} summarizes and concludes
+with open problems.
+
+\section{Preliminaries}
+\seclabel{prelim}
+
+In this paper, a \emph{simplex} in $\R^d$ is the common intersection of
+a set of at most $d+1$ closed halfspaces in $\R^d$. Note that, under this
+definition, simplices need not be bounded and $\R^d$ itself is a simplex.
+
+Throughout this paper, we assume an underlying probability measure
+$D$ over $\R^d$.  All expectations and probabilities are (implicitly)
+with respect to $D$.  For any subset $X\subseteq\R^d$, $\Pr(X)$ refers
+to $D(X)$.  We use the notation $D_{|X}$ to denote the distribution $D$
+conditioned on $X$, i.e., $D_{|X}(Y)=\Pr(Y\mid X)=\Pr(X\cap Y)/\Pr(X)$
+for all $Y\subseteq\R^d$.  If $\Delta$ is a partition of $\R^d$, then
+the \emph{entropy} of $\Delta$, denoted $H(\Delta)$ is
+\[
+    H(\Delta) = \sum_{t\in \Delta} \Pr(t)\log(1/\Pr(t)) \enspace .
+\]
+The probability measure $D$ is used as an input to our algorithms.
+We assume that the algorithm has access to $D$ through two oracles.
+Oracle~A allows, for any simplex $t$, to determine $\Pr(t)$ in
+constant time.  Oracle~B allows us to draw a random sample $p$ from the
+distribution $D$.
+
+A \emph{query problem} over $\R^d$ is a function
+$\mathcal{P}:\R^d\rightarrow A$ where $A$ is some set of \emph{answers}.
+A \emph{linear decision tree} for $\mathcal{P}$ is a rooted ordered
+binary tree in which each internal node $v$ is labelled with a linear
+inequality $a_{v,1}x_1 + a_{v,2}x_2 + \cdots a_{v,d}x_d + a_{v,d+1} >
+0$, and each leaf $\ell$ is labelled with an element of $A$.  A query
+point $p=(x_1,\ldots,x_d)$ follows a root-to-leaf path, proceeding
+to the right child of $v$ if it satisfies the inequality and the left
+child of $v$ if it does not.  For a linear decision tree $T$ and a point
+$p\in\R^d$, we denote by $T(p)$ the label of the leaf on the root-to-leaf
+path for $p$ in $T$.  A linear decision tree \emph{solves} $\mathcal{P}$
+if $T(p)=\mathcal{P}(p)$ for all $p\in\R^d$.  The \emph{(expected) cost}
+of a linear decision tree is the expected depth of the leaf reached when
+$p$ is drawn according to the probability measure $D$.
+
+\section{The Data Structure}
+\seclabel{data-structure}
+
+In this section we describe our data structure for point location in
+disconnected planar subdivisions.  The first tool we use is simplicial
+partitions, from the field of geometric range searching:
+
+\begin{thm}[Matou\v{s}ek 1992]\thmlabel{point-partition}
+There exists a universal constant $c$ such that, for any set $S$ of $m$
+points in $\R^d$ and any constant $r$, there exists a sequence
+$\langle \Delta_1,\ldots,\Delta_r\rangle$ of closed simplices such that
+  \begin{enumerate}
+    \item $\bigcup_{i=1}^r \Delta_i = \R^d$,
+    \item $\left|\Delta_i \cap S\setminus
+    \left(\bigcup_{j=1}^{i-1}\Delta_j\right)\right| \le 2m/r$, and
+    \item For any hyperplane $\ell$, there are at most $cr^{1-1/d}$ elements of
+  $\{\Delta_1,\ldots,\Delta_r\}$ whose interiors intersect $\ell$.
+  \end{enumerate}
+  The sequence of simplices $\Delta_1,\ldots,\Delta_r$ can be computed
+  in $O(m)$ time.
+\end{thm}
+
+Note that Part~2 of \thmref{point-partition} is not in the original
+statement of the theorem, but follows from Matou\v{s}ek's construction
+of $\Delta_1,\ldots,\Delta_r$ \cite{m92}.
+
+Let $\Delta_i^*$ denote the increment difference
+$\Delta_i^*=\Delta_i\setminus\bigcup_{j=1}^{i-1}\Delta_j$.
+A \emph{partition tree} $T_S$ for $S$ is an ordered $r$-ary tree obtained
+by recursively applying \thmref{point-partition}.  The root of $T_S$
+corresponds to $S$.  The root has $r$ children, where the $i$th child
+corresponds to $S\cap \Delta_i^*$, for each $i\in\{1,\ldots,r\}$.
+This processes is applied recursively to the children of the root and
+recursion is truncated at some chosen depth $\alpha\log_r m$, for some
+appropriately chosen constant $\alpha < 1$.
+
+Note that every node $v$ in $T_S$ is naturally associated with a simplex
+$t(v)$ that was obtained from \thmref{point-partition} and that generated
+$v$. Within a particular level (and across) levels, these simplices are
+not necessarily disjoint.  For a point $p\in\R^d$, the \emph{search
+path} for $p$ in $T_S$ starts at the root and proceeds to the first
+child $i$ such $p\in\Delta_i$ (note that this implies $p\in\Delta_i^*$)
+and this process is applied recursively until reaching  a leaf of $T_S$.
+In this way, for every $v$ of the partition tree there is a maximal
+subset $r(v)\subseteq \R^d$ such that the search path for every point
+in $p\in r(v)$ contains $v$.
+
+The following theorem summarizes the properties of the partition tree $T_S$:
+
+\begin{thm}[Matou\v{s}ek 1992]\thmlabel{point-partition-tree}
+Let $T_S$ denote the partition tree described above and let $V_i$
+denote the set of nodes of $T_S$ at distance $i$ from the root.
+The partition tree $T_S$ has the following properties, for every
+$i\in\{0,\ldots,\lfloor\alpha\log_r n\rfloor\}$:
+\begin{enumerate}
+  \item $\{r(v) : v\in V_i\}$ is a partition of $\R^2$,  
+  \item For every node $v\in V_i$, $|S\cap r(v)| \le m(2/r)^i$, and 
+  \item For any hyperplane $\ell$, the number of nodes in $V_i$ such that
+       $\ell$ intersects the interior of $t(v)$ is at most
+       $(cr^{1-1/d})^i$.
+\end{enumerate}
+The partition tree $T_S$ can be constructed in $O(m\log m)$ time.
+\end{thm}
+
+Restating \thmref{point-partition} in terms of probability distributions,
+we have:
+
+\begin{thm}\thmlabel{prob-partition-tree}
+Let $S$ be a sample of $m$ points in $\R^d$ drawn i.i.d. according to
+probability measure $D$, let $T_S$ denote the partition tree described
+above and let $V_i$ denote the set of nodes of $T_S$ at distance $i$ from
+the root.  With probability at least $1/2$, the partition tree $T_S$ has
+the following properties, for every $i\in\{0,\ldots,\lfloor\alpha\log_r
+n\rfloor\}$:
+\begin{enumerate}
+  \item $\{r(v) : v\in V_i\}$ is a partition of $\R^2$,  
+  \item For every node $v\in V_i$, $\Pr(r(v)) \le (2/r)^i+O(m^{-\delta})$, 
+        and 
+  \item For any hyperplane $\ell$, the number of nodes in $V_i$ such that
+       $\ell$ intersects the interior of $t(v)$ is at most
+       $(cr^{1-1/d})^i$.
+\end{enumerate}
+The partition tree $T_D$ can be constructed in $O(m\log m)$ time using 
+$O(m)$ calls to Oracle~A and Oracle~B.
+\end{thm}
+
+\begin{proof}
+Use oracle $B$ to obtain a sample $S$ of $O(m)$ elements from $D$ and
+then apply \thmref{point-partition-tree}.
+\end{proof}
+
+Note that, so far, we have not considered the query problem $\mathcal{P}$
+at all. A \emph{filter tree} $T_{\mathcal{P},D}$ for $(\mathcal{P},D)$
+is obtained in the following way:  We construct a partition tree $T_D$
+described in \thmref{prob-partition-tree}, using the value $m=n^{\tau}$
+for some parameter $0 < \tau < 1$.  Next, we inspect each node $v$ of
+$T_D$ and determine if $\mathcal{P}(p)=\mathcal{P(q)}$ for all pairs
+of points $p,q\in t(v)$. If so, we call $v$ a \emph{terminal} node and
+we label $v$ with the label $\ell(v) = \mathcal{P}(p)$.  Otherwise, $v$
+is a \emph{non-terminal} node.
+
+Using a filter tree to answer a query $p\in \R^d$, is easy: We follow
+the search path for $p$ in $T_{\mathcal{P},D}$ until we reach a terminal
+node $v$, in which case we output $\ell(v)$, or we reach a non-terminal
+leaf $w$ after $\lfloor \alpha\log_r m\rfloor=O(\log n)$ steps, in which
+case we rely on a backup structure to report $\mathcal{P}(v)$ in $O(\log
+n)$ time.  The correctness of this procedure follows immediately from
+the definition of terminal and non-terminal nodes.  In the next section,
+we analyze the performance of filter trees.
+
+
+
+\section{Analysis}
+\seclabel{analysis}
+
+An \emph{$i$-set} of a rooted tree $T$ is a set of vertices in $T$ all
+of which are at distance at most $i$ from the root of $T$ and in which
+no vertex in the set is the ancestor of any other vertex in the set.
+Note that if $T$ is a partition tree defined in \secref{data-structure}
+then an $i$-set of $T$ is a set of disjoint simplices.  We say that
+a set of regions $X=\{X_1,\ldots,X_m\}$, $X_i\subseteq\R^d$, is in
+\emph{$k$-general position} if there is no hyperplane that intersects $k$
+or more elements of $X$.
+
+\begin{lem}\lemlabel{independent}
+  Let $T_{\mathcal{P},D}$ be the filter tree defined in
+  \secref{data-structure}, let $V$ be an $i$-set of $T$, and let
+  $k>1$ be a constant.  Then $V$ contains a subset $V'\subseteq
+  V$ that $\{t(v): v\in V'\}$ is in $k$-general position and
+  $|V'|=\Omega(|V|/(3/r)^{i(1-1/d+\delta)}$.
+\end{lem}
+
+\begin{proof}
+  We will prove the lemma using the probabilistic method \cite{as08}.
+  Let $V'$ be a Bernoulli sample of $V$ where each element is selected
+  independently with probability $p$
+  \[
+     \Pr\left\{
+        \mbox{$V'$ is in $k$-general position 
+          and $|V'| \ge \floor{p|V|}$}
+      \right\} > 0 \enspace ,
+  \]
+  thus proving the existence of a set $V'$ satisfying the conditions of
+  the lemma.
+
+  Consider any hyperplane $\ell$. Condition~3 of
+  \thmref{prob-partition-tree}, implies that $\ell$ intersects the
+  interior of at most $(cr^{1-1/d})^{i}$ elements of $V$.
+  The probability that $\ell$ intersects the interior of $k$ or more
+  elements of $V'$ is therefore no more than
+  \[
+    \binom{((cr)^{1-1/d})^{i}}{k}\cdot p^k
+    \le (cr)^{i(k-k/d)}p^k
+  \]
+  The nodes in $V$ define a \emph{test set} $L$ of $O(|V|^d)=O(r^{di})$
+  hyperplanes such that $V'$ is in $k$-general position if and only
+  if no hyperplane in $L$ intersects $k$ or more elements of $V'$. The
+  probability that any line in $L$ intersects more than $k$ elements of
+  $V'$ is therefore at most
+  \[
+    (cr)^{di}\cdot(cr)^{i(k-k/d)}p^k = (cr)^{i(d+k-k/d)}p^k \enspace .
+  \]
+  and selecting $p=\frac{1}{4}(cr)^{-i(1-1/d+d/k)}$ makes probability at most.
+
+$O(r^{i(4+\epsilon)}c^kr^{-ki\delta})=O(c^kr^{i(4+\epsilon-k\delta)})=o(1)$ for any
+  constant $\delta > 4/k+\epsilon$.
+
+  The above argument shows that the nodes in $V'$ are quite likely
+  to be in $k$-general position.  To see that $V'$ is sufficiently
+  large, we simply observe that $|V'|$ is a $\mathrm{binomal}(|V|,p)$
+  random variable and therefore has median value at least
+  $\lfloor{p|V|}\rfloor=\Omega(|V|/r^{i(1/2+\epsilon + \delta)})$.
+  In particular, $\Pr\{|V'|\ge \lfloor{p|V|}\rfloor\}\ge 1/2$.  Therefore,
+  \[
+     \Pr\left\{
+        \mbox{$V'$ is in $k$-general position 
+          and $|V'|=\Omega(|V|/r^{i(1/2+\epsilon+\delta)})$}
+      \right\} \ge 1- (o(1) + 1/2) > 0 \enspace .
+  \]
+  Setting $\delta$ sufficiently close to (but larger than) $4/k+\epsilon$
+  completes the proof.
+\end{proof}
+
+We are now ready to show that the search time in our data structure
+is a lower bound on the entropy of any Steiner triangulation of $G$.
+Recall that, by \thmref{triangulation}, the entropy of a minimum entropy
+Steiner triangulation of $G$ is a lower bound on the expected cost of
+any linear decision tree for point location in $G$.
+
+\begin{lem}\lemlabel{lower-bound}
+  Let $T$ be the partition tree defined in \secref{data-structure},
+  let $L$ denote the set of leaves of $T$, and let $H^*=H(\Delta^*)$ be
+  the entropy of a Steiner triangulation $\Delta^*$ of $G$.  Then $H^*
+  = \Omega(H(L)-1)$
+\end{lem}
+
+\begin{proof}
+  This proof mixes the ideas from the proofs of Lemma~3 by Dujmovi\'c
+  \etal\ \cite{dhm09} and Lemma~4 by Collette \etal\ \cite{cdilm08}.
+
+  Let $T'$ be the tree obtained from $T$ by removing all terminal leaves,
+  and let $L'$ denote the set of leaves of $T'$.  Note that $L'$ is a Steiner
+  triangulation of $G$ and that 
+  \[  
+     H(L') = H(L) - O(\log r) = H(L) - O(1)
+  \]
+  since each simplex in $L'$ is partitioned in $O(r^2)$ simplices in $L$. 
+
+  Partition $L'$ into groups $G_1,G_2,\ldots$, where $G_i$
+  contains all leaves $v$ such that $1/2^{i-1} \ge \Pr(v) \ge
+  1/2^{i}$.  Further partition each group $G_i$ into subgroups
+  $G_{i,1},\ldots,G_{i,t_i}$ with the property that each group $G_{i,j}$
+  with $j\in\{1,\ldots,t_i-1\}$ is in $k$-general position and has size
+  at least $2^{\gamma i}$ for some constant $\gamma > 0$. Furthermore,
+  the final group, $G_{i,t_i}$ has size at most $O(2^{\beta i})$, for some
+  constant $\beta < 1$.  This partitioning is accomplished by repeatedly
+  applying \lemref{independent} to remove a subset $G_{i,j}\subseteq
+  G_{i}$ that is in $k$-general position and has size $2^{\gamma i}$,
+  stopping the process once the size of $G_i$ drops below $2^{\beta
+  i}$. This works provided that we choose $\beta$, $k$, and $r$ so
+  that $\beta > ((\log r)/(\log r - 1))(1/2+\epsilon+4/k)$ and set
+  $\gamma=\beta - ((\log r)/(\log r - 1))(1/2+\epsilon+4/k)$.
+
+  Now, consider any Steiner triangulation $\Delta^*$ of $G$ and let
+  $t$ be a simplex in $\Delta^*$.  Note that $t$ cannot contain any
+  simplex in $L'$ since each element in $L'$ is non-terminal in $T$
+  and therefore its interior intersects at least two faces of $G$.
+  Therefore, any subgroup $G_{i,j}$ intersected by $t$ must intersect one
+  of $t$'s three edges. Since each $G_{i,j}$ is in $k$-general position,
+  this means that $t$ intersects at most $3k$ elements of $G_{i,j}$.
+  It follows \cite[Lemma~3]{cdilm09} that
+  \[
+    H^* \ge H(L') 
+       - H(\{\cup G_{i,j}:i\in\N,\, j \in\{1,\ldots,t_{i,j}\}) 
+       - O(1) \enspace .
+  \]
+  Thus, all that remains is to upper-bound the contribution of $\bar{H}=H(\{\cup G_{i,j}:i\in\N,\, j \in\{1,\ldots,t_{i,j}\})$.
+  \begin{eqnarray*}
+    \bar{H} &= & H(\{\cup G_{i,j}:i\in\N,\, j \in\{1,\ldots,t_{i,j}\}) \\
+     & = & \sum_{i=1}^\infty \sum_{j=1}^{t_{i}} 
+         \Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j})) \\
+   & = & \sum_{i=1}^\infty
+        \left( 
+          \sum_{j=1}^{t_{i}-1} 
+             \Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j}) 
+             + \Pr(\cup G_{i,t_i})\log(1/\Pr(\cup G_{i,t_i}))
+        \right) \\
+   & \le & \sum_{i=1}^\infty
+        \left( 
+          \sum_{j=1}^{t_{i}-1} 
+             \Pr(\cup G_{i,j})\log(2^{i-\alpha i})
+             + i 2^{\beta i - i + 1}
+        \right) \\
+    & \le & (1-\alpha)H(L') + O(1) \enspace .
+  \end{eqnarray*}
+  Thus, we have 
+  \[  
+     H^* \ge H(L') - \bar{H} -O(1) \ge \alpha H(L') - O(1) 
+         \ge \alpha H(L) - O(1) = \Omega(H(L) - 1) 
+  \]
+  as required.
+\end{proof}
+
+\begin{thm}
+  Let $G$ be a (possibly disconnected) planar subdivision of size $n$
+  and let $D$ be a probability measure over $\R^d$.  There exists a data
+  structure $T$ that, given $G$ and $D$, can be constructed in $O(n)$
+  time, has $O(n)$ size, and can answer point location queries in $G$
+  in $O(H^*)$ expected time, where $H^*$ is the expected time to answer
+  point location queries in $G$ using any linear decision tree.
+\end{thm}
+
+\begin{proof}
+  The data structure is, of course, the partition tree $T$ of
+  \secref{data-structure} and some backup structure that can answer
+  queries in $O(\log n)$ worst case time in case a query reaches a
+  non-terminal leaf of $T$.  The expected time answer queries in $T$ is
+  \[
+     \sum_{t\in L} \Pr(t)O(\depth_T(t)) = \sum_{t\in L}\Pr(t)O(\log(1/\Pr(t))) = O(H(L)) \enspace .
+  \]
+  On the other hand, by \lemref{lower-bound} and \thmref{triangulation},
+  the expected time required by any linear decision tree for answering
+  queries in $G$ is
+  \[
+      H^* = \Omega(H(L) - 1) \enspace ,
+  \]
+  which completes the proof.
+\end{proof}
+
+We finish by observing that the tree $T$ in \secref{data-structure}
+has sublinear size. Indeed, for any constant $0 \le d \le 1$, we can
+construct a tree $T$ of size $O(n^d)$ that satisfies the conditions
+of \lemref{lower-bound}.  Thus, we can think of $T$ as a sublinear
+sized filter that can take any point location structure with $O(\log n)$
+worst-case query time and make it into a distribution-sensitive data
+structure.  In particular, one can combine $T$ with the succinct point
+location structure of Bose \etal\ \cite[Theorem~2]{bchmm09}, to obtain the
+following result:
+
+\begin{thm}
+  Let $G$ be a (possibly disconnected) planar subdivision of size $n$
+  and let $D$ be a probability measure over $\R^d$.  There exists a data
+  structure $T$ that, given $G$ and $D$, can be constructed in $O(n)$
+  time and can answer point location queries in $G$ in $O(H^*)$ expected
+  time, where $H^*$ is the expected time to answer point location queries
+  in $G$ using any linear decision tree.  This structure is represented
+  as a permutation of the vertices of $G$ and an additional $o(n)$ bits.
+\end{thm}
+
+
+
+
+\bibliographystyle{plain}
+\bibliography{entropy3}
+\end{document}

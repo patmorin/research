@@ -5,6 +5,10 @@
 \listfiles
 
 \newcommand{\depth}{\mathrm{depth}}
+%\usepackage{wasysym}
+%\newcommand{\poly}{\hexagon}
+\newcommand{\poly}{\includegraphics{poly}}
+% consider also \pentagon \varhexagon \hexagon with package wasysym
 
 \title{\MakeUppercase{Working Title: Distribution-Sensitive Everything}}
 
@@ -50,12 +54,11 @@ With this filter, the expected query time for a point drawn according
 to $D$ is $O(1+ H^*)$, where $H^*$ is a lower-bound on the expected cost
 of any linear decision tree that solves $\mathcal{P}$.
 
-
 The remainder of this paper is organized as follows: \Secref{prelim}
 presents some preliminary definitions and results. \Secref{filter}
 presents the data structure and algorithms for constructing it.
 \Secref{applications} presents some of the geometric applications of this
-data structure.  Finally, \secref{conclusions} summarizes and concludes
+data structure. Finally, \secref{conclusions} summarizes and concludes
 with open problems.
 
 \section{Preliminaries}
@@ -65,45 +68,60 @@ Throughout this paper, the underlying dimension $d$ is a constant, and
 other constants defined throughout the paper may (implicitly) depend
 on $d$.  A \emph{simplex} in $\R^d$ is the common intersection of a
 set of at most $d+1$ closed halfspaces in $\R^d$. Note that, under this
-definition, simplices need not be bounded and $\R^d$ itself is a simplex.
+definition, simplices need not be bounded and $\R^d$ as well as $\emptyset$ are both simplices.
 
 Throughout this paper, we assume an underlying probability measure
 $D$ over $\R^d$.  All expectations and probabilities are (implicitly)
 with respect to $D$.  For any subset $X\subseteq\R^d$, $\Pr(X)$ refers
 to $D(X)$.  We use the notation $D_{|X}$ to denote the distribution $D$
 conditioned on $X$, i.e., $D_{|X}(Y)=\Pr(Y\mid X)=\Pr(X\cap Y)/\Pr(X)$
-for all $Y\subseteq\R^d$.  If $\Delta$ is a partition of $\R^d$, then
-the \emph{entropy} of $\Delta$, denoted $H(\Delta)$ is
+for all $Y\subseteq\R^d$.  If $F=\{X_1,\ldots,X_k\}$ are non-overlapping
+subsets of $\R^d$ then the \emph{entropy} of $F$, denoted $H(F)$ is
 \[
-    H(\Delta) = \sum_{t\in \Delta} \Pr(t)\log(1/\Pr(t)) \enspace .
+    H(F) = \sum_{i=1}^k \Pr(X_i|\cup F)\log(1/\Pr(X_i|\cup F)) \enspace .
 \]
+
 The probability measure $D$ is used as an input to our algorithms.
 We assume that the algorithm has access to $D$ through two oracles.
-Oracle~A allows, for any simplex $t$, to determine $\Pr(t)$ in
-constant time.  Oracle~B allows us to draw a random sample $p$ from the
-distribution $D$.
+Oracle~A allows, for any simplex $\Delta$, to determine $\Pr(\Delta)$
+in constant time.  Oracle~B allows us to draw a random sample $p$ from
+the distribution $D$.
 
 A \emph{query problem} over $\R^d$ is a function
 $\mathcal{P}:\R^d\rightarrow A$ where $A$ is some set of \emph{answers}.
 A \emph{linear decision tree} for $\mathcal{P}$ is a rooted ordered
 binary tree in which each internal node $v$ is labelled with a linear
-inequality $a_{v,1}x_1 + a_{v,2}x_2 + \cdots a_{v,d}x_d + a_{v,d+1} >
-0$, and each leaf $\ell$ is labelled with an element of $A$.  A query
-point $p=(x_1,\ldots,x_d)$ follows a root-to-leaf path, proceeding
-to the right child of $v$ if it satisfies the inequality and the left
-child of $v$ if it does not.  For a linear decision tree $T$ and a point
-$p\in\R^d$, we denote by $T(p)$ the label of the leaf on the root-to-leaf
-path for $p$ in $T$.  A linear decision tree \emph{solves} $\mathcal{P}$
-if $T(p)=\mathcal{P}(p)$ for all $p\in\R^d$.  The \emph{(expected) cost}
-of a linear decision tree is the expected depth of the leaf reached when
-$p$ is drawn according to the probability measure $D$.
+inequality $a_{v,1}x_1 + a_{v,2}x_2 + \cdots a_{v,d}x_d + a_{v,d+1} > 0$,
+and each leaf $w$ is labelled with an element $w_A\in A$.  A query point
+$p=(x_1,\ldots,x_d)$ follows a root-to-leaf path, proceeding to the right
+child of $v$ if it satisfies the inequality and the left child of $v$
+if it does not.  For a linear decision tree $T$ and a point $p\in\R^d$,
+we denote by $T(p)$ the label of the leaf on the root-to-leaf path
+for $p$ in $T$.  A linear decision tree \emph{solves} $\mathcal{P}$ if
+$T(p)=\mathcal{P}(p)$ for all $p\in\R^d$. The \emph{depth} of a node $v$
+in a rooted tree $T$ is the number of edges on the path from $v$ to the
+root of $T$.  The \emph{(expected) cost} of a linear decision tree is
+the expected depth of the leaf reached when $p$ is drawn according to
+the probability measure $D$.
+
+We assume that we have two oracles that give us access to $\mathcal{P}$.
+The \emph{Backup Oracle} allows us to compute $\mathcal{P}(p)$ for
+any query point $p$, but requires $O(\log n)$ time to do so.  The
+\emph{Interference Oracle} allows us to test, for any simplex $\Delta$
+if $\mathcal{P}(p)=\mathcal{P}(q)$ for every pair $p,q\in\Delta$.
+The running time of the Interference Oracle will be unspecified.
+When discussing applications in \secref{applications}, implementations
+of the Interference Oracle for particular problems will be described.
 
 \section{The Data Structure}
 \seclabel{data-structure}
 
-In this section we describe our data structure for point location in
-disconnected planar subdivisions.  The first tool we use is simplicial
-partitions, from the field of geometric range searching:
+In this section we describe a data structure $T_{\mathcal{P},D}$ called
+the \emph{filter tree} that, in conjunction with a backup oracle, yields
+a data structure for $\mathcal{P}$ that has expected query time that
+is within a constant factor of the expected query time of any linear
+decision tree $T^*$ for $\mathcal{P}$.  The filter tree is based on
+simplicial partitions, from the field of geometric range searching:
 
 \begin{thm}[Matou\v{s}ek 1992]\thmlabel{point-partition}
 There exists a constant $c$ such that, for any set $S$ of $m$
@@ -122,110 +140,120 @@ $\langle \Delta_1,\ldots,\Delta_r\rangle$ of closed simplices such that
 
 Note that Part~2 of \thmref{point-partition} is not in the original
 statement of the theorem, but follows from Matou\v{s}ek's incremental
-construction of $\Delta_1,\ldots,\Delta_r$ \cite{m92}.  We require a
-slightly more restricted version of this Theorem in which the $\Delta_i$
-are restricted to lie in containing simplex $t$:
+construction of $\Delta_1,\ldots,\Delta_r$ \cite{m92}.
 
-\begin{cor}\corlabel{point-partition-2}
-There exists a constant $c$ such that, for any set $S$ of $m$ points
-contained in some simplex $\Delta \subseteq \R^d$ and any constant $r<m$,
-there exists a sequence
-$\langle \Delta_1,\ldots,\Delta_{r'}\rangle$ of closed simplices such that
-  \begin{enumerate}
-    \item $\bigcup_{i=1}^{r'} \Delta_i = \Delta$,
-    \item $\left|\Delta_i \cap S\setminus
-    \left(\bigcup_{j=1}^{i-1}\Delta_j\right)\right| \le 2m/r$, and
-    \item For any hyperplane $\ell$, there are at most $cr^{1-1/d}$ elements of
-  $\{\Delta_1,\ldots,\Delta_{r'}\}$ whose interiors intersect $\ell$.
-  \end{enumerate}
-  The sequence of simplices $\Delta_1,\ldots,\Delta_{r'}$ has $r'=O(r)$
-  elements and can be computed in $O(m)$ time.
-\end{cor}
+%We require a slightly more restricted version of this Theorem in which
+%the $\Delta_i$ are restricted to lie some containing simplex $\Delta$:
+%
+%\begin{cor}\corlabel{point-partition}
+%There exists a constant $c$ such that, for any set $S$ of $m$ points
+%contained in some simplex $\Delta \subseteq \R^d$ and any constant $r<m$,
+%there exists a sequence
+%$\langle \Delta_1,\ldots,\Delta_{r}\rangle$ of closed simplices such that
+%  \begin{enumerate}
+%    \item $\bigcup_{i=1}^{r} \Delta_i = \Delta$,
+%    \item $\left|\Delta_i \cap S\setminus
+%    \left(\bigcup_{j=1}^{i-1}\Delta_j\right)\right| \le 2m/r$, and
+%    \item For any hyperplane $\ell$, there are at most $cr^{1-1/d}$ elements of
+%  $\{\Delta_1,\ldots,\Delta_{r}\}$ whose interiors intersect $\ell$.
+%  \end{enumerate}
+%  The sequence of simplices $\Delta_1,\ldots,\Delta_{r}$ has $r=O(r)$
+%  elements and can be computed in $O(m)$ time.
+%\end{cor}
+%
+%\begin{proof}
+%The theorem is obtained by applying \thmref{point-partition} and then
+%further subdividing the resulting sequence $\Delta_1,\ldots,\Delta_r$
+%of simplices.  For each $\Delta_i$, we compute the common
+%intersection $P_i=\Delta_i \cap \Delta$. The resulting polytope $P_i$
+%is the common intersection of at most $2d$ halfspaces and, by the
+%Upper Bound Theorem \cite{m70}, has $O(d^{\floor{d/2}})$ vertices
+%and can therefore be partitioned into $O(d^{\floor{d/2}})$ simplices
+%$\Delta_{i,1},\ldots,\Delta_{i,r_i}$ using the bottom-vertex triangulation
+%\cite{c88}.
+%
+%The resulting sequence of $r=O(r)$ simplices certainly has properties 1
+%and 2 of the theorem.  The sequence also has property 3, though the
+%constant $c$ is multiplied by a factor of $O(d^{\floor{d/2}})=O(1)$.
+%\end{proof}
 
-\begin{proof}
-The theorem is obtained by applying \thmref{point-partition} and then
-further subdividing the resulting sequence $\Delta_1,\ldots,\Delta_r$
-of triangles.  For each $Delta_i$, we compute the common
-intersection $P_i=\Delta_i \cap \Delta$. The resulting polytope $P_i$
-is the common intersection of at most $2d$ halfspaces and, by the
-Upper Bound Theorem \cite{X}, has $O(d^{\floor{d/2}})$ vertices
-and can therefore be partitioned into $O(d^{\floor{d/2}})$ simplices
-$\Delta_{i,1},\ldots,\Delta_{i,r_i}$ using the bottom-vertex triangulation
-\cite{S}.
-
-The resulting sequence of $r'=O(r)$ simplices certainly has properties 1
-and 2 of the theorem.  The sequence also has property 3, though the
-constant $c$ is multiplied by a factor of $O(d^{\floor{d/2}})=O(1)$.
-\end{proof}
-
-Let $\Delta_i^*$ denote the increment difference
-$\Delta_i^*=\Delta_i\setminus\bigcup_{j=1}^{i-1}\Delta_j$.
-Let $S$ be a set of $m$ points contained in some simplex
-$\Delta$. Then, a \emph{partition tree} $T_{S,\Delta}$ for
-$S$ is a rooted ordered tree obtained by recursively applying
-\corref{point-partition-2}.  The root of $T_{S,\Delta}$ has $r'$
-children corresponding to the simplices $\Delta_1,\ldots,\Delta_{r'}$
-obtained by applying \corref{point-partition-2} to $S$ and $\Delta$.
-The $i$th child of the root is itself the root of a partition tree
-$T_{S\cap\Delta_i^*,\Delta_i}$. This recursive process stops when a
-node is empty of points or its depth exceeds $\floor{\alpha\log_r m}$,
+Let $\Delta_i^*$ denote the incremental difference
+$\Delta_i^*=\Delta_i\setminus\bigcup_{j=1}^{i-1}\Delta_j$.  Let $S$
+be a set of $m$ points in $\R^d$. Then the \emph{partition tree}
+$T_S$ for $S$ is a rooted ordered tree obtained by recursively
+applying \thmref{point-partition}.  The root of $T_S$ has $r$ children
+corresponding to the simplices $\Delta_1,\ldots,\Delta_{r}$ obtained
+by applying \thmref{point-partition} to $S$.  The $i$th child of the
+root is itself the root of the partition tree $T_{S\cap\Delta_i^*}$
+for $S\cap\Delta_i^*$. This recursive process stops when a node is
+empty of points in $S$ or its depth exceeds $\floor{\alpha\log_r m}$,
 for some appropriately chosen constant $0< \alpha < 1$.
 
-Note that every node $v$ in $T_S$ is naturally associated with a
-simplex $\Delta(v)$ that was obtained from \corref{point-partition-2} and
-that generated $v$. Within a particular level (and across) levels,
-these simplices are not necessarily disjoint.  For a point $p\in\R^d$,
-the \emph{search path} for $p$ in $T_S$ starts at the root and proceeds
-to the first child $i$ such $p\in\Delta_i$ (note that this implies
-$p\in\Delta_i^*$) and this process is applied recursively until reaching
-a leaf of $T_S$.  In this way, for every $v$ of the partition tree there
-is a maximal subset $\Xi(v)\subseteq \R^d$ such that the search path for
-every point in $p\in\Xi(v)$ contains $v$.  (Note that, unlike $\Delta(v)$,
-$\Xi(v)$ is not necessarily convex or even connected.)
+Next we define some regions associated with the nodes of $T_S$.  Note that
+every node $v$ in $T_S$ is naturally associated with a simplex $\Delta(v)$
+that was obtained from \thmref{point-partition} and that generated $v$.
+For a node $v$ of $T$ whose ancestors are $v=v_0, v_1,\ldots,v_i$
+we define $\poly(v)=\bigcap_{j=0}^i \Delta(v_i)$.  Note that
+$\poly(v)\subseteq\Delta(v)$, and that $\poly(v)$ is a convex polytope
+that has $O(((d+1)(i+1))^{\floor{d/2}})=O(i^{\floor{d/2}})$ vertices since
+it is the intersection of at most $(d+1)(i+1)$ halfspaces \cite{m70}.
+
+For a point $p\in\R^d$, the \emph{search path} for $p$ in $T_S$ starts
+at the root and proceeds to the first child $i$ such $p\in\Delta_i$
+(note that this implies $p\in\Delta_i^*$) and this process is applied
+recursively until reaching a leaf of $T_S$.  In this way, for every $v$
+of the partition tree there is a maximal subset $\Xi(v)\subseteq \R^d$
+such that the search path for every point in $p\in\Xi(v)$ contains $v$.
+Note that $\Xi(v)\subseteq \poly(v)\subseteq \Delta(v)$, but that
+$\Xi(v)$ is not necessarily convex or even connected.
 
 The following theorem summarizes the properties of the partition tree
-$T_{S,\R^2}$:
+$T_{S}$ \cite{m92}:
 
 \begin{thm}\thmlabel{point-partition-tree}
-Let $T_S$ denote the partition tree described above and let $V_i$
-denote the set of nodes of $T_S$ at distance $i$ from the root.
-The partition tree $T_S$ has the following properties, for every
+Let $S$ be a set of $m$ points in $\R^2$, let $T_S$
+denote the partition tree described above, and let $V_i$ denote
+the set of nodes of $T_S$ at distance $i$ from the root.
+There exists a constant $c$, independent of $r$, such that 
+the partition tree $T_S$ has the following properties, for every
 $i\in\{0,\ldots,\lfloor\alpha\log_r n\rfloor\}$:
 \begin{enumerate}
+  \item $|V_i| \le (cr)^{i}$
   \item $\{\Xi(v) : v\in V_i\}$ is a partition of $\R^2$,  
   \item For every node $v\in V_i$, $|S\cap\Xi(v)| \le m(2/r)^i$, and 
   \item For any hyperplane $\ell$, the number of nodes in $V_i$ such that
-        $\ell$ intersects the interior of $\Delta(v)$ is at most
+        $\ell$ intersects the interior of $\poly(v)$ is at most
         $(cr^{1-1/d})^i$.
   \end{enumerate}
   The partition tree $T_S$ can be constructed in $O(m\log m)$ time.
 \end{thm}
 
-\noindent\textbf{Remark:} The use of \corref{point-partition-2} (as
-opposed to \thmref{point-partition} is crucial for the construction
-of $T_{S,\R^2}$ since, otherwise, the resulting tree will not have
-Property 3.
+%\noindent\textbf{Remark:} The use of \thmref{point-partition} (as
+%opposed to \thmref{point-partition}) is crucial for the construction
+%of $T_{S,\R^2}$ since, otherwise, the resulting tree will not have
+%Property 3.
 
 Restating \thmref{point-partition} in terms of probability distributions,
 we have:
 
-\begin{thm}\thmlabel{prob-partition-tree}
-Let $S$ be a sample of $m$ points in $\R^d$ drawn i.i.d. according
-to probability measure $D$, let $T_{S,\R^2}$ denote the partition
-tree given by \thmref{point-partition-tree}, and let $V_i$ denote the
-set of nodes of $T_{S,\R^2}$ at depth $i$.  With probability at least
-$1-O(m^{\gamma})$, $T_{S,\R^2}$ has the following properties, for every
-$i\in\{0,\ldots,\lfloor\alpha\log_r n\rfloor\}$:
-\begin{enumerate}
-  \item $\{r(v) : v\in V_i\}$ is a partition of $\R^2$,  
-  \item For every node $v\in V_i$, $\Pr(\Xi(v)) \le (2/r)^i+O(m^{-\delta})$, 
-        and 
-  \item For any hyperplane $\ell$, the number of nodes in $V_i$ such that
-       $\ell$ intersects the interior of $\Delta(v)$ is at most
-       $(cr^{1-1/d})^i$.
-\end{enumerate}
-The partition tree $T_D$ can be constructed in $O(m\log m)$ time using 
-$O(m)$ calls to Oracle~B.
+\begin{thm}\thmlabel{prob-partition-tree} 
+  Let $S$ be a sample of $m$ points in $\R^d$ drawn i.i.d.\ according to
+  probability measure $D$, let $T_D=T_S$ denote the partition tree given
+  by \thmref{point-partition-tree}, and let $V_i$ denote the set of nodes
+  of $T_D$ at depth $i$.  There exists a constant $c$, independent of $r$,
+  such that with probability at least $1-O(m^{\gamma})$, $T_D$ has the
+  following properties, for every $i\in\{0,\ldots,\lfloor\alpha\log_r
+  n\rfloor\}$:
+  \begin{enumerate}
+    \item $\{\Xi(v) : v\in V_i\}$ is a partition of $\R^2$,  
+    \item For every node $v\in V_i$, $\Pr(\Xi(v)) \le
+           (3/r)^i+O(m^{-\delta})$, and
+    \item For any hyperplane $\ell$, the number of nodes in $V_i$
+         such that $\ell$ intersects the interior of $\poly(v)$ is at
+         most $(cr^{1-1/d})^i$.
+  \end{enumerate}
+  The partition tree $T_D$ can be constructed in $O(m\log m)$ time using 
+  $O(m)$ calls to Oracle~B.
 \end{thm}
 
 \begin{proof}
@@ -234,25 +262,23 @@ then apply \thmref{point-partition-tree}.
 \end{proof}
 
 Note that, so far, we have not considered the query problem $\mathcal{P}$
-at all. A \emph{filter tree} $T_{\mathcal{P},D}$ for $(\mathcal{P},D)$
+at all. The \emph{filter tree} $T_{\mathcal{P},D}$ for $(\mathcal{P},D)$
 is obtained in the following way:  We construct a partition tree $T_D$
 described in \thmref{prob-partition-tree}, using the value $m=n^{\tau}$
 for some parameter $0 < \tau < 1$.  Next, we inspect each node $v$ of
 $T_D$ and determine if $\mathcal{P}(p)=\mathcal{P}(q)$ for all pairs of
-points $p,q\in \Delta(v)$. If so, we call $v$ a \emph{terminal} node and
-we label $v$ with the label $\ell(v) = \mathcal{P}(p)$.  Otherwise, $v$
+points $p,q\in \poly(v)$. If so, we call $v$ a \emph{terminal} node and
+we label $v$ with the label $\mathcal{P}(p)$.  Otherwise, $v$
 is a \emph{non-terminal} node.
 
 Using a filter tree to answer a query $p\in \R^d$, is easy: We follow
-the search path for $p$ in $T_{\mathcal{P},D}$ until we reach a terminal
-node $v$, in which case we output $\ell(v)$, or we reach a non-terminal
-leaf $w$ after $\lfloor \alpha\log_r m\rfloor=O(\log n)$ steps, in which
-case we rely on a backup structure to report $\mathcal{P}(v)$ in $O(\log
-n)$ time.  The correctness of this procedure follows immediately from
-the definition of terminal and non-terminal nodes.  In the next section,
-we analyze the performance of filter trees.
-
-
+the search path for $p$ in $T_{\mathcal{P},D}$ until we either reach
+a terminal node $v$, in which case we output $\ell(v)$, or we reach
+a non-terminal leaf $w$ after $\lfloor \alpha\log_r m\rfloor=O(\log
+n)$ steps, in which case we rely on a backup structure to report
+$\mathcal{P}(v)$ in $O(\log n)$ time.  The correctness of this procedure
+follows immediately from the definition of terminal and non-terminal
+nodes.  In the next section, we analyze the performance of filter trees.
 
 \section{Analysis}
 \seclabel{analysis}
@@ -442,6 +468,14 @@ following result:
   as a permutation of the vertices of $G$ and an additional $o(n)$ bits.
 \end{thm}
 
+\section{Applications}
+\seclabel{applications}
+
+\section{Self-Adjusting Data Structures}
+\seclabel{self-adjusting}
+
+\section{Summary and Conclusions}
+\seclabel{conclusions}
 
 
 

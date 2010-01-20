@@ -61,8 +61,10 @@ with open problems.
 \section{Preliminaries}
 \seclabel{prelim}
 
-In this paper, a \emph{simplex} in $\R^d$ is the common intersection of
-a set of at most $d+1$ closed halfspaces in $\R^d$. Note that, under this
+Throughout this paper, the underlying dimension $d$ is a constant, and
+other constants defined throughout the paper may (implicitly) depend
+on $d$.  A \emph{simplex} in $\R^d$ is the common intersection of a
+set of at most $d+1$ closed halfspaces in $\R^d$. Note that, under this
 definition, simplices need not be bounded and $\R^d$ itself is a simplex.
 
 Throughout this paper, we assume an underlying probability measure
@@ -104,7 +106,7 @@ disconnected planar subdivisions.  The first tool we use is simplicial
 partitions, from the field of geometric range searching:
 
 \begin{thm}[Matou\v{s}ek 1992]\thmlabel{point-partition}
-There exists a universal constant $c$ such that, for any set $S$ of $m$
+There exists a constant $c$ such that, for any set $S$ of $m$
 points in $\R^d$ and any constant $r$, there exists a sequence
 $\langle \Delta_1,\ldots,\Delta_r\rangle$ of closed simplices such that
   \begin{enumerate}
@@ -119,67 +121,111 @@ $\langle \Delta_1,\ldots,\Delta_r\rangle$ of closed simplices such that
 \end{thm}
 
 Note that Part~2 of \thmref{point-partition} is not in the original
-statement of the theorem, but follows from Matou\v{s}ek's construction
-of $\Delta_1,\ldots,\Delta_r$ \cite{m92}.
+statement of the theorem, but follows from Matou\v{s}ek's incremental
+construction of $\Delta_1,\ldots,\Delta_r$ \cite{m92}.  We require a
+slightly more restricted version of this Theorem in which the $\Delta_i$
+are restricted to lie in containing simplex $t$:
+
+\begin{cor}\corlabel{point-partition-2}
+There exists a constant $c$ such that, for any set $S$ of $m$ points
+contained in some simplex $\Delta \subseteq \R^d$ and any constant $r<m$,
+there exists a sequence
+$\langle \Delta_1,\ldots,\Delta_{r'}\rangle$ of closed simplices such that
+  \begin{enumerate}
+    \item $\bigcup_{i=1}^{r'} \Delta_i = \Delta$,
+    \item $\left|\Delta_i \cap S\setminus
+    \left(\bigcup_{j=1}^{i-1}\Delta_j\right)\right| \le 2m/r$, and
+    \item For any hyperplane $\ell$, there are at most $cr^{1-1/d}$ elements of
+  $\{\Delta_1,\ldots,\Delta_{r'}\}$ whose interiors intersect $\ell$.
+  \end{enumerate}
+  The sequence of simplices $\Delta_1,\ldots,\Delta_{r'}$ has $r'=O(r)$
+  elements and can be computed in $O(m)$ time.
+\end{cor}
+
+\begin{proof}
+The theorem is obtained by applying \thmref{point-partition} and then
+further subdividing the resulting sequence $\Delta_1,\ldots,\Delta_r$
+of triangles.  For each $Delta_i$, we compute the common
+intersection $P_i=\Delta_i \cap \Delta$. The resulting polytope $P_i$
+is the common intersection of at most $2d$ halfspaces and, by the
+Upper Bound Theorem \cite{X}, has $O(d^{\floor{d/2}})$ vertices
+and can therefore be partitioned into $O(d^{\floor{d/2}})$ simplices
+$\Delta_{i,1},\ldots,\Delta_{i,r_i}$ using the bottom-vertex triangulation
+\cite{S}.
+
+The resulting sequence of $r'=O(r)$ simplices certainly has properties 1
+and 2 of the theorem.  The sequence also has property 3, though the
+constant $c$ is multiplied by a factor of $O(d^{\floor{d/2}})=O(1)$.
+\end{proof}
 
 Let $\Delta_i^*$ denote the increment difference
 $\Delta_i^*=\Delta_i\setminus\bigcup_{j=1}^{i-1}\Delta_j$.
-A \emph{partition tree} $T_S$ for $S$ is an ordered $r$-ary tree obtained
-by recursively applying \thmref{point-partition}.  The root of $T_S$
-corresponds to $S$.  The root has $r$ children, where the $i$th child
-corresponds to $S\cap \Delta_i^*$, for each $i\in\{1,\ldots,r\}$.
-This processes is applied recursively to the children of the root and
-recursion is truncated at some chosen depth $\alpha\log_r m$, for some
-appropriately chosen constant $\alpha < 1$.
+Let $S$ be a set of $m$ points contained in some simplex
+$\Delta$. Then, a \emph{partition tree} $T_{S,\Delta}$ for
+$S$ is a rooted ordered tree obtained by recursively applying
+\corref{point-partition-2}.  The root of $T_{S,\Delta}$ has $r'$
+children corresponding to the simplices $\Delta_1,\ldots,\Delta_{r'}$
+obtained by applying \corref{point-partition-2} to $S$ and $\Delta$.
+The $i$th child of the root is itself the root of a partition tree
+$T_{S\cap\Delta_i^*,\Delta_i}$. This recursive process stops when a
+node is empty of points or its depth exceeds $\floor{\alpha\log_r m}$,
+for some appropriately chosen constant $0< \alpha < 1$.
 
-Note that every node $v$ in $T_S$ is naturally associated with a simplex
-$t(v)$ that was obtained from \thmref{point-partition} and that generated
-$v$. Within a particular level (and across) levels, these simplices are
-not necessarily disjoint.  For a point $p\in\R^d$, the \emph{search
-path} for $p$ in $T_S$ starts at the root and proceeds to the first
-child $i$ such $p\in\Delta_i$ (note that this implies $p\in\Delta_i^*$)
-and this process is applied recursively until reaching  a leaf of $T_S$.
-In this way, for every $v$ of the partition tree there is a maximal
-subset $r(v)\subseteq \R^d$ such that the search path for every point
-in $p\in r(v)$ contains $v$.
+Note that every node $v$ in $T_S$ is naturally associated with a
+simplex $\Delta(v)$ that was obtained from \corref{point-partition-2} and
+that generated $v$. Within a particular level (and across) levels,
+these simplices are not necessarily disjoint.  For a point $p\in\R^d$,
+the \emph{search path} for $p$ in $T_S$ starts at the root and proceeds
+to the first child $i$ such $p\in\Delta_i$ (note that this implies
+$p\in\Delta_i^*$) and this process is applied recursively until reaching
+a leaf of $T_S$.  In this way, for every $v$ of the partition tree there
+is a maximal subset $\Xi(v)\subseteq \R^d$ such that the search path for
+every point in $p\in\Xi(v)$ contains $v$.  (Note that, unlike $\Delta(v)$,
+$\Xi(v)$ is not necessarily convex or even connected.)
 
-The following theorem summarizes the properties of the partition tree $T_S$:
+The following theorem summarizes the properties of the partition tree
+$T_{S,\R^2}$:
 
-\begin{thm}[Matou\v{s}ek 1992]\thmlabel{point-partition-tree}
+\begin{thm}\thmlabel{point-partition-tree}
 Let $T_S$ denote the partition tree described above and let $V_i$
 denote the set of nodes of $T_S$ at distance $i$ from the root.
 The partition tree $T_S$ has the following properties, for every
 $i\in\{0,\ldots,\lfloor\alpha\log_r n\rfloor\}$:
 \begin{enumerate}
-  \item $\{r(v) : v\in V_i\}$ is a partition of $\R^2$,  
-  \item For every node $v\in V_i$, $|S\cap r(v)| \le m(2/r)^i$, and 
+  \item $\{\Xi(v) : v\in V_i\}$ is a partition of $\R^2$,  
+  \item For every node $v\in V_i$, $|S\cap\Xi(v)| \le m(2/r)^i$, and 
   \item For any hyperplane $\ell$, the number of nodes in $V_i$ such that
-       $\ell$ intersects the interior of $t(v)$ is at most
-       $(cr^{1-1/d})^i$.
-\end{enumerate}
-The partition tree $T_S$ can be constructed in $O(m\log m)$ time.
+        $\ell$ intersects the interior of $\Delta(v)$ is at most
+        $(cr^{1-1/d})^i$.
+  \end{enumerate}
+  The partition tree $T_S$ can be constructed in $O(m\log m)$ time.
 \end{thm}
+
+\noindent\textbf{Remark:} The use of \corref{point-partition-2} (as
+opposed to \thmref{point-partition} is crucial for the construction
+of $T_{S,\R^2}$ since, otherwise, the resulting tree will not have
+Property 3.
 
 Restating \thmref{point-partition} in terms of probability distributions,
 we have:
 
 \begin{thm}\thmlabel{prob-partition-tree}
-Let $S$ be a sample of $m$ points in $\R^d$ drawn i.i.d. according to
-probability measure $D$, let $T_S$ denote the partition tree described
-above and let $V_i$ denote the set of nodes of $T_S$ at distance $i$ from
-the root.  With probability at least $1/2$, the partition tree $T_S$ has
-the following properties, for every $i\in\{0,\ldots,\lfloor\alpha\log_r
-n\rfloor\}$:
+Let $S$ be a sample of $m$ points in $\R^d$ drawn i.i.d. according
+to probability measure $D$, let $T_{S,\R^2}$ denote the partition
+tree given by \thmref{point-partition-tree}, and let $V_i$ denote the
+set of nodes of $T_{S,\R^2}$ at depth $i$.  With probability at least
+$1-O(m^{\gamma})$, $T_{S,\R^2}$ has the following properties, for every
+$i\in\{0,\ldots,\lfloor\alpha\log_r n\rfloor\}$:
 \begin{enumerate}
   \item $\{r(v) : v\in V_i\}$ is a partition of $\R^2$,  
-  \item For every node $v\in V_i$, $\Pr(r(v)) \le (2/r)^i+O(m^{-\delta})$, 
+  \item For every node $v\in V_i$, $\Pr(\Xi(v)) \le (2/r)^i+O(m^{-\delta})$, 
         and 
   \item For any hyperplane $\ell$, the number of nodes in $V_i$ such that
-       $\ell$ intersects the interior of $t(v)$ is at most
+       $\ell$ intersects the interior of $\Delta(v)$ is at most
        $(cr^{1-1/d})^i$.
 \end{enumerate}
 The partition tree $T_D$ can be constructed in $O(m\log m)$ time using 
-$O(m)$ calls to Oracle~A and Oracle~B.
+$O(m)$ calls to Oracle~B.
 \end{thm}
 
 \begin{proof}
@@ -192,8 +238,8 @@ at all. A \emph{filter tree} $T_{\mathcal{P},D}$ for $(\mathcal{P},D)$
 is obtained in the following way:  We construct a partition tree $T_D$
 described in \thmref{prob-partition-tree}, using the value $m=n^{\tau}$
 for some parameter $0 < \tau < 1$.  Next, we inspect each node $v$ of
-$T_D$ and determine if $\mathcal{P}(p)=\mathcal{P(q)}$ for all pairs
-of points $p,q\in t(v)$. If so, we call $v$ a \emph{terminal} node and
+$T_D$ and determine if $\mathcal{P}(p)=\mathcal{P}(q)$ for all pairs of
+points $p,q\in \Delta(v)$. If so, we call $v$ a \emph{terminal} node and
 we label $v$ with the label $\ell(v) = \mathcal{P}(p)$.  Otherwise, $v$
 is a \emph{non-terminal} node.
 
@@ -212,11 +258,9 @@ we analyze the performance of filter trees.
 \seclabel{analysis}
 
 An \emph{$i$-set} of a rooted tree $T$ is a set of vertices in $T$ all
-of which are at distance at most $i$ from the root of $T$ and in which
-no vertex in the set is the ancestor of any other vertex in the set.
-Note that if $T$ is a partition tree defined in \secref{data-structure}
-then an $i$-set of $T$ is a set of disjoint simplices.  We say that
-a set of regions $X=\{X_1,\ldots,X_m\}$, $X_i\subseteq\R^d$, is in
+of which are at distance at most $i$ from the root of $T$ and in which no
+vertex in the set is the ancestor of any other vertex in the set.  We say
+that a set of regions $X=\{X_1,\ldots,X_m\}$, $X_i\subseteq\R^d$, is in
 \emph{$k$-general position} if there is no hyperplane that intersects $k$
 or more elements of $X$.
 
@@ -224,14 +268,15 @@ or more elements of $X$.
   Let $T_{\mathcal{P},D}$ be the filter tree defined in
   \secref{data-structure}, let $V$ be an $i$-set of $T_{\mathcal{P},D}$,
   and let $k>1$ be a constant.  Then $V$ contains a subset $V'\subseteq V$
-  such that $\{t(v): v\in V'\}$ is in $k$-general position and
-  $|V'|=\Omega(|V|/(cr)^{i(d/k+1-1/d)})$.
+  such that $\{\Delta(v): v\in V'\}$ is in $k$-general position and
+  $|V'|\ge |V|/(cr)^{i(d/k+1-1/d)}$ for some constant $c$ independent of $r$.
 \end{lem}
 
 \begin{proof}
   We will prove the lemma using the probabilistic method \cite{as08}.
   Let $V'$ be a Bernoulli sample of $V$ where each element is selected
-  independently with probability $p$
+  independently with probability $p=\frac{1}{4}(cr)^{-i(d/k+1-1/d)}$. We
+  will prove that
   \[
      \Pr\left\{
         \mbox{$V'$ is in $k$-general position 
@@ -250,17 +295,14 @@ or more elements of $X$.
     \binom{((cr)^{1-1/d})^{i}}{k}\cdot p^k
     \le (cr)^{i(k-k/d)}p^k
   \]
-  The nodes in $V$ define a \emph{test set} $L$ of $O(|V|^d)=O(r^{di})$
+  The nodes in $V$ define a \emph{test set} $L$ of $O(|V|^d)\le (cr)^{di}$
   hyperplanes such that $V'$ is in $k$-general position if and only
   if no hyperplane in $L$ intersects $k$ or more elements of $V'$. The
-  probability that any line in $L$ intersects more than $k$ elements of
-  $V'$ is therefore at most
+  probability that \emph{any} hyperplane in $L$ intersects $k$ or more
+  elements of $V'$ is therefore at most
   \[
-    (cr)^{di}\cdot(cr)^{i(k-k/d)}p^k = (cr)^{i(d+k-k/d)}p^k \enspace .
+    (cr)^{di}\cdot(cr)^{i(k-k/d)}p^k = (cr)^{i(d+k-k/d)}p^k \le 1/4 \enspace .
   \]
-  Setting $p=\frac{1}{4}(cr)^{-i(d/k+1-1/d)}$ makes this probability
-at most $1/4$.
-
   The above argument shows that the nodes in $V'$ are quite likely to
   be in $k$-general position. To see that $V'$ is sufficiently large,
   we simply observe that $|V'|$ is a $\mathrm{binomal}(|V|,p)$
@@ -284,7 +326,7 @@ solves $\mathcal{P}$.
   Let $T_{\mathcal{P},D}$ be the filter tree defined in
   \secref{data-structure}, let $L$ denote the set of leaves of $T$,
   and let $H^*$ be the expected cost of some linear decision tree $T^*$
-  that solves $\mathcal{P}$.  Then $H^* = \Omega(H(\{r(v):v\in L\})-1)$.
+  that solves $\mathcal{P}$.  Then $H^* = \Omega(H(\{\Xi(v):v\in L\})-1)$.
 \end{lem}
 
 \begin{proof}

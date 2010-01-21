@@ -99,10 +99,10 @@ if it does not.  For a linear decision tree $T$ and a point $p\in\R^d$,
 we denote by $T(p)$ the label of the leaf on the root-to-leaf path
 for $p$ in $T$.  A linear decision tree \emph{solves} $\mathcal{P}$ if
 $T(p)=\mathcal{P}(p)$ for all $p\in\R^d$. The \emph{depth} of a node $v$
-in a rooted tree $T$ is the number of edges on the path from $v$ to the
-root of $T$.  The \emph{(expected) cost} of a linear decision tree is
-the expected depth of the leaf reached when $p$ is drawn according to
-the probability measure $D$.
+in a rooted tree $T$, denoted $\depth_T(v)$, is the number of edges on
+the path from $v$ to the root of $T$.  The \emph{(expected) cost} of a
+linear decision tree is the expected depth of the leaf reached when $p$
+is drawn according to the probability measure $D$.
 
 We assume that we have two oracles that give us access to $\mathcal{P}$.
 The \emph{Backup Oracle} allows us to compute $\mathcal{P}(p)$ for
@@ -294,54 +294,72 @@ or more elements of $X$.
   Let $T_{\mathcal{P},D}$ be the filter tree defined in
   \secref{data-structure}, let $V$ be an $i$-set of $T_{\mathcal{P},D}$,
   and let $k>1$ be a constant.  Then $V$ contains a subset $V'\subseteq V$
-  such that $\{\Delta(v): v\in V'\}$ is in $k$-general position and
-  $|V'|\ge |V|/(cr)^{i(d/k+1-1/d)}$ for some constant $c$ independent of $r$.
+  such that the elements of $\{\poly(v): v\in V'\}$ are pairwise disjoint
+  and  in $k$-general position and $|V'|\ge |V|/(cr)^{i(d/k+1-1/d)}$
+  for some constant $c$ independent of $r$.
 \end{lem}
 
 \begin{proof}
-  We will prove the lemma using the probabilistic method \cite{as08}.
-  Let $V'$ be a Bernoulli sample of $V$ where each element is selected
-  independently with probability $p=\frac{1}{4}(cr)^{-i(d/k+1-1/d)}$. We
+  We will first use the probabilistic method \cite{as08} to establish
+  the existence of a (not necessarily disjoint) set $V''$ satisfying the
+  size and $k$-general position requirements and then show that $V''$
+  contains a large subset $V'$ whose elements are also pairwise disjoint.
+
+  Let $V''$ be a Bernoulli sample of $V$ where each element is selected
+  independently with probability $p=(c'r)^{-i(d/k+1-1/d)}$. We
   will prove that
   \[
      \Pr\left\{
-        \mbox{$V'$ is in $k$-general position 
-          and $|V'| \ge \floor{p|V|}$}
-      \right\} > 0 \enspace ,
+        \mbox{$V''$ is in $k$-general position 
+          and $|V''| \ge \floor{p|V|}$}
+      \right\} > 0 \enspace .
   \]
-  thus proving the existence of a set $V'$ satisfying the conditions of
-  the lemma.
 
   Consider any hyperplane $\ell$. Condition~3 of
   \thmref{prob-partition-tree}, implies that $\ell$ intersects the
-  interior of at most $(cr^{1-1/d})^{i}$ elements of $V$.
-  The probability that $\ell$ intersects the interior of $k$ or more
-  elements of $V'$ is therefore no more than
+  interior of at most $(cr^{1-1/d})^{i}$ elements of $V$.  The probability
+  that $\ell$ intersects the interior of $k$ or more elements of $V''$
+  is therefore no more than
   \[
     \binom{((cr)^{1-1/d})^{i}}{k}\cdot p^k
     \le (cr)^{i(k-k/d)}p^k
   \]
-  The nodes in $V$ define a \emph{test set} $L$ of $O(|V|^d)\le (cr)^{di}$
-  hyperplanes such that $V'$ is in $k$-general position if and only
-  if no hyperplane in $L$ intersects $k$ or more elements of $V'$. The
-  probability that \emph{any} hyperplane in $L$ intersects $k$ or more
-  elements of $V'$ is therefore at most
+  For each node $v\in V$, $\poly(v)$ has at most $ci^{\floor{d/2}}$
+  vertices and number of nodes in $V$ is at most $r^{i}$.  Therefore,
+  the elements of $\{\poly(v):v\in V\}$ define a \emph{test set} $L$ of
+  at most $i^{d^2/2}(cr)^{di}$ hyperplanes such that $V''$ is in $k$-general
+  position if and only if no hyperplane in $L$ intersects $k$ or more
+  elements of $V''$. The probability that \emph{any} hyperplane in $L$
+  intersects $k$ or more elements of $V''$ is therefore at most
   \[
-    (cr)^{di}\cdot(cr)^{i(k-k/d)}p^k = (cr)^{i(d+k-k/d)}p^k \le 1/4 \enspace .
+    i^{d^2/2}(cr)^{di}\cdot(cr)^{i(k-k/d)}p^k 
+     = i^{d^2/2}(cr)^{i(d+k-k/d)}p^k 
+     = o(1) \enspace 
   \]
-  The above argument shows that the nodes in $V'$ are quite likely to
-  be in $k$-general position. To see that $V'$ is sufficiently large,
-  we simply observe that $|V'|$ is a $\mathrm{binomal}(|V|,p)$
-  random variable and therefore has median value at least
-  $\lfloor{p|V|}\rfloor=\Omega(|V|/(cr)^{i(d/k+1-1/d)})$.  In particular,
-  $\Pr\{|V'|\ge \lfloor{p|V|}\rfloor\}\ge 1/2$.  Therefore,
+  provided that $c'> c$.  The above argument shows that the nodes in
+  $V''$ are quite likely to be in $k$-general position. To see that
+  $V''$ is sufficiently large, we simply observe that $|V''|$ is a
+  $\mathrm{binomal}(|V|,p)$ random variable and therefore has median
+  value at least $\lfloor{p|V|}\rfloor=\Omega(|V|/(cr)^{i(d/k+1-1/d)})$.
+  In particular, $\Pr\{|V''|\ge \lfloor{p|V|}\rfloor\}\ge 1/2$.  Therefore,
   \[
      \Pr\left\{
-        \mbox{$V'$ is in $k$-general position 
-          and $|V'|=\Omega(|V|/r^{i(1/2+\epsilon+\delta)})$}
-      \right\} \ge 1- (1/4 + 1/2) > 0 \enspace .
+        \mbox{$V''$ is in $k$-general position 
+          and $|V''|=\Omega(|V|/r^{i(1/2+\epsilon+\delta)})$}
+      \right\} \ge 1- (o(1) + 1/2) > 0 \enspace .
   \]
-  This completes the proof.
+  Finally, we select $V'\subseteq V''$ so that the elements of
+  $\{\poly(v):v\in V'\}$ are pairwise disjoint.  To do this, imagine
+  sweeping a hyperplane $\ell(t)=\{(x_0,\ldots,x_d)\in\R^d:x_0=t\}$ from
+  $t=-\infty$ to $+\infty$.  Associate with each element $v\in V'$, the
+  maximal interval $[a_v,b_v]$ such that $\poly(v)$ intersects $\ell(t)$
+  for all $t\in[a_v,b_v]$. This yields a set $S_{V''}$ of real intervals
+  such that no point is contained in $k$ or more elements of $S_{V''}$.
+  This implies that $S_{V''}$ contains a subset of size at least $|V''|/k$
+  of non-overlapping intervals. This subset corresponds to a subset of
+  $V'\subseteq V''$ with $|V'|\ge |V''|/k$ and such that the elements of
+  $\{\poly(v):v\in V'\}$ are pairwise disjoint. The set $V'$ satisfies
+  the conditions of the lemma.
 \end{proof}
 
 We are now ready to show that the search time in the filter tree
@@ -351,25 +369,25 @@ solves $\mathcal{P}$.
 \begin{lem}\lemlabel{lower-bound}
   Let $T_{\mathcal{P},D}$ be the filter tree defined in
   \secref{data-structure}, let $L$ denote the set of leaves of $T$,
-  and let $H^*$ be the expected cost of some linear decision tree $T^*$
-  that solves $\mathcal{P}$.  Then $H^* = \Omega(H(\{\Xi(v):v\in L\})-1)$.
+  and let $T^*$ be some linear decision tree that solves $\mathcal{P}$.
+  Then $\mu_D(T^*) = \Omega(H(\{\Xi(v):v\in L\})-1)$.
 \end{lem}
 
 \begin{proof}
   This proof mixes the ideas from the proofs of Lemma~3 by Dujmovi\'c
   \etal\ \cite{dhm09} and Lemma~4 by Collette \etal\ \cite{cdilm08}.
-
-  Let $T'$ be the tree obtained from $T$ by removing all terminal leaves,
-  and let $L'$ denote the set of leaves of $T'$.  Note that $L'$ is a Steiner
-  triangulation of $G$ and that 
+  Let $T'$ be the tree obtained from $T_{\mathcal{P},D}$ by removing
+  all terminal leaves, and let $L'$ denote the set of leaves of $T'$.
+  Note that 
   \[  
-     H(L') = H(L) - O(\log r) = H(L) - O(1)
+     H(\{\Xi(v):v\in L'\}) = H(\{\Xi(v):v\in L\}) - O(\log r) 
+     = H(\{\Xi(v):v\in L\}) - O(1)
   \]
-  since each simplex in $L'$ is partitioned in $O(r^2)$ simplices in $L$. 
+  since each leaf in $L'$ has at most $r$ children in $L$. 
 
   Partition $L'$ into groups $G_1,G_2,\ldots$, where $G_i$
-  contains all leaves $v$ such that $1/2^{i-1} \ge \Pr(v) \ge
-  1/2^{i}$.  Further partition each group $G_i$ into subgroups
+  contains all leaves $v$ such that $1/2^{i-1} \ge \Pr(\Xi(v))
+  \ge 1/2^{i}$.  Further partition each group $G_i$ into subgroups
   $G_{i,1},\ldots,G_{i,t_i}$ with the property that each group $G_{i,j}$
   with $j\in\{1,\ldots,t_i-1\}$ is in $k$-general position and has size
   at least $2^{\gamma i}$ for some constant $\gamma > 0$. Furthermore,
@@ -379,19 +397,46 @@ solves $\mathcal{P}$.
   G_{i}$ that is in $k$-general position and has size $2^{\gamma i}$,
   stopping the process once the size of $G_i$ drops below $2^{\beta
   i}$. This works provided that we choose $\beta$, $k$, and $r$ so
-  that $\beta > ((\log r)/(\log r - 1))(1/2+\epsilon+4/k)$ and set
-  $\gamma=\beta - ((\log r)/(\log r - 1))(1/2+\epsilon+4/k)$.
+  that $\beta > ((\log r)/(\log r - 1))((d/k+1-1/d+\epsilon)$ for some
+  constant $\epsilon > 0$ and set $\gamma=\beta - ((\log r)/(\log r -
+  1))(d/k+1-1/d+\epsilon)$.
 
-  Now, consider any Steiner triangulation $\Delta^*$ of $G$ and let
-  $t$ be a simplex in $\Delta^*$.  Note that $t$ cannot contain any
-  simplex in $L'$ since each element in $L'$ is non-terminal in $T$
-  and therefore its interior intersects at least two faces of $G$.
-  Therefore, any subgroup $G_{i,j}$ intersected by $t$ must intersect one
-  of $t$'s three edges. Since each $G_{i,j}$ is in $k$-general position,
-  this means that $t$ intersects at most $3k$ elements of $G_{i,j}$.
+  Let $\poly_{i,j}=\{\poly(v):v\in G_{i,j}\}$.  Consider the linear
+  decision tree $T^*$ that solves $\mathcal{P}$.  The leaves of $T^*$
+  partition $\R^d$ into cells whose closures are convex polytopes.
+  For a leaf $w$ of $T^*$ we denote its polytope by $\poly(w)$. If
+  the depth of $w$ is $i$, then $\poly(w)$ is the intersection of  at
+  most $i$ halfspaces.  This implies that $\poly(w)$ intersects at most
+  $ik$ elements of $\poly_{i,j}$ since, otherwise, $\poly(w)$ contains
+  $\poly(v)$ for some non-terminal node $v\in G_{i,j}$.  (This would
+  contradict the assumption that $T^*$ solves $\mathcal{P}$.)
+
+  Let $w$ be some leaf of $T^*$ such that $\poly(w)$ intersects $t$
+  elements of $\poly_{i,j}$.  Then, by the discussion in the previous
+  paragraph, $\depth_{T^*}(w) \ge \ceil{t/k}$.  We can easily create a
+  subtree $T_w^*$ of $w$ whose height is at most $t$ and with the property
+  that $\poly(w')$ intersects at most one element of $\poly_{i,j}$ for
+  each leaf $w'$ of $T_w^*$.\footnote{For example, making the root of
+  $T^*_w$ correspond to the bisector of two polyhedra of $\poly_{i,j}$
+  that intersect $\poly(w)$ means that each of the children of the root
+  intersect at most $t-1$ elements of $\poly_{i,j}$. Applying this
+  recursively yields a subtree of height at most $t-1$.} Notice that
+  if we do this for every leaf $w$ of $T^*$ we obtain a tree $T^{*}_{i,j}$
+  such that every leaf
+  of $T^*_{i,j}$ intersects at most one element of $\poly_{i,j}$.
+
+  Let $D_{i,j}$ denote the distribution $D$ conditioned on $\cup\{\Xi(v):
+  v\in G_{i,j}\}$.  Note that the leaves of $T^*_{i,j}$ could be
+  relabeled so that they indicate which element of $\poly_{i,j}$ (if any)
+  that they intersect.  By Shannon's Theorem, this implies that
+  \[
+    (k+1)\mu_{D_{i,j}}(T^*)
+       \ge \mu_{D_{i,j}}(T^*_{i,j}) 
+       \ge H(\{\Xi(v): v\in G_{i,j}\}) \enspace .
+  \]
   It follows \cite[Lemma~3]{cdilm09} that
   \[
-    H^* \ge H(L') 
+    (k+1)\cdot\mu_D(T^*) \ge H(L') 
        - H(\{\cup G_{i,j}:i\in\N,\, j \in\{1,\ldots,t_{i,j}\}) 
        - O(1) \enspace .
   \]
@@ -416,7 +461,7 @@ solves $\mathcal{P}$.
   \end{eqnarray*}
   Thus, we have 
   \[  
-     H^* \ge H(L') - \bar{H} -O(1) \ge \alpha H(L') - O(1) 
+     (k+1)\mu_D(T^*) \ge H(L') - \bar{H} -O(1) \ge \alpha H(L') - O(1) 
          \ge \alpha H(L) - O(1) = \Omega(H(L) - 1) 
   \]
   as required.

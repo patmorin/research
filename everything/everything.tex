@@ -4,6 +4,8 @@
 \linenumbers
 \listfiles
 
+
+\newcommand{\eps}{\epsilon}
 \newcommand{\depth}{\mathrm{depth}}
 %\usepackage{wasysym}
 %\newcommand{\poly}{\hexagon}
@@ -23,43 +25,47 @@
 \maketitle
 
 \begin{abstract}
-Let $\mathcal{P}:\R^d\rightarrow\{1,\ldots,k\}$ be a query problem over
+Let $\mathcal{P}:\R^d\rightarrow A$ be a query problem over
 $\R^d$ for which there exists a data structure $\mathcal{S}$ that can
-compute $P(q)$ in $O(\log n)$ time for any query point $q$.  Let $D$ be
-a probability measure over $\R^d$ representing a distribution of queries.
-We describe a data structure $T=T(\mathcal{P},D)$ of size $o(n)$ that can
-be used as a filter that quickly computes $\mathcal{P}(q)$ for some query
-values in $\R^d$ and relies on $\mathcal{S}$ for the remaining queries.
-With this filter, the expected query time for a point drawn according
-to $D$ is $O(1+ H^*)$, where $H^*$ is a lower-bound on the expected cost
-of any linear decision tree that solves $\mathcal{P}$.
+compute $P(q)$ in $O(\log n)$ time for any query point $q$.  Let $D$ be a
+probability measure over $\R^d$ representing a distribution of queries.
+We describe a data structure $T=T(\mathcal{P},D)$ of size $O(n^\eps)$
+that can be used as a filter that quickly computes $\mathcal{P}(q)$
+for some query values in $\R^d$ and relies on $\mathcal{S}$ for the
+remaining queries.  With this filter, the expected query time for a point
+drawn according to $D$ is $O(1+ H^*)$, where $H^*$ is a lower-bound on
+the expected cost of any linear decision tree that solves $\mathcal{P}$.
 
-This result has many applications, including distribution-sensitive data
-structures for point location in 2-d, point-in-polytope testing in 3-d,
-nearest-neighbour queries in $\R^d$, point-location in arrangements of
-hyperplanes in $\R^d$, and many other geometric problems that can be
-solved in the linear-decision tree model.
+This result has a number of applications, including distribution-sensitive
+data structures for point location in 2-d, point-in-polytope testing in
+3-d, nearest-neighbour queries in $\R^d$, point-location in arrangements
+of hyperplanes in $\R^d$, and many other geometric searching problems
+that can be solved in the linear-decision tree model.
 \end{abstract}
 
 \section{Introduction}
 
-Let $\mathcal{P}:\R^d\rightarrow\{1,\ldots,k\}$ be a query problem over
-$\R^d$ for which there exists a data structure $\mathcal{S}$ that can
-compute $P(q)$ in $O(\log n)$ time for any query point $q$.  Let $D$ be
-a probability measure over $\R^d$ representing a distribution of queries.
-We describe a data structure $T=T(\mathcal{P},D)$ of size $o(n)$ that can
-be used as a filter that quickly computes $\mathcal{P}(q)$ for some query
-values in $\R^d$ and relies on $\mathcal{S}$ for the remaining queries.
-With this filter, the expected query time for a point drawn according
-to $D$ is $O(1+ H^*)$, where $H^*$ is a lower-bound on the expected cost
-of any linear decision tree that solves $\mathcal{P}$.
+Let $\mathcal{P}:\R^d\rightarrow A$ be a query problem over $\R^d$.
+That is, $\mathcal{P}$ represents a searching problem in which every query
+$p\in\R^d$ has an answer the set $A$ of possible answers.  Suppose,
+further that there exists a data structure $\mathcal{S}$ that can
+compute $P(q)$ in $O(\log n)$ time for any query point $q$. Let $D$ be a
+probability measure over $\R^d$ representing a distribution of queries.
+We describe a data structure $T_{\mathcal{P},D}$ of size $O(n^{\eps})$
+that can be used as a filter that quickly computes $\mathcal{P}(q)$
+for some query values in $\R^d$ and relies on $\mathcal{S}$ for the
+remaining queries.  With this filter, the expected query time for a point
+drawn according to $D$ is $O(1+ H^*)$, where $H^*$ is a lower-bound on
+the expected cost of any linear decision tree that solves $\mathcal{P}$
+when queries are drawn according to $D$.
 
 The remainder of this paper is organized as follows: \Secref{prelim}
 presents some preliminary definitions and results. \Secref{filter}
 presents the data structure and algorithms for constructing it.
-\Secref{applications} presents some of the geometric applications of this
-data structure. Finally, \secref{conclusions} summarizes and concludes
-with open problems.
+\Secref{lower-bound} proves that this data structure matches the query
+time of any linear decision tree.  \Secref{applications} presents
+some of the geometric applications of this data structure. Finally,
+\secref{conclusions} summarizes and concludes with open problems.
 
 \section{Preliminaries}
 \seclabel{prelim}
@@ -80,15 +86,23 @@ subsets of $\R^d$ then the \emph{entropy} of $F$, denoted $H(F)$ is
 \[
     H(F) = \sum_{i=1}^k \Pr(X_i|\cup F)\log(1/\Pr(X_i|\cup F)) \enspace .
 \]
-
 The probability measure $D$ is used as an input to our algorithms.
 We assume that the algorithm has access to $D$ through two oracles.
-Oracle~A allows, for any simplex $\Delta$, to determine $\Pr(\Delta)$
-in constant time.  Oracle~B allows us to draw a random sample $p$ from
-the distribution $D$.
+The \emph{Measure Oracle} allows, for any simplex $\Delta$, to determine
+$\Pr(\Delta)$ in constant time.  The \emph{Sampling Oracle} allows us
+to draw a random sample $p$ from the distribution $D$.
 
 A \emph{query problem} over $\R^d$ is a function
 $\mathcal{P}:\R^d\rightarrow A$ where $A$ is some set of \emph{answers}.
+We assume the existence of two oracles that allow access to $\mathcal{P}$.
+The \emph{Backup Oracle} allows us to compute $\mathcal{P}(p)$ for
+any query point $p$, but requires $O(\log n)$ time to do so.  The
+\emph{Interference Oracle} allows us to test, for any simplex $\Delta$,
+if $\mathcal{P}(p)=\mathcal{P}(q)$ for every pair $p,q\in\Delta$.
+The running time of the Interference Oracle will be unspecified.
+When discussing applications in \secref{applications}, implementations
+of the Interference Oracle for particular problems will be described.
+
 A \emph{linear decision tree} for $\mathcal{P}$ is a rooted ordered
 binary tree in which each internal node $v$ is labelled with a linear
 inequality $a_{v,1}x_1 + a_{v,2}x_2 + \cdots a_{v,d}x_d + a_{v,d+1} > 0$,
@@ -101,23 +115,15 @@ for $p$ in $T$.  A linear decision tree \emph{solves} $\mathcal{P}$ if
 $T(p)=\mathcal{P}(p)$ for all $p\in\R^d$. The \emph{depth} of a node $v$
 in a rooted tree $T$, denoted $\depth_T(v)$, is the number of edges on
 the path from $v$ to the root of $T$.  The \emph{(expected) cost} of a
-linear decision tree is the expected depth of the leaf reached when $p$
-is drawn according to the probability measure $D$.
+linear decision tree, denoted $\mu_D(T)$, is the expected depth of the
+leaf reached when $p$ is drawn according to the probability measure $D$.
 
-We assume that we have two oracles that give us access to $\mathcal{P}$.
-The \emph{Backup Oracle} allows us to compute $\mathcal{P}(p)$ for
-any query point $p$, but requires $O(\log n)$ time to do so.  The
-\emph{Interference Oracle} allows us to test, for any simplex $\Delta$
-if $\mathcal{P}(p)=\mathcal{P}(q)$ for every pair $p,q\in\Delta$.
-The running time of the Interference Oracle will be unspecified.
-When discussing applications in \secref{applications}, implementations
-of the Interference Oracle for particular problems will be described.
 
 \section{The Data Structure}
 \seclabel{data-structure}
 
 In this section we describe a data structure $T_{\mathcal{P},D}$ called
-the \emph{filter tree} that, in conjunction with a backup oracle, yields
+the \emph{filter tree} that, in conjunction with a Backup Oracle, yields
 a data structure for $\mathcal{P}$ that has expected query time that
 is within a constant factor of the expected query time of any linear
 decision tree $T^*$ for $\mathcal{P}$.  The filter tree is based on
@@ -186,12 +192,15 @@ corresponding to the simplices $\Delta_1,\ldots,\Delta_{r}$ obtained
 by applying \thmref{point-partition} to $S$.  The $i$th child of the
 root is itself the root of the partition tree $T_{S\cap\Delta_i^*}$
 for $S\cap\Delta_i^*$. This recursive process stops when a node is
-empty of points in $S$ or its depth exceeds $\floor{\alpha\log_r m}$,
-for some appropriately chosen constant $0< \alpha < 1$.
+empty of points in $S$ or its depth exceeds $\floor{\eps\log_r m}$,
+for some constant parameter $\epsilon\in(0,1]$.
 
-Next we define some regions associated with the nodes of $T_S$.  Note that
-every node $v$ in $T_S$ is naturally associated with a simplex $\Delta(v)$
-that was obtained from \thmref{point-partition} and that generated $v$.
+Next we define some regions, $\Delta(v)$, $\poly(v)$, and $\Xi(v)$,
+that are associated with each node $v$ of $T_S$.  Every node $v$ in
+$T_S$, except the root of $T_S$, is naturally associated with a simplex
+$\Delta(v)$ that was obtained from \thmref{point-partition} and that
+generated $v$.  For the root of $T_S$, we define $\Delta(v)=\R^d$.
+
 For a node $v$ of $T$ whose ancestors are $v=v_0, v_1,\ldots,v_i$
 we define $\poly(v)=\bigcap_{j=0}^i \Delta(v_i)$.  Note that
 $\poly(v)\subseteq\Delta(v)$, and that $\poly(v)$ is a convex polytope
@@ -208,24 +217,24 @@ Note that $\Xi(v)\subseteq \poly(v)\subseteq \Delta(v)$, but that
 $\Xi(v)$ is not necessarily convex or even connected.
 
 The following theorem summarizes the properties of the partition tree
-$T_{S}$ \cite{m92}:
+$T_{S}$ \cite{m92} (each property is inherited from the corresponding
+property of the simplicial partition in
+\thmref{point-partition}):
 
 \begin{thm}\thmlabel{point-partition-tree}
-Let $S$ be a set of $m$ points in $\R^2$, let $T_S$
-denote the partition tree described above, and let $V_i$ denote
-the set of nodes of $T_S$ at distance $i$ from the root.
-There exists a constant $c$, independent of $r$, such that 
-the partition tree $T_S$ has the following properties, for every
-$i\in\{0,\ldots,\lfloor\alpha\log_r n\rfloor\}$:
+Let $S$ be a set of $m$ points in $\R^2$, let $T_S$ denote the partition
+tree described above, and let $V_i$ denote the set of $r^i$ nodes of
+$T_S$ at depth $i$.  There exists a constant $c$, independent of $r$,
+such that the partition tree $T_S$ has the following properties, for
+every $i\in\{0,\ldots,\lfloor\eps\log_r n\rfloor\}$:
 \begin{enumerate}
-  \item $|V_i| \le (cr)^{i}$
   \item $\{\Xi(v) : v\in V_i\}$ is a partition of $\R^2$,  
   \item For every node $v\in V_i$, $|S\cap\Xi(v)| \le m(2/r)^i$, and 
   \item For any hyperplane $\ell$, the number of nodes in $V_i$ such that
         $\ell$ intersects the interior of $\poly(v)$ is at most
         $(cr^{1-1/d})^i$.
   \end{enumerate}
-  The partition tree $T_S$ can be constructed in $O(m\log m)$ time.
+  The partition tree $T_S$ can be constructed from $S$ in $O(m\log m)$ time.
 \end{thm}
 
 %\noindent\textbf{Remark:} The use of \thmref{point-partition} (as
@@ -237,13 +246,13 @@ Restating \thmref{point-partition} in terms of probability distributions,
 we have:
 
 \begin{thm}\thmlabel{prob-partition-tree} 
-  Let $S$ be a sample of $m$ points in $\R^d$ drawn i.i.d.\ according to
-  probability measure $D$, let $T_D=T_S$ denote the partition tree given
-  by \thmref{point-partition-tree}, and let $V_i$ denote the set of nodes
-  of $T_D$ at depth $i$.  There exists a constant $c$, independent of $r$,
-  such that with probability at least $1-O(m^{\gamma})$, $T_D$ has the
-  following properties, for every $i\in\{0,\ldots,\lfloor\alpha\log_r
-  n\rfloor\}$:
+  Let $S$ be a sample of $m$ points in $\R^d$ drawn i.i.d.\ according
+  to probability measure $D$, let $T_D=T_S$ denote the partition tree
+  given by \thmref{point-partition-tree}, and let $V_i$ denote the set
+  of $r^i$ nodes of $T_D$ at depth $i$.  There exists a constant $c$,
+  independent of $r$, $m$ and $D$, such that with probability at least
+  $1-O(m^{-\gamma})$, $T_D$ has the following properties, for every
+  $i\in\{0,\ldots,\lfloor\alpha\log_r n\rfloor\}$:
   \begin{enumerate}
     \item $\{\Xi(v) : v\in V_i\}$ is a partition of $\R^2$,  
     \item For every node $v\in V_i$, $\Pr(\Xi(v)) \le
@@ -257,8 +266,9 @@ we have:
 \end{thm}
 
 \begin{proof}
-Use oracle $B$ to obtain a sample $S$ of $O(m)$ elements from $D$ and
-then apply \thmref{point-partition-tree}.
+The constants $\gamma$ and $\delta$ aren't important, as long as they're
+bigger than 0. In fact, the failure probability ($m^{-\gamma}$) can be
+as large as $O(1/\log m)$ and that would be good enough.
 \end{proof}
 
 Note that, so far, we have not considered the query problem $\mathcal{P}$
@@ -274,7 +284,7 @@ is a \emph{non-terminal} node.
 Using a filter tree to answer a query $p\in \R^d$, is easy: We follow
 the search path for $p$ in $T_{\mathcal{P},D}$ until we either reach
 a terminal node $v$, in which case we output $\ell(v)$, or we reach
-a non-terminal leaf $w$ after $\lfloor \alpha\log_r m\rfloor=O(\log
+a non-terminal leaf $w$ after $\lfloor \eps\log_r m\rfloor=O(\log
 n)$ steps, in which case we rely on a backup structure to report
 $\mathcal{P}(v)$ in $O(\log n)$ time.  The correctness of this procedure
 follows immediately from the definition of terminal and non-terminal
@@ -282,6 +292,12 @@ nodes.  In the next section, we analyze the performance of filter trees.
 
 \section{Analysis}
 \seclabel{analysis}
+
+In this section, our goal is to lower-bound the expected cost of any
+linear decision tree for $\mathcal{P}$ in terms of the filter tree
+$T_{\mathcal{P},D}$.  The way we achieve this goal is by decomposing the
+nodes of $T_{\mathcal{P},D}$ into subsets with some helpful combinatorial
+properties.
 
 An \emph{$i$-set} of a rooted tree $T$ is a set of vertices in $T$ all
 of which are at distance at most $i$ from the root of $T$ and in which no
@@ -295,8 +311,9 @@ or more elements of $X$.
   \secref{data-structure}, let $V$ be an $i$-set of $T_{\mathcal{P},D}$,
   and let $k>1$ be a constant.  Then $V$ contains a subset $V'\subseteq V$
   such that the elements of $\{\poly(v): v\in V'\}$ are pairwise disjoint
-  and  in $k$-general position and $|V'|\ge |V|/(cr)^{i(d/k+1-1/d)}$
-  for some constant $c$ independent of $r$.
+  and  in $k$-general position and $|V'| =
+  \Omega(|V|/r^{i(d/k+1-1/d+\delta)})$, where $\delta > 0$ is a decreasing
+  function of $r$.
 \end{lem}
 
 \begin{proof}
@@ -306,15 +323,14 @@ or more elements of $X$.
   contains a large subset $V'$ whose elements are also pairwise disjoint.
 
   Let $V''$ be a Bernoulli sample of $V$ where each element is selected
-  independently with probability $p=(c'r)^{-i(d/k+1-1/d)}$. We
+  independently with probability $p=r^{-i(d/k+1-1/d+\delta)}$. We
   will prove that
   \[
      \Pr\left\{
         \mbox{$V''$ is in $k$-general position 
-          and $|V''| \ge \floor{p|V|}$}
+          and $|V''| = \Omega(p|V|)$}
       \right\} > 0 \enspace .
   \]
-
   Consider any hyperplane $\ell$. Condition~3 of
   \thmref{prob-partition-tree}, implies that $\ell$ intersects the
   interior of at most $(cr^{1-1/d})^{i}$ elements of $V$.  The probability
@@ -322,30 +338,32 @@ or more elements of $X$.
   is therefore no more than
   \[
     \binom{((cr)^{1-1/d})^{i}}{k}\cdot p^k
-    \le (cr)^{i(k-k/d)}p^k
+    \le (cr)^{i(k-k/d)}p^k 
   \]
-  For each node $v\in V$, $\poly(v)$ has at most $ci^{\floor{d/2}}$
+  For each node $v\in V$, $\poly(v)$ has $O(i^{\floor{d/2}})$
   vertices and number of nodes in $V$ is at most $r^{i}$.  Therefore,
   the elements of $\{\poly(v):v\in V\}$ define a \emph{test set} $L$ of
-  at most $i^{d^2/2}(cr)^{di}$ hyperplanes such that $V''$ is in $k$-general
+  $O(i^{d^2/2}r^{di})$ hyperplanes such that $V''$ is in $k$-general
   position if and only if no hyperplane in $L$ intersects $k$ or more
   elements of $V''$. The probability that \emph{any} hyperplane in $L$
   intersects $k$ or more elements of $V''$ is therefore at most
   \[
-    i^{d^2/2}(cr)^{di}\cdot(cr)^{i(k-k/d)}p^k 
-     = i^{d^2/2}(cr)^{i(d+k-k/d)}p^k 
+    O(i^{d^2/2}r^{di})\cdot (cr)^{i(k-k/d)}p^k
+     = O(r^{i(d+k-k/d+\delta)})p^k 
+     = O(r^{\delta-k\delta)})
      = o(1) \enspace 
   \]
-  provided that $c'> c$.  The above argument shows that the nodes in
+  for any $\delta > (k-k/d)\log_r c$.
+  The above argument shows that the nodes in
   $V''$ are quite likely to be in $k$-general position. To see that
   $V''$ is sufficiently large, we simply observe that $|V''|$ is a
   $\mathrm{binomal}(|V|,p)$ random variable and therefore has median
-  value at least $\lfloor{p|V|}\rfloor=\Omega(|V|/(cr)^{i(d/k+1-1/d)})$.
-  In particular, $\Pr\{|V''|\ge \lfloor{p|V|}\rfloor\}\ge 1/2$.  Therefore,
+  value at least $\lfloor{p|V|}\rfloor = \Omega(|V|/r^{i(d/k+1-1/d+\delta)})$.
+  Therefore,
   \[
      \Pr\left\{
         \mbox{$V''$ is in $k$-general position 
-          and $|V''|=\Omega(|V|/r^{i(1/2+\epsilon+\delta)})$}
+          and $|V''| = \Omega(|V|/r^{i(d/k+1-1/d+\delta)})$ }
       \right\} \ge 1- (o(1) + 1/2) > 0 \enspace .
   \]
   Finally, we select $V'\subseteq V''$ so that the elements of
@@ -368,9 +386,10 @@ solves $\mathcal{P}$.
 
 \begin{lem}\lemlabel{lower-bound}
   Let $T_{\mathcal{P},D}$ be the filter tree defined in
-  \secref{data-structure}, let $L$ denote the set of leaves of $T$,
-  and let $T^*$ be some linear decision tree that solves $\mathcal{P}$.
-  Then $\mu_D(T^*) = \Omega(H(\{\Xi(v):v\in L\})-1)$.
+  \secref{data-structure}, let $L$ denote the set of leaves of
+  $T_{\mathcal{P},D}$, and let $T^*$ be any linear decision tree that
+  solves $\mathcal{P}$.  Then
+  \[ \mu_D(T^*) = \Omega(H(\{\Xi(v):v\in L\})-1) \enspace . \]
 \end{lem}
 
 \begin{proof}

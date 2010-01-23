@@ -5,6 +5,7 @@
 \listfiles
 
 
+\newtheorem{defn}{Definition}
 \newcommand{\eps}{\epsilon}
 \newcommand{\depth}{\mathrm{depth}}
 %\usepackage{wasysym}
@@ -535,13 +536,23 @@ solves $\mathcal{P}$.
   yields the stated bounds on the construction time and the use of the
   Sampling and Interference Oracles.
 
-  The expected time answer queries using $T_{\mathcal{P},D}$ is
+  If $T_{\mathcal{P},D}$ satisfies Conditions~1--3 of 
+  \thmref{prob-partition-tree} then, by \lemref{lower-bound},
+  the expected time to answer queries using $T_{\mathcal{P},D}$ is
   \[
      \sum_{t\in L} \Pr(t)O(\depth_T(t)) 
           = \sum_{t\in L}\Pr(t)O(\log(1/\Pr(t))) = O(H(L)) \enspace .
   \]
+  Otherwise, the expected time to answer queries using $T_{\mathcal{P},D}$
+  is $O(\log n)$.  Therefore, the expected time (where the expectation
+  is taken over $D$ and the random sampling used to generate $S$ in
+  \thmref{prob-partition-tree}) to answer a query using a filter tree is
+  \[
+     (1-O(n^{-\tau\delta})) O(H(L)) + O(n^{-\tau\delta}) O(\log n) =
+        O(H(L)+1)  \enspace .
+  \]
   On the other hand, by \lemref{lower-bound} the expected time required
-  by any linear decision tree that solves $\mathcal{P}$ is
+  by any linear decision tree $T^*$ that solves $\mathcal{P}$ is
   \[
       \mu_D(T^*) = \Omega(H(L) - 1) \enspace ,
   \]
@@ -560,12 +571,14 @@ for any constant $\epsilon > 0$.  Furthermore, the number of calls to
 the Interference Oracle made during the construction of a filter tree
 is $O(n^\epsilon)$.  In almost all applications, the Interference Oracle
 can be trivially implemented to run in $O(n)$ time by testing the query
-simplex $\Delta$ against each element of the input.  This means that, even
-with no special work, the contribution of calls to the Interference Oracle
-to the construction time of a filter is no more than $O(n^{1+\epsilon})$.
+simplex $\Delta$ against each element of the input.  This means that,
+even with no special work, the contribution of calls to the Interference
+Oracle to the construction time of a filter tree is no more than
+$O(n^{1+\epsilon})$.  Subsequent theorems in this paper will use this fact
+implicitly.
 
 In other cases, the Interference Oracle corresponds to a natural query
-for which there exists (or we can develop) and $O(n^{1-\epsilon})$
+for which there exists (or we can develop) an $O(n^{1-\epsilon})$
 query-time $O(n\log n)$ preprocessing-time data structure.  In these
 cases, the time to construct the filter tree becomes $O(n\log n)$.
 One particularly common instance of this occurs when Interference
@@ -577,15 +590,16 @@ $O(n^{1-1/d+\epsilon})$ time.
 
 \subsection{Point Location Problems}
 
-The \emph{planar point location problem} is to determine which face of a
-planar straight line graph $G$ contains a query point $q\in\R^2$.  A number
-of authors have considered distribution-sensitive algorithms for this
-problem \cite{S} and have mostly solved it. The one exception to this is
-the problem of planar point location in a disconnected planar subdivision,
-where no distribution-sensitive solution was known.  Since there are
-several $O(\log n)$ query-time, $O(n\log n)$ preprocessing-time data
-structure for planar point location in (possibly disconnected) planar
-subdivision, we obtain the first result:
+The \emph{planar point location problem} is to determine which face
+of a planar straight line graph $G$ contains a query point $q\in\R^2$.
+A number of authors have considered distribution-sensitive algorithms for
+this problem \cite{acmr00,amm00,amm01a,amm01b,ammw07,cdilm08,i01,i04}
+and have mostly solved it. The one exception to this is the problem
+of planar point location in a disconnected planar subdivision, where
+no distribution-sensitive solution was known.  Since there are several
+$O(\log n)$ query-time, $O(n\log n)$ preprocessing-time data structure
+for planar point location in (possibly disconnected) planar subdivision
+\cite{k83,st86,egs86,m90,as98} we obtain the first result:
 
 \begin{thm}
   There exists a distribution-sensitive data structure for the planar
@@ -595,7 +609,7 @@ subdivision, we obtain the first result:
 
 The \emph{3-d point in polytope problem} is the problem of determining
 if a query point $q\in\R^3$ is contained in a planar polytope $P$.
-The Dobkin-Kirkpatrick hierarchy \cite{X} gives an $O(\log n)$ query-time,
+The Dobkin-Kirkpatrick hierarchy \cite{dk83} gives an $O(\log n)$ query-time,
 $O(n)$ preprocessing-time data structure for this problem.  Furthermore,
 Interference Oracle queries (which involve testing if a simplex intersects
 the boundary of $P$) can also be answered in $O(\log n)$ time by the
@@ -607,7 +621,8 @@ Dobkin-Kirkpatrick hierarchy.
   time and $O(n)$ space.
 \end{thm}
 
-These results can be extended to higher dimensions, though with more space \cite{c88}:
+These results can be extended to higher dimensions, though with more
+space \cite{c88}:
 
 \begin{thm}
   There exists a distribution-sensitive data structure for
@@ -619,7 +634,7 @@ The problem of \emph{point-location in an arrangement of hyperplanes} is
 the problem of determining which cell in an arrangement of $n$ hyperplanes
 in $\R^d$ contains the query point $q\in\R^d$.  Liu gives an $O(n^d)$
 space and preprocessing-time, $O(\log n)$ query-time data structure for
-this problem \cite{S}.
+this problem \cite{l04}.
 
 \begin{thm}
   There exists a distribution-sensitive data structure for point location
@@ -634,7 +649,7 @@ on the boundary of a polygon $P$ intersected by a query ray.  A query
 ray can be represented as a pair of points in $\R^2$ (the source and
 any other point on the ray), so this is a query problem over $\R^4$.
 Several $O(n)$ preprocessing time $O(\log n)$ query time solutions to
-this problem exist \cite{X,Y,Z,W}.
+this problem exist \cite{cegghss94,hs95}.
 
 \begin{thm}
   There exists a distribution-sensitive data structure for ray shooting
@@ -655,12 +670,12 @@ time solution to this problem.
 
 \subsection{Orthogonal Range Counting}
 
-The \emph{2-d orthogonal range counting problem} is the problem of
-counting the number of points of a set $S\subseteq\R^2$ that are contained
-in a query rectangle $[q_1,q_2]\times[q_3,q_4]$.  Bentley's range trees
-\cite{bXX} with fractional cascading \cite{yy} yield an $O(n\log n)$
-preprocessing time and space, $O(\log n)$ query time data structure for
-this problem.
+The \emph{2-d orthogonal range counting problem} is the problem
+of counting the number of points of a set $S\subseteq\R^2$ that are
+contained in a query rectangle $[q_1,q_2]\times[q_3,q_4]$. (Note that
+produces a query point $q\in \R^4$.) Bentley's range trees \cite{b75} with
+fractional cascading \cite{cg86,l78} yield an $O(n\log n)$ preprocessing
+time and space, $O(\log n)$ query time data structure for this problem.
 
 \begin{thm}
   There exists a distribution-sensitive data structure for 2-d orthogonal
@@ -668,14 +683,29 @@ this problem.
   $O(n\log n)$ space.
 \end{thm}
 
-Range trees satisfy the constraints of the \emph{comparison tree} model
-of computation, which is considerably weaker than the linear decision tree
-model. Dujmovi\'c \etal\ \cite{XX} recently gave a distribution-sensitive
-data structure that works in the comparison tree model, but can
-only answer query ranges of the form $[q,\infty)\times[q_2,\infty)$.
-The method in the current paper can be made to work in the comparison
-tree model and handle full range queries.  The key change is to use
-$k$-d trees rather than Matou\v{s}ek's partition trees.
+Range trees satisfy the constraints of the \emph{comparison tree} model of
+computation, which is considerably weaker than the linear decision tree
+model.\footnote{In particular, each node $v$ of a comparison tree can
+only compare some value $a_v$ against a single coordinate $q_i$ of the
+query.} Dujmovi\'c \etal\ \cite{dhm09} give a distribution-sensitive 2-d
+orthogonal range counting data structure that works in the comparison
+tree model.  However, their technique can only answer \emph{2-sided
+queries}, i.e., queries of the form $[q_1,\infty)\times[q_2,\infty)$.
+
+Filter trees can be made to work in the comparison tree model
+and handle full (4-sided) 2-d orthogonal range counting queries.
+The key modification required is the use of $k$-d trees in
+\thmref{prob-partition-tree} rather than Matou\v{s}ek's partition
+trees. (This method, in 2 dimensions, is essentially how Dujmovi\'c \etal\
+obtain their results.)
+
+In the comparison tree model, an Interference Oracle query is a
+$d$-dimensional box, rather than a simplex. In the special case of
+2-d orthogonal range counting, Interference Oracle queries can be
+reduced to a constant number of rectangular range counting queries
+(or, more simply, rectangle-emptiness queries) among the input set $S$.
+Therefore, Interference Oracle queries can, in this case, be answered in
+$O(\log n)$ time after $O(n\log n)$ preprocessing using range trees.
 
 \begin{thm}
   There exists a distribution-sensitive data structure \emph{in the
@@ -683,11 +713,63 @@ $k$-d trees rather than Matou\v{s}ek's partition trees.
   $O(n\log n)$ preprocessing time and space.
 \end{thm}
 
-
-
-
 \section{Summary and Conclusions}
 \seclabel{conclusions}
+
+We have presented a data structure --- the filter tree --- that can
+be added on to any data structure that answers queries drawn from some
+distribution $D$ over $\R^d$.  If the underlying data structure has query
+time $O(\log n)$, then the combined data structure will have optimal
+expected query time in the linear decision tree model.  A variant of
+the filter tree based on $k$-d trees provides a similar result in the
+comparison tree model.  \secref{applications} contains a smattering of
+applications of the filter tree.  Many more are possible.
+
+We believe that the filter tree may actually be practical for some
+problems in some settings.  We outline two of these setting below.
+
+The comparison-tree version of the filter tree should be practical
+because it is based on $k$-d trees, which are simple and widely used
+in practice. At worst, a comparison-based filter tree will perform
+$O(\epsilon\log n)$ extra comparisons before falling back to the backup
+data structure.
+
+In low dimensions, simpler alternatives to the Matou\v{s}ek's Partition
+Theorem (\thmref{point-partition}) are available and may be more
+practical.  For example, in 2-d one can use two lines to partition any $m$
+point set into 4 points sets each of size at most $\ceil{m/4}$ such that
+no line intersects more than the 3 of the resulting sets. This result is
+strong enough that it can be used in place of \thmref{point-partition}
+to prove all our results (for 2-d problems) and results in a filter tree
+that only requires 2 point-line comparisons at each node.
+
+Because the filter tree is so small (of size $O(n^\epsilon)$) it
+may be useful to speed up searching in environments where memory
+is constrained. For example, it can be applied to the succinct
+point location data structures of Bose \etal\ \cite{bchmm09} to obtain a
+distribution-sensitive and succinct data structure for point location.
+It may also be useful as a filter that is sufficiently small to fit
+into internal memory whereas the backup structure might live in external
+memory.
+
+Finally, we conclude with a possible direction for future research.  The
+filter tree is a static structure that requires the ability to sample from
+the distribution $D$.  It would be useful to have a \emph{self-adjusting}
+version that knows nothing about the query distribution (if any), but
+adjusts itself based on incoming queries.   The following definition
+is an attempt to capture the notion of \emph{static optimality} from the theory
+of comparison-based searching \cite{st85}:
+
+\begin{defn}[Static Optimality]\label{defn:static-optimality}
+A data structure for a query problem $\mathcal{P}$ is \emph{empirically
+distribution sensitive} if, for every sequence $Q=q_1,\ldots,q_m$
+of queries, the time required to answer all queries in the sequence
+is $O(t + m\mu_{D_Q}(T^*))$, where $t$ is independent of $m$, $T^*$
+is any linear decision tree that solves $\mathcal{P}$, and $D_{Q}$
+is the uniform distribution over the multiset $\{q_1,\ldots,q_m\}$.
+\end{defn}
+Is there a self-adjusting version of filter trees that satisfies
+Definition~\ref{defn:static-optimality}?
 
 
 

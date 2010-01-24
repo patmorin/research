@@ -581,11 +581,11 @@ In other cases, the Interference Oracle corresponds to a natural query
 for which there exists (or we can develop) an $O(n^{1-\epsilon})$
 query-time $O(n\log n)$ preprocessing-time data structure.  In these
 cases, the time to construct the filter tree becomes $O(n\log n)$.
-One particularly common instance of this occurs when Interference
-Oracle queries can be reduced to simplex range searching in $\R^d$.
-In this case, Matou\v{s}ek's partition trees yield a data structure that
-can be constructed in $O(n\log n)$ time and that can answer queries in
-$O(n^{1-1/d+\epsilon})$ time.
+One particularly common instance of this occurs when Interference Oracle
+queries can be reduced to simplex range searching in $\R^{d'}$ for some
+constant dimension $d'$.  In this case, Matou\v{s}ek's partition trees
+yield a data structure that can be constructed in $O(n\log n)$ time and
+that can answer queries in $O(n^{1-1/d+\epsilon})$ time.
 
 
 \subsection{Point Location Problems}
@@ -593,27 +593,61 @@ $O(n^{1-1/d+\epsilon})$ time.
 The \emph{planar point location problem} is to determine which face
 of a planar straight line graph $G$ contains a query point $q\in\R^2$.
 A number of authors have considered distribution-sensitive algorithms for
-this problem \cite{acmr00,amm00,amm01a,amm01b,ammw07,cdilm08,i01,i04}
-and have mostly solved it. The one exception to this is the problem
-of planar point location in a disconnected planar subdivision, where
-no distribution-sensitive solution was known.  Since there are several
-$O(\log n)$ query-time, $O(n\log n)$ preprocessing-time data structure
-for planar point location in (possibly disconnected) planar subdivision
-\cite{k83,st86,egs86,m90,as98} we obtain the first result:
+this problem \cite{acmr00,amm00,amm01a,amm01b,ammw07,cdilm08,i01,i04} and
+have mostly solved it.  The most general such result is due to Collette
+\etal\ \cite{cdilm08} and gives a distribution-sensitive data structure
+for point location in connected planar subdivisions.  This leaves open
+the case where the graph of the subdivision is not connected.  Since there
+are several $O(\log n)$ query-time, $O(n\log n)$ preprocessing-time data
+structure for planar point location in (possibly disconnected) planar
+subdivision \cite{k83,st86,egs86,m90,as98} we can apply filter trees.
+
+To obtain a fast preprocessing time, we can use an
+implementation of the Interference Oracle based on partition trees.  For
+this problem, the Interference Oracle must answer queries of the form:
+``Does the interior of query triangle $\Delta$ intersect more than one face
+of $G$?''  We can build a data structure for this problem by first removing
+from $G$ any edges and vertices not on the boundary of more than 1 face to
+obtain a graph $G'$.  The interior of $\Delta$ intersects more than one
+face of $G$ if and only if the interior of $\Delta$ intersects an edge of
+$G'$.
+
+If $\Delta$ intersects an edge of $G'$ then $\Delta$ contains a vertex of
+$G'$ or some edge of $\Delta$ intersects some edge of $G'$.  Determining if
+$\Delta$ contains a vertex of $G'$ is the classic 2-dimensional
+simplex-range counting problem that can be solved in $O(n^{1/2+\epsilon})$
+time after $O(n\log n)$ preprocessing using partition trees.  To determine
+if some edge $uw$ of $\Delta$ intersects some edge $xy$ of $G'$, we observe
+that $uw$ and $xy$ intersect if and only if
+\[ L(u,w,y) \wedge L(x,y,u) \wedge L(w,u,x) \wedge L(y,x,w) \]
+or
+\[ R(u,w,y) \wedge R(x,y,u) \wedge R(w,u,x) \wedge R(y,x,w) \]
+where $L(a,b,c)$, respectively $R(a,b,c)$, is the predicate that is true
+if and only if the sequence of points $abc$ form a left, respectively,
+right, turn.  If we fix $x$ and $y$, then each of the above predicates
+is the sign of a linear function whose coefficients are determined by $u$
+and $w$.  Therefore, we can treat each edge of $G'$ as a point in $\R^4$,
+yielding a point set $S_{G'} \subset\R^4$ such that testing if edge $uw$
+intersects some edge of $G'$ is equivalent to 2 simplex range counting
+queries over $S_{G'}$.  Again, partition trees allow us to do this in
+$O(n^{3/4+\epsilon})$ time after $O(n\log n)$ preprocessing.  Therefore,
+the Interference Oracle for point location can be implemented to run
+in $O(n^{3/4+\epsilon})$ time after $O(n\log n)$ preprocessing.  This yields
+our first theorem:
 
 \begin{thm}
   There exists a distribution-sensitive data structure for the planar
-  point location problem that uses $O(n^{1+\epsilon})$ preprocessing
+  point location problem that uses $O(n\log n)$ preprocessing
   time and $O(n)$ space.
 \end{thm}
 
-The \emph{3-d point in polytope problem} is the problem of determining
-if a query point $q\in\R^3$ is contained in a planar polytope $P$.
-The Dobkin-Kirkpatrick hierarchy \cite{dk83} gives an $O(\log n)$ query-time,
-$O(n)$ preprocessing-time data structure for this problem.  Furthermore,
-Interference Oracle queries (which involve testing if a simplex intersects
-the boundary of $P$) can also be answered in $O(\log n)$ time by the
-Dobkin-Kirkpatrick hierarchy.
+The \emph{3-d point in polytope problem} is the problem of determining if
+a query point $q\in\R^3$ is contained in a 3-dimensional polytope $P$.
+The Dobkin-Kirkpatrick hierarchy \cite{dk83} gives an $O(\log n)$
+query-time, $O(n)$ preprocessing-time data structure for this problem.
+Furthermore, Interference Oracle queries (which involve testing if a
+simplex intersects the boundary of $P$) can also be answered in $O(\log
+n)$ time by the Dobkin-Kirkpatrick hierarchy.
 
 \begin{thm}
   There exists a distribution-sensitive data structure for the
@@ -639,7 +673,7 @@ this problem \cite{l04}.
 \begin{thm}
   There exists a distribution-sensitive data structure for point location
   in an arrangement of hyperplanes that uses $O(n^d)$ preprocessing time
-  and $O(n^d)$ space.
+  and space.
 \end{thm}
 
 \subsection{Ray Shooting}
@@ -664,22 +698,29 @@ time solution to this problem.
 
 \begin{thm}
   There exists a distribution-sensitive data structure for
-  the ray shooting in a $d$-dimensional polytope that uses
+  ray shooting in a $d$-dimensional polytope that uses
   $O(n^{\floor{d/2}+\epsilon})$ preprocessing time and space.
 \end{thm}
 
 \subsection{Orthogonal Range Counting}
 
-The \emph{2-d orthogonal range counting problem} is the problem
-of counting the number of points of a set $S\subseteq\R^2$ that are
-contained in a query rectangle $[q_1,q_2]\times[q_3,q_4]$. (Note that
-produces a query point $q\in \R^4$.) Bentley's range trees \cite{b75} with
+The \emph{2-d orthogonal range counting problem} is the problem of
+counting the number of points of a set $S\subset\R^2$ that are contained
+in a query rectangle $[q_1,q_2]\times[q_3,q_4]$. (Note that produces
+a query point $q\in \R^4$.) Bentley's range trees \cite{b75} with
 fractional cascading \cite{cg86,l78} yield an $O(n\log n)$ preprocessing
 time and space, $O(\log n)$ query time data structure for this problem.
+Interference Oracle queries for 2-d orthogonal range counting require
+determining if any query represented by a point in a 4-d simplex have some
+point of $S$ on its boundary.  This problem be decomposed into $O(1)$
+simplex range counting query in $\R^4$ in a manner similar to that used
+for the point location problem.  Thus, an Interference Oracle for this
+problem can be implemented in $O(n^{3/4+\epsilon})$ time after $O(n\log
+n)$ preprocessing.
 
 \begin{thm}
   There exists a distribution-sensitive data structure for 2-d orthogonal
-  range counting that uses $O(n^{1+\epsilon})$ preprocessing time and
+  range counting that uses $O(n\log n)$ preprocessing time and
   $O(n\log n)$ space.
 \end{thm}
 

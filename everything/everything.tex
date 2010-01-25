@@ -1,11 +1,14 @@
 \documentclass{patmorin}
-\usepackage{pat,graphicx,amsmath}
+\usepackage{graphicx,amsmath}
+\usepackage{pat}
 \usepackage[mathlines]{lineno}
 \linenumbers
 \listfiles
 
 
 \newtheorem{defn}{Definition}
+\newcommand{\deflabel}[1]{\label{defn:#1}}
+\newcommand{\defref}[1]{Definition~\ref{defn:#1}}
 \newcommand{\eps}{\epsilon}
 \newcommand{\depth}{\mathrm{depth}}
 %\usepackage{wasysym}
@@ -13,7 +16,7 @@
 \newcommand{\poly}{\includegraphics{poly}}
 % consider also \pentagon \varhexagon \hexagon with package wasysym
 
-\title{\MakeUppercase{Working Title: Distribution-Sensitive Everything}}
+\title{\MakeUppercase{Odds-On Trees}}
 
 \author{Prosenjit~Bose, 
         Luc~Devroye,
@@ -26,45 +29,120 @@
 \maketitle
 
 \begin{abstract}
-Let $\mathcal{P}:\R^d\rightarrow A$ be a query problem over $\R^d$
-for which there exists a data structure $\mathcal{S}$ that can compute
-$\mathcal{P}(q)$ in $O(\log n)$ time for any query point $q$.  Let $D$ be
-a probability measure over $\R^d$ representing a distribution of queries.
-We describe a data structure $T=T(\mathcal{P},D)$ of size $O(n^\eps)$
-that can be used as a filter that quickly computes $\mathcal{P}(q)$
-for some query values in $\R^d$ and relies on $\mathcal{S}$ for the
-remaining queries.  With this filter, the expected query time for a point
-drawn according to $D$ is $O(1+ H^*)$, where $H^*$ is a lower-bound on
-the expected cost of any linear decision tree that solves $\mathcal{P}$.
+  Let $\mathcal{P}:\R^d\rightarrow A$ be a query problem over $\R^d$
+  for which there exists a data structure $\mathcal{S}$ that can compute
+  $\mathcal{P}(q)$ in $O(\log n)$ time for any query point $q$.  Let $D$
+  be a probability measure over $\R^d$ representing a distribution of
+  queries.  We describe a data structure $T=T_{\mathcal{P},D}$, called
+  the \emph{odds-on tree}, of size $O(n^\eps)$ that can be used as a
+  filter that quickly computes $\mathcal{P}(q)$ for some query values in
+  $\R^d$ and relies on $\mathcal{S}$ for the remaining queries.  With an
+  odds-on tree, the expected query time for a point drawn according to
+  $D$ is $O(H^*+1)$, where $H^*$ is a lower-bound on the expected cost
+  of any linear decision tree that solves $\mathcal{P}$.
 
-This result has a number of applications, including distribution-sensitive
-data structures for point location in 2-d, point-in-polytope testing in
-3-d, nearest-neighbour queries in $\R^d$, point-location in arrangements
-of hyperplanes in $\R^d$, and many other geometric searching problems
-that can be solved in the linear-decision tree model.
+  This result has a number of applications, including
+  distribution-sensitive data structures for point location in 2-d,
+  point-in-polytope testing in $d$ dimensions, ray shooting in simple
+  polygons, ray shooting in polytopes, nearest-neighbour queries in
+  $\R^d$, point-location in arrangements of hyperplanes in $\R^d$,
+  and many other geometric searching problems that can be solved in the
+  linear-decision tree model.
 \end{abstract}
 
 \section{Introduction}
 
-Let $\mathcal{P}:\R^d\rightarrow A$ be a query problem over $\R^d$.
-That is, $\mathcal{P}$ represents a searching problem in which every query
-$p\in\R^d$ has an answer the set $A$ of possible answers.  Suppose,
-further that there exists a data structure $\mathcal{S}$ that can
-compute $P(q)$ in $O(\log n)$ time for any query point $q$. Let $D$ be a
-probability measure over $\R^d$ representing a distribution of queries.
-We describe a data structure $T_{\mathcal{P},D}$ of size $O(n^{\eps})$
-that can be used as a filter that quickly computes $\mathcal{P}(q)$
-for some query values in $\R^d$ and relies on $\mathcal{S}$ for the
-remaining queries.  With this filter, the expected query time for a point
-drawn according to $D$ is $O(1+ H^*)$, where $H^*$ is a lower-bound on
-the expected cost of any linear decision tree that solves $\mathcal{P}$
-when queries are drawn according to $D$.
+Geometric search problems have a long and rich history
+\cite{ae99,g00chapter,ms05}. In these problems, we are typically
+given a collection $S$ of $n$ geometric objects in $\R^d$ and asked
+to store them in a data structure so that we can efficiently answer
+queries about these objects. Until quite recently, the performance of
+these data structures was typically measured, at least theoretically,
+in terms of the worst-case (over all possible choices of $S$ and $q$)
+query time as a function of $n$.  A worst-case query time of $O(\log
+n)$ is typically viewed as the gold standard for such search problems,
+at least in models of computation that only allow binary decisions.
+
+Somewhat more recently, researchers have begun studying geometric search
+under the lens of distribution-sensitivity. In this setting, one assumes
+that there is a probability measure $D$ over the set of possible queries,
+and one attempts to optimize the expected query time when queries are
+distributed according to $D$.  For example, given a planar triangulation $G$ and a distribution $D$ over $\R^2$, one can construct an $O(n)$ sized data structure that
+can determine the face of $G$ that contains any query point $q\in\R^2$.
+The expected query time of this structure is $O(H+1)$, where
+\begin{equation}
+    H = \sum_{i} p_i\log (1/p_i)  \enspace  \eqlabel{entropy-faces}
+\end{equation}
+and $p_i$ denotes the probability that $q$ is contained in the $i$th
+face of $G$ \cite{acmr00,amm00,amm01a,amm01b,ammw07,i01,i04}.
+
+More recently, Collette \etal\ \cite{cdilm08,cdilm09} have shown that a
+similar result holds for point location in any simple connected planar
+subdivision $G$.  Note that this involves more than simply triangulating
+$G$ and applying the results for triangulations.  Triangulating $G$
+increases the number of faces and therefore also increases the value of
+$H$ in \eqref{entropy-faces}.  On the other hand, we can not expect to
+always achieve a query time of $O(H+1)$ since this would imply, for
+example, an $O(1)$ query-time data structure for testing if a point
+is contained in a simple polygon.  The result of Collette \etal\  is
+a data structure whose expected query time is $O(H^*+1)$ where $H^*$
+is a lower-bound on the expected cost of any linear decision tree for
+point location in $G$ with queries distributed according to $D$.
+
+Dujmovi\'c \etal\ \cite{dhm09} study distribution-sensitive 2-sided
+2-dimensional orthogonal range counting.  They describe a structure,
+called a biased range tree, that preprocesses an $n$ point set
+$S\subset\R^2$ and a query distribution $D$ over $\R^2$.  A biased range
+trees uses $O(n\log n)$ preprocessing time and space and can answer
+2-sided 2-dimensional orthogonal range counting queries over a set
+$S\subset\R^2$ of $n$ points in expected time $O(H^*+1)$, where $H^*$
+is a lower-bound on the expected cost of any comparison tree for 2-sided
+range queries over $S$ with queries distributed according to $D$.
+
+The results of Collette \etal\ \cite{cdilm08,cdilm09} and Dujmovi\'c
+\etal\ \cite{dhm09} use similar techniques to prove their optimality,
+but each requires their own \textit{ad hoc} arguments.  For example, the point
+location results are achieved by finding near-minimum-entropy Steiner
+triangulations and then applying existing distribution-sensitive results
+for point location in triangulations.  Biased range trees on the other
+hand, mix $k$-d trees, fractional cascading, and biased binary search
+trees to achieve their running time.
+
+In the current paper, we describe a general and low-overhead method
+of taking any $O(\log n)$ query-time data structure and making it
+distribution-sensitive.  Let $\mathcal{P}:\R^d\rightarrow A$ be any query
+problem over $\R^d$ for which there exists a data structure $\mathcal{S}$
+that can compute $\mathcal{P}(q)$ in $O(\log n)$ time\footnote{There
+is no natural definition of $n$ for the abstract problem $\mathcal{P}$.
+Nevertheless, all the problems we will eventually consider arise from a
+set of $n$ objects in $\R^d$ and, for all these problems $O(\log n)$ is
+the optimal query time in the models of computation we will consider.}
+for any query point $q$.  Let $D$ be a probability measure over $\R^d$
+representing a distribution of queries.  We describe a data structure
+$T=T_{\mathcal{P},D}$, called the \emph{odds-on tree},\footnote{odds-on:
+(adj) having a better than even chance of success ``the odds-on
+favourite''}  of size $O(n^\eps)$ that can be used as a filter that
+quickly computes $\mathcal{P}(q)$ for some query values in $\R^d$ and
+relies on $\mathcal{S}$ for the remaining queries.  With an odds-on tree,
+the expected query time for a point drawn according to $D$ is $O(H^*+1)$,
+where $H^*$ is a lower-bound on the expected cost of any linear decision
+tree that solves $\mathcal{P}$.
+
+This result has a number of applications, including distribution-sensitive
+data structures for point location in 2-d, point-in-polytope testing
+in $d$ dimensions, ray shooting in simple polygons, ray shooting
+in polytopes, nearest-neighbour queries in $\R^d$, point-location
+in arrangements of hyperplanes in $\R^d$, and many other geometric
+searching problems that can be solved in the linear-decision tree model.
+Furthermore, a variant of the odds-on tree that works in the comparison
+tree model provides distribution-sensitive data structures for orthogonal
+searching problems in the comparison tree model.
 
 The remainder of this paper is organized as follows: \Secref{prelim}
 presents some preliminary definitions and results. \Secref{data-structure}
-presents the data structure and algorithms for constructing it.
-\Secref{analysis} proves that this data structure matches the query
-time of any linear decision tree.  \Secref{applications} presents
+presents the data structure and algorithms for constructing an odds-on
+tree.  \Secref{analysis} proves that this data structure matches the
+query time of any linear decision tree.  \Secref{applications} presents
 some of the geometric applications of this data structure. Finally,
 \secref{conclusions} summarizes and concludes with open problems.
 
@@ -78,6 +156,7 @@ $d+1$ closed halfspaces in $\R^d$. Note that, under this definition,
 simplices need not be bounded and $\R^d$ as well as $\emptyset$ are
 both simplices.
 
+
 Throughout this paper, we assume an underlying probability measure
 $D$ over $\R^d$.  All expectations and probabilities are (implicitly)
 with respect to $D$.  For any subset $X\subseteq\R^d$, $\Pr(X)$ refers
@@ -86,13 +165,13 @@ conditioned on $X$, i.e., $D_{|X}(Y)=\Pr(Y\mid X)=\Pr(X\cap Y)/\Pr(X)$
 for all $Y\subseteq\R^d$.  If $F=\{X_1,\ldots,X_k\}$ are non-overlapping
 subsets of $\R^d$ then the \emph{entropy} of $F$, denoted $H(F)$ is
 \[
-    H(F) = \sum_{i=1}^k \Pr(X_i|{\cup F})\log(1/\Pr(X_i|{\cup F})) \enspace .
+    H(F) = \sum_{i=1}^k \Pr(X_i|{\cup F})\log(1/\Pr(X_i|{\cup F})) \enspace ,
 \]
+where for any set $S$, $\cup S$ denotes $\bigcup_{s\in S} s$.
 The probability measure $D$ is used as an input to our algorithms.
-We assume that the algorithm has access to $D$ through two oracles.
-The \emph{Measure Oracle} returns $\Pr(\Delta)$ for any simplex $\Delta$
-in constant time.  The \emph{Sampling Oracle} allows us to draw a random
-sample $p$ from the distribution $D$.
+We assume that the algorithm has access to $D$ through a \emph{Sampling
+Oracle} that allows us to draw a random sample $q\in\R^d$ from the
+distribution $D$.
 
 A \emph{query problem} over $\R^d$ is a function
 $\mathcal{P}:\R^d\rightarrow A$ where $A$ is some set of \emph{answers}.
@@ -112,7 +191,7 @@ A \emph{linear decision tree} for $\mathcal{P}$ is a rooted ordered
 binary tree in which each internal node $v$ is labelled with a linear
 inequality $a_{v,1}x_1 + a_{v,2}x_2 + \cdots a_{v,d}x_d + a_{v,d+1} > 0$,
 and each leaf $w$ is labelled with an element $w_A\in A$.  A query point
-$p=(x_1,\ldots,x_d)$ follows a root-to-leaf path, proceeding to the right
+$q=(x_1,\ldots,x_d)$ follows a root-to-leaf path, proceeding to the right
 child of $v$ if it satisfies the inequality and the left child of $v$
 if it does not.  For a linear decision tree $T$ and a point $q\in\R^d$,
 we denote by $T(q)$ the label of the leaf on the root-to-leaf path
@@ -123,20 +202,35 @@ the path from $v$ to the root of $T$.  The \emph{(expected) cost} of a
 linear decision tree, denoted $\mu_D(T)$, is the expected depth of the
 leaf reached when $p$ is drawn according to the probability measure $D$.
 
+Entropy, query problems, and decision trees are all related by (half of)
+Shannon's Source Coding Theorem \cite{s48}:
+
+\begin{thm}[Shannon's Theorem]
+  Let $\mathcal{P}:\R^d\rightarrow A$ be a query problem and define
+  $\mathcal{P}^{-1}(a)=\{q\in\R^d:\mathcal{P}=a\}$, for any $a\in A$. Then,
+  for any linear decision tree $T$ that solves $\mathcal{P}$,
+  \[
+    \mu_D(T) \ge H(\{\mathcal{P}^{-1}(a): a\in A\}) \enspace .
+  \]
+\end{thm}
+
 
 \section{The Data Structure}
 \seclabel{data-structure}
 
 In this section we describe a data structure $T_{\mathcal{P},D}$ called
-the \emph{filter tree} that, in conjunction with a Backup Oracle, yields
-a data structure for $\mathcal{P}$ that has expected query time that
-is within a constant factor of the expected query time of any linear
-decision tree $T^*$ for $\mathcal{P}$.  The filter tree is based on
-simplicial partitions, from the field of geometric range searching:
+the \emph{odds-on tree} that, in conjunction with a Backup Oracle, yields
+a data structure that solves $\mathcal{P}$ and has expected query time
+that is within a constant factor of the expected cost of any
+linear decision tree $T^*$ for $\mathcal{P}$.   For a reader familiar
+with Matou\v{s}ek's efficient partition trees \cite{m92},  the executive
+summary of this section is as follows: An odds-on tree is essentially a
+partition tree on a sample of $O(n^\epsilon)$ points drawn according to
+the distribution $D$.  A complete description follows.
 
 \begin{thm}[Matou\v{s}ek 1992]\thmlabel{point-partition}
 There exists a constant $c$ such that, for any set $S$ of $m$
-points in $\R^d$ and any constant $r$, there exists a sequence
+points in $\R^d$ and any constant $r\le m$, there exists a sequence
 $\langle \Delta_1,\ldots,\Delta_r\rangle$ of closed simplices such that
   \begin{enumerate}
     \item $\bigcup_{i=1}^r \Delta_i = \R^d$,
@@ -193,9 +287,9 @@ tree} $T_S$ for $S$ is a rooted ordered tree obtained by recursively
 applying \thmref{point-partition}.  The root of $T_S$ has $r$ children
 corresponding to the simplices $\Delta_1,\ldots,\Delta_{r}$ obtained
 by applying \thmref{point-partition} to $S$. The $i$th child of the
-root is itself the root of the partition tree $T_{S\cap\Delta_i^*}$ for
-$S\cap\Delta_i^*$. This recursive process stops when a node contains at
-most one point of $S$ or when the depth exceeds .
+root is itself the root of the partition tree $T_{S\cap\Delta_i^*}$
+for $S\cap\Delta_i^*$. This recursive process stops when the depth of
+a node exceeds some predefined depth $k\le \log_{r/3} m$.
 
 Next we define some regions, $\Delta(v)$, $\poly(v)$, and $\Xi(v)$,
 that are associated with each node $v$ of $T_S$.  Every node $v$ in
@@ -203,8 +297,8 @@ $T_S$, except the root of $T_S$, is naturally associated with a simplex
 $\Delta(v)$ that was obtained from \thmref{point-partition} and that
 generated $v$.  For the root of $T_S$, we define $\Delta(v)=\R^d$.
 
-For a node $v$ of $T$ whose ancestors are $v_0, v_1,\ldots,v_i$
-we define $\poly(v)=\Delta(v)\cap\bigcap_{j=0}^i \Delta(v_i)$.  Note that
+For a node $v$ of $T$ whose ancestors are $v_1,\ldots,v_i$
+we define $\poly(v)=\Delta(v)\cap\bigcap_{j=1}^i \Delta(v_i)$.  Note that
 $\poly(v)\subseteq\Delta(v)$, and that $\poly(v)$ is a convex polytope
 that has $O(((d+1)(i+1))^{\floor{d/2}})=O(i^{\floor{d/2}})$ vertices since
 it is the intersection of at most $(d+1)(i+1)$ halfspaces \cite{m70}.
@@ -212,11 +306,16 @@ it is the intersection of at most $(d+1)(i+1)$ halfspaces \cite{m70}.
 For a point $q\in\R^d$, the \emph{search path} for $q$ in $T_S$ starts
 at the root and proceeds to the first child $i$ such $q\in\Delta_i$
 (note that this implies $q\in\Delta_i^*$) and this process is applied
-recursively until reaching a leaf of $T_S$.  In this way, for every $v$
-of the partition tree there is a maximal subset $\Xi(v)\subseteq \R^d$
-such that the search path for every point in $p\in\Xi(v)$ contains $v$.
-Note that $\Xi(v)\subseteq \poly(v)\subseteq \Delta(v)$, but that
-$\Xi(v)$ is not necessarily convex or even connected.
+recursively until reaching a leaf of $T_S$.  In this way, for every node
+$v$ of the partition tree there is a maximal subset $\Xi(v)\subseteq \R^d$
+such that the search path for every point $q\in\Xi(v)$ contains $v$.
+Note that $\Xi(v)\subseteq \poly(v)\subseteq \Delta(v)$, but that $\Xi(v)$
+is not necessarily convex or even connected.
+
+We extend the definitions of $\Xi$, $\poly$, and $\Delta$ to sets of
+nodes in $T$ in the natural way; if $V$ is a set of nodes in $T$,
+then $\Xi(V)=\{\Xi(v):v\in V\}$, $\poly(V)=\{\poly(v):v\in V\}$, and
+$\Delta(V)=\{\Delta(v):v\in V\}$.
 
 The following theorem summarizes the properties of the partition tree
 $T_{S}$ \cite{m92} (each property is inherited from the corresponding
@@ -225,15 +324,15 @@ property of the simplicial partition in
 
 \begin{thm}\thmlabel{point-partition-tree}
   Let $S$ be a set of $m$ points in $\R^d$, let $T_S$ denote the partition
-  tree described above, and let $V_i$ denote the set of $r^i$ nodes of
-  $T_S$ at depth $i$.  There exists a constant $c$, independent of $r$,
-  such that the partition tree $T_S$ has the following properties, for
-  every $i\in\{0,\ldots,\lfloor\eps\log_r n\rfloor\}$:
+  tree described above, and let $V_i$ denote the set of at most $r^i$
+  nodes of $T_S$ at depth $i$.  There exists a constant $c$, independent
+  of $r$ and $m$, such that the partition tree $T_S$ has the following
+  properties, for every $i\in\{0,\ldots,k\}$:
   \begin{enumerate}
-    \item $\{\Xi(v) : v\in V_i\}$ is a partition of $\R^d$,  
+    \item $\Xi(V_i)$ is a partition of $\R^d$,  
     \item For every node $v\in V_i$, $|S\cap\Xi(v)| \le m(2/r)^i$, and 
-    \item For any hyperplane $\ell$, the number of nodes in $v\in V_i$
-      such that $\ell$ intersects the interior of $\poly(v)$ is at most
+    \item For any hyperplane $\ell$, the number of elements in
+      $\poly(V_i)$ whose interiors intersect $\ell$ is at most
       $(cr^{1-1/d})^i$.
     \end{enumerate}
     The partition tree $T_S$ can be constructed from $S$ in
@@ -248,16 +347,16 @@ we have:
   Let $S$ be a sample of $m$ points in $\R^d$ drawn i.i.d.\ according
   to probability measure $D$, let $T_D=T_S$ denote the partition tree
   given by \thmref{point-partition-tree}, and let $V_i$ denote the set
-  of $r^i$ nodes of $T_D$ at depth $i$.  There exists a constant $c$,
+  of at most $r^i$ nodes of $T_D$ at depth $i$.  There exists a constant $c$,
   independent of $r$, $m$ and $D$, such that with probability at least
   $1-O(m^{-\gamma})$, $T_D$ has the following properties, for every
-  $i\in\{0,\ldots,\lfloor\alpha\log_r n\rfloor\}$:
+  $i\in\{0,\ldots,k\}$:
   \begin{enumerate}
-    \item $\{\Xi(v) : v\in V_i\}$ is a partition of $\R^2$,  
+    \item $\Xi(V_i)$ is a partition of $\R^d$,  
     \item For every node $v\in V_i$, $\Pr(\Xi(v)) \le
            (3/r)^i+O(m^{-\delta})$, and
-    \item For any hyperplane $\ell$, the number of nodes in $v\in V_i$
-      such that $\ell$ intersects the interior of $\poly(v)$ is at most
+    \item For any hyperplane $\ell$, the number of elements in
+      $\poly(V_i)$ whose interiors intersect $\ell$ is at most
       $(cr^{1-1/d})^i$.
   \end{enumerate}
   The partition tree $T_D$ can be constructed in $O(m\log m)$ time using 
@@ -271,40 +370,40 @@ as large as $O(1/\log m)$ and that would be good enough.
 \end{proof}
 
 Note that, so far, we have not considered the query problem $\mathcal{P}$
-at all. The \emph{filter tree} $T_{\mathcal{P},D}$ for $(\mathcal{P},D)$
+at all. The \emph{odds-on tree} $T_{\mathcal{P},D}$ for $(\mathcal{P},D)$
 is obtained in the following way:  We construct a partition tree $T_D$
 described in \thmref{prob-partition-tree}, using the value $m=n^{\tau}$
-for some parameter $\tau > 0$.
+for some parameter $\tau > 0$ and setting the maximum depth to
+$k=\floor{\delta\log_{r/3} m}$.
 
-Next, we trim some nodes of $T_{\mathcal{P},D}$.  First, we elminate
-all nodes of depth greater than $\delta\log_{r/3} m$.  Next, we
-use the Interference Oracle to test, for each node $v$ of $T_D$,
-if $\mathcal{P}(p)=\mathcal{P}(q)$ for all pairs of points $p,q\in
-\poly(v)$.  If so, we remove all the subtrees rooted at children of $v$.
-We call $v$ a \emph{terminal leaf} and we label $v$ with the label
+Next, we trim some nodes of $T_{\mathcal{P},D}$. We use the
+Interference Oracle to test, for each node $v$ of $T_D$, if
+$\mathcal{P}(p)=\mathcal{P}(q)$ for all pairs of points $p,q\in
+\poly(v)$.  If so, we remove all the subtrees rooted at children of $v$,
+we call $v$ a \emph{terminal leaf}, and we label $v$ with the label
 $\ell(v)=\mathcal{P}(q)$.  Note that the Interference Oracle works
 for simplices, but $\poly(v)$ is a polytope. Thus, this test requires
 decomposing $\poly(v)$ into simplices and using the Interference
 Oracle on each simplex. Using the \emph{bottom vertex triangulation}
 \cite{c88} for this decomposition allows us to decompose $\poly(v)$
-into $O(((d+1)\depth_T(v))^{d/2})=\log^{O(1)} n$ simplices.
+into $O((\depth_T(v))^{d/2})=\log^{O(1)} n$ simplices.
 
-\begin{lem}\lemlabel{filter-tree-construction}
-For any $n>0$ and any $\tau > 0$, a filter tree of size $m=n^\tau$ having
+\begin{lem}\lemlabel{odds-on-tree-construction}
+For any $n>0$ and any $\tau > 0$, an odds-on tree of size $m=n^\tau$, with maximum depth $k=\floor{\delta\log_{r/3} m}$, and having
 the properties of \thmref{prob-partition-tree} can be constructed in
 $O(n^\tau\log^{O(1)} n)$ time using $O(n^\tau)$ calls to the Sampling
 Oracle and using $O(n^\tau\log^{O(1)} n)$ calls to the Interference
 Oracle.
 \end{lem}
 
-Using a filter tree to answer a query $q\in \R^d$, is easy: We follow
+Using an odds-on tree to answer a query $q\in \R^d$, is easy: We follow
 the search path for $q$ in $T_{\mathcal{P},D}$ until we either reach
 a terminal leaf $v$, in which case we output $\ell(v)$, or we reach a
 non-terminal leaf $w$ after $O(\log n)$ steps, in which case we rely
 on the Backup Oracle to report $\mathcal{P}(v)$ in $O(\log n)$ time.
 The correctness of this procedure follows immediately from the definition
 of terminal and non-terminal nodes.  In the next section, we analyze
-the performance of filter trees.
+the performance of odds-on trees.
 
 
 
@@ -312,8 +411,8 @@ the performance of filter trees.
 \seclabel{analysis}
 
 In this section, our goal is to lower-bound the expected cost of any
-linear decision tree for $\mathcal{P}$ in terms of the filter tree
-$T_{\mathcal{P},D}$.  We accomplish this by decomposing the nodes
+linear decision tree that solves $\mathcal{P}$ in terms of the odds-on
+tree $T_{\mathcal{P},D}$.  We accomplish this by decomposing the nodes
 of $T_{\mathcal{P},D}$ into subsets with some helpful combinatorial
 properties.
 
@@ -325,13 +424,12 @@ position} if there is no hyperplane that intersects $k$ or more elements
 of $X$.
 
 \begin{lem}\lemlabel{independent}
-  Let $T_{\mathcal{P},D}$ be the filter tree defined in
+  Let $T_{\mathcal{P},D}$ be the odds-on tree defined in
   \secref{data-structure}, let $V$ be an $i$-set of $T_{\mathcal{P},D}$,
-  and let $k>1$ be a constant.  Then $V$ contains a subset $V'\subseteq V$
-  such that the elements of $\{\poly(v): v\in V'\}$ are pairwise disjoint
-  and  in $k$-general position and $|V'| =
-  \Omega(|V|/r^{i(d/k+1-1/d+\delta)})$, where $\delta > 0$ is a decreasing
-  function of $r$.
+  and let $k>1$ be a constant.  Then $V$ contains a subset $V'\subseteq
+  V$ such that the elements of $\poly(V')$ are pairwise disjoint and  in
+  $k$-general position and $|V'| = \Omega(|V|/r^{i(d/k+1-1/d+\delta)})$,
+  where $\delta > 0$ is a decreasing function of $r$.
 \end{lem}
 
 \begin{proof}
@@ -345,25 +443,25 @@ of $X$.
   will prove that
   \[
      \Pr\left\{
-        \mbox{$V''$ is in $k$-general position 
+        \mbox{$\poly(V'')$ is in $k$-general position 
           and $|V''| = \Omega(p|V|)$}
       \right\} > 0 \enspace .
   \]
   Consider any hyperplane $\ell$. Condition~3 of
   \thmref{prob-partition-tree}, implies that $\ell$ intersects the
-  interior of at most $(cr^{1-1/d})^{i}$ elements of $V$.  The probability
-  that $\ell$ intersects the interior of $k$ or more elements of $V''$
-  is therefore no more than
+  interior of at most $(cr^{1-1/d})^{i}$ elements of $V$ for some
+  constant $c$.  The probability that $\ell$ intersects the interior of
+  $k$ or more elements of $V''$ is therefore no more than
   \[
     \binom{((cr)^{1-1/d})^{i}}{k}\cdot p^k
     \le (cr)^{i(k-k/d)}p^k 
   \]
-  For each node $v\in V$, $\poly(v)$ has $O(i^{\floor{d/2}})$
-  vertices and number of nodes in $V$ is at most $r^{i}$.  Therefore,
-  the elements of $\{\poly(v):v\in V\}$ define a \emph{test set} $L$ of
-  $O(i^{d^2/2}r^{di})$ hyperplanes such that $V''$ is in $k$-general
-  position if and only if no hyperplane in $L$ intersects $k$ or more
-  elements of $V''$. The probability that \emph{any} hyperplane in $L$
+  For each node $v\in V$, $\poly(v)$ has $O(i^{\floor{d/2}})$ vertices
+  and number of nodes in $V$ is at most $r^{i}$.  Therefore, the elements
+  of $\poly(V)$ define a \emph{test set} $L$ of $O(i^{d^2/2}r^{di})$
+  hyperplanes such that $\poly(V'')$ is in $k$-general position if
+  and only if no hyperplane in $L$ intersects $k$ or more elements
+  of $\poly(V'')$. The probability that \emph{any} hyperplane in $L$
   intersects $k$ or more elements of $V''$ is therefore at most
   \[
     O(i^{d^2/2}r^{di})\cdot (cr)^{i(k-k/d)}p^k
@@ -380,12 +478,15 @@ of $X$.
   Therefore,
   \[
      \Pr\left\{
-        \mbox{$V''$ is in $k$-general position 
+        \mbox{$\poly(V'')$ is in $k$-general position 
           and $|V''| = \Omega(|V|/r^{i(d/k+1-1/d+\delta)})$ }
       \right\} \ge 1- (o(1) + 1/2) > 0 \enspace .
   \]
+  This establishes the existence of a sufficiently large set $V''$
+  such that $\poly(V'')$ is in $k$-general position.
+
   Finally, we select $V'\subseteq V''$ so that the elements of
-  $\{\poly(v):v\in V'\}$ are pairwise disjoint.  To do this, imagine
+  $\poly(V')$ are pairwise disjoint.  To do this, imagine
   sweeping a hyperplane $\ell(t)=\{(x_0,\ldots,x_d)\in\R^d:x_0=t\}$ from
   $t=-\infty$ to $+\infty$.  Associate with each element $v\in V'$, the
   maximal interval $[a_v,b_v]$ such that $\poly(v)$ intersects $\ell(t)$
@@ -395,30 +496,29 @@ of $X$.
   of size at least $|V''|/k$ of non-overlapping intervals. This subset
   corresponds to a subset of $V'\subseteq V''$ with $|V'|\ge |V''|/k$
   and such that the elements of $\{\poly(v):v\in V'\}$ are pairwise
-  disjoint. The set $V'$ satisfies the conditions of the lemma.
+  disjoint. The set $V'$ satisfies all the conditions of the lemma.
 \end{proof}
 
-We are now ready to show that the search time in the filter tree
+We are now ready to show that the search time in the odds-on tree
 is a lower bound on the expected cost of any linear decision tree that
 solves $\mathcal{P}$.
 
 \begin{lem}\lemlabel{lower-bound}
-  Let $T_{\mathcal{P},D}$ be the filter tree defined in
+  Let $T_{\mathcal{P},D}$ be the odds-on tree defined in
   \secref{data-structure} and assume $T_{\mathcal{P},D}$ satisfies
   Conditions~1--3 of \thmref{prob-partition-tree}.  Let $L$ denote the
   set of leaves of $T_{\mathcal{P},D}$, and let $T^*$ be any linear
   decision tree that solves $\mathcal{P}$.  Then
-  \[ \mu_D(T^*) = \Omega(H(\{\Xi(v):v\in L\})-1) \enspace . \]
+  \[ \mu_D(T^*) = \Omega(H(\Xi(L))-1) \enspace . \]
 \end{lem}
 
 \begin{proof}
   This proof mixes the ideas from the proofs of Lemma~3 by Dujmovi\'c
   \etal\ \cite{dhm09} and Lemma~4 by Collette \etal\ \cite{cdilm08}.
-  For a set $V$ of nodes $T_{\mathcal{P},D}$, we define
-  $H(V)=H(\{\Xi(v):v\in V\})$
-  Let $T'$ be the tree obtained from $T_{\mathcal{P},D}$ by removing
-  all terminal leaves, and let $L'$ denote the set of leaves of $T'$.
-  Note that 
+  For an $i$-set $V$ of nodes $T_{\mathcal{P},D}$, we define the
+  shorthands $\Pr(V)=\Pr(\cup\Xi(V))$ and $H(V)=H(\Xi(V))$.  Let $T'$
+  be the tree obtained from $T_{\mathcal{P},D}$ by removing all terminal
+  leaves, and let $L'$ denote the set of leaves of $T'$.  Note that
   \[  
      H(L') = H(L) - O(\log r) 
      = H(L) - O(1)
@@ -426,19 +526,19 @@ solves $\mathcal{P}$.
   since each leaf in $L'$ has at most $r$ children in $L$. 
 
   We first partition $L'$ into groups $G_1,G_2,\ldots$, where $G_i$
-  contains all leaves $v$ such that $1/2^{i-1}\ge \Pr(\Xi(v)) \ge
-  1/2^{i}$.  Note that, because the maximum depth of a node is
-  $\gamma\log_{r/3} m$, the depth of a node in $G_i$ is at most
-  $i/\log(r/3) + O(1)$.
+  contains all leaves $v$ such that $1/2^{i-1}\ge \Pr(\Xi(v))
+  \ge 1/2^{i}$.  Note that, because the maximum depth of a node
+  in $T_{\mathcal{P},D}$ is $\delta\log_{r/3} m$, Condition~2 of
+  \thmref{prob-partition-tree} implies that the depth of a node in $G_i$
+  is at most $i/\log(r/3) + O(1)$.
 
   We then further partition each group $G_i$ into subgroups
-  $G_{i,1},\ldots,G_{i,t_i}$.  Let $\poly_{i,j}=\{\poly(v):v\in
-  G_{i,j}\}$.  We partition $G_i$ into subgroups $G_{i,j}$ where, for
-  $j\in\{1,\ldots,t_i-1\}$, we have $|G_{i,j}|= \Omega(2^{\alpha i})$,
-  for some constant $\alpha >0$ and the elements of $\poly_{i,j}$
-  are pairwise disjoint and in $k$-general position.  Furthermore,
-  the final subgroup, $G_{i,t_i}$ has size at most $O(2^{\beta i})$,
-  for some constant $\beta < 1$.
+  $G_{i,1},\ldots,G_{i,t_i}$. We partition $G_i$ into subgroups
+  $G_{i,j}$ where, for $j\in\{1,\ldots,t_i-1\}$, we have $|G_{i,j}|=
+  \Omega(2^{\alpha i})$, for some constant $\alpha >0$ and the elements
+  of $\poly(G_{i,j})$ are pairwise disjoint and in $k$-general position.
+  Furthermore, the final subgroup, $G_{i,t_i}$ has size at most
+  $O(2^{\beta i})$, for some constant $\beta < 1$.
 
   This partitioning is accomplished by repeatedly applying
   \lemref{independent} to remove a subset $G_{i,j}\subseteq G_{i}$ that is
@@ -446,36 +546,35 @@ solves $\mathcal{P}$.
   the process once the size of $G_i$ drops below $O(2^{\beta i})$. This
   works provided that we choose $\beta$, $k$, and $r$ so that $\beta >
   ((\log r)/(\log (r/3) ))((d/k+1-1/d+\delta)$ and set $\alpha=\beta -
-  ((\log r)/(\log (r/1)))(d/k+1-1/d+\delta)$.
+  ((\log r)/(\log (r/3)))(d/k+1-1/d+\delta)$.
 
   Consider the linear decision tree $T^*$ that solves $\mathcal{P}$.
   The leaves of $T^*$ partition $\R^d$ into cells whose closures are
   convex polytopes.  For a leaf $w$ of $T^*$ we denote its polytope
   by $\poly(w)$. If the depth of $w$ is $i$, then $\poly(w)$ is
   the intersection of  at most $i$ halfspaces.  This implies that
-  $\poly(w)$ intersects at most $ik$ elements of $\poly_{i,j}$ since,
+  $\poly(w)$ intersects at most $ik$ elements of $\poly(G_{i,j})$ since,
   otherwise, $\poly(w)$ contains $\poly(v)$ for some non-terminal node
   $v\in G_{i,j}$.  (This would contradict the assumption that $T^*$
   solves $\mathcal{P}$.)
 
   Let $w$ be some leaf of $T^*$ such that $\poly(w)$ intersects $t$
-  elements of $\poly_{i,j}$.  Then, by the discussion in the previous
+  elements of $\poly(G_{i,j})$.  Then, by the discussion in the previous
   paragraph, $\depth_{T^*}(w) \ge \ceil{t/k}$.  We can easily create a
   subtree $T_w^*$ of $w$ whose height is at most $t$ and with the property
-  that $\poly(w')$ intersects at most one element of $\poly_{i,j}$ for
-  each leaf $w'$ of $T_w^*$.\footnote{For example, making the root of
-  $T^*_w$ correspond to the bisector of two polyhedra of $\poly_{i,j}$
+  that $\poly(w')$ intersects at most one element of $\poly(G_{i,j})$
+  for each leaf $w'$ of $T_w^*$.\footnote{For example, making the root of
+  $T^*_w$ correspond to the bisector of two polyhedra of $\poly(G_{i,j})$
   that intersect $\poly(w)$ means that each of the children of the root
-  intersect at most $t-1$ elements of $\poly_{i,j}$. Applying this
-  recursively yields a subtree of height at most $t-1$.} Notice that
-  if we do this for every leaf $w$ of $T^*$ we obtain a tree $T^{*}_{i,j}$
-  such that every leaf
-  of $T^*_{i,j}$ intersects at most one element of $\poly_{i,j}$.
+  intersect at most $t-1$ elements of $\poly(G_{i,j})$. Applying this
+  recursively yields a subtree of height at most $t-1$.} If we do this for
+  every leaf $w$ of $T^*$ we obtain a tree $T^{*}_{i,j}$ such that every
+  leaf of $T^*_{i,j}$ intersects at most one element of $\poly(G_{i,j})$.
 
-  Let $D_{i,j}$ denote the distribution $D$ conditioned on $\cup\{\Xi(v):
-  v\in G_{i,j}\}$.  Note that the leaves of $T^*_{i,j}$ could be
-  relabeled so that they indicate which element of $\poly_{i,j}$ (if any)
-  that they intersect.  By Shannon's Theorem, this implies that
+  Let $D_{i,j}$ denote the distribution $D$ conditioned on
+  $\cup\Xi(G_{i,j})$.  Note that the leaves of $T^*_{i,j}$ could be
+  relabeled so that they indicate which element of $\poly(G_{i,j})$
+  (if any) that they intersect.  By Shannon's Theorem, this implies that
   \[
     (k+1)\cdot\mu_{D_{i,j}}(T^*)
        \ge \mu_{D_{i,j}}(T^*_{i,j}) 
@@ -487,7 +586,8 @@ solves $\mathcal{P}$.
        - H(\{\cup G_{i,j}:i\in\N,\, j \in\{1,\ldots,t_{i,j}\}) 
        - O(1) \enspace .
   \]
-  Thus, all that remains is to upper-bound the contribution of $\bar{H}=H(\{\cup G_{i,j}:i\in\N,\, j \in\{1,\ldots,t_{i,j}\})$.
+  Thus, all that remains is to upper-bound the contribution of
+  $\bar{H}=H(\{\cup G_{i,j}:i\in\N,\, j \in\{1,\ldots,t_{i,j}\})$.
   \begin{eqnarray*}
     \bar{H} &= & H(\{\cup G_{i,j}:i\in\N,\, j \in\{1,\ldots,t_{i,j}\}) \\
      & = & \sum_{i=1}^\infty \sum_{j=1}^{t_{i}} 
@@ -502,7 +602,7 @@ solves $\mathcal{P}$.
         \left( 
           \sum_{j=1}^{t_{i}-1} 
              \Pr(\cup G_{i,j})\log(2^{i-\alpha i})
-             + i 2^{\beta i - i + 1}
+             + i 2^{\beta i - i + 1} + O(1)
         \right) \\
     & \le & (1-\alpha)H(L') + O(1) \enspace .
   \end{eqnarray*}
@@ -523,16 +623,16 @@ solves $\mathcal{P}$.
   Oracle, and let $D$ be any probability measure over $\R^d$ for
   which we have a Sampling Oracle.  Then, for any constant $\epsilon
   > 0$, using $O(n^\epsilon)$ calls to the Sampling Oracle and
-  $O(n^\epsilon)$ calls to the Interference Oracle, a filter tree can
+  $O(n^\epsilon)$ calls to the Interference Oracle, an odds-on tree can
   be constructed in $O(n^\epsilon)$ time and $O(n^\epsilon)$ space.
-  This filter tree can, in conjunction with the backup oracle, answer
+  This odds-on tree can, in conjunction with the backup oracle, answer
   $\mathcal{P}$-queries drawn according to $D$ in $O(H+1)$ expected
   time, where $H \le \mu_D(T^*)$ for any linear decision tree $T^*$
   that solves $\mathcal{P}$.
 \end{thm}
 
 \begin{proof}
-  Applying \lemref{filter-tree-construction} with $\tau < \epsilon$
+  Applying \lemref{odds-on-tree-construction} with $\tau < \epsilon$
   yields the stated bounds on the construction time and the use of the
   Sampling and Interference Oracles.
 
@@ -546,13 +646,13 @@ solves $\mathcal{P}$.
   Otherwise, the expected time to answer queries using $T_{\mathcal{P},D}$
   is $O(\log n)$.  Therefore, the expected time (where the expectation
   is taken over $D$ and the random sampling used to generate $S$ in
-  \thmref{prob-partition-tree}) to answer a query using a filter tree is
+  \thmref{prob-partition-tree}) to answer a query using an odds-on tree is
   \[
-     (1-O(n^{-\tau\delta})) O(H(L)) + O(n^{-\tau\delta}) O(\log n) =
+     (1-O(n^{-\tau\gamma})) O(H(L)) + O(n^{-\tau\gamma}) O(\log n) =
         O(H(L)+1)  \enspace .
   \]
-  On the other hand, by \lemref{lower-bound} the expected time required
-  by any linear decision tree $T^*$ that solves $\mathcal{P}$ is
+  On the other hand, by \lemref{lower-bound} the expected cost of any
+  linear decision tree $T^*$ that solves $\mathcal{P}$ is
   \[
       \mu_D(T^*) = \Omega(H(L) - 1) \enspace ,
   \]
@@ -563,30 +663,33 @@ solves $\mathcal{P}$.
 \seclabel{applications}
 
 In this section, we discuss a few of the many potential application of
-filter trees.  However, before discussing applications, we first discuss
-possible methods of implementing an Interference Oracle.
+odds-on trees.  In all of our applications, the problem $\mathcal{P}$
+is a query problem over some set of $n$ geometric objects in $\R^d$.
+Before delving into the details of the applications, we first outline
+some general strategies for implementing the Interference Oracle needed
+to build an odds-on tree.
 
-Note that the filter tree can be made to have size $O(n^\epsilon)$
-for any constant $\epsilon > 0$.  Furthermore, the number of calls to
-the Interference Oracle made during the construction of a filter tree
-is $O(n^\epsilon)$.  In almost all applications, the Interference Oracle
-can be trivially implemented to run in $O(n)$ time by testing the query
-simplex $\Delta$ against each element of the input.  This means that,
-even with no special work, the contribution of calls to the Interference
-Oracle to the construction time of a filter tree is no more than
-$O(n^{1+\epsilon})$.  Subsequent theorems in this paper will use this fact
-implicitly.
+An odds-on tree can be made to have size $O(n^\epsilon)$ for any
+constant $\epsilon > 0$.  Furthermore, the number of calls to the
+Interference Oracle made during the construction of an odds-on tree is
+$O(n^\epsilon)$.  In almost all of our applications, the Interference
+Oracle can be trivially implemented to run in $O(n)$ time by testing
+the query simplex $\Delta$ against each input element.  This means
+that, even with no preprocessing, the contribution of calls to the
+Interference Oracle to the construction time of an odds-on tree is no more
+than $O(n^{1+\epsilon})$.  Some of the subsequent theorems in this paper
+will use this fact implicitly.
 
-In other cases, the Interference Oracle corresponds to a natural query
-for which there exists (or we can develop) an $O(n^{1-\epsilon})$
-query-time $O(n\log n)$ preprocessing-time data structure.  In these
-cases, the time to construct the filter tree becomes $O(n\log n)$.
-One particularly common instance of this occurs when Interference Oracle
-queries can be reduced to simplex range searching in $\R^{d'}$ for some
-constant dimension $d'$.  In this case, Matou\v{s}ek's partition trees
-yield a data structure that can be constructed in $O(n\log n)$ time and
-that can answer queries in $O(n^{1-1/d+\epsilon})$ time.
-
+In other cases, the Interference Oracle corresponds to a natural query for
+which there exists (or we can develop) an $O(n^{1-\epsilon})$ query-time
+$O(n\log n)$ preprocessing-time data structure.  In these cases, the time
+to construct the odds-on tree becomes $O(n\log n)$.  One particularly
+common instance of this occurs when Interference Oracle queries can
+be reduced to $O(1)$ simplex range counting queries in $\R^{d'}$ for
+some constant dimension $d'$.  In this case, Matou\v{s}ek's partition
+trees \cite{m92} yield an Interference Oracle that can be constructed in
+$O(n\log n)$ time and that can answer queries in $O(n^{1-1/d+\epsilon})$
+time. 
 
 \subsection{Point Location Problems}
 
@@ -600,7 +703,7 @@ for point location in connected planar subdivisions.  This leaves open
 the case where the graph of the subdivision is not connected.  Since there
 are several $O(\log n)$ query-time, $O(n\log n)$ preprocessing-time data
 structure for planar point location in (possibly disconnected) planar
-subdivision \cite{k83,st86,egs86,m90,as98} we can apply filter trees.
+subdivision \cite{k83,st86,egs86,m90,as98} we can apply odds-on trees.
 
 To obtain a fast preprocessing time, we can use an
 implementation of the Interference Oracle based on partition trees.  For
@@ -622,23 +725,26 @@ that $uw$ and $xy$ intersect if and only if
 \[ L(u,w,y) \wedge L(x,y,u) \wedge L(w,u,x) \wedge L(y,x,w) \]
 or
 \[ R(u,w,y) \wedge R(x,y,u) \wedge R(w,u,x) \wedge R(y,x,w) \]
-where $L(a,b,c)$, respectively $R(a,b,c)$, is the predicate that is true
-if and only if the sequence of points $abc$ form a left, respectively,
-right, turn.  If we fix $x$ and $y$, then each of the above predicates
-is the sign of a linear function whose coefficients are determined by $u$
-and $w$.  Therefore, we can treat each edge of $G'$ as a point in $\R^4$,
-yielding a point set $S_{G'} \subset\R^4$ such that testing if edge $uw$
-intersects some edge of $G'$ is equivalent to 2 simplex range counting
-queries over $S_{G'}$.  Again, partition trees allow us to do this in
-$O(n^{3/4+\epsilon})$ time after $O(n\log n)$ preprocessing.  Therefore,
-the Interference Oracle for point location can be implemented to run
-in $O(n^{3/4+\epsilon})$ time after $O(n\log n)$ preprocessing.  This yields
-our first theorem:
+where $L(a,b,c)$ and $R(a,b,c)$, are predicates that are true if and
+only if the sequence of points $abc$ form a left turn, respectively a
+right turn.  If we fix $x$ and $y$, then each of the above predicates is
+the sign of a linear function over the variables $u_1$, $u_2$, $w_1$,
+and $w_2$.  Therefore, we can treat each edge of $G'$ as a point in
+$\R^4$, yielding a point set $S_{G'} \subset\R^4$ such that testing if
+edge $uw$ intersects some edge of $G'$ can be reduced to two simplex
+range counting queries over $S_{G'}$.  Again, partition trees allow us to
+do this in $O(n^{3/4+\epsilon})$ time after $O(n\log n)$ preprocessing.
+Therefore, the Interference Oracle for point location can be implemented
+to run in $O(n^{3/4+\epsilon})$ time after $O(n\log n)$ preprocessing.
+This yields our first theorem:
 
 \begin{thm}\thmlabel{planar-point-location}
-  There exists a distribution-sensitive data structure for the planar
-  point location problem that uses $O(n\log n)$ preprocessing
-  time and $O(n)$ space.
+  There exists a distribution-sensitive data structure\footnote{Here,
+  and for the remainder of the paper, a data structure for a problem
+  $\mathcal{P}$ is distribution-sensitive if the expected query time of
+  the data structure is $O(\mu_D(T^*)+1)$ for any linear decision tree
+  $T^*$ that solves $\mathcal{P}$.}for the planar point location problem
+  that uses $O(n\log n)$ preprocessing time and $O(n)$ space.
 \end{thm}
 
 The \emph{3-d point in polytope problem} is the problem of determining if
@@ -646,7 +752,7 @@ a query point $q\in\R^3$ is contained in a 3-dimensional polytope $P$.
 The Dobkin-Kirkpatrick hierarchy \cite{dk83} gives an $O(\log n)$
 query-time, $O(n)$ preprocessing-time data structure for this problem.
 Furthermore, Interference Oracle queries (which involve testing if a
-simplex intersects the boundary of $P$) can also be answered in $O(\log
+tetrahedron intersects the boundary of $P$) can also be answered in $O(\log
 n)$ time by the Dobkin-Kirkpatrick hierarchy.
 
 \begin{thm}
@@ -686,9 +792,9 @@ The post-office problem can be solved efficiently through the use of
 point location in Voronoi diagrams.  In 2-dimensions, Voronoi diagrams
 are planar graphs of size $O(n)$ and can be computed in $O(n\log n)$ time
 \cite{ps85}.  Combining this with \thmref{planar-point-location} gives
-a distribution-sensitive data structure for the 2-d postoffice problem:
+a distribution-sensitive data structure for the 2-d post-office problem:
 
-\begin{thm}\thmlabel{planar-point-location}
+\begin{thm}
   There exists a distribution-sensitive data structure for the
   2-dimensional post office problem that uses $O(n\log n)$ preprocessing
   time and $O(n)$ space.
@@ -698,7 +804,7 @@ In $d >2$ dimensions, the post-office problem can still be solved using
 Voronoi diagrams, but the space and preprocessing costs are higher
 \cite{c88postoffice}:
 
-\begin{thm}\thmlabel{planar-point-location}
+\begin{thm}
   There exists a distribution-sensitive data structure for the
   2-dimensional post office problem that uses $O(n^{\ceil{d/2}+\epsilon})$
   preprocessing time and space.
@@ -731,9 +837,9 @@ in $O(\log n)$ time per query.
   $O(n^{1+\epsilon})$ preprocessing time and $O(n)$ space.
 \end{thm}
 
-Schwarzkopf gives an $O(n^{\floor{d/2}+\epsilon})$ space, $O(\log n)$ query
-time solution for the problem of ray shooting in a $d$-dimensional
-polytope with $d \ge 4$.
+Schwarzkopf \cite{s92} gives an $O(n^{\floor{d/2}+\epsilon})$ space,
+$O(\log n)$ query time solution for the problem of ray shooting in a
+$d$-dimensional polytope with $d \ge 4$.
 
 \begin{thm}
   There exists a distribution-sensitive data structure for the
@@ -745,22 +851,22 @@ polytope with $d \ge 4$.
 
 The \emph{2-d orthogonal range counting problem} is the problem of
 counting the number of points of a set $S\subset\R^2$ that are contained
-in a query rectangle $[q_1,q_2]\times[q_3,q_4]$. (Note that produces
-a query point $q\in \R^4$.) Bentley's range trees \cite{b75} with
-fractional cascading \cite{cg86,l78} yield an $O(n\log n)$ preprocessing
-time and space, $O(\log n)$ query time data structure for this problem.
-Interference Oracle queries for 2-d orthogonal range counting require
-determining if any query represented by a point in a 4-d simplex have some
-point of $S$ on its boundary.  This problem be decomposed into $O(1)$
-simplex range counting query in $\R^4$ in a manner similar to that used
-for the point location problem.  Thus, an Interference Oracle for this
-problem can be implemented in $O(n^{3/4+\epsilon})$ time after $O(n\log
-n)$ preprocessing.
+in a query rectangle $[q_1,q_2]\times[q_3,q_4]$. (Note that this
+produces a query point $q\in \R^4$.) Bentley's range trees \cite{b75},
+with fractional cascading \cite{cg86,l78}, yield an $O(n\log n)$
+preprocessing time and space, $O(\log n)$ query time data structure
+for this problem.  Interference Oracle queries for 2-d orthogonal
+range counting require determining if any rectangle represented by a
+point in a 4-dimensional simplex has some point of $S$ on its boundary.
+This problem can be decomposed into $O(1)$ simplex range counting query in
+$\R^4$ in a manner similar to that used for the point location problem.
+Thus, an Interference Oracle for this problem can be implemented in
+$O(n^{3/4+\epsilon})$ time after $O(n\log n)$ preprocessing.
 
 \begin{thm}
-  There exists a distribution-sensitive data structure for 2-d orthogonal
-  range counting that uses $O(n\log n)$ preprocessing time and
-  $O(n\log n)$ space.
+  There exists a distribution-sensitive data structure for the 2-d
+  orthogonal range counting problem that uses $O(n\log n)$ preprocessing
+  time and $O(n\log n)$ space.
 \end{thm}
 
 Range trees satisfy the constraints of the \emph{comparison tree} model of
@@ -789,52 +895,52 @@ $O(\log n)$ time after $O(n\log n)$ preprocessing using range trees.
 
 \begin{thm}
   There exists a distribution-sensitive data structure \emph{in the
-  comparison tree model} for 2-d orthogonal range counting that uses
-  $O(n\log n)$ preprocessing time and space.
+  comparison tree model} for the 2-d orthogonal range counting problem
+  that uses $O(n\log n)$ preprocessing time and space.
 \end{thm}
 
 \section{Summary and Conclusions}
 \seclabel{conclusions}
 
-We have presented a data structure --- the filter tree --- that can
+We have presented a data structure --- the odds-on tree --- that can
 be added on to any data structure that answers queries drawn from some
 distribution $D$ over $\R^d$.  If the underlying data structure has query
 time $O(\log n)$, then the combined data structure will have optimal
 expected query time in the linear decision tree model.  A variant of
-the filter tree based on $k$-d trees provides a similar result in the
+the odds-on tree based on $k$-d trees provides a similar result in the
 comparison tree model.  \secref{applications} contains a smattering of
-applications of the filter tree.  Many more are possible.
+applications of the odds-on tree.  Many more are possible.
 
-We believe that the filter tree may actually be practical for some
-problems in some settings.  We outline two of these setting below.
+We believe that the odds-on tree may actually be practical in some settings.
+We outline two of these setting below.
 
-The comparison-tree version of the filter tree should be practical
+The comparison-tree version of the odds-on tree should be practical
 because it is based on $k$-d trees, which are simple and widely used
-in practice. At worst, a comparison-based filter tree will perform
+in practice. At worst, a comparison-based odd-on tree will perform
 $O(\epsilon\log n)$ extra comparisons before falling back to the backup
 data structure.
 
-In low dimensions, simpler alternatives to the Matou\v{s}ek's Partition
+In low dimensions, simpler alternatives to Matou\v{s}ek's Partition
 Theorem (\thmref{point-partition}) are available and may be more
 practical.  For example, in 2-d one can use two lines to partition any $m$
 point set into 4 points sets each of size at most $\ceil{m/4}$ such that
 no line intersects more than the 3 of the resulting sets. This result is
 strong enough that it can be used in place of \thmref{point-partition}
-to prove all our results (for 2-d problems) and results in a filter tree
+to prove all our results (for 2-d problems) and yields an odds-on tree
 that only requires 2 point-line comparisons at each node.
 
-Because the filter tree is so small (of size $O(n^\epsilon)$) it
-may be useful to speed up searching in environments where memory
-is constrained. For example, it can be applied to the succinct
-point location data structures of Bose \etal\ \cite{bchmm09} to obtain a
+Because the odds-on tree is so small (of size $O(n^\epsilon)$) it
+may be useful to speed up searching in environments where memory is
+constrained. For example, it can be applied to the succinct point
+location data structures of Bose \etal\ \cite{bchmm09} to obtain a
 distribution-sensitive and succinct data structure for point location.
-It may also be useful as a filter that is sufficiently small to fit
-into internal memory whereas the backup structure might live in external
-memory.
+In external-memory settings, an odds-on tree may also be useful as a filter
+that is sufficiently small to fit into internal memory while the backup
+structure lives in (larger but slower) external memory.
 
 Finally, we conclude with a possible direction for future research.  The
-filter tree is a static structure that requires the ability to sample from
-the distribution $D$.  It would be useful to have a \emph{self-adjusting}
+odds-on tree is a static structure that requires the ability to sample from
+the query distribution $D$.  It would be useful to have a \emph{self-adjusting}
 version that knows nothing about the query distribution (if any), but
 adjusts itself based on incoming queries.   The following definition
 is an attempt to capture the notion of \emph{static optimality} from the theory
@@ -848,9 +954,18 @@ is $O(t + m\mu_{D_Q}(T^*))$, where $t$ is independent of $m$, $T^*$
 is any linear decision tree that solves $\mathcal{P}$, and $D_{Q}$
 is the uniform distribution over the multiset $\{q_1,\ldots,q_m\}$.
 \end{defn}
-Is there a self-adjusting version of filter trees that satisfies
-Definition~\ref{defn:static-optimality}?
 
+\noindent\textbf{Open Problem:} Is there a self-adjusting version of
+odds-on trees that satisfies \defref{static-optimality}?
+
+Using the technique of \emph{partial rebuilding} \cite{o83} on the odds-on
+tree seems like a promising approach since partial rebuilding has been
+applied successfully to binary search trees to obtain a data structure
+for 1-dimensional searching that satisfies \defref{static-optimality}
+\cite{g00}.  However this result uses an $O(m)$ time algorithm for
+optimally rebuilding a binary search (sub)tree of size $m$ based on
+access counts \cite{m77}.  No such algorithm is currently known for
+partition trees, which require $O(m\log m)$ time to (re)build.
 
 
 \bibliographystyle{plain}

@@ -207,7 +207,7 @@ Shannon's Source Coding Theorem \cite{s48}:
 
 \begin{thm}[Shannon's Theorem]
   Let $\mathcal{P}:\R^d\rightarrow A$ be a query problem and define
-  $\mathcal{P}^{-1}(a)=\{q\in\R^d:\mathcal{P}=a\}$, for any $a\in A$. Then,
+  $\mathcal{P}^{-1}(a)=\{q\in\R^d:\mathcal{P}(q)=a\}$, for any $a\in A$. Then,
   for any linear decision tree $T$ that solves $\mathcal{P}$,
   \[
     \mu_D(T) \ge H(\{\mathcal{P}^{-1}(a): a\in A\}) \enspace .
@@ -232,8 +232,8 @@ the distribution $D$.  A complete description follows.
 There exists a constant $c$ such that, for any set $S$ of $m$
 points in $\R^d$ and any constant $r\le m$, there exists a sequence
 $\langle \Delta_1,\ldots,\Delta_r\rangle$ of closed simplices such that
+$\bigcup_{i=1}^r \Delta_i = \R^d$,
   \begin{enumerate}
-    \item $\bigcup_{i=1}^r \Delta_i = \R^d$,
     \item $|\Delta_i^*| \le 2m/r$, where $\Delta_i^*=\Delta_i \cap S\setminus
     \left(\bigcup_{j=1}^{i-1}\Delta_j\right)$, and
     \item For any hyperplane $\ell$, there are at most $cr^{1-1/d}$ elements of
@@ -288,8 +288,9 @@ applying \thmref{point-partition}.  The root of $T_S$ has $r$ children
 corresponding to the simplices $\Delta_1,\ldots,\Delta_{r}$ obtained
 by applying \thmref{point-partition} to $S$. The $i$th child of the
 root is itself the root of the partition tree $T_{S\cap\Delta_i^*}$
-for $S\cap\Delta_i^*$. This recursive process stops when the depth of
-a node exceeds some predefined depth $k\le \log_{r/3} m$.
+for $S\cap\Delta_i^*$. This recursive process stops when the set $S$
+contains at most 1 point or when the depth exceeds some pre-specified
+maximum depth $k$.
 
 Next we define some regions, $\Delta(v)$, $\poly(v)$, and $\Xi(v)$,
 that are associated with each node $v$ of $T_S$.  Every node $v$ in
@@ -327,9 +328,8 @@ property of the simplicial partition in
   tree described above, and let $V_i$ denote the set of at most $r^i$
   nodes of $T_S$ at depth $i$.  There exists a constant $c$, independent
   of $r$ and $m$, such that the partition tree $T_S$ has the following
-  properties, for every $i\in\{0,\ldots,k\}$:
+  properties, for every $i\in\Z$:
   \begin{enumerate}
-    \item $\Xi(V_i)$ is a partition of $\R^d$,  
     \item For every node $v\in V_i$, $|S\cap\Xi(v)| \le m(2/r)^i$, and 
     \item For any hyperplane $\ell$, the number of elements in
       $\poly(V_i)$ whose interiors intersect $\ell$ is at most
@@ -339,22 +339,20 @@ property of the simplicial partition in
     $O(m\log m)$ time.
 \end{thm}
 
-
-Restating \thmref{point-partition} in terms of probability distributions,
-we have:
+The following is a sampling version of \thmref{point-partition-tree} that we
+will use in the construction of an odds-on tree:
 
 \begin{thm}\thmlabel{prob-partition-tree} 
-  Let $S$ be a sample of $m$ points in $\R^d$ drawn i.i.d.\ according
-  to probability measure $D$, let $T_D=T_S$ denote the partition tree
+  Let $S$ be a sample of $m$ points in $\R^d$ i.i.d.\ according
+  to $D$, let $T_D=T_S$ denote the partition tree
   given by \thmref{point-partition-tree}, and let $V_i$ denote the set
   of at most $r^i$ nodes of $T_D$ at depth $i$.  There exists a constant $c$,
   independent of $r$, $m$ and $D$, such that with probability at least
-  $1-O(m^{-\gamma})$, $T_D$ has the following properties, for every
-  $i\in\{0,\ldots,k\}$:
+  $1-O(e^{-m^{1/2}})$, $T_D$ has the following properties, for every
+  $i\in\{0,\ldots,\lfloor (1/4)\log_rm\rfloor\}$:
   \begin{enumerate}
-    \item $\Xi(V_i)$ is a partition of $\R^d$,  
-    \item For every node $v\in V_i$, $\Pr(\Xi(v)) \le
-           (3/r)^i+O(m^{-\delta})$, and
+    \item For every node $v\in V_i$, $\Pr(\Xi(v)) \le (3/r)^i$,
+         and
     \item For any hyperplane $\ell$, the number of elements in
       $\poly(V_i)$ whose interiors intersect $\ell$ is at most
       $(cr^{1-1/d})^i$.
@@ -363,10 +361,67 @@ we have:
   $O(m)$ calls to the Sampling Oracle.
 \end{thm}
 
+% Some of Luc and Jamie's defines
+\def\isdef{\buildrel {\rm def} \over =}
+\def\PROB{\Pr}
+
 \begin{proof}
-The constants $\gamma$ and $\delta$ aren't important, as long as they're
-bigger than 0. In fact, the failure probability ($m^{-\gamma}$) can be
-as large as $O(1/\log m)$ and that would be good enough.
+Condition~2 follows with certainty from \thmref{point-partition-tree}.  In this
+proof we bound the probability of failure for Condition~1.  Let $k=\lfloor (1/4)\log_rm\rfloor$.
+
+We will use $D_m(A)$ to denote the empirical measure of a set $A$: 
+\[ 
+  D_m (A) \isdef {{|S\cap A|} \over m} \enspace .
+\]  
+From \thmref{point-partition-tree} we have
+\[
+  \sup_{v\in V_i} D_m(\Xi(v)) \le (2/r)^i \enspace .
+\]
+Now,
+\begin{eqnarray*}
+\PROB \left( \sup_{v\in V_i} D ( \Xi(v) ) > \left(\frac{3}{r}\right)^i \right)
+&=& \PROB \left( \cup_{v\in V_i} \left[ D ( \Xi(v) ) - D_m(\Xi(v))  >  \left(\frac{3}{r}\right)^i - D_m(\Xi(v)) \right] \right) \cr
+&\le& \PROB \left( \cup_{v\in V_i} \left[ D ( \Xi(v) ) - D_m(\Xi(v))  > \left(\frac{3}{r}\right)^i - \left(\frac{2}{r}\right)^i  \right] \right) \cr
+&\le& \PROB \left( \sup_{v\in V_i} \left(  D ( \Xi(v) ) - D_m(\Xi(v)) \right) > r^{-i} \right) \cr
+&\le& \PROB \left( \sup_{A \in {\mathcal{A}}} \left( D ( A ) - D_m ( A ) \right)  > r^{-i} \right) \cr
+\end{eqnarray*}
+where $\mathcal{A}$ are sets formed by taking the intersection of $k$
+closed simplices and subtracting $k(r-1)$  (possibly empty) simplices
+from this intersection.  This is because $\Xi(V)\subseteq \mathcal{A}$.
+We can actually handle all levels $i\in \{0,\ldots,k\}$ of the tree at
+once with the inequality
+\begin{eqnarray*}
+\PROB \left\{ \cup_{i\in\{1,\ldots,k\}}\left[\sup_{v\in V_i} D ( \Xi(v) ) > \left(\frac{3}{r}\right)^i \right] \right\}
+\leq \Pr \left\{ \sup_{A \in {\mathcal{A}}} \left( D ( A ) - D_m ( A ) \right)  > r^{-k} \right\} \enspace .
+\end{eqnarray*}
+The class $\mathcal{A}$ for $k=1$ and $r=1$ is the class of all simplices
+in $\R^d$.   Since a simplex in $\R^d$ is the common intersection of $d+1$
+halfspaces in $\R^d$, it helps to first consider halfspaces.  The set of
+halfspaces in $\R^d$ have Vapnik-Chervonenkis dimension $d+1$.  By Sauer's
+lemma \cite{s72}\cite[pages~28--29]{dl01}, the number of subsets of an
+$m$-point set that can be obtained by intersections with halfspaces does
+not exceed $(m+1)^{d+1}$.  A simple combinatorial argument then implies
+that the number of subsets of an $m$-point set that can be obtained by
+intersections with simplices does not exceed $(m+1)^{(d+1)^2}$.
+
+Assume now general $r$ and $k$. Then the number of subsets of an $m$-point
+set that can be obtained by intersections with sets from $\mathcal{A}$
+does not exceed $(m+1)^{rk(d+1)^2}$, by the same combinatorial argument.
+Then, by a version of the Vapnik-Chervonenkis inequality \cite{vc71} shown by Devroye \cite{d82},
+\[
+\PROB \left\{ \sup_{A \in {\mathcal{A}}} \left| D ( A ) - D_m ( A ) \right|  \ge t \right\}
+\le 4 \left( m^2 + 1 \right)^{rk(d+1)^2} \exp\left(4t+4t^2-2mt^2\right) \enspace ,
+\]
+for all $t>0$.
+Thus, 
+\begin{eqnarray*}
+\PROB \left\{ \cup_{i\in\{1,\ldots,k\}}\left[\sup_{v\in V_i} D ( \Xi(v) ) > \left(\frac{3}{r}\right)^i \right] \right\}
+&\le& 4 \left( m^2 + 1 \right)^{rk(d+1)^2} \exp\left(4r^{-k}+4r^{-2k}-2mr^{-2k}\right) \\
+&\le& \exp\left(2+4r^{-k}+4r^{-2k}+rk(d+1)^2\ln(m^2+1)-2mr^{-2k}\right) \\
+&\le& \exp\left(10+r(d+1)^2\log_r(m)\ln(m^2+1)-2m^{1/2}\right) ~,\\
+& = & O\left(e^{-m^{1/2}}\right)
+\end{eqnarray*}
+since $k\leq (1/4)\log_rm$.
 \end{proof}
 
 Note that, so far, we have not considered the query problem $\mathcal{P}$
@@ -374,7 +429,7 @@ at all. The \emph{odds-on tree} $T_{\mathcal{P},D}$ for $(\mathcal{P},D)$
 is obtained in the following way:  We construct a partition tree $T_D$
 described in \thmref{prob-partition-tree}, using the value $m=n^{\tau}$
 for some parameter $\tau > 0$ and setting the maximum depth to
-$k=\floor{\delta\log_{r/3} m}$.
+$k=\lfloor{(1/4)\log_{r} m}\rfloor$.
 
 Next, we trim some nodes of $T_{\mathcal{P},D}$. We use the
 Interference Oracle to test, for each node $v$ of $T_D$, if
@@ -447,7 +502,7 @@ of $X$.
           and $|V''| = \Omega(p|V|)$}
       \right\} > 0 \enspace .
   \]
-  Consider any hyperplane $\ell$. Condition~3 of
+  Consider any hyperplane $\ell$. Condition~2 of
   \thmref{prob-partition-tree}, implies that $\ell$ intersects the
   interior of at most $(cr^{1-1/d})^{i}$ elements of $V$ for some
   constant $c$.  The probability that $\ell$ intersects the interior of
@@ -506,8 +561,8 @@ solves $\mathcal{P}$.
 \begin{lem}\lemlabel{lower-bound}
   Let $T_{\mathcal{P},D}$ be the odds-on tree defined in
   \secref{data-structure} and assume $T_{\mathcal{P},D}$ satisfies
-  Conditions~1--3 of \thmref{prob-partition-tree}.  Let $L$ denote the
-  set of leaves of $T_{\mathcal{P},D}$, and let $T^*$ be any linear
+  Conditions~1 and 2 of \thmref{prob-partition-tree}.  Let $L$ denote
+  the set of leaves of $T_{\mathcal{P},D}$, and let $T^*$ be any linear
   decision tree that solves $\mathcal{P}$.  Then
   \[ \mu_D(T^*) = \Omega(H(\Xi(L))-1) \enspace . \]
 \end{lem}
@@ -526,11 +581,9 @@ solves $\mathcal{P}$.
   since each leaf in $L'$ has at most $r$ children in $L$. 
 
   We first partition $L'$ into groups $G_1,G_2,\ldots$, where $G_i$
-  contains all leaves $v$ such that $1/2^{i-1}\ge \Pr(\Xi(v))
-  \ge 1/2^{i}$.  Note that, because the maximum depth of a node
-  in $T_{\mathcal{P},D}$ is $\delta\log_{r/3} m$, Condition~2 of
-  \thmref{prob-partition-tree} implies that the depth of a node in $G_i$
-  is at most $i/\log(r/3) + O(1)$.
+  contains all leaves $v$ such that $1/2^{i-1}\ge \Pr(\Xi(v)) \ge
+  1/2^{i}$.  Note that Condition~1 of \thmref{prob-partition-tree}
+  implies that the depth of a node in $G_i$ is at most $i/\log(r/3)$.
 
   We then further partition each group $G_i$ into subgroups
   $G_{i,1},\ldots,G_{i,t_i}$. We partition $G_i$ into subgroups
@@ -583,13 +636,13 @@ solves $\mathcal{P}$.
   It follows \cite[Lemma~3]{cdilm09} that
   \[
     (k+1)\cdot\mu_D(T^*) \ge H(L') 
-       - H(\{\cup G_{i,j}:i\in\N,\, j \in\{1,\ldots,t_{i,j}\}) 
+       - H(\{\cup G_{i,j}:i\in\N,\, j \in\{1,\ldots,t_{i}\}) 
        - O(1) \enspace .
   \]
   Thus, all that remains is to upper-bound the contribution of
-  $\bar{H}=H(\{\cup G_{i,j}:i\in\N,\, j \in\{1,\ldots,t_{i,j}\})$.
+  $\bar{H}=H(\{\cup G_{i,j}:i\in\N,\, j \in\{1,\ldots,t_{i}\})$.
   \begin{eqnarray*}
-    \bar{H} &= & H(\{\cup G_{i,j}:i\in\N,\, j \in\{1,\ldots,t_{i,j}\}) \\
+    \bar{H} &= & H(\{\cup G_{i,j}:i\in\N,\, j \in\{1,\ldots,t_{i}\}) \\
      & = & \sum_{i=1}^\infty \sum_{j=1}^{t_{i}} 
          \Pr(\cup G_{i,j})\log(1/\Pr(\cup G_{i,j})) \\
    & = & \sum_{i=1}^\infty
@@ -636,9 +689,9 @@ solves $\mathcal{P}$.
   yields the stated bounds on the construction time and the use of the
   Sampling and Interference Oracles.
 
-  If $T_{\mathcal{P},D}$ satisfies Conditions~1--3 of 
-  \thmref{prob-partition-tree} then, by \lemref{lower-bound},
-  the expected time to answer queries using $T_{\mathcal{P},D}$ is
+  If $T_{\mathcal{P},D}$ satisfies Conditions~1 and 2 of
+  \thmref{prob-partition-tree} then, by \lemref{lower-bound}, the expected
+  time to answer queries using $T_{\mathcal{P},D}$ is
   \[
      \sum_{t\in L} \Pr(t)O(\depth_T(t)) 
           = \sum_{t\in L}\Pr(t)O(\log(1/\Pr(t))) = O(H(L)) \enspace .
@@ -648,7 +701,7 @@ solves $\mathcal{P}$.
   is taken over $D$ and the random sampling used to generate $S$ in
   \thmref{prob-partition-tree}) to answer a query using an odds-on tree is
   \[
-     (1-O(n^{-\tau\gamma})) O(H(L)) + O(n^{-\tau\gamma}) O(\log n) =
+     (1-O(e^{-n^{\tau/2}}))\cdot O(H(L)) + O(e^{-n^{\tau/2}})\cdot O(\log n) =
         O(H(L)+1)  \enspace .
   \]
   On the other hand, by \lemref{lower-bound} the expected cost of any
@@ -703,7 +756,7 @@ for point location in connected planar subdivisions.  This leaves open
 the case where the graph of the subdivision is not connected.  Since there
 are several $O(\log n)$ query-time, $O(n\log n)$ preprocessing-time data
 structure for planar point location in (possibly disconnected) planar
-subdivision \cite{k83,st86,egs86,m90,as98} we can apply odds-on trees.
+subdivision \cite{as98,egs86,k83,m90,st86} we can apply odds-on trees.
 
 To obtain a fast preprocessing time, we can use an
 implementation of the Interference Oracle based on partition trees.  For

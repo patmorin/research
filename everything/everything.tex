@@ -47,7 +47,10 @@
   polygons, ray shooting in polytopes, nearest-neighbour queries in
   $\R^d$, point-location in arrangements of hyperplanes in $\R^d$,
   and many other geometric searching problems that can be solved in the
-  linear-decision tree model.
+  linear-decision tree model.  A standard lifting technique extends these
+  results to algebraic decision trees of constant degree.  A slightly
+  different version of odds-on trees yields similar results for orthogonal
+  searching problems that can be solved in the comparison tree model.
 \end{abstract}
 
 \section{Introduction}
@@ -116,17 +119,25 @@ that can compute $\mathcal{P}(q)$ in $O(\log n)$ time\footnote{There
 is no natural definition of $n$ for the abstract problem $\mathcal{P}$.
 Nevertheless, all the problems we will eventually consider arise from a
 set of $n$ objects in $\R^d$ and, for all these problems $O(\log n)$ is
-the optimal query time in the models of computation we will consider.}
-for any query point $q$.  Let $D$ be a probability measure over $\R^d$
-representing a distribution of queries.  We describe a data structure
-$T=T_{\mathcal{P},D}$, called the \emph{odds-on tree},\footnote{odds-on:
-(adj) having a better than even chance of success ``the odds-on
-favourite''}  of size $O(n^\eps)$ that can be used as a filter that
-quickly computes $\mathcal{P}(q)$ for some query values in $\R^d$ and
-relies on $\mathcal{S}$ for the remaining queries.  With an odds-on tree,
-the expected query time for a point drawn according to $D$ is $O(H^*+1)$,
-where $H^*$ is a lower-bound on the expected cost of any linear decision
-tree that solves $\mathcal{P}$.
+the optimal worst-case query time in the models of computation we will
+consider.} for any query point $q$.  Let $D$ be a probability measure
+over $\R^d$ representing a distribution of queries.  We describe
+a data structure $T=T_{\mathcal{P},D}$, called the \emph{odds-on
+tree},\footnote{odds-on: (adj.) having a better than even chance of
+success ``the odds-on favourite''}  of size $O(n^\eps)$ that can be
+used as a filter that quickly computes $\mathcal{P}(q)$ for some query
+values in $\R^d$ and relies on $\mathcal{S}$ for the remaining queries.
+With an odds-on tree, the expected query time for a point drawn according
+to $D$ is $O(H^*+1)$, where $H^*$ is a lower-bound on the expected cost
+of any linear decision tree that solves $\mathcal{P}$.
+
+For any constant integer $p\ge 1$, a standard lifting technique allows us
+to lift the query distribution from $\R^d$ into $\R^{d'}$, with $d'={p+d
+\choose d}$ so that there is a correspondence between linear inequalities
+(halfspaces) in $\R^{d'}$ and $d$-variate polynomial inequalities of
+maximum degree $p$.  This technique yields the same result, except that
+$H^*$ becomes a lower-bound on the expected cost of any algebraic decision
+tree of degree $p$.
 
 This result has a number of applications, including distribution-sensitive
 data structures for point location in 2-d, point-in-polytope testing
@@ -670,7 +681,7 @@ solves $\mathcal{P}$.
   so $\mu_D(T^*) = \Omega(H(L) - 1)$, as required.
 \end{proof}
 
-\begin{thm}
+\begin{thm}\thmlabel{odds-on}
   Let $\mathcal{P}:\R^d\rightarrow A$ be a decision problem for which
   we have an ($O(\log n)$ time) Backup Oracle and an Interference
   Oracle, and let $D$ be any probability measure over $\R^d$ for
@@ -712,15 +723,38 @@ solves $\mathcal{P}$.
   which completes the proof.
 \end{proof}
 
+Using a standard lifting of query points, any degree $p$ algebraic
+decision tree that solves a problem $\mathcal{P}:\R^d\rightarrow A$
+can be implemented as a linear decision tree in $\R^{d'}$, with
+$d'={p+d\choose d}$.  Applying this yields the following corollary:
+
+\begin{cor}\corlabel{odds-on-algebraic}
+  Let $\mathcal{P}:\R^d\rightarrow A$ be a decision problem for which
+  we have an ($O(\log n)$ time) Backup Oracle and an Interference
+  Oracle, and let $D$ be any probability measure over $\R^d$ for which
+  we have a Sampling Oracle.  Then, for any constants $\epsilon > 0$
+  and $p\ge 1$, using $O(n^\epsilon)$ calls to the Sampling Oracle and
+  $O(n^\epsilon)$ calls to the Interference Oracle, an odds-on tree
+  can be constructed in $O(n^\epsilon)$ time and $O(n^\epsilon)$ space.
+  This odds-on tree can, in conjunction with the backup oracle, answer
+  $\mathcal{P}$-queries drawn according to $D$ in $O(H+1)$ expected time,
+  where $H \le \mu_D(T^*)$ for any degree $p$ algebraic decision tree $T$
+  that solves $\mathcal{P}$.
+\end{cor}
+
 \section{Applications}
 \seclabel{applications}
 
 In this section, we discuss a few of the many potential application of
-odds-on trees.  In all of our applications, the problem $\mathcal{P}$
-is a query problem over some set of $n$ geometric objects in $\R^d$.
-Before delving into the details of the applications, we first outline
-some general strategies for implementing the Interference Oracle needed
-to build an odds-on tree.
+odds-on trees.  In all of our applications, the problem $\mathcal{P}$ is a
+query problem over some set of $n$ geometric objects in $\R^d$.  In order
+to shorten the statements of theorem in this section, we say that a data
+structure for a problem $\mathcal{P}$ is \emph{distribution-sensitive
+(in the linear decision tree model)} if the expected query time of the
+data structure is $O(\mu_D(T^*)+1)$ for any linear decision tree $T^*$
+that solves $\mathcal{P}$.} Before delving into the details of the
+applications, we first outline some general strategies for implementing
+the Interference Oracle needed to build an odds-on tree.
 
 An odds-on tree can be made to have size $O(n^\epsilon)$ for any
 constant $\epsilon > 0$.  Furthermore, the number of calls to the
@@ -792,12 +826,9 @@ to run in $O(n^{3/4+\epsilon})$ time after $O(n\log n)$ preprocessing.
 This yields our first theorem:
 
 \begin{thm}\thmlabel{planar-point-location}
-  There exists a distribution-sensitive data structure\footnote{Here,
-  and for the remainder of the paper, a data structure for a problem
-  $\mathcal{P}$ is distribution-sensitive if the expected query time of
-  the data structure is $O(\mu_D(T^*)+1)$ for any linear decision tree
-  $T^*$ that solves $\mathcal{P}$.}for the planar point location problem
-  that uses $O(n\log n)$ preprocessing time and $O(n)$ space.
+  There exists a distribution-sensitive data structure for the planar
+  point location problem that uses $O(n\log n)$ preprocessing time and
+  $O(n)$ space.
 \end{thm}
 
 The \emph{3-d point in polytope problem} is the problem of determining if
@@ -951,6 +982,10 @@ $O(\log n)$ time after $O(n\log n)$ preprocessing using range trees.
   comparison tree model} for the 2-d orthogonal range counting problem
   that uses $O(n\log n)$ preprocessing time and space.
 \end{thm}
+
+\subsection{Algebraic Decision Trees}
+
+Note that \corref{odds-on-algebraic} 
 
 \section{Summary and Conclusions}
 \seclabel{conclusions}

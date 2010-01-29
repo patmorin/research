@@ -198,28 +198,34 @@ data structure.  When discussing applications in \secref{applications},
 implementations of the Interference Oracle for particular problems will
 be described.
 
-A \emph{linear decision tree} for $\mathcal{P}$ is a rooted ordered
-binary tree in which each internal node $v$ is labelled with a linear
-inequality $a_{v,1}x_1 + a_{v,2}x_2 + \cdots a_{v,d}x_d + a_{v,d+1} > 0$,
+A \emph{decision tree} for $\mathcal{P}$ is a rooted ordered binary
+tree in which each internal node $v$ is labelled with a predicate $v_P$
 and each leaf $w$ is labelled with an element $w_A\in A$.  A query point
-$q=(x_1,\ldots,x_d)$ follows a root-to-leaf path, proceeding to the right
-child of $v$ if it satisfies the inequality and the left child of $v$
-if it does not.  For a linear decision tree $T$ and a point $q\in\R^d$,
-we denote by $T(q)$ the label of the leaf on the root-to-leaf path
-for $p$ in $T$.  A linear decision tree \emph{solves} $\mathcal{P}$ if
-$T(q)=\mathcal{P}(q)$ for all $q\in\R^d$. The \emph{depth} of a node $v$
-in a rooted tree $T$, denoted $\depth_T(v)$, is the number of edges on
-the path from $v$ to the root of $T$.  The \emph{(expected) cost} of a
-linear decision tree, denoted $\mu_D(T)$, is the expected depth of the
-leaf reached when $p$ is drawn according to the probability measure $D$.
+$q\in\R^d$ follows a root-to-leaf path, proceeding to the right child
+of $v$ if $v_P(q)$ is true and the left child of $v$ if $v_P(q)$
+is false.  For a decision tree $T$ and a point $q\in\R^d$, we denote by
+$T(q)$ the label of the leaf on the root-to-leaf path for $p$ in $T$.
+A decision tree \emph{solves} $\mathcal{P}$ if $T(q)=\mathcal{P}(q)$
+for all $q\in\R^d$. The \emph{depth} of a node $v$ in a rooted tree $T$,
+denoted $\depth_T(v)$, is the number of edges on the path from $v$
+to the root of $T$.  The \emph{(expected) cost} of a decision tree,
+denoted $\mu_D(T)$, is the expected depth of the leaf reached when $p$
+is drawn according to the probability measure $D$.
+
+Decision trees are classified based on the types of predicates they
+use.  In a \emph{linear decision tree}, all predicates are $d$-variate
+linear inequalities.  In a \emph{degree $p$ algebraic decision tree},
+all predicates are $d$-variate polynomial inequalities of degree $p$.
+In a \emph{comparison tree}, all predicates are comparisons that compare
+one coordinate of the query point $q$ to some value.
 
 Entropy, query problems, and decision trees are all related by (half of)
 Shannon's Source Coding Theorem \cite{s48}:
 
 \begin{thm}[Shannon's Theorem]
   Let $\mathcal{P}:\R^d\rightarrow A$ be a query problem and define
-  $\mathcal{P}^{-1}(a)=\{q\in\R^d:\mathcal{P}(q)=a\}$, for any $a\in A$. Then,
-  for any linear decision tree $T$ that solves $\mathcal{P}$,
+  $\mathcal{P}^{-1}(a)=\{q\in\R^d:\mathcal{P}(q)=a\}$, for any $a\in
+  A$. Then, for any decision tree $T$ that solves $\mathcal{P}$,
   \[
     \mu_D(T) \ge H(\{\mathcal{P}^{-1}(a): a\in A\}) \enspace .
   \]
@@ -752,7 +758,7 @@ to shorten the statements of theorem in this section, we say that a data
 structure for a problem $\mathcal{P}$ is \emph{distribution-sensitive
 (in the linear decision tree model)} if the expected query time of the
 data structure is $O(\mu_D(T^*)+1)$ for any linear decision tree $T^*$
-that solves $\mathcal{P}$.} Before delving into the details of the
+that solves $\mathcal{P}$. Before delving into the details of the
 applications, we first outline some general strategies for implementing
 the Interference Oracle needed to build an odds-on tree.
 
@@ -825,7 +831,7 @@ Therefore, the Interference Oracle for point location can be implemented
 to run in $O(n^{3/4+\epsilon})$ time after $O(n\log n)$ preprocessing.
 This yields our first theorem:
 
-\begin{thm}\thmlabel{planar-point-location}
+\begin{thm}\thmlabel{planar-point-location}\thmlabel{first-app}\thmlabel{a}
   There exists a distribution-sensitive data structure for the planar
   point location problem that uses $O(n\log n)$ preprocessing time and
   $O(n)$ space.
@@ -839,7 +845,7 @@ Furthermore, Interference Oracle queries (which involve testing if a
 tetrahedron intersects the boundary of $P$) can also be answered in $O(\log
 n)$ time by the Dobkin-Kirkpatrick hierarchy.
 
-\begin{thm}
+\begin{thm}\thmlabel{b}
   There exists a distribution-sensitive data structure for the
   3-dimensional point in polytope problem that uses $O(n)$ preprocessing
   time and $O(n)$ space.
@@ -878,7 +884,7 @@ are planar graphs of size $O(n)$ and can be computed in $O(n\log n)$ time
 \cite{ps85}.  Combining this with \thmref{planar-point-location} gives
 a distribution-sensitive data structure for the 2-d post-office problem:
 
-\begin{thm}
+\begin{thm}\thmlabel{c}
   There exists a distribution-sensitive data structure for the
   2-dimensional post office problem that uses $O(n\log n)$ preprocessing
   time and $O(n)$ space.
@@ -947,7 +953,7 @@ $\R^4$ in a manner similar to that used for the point location problem.
 Thus, an Interference Oracle for this problem can be implemented in
 $O(n^{3/4+\epsilon})$ time after $O(n\log n)$ preprocessing.
 
-\begin{thm}
+\begin{thm}\thmlabel{d}
   There exists a distribution-sensitive data structure for the 2-d
   orthogonal range counting problem that uses $O(n\log n)$ preprocessing
   time and $O(n\log n)$ space.
@@ -977,15 +983,11 @@ reduced to a constant number of rectangular range counting queries
 Therefore, Interference Oracle queries can, in this case, be answered in
 $O(\log n)$ time after $O(n\log n)$ preprocessing using range trees.
 
-\begin{thm}
+\begin{thm}\thmlabel{last-app}
   There exists a distribution-sensitive data structure \emph{in the
   comparison tree model} for the 2-d orthogonal range counting problem
   that uses $O(n\log n)$ preprocessing time and space.
 \end{thm}
-
-\subsection{Algebraic Decision Trees}
-
-Note that \corref{odds-on-algebraic} 
 
 \section{Summary and Conclusions}
 \seclabel{conclusions}
@@ -999,9 +1001,22 @@ the odds-on tree based on $k$-d trees provides a similar result in the
 comparison tree model.  \secref{applications} contains a smattering of
 applications of the odds-on tree.  Many more are possible.
 
-We believe that the odds-on tree may actually be practical in some settings.
-We outline two of these setting below.
+Note that \corref{odds-on-algebraic} applies to all of the problems
+in Theorems~\ref{thm:first-app}--\ref{thm:last-app} to yield, for
+any constant $p$, data structures that are distribution-sensitive
+in the degree $p$ algebraic decision tree model.  However, when
+applying \corref{odds-on-algebraic}, the Interference Oracle becomes
+considerably more complicated, so that the fast preprocessing times in
+Theorems~\ref{thm:a}, \ref{thm:b}, \ref{thm:c}, and \ref{thm:d} increase
+to $O(n^{1+\epsilon})$.
+However, the real power of \corref{odds-on-algebraic} is its applications
+to problems that cannot be solved by finite linear decision trees.
+Examples of such problems include fixed-radius circular ray shooting in
+polygons \cite{cceo04}, point-location in 2-dimensional power diagrams
+\cite{a87}, point-location in planar subdivisions whose edges are defined
+by algebraic curves (such as arrangements of circles), and many others.
 
+We believe that the odds-on tree may actually be practical in some settings.
 The comparison-tree version of the odds-on tree should be practical
 because it is based on $k$-d trees, which are simple and widely used
 in practice. At worst, a comparison-based odd-on tree will perform
@@ -1047,7 +1062,7 @@ is the uniform distribution over the multiset $\{q_1,\ldots,q_m\}$.
 odds-on trees that satisfies \defref{static-optimality}?
 
 Using the technique of \emph{partial rebuilding} \cite{o83} on the odds-on
-tree seems like a promising approach since partial rebuilding has been
+tree seems like a promising approach since this technique has been
 applied successfully to binary search trees to obtain a data structure
 for 1-dimensional searching that satisfies \defref{static-optimality}
 \cite{g00}.  However this result uses an $O(m)$ time algorithm for

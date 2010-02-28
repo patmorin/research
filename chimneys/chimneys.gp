@@ -149,5 +149,6 @@ set fit noerrorvariables
 GNUTERM = "wxt"
 ot = 0.333333333333333
 tt = 0.666666666666667
-plot 32.*(((x**tt)/2**ot + x/(2**ot) + (x**(4./3.))/2)/x)**3. -1, 276.15
+gamma = 1024./31827.
+plot (1./gamma)*(((x**tt)/2**ot + x/(2**ot) + (x**(4./3.))/2)/x)**3. -1, 268.19
 #    EOF

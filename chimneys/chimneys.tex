@@ -8,37 +8,34 @@
 \newcommand{\const}{268.19}
 
 \begin{document}
+The proof of the upper-bound is closely related to Sz\'ekely's proof of
+the Szem\'eredi-Trotter Theorem.  Indeed, a version of our upper bound,
+with weaker constants, can be proven using only the Szemer\'edi-Trotter
+Theorem.
 
-\begin{lem}[Crossing Lemma]
-For any graph $G$ with $v$ vertices and $e > 4v$ edges,
+We make use of the following version of the Crossing Lemma, which was
+proven by Pach, Radoici\'c, Tardos, and T\'oth (SoCG~2004):
+
+\begin{lem}[Crossing Lemma]\label{lem:crossing}
+Let
+$\beta=103/6$, $\gamma = 1024/31827$, and let
+$G$ be a graph with no self loops, no parallel edges, $v$ vertices, and
+$e > \beta v$ edges.  Then
 \[
   \cn(G) \ge \gamma \cdot \frac{e^3}{v^2} \enspace ,
 \]
-where $\gamma = 1024/31827$.
 \end{lem}
 
 
 \begin{thm}
 Let $S$ be a set of $r$ points and let $H_0,\ldots,H_{t-1}$ be a
 set of lines such that the orthogonal projection of $S$ onto $H_{j}$
-gives exactly $i+j$ distinct values, for each $j\in\{0,\ldots,t-1\}$.
-Then $t \le \const i+1$.
+gives exactly $i+j$ distinct values, for some $i\ge 8$ and for each
+$j\in\{0,\ldots,t-1\}$.  Then $t \le \const i+1$.
 \end{thm}
 
 \begin{proof}
-The proof is by contradiction.  We will assume that $t > ci$ for some
-constant $c$ to be defined later.
-First we observe that the number of points, $r$, satisfies 
-\[   r \ge i+t-1 
-\]
-since the points of $S$ project onto $i+t-1$ distinct values in $H_{t-1}$.
-Furthermore, the projections of $S$ onto $H_0$ and $H_1$ imply that the
-points of $S$ are contained in the intersection of two sets of parallel
-lines $L_0$ and $L_1$, with $|L_0|=i$ and $|L_1|=i+1$, so
-\[
-   r \le i(i+1) \enspace .
-\]
-Each projection direction $H_j$ defines a set $L_j$ of $i+j$ parallel lines,
+The proof is by contradiction. Each projection direction $H_j$ defines a set $L_j$ of $i+j$ parallel lines,
 each of which contains at least one point of $S$.  In total, this defines
 a set $L=L_0\cup\cdots\cup L_{t-1}$ of
 \[
@@ -47,21 +44,22 @@ a set $L=L_0\cup\cdots\cup L_{t-1}$ of
 lines.  The total number of incidences between the these lines and
 the points in $S$ is $tr$.
 
+Next we observe that the number of points, $r$, satisfies
+\[  r \ge i+t-1 
+\]
+since there are $i+t-1$ parallel lines in $L_{t-1}$ and each of these
+contains at least one point of $S$.  Furthermore, the points of $S$
+are all contained in the intersections of lines in $L_{i}$ with lines
+in $L_{i+1}$, so
+\[
+   r \le i(i+1) \enspace .
+\]
+
 Define a geometric graph $G$ having $r+2$ vertices consisting
 of the points in $S$ plus two points ``at infinity,'' as in
 Figure~\ref{fig:G}. Observe that $G$ is a graph with no self-loops and no
 parallel edges. The number of
 edges in $G$ is exactly $tr + \ell(t)$.
-The Crossing Lemma \cite{XX} then implies that, either
-\[
-  tr +\ell(t) \le 7.5(r+2)
-\]
-or that
-\begin{equation}
-  \cn(G) \ge \gamma\cdot\frac{(tr+\ell(t))^3}{(r+2)^2} \enspace . \label{eq:cn}
-\end{equation}
-In the former case, we readily establish that $t \le i$,
-so we may assume that Eq.~(\ref{eq:cn}) holds.
 
 Observe that we have a drawing of $G$ so that the only crossings between
 edges occur where lines in $L$ intersect each other.  The total number of
@@ -75,25 +73,35 @@ intersecting pairs of lines in $L$ is
       & \le i^2t^2/2 + it^3/2 + t^4/8 \enspace .
   \end{aligned}
 \]
-%However, each point of $S$ eliminates $\binom{t}{2}$ of these intersecting
-%pairs.  Therefore, the crossing number $\cn(G)$ of $G$ satisfies
-%\[
-%  \cn(G) \le \chi(t) - \binom{t}{2}r = i^2t^2/2 + it^3/2 + t^4/8 - \binom{t}{2}r \enspace .
-%\]
-Combining this with Eq.~\ref{eq:cn} and rewriting, we obtain 
-\[
-  \chi(t)  \ge \gamma\cdot\frac{(tr+\ell(t))^3}{(r+2)^2} \enspace .
+At this point, one would normally apply the Crossing Lemma
+(Lemma~\ref{lem:crossing}) to $G$.  However, this turns out to be
+insufficient to prove a linear bound on $t$.  Instead, we will consider
+a subgraph of $G$.  Let $G_{s}$, $s\in\{1,\ldots,t\}$, be defined like
+$G$, but only with respect to the set of lines in $L_0,\ldots,L_{s-1}$.
+Then, by Lemma~\ref{lem:crossing},
+\begin{equation}
+   sr + \ell(s) \le \beta(r+2)
+     \label{eq:few-edges}
+\end{equation}
+or
+\begin{equation}
+  \chi(s) \ge \gamma\cdot\frac{(sr+\ell(s))^3}{(r+2)^2}
+     \label{eq:many-crossings}
+\end{equation}
+for each $s\in\{0,\ldots,t-1\}$.
+In particular, select $s=2i$.  Then Eq.~(\ref{eq:few-edges}) implies that
+\[  
+   2ir + \ell(2i)  \le \beta(r+2)
 \]
-Let $G_{s}$, $s\in\{1,\ldots,t\}$, be defined like $G$, but only with
-respect to the set of lines in $L_0,\ldots,L_{s-1}$.  Then, by the same reasoning as above,
+which implies that $r \le 2/(2i/\beta-1)-\ell(s)/\beta$, so 
 \[
-  \chi(s) \ge \gamma\cdot\frac{(sr+\ell(s))^3}{(r+2)^2} 
+  t < 2/(2i/\beta-1) - \ell(s)/\beta - i + 1 \le \const i + 1
 \]
-for all $s\in\{0,\ldots,t-1\}$.
-
-Select $s=di$ and $t=ci$ for some constants $1 < d < c$ to be determined
-later.
-Rewriting, we get
+for every non-negative integer $i$.
+Therefore, we may assume that 
+Eq.~(\ref{eq:many-crossings}) holds.
+Letting $t=ci$ and 
+rewriting Eq.~(\ref{eq:many-crossings}), we get
 \[
   \begin{aligned}
   s 
@@ -107,20 +115,22 @@ Rewriting, we get
            +\frac{\gamma^{-1/3}(2\ell(s))^{2/3} - \ell(s)}{r} 
     & \mbox{ (since $\chi(s) \le \ell(s)^2$)} \\
    &\le \frac{\chi(s)^{1/3}}{(\gamma r)^{1/3}}
-    & \mbox{ (for sufficiently large $\ell(s)$)} \\
+    & \mbox{ (for $\ell(s) \ge 125 \Leftrightarrow i\ge 8$))} \\
    &\le \frac{(i^2s^2/2 + is^3/2 + s^4/8)^{1/3}}{(\gamma r)^{1/3} }  \\
    &\le \frac{((is)^{2/3}/2^{1/3} + i^{1/3}s/2^{1/3} + s^{4/3}/2)}{(\gamma r)^{1/3}}  \\
-   &\le \frac{(d^{2/3}/2^{1/3}+d/2^{1/3}+d^{4/3}/2)i^{4/3}}{(\gamma r)^{1/3}}  
-    & \mbox{ (since $s=di$)} \\
-   & =  \frac{(d^{2/3}/2^{1/3}+d/2^{1/3}+d^{4/3}/2)i^{4/3}}{(\gamma(i+t-1))^{1/3}} \\ 
-   &\le  \frac{(d^{2/3}/2^{1/3}+d/2^{1/3}+d^{4/3}/2)i^{4/3}}{(\gamma(1+c-1/i)i)^{1/3}}  
+   &\le \frac{(2^{1/3}+2^{2/3}+2^{1/3})i^{4/3}}{(\gamma r)^{1/3}}  
+    & \mbox{ (since $s=2i$)} \\
+   & = \frac{(2^{4/3} + 2^{2/3})i^{4/3}}{(\gamma r)^{1/3}}  \\
+   & =  \frac{(2^{4/3} + 2^{2/3})i^{4/3}}{(\gamma(i+t-1))^{1/3}} \\ 
+   &\le  \frac{(2^{4/3} + 2^{2/3})i^{4/3}}{(\gamma(1+c-1/i)i)^{1/3}}  
     & \mbox{ (since $t=ci$)} \\
-   & =  \frac{(d^{2/3}/2^{1/3}+d/2^{1/3}+d^{4/3}/2)i}{(\gamma(1+c-1/i))^{1/3}} \\ 
-   & < di = s
+   & =  \frac{(2^{4/3} + 2^{2/3})i}{(\gamma(1+c-1/i))^{1/3}} \\ 
+   & < 2i = s
   \end{aligned}
 \]
-for any $c > ((d^{2/3}/2^{1/3}+d/2^{1/3}+d^{4/3}/2)/d)^3/\gamma-1+1/i$.
-Selecting $d=2$ and $c=\const+1/i$ completes the proof.
+where the last inequality yields the desired contradiction provided that
+$c > (2^{1/3} + 2^{-1/3})^3/\gamma-1+1/i$.  Selecting $c=\const+1/i$
+gives $t=\const i + 1$ and completes the proof.
 \end{proof}
 
 

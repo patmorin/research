@@ -90,7 +90,7 @@ Next we study whether \emph{any} randomized memoryless routing algorithm for con
 
 \section{A Bad Example for Random-Compass}
 
-The \textsc{Random-Compass} algorithm works by using a coin toss to select among the (at most two) neighbours $\ccw_t(v)$ and $\cw_t(v)$ of the current node $v$ that make the minimum and maximum angle, respectively, with the segment $vt$ (see Figure~\ref{fig:random-compass}.a). When applied on a convex subdivision $G=(V,E)$, Bose \etal\ show that, in the directed graph $G'$ that contains the edges $(v,\cw_t(v))$ and $(v,\ccw_t(v))$ for all $v\in V$, there exists at least one directed path $P(v,t)$ from every vertex $v$ to $t$ (see Figure~\ref{fig:random-compass}.b).  This, and Wald's Equation, immediately imply that the expected time to reach $t$ from any vertex is at most $2^{n}$; from any vertex $v$, \textsc{Random-Compass} has probability at least $1/2^{|P(v,t)|}\ge 1/2^{n-1}$ of reaching $t$ by following $P(v,t)$, and the expected number of steps it takes on $P(v,t)$ before falling off $P(v,t)$ is at most 2.
+The \textsc{Random-Compass} algorithm works by using a coin toss to select among the (at most two) neighbours $\ccw_t(v)$ and $\cw_t(v)$ of the current node $v$ that make the minimum counterclockwise and clockwise angle, respectively, with the segment $vt$ (see Figure~\ref{fig:random-compass}.a). When applied on a convex subdivision $G=(V,E)$, Bose \etal\ show that, in the directed graph $G'$ that contains the edges $(v,\cw_t(v))$ and $(v,\ccw_t(v))$ for all $v\in V$, there exists at least one directed path $P(v,t)$ from every vertex $v$ to $t$ (see Figure~\ref{fig:random-compass}.b).  This, and Wald's Equation, immediately imply that the expected time to reach $t$ from any vertex is at most $2^{n}$; from any vertex $v$, \textsc{Random-Compass} has probability at least $1/2^{|P(v,t)|}\ge 1/2^{n-1}$ of reaching $t$ by following $P(v,t)$, and the expected number of steps it takes on $P(v,t)$ before falling off $P(v,t)$ is at most 2.
 
 \begin{figure}
   \begin{center}
@@ -115,11 +115,11 @@ The example in Figure~\ref{fig:bad-unbiased} shows that the above analysis of \t
   \label{fig:bad-unbiased}
 \end{figure}
 
-If we consider the directed graph $G'$ defined above, then we see that, at any point the packet is at some distance $i$ from $t$ and that, it can, with equal probability, move to a vertex  of distance $i-1$ or move to a vertex (on the outer face) of distance $k$.  If we denote by $T_i$ the expected number of steps required by \textsc{Random-Compass} to reach $t$ given that it is currently at distance $i$ from $t$, we see that 
+If we consider the directed graph $G'$ defined above, then we see that, at any point if the packet is at some distance $i > 1$ from $t$, it can, with equal probability, move to a vertex  of distance $i-1$ or move to a vertex (on the outer face) of distance $k$.  If we denote by $T_i$ the expected number of steps required by \textsc{Random-Compass} to reach $t$ given that it is currently at distance $i$ from $t$, we see that 
 \[ 
   T_i = \left\{ \begin{array}{ll}
-          0 & \mbox{for $i=0$} \\
-          (1/2)T_{i-1} + (1/2)T_k & \mbox{for $i\in\{1,\ldots,k\}$} 
+          1 & \mbox{for $i=1$} \\
+          1 + (1/2)T_{i-1} + (1/2)T_k & \mbox{for $i\in\{2,\ldots,k\}$} 
         \end{array}\right.
 \]
 Expanding the value of $T_k$ gives
@@ -127,10 +127,10 @@ Expanding the value of $T_k$ gives
   T_k & = & 1 + (1/2)T_k + (1/2)T_{k-1} \\
       & = & 1 + (1/2)T_k + 1/2 + (1/4)T_{k} + (1/4)T_{k-2} \\
       & = & 1 + (1/2)T_k + 1/2 + (1/4)T_{k} + (1/4)
-              + \cdots  + (1/2^{k-1}) + (1/2^{k})T_{k} + (1/2^{k})T_0 \\
-      & = & 2-1/2^{k} + (1-1/2^k)T_k \enspace ,
+              + \cdots  + (1/2^{k-2}) + (1/2^{k-1})T_{k} + (1/2^{k-1})T_1 \\
+      & = & 2-1/2^{k-1} + (1-1/2^{k-1})T_k \enspace ,
 \end{eqnarray*}
-and rewriting this gives $T_k = 2^k(2-1/2^{k}) = \Omega(2^{n/4})$.  This proves:
+and rewriting this gives $T_k = 2^{k} - 1 = \Omega(2^{n/4})$.  This proves:
 
 \begin{theorem}\label{theorem:random-compass}
 For any $n>1$, there exists a triangulation $G$ having two vertices $s$ and $t$ such that the expected number of steps taken by $\textsc{Random-Compass}$ when routing from $s$ to $t$ is $2^{\Omega(n)}$.

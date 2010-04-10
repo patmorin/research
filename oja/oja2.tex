@@ -1,0 +1,147 @@
+\documentclass{article}
+\usepackage{amsfonts,amsopn,amsmath,amsthm,fullpage}
+\usepackage[mathlines]{lineno}
+\linenumbers
+
+\title{Oja depth and Centers of Gravity}
+\newcommand{\R}{\mathbb{R}}
+\DeclareMathOperator{\od}{od}
+\DeclareMathOperator{\vol}{vol}
+\DeclareMathOperator{\cog}{c}
+\newtheorem{lem}{Lemma}
+
+\begin{document}
+
+The \emph{Oja depth} of a point $x$ with respect to a finite point set
+$S\subset \R^d$ is
+\[
+  \od(x,S) = %\binom{|S|}{d}^{-1}
+             \sum_{T\in\binom{S}{d}}
+             \vol(\{x\}\cup T) \enspace ,
+\]
+Where $\vol(X)$ denotes the $d$-dimensional volume of the
+convex hull of $X\subset\R^d$.
+
+Define the \emph{center of gravity} of a finite point set $S$ as
+\[
+    \cog(S) = |S|^{-1}\sum_{p\in S} p
+\]
+The following lemma shows that, at least for 1-dimensional point sets, the
+center of gravity gives a reasonable approximation to the point of minimum
+Oja depth.
+
+\begin{lem}
+For any finite set $S\subset\R$, $\od(\cog(S),S) \le 2\od(x,S)$ for
+any $x\in\R$.
+\end{lem}
+
+\begin{proof}
+Denote the elements of $S$ by $p_1,\ldots,p_n$ in any order.  Let the
+multiset $S_i$ contain $p_1,\ldots,p_i$ as well as $n-i$ copies of
+$x$.  We will show, by induction on $i$, that $\od(\cog(S_i),S_i)\le
+2\cog(s,S_i)$ for all $i\in\{0,\ldots,n\}$.  This is sufficient,
+since $S_n=S$.
+
+For the base case $S_0$ consists of $n$ copies of $x$, so
+$\cog(S_0)=x$ and $\od(\cog(S_0),S_0)= 0 = 2\od(x,S_0)$.  Next,
+we assume that $\od(\cog(S_i),S_i) \le 2\od(x,S_i)$ and prove that
+$\od(\cog(S_{i+1}),S_{i+1}) \le 2\od(x,S_{i+1})$.  Note that
+\[
+   \od(x,S_{i+1}) = \od(x,S_i) + |p_{i+1}-x| \enspace .
+\]
+Furthermore, 
+\[
+   \cog(S_{i+1}) = \cog(S_i) + (p_{i+1}-x)/n \enspace ,
+\]
+so
+\begin{eqnarray*}
+   \od(\cog(S_{i+1}), S_{i+1}) 
+     & = & \od(\cog(S_{i}), S_{i}) \\ 
+    &&    {} + \sum_{q\in S_i} (|\cog(S_{i+1}) - q| - |\cog(S_{i}) - q|) \\
+    &&    {} + (|\cog(S_{i+1}) - p_{i+1}| - |\cog(S_{i+1}) - x|) \\
+     & \le & \od(\cog(S_{i}), S_{i}) 
+             + n|p_{i+1}-x|/n  \\
+    &&    {} + (|\cog(S_{i+1}) - p_{i+1}| - |\cog(S_{i+1}) - x|) \\
+     & \le & \od(\cog(S_{i}), S_{i}) 
+             + 2|p_{i+1}-x|  \\
+     & \le & 2\od(x, S_{i}) 
+             + 2|p_{i+1}-x|  \\
+     &  = & 2\od(x, S_{i+1}) 
+\end{eqnarray*}
+
+\end{proof}
+
+\begin{lem}
+For any finite set $S\subseteq\R^2$,
+$\od(\cog(S),S) \le 3\od(x,S)$ for any $x\in\R^2$.
+\end{lem}
+
+\begin{proof}
+Define $S_i$ as in the proof of Lemma~1.  The induction and base case are
+the same as in Lemma~1.  First, we have
+\begin{eqnarray}
+\od(x,S_{i+1}) 
+   & = & \od(x,S_i) \\
+   && {} + \sum_{j=1}^i \vol(x,p_j,p_{i+1}) \label{eq:o}
+\end{eqnarray}
+
+\begin{eqnarray}
+\od(\cog(S_{i+1}),S_{i+1}) 
+   & = &\od(\cog(S_{i},S_{i})) \\
+   &&    {} + \sum_{(p,q)\in S_i} 
+           (\vol(\cog(S_{i+1},p,q))- \vol(\cog(S_{i},p,q)))
+              \label{eq:i} \\
+   &&   {} + \sum_{q\in S_{i+1}\setminus \{p_{i+1}\}}
+           (\vol(\cog(S_{i+1},p_{i+1},q))- \vol(\cog(S_{i+1},x,q))) 
+            \label{eq:ii} \\
+\end{eqnarray}
+First we show that $(\ref{eq:i}) \le 2\times (\ref{eq:o})$.  Note that each term in
+(\ref{eq:i}) is the difference in area between two triangles that share a
+common base and whose third vertex has moved by the vector
+$v_{i+1}=(p_{i+1}-x)/n$.  Each term can therefore be upper-bounded by
+\[
+   \vol(\cog(S_{i+1},p,q))- \vol(\cog(S_{i},p,q))
+  \le 
+   \vol(p,\cog(S_i),\cog(S_{i+1})) + \vol(q,\cog(S_i),\cog(S_{i+1}))
+\]
+(see Figure~\ref{fig:approx}). When taken over all pairs $p$ and $q$, each
+triangle appears $n-1$ times, so
+\begin{eqnarray*}
+(\ref{eq:i}) 
+   & \le & (n-1)\sum_{p\in S_i} \vol(p,\cog(S_i),\cog(S_{i+1})) \\
+   & = & (1-1/n)\frac{1}{2}\|v_{i+1}\|\sum_{p\in
+S_i}\|\cog(S_{i+1})_\downarrow-p_\downarrow\|) \\
+   & = & (1-1/n)\frac{1}{2}\|v_{i+1}\|\od(\cog(S_{i+1})_\downarrow,
+\{p_\downarrow:p\in S_{i}\}) \\
+   & = & (1-1/n)\frac{1}{2}\|v_{i+1}\|\od(\cog(S_{i})_\downarrow,
+\{p_\downarrow:p\in S_{i}\}) \\
+   & \le & (1-1/n)\|v_{i+1}\|\od(x_\downarrow, \{p_\downarrow:p\in S_{i}\})
+      \label{eq:drop} \\
+   & \le & \|v_{i+1}\|\od(x_\downarrow, \{p_\downarrow:p\in S_{i}\}) \\
+   & = & 2\cdot \sum_{j=1}^i \vol(x,p_j,p_{i+1}) 
+\end{eqnarray*}
+where $p_\downarrow$ denotes the orthogonal projection of $p$ onto some line
+orthogonal to $v_{i+1}$, so that (\ref{eq:drop}) follows from Lemma~1.
+
+Next, we relate (\ref{eq:ii}) to (\ref{eq:o}).
+\begin{eqnarray*}
+ (\ref{eq:ii})  
+     &=&  \sum_{q\in S_{i+1}\setminus \{p_{i+1}\}}
+          (\vol(\cog(S_{i+1},p_{i+1},q)) - \vol(\cog(S_{i+1},x,q))) \\
+     &\le &  \sum_{q\in S_{i+1}\setminus \{p_{i+1}\}} (\vol(x,p_{i+1},q)) \\
+     & = &  (\ref{eq:o}) \enspace ,
+\end{eqnarray*}
+(see Figure~\ref{fig:overlap}).
+
+Finally, we resubstitute to obtain
+\begin{eqnarray*}
+\od(\cog(S_{i+1}),S_{i+1}) 
+  & = & \od(\cog(S_{i}),S_{i}) + 3 \sum_{j=1}^i \vol(x,p_j,p_{i+1}) \\
+  &\le& \od(x,S_{i}) + 3 \sum_{j=1}^i \vol(x,p_j,p_{i+1}) \\
+  &\le& 3\od(x,S_{i+1}) \enspace ,
+\end{eqnarray*}
+as required.
+\end{proof}
+
+
+\end{document}

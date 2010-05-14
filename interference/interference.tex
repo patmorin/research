@@ -1,0 +1,116 @@
+\documentclass{article}
+\usepackage{amsmath,amsthm}
+
+\newtheorem{lem}{Lemma}
+\newtheorem{thm}{Theorem}
+\newtheorem{cor}{Corollary}
+
+\begin{document}
+A sequence of numbers $X_0,\ldots,X_k$ forms a \emph{$k$-frame} if
+\[
+     X_0 \le 1
+\]
+and
+\[
+     X_{i-1}/4 \le X_i \le X_{i-1}/2 \enspace ,
+\]
+for all $i\in\{1,\ldots,k\}$.  Later, we will show that a $k$-frame implies a
+node that has interference $k$.  For now, we start by showing that frames
+are not that unlikely:
+
+\begin{lem}
+If $X_0,\ldots,X_k$ are a sequence of independent Exponential(1) random
+variables, then the probability that $X_0,\ldots,X_k$ form a $k$-frame is
+at least $2^{-O(k^2)}$.
+\end{lem}
+
+\begin{proof}
+Recall that an Exponential(1) random variable $X$ has cumulative
+distribution function
+\[
+   \Pr\{X \le x\} = 1-e^{-x} \enspace .
+\]
+
+Next, observe that, in a frame,
+\[
+                 4^{-i} \le X_i \le 2^{-i}  \enspace ,
+\]
+for all $i\in\{0,\ldots,k\}$.  Let $F(X)$ be the event ``$X$ is a frame.''
+Then,
+\begin{align*}
+     \Pr\{F(X_0,\ldots,X_{i+1}) \mid F(X_0,\ldots,X_{i})\} 
+        & = \Pr\{X_{i+1} \in [X_{i}/4,X_{i}/2] \mid F(X_0,\ldots,X_{i})\} \\
+        & \ge \Pr\{X_{i+1} \in [4^{-i}/4,4^{-i}/2]\} \\
+        & = \Pr\{X_{i+1} \in [2^{-(2i+2)},2^{-(2i+1)}]\} \\
+        & = \exp(-2^{-(2i+2)}) - \exp(2^{-(2i+1)}) \\
+        & \sim -2^{-(2i+2)} + 2^{-(2i+1)} \\
+        & = 2^{-(2i+2)} \enspace .
+\end{align*}
+Therefore,
+\begin{align*}
+     \Pr\{F(X_0,\ldots,X_{k})\}
+   & = \Pr\{X_0\le 1\}
+         \cdot\prod_{i=1}^k \Pr\{F(X_0,\ldots,X_{i})
+                                 \mid F(X_0,\ldots,X_{i-1})\} \\
+   & = (1-1/e)
+         \cdot\prod_{i=1}^k \Pr\{F(X_0,\ldots,X_{i})
+                                 \mid F(X_0,\ldots,X_{i-1})\} \\
+   & \ge (1-1/e)\cdot\prod_{i=1}^k 2^{-2i} \\
+   & = (1-1/e)\cdot2^{-\sum_{i=1}^k 2i} \\
+   & = (1-1/e)\cdot2^{-k(k+1)} \\
+   & = 2^{-O(k^2)} \enspace ,
+\end{align*}
+as required.
+\end{proof}
+
+\begin{thm}
+Let $S$ be a set of $n$ real numbers each selected independently
+and uniformly from the real interval $[0,1]$.
+Then, the expected number of elements of $S$ that have interference at least
+$k$ is at least $n2^{-O(k^2)}$.
+\end{thm}
+
+\begin{proof}
+Let $X_0,\ldots,X_n$ be a sequence of Exponential(1) random variables,
+let $x_i=\sum_{j=0}^{i-1} X_i$, and let $\tilde x_i = x_i/x_{n+1}$.
+It is well-known that the sequence $\tilde x_1,\ldots,\tilde x_n$ has
+the same distribution that one would obtain by sorting the points of $S$.
+Thus, it suffices to study the set $S=\{\tilde x_1,\ldots,\tilde x_n\}$.
+
+Observe that, for any $i > k$, if $X_{i-k-1},\ldots,X_{i-1}$ is a
+$k$-frame, then $\tilde x_i$ has interference at least $k$.
+Therefore
+\[
+  \Pr\{\mbox{$\tilde x_i$ has interference at least $k$}\} \ge 2^{-O(k^2)}
+    \enspace ,
+\]
+for all $i\in\{1,\ldots,n\}$.\footnote{For $i <k$, we can reverse the
+argument.}
+Therefore, the expected number of elements that have interference at least
+$k$ is $n2^{-O(k^2)}$, as required.
+\end{proof}
+
+Taking $k=\sqrt{\alpha\log n}$ yields the following corollary
+\begin{cor}
+Let $S$ be a set of $n$ real numbers each selected independently and
+uniformly from the real interval $[0,1]$.  Then, for any $\alpha > 0$,
+the expected number of elements of $S$ that have interference at least
+$\sqrt{\alpha\log n}$ is at least $n^{1-O(\alpha)}$.
+\end{cor}
+
+This doesn't quite prove that elements with interference at least
+$\sqrt{\alpha\log n}$ have a high probability of occuring.  For that, we
+can consider blocks of $k=\sqrt{\alpha\log n}$ consecutive elements.  The
+last element in each block has probability $n^{-O(\alpha)}$ of being the
+last element in a $k$-frame, and this is independent of whether any other
+block ends with the last element in a $k$-frame.  Using this, we obtain:
+
+\begin{cor}
+Let $S$ be a set of $n$ real numbers each selected independently and
+uniformly from the real interval $[0,1]$.  Then, for any $\alpha > 0$,
+the probability that no element of $S$ has interference at
+least $\sqrt{\alpha\log n}$ is at most $e^{-n^{1-O(\alpha)}}$.
+\end{cor}
+
+\end{document}
+

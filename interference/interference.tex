@@ -1,11 +1,39 @@
-\documentclass{article}
+\documentclass{patmorin}
 \usepackage{amsmath,amsthm}
+\usepackage{pat}
 
-\newtheorem{lem}{Lemma}
-\newtheorem{thm}{Theorem}
 \newtheorem{cor}{Corollary}
 
+\title{Maximum Interference for Transmitters Uniformly Distributed on a Segment}
+\author{Evangelos Kranakis, Danny Krizanc, and Pat Morin}
+
 \begin{document}
+\maketitle
+
+\begin{abstract}
+We consider the following problem: A set of $n$ transmitters are
+place independently and uniformly at random on a unit interval.  Each
+transmitter, except the two extreme ones, adjust their transmission ranges
+so that they can be heard by the further of their left neighbour and right
+neighbour.  What is the maximum number of transmitters that can be heard
+by any individual transmitter?  We show that, with high probability,
+there exists some transmitter that hears $\Omega(\sqrt{\log n})$
+transmitters and all transmitters hear $O(\sqrt{\log n})$ transmitters.
+\end{abstract}
+
+\section{Introduction}
+
+Related Work.
+
+\section{The Lower Bound}
+
+In this section we show that, with high probability, in a set of $n$
+elements uniformly distributed on an interval, there exists an element
+that has interference $\Omega(\sqrt{\log n})$.  We do this by defining
+a configuration of points that leads to an element with interference
+$c\sqrt{\log n}$ and then showing that, with high probability, this
+configuration occurs somewhere in our point set.
+
 A sequence of numbers $X_0,\ldots,X_k$ forms a \emph{$k$-frame} if
 \[
      X_0 \le 1
@@ -58,7 +86,7 @@ Therefore,
    & \ge (1-1/e)\cdot\prod_{i=1}^k 2^{-2i} \\
    & = (1-1/e)\cdot2^{-\sum_{i=1}^k 2i} \\
    & = (1-1/e)\cdot2^{-k(k+1)} \\
-   & = 2^{-O(k^2)} \enspace ,
+   & \ge 2^{-(k+1)^2} \\
 \end{align*}
 as required.
 \end{proof}
@@ -101,6 +129,84 @@ uniformly from the real interval $[0,1]$.  Then, for any $\alpha > 0$,
 the probability that no element of $S$ has interference at
 least $\sqrt{\alpha\log n}$ is at most $e^{-n^{1-O(\alpha)}}$.
 \end{cor}
+
+\section{The Upper Bound}
+
+In this section we show that, with high probability, the maximum
+interference among $n$ points uniformly distributed in an interval is
+$O(\sqrt{\log n})$.
+
+\begin{lem}\lemlabel{no-big-gap}
+With probability at least $1-n^{-\Omega(c)}$, there is no open interval
+$I\subseteq[0,1]$ of length greater $c\log n / n$ that is empty of points
+in $S$.
+\end{lem}
+
+\begin{proof}
+Fix a particular interval of length $c\log n /n$.  The probability that
+this interval is empty of point is at most
+\[
+   p = (1-c\log n/n))^{n-1} \le n\exp(-(n-1)c\log n/n) = n^{-\Omega(c)} \enspace .
+\]
+Any such maximal empty interval either contains $1$, or is bounded from
+above by some $x_i\in[c\log n /n,1]$.  Therefore, the probability that
+there exists \emph{any} such interval is most $(n+1)p= n^{-\Omega(c)}$,
+as required.
+\end{proof}
+
+\begin{proof}
+We define the \emph{left-interference} of an element $x_t\in S$ as
+the number of elements $x_i\in S$ such that $x_i < x_t$ and $x_t-x_i
+\le \max\{x_i-x_{i-1},x_{i+1}-x_i\}$.  We define the \emph{short-range
+left-interference} of $x_t$ in the same way, except only counting those
+elements $x_i$ such that $X_{i-1} \le 1$. (Note that this implies $x_t-x_i
+\le 2$.)
+
+Shortly, we will show that the probability that the short-range
+left-interference of any $x_t\in S$ exceeds $c\sqrt{\log n}\le
+n^{-\Omega(c)}$.  This will be sufficient, for two reasons: (1)~a
+symmetric argument bounds the probability that the right-interference
+exceeds $c\sqrt{\log n}$ and (2)~\lemref{no-big-gap} implies that, for any
+$x_t\in S$ the number of elements $x_i$ that contribute to the left
+interference of $x_t$ and have $X_{i-1}>1$ is at most $c\log \log n$ with
+probability at least $n^{-\Omega(c)}$.
+
+Consider the following process: Start with a \emph{length} $\ell_0 \le 1$
+and Generate i.i.d.\ Exponential(1) random variables $X_1,\ldots,X_i$
+until $\sum_{j=1}^i {X_j} \ge \ell_0/2$. If $\sum_{j=1}^i {X_j} \ge
+\ell_0$ then the process stops.  Otherwise, the process begins another
+round with a new input length $\ell_1=\ell_0-\sum_{j=1}^i {X_j}$, and
+the process continues in this manner until the stopping condition is met.
+
+Observe that, in this process, the length $\ell_i$ during the $i$th
+round (starting at round 0) satisfies $\ell_i\le (1/2)^i$.  Therefore,
+the probability of continuing onto round $i+1$ from round $i$ is at most
+\[
+   \Pr\{X_1 \le 1/2^i\} = 1-e^{-1/2^i} \le 1/2^{i} \enspace .
+\]
+Therefore, the probability that this process continues beyond round $k$
+is at most
+\[
+    \prod_{i=0}^{k} (1/2)^i = (1/2)^{\sum_{i=0}^{k} i} \le (1/2)^{k^2}
+\enspace .
+\]
+The relationship between the above process and interference is the
+following:  Suppose that some element $x_t\in S$ has interference $k$
+and $x_i$ contributes to the left-interference of $x_t$ and $X_{i-1}\le
+1$.  Then, we let $\ell_0=X_{i-1}$ and observe that the elements
+$x_{i_1}=x_i,\ldots,x_{i_k}$ that contribute the left-interference of
+$x_t$ correspond to elements that terminate a round in the above process,
+with the next-to-last round being terminated by $x_t$ itself.
+
+By setting $k=\sqrt{c\log n}$, we find that the probability that $X_{1}$
+starts a process leading to an $x_t$ whose short-range left-interference is
+greater than $k$ is at most $n^{-c}$.  Therefore, the probability that
+there exists \emph{any} $X_i$ that starts a process leading an $x_t$ with
+short-range left-interference greater than $k$ is at most
+$n^{-c+1}=n^{-\Omega(c)}$, completing the proof.
+\end{proof}
+
+
 
 \end{document}
 

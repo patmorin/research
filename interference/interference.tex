@@ -25,6 +25,23 @@ transmitters and all transmitters hear $O(\sqrt{\log n})$ transmitters.
 
 Related Work.
 
+\section{The Proof}
+
+In this section we prove our main result, namely that the maximum
+interference is $\Theta(\sqrt{\log n})$ with high probability.
+
+Throughout this section, we will make use of the relationship between
+uniformly distributed point sets and exponential random variables.
+Suppose $S$ is a set of $n$ points independently and uniformly
+distributed in $[0,1]$ whose elements are $x_1,\ldots,x_n$
+in sorted order.  Let $X_0,\ldots,X_n$ be Exponential(1) random
+variables, let $x'_i=\sum_{j=0}^{i-1}X_j$, and let $x_i''=x_i/x_n$.
+Then $x_1'',\ldots,x_n''$ have the same distribution as $x_1,\ldots,x_n$.
+
+Because of the above relationship we will, throughout this section, use
+the convention that $X_0,\ldots,X_n$ are Exponential(1) random variables,
+$x_i=\sum_{j=0}^{i-1}X_j$, and $S=\{x_1,\ldots,x_n\}$.
+
 \section{The Lower Bound}
 
 In this section we show that, with high probability, in a set of $n$
@@ -42,14 +59,14 @@ and
 \[
      X_{i-1}/4 \le X_i \le X_{i-1}/2 \enspace ,
 \]
-for all $i\in\{1,\ldots,k\}$.  Later, we will show that a $k$-frame
-implies a node that has interference $k$.  For now, we start by showing
-that frames are not that unlikely:
+for all $i\in\{1,\ldots,k\}$.  Notice that, if $X_0,\ldots,X_k$ form a
+$k$-frame, then $x_{k+1}$ is a node that has interference at least $k$.
+The next lemma shows that this situation is not too unlikely:
 
-\begin{lem}
+\begin{lem}\lemlabel{frame}
 If $X_0,\ldots,X_k$ are a sequence of independent Exponential(1) random
 variables, then the probability that $X_0,\ldots,X_k$ form a $k$-frame
-is at least $2^{-O(k^2)}$.
+is at least $(1-1/e)2^{-(k+1)^2}$.
 \end{lem}
 
 \begin{proof}
@@ -58,7 +75,6 @@ distribution function
 \[
    \Pr\{X \le x\} = 1-e^{-x} \enspace .
 \]
-
 Next, observe that, in a frame,
 \[
                  4^{-i} \le X_i \le 2^{-i}  \enspace ,
@@ -71,10 +87,9 @@ Then,
         & \ge \Pr\{X_{i+1} \in [4^{-i}/4,4^{-i}/2]\} \\
         & = \Pr\{X_{i+1} \in [2^{-(2i+2)},2^{-(2i+1)}]\} \\
         & = \exp(-2^{-(2i+2)}) - \exp(2^{-(2i+1)}) \\
-        & \sim -2^{-(2i+2)} + 2^{-(2i+1)} \\
-        & = 2^{-(2i+2)} \enspace .
+        & \ge 2^{-(2i+3)} \enspace ,
 \end{align*}
-Therefore,
+where the last inequality holds for all $i\ge 0$.  Therefore,
 \begin{align*}
      \Pr\{F(X_0,\ldots,X_{k})\}
    & = \Pr\{X_0\le 1\}
@@ -83,52 +98,33 @@ Therefore,
    & = (1-1/e)
          \cdot\prod_{i=1}^k \Pr\{F(X_0,\ldots,X_{i})
                                  \mid F(X_0,\ldots,X_{i-1})\} \\
-   & \ge (1-1/e)\cdot\prod_{i=1}^k 2^{-2i} \\
-   & = (1-1/e)\cdot2^{-\sum_{i=1}^k 2i} \\
-   & = (1-1/e)\cdot2^{-k(k+1)} \\
-   & \ge 2^{-(k+1)^2} \\
+   & \ge (1-1/e)\cdot\prod_{i=1}^k 2^{-(2i+1)} \\
+   & = (1-1/e)\cdot2^{-\sum_{i=1}^k(2i+1)} \\
+   & = (1-1/e)\cdot2^{-(k^2+2k)} \\
+   & \ge (1-1/e)\cdot2^{-(k+1)^2} \\
 \end{align*}
 as required.
 \end{proof}
 
-%\begin{thm}
-%Let $S$ be a set of $n$ real numbers each selected independently and
-%uniformly from the real interval $[0,1]$.  Then, the expected number
-%of elements of $S$ that have interference at least $k$ is at least
-%$n2^{-O(k^2)}$.
-%\end{thm}
-%
-%\begin{proof}
-%Let $X_0,\ldots,X_n$ be a sequence of Exponential(1) random variables,
-%let $x_i=\sum_{j=0}^{i-1} X_i$, and let $\tilde x_i = x_i/x_{n+1}$.
-%It is well-known that the sequence $\tilde x_1,\ldots,\tilde x_n$ has
-%the same distribution that one would obtain by sorting the points of $S$.
-%Thus, it suffices to study the set $S=\{\tilde x_1,\ldots,\tilde x_n\}$.
-%
-%Observe that, for any $i > k$, if $X_{i-k-1},\ldots,X_{i-1}$ is a
-%$k$-frame, then $\tilde x_i$ has interference at least $k$.  Therefore
-%\[
-%  \Pr\{\mbox{$\tilde x_i$ has interference at least $k$}\} \ge 2^{-O(k^2)}
-%    \enspace ,
-%\]
-%for all $i\in\{1,\ldots,n\}$.\footnote{For $i <k$, we can reverse
-%the argument.} Therefore, the expected number of elements that have
-%interference at least $k$ is $n2^{-O(k^2)}$, as required.
-%\end{proof}
-
-This doesn't quite prove that elements with interference at least
-$\sqrt{\alpha\log n}$ have a high probability of occuring.  For that, we
-can consider blocks of $k=\sqrt{\alpha\log n}$ consecutive elements.  The
-last element in each block has probability $n^{-O(\alpha)}$ of being the
-last element in a $k$-frame, and this is independent of whether any other
-block ends with the last element in a $k$-frame.  Using this, we obtain:
 
 \begin{cor}
-Let $S$ be a set of $n$ real numbers each selected independently and
-uniformly from the real interval $[0,1]$.  Then, for any $\alpha > 0$,
-the probability that no element of $S$ has interference at
-least $\sqrt{\alpha\log n}$ is at most $e^{-n^{1-O(\alpha)}}$.
+With probability at least $1-\exp(-n^{1-c}/\sqrt{c\log n})$, there exists an some
+element of $S$ that has interference at least $\lfloor\sqrt{c\log n}\rfloor-2$.
 \end{cor}
+
+\begin{proof}
+Let $k=\lfloor \sqrt{c\log n} \rfloor-1$.  By \lemref{frame},
+$X_{jk},\ldots,X_{jk+k}$ have probability at least $2^{-(k+1)^2}\ge
+n^{-c}$ of forming a $k$-frame, in which case $x_{jk+k}$ has
+interference at least $k$.  Since this is true, independently, for any
+$j\in\{0,\ldots,\lfloor n/k\rfloor\}$, the probability that there is no
+element of $S$ with with interference greater than $k$ is at most
+\[
+   (1-n^{-c})^{\lfloor n/k\rfloor} \le \exp(-\lfloor n^{1-c}/k\rfloor) \enspace ,
+\]
+as required.
+\end{proof}
+
 
 \section{The Upper Bound}
 
@@ -136,41 +132,21 @@ In this section we show that, with high probability, the maximum
 interference among $n$ points uniformly distributed in an interval is
 $O(\sqrt{\log n})$.
 
-\begin{lem}\lemlabel{no-big-gap}
-With probability at least $1-n^{-\Omega(c)}$, there is no open interval
-$I\subseteq[0,1]$ of length greater $c\log n / n$ that is empty of points
-in $S$.
+We begin by studying a variant of interference that is 1-sided and
+that considers only interference generated by transmitters that
+are nearby.  The \emph{left-interference} of an element $x_t\in
+S$ is the number of elements $x_i\in S$ such that $x_i < x_t$ and
+$x_t-x_i \le \max\{x_i-x_{i-1},x_{i+1}-x_i\}$.  The \emph{short-range
+left-interference} of $x_t$ is defined in the same way, except only
+counting those elements $x_i$ such that $X_{i-1} \le 1$. (Note that this
+implies $x_t-x_i \le 2$.)
+
+\begin{lem}\lemlabel{squeaker}
+The maximum short-range left-interference of any element in $S$ is at
+most $\sqrt{c\log n}$ with probability at least $1-n^{-\Omega(c)}$.
 \end{lem}
 
 \begin{proof}
-Fix a particular interval of length $c\log n /n$.  The probability that
-this interval is empty of point is at most
-\[
-   p = (1-c\log n/n))^{n-1} \le n\exp(-(n-1)c\log n/n) = n^{-\Omega(c)} \enspace .
-\]
-Any such maximal empty interval either contains $1$, or is bounded from
-above by some $x_i\in[c\log n /n,1]$.  Therefore, the probability that
-there exists \emph{any} such interval is most $(n+1)p= n^{-\Omega(c)}$,
-as required.
-\end{proof}
-
-\begin{proof}
-We define the \emph{left-interference} of an element $x_t\in S$ as
-the number of elements $x_i\in S$ such that $x_i < x_t$ and $x_t-x_i
-\le \max\{x_i-x_{i-1},x_{i+1}-x_i\}$.  We define the \emph{short-range
-left-interference} of $x_t$ in the same way, except only counting those
-elements $x_i$ such that $X_{i-1} \le 1$. (Note that this implies $x_t-x_i
-\le 2$.)
-
-Shortly, we will show that the probability that the short-range
-left-interference of any $x_t\in S$ exceeds $c\sqrt{\log n}\le
-n^{-\Omega(c)}$.  This will be sufficient, for two reasons: (1)~a
-symmetric argument bounds the probability that the right-interference
-exceeds $c\sqrt{\log n}$ and (2)~\lemref{no-big-gap} implies that, for any
-$x_t\in S$ the number of elements $x_i$ that contribute to the left
-interference of $x_t$ and have $X_{i-1}>1$ is at most $c\log \log n$ with
-probability at least $n^{-\Omega(c)}$.
-
 Consider the following process: Start with a \emph{length} $\ell_0 \le 1$
 and Generate i.i.d.\ Exponential(1) random variables $X_1,\ldots,X_i$
 until $\sum_{j=1}^i {X_j} \ge \ell_0/2$. If $\sum_{j=1}^i {X_j} \ge
@@ -182,12 +158,12 @@ Observe that, in this process, the length $\ell_i$ during the $i$th
 round (starting at round 0) satisfies $\ell_i\le (1/2)^i$.  Therefore,
 the probability of continuing onto round $i+1$ from round $i$ is at most
 \[
-   \Pr\{X_1 \le 1/2^i\} = 1-e^{-1/2^i} \le 1/2^{i} \enspace .
+   \Pr\{X_1 \le 2^{-i}\} = 1-e^{-1/2^i} \le 2^{-i} \enspace .
 \]
 Therefore, the probability that this process continues beyond round $k$
 is at most
 \[
-    \prod_{i=0}^{k} (1/2)^i = (1/2)^{\sum_{i=0}^{k} i} \le (1/2)^{k^2}
+    \prod_{i=0}^{k} 2^{-i} = 2^{-\sum_{i=0}^{k} i} = 2^{-k(k+1)/2}
 \enspace .
 \]
 The relationship between the above process and interference is the
@@ -200,11 +176,45 @@ with the next-to-last round being terminated by $x_t$ itself.
 
 By setting $k=\sqrt{c\log n}$, we find that the probability that $X_{1}$
 starts a process leading to an $x_t$ whose short-range left-interference is
-greater than $k$ is at most $n^{-c}$.  Therefore, the probability that
+greater than $k$ is at most $n^{-\Omega(c)}$.  Therefore, the probability that
 there exists \emph{any} $X_i$ that starts a process leading an $x_t$ with
 short-range left-interference greater than $k$ is at most
-$n^{-c+1}=n^{-\Omega(c)}$, completing the proof.
+$n^{1-\Omega(c)}=n^{-\Omega(c)}$, completing the proof.
 \end{proof}
+
+
+Finally, we have all the pieces needed to complete the upper bound
+
+\begin{lem}
+With probability at least $1-n^{-\Omega(c)}$, the maximum interference of
+any element in $S$ is at most $\sqrt{c\log n}$.
+\end{lem}
+
+\begin{proof}
+We consider only left-interference, since the right-interference
+can be bounded in a symmetric way.  Consider some element $x_t$.  The
+left-interference of $x_t$ is generated by some elements
+$x_{i_0},\ldots,x_{i_k}$ where $x_{i_k}<\cdots<
+x_{i_0}<x_t$.  \lemref{squeaker} already bounds the number of elements of this
+sequence where $X_{i_j}-1 \le 1$.  Thus, all that remains is to bound
+the number of elements $x_{i_j}$ where $X_{i_j} > 1$.
+
+Observe that, for any $j\in\{1,\ldots,k\}$, in order for $x_{i_j}$
+to interfere with $x_t$ we must have
+\[
+   X_{i_j-1} \ge x_t - x_{i_j} 
+\enspace ,
+\]
+which implies that $X_{i_j} \ge 2 X_{i_{j-1}}$ for all
+$j\in\{1,\ldots,k\}$.  Therefore, if we have $2^r$ elements with
+$X_{i_j}>1$, then we have some element $X_{i_k} > 2^r$.  The probability
+that a particular $X_i$ is greater than $2^r$ is $e^{-2^r}$. Therefore,
+the probability that there exists any $X_i$ greater than $2^r$ is at most
+$ne^{-2^r}$.  Setting $r=d\log\ln n$ for a sufficiently large constant
+$d$ makes this probability at most $n^{-d}$, and completes the proof.
+\end{proof}
+
+
 
 
 

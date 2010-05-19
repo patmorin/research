@@ -1,4 +1,4 @@
-\documentclass[charterfonts]{patmorin}
+\documentclass{patmorin}
 \usepackage{amsmath,amsopn,amsfonts,graphicx}
 
 \input{pat}
@@ -37,10 +37,10 @@ measure over $\R^2$.  A \emph{2-sided orthogonal range counting query}
 over $S$ asks, for a query point $q=(q_x,q_y)$, to report the number
 of points $(p_x,p_y)\in S$ such that $p_x \ge q_x$ and $p_y \ge q_y$.
 A 2-sided range counting query \emph{has distribution $D$} if the
-query point $q$ is chosen from the probability measure $D$.  If $T$ is
-a data structure for answering 2-sided range counting queries over $S$
-then we denote by $\mu_D(T)$ the expected time, using $T$, to answer a
-range query with distribution $D$.  The current paper is concerned
+query point $q$ is chosen from the probability measure $D$.  If $T$
+is a data structure for answering 2-sided range counting queries over
+$S$ then we denote by $\mu_D(T)$ the expected time to answer a range
+query with distribution $D$ using $T$.  The current paper is concerned
 with preprocessing the pair $(S,D)$ to build a data structure $T$ that
 minimizes $\mu_D(T)$.
 
@@ -55,18 +55,23 @@ queries in 2 dimensions.  The interested reader is directed to the
 excellent, and easily accessible, survey by Agarwal and Erickson
 \cite{ae99}.
 
-Orthogonal range counting is a classic problem in computational
-geometry.  The 2- (and 3- and 4-) sided range counting problem can be
-solved by Bentley's \emph{range trees} \cite{ae42}.  Range trees use
-$O(n\log n)$ space and can be constructed in $O(n\log n)$ time.
-Originally, range trees answered queries in $O(\log^2 n)$ time.
-However, with the application of fractional cascading
-\cite{ae76,ae196} the query time can be reduced to $O(\log n)$ without
-increasing the space requirement by more than a constant factor.
-Range trees can also answer more general \emph{semigroup queries} in
-which each point of $S$ is assigned a weight from a commutative
-semigroup and the goal is to report the weight of all points in the
-query range \cite{ae133,ae292}.
+Orthogonal range counting is a classic problem in computational geometry.
+The 2- (and 3- and 4-) sided range counting problem can be solved by
+Bentley's \emph{range trees} \cite{ae42}.  Range trees use $O(n\log
+n)$ space and can be constructed in $O(n\log n)$ time.  Originally,
+range trees answered queries in $O(\log^2 n)$ time.  However, with the
+application of fractional cascading \cite{ae76,ae196} the query time can
+be reduced to $O(\log n)$ without increasing the space requirement by
+more than a constant factor.  Range trees can also answer more general
+\emph{semigroup queries} in which each point of $S$ is assigned a weight
+from a commutative semigroup and the goal is to report the sum of the
+weight of all points in the query range \cite{ae133,ae292}.
+
+Note that 3- and 4-sided range counting queries can be answered
+using a data structure for 2-sided range counting and the principle of
+inclusion/exclusion.  This is not true for semigroup queries, since 
+semigroups, in general, lack the inverses required for implementing the
+subtractions used in the inclusion/exclusion formulas.
 
 For 2-sided orthogonal range counting queries, Chazelle
 \cite{ae55,ae58} proposes a data structure of size $O(n)$, that can be
@@ -103,31 +108,31 @@ queries in $O(\log n)$ time.
 
 \subsection{New Results}
 
-In the current paper we present a data structure, the \emph{biased
-range tree}, for 2-sided orthogonal range counting.  Biased range
-trees fit into the \emph{comparison tree} model of computation, in
-which all decisions made during a query are based on the result of
-comparing either the $x$- or $y$-coordinate of the query point to some
-precomputed values.  Most data structures for orthogonal range
-searching, including range trees, $k$-d trees and quadtrees, fit into
-the comparison tree model. This model makes no assumptions about the
-$x$- or $y$-coordinates of points other than that they each come from
-some (possibly different) total order.  This is particularly useful in
-practice since it avoid the precision problems usually associated with
-algebraic decisions and allows the mixing of different data types
-(one for $x$-coordinates and one for $y$-coordinates) in one data
-structure.
+In the current paper we present a data structure, the \emph{biased range
+tree}, for 2-sided orthogonal range counting.  Biased range trees fit into
+the \emph{comparison tree} model of computation, in which all decisions
+made during a query are based on the result of comparing either the
+$x$- or $y$-coordinate of the query point to some precomputed values
+(each such comparison is treated as an atomic operation).  Most data
+structures for orthogonal range searching, including range trees, $k$-d
+trees and quadtrees, fit into the comparison tree model. This model
+makes no assumptions about the $x$- or $y$-coordinates of points other
+than that they each come from some (possibly different) total order.
+This is particularly useful in practice since it avoids the precision
+problems usually associated with algebraic decisions and allows the
+mixing of different data types (one for $x$-coordinates and one for
+$y$-coordinates) in one data structure.
 
 A biased range tree has size $O(n\log n)$, can be constructed in
-$O(n\log n)$ time, and can answer range counting (or semigroup)
-queries in $O(\mu_D(T^*))$ expected time, where $T^*$ is any
-comparison tree that answers range counting queries over $S$.  In
-particular, $T^*$ could be a comparison tree that minimizes
-$\mu_D(T^*)$ implying that the expected query time of our data
-structure is as fast as the fastest comparison-based data structure
-for answering range counting queries over $S$.  Moreover, the
-worst-case search time of biased range trees is $O(\log n)$, matching
-the worst-case performance of range trees.
+$O(n\log n)$ time, and can answer range counting (or semigroup) queries
+in $O(\mu_D(T^*))$ expected time, where $T^*$ is any comparison tree
+that answers range counting queries over $S$.  In particular, $T^*$
+could be a comparison tree that minimizes $\mu_D(T^*)$ implying that
+the expected query time of our data structure is as fast as the fastest
+comparison-based data structure for answering range counting queries
+over $S$.  Moreover, by maintaining a backup range-tree, the worst-case
+search time of biased range trees is $O(\log n)$, matching the worst-case
+performance of range trees.
 
 Note that we do not place any restrictions on the comparison tree $T^*$.
 Biased range trees, while requiring only $O(n\log n)$ space, are
@@ -194,23 +199,23 @@ and $T(q)=|R(q)\cap S|$ for all $q\in\R^2$.
 
 \paragraph{Probability.}
 
-For a probability measure $D$ and an event $X$, we denote by $D_{|X}$ the
-distribution $D$ conditioned on $X$.  That is, the distribution where
+For a probability measure $D$ and an event $X$, we denote by $D_{|X}$
+the distribution $D$ conditioned on $X$.  That is, the distribution where
 the probability of an event $Y$ is $\Pr(Y\mid X)=\Pr(Y\cap X)/\Pr(X)$.
 The probability measures used in this paper are usually defined over
-$\R^2$.  We make no assumptions about how these measures are
-represented, but we assume that an algorithm can, in constant time,
-given a rectangle $r$, determine $\Pr(r)$.
+$\R^2$.  We make no assumptions about how these measures are represented,
+but we assume that an algorithm can, in constant time, given a rectangle
+$r$, determine $\Pr(r)$, i.e., the probability that a point drawn from
+$D$ is contained in the rectangle $r$.
 
 For a classification tree $T$ that solves a problem
 $P:\mathcal{D}\mapsto\{0,\ldots,k-1\}$ and a probability measure $D$
-over $\mathcal{D}$, the \emph{expected search time} of $T$, denoted
-by $\mu_D(T)$, is the
-expected length of the search path for $q$ when $q$ is drawn at random
-from $\mathcal{D}$ according to $D$.  Note that, for each leaf $\ell$
-of $T$ there is a maximal subset $r(\ell)\subseteq \mathcal{D}$ such
-that the search path for any $q\in r(\ell)$ ends at $\ell$.  Thus, the
-expected search time of $T$ (under distribution $D$) can be written as
+over $\mathcal{D}$, the \emph{expected search time} of $T$, denoted by
+$\mu_D(T)$, is the expected length of the search path for $q$ when $q$ is
+drawn at random from $\mathcal{D}$ according to $D$.  Note that, for each
+node $v$ of $T$ there is a maximal subset $r(v)\subseteq \mathcal{D}$
+such that the search path for any $q\in r(v)$ contains $v$.  Thus,
+the expected search time of $T$ (under distribution $D$) can be written as
 \[
      \mu_D(T) = \sum_{\ell\in L(T)} \Pr(r(\ell))\times \depth_T(\ell)
 	\enspace ,
@@ -264,8 +269,8 @@ this, consider \figref{arrangement}.b, when the query point $q$ is
 uniformly distributed among the $n+1$ shaded disks.  In this case,
 $q$ is always in the same face of $A$ so the lower bound given above
 is 0.  Nevertheless, it is not hard to see that the leaves of
-any decision tree $T$ for range searching in $S$ can be relabelled to
-determine which of the $n+1$ circles contains $q$, so $\mu_D(T) \ge
+any comparison tree $T$ for range searching in $S$ can be relabelled to
+determine which of the $n+1$ disks contains $q$, so $\mu_D(T) \ge
 \log(n+1)$.
 
 \begin{figure}
@@ -298,14 +303,13 @@ by
 \[
    \mu_D(T) \le \sum_{i=1}^{n} p_i\log(1/p_i) + 1 
 \]
-and the tree $T$ can be constructed in $O(n)$ time \cite{m75}.
-Clearly, by \thmref{shannon}, the query time of this binary search
-tree is optimal up to an additive constant term.  Note that, by having
-each node of $T$ store the size of its subtree, a biased search tree
-can count the number of elements of $X$ in the interval
-$I(q)=[q,\infty)$ without increasing the search time by more than a
-constant factor.  Thus, biased search trees are an optimal data
-structure for 1-dimensional range counting.
+and the tree $T$ can be constructed in $O(n)$ time \cite{m75}.  Clearly,
+by \thmref{shannon}, the query time of this binary search tree is optimal
+up to an additive constant term.  Note that, by having each node of $T$
+store the size of its subtree, a biased search tree can count the number
+of elements of $X$ in the interval $I(q)=[q,\infty)$ without increasing
+the search time by more than a constant factor.  Thus, biased search
+trees are an optimal data structure for 1-dimensional range counting.
 
 \section{Biased Range Trees}
 \seclabel{data-structure}

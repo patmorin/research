@@ -304,12 +304,13 @@ by
    \mu_D(T) \le \sum_{i=1}^{n} p_i\log(1/p_i) + 1 
 \]
 and the tree $T$ can be constructed in $O(n)$ time \cite{m75}.  Clearly,
-by \thmref{shannon}, the query time of this binary search tree is optimal
-up to an additive constant term.  Note that, by having each node of $T$
-store the size of its subtree, a biased search tree can count the number
-of elements of $X$ in the interval $I(q)=[q,\infty)$ without increasing
-the search time by more than a constant factor.  Thus, biased search
-trees are an optimal data structure for 1-dimensional range counting.
+by \thmref{shannon}, the query time of this binary search tree is
+optimal up to an additive constant term.  Note that, by having each
+node of $T$ store the size of its subtree, a biased search tree can
+count the number of elements of $X$ in the interval $I(q)=[q,\infty)$
+without increasing the search time by more than a constant factor
+\cite[Chapter~14]{clrs09}. Thus, biased search trees are an optimal data
+structure for 1-dimensional range counting.
 
 \section{Biased Range Trees}
 \seclabel{data-structure}
@@ -333,27 +334,41 @@ requirements of this backup tree are $O(n\log n)$ \cite{bkos97}.
 Like a range tree, a biased range tree is an augmented data structure
 consisting of a primary tree whose nodes store secondary structures.
 However, in a range tree the primary tree is a binary search tree that
-discriminates based only on the $x$-coordinate of the query point $q$.  In
-order to achieve optimal expected query time, this turns out to be
-insufficient,\footnote{This is because it would force the query algorithm
-to resolve the rank of $x$-coordinate of the query point with respect to
-the $x$-coordinates of all data points. For certain distributions this
-would require $\Omega(\log n)$ expected time even though the query could be
-answered in $O(1)$ expected time by first discriminating based on the
-query's $y$ coordinate.} so instead biased range trees use a variation of a
-$k$-d tree as the primary tree.
+discriminates based only on the $x$-coordinate of the query point $q$.
+In order to achieve optimal expected query time, this turns out to be
+insufficient.  This is because it forces the query algorithm to resolve
+the rank of $x$-coordinate or the $y$-coordinate of the query point
+with respect to the $x$-coordinates or $y$-coordinates, respectively,
+of all data points. For certain point sets and query distributions this
+requires $\Omega(\log n)$ expected time even though the query could
+be answered in $O(1)$ expected time (see \figref{xy}).  Instead biased
+range trees use a variation of a $k$-d tree as the primary tree.
 
-The primary tree is constructed in a top-down fashion.  Each node $v$ of
-$T$ is associated with a region $r(v)$ whose closure is a rectangle.  The
-region associated with the root of $T$ is all of $\R^2$.  We say that a
-node $v$ is \emph{bad} if its depth is at least $\ceil{\log_2 n}$ and
-$r(v)\cap S \neq \emptyset$.  A node $v$ is \emph{split} if its depth is
-less than $\ceil{\log_2 n}$, and $r(v)\cap S\neq \emptyset$.  The two
-children of a split node $v$ are associated with the two regions obtained
-by removing a horizontal or vertical strip $s(v)$ from $r(v)$ depending on
-whether the depth of $v$ is even or odd, respectively.  We call a node $v$
-at even distance from the root a \emph{vertical node}, otherwise we call
-$v$ a \emph{horizontal node}. 
+\begin{figure}
+  \begin{center}
+    \includegraphics{xy}
+  \end{center}
+  \caption{For queries uniformly distributed in the shaded region,
+  determining the rank of the $x$- or $y$-coordinate of the query point
+  takes $\Omega(\log n)$ time, even though any query in the shaded region
+  can be answered using 2 comparisons.}
+  \figlabel{xy}
+\end{figure}
+
+The primary tree is constructed in a top-down fashion.  Each node $v$
+of $T$ is associated with a region $r(v)$ whose closure is a rectangle.
+The region associated with the root of $T$ is all of $\R^2$.  We say
+that a node $v$ is \emph{bad} if its depth is at least $\ceil{\log_2 n}$
+and $r(v)\cap S \neq \emptyset$.  Queries leading to bad nodes can not
+be answered by the primary tree and will be handled by the backup tree.
+
+A node $v$ is \emph{split} if its depth is less than $\ceil{\log_2 n}$,
+and $r(v)\cap S\neq \emptyset$.  The two children of a split node $v$
+are associated with the two regions obtained by removing a horizontal or
+vertical strip $s(v)$ from $r(v)$ depending on whether the depth of $v$
+is even or odd, respectively.  We call a node $v$ at even distance from
+the root a \emph{vertical node}, otherwise we call $v$ a \emph{horizontal
+node}.
 
 Refer to \figref{left-right}.  For a vertical node $v$, we denote its
 children by $\lft(v)$ and $\rght(v)$ and call them the \emph{left child}
@@ -381,26 +396,24 @@ $r(\rght(v))$ but not $r(\lft(v))$
   \figlabel{left-right}
 \end{figure}
 
-All that remains is to define the strip $s(v)$ for each node $v$. If
-$v$ is a leaf then we use the convention that $s(v)=r(v)$.  If $v$ is
-not a leaf then $s(v)\subseteq r(v)$ is selected as a maximal strip
-containing no point of $r(v)\cap S$ in its interior, that is closed on
-its right side and open on its left side and such that each of the at
-most two components of $r(v)\setminus s(v)$ has probability at most
-$\Pr(r(v))/2$.  Suppose $v$ is a vertical node.  Then let
-$r(v)_1,\ldots,r(v)_k$, be a partitioning of $r(v)$ into strips, in
-left-to-right order, obtained by drawing a vertical line through each
-of the $k$ points in $S\cap r(v)$.  We use the convention that each
-strip is closed on its right side and open on its left side.  Then
-there is a unique strip $s(v)=r(v)_i$ such that $\sum_{j=1}^{i-1}
-\Pr(r(v)_j) \le \Pr(r(v))/2$ and $\sum_{j=i+1}^{k} \Pr(r(v)_j) <
-\Pr(r(v))/2$.  For a
-horizontal node $v$, the definition of $s(v)$ is analagous except we
-use horizontal lines through each point of $r(v)\cap S$.
+All that remains is to define the strip $s(v)$ for each node $v$. If $v$
+is a leaf then we use the convention that $s(v)=r(v)$.  If $v$ is not a
+leaf then $s(v)\subseteq r(v)$ is selected as a maximal strip containing
+no point of $r(v)\cap S$ in its interior, that is closed on its right
+side and open on its left side and such that each of the at most two
+components of $r(v)\setminus s(v)$ has probability at most $\Pr(r(v))/2$.
+Suppose $v$ is a vertical node.  Then let $r(v)_1,\ldots,r(v)_k$,
+be a partitioning of $r(v)$ into (closed-right/open-left) strips,
+in left-to-right order, obtained by drawing a vertical line through
+each of the $k$ points in $S\cap r(v)$.  Then there is a unique strip
+$s(v)=r(v)_i$ such that $\sum_{j=1}^{i-1} \Pr(r(v)_j) \le \Pr(r(v))/2$
+and $\sum_{j=i+1}^{k} \Pr(r(v)_j) < \Pr(r(v))/2$.  For a horizontal
+node $v$, the definition of $s(v)$ is analagous except we use horizontal
+lines through each point of $r(v)\cap S$.
 
 Note that for a node $v$ that is not a leaf, we use the convention
 that $s(v)$ contains its right side but not its left side and that
-$r(\rght(v)$ and $r(\lft(v))$ are the two components of $r(v)\setminus
+$r(\rght(v))$ and $r(\lft(v))$ are the two components of $r(v)\setminus
 s(v)$.  This implies that $r(\lft(v))$ and/or $r(\rght(v))$ may be
 empty, in which case $\lft(v)$, respectively, $\rght(v)$ is a leaf of
 $T$.  With these definitions, for any point $q\in \R^2$ there is
@@ -592,8 +605,8 @@ $q_y$, respectively, in the catalogues $C_x(v')$ and $C_y(v')$,
 respectively.
 
 \item The algorithm walks back from $v'$ to the root of $T$, locating
-$q$ in the catalogues of all nodes on this path and computing the
-results of the range counting query as it goes.  Thanks to fractional
+$q$'s position in the catalogues of all nodes on this path and computing
+the results of the range counting query as it goes.  Thanks to fractional
 cascading, each step of this walk can be done in constant time, so the
 overall time for this step is also $O(d_T(q))$.
 \end{enumerate}
@@ -701,39 +714,37 @@ HV-independent.
 
 \begin{lem}\lemlabel{independent}
 Let $S$ be a set of $n$ points and let $D$ be a probability measure
-over $\R^2$.
-Let $T=T(S,D)$ be the biased range tree for $(S,D)$ and label
-each node of $T$ white
-or black, such that all white nodes are at distance at most $i$ from
-the root of $T$.  Then, if $T$ contains more than $\gamma^i$, for
-$\gamma\ge 0$, white nodes
-then $T$ contains an HV-independent set of white nodes of size
+over $\R^2$.  Let $T=T(S,D)$ be the biased range tree for $(S,D)$ and
+label each node of $T$ white or black, such that all white nodes are at
+distance at most $i$ from the root of $T$.
+
+If $T$ contains more than $\gamma^i$, for $\gamma\ge 0$, white
+nodes then $T$ contains an HV-independent set of white nodes of size
 $\Omega((\gamma/\sqrt{2})^i)$.
 \end{lem}
 
 \begin{proof}
 Define a graph $G=(V,E)$ whose vertices are the white nodes of $T$ and
-for which $uv\in E$ if and only if there is a horizontal or vertical line that
-intersects both $r(u)$ and $r(v)$.  Note that an independent set of
-vertices in $G$ is an HV-independent set of which nodes in $T$.  Thus,
-it suffices to find a sufficiently large independent set in $G$
+for which $uv\in E$ if and only if there is a horizontal or vertical
+line that intersects both $r(u)$ and $r(v)$.  Note that an independent
+set of vertices in $G$ is an HV-independent set of white nodes in $T$.
+Thus, it suffices to find a sufficiently large independent set in $G$
 
-A well-know result on $k$-d trees states that, for a $k$-d tree of
-height $i$, any horizontal or vertical line intersects at most
-$2^{\ceil{i/2}}$ rectangles of the $k$-d tree
-\cite[Lemma~5.4]{bkos97}.  Therefore, since $T$ is a $k$-d
-tree,\footnote{Although $T$ is not exactly a $k$-d tree as described
-in Reference~\cite{bkos97}, the proof found there still holds.} the
-number of edges in $G$ is at most $|V|\cdot 2^{\ceil{i/2}}$.  This
-implies that $G$ has a vertex $v$ of degree at most $2^{\ceil{i/2}+1}$
-and this is also true of any vertex-induced subgraph of $G$.
+A well-know result on $k$-d trees states that, for a $k$-d tree of height
+$i$, any horizontal or vertical line intersects at most $2^{\ceil{i/2}}$
+rectangles of the $k$-d tree \cite[Lemma~5.4]{bkos97}, so the number of
+edges in $G$ is at most $|V|\cdot 2^{\ceil{i/2}}$.\footnote{Although $T$
+is not exactly a $k$-d tree as described in Reference~\cite{bkos97},
+the proof found there still holds.}  This implies that $G$ has a vertex
+$v$ of degree at most $2^{\ceil{i/2}+1}$ and this is also true of any
+vertex-induced subgraph of $G$.
 
 We can therefore obtain an independent set in $G$ by repeatedly
 selecting a vertex $v$ of degree $2^{\ceil{i/2}+1}$, adding $v$ to the
-independent set and deleting $v$ and its neighbours from $G$.  Since, at
-each step we add one vertex to the independent set and delete at most
-$2^{\ceil{i/2}+1}+1$ vertices from $G$, this produces an independent of size
-$\Omega(|V|/2^{i/2}) = \Omega((\gamma/\sqrt{2})^i)$, as required.
+independent set and deleting $v$ and its neighbours from $G$.  Since,
+at each step we add one vertex to the independent set and delete at most
+$2^{\ceil{i/2}+1}+1$ vertices from $G$, this produces an independent of
+size $\Omega(|V|/2^{i/2}) = \Omega((\gamma/\sqrt{2})^i)$, as required.
 \end{proof}
 
 We can now provide the second piece of the lower bound.
@@ -751,9 +762,9 @@ range tree $T=T(S,D)$ such that $q\in s(v)$.  Then
 
 \begin{proof}
 Partition the nodes of $T$ into groups $G_1,G_2,\ldots$ where $G_i$
-contains all nodes $v$ such that $1/2^{i} \le \Pr(v) \le 1/2^{i-1}$.
+contains all nodes $v$ such that $1/2^{i} \le \Pr(v) < 1/2^{i-1}$.
 Observe that the nodes in group $G_i$ occur in the first $i$ levels of
-$T$.  Select a constants $\gamma$ and $\beta$ with $\sqrt{2} < \gamma
+$T$.  Select constants $\gamma$ and $\beta$ with $\sqrt{2} < \gamma
 < \beta < 2$ and define $\alpha=\gamma/\sqrt{2}$.  By
 repeatedly applying \lemref{independent}, each group $G_i$ can be
 partitioned into groups $G_{i,1},\ldots,G_{i,t_i}$ where, for each $1

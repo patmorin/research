@@ -22,27 +22,27 @@
 \maketitle
 \begin{abstract}
 A data structure, called a \emph{biased range tree}, is presented that
-preprocesses a set $S$ of $n$ points in $\R^2$ and a query
-distribution $D$ for 2-sided orthogonal range counting queries.  The
-expected query time for this data structure, when queries are drawn
-according to $D$, matches, to within a constant factor, that of the
-optimal comparison tree for $S$ and $D$.   The memory and preprocessing
-requirements of the data structure are $O(n\log n)$.
+preprocesses a set $S$ of $n$ points in $\R^2$ and a query distribution
+$D$ for 2-sided orthogonal range counting queries (a.k.a.\ dominance
+counting queries).  The expected query time for this data structure,
+when queries are drawn according to $D$, matches, to within a constant
+factor, that of the optimal comparison tree for $S$ and $D$.   The memory
+and preprocessing requirements of the data structure are $O(n\log n)$.
 \end{abstract}
 
 \section{Introduction}
 
 Let $S$ be a set of $n$ points in $\R^2$ and let $D$ be a probability
 measure over $\R^2$.  A \emph{2-sided orthogonal range counting query}
-over $S$ asks, for a query point $q=(q_x,q_y)$, to report the number
-of points $(p_x,p_y)\in S$ such that $p_x \ge q_x$ and $p_y \ge q_y$.
-A 2-sided range counting query \emph{has distribution $D$} if the
-query point $q$ is chosen from the probability measure $D$.  If $T$
-is a data structure for answering 2-sided range counting queries over
-$S$ then we denote by $\mu_D(T)$ the expected time to answer a range
-query with distribution $D$ using $T$.  The current paper is concerned
-with preprocessing the pair $(S,D)$ to build a data structure $T$ that
-minimizes $\mu_D(T)$.
+(also known as a \emph{dominance counting query}) over $S$ asks, for a
+query point $q=(q_x,q_y)$, to report the number of points $(p_x,p_y)\in
+S$ such that $p_x \ge q_x$ and $p_y \ge q_y$.  A 2-sided range counting
+query \emph{has distribution $D$} if the query point $q$ is chosen from
+the probability measure $D$.  If $T$ is a data structure for answering
+2-sided range counting queries over $S$ then we denote by $\mu_D(T)$ the
+expected time to answer a range query with distribution $D$ using $T$.
+The current paper is concerned with preprocessing the pair $(S,D)$
+to build a data structure $T$ that minimizes $\mu_D(T)$.
 
 \subsection{Previous Work}
 
@@ -55,8 +55,8 @@ queries in 2 dimensions.  The interested reader is directed to the
 excellent, and easily accessible, survey by Agarwal and Erickson
 \cite{ae99}.
 
-Orthogonal range counting is a classic problem in computational geometry.
-The 2- (and 3- and 4-) sided range counting problem can be solved by
+Orthogonal range counting is a classic problem in computational
+geometry.  The 2-sided range counting problem can be solved by
 Bentley's \emph{range trees} \cite{ae42}.  Range trees use $O(n\log
 n)$ space and can be constructed in $O(n\log n)$ time.  Originally,
 range trees answered queries in $O(\log^2 n)$ time.  However, with the
@@ -68,30 +68,38 @@ from a commutative semigroup and the goal is to report the sum of the
 weight of all points in the query range \cite{ae133,ae292}.
 
 Note that 3- and 4-sided range counting queries can be answered
-using a data structure for 2-sided range counting and the principle of
-inclusion/exclusion.  This is not true for semigroup queries, since 
+using a data structure for 2-sided range counting and the principle
+of inclusion/exclusion.  This is not true for semigroup queries, since
 semigroups, in general, lack the inverses required for implementing the
-subtractions used in the inclusion/exclusion formulas.
+subtractions used in the inclusion/exclusion formulas.  
 
-For 2-sided orthogonal range counting queries, Chazelle
-\cite{ae55,ae58} proposes a data structure of size $O(n)$, that can be
-constructed in $O(n\log n)$ time, and that can answer range couting
-queries in $O(\log n)$ time.  Unfortunately, this data structure is
-not capable of answering semigroup queries in the same time bound.
-For semigroup queries, Chazelle provides data structures with the
-following requirements: (1)~$O(n)$ space and $O(\log^{2+\epsilon} n)$
-query time, (2)~$O(n\log\log n)$ space and $O(\log^{2}n\log\log n)$
-query time, and (3)~$O(n\log^\epsilon n)$ space and $O(\log^2 n)$
-query time.
+For 2-sided orthogonal range counting queries, Chazelle \cite{ae55,ae58}
+proposes a data structure of size $O(n)$, that can be constructed in
+$O(n\log n)$ time, and that can answer range counting queries in $O(\log
+n)$ time.  Chazelle's data structures work in the Arithmetic Pointer
+Machine Model.  In the more powerful $O(\log n)$ word-size RAM model,
+Chan and P\v{a}tra\c{s}cu have recently improved the construction time of
+previous data structures \cite{jms04} to obtain an $O(n)$-sized structure
+that be constructed in $O(n\sqrt{\log n})$ time and can answer queries
+in $O(\log n/\log\log n)$ time \cite{cp10}.
 
-Practical linear space data structures for range counting include
-$k$-d trees \cite{ae41}, quad-trees \cite{ae251}, and their
-variants.  These structures are practical in the sense that they are
-easy to implement and use only $O(n)$ space.  Unfortunately, neither
-of these structures has a worst-case query time of $\log^{O(1)} n$.
-Thus, in terms of query time, $k$-d trees and quad-trees are nowhere
-near competitive with range trees, at least with respect to asymptotic
-complexity.
+Unfortunately, the above data structures are not capable of answering
+semigroup queries in the same time bound.  For semigroup queries, Chazelle
+provides data structures with the following requirements: (1)~$O(n)$ space
+and $O(\log^{2+\epsilon} n)$ query time, (2)~$O(n\log\log n)$ space and
+$O(\log^{2}n\log\log n)$ query time, and (3)~$O(n\log^\epsilon n)$ space
+and $O(\log^2 n)$ query time.  Chazelle's structures can answer general
+(4-sided) queries in the same time bounds.  Alstrup \etal\ \cite{abr00}
+give an $O(n\log n)$ space, $O(\log n)$ query time data structure that
+answers 4-sided orthogonal range counting queries in the semigroup model.
+
+Practical linear space data structures for range counting include $k$-d
+trees \cite{ae41}, quad-trees \cite{ae251}, and their variants.  These
+structures are practical in the sense that they are easy to implement and
+use only $O(n)$ space.  Unfortunately, neither of these structures has a
+worst-case query time of $\log^{O(1)} n$.  Thus, in terms of query time,
+$k$-d trees and quad-trees are nowhere near competitive with range trees,
+at least with respect to worst-case asymptotic complexity.
 
 %Chazelle \cite{ae61} has proven lower bounds on the time-space
 %tradeoffs associated with orthogonal range searching in the semigroup
@@ -104,7 +112,20 @@ queries, range trees with fractional cascading are still the most
 effective data structure for 2-sided orthogonal range queries in the
 semigroup model.  In particular, no data structure is currently known
 that uses $o(n\log n)$ space and can answer 2-sided orthogonal range
-queries in $O(\log n)$ time. 
+semigroup queries in $O(\log n)$ time.
+
+A recent development in the field of geometric data structures, which
+motivates the current work, is the study of distribution-sensitive
+data structures for point-location.  In this problem, one
+preprocesses a planar subdivision $G$ and a query distribution $D$
+so that one can quickly determine the face of $G$ containing a
+point drawn according to $D$.  A flurry of activity in this area
+\cite{acmr00,amm00,amm01a,amm01b,ammw07,cdilm08,cdilm09,i01,i04}
+has culminated in $O(n)$-space data structures for point location
+in triangulations \cite{ammw07} and connected planar subdivisions
+\cite{cdilm09} whose expected query times match, to within a lower-order
+term, lower-bounds on the expected query time of any linear decision
+tree for point location in $G$ with queries drawn from $D$.
 
 \subsection{New Results}
 
@@ -139,7 +160,17 @@ Biased range trees, while requiring only $O(n\log n)$ space, are
 competitive with any comparison-based data structure.  Thus, the memory
 requirement of biased range trees is the same as that of range trees, but
 their expected query time can never be any worse.
- 
+
+A preliminary version of the results in the current paper have
+appeared in the Proceedings of the 20th ACM-SIAM Symposium on Discrete
+Algorithms (SODA~2009) \cite{dhm09}.  Since then, Afshani, Barbay, and Chan
+\cite{abc09} have discovered a general approach to distribution-sensitive
+geometric data structures that has many applications.  One such
+application is a solution to the problem of distribution-sensitive
+4-sided orthogonal range counting.  Thus, their data structure subsumes
+the results in the current paper by solving the more general (4-sided)
+problem.
+
 The remainder of the paper is organized as follows. In
 \secref{preliminaries} we present background material that is used in
 subsequent sections.  In \secref{data-structure} we define biased
@@ -212,7 +243,7 @@ For a classification tree $T$ that solves a problem
 $P:\mathcal{D}\mapsto\{0,\ldots,k-1\}$ and a probability measure $D$
 over $\mathcal{D}$, the \emph{expected search time} of $T$, denoted by
 $\mu_D(T)$, is the expected length of the search path for $q$ when $q$ is
-drawn at random from $\mathcal{D}$ according to $D$.  Note that, for each
+drawn at random from $\mathcal{D}$ according to $D$.  Note that for each
 node $v$ of $T$ there is a maximal subset $r(v)\subseteq \mathcal{D}$
 such that the search path for any $q\in r(v)$ contains $v$.  Thus,
 the expected search time of $T$ (under distribution $D$) can be written as
@@ -382,7 +413,7 @@ and top sides of $s(v)$.  Note that, with these conventions, if the query
 point $q$ is in $r(\lft(v))$ then $R(q)$ intersects $r(\rght(v))$.
 However, if $q\in r(\rght(v))$ then $R(q)$ does not intersect $r(\lft(v))$.
 Similarly, for a query point $q\in s(v)$, the query range $R(q)$ intersects
-$r(\rght(v))$ but not $r(\lft(v))$
+$r(\rght(v))$ but not $r(\lft(v))$.
 
 \begin{figure}
   \begin{center}
@@ -408,7 +439,7 @@ in left-to-right order, obtained by drawing a vertical line through
 each of the $k$ points in $S\cap r(v)$.  Then there is a unique strip
 $s(v)=r(v)_i$ such that $\sum_{j=1}^{i-1} \Pr(r(v)_j) \le \Pr(r(v))/2$
 and $\sum_{j=i+1}^{k} \Pr(r(v)_j) < \Pr(r(v))/2$.  For a horizontal
-node $v$, the definition of $s(v)$ is analagous except we use horizontal
+node $v$, the definition of $s(v)$ is analogous except we use horizontal
 lines through each point of $r(v)\cap S$.
 
 Note that for a node $v$ that is not a leaf, we use the convention
@@ -762,7 +793,7 @@ range tree $T=T(S,D)$ such that $q\in s(v)$.  Then
 
 \begin{proof}
 Partition the nodes of $T$ into groups $G_1,G_2,\ldots$ where $G_i$
-contains all nodes $v$ such that $1/2^{i} \le \Pr(v) < 1/2^{i-1}$.
+contains all nodes $v$ such that $1/2^{i} < \Pr(v) \le 1/2^{i-1}$.
 Observe that the nodes in group $G_i$ occur in the first $i$ levels of
 $T$.  Select constants $\gamma$ and $\beta$ with $\sqrt{2} < \gamma
 < \beta < 2$ and define $\alpha=\gamma/\sqrt{2}$.  By
@@ -837,7 +868,7 @@ within a factor of $1/0.178071905\approx 5.615$ and an additive
 constant of 20.  Alternatively, selecting $\gamma=1.8$ gives a
 constant factor less than 3 and an additive term of approximately 90.
 
-And now the main event:
+Finally, we have all the pieces needed for our main theorem:
 
 \begin{thm}
 Let $S$ be a set of $n$ points and let $D$ be a probability measure
@@ -853,7 +884,7 @@ tree that answers range counting queries for $S$.  Then
 \begin{proof}
 By the definition of $C_1$ and $C_2$, the expected cost of searching in
 $T$ is $\mu_D(T)=O(C_1(S,D)+C_2(S,D))$.  On the other hand, by
-\lemref{depth} and \lemref{cataloguer} $\mu_D(T^*) =
+\lemref{depth} and \lemref{cataloguer}, $\mu_D(T^*) =
 \Omega(\max\{C_1(S,D),C_2(S,D)\}) =
 \Omega(C_1(S,D)+C_2(S,D))=\Omega(\mu_D(T))$.  This completes the proof.
 \end{proof}
@@ -862,18 +893,17 @@ $T$ is $\mu_D(T)=O(C_1(S,D)+C_2(S,D))$.  On the other hand, by
 \seclabel{summary}
 
 We have presented biased range trees, an optimal data structure for
-2-sided orthogonal range counting queries when the point set $S$ and
-query distribution $D$ are known in advance. The expected time required
-to answer queries with a biased range tree, when the queries are
-distributed according to $D$, is within a constant factor of any
-decision tree for answering range queries over $S$.  Like standard
-range trees, biased range trees use $O(n\log n)$ space and can also
-answer semigroup queries \cite{ae133,ae292}.\footnote{That biased
-range trees can answer semigroup queries follows
-from Properties~1--3 of the catalogues in \secref{catalogues}.}
-Although the analysis of
-biased range trees is complicated, their implementation is not much
-more complicated than that of standard range trees.
+2-sided orthogonal range counting queries when the point set $S$
+and query distribution $D$ are known in advance. The expected time
+required to answer queries with a biased range tree, when the queries are
+distributed according to $D$, is within a constant factor of any decision
+tree for answering range queries over $S$.  Like standard range trees,
+biased range trees use $O(n\log n)$ space and can also answer semigroup
+queries \cite{ae133,ae292}.\footnote{That biased range trees can answer
+semigroup queries follows from Properties~1--3 of the catalogues in
+\secref{catalogues}.} Although the analysis of biased range trees is
+complicated, their implementation is not much more complicated than that
+of standard range trees.
 
 As a small optimization, the backup range tree data structure can be
 eliminated from biased range trees.  Instead, once the probability of
@@ -887,72 +917,20 @@ distribution-sensitive range searching.  Several open problems
 immediately arise.  
 
 \begin{op}
-Are there efficient distribution-sensitive data structures for 3-sided
-and 4-sided orthogonal range counting queries?  In this case, the query
-distribution is defined as a distribution over a subset of $\R^3$,
-respectively, $\R^4$ that defines the 3 or 4 sides of the query range.
+Biased range trees, and the data structures proposed by Afshani, Barbay,
+and Chan \cite{abc09}, require that the point set $S$ and the distribution
+$D$ be known in advance.  Is there a self-adapting version of biased range
+trees that, without knowing $D$ in advance, can answer $m$ queries, each
+drawn independently from $D$ in $O(n\log n+ m\mu_D(T^*))$ expected time?
 \end{op}
-
-Note that a 4-sided orthogonal range counting query can be reduced to 4
-2-sided orthogonal range counting queries using the principle of
-inclusion-exclusion.  Unfortunately, this reduction does not produce an
-optimal distribution-sensitive data structure.  To see this, consider
-4-sided queries consisting of unit squares whose bottom left corners are
-uniformly distributed in the shaded region of \figref{squares}.  All such
-queries contain no points in the query region, and all such queries can be
-answered in $O(1)$ time by simply checking that all four corners of the
-square are to the left of the point set.  However, when we decompose these
-queries into four 2-sided queries we obtain 2-sided queries that require
-$\Omega(\log n)$ time to be answered.
-
-\begin{figure}
-  \begin{center}
-    \begin{tabular}{c}
-      \includegraphics{squares}
-    \end{tabular}
-  \end{center}
-  \caption{Decomposing a 4-sided query into four 2-sided queries can
-           produce a bad distribution of 2-sided queries.}
-  \figlabel{squares}
-\end{figure}
-
-
-
-\begin{op}
-Biased range trees require that the point set $S$ and the
-distribution $D$ be known in advance.  Is
-there a self-adapting version of biased range trees that, without
-knowing $D$ in advance, can answer $m$ queries, each drawn
-independently from $D$ in $O(n\log n+ m\mu_D(T^*))$ expected time?
-\end{op}
-
-\begin{op}
-Determine the worst-case or the average case constants associated with
-2-dimensional orthogonal range searching for comparison-based data
-structures.  Using a table of size $O(n^2)$ and two applications of binary
-search, one immediately obtains an $O(n^2)$ space data structure that
-answers queries using at most $2\log n + O(1)$ comparisons.  Is there an
-$O(n\log n)$ space structure with the same performance?
-\end{op}
-
-\begin{op}
-A point $q\in \R^d$ is \emph{maximal} with respect to $S\subseteq\R^d$
-if no point of $S$ has every coordinate larger than the corresponding
-coordinate of $q$. For $d\ge 3$,  is there a distribution-sensitive 
-data structure for
-testing if a query point $q$ is maximal?  For point sets in 2
-dimensions, an orthogonal variant of the point-location techniques of Collette
-\etal\ \cite{cdilm08} seems to apply. 
-\end{op}
-
 
 \begin{op}
 Are there distribution-sensitive data structures for $d$-sided range
 search in point sets in $\R^d$?  The current fastest structures
-for range search in point sets in $\R^d$ that use near-linear space have
-$\Theta(\log^{d-1} n)$ query time.  Is there a structure that uses
-near-linear space and is optimal
-when the point set $S$ and the distribution $D$ are known in advance?
+for range search in point sets in $\R^d$ that use near-linear space
+have $\Theta(\log^{d-1} n)$ query time.  Is there a structure that
+uses near-linear space and is optimal when the point set $S$ and the
+distribution $D$ are known in advance?
 \end{op}
 
 \bibliographystyle{plain}

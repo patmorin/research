@@ -45,18 +45,18 @@ and the \emph{broadcast interval}
 \[
    I_i = [x_i-R_i,x_i+R_i] \enspace .
 \]
-The \emph{interference at $x_i$} is then given by
+The \emph{interference at $x\in\R$} is then given by
 \[
-   Z_i = |\{j\in\{1,\ldots,n\}\setminus\{i\} : x_i \in I_j\}| \enspace .
+   Z(x) = |\{x_j\in S\setminus\{x\}: x \in I_j\}| \enspace .
 \]
 The \emph{maximum interference} in $S$, is given by
 \[
-   Z_S=\max\{Z_i:i\in\{1,\ldots,n\}\} \enspace .
+   Z(S)=\max\{Z(x_i):i\in\{1,\ldots,n\}\} \enspace .
 \]
 We prove the following result:
 
 \begin{thm}
-With probability $1-o(1)$, $Z_S\in \Theta(\sqrt{\log n})$.
+With probability $1-o(1)$, $Z(S)\in \Theta(\sqrt{\log n})$.
 \end{thm}
 
 This result is an immediate consequence of \lemref{lower-bound} and
@@ -71,7 +71,7 @@ uniformly distributed point sets and exponential random variables
 \cite[Chapter~V, Theorem~2.2]{d86}.  Suppose $S$ is a set of $n$ points
 independently and uniformly distributed in $[0,1]$ whose elements are
 $x_1,\ldots,x_n$ in sorted order.  Let $X_0,\ldots,X_n$ be Exponential(1)
-random variables, let $x'_i=\sum_{j=0}^{i-1}X_j$, and let $x_i''=x_i/x_n$.
+random variables, let $x'_i=\sum_{j=0}^{i-1}X_j$, and let $x_i''=x_i/x_{n+1}$.
 Then $x_1'',\ldots,x_n''$ have the same distribution as $x_1,\ldots,x_n$.
 
 Because of the above relationship we will, throughout this section, use
@@ -102,7 +102,7 @@ The next lemma shows that this situation is not too unlikely:
 \begin{lem}\lemlabel{frame}
 If $X_0,\ldots,X_k$ are a sequence of independent Exponential(1) random
 variables, then the probability that $X_0,\ldots,X_k$ form a $k$-frame
-is at least $(1/e-1/e^2)2^{-(k+1)^2}$.
+is at least $e^{-1}(1-e^{-1})2^{-(k+1)^2}$.
 \end{lem}
 
 \begin{proof}
@@ -131,13 +131,18 @@ where the last inequality holds for all $i\ge 0$.  Therefore,
    & = \Pr\{X_0\in[1,2]\}
          \cdot\prod_{i=1}^k \Pr\{F(X_0,\ldots,X_{i})
                                  \mid F(X_0,\ldots,X_{i-1})\} \\
-   & = (1/e-1/e^2)
+   & = e^{-1}(1-e^{-1})
          \cdot\prod_{i=1}^k \Pr\{F(X_0,\ldots,X_{i})
                                  \mid F(X_0,\ldots,X_{i-1})\} \\
-   & \ge (1/e-1/e^2)\cdot\prod_{i=1}^k 2^{-(2i+1)} \\
-   & = (1/e-1/e^2)\cdot2^{-\sum_{i=1}^k(2i+1)} \\
-   & = (1/e-1/e^2)\cdot2^{-(k^2+2k)} \\
-   & \ge (1/e-1/e^2)\cdot2^{-(k+1)^2} \\
+   & = e^{-1}(1-e^{-1})
+         \cdot\prod_{i=1}^k \Pr\{X_{i} \in [X_{i-1}/4,X_{i-1}/2]\}
+                                 \mid F(X_0,\ldots,X_{i-1})\} \\
+   & \ge e^{-1}(1-e^{-1})
+         \cdot\prod_{i=1}^k \Pr\{X_{i} \in [4^{-i}/4,4^{-i}/2]\} \\
+   & \ge e^{-1}(1-e^{-1})\cdot\prod_{i=1}^k 2^{-(2i+1)} \\
+   & = e^{-1}(1-e^{-1})\cdot2^{-\sum_{i=1}^k(2i+1)} \\
+   & = e^{-1}(1-e^{-1})\cdot2^{-(k^2+2k)} \\
+   & \ge e^{-1}(1-e^{-1})\cdot2^{-(k+1)^2} \\
 \end{align*}
 as required.
 \end{proof}
@@ -145,7 +150,7 @@ as required.
 
 \begin{lem}[Lower Bound]\lemlabel{lower-bound}
 With probability at least $1-\exp(-n^{1-c}/\sqrt{c\log n})$, there exists
-an some element of $S$ that has interference at least $\lfloor\sqrt{c\log
+some element of $S$ that has interference at least $\lfloor\sqrt{c\log
 n}\rfloor-2$.
 \end{lem}
 
@@ -180,59 +185,50 @@ most $\sqrt{c\log n}$ with probability at least $1-n^{-\Omega(c)}$.
 \end{lem}
 
 \begin{proof}
-Consider an element $x_t$ that has short-range left-interference $k+1$
-and suppose that this inteference comes from $x_{i_0},\ldots,x_{i_{k}}$
-with $x_{i_{k}} <\cdots<x_{i_0}<x_t$.  This implies that, for all $j\in\{1,\ldots,k\}$,
-\[
-   X_{i_j-1} > x_t - x_{i_j} \enspace ,
-\]
-or, equivalently
-\[
-   X_{i_j-1} > (x_t - x_{i_j-1})/2 
-\]
-(see \figref{upper-bound}).  There are other requirements on the values
-of $X_{i_k},\ldots,X_{i_0}$, but the above condition is enough to prove
-our upper-bound.
+We will actually prove something stronger, namely that the short-range
+left-interference of any point $x\in\R$ is at most $\sqrt{c\log n}$
+with probability at least $1-n^{-\Omega(c)}$.  We first observe that the
+maximum value of the short range interference occurs when $x$ is of the
+form $x_{i} + X_{i-1}$, for some $i\in\{1,\ldots,n\}$ where $X_{i-1}
+\le 1$.
+
+Consider the following process, that begins with $X_0$ and
+upper-bounds the short-range left-interference at $x=x_1+X_0=2X_0$
+(see \figref{upper-bound}). If $X_0>1$, the process immediately ends.
+Otherwise, the process proceeds in rounds where, in round $i$, there
+is a length $\ell_i$.  Initially $\ell_i=X_0$.  During round~$i$, we
+generate $X_{r_{i-1}+1},\ldots,X_{r_i}$ until $\sum_{j=1}^r X_{r_{i-1}+j}
+\ge \ell_i/2$.  If $\sum_{j=1}^r X_j \ge \ell_i$, then the process ends.
+Otherwise, we set $\ell_{i+1} = \ell_i-\sum_{j=1}^{r_i} X_j$ and continue
+onto round $i+1$.
 
 \begin{figure}
-  \begin{center}\includegraphics{upper-bound}\end{center}  
-  \caption{$x_t\in R_{i_j}$ implies $X_{i_j-1} > (x_t - x_{i_j-1})/2$.}
+  \begin{center}\includegraphics{upper-bound}\end{center}
+  \caption{A process that leads to an interference of 3 at $x$.  The process ends because $X_4 > \ell_3$}
   \figlabel{upper-bound}
 \end{figure}
 
-Consider the following process: Start with a \emph{length} $\ell_0 \le 1$
-and generate i.i.d.\ Exponential(1) random variables $X_1,\ldots,X_i$
-until $\sum_{j=1}^i {X_j} \ge \ell_0/2$. If $\sum_{j=1}^i {X_j} \ge
-\ell_0$ then the process stops.  Otherwise, the process begins another
-round with a new input length $\ell_1=\ell_0-\sum_{j=1}^i {X_j}$, and
-the process continues in this manner until the stopping condition is met.
+Notice that, in this process, the only elements that might contribute
+to the short-range left-interference at $x$ are $x_1$ and those $x_i$
+where $X_{i-1}$ completes a round other than the final round.  Thus,
+if the above process terminates during round $k$, then the short-range
+left-interference at $x$ is at most $k$.
 
-Observe that, in this process, the length $\ell_i$ during the $i$th
-round (starting at round 0) satisfies $\ell_i\le (1/2)^i$.  Therefore,
-the probability of continuing onto round $i+1$ from round $i$ is at most
+Now, observe that in round $i$, $\ell_i \le 1/2^{i-1}$.  Therefore,
+the probability of continuing to round $i+1$ from round $i$ is at most
 \[
-   \Pr\{X_1 \le 2^{-i}\} = 1-e^{-1/2^i} \le 2^{-i} \enspace .
+   \Pr\{X_{r_{i-1}+1} \le 1/2^{i-1}\} = 1-e^{-2^{-i+1}} \le 2^{-i+1} \enspace .
 \]
-Therefore, the probability that this process continues beyond round $k$
-is at most
+Therefore, the probability of continuing up to round $k$ is at most
 \[
-    \prod_{i=0}^{k} 2^{-i} = 2^{-\sum_{i=0}^{k} i} = 2^{-k(k+1)/2}
-\enspace .
+  \prod_{i=1}^{k-1} 2^{-i+1}
+  = 2^{-\sum_{i=1}^{k-1}(i+1)}
+  = 2^{-(k+2)(k-1)/2} \le 2^{-k^2/2} \enspace ,
 \]
-The relationship between the above process and interference is the
-following:  Suppose that some element $x_t\in S$ has interference $k$
-and $x_i$ contributes to the left-interference of $x_t$ and $X_{i-1}\le
-1$.  Then, we let $\ell_0=X_{i-1}$ and observe that the elements
-$x_{i_1}=x_i,\ldots,x_{i_k}$ that contribute the left-interference of
-$x_t$ correspond to elements that terminate a round in the above process,
-with the next-to-last round being terminated by $x_t$ itself.
-
-By setting $k=\sqrt{c\log n}$, we find that the probability that $X_{1}$
-starts a process leading to an $x_t$ whose short-range left-interference is
-greater than $k$ is at most $n^{-\Omega(c)}$.  Therefore, the probability that
-there exists \emph{any} $X_i$ that starts a process leading an $x_t$ with
-short-range left-interference greater than $k$ is at most
-$n^{1-\Omega(c)}=n^{-\Omega(c)}$, completing the proof.
+for $k\ge 2$.  Taking $k=\sqrt{c\log n}$, we find that this probability
+is at most $1/n^{c/\sqrt{2}}$.  Therefore, the probability that there
+is \emph{any} point $x\in\R$ with short-range left-interference greater
+than $\sqrt{c\log n}$ is at most $1/n^{c/\sqrt{2}-1}$, as required.
 \end{proof}
 
 
@@ -252,19 +248,20 @@ x_{i_0}<x_t$.  \lemref{squeaker} already bounds the number of elements of this
 sequence where $X_{i_j-1} \le 1$.  Thus, all that remains is to bound
 the number of elements $x_{i_j}$ where $X_{i_j} > 1$.
 
-Observe again that, for any $j\in\{1,\ldots,k\}$, in order for $x_{i_j}$
-to interfere with $x_t$ we must have
+Observe, as in the proof of \lemref{squeaker}, that, for any
+$j\in\{1,\ldots,k\}$, in order for $x_{i_j}$ to interfere with $x_t$
+we must have
 \[
-   X_{i_j-1} \ge x_t - x_{i_j} 
+   X_{i_j-1} \ge x_t - x_{i_j}
 \enspace ,
 \]
-which implies that $X_{i_j} \ge 2 X_{i_{j-1}}$ for all
+which implies that $X_{i_j-1} \ge 2 X_{i_{j-1}-1}$ for all
 $j\in\{1,\ldots,k\}$.  Therefore, if we have $2^r$ elements with
 $X_{i_j}>1$, then we have some element $X_{i_k-1} > 2^r$.  The probability
 that a particular $X_i$ is greater than $2^r$ is $e^{-2^r}$. Therefore,
 the probability that there exists any $X_i$ greater than $2^r$ is at most
 $ne^{-2^r}$.  Setting $r=d\log\ln n$ for a sufficiently large constant
-$d$ makes this probability at most $n^{-d}$, and completes the proof.
+$d>1$ makes this probability at most $n^{1-d}$, and completes the proof.
 \end{proof}
 
 \bibliographystyle{plain}

@@ -8,6 +8,7 @@
 \DeclareMathOperator{\od}{od}
 \DeclareMathOperator{\vol}{vol}
 \DeclareMathOperator{\cog}{c}
+\newcommand{\drop}{\downarrow}
 \newtheorem{lem}{Lemma}
 
 \begin{document}
@@ -77,6 +78,15 @@ $\od(\cog(S),S) \le 3\od(x,S)$ for any $x\in\R^2$.
 \end{lem}
 
 \begin{proof}
+In this proof, we will make use of the fact that, for any 4 points
+$a,b,c,d\in\R^2$,
+\begin{equation}
+  \vol(a,b,c) \le \vol(a,b,d) + \vol(a,c,d) + \vol(b,c,d) \enspace , 
+   \label{eq:cover}
+\end{equation}
+since the three triangles on the right hand side cover the convex hull
+of the four points.
+
 Define $S_i$ as in the proof of Lemma~1.  The induction and base case are
 the same as in Lemma~1.  First, we have
 \begin{eqnarray}
@@ -84,7 +94,7 @@ the same as in Lemma~1.  First, we have
    & = & \od(x,S_i) \\
    && {} + \sum_{j=1}^i \vol(x,p_j,p_{i+1}) \label{eq:o}
 \end{eqnarray}
-
+and
 \begin{eqnarray}
 \od(\cog(S_{i+1}),S_{i+1}) 
    & = &\od(\cog(S_{i},S_{i})) \\
@@ -93,52 +103,63 @@ the same as in Lemma~1.  First, we have
               \label{eq:i} \\
    &&   {} + \sum_{q\in S_{i+1}\setminus \{p_{i+1}\}}
            (\vol(\cog(S_{i+1},p_{i+1},q))- \vol(\cog(S_{i+1},x,q))) 
-            \label{eq:ii} \\
+            \label{eq:ii} 
 \end{eqnarray}
-First we show that $(\ref{eq:i}) \le 2\times (\ref{eq:o})$.  Note that each term in
-(\ref{eq:i}) is the difference in area between two triangles that share a
-common base and whose third vertex has moved by the vector
-$v_{i+1}=(p_{i+1}-x)/n$.  Each term can therefore be upper-bounded by
+First we show that $(\ref{eq:i}) \le 2\times (\ref{eq:o})$.
+By (\ref{eq:cover}), we can bound each term in (\ref{eq:i}) using the inequality
 \[
-   \vol(\cog(S_{i+1},p,q))- \vol(\cog(S_{i},p,q))
+   \vol(\cog(S_{i+1}),p,q)- \vol(\cog(S_{i}),p,q)
   \le 
-   \vol(p,\cog(S_i),\cog(S_{i+1})) + \vol(q,\cog(S_i),\cog(S_{i+1}))
+   \vol(p,\cog(S_i),\cog(S_{i+1})) + \vol(q,\cog(S_i),\cog(S_{i+1})) 
 \]
-(see Figure~\ref{fig:approx}). When taken over all pairs $p$ and $q$, each
-triangle appears $n-1$ times, so
-\begin{eqnarray*}
+(see Figure~\ref{fig:approx}). 
+On the right-hand side of the above inequality, there are two triangles each having a side at $\cog(S_i),\cog(S_{i+1})$.  Let $v_{i+1}=p_{i+1}-x$ and note that 
+$\cog(S_{i+1})-\cog(S_{i}) = v_{i+1}/n$.  Therefore, 
+\[
+ \vol(\cog(S_{i}),\cog(S_{i+1}),p) = \frac{1}{2n}\cdot\|v_{i+1}\|\cdot\|(p_\drop-x_\drop)\|
+\]
+where $p_\drop$ denotes the orthogonal projection of $p$ onto some line
+orthogonal to $v_{i+1}$.  Therefore, we get
+\begin{eqnarray}
 (\ref{eq:i}) 
+   & = & \sum_{\{p,q\}\in S_i}
+            (\vol(\cog(S_{i+1},p,q))- \vol(\cog(S_{i},p,q))) \\
+   &\le& \sum_{\{p,q\}\in S_i}
+   (\vol(p,\cog(S_i),\cog(S_{i+1})) + \vol(q,\cog(S_i),\cog(S_{i+1})))  \\
    & \le & (n-1)\sum_{p\in S_i} \vol(p,\cog(S_i),\cog(S_{i+1})) \\
    & = & (1-1/n)\frac{1}{2}\|v_{i+1}\|\sum_{p\in
-S_i}\|\cog(S_{i+1})_\downarrow-p_\downarrow\|) \\
-   & = & (1-1/n)\frac{1}{2}\|v_{i+1}\|\od(\cog(S_{i+1})_\downarrow,
-\{p_\downarrow:p\in S_{i}\}) \\
-   & = & (1-1/n)\frac{1}{2}\|v_{i+1}\|\od(\cog(S_{i})_\downarrow,
-\{p_\downarrow:p\in S_{i}\}) \\
-   & \le & (1-1/n)\|v_{i+1}\|\od(x_\downarrow, \{p_\downarrow:p\in S_{i}\})
-      \label{eq:drop} \\
-   & \le & \|v_{i+1}\|\od(x_\downarrow, \{p_\downarrow:p\in S_{i}\}) \\
+S_i}\|\cog(S_{i+1})_\drop-p_\drop\|) \\
+   & = & (1-1/n)\frac{1}{2}\|v_{i+1}\|\od(\cog(S_{i+1})_\drop,
+\{p_\drop:p\in S_{i}\}) \\
+   & = & (1-1/n)\frac{1}{2}\|v_{i+1}\|\od(\cog(S_{i})_\drop,
+\{p_\drop:p\in S_{i}\}) \\
+   & \le & (1-1/n)\|v_{i+1}\|\od(x_\drop, \{p_\drop:p\in S_{i}\})
+     \label{eq:drop} \\ 
+   & \le & \|v_{i+1}\|\od(x_\drop, \{p_\drop:p\in S_{i}\}) \\
    & = & 2\cdot \sum_{j=1}^i \vol(x,p_j,p_{i+1}) 
-\end{eqnarray*}
-where $p_\downarrow$ denotes the orthogonal projection of $p$ onto some line
-orthogonal to $v_{i+1}$, so that (\ref{eq:drop}) follows from Lemma~1.
+\end{eqnarray}
+where inequality (\ref{eq:drop}) follows from Lemma~1.
 
-Next, we relate (\ref{eq:ii}) to (\ref{eq:o}).
+Next, we relate (\ref{eq:ii}) to (\ref{eq:o}).    Applying (\ref{eq:cover}), we obtain
 \begin{eqnarray*}
  (\ref{eq:ii})  
      &=&  \sum_{q\in S_{i+1}\setminus \{p_{i+1}\}}
           (\vol(\cog(S_{i+1},p_{i+1},q)) - \vol(\cog(S_{i+1},x,q))) \\
-     &\le &  \sum_{q\in S_{i+1}\setminus \{p_{i+1}\}} (\vol(x,p_{i+1},q)) \\
-     & = &  (\ref{eq:o}) \enspace ,
+     &\le &  \sum_{q\in S_{i+1}\setminus \{p_{i+1}\}} 
+              (\vol(x,p_{i+1},q) + \vol(\cog(S_{i+1}),p_{i+1},x)) \\
+     &\le &  
+            \sum_{q\in S_{i+1}\setminus \{p_{i+1}\}} 
+              \frac{1}{2}\|v_{i+1}\|\cdot(\|q_\drop-x_\drop\|
+                 + \|\cog(S_{i+1})_\drop-x_\drop\|) \\
+     &\le &  3\sum_{j=1}^i \vol(x,p_j,p_{i+1}) \enspace .
 \end{eqnarray*}
-(see Figure~\ref{fig:overlap}).
 
 Finally, we resubstitute to obtain
 \begin{eqnarray*}
 \od(\cog(S_{i+1}),S_{i+1}) 
-  & = & \od(\cog(S_{i}),S_{i}) + 3 \sum_{j=1}^i \vol(x,p_j,p_{i+1}) \\
-  &\le& \od(x,S_{i}) + 3 \sum_{j=1}^i \vol(x,p_j,p_{i+1}) \\
-  &\le& 3\od(x,S_{i+1}) \enspace ,
+  & = & \od(\cog(S_{i}),S_{i}) + 5 \sum_{j=1}^i \vol(x,p_j,p_{i+1}) \\
+  &\le& 5\od(x,S_{i}) + 5 \sum_{j=1}^i \vol(x,p_j,p_{i+1}) \\
+  & = & 5\od(x,S_{i+1}) \enspace ,
 \end{eqnarray*}
 as required.
 \end{proof}

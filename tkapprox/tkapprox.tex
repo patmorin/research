@@ -1,0 +1,362 @@
+\documentclass{patmorin}
+%fleqn: left alignment of the equations
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{url}
+%\usepackage [noend] {algorithmic}
+%\usepackage{setspace}
+\usepackage [letterpaper] {geometry}
+\usepackage{indentfirst}
+\usepackage[pdftex]{color, graphicx}
+\usepackage{supertabular}
+\usepackage{multirow}
+\usepackage[mathlines]{lineno}
+\linenumbers
+
+%\newcommand{\note}[1]{$\spadesuit$\marginpar{$\spadesuit$ #1}}
+
+\newtheorem{theorem}{Theorem}%[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{lemma}{Lemma}%[section]
+\newtheorem{notation}{Notation}[section]
+\newtheorem{proposition}{Proposition}[section]
+
+\DeclareMathOperator{\depth}{depth}
+
+\title{\MakeUppercase{Absolute Approximation of Tukey Depth: \newline
+       Theory and Experiments}}
+\author{Dan Chen, Pat Morin, and Uli Wagner}
+%\date{}
+
+\begin{document}
+%\large
+%\doublespace
+\maketitle
+
+
+\begin{abstract}
+  A Monte Carlo approximation algorithm for the Tukey depth problem in high dimensions is introduced. The algorithm is a generalization of an algorithm presented by Rousseeuw and Struyf (1998). The performance of this algorithm is studied both analytically and experimentally.
+\end{abstract}
+
+%\keywords{Tukey depth}
+
+\section{Introduction}
+\label{sec:intro}
+
+%Data depth
+
+\emph{Tukey depth} is also called \emph{location depth} or \emph{halfspace depth}. Given a finite set $S$ of $n$ points and a point $p$ in $\mathbb{R}^{d}$, the Tukey depth of $p$ is defined as the minimum number of points of $S$ contained in any closed halfspace with $p$ on its boundary~\cite{Hodges,Tukey}. An equivalent definition is the minimum number of points of $S$ contained in any halfspace which also contains $p$~\cite{Bremner08}. This problem is NP-hard if both $n$ and $d$ are parts of the input~\cite{Johnson}, and it is even hard to approximate~\cite{Amaldi95}. Many different algorithms have been developed to compute the Tukey depth of a point, or to find a point that maximizes the Tukey depth~\cite{Bremner06, Chan04, Langerman03, Matousek92, Rousseeuw98}. There are also many algorithms for approximating Tukey depth in low dimensions~\cite{Afshani07, Cuesta08, Rousseeuw98, Wilcox03}. The Tukey depth problem is equivalent to the \emph{maximum feasible subsystem (MAX FS)} problem~\cite{Chen07} which is a long-standing problem and has been extensively studied~\cite[Chapter 7]{Chinneck08}.
+
+Suppose points in $S$ are in general position (no $d + 1$ points of $S \cup \{ p \}$ lie on a common hyperplane), an upper bound can be obtained by selecting any non-trivial vector $v \in \mathbb{R}^{d}$ and computing the Tukey depth of $p \cdot v$ in the one dimensional point set
+\begin{equation}
+  \label{eq:intro.1dset}
+  S \cdot v = \{x \cdot v : x \in S \}. \tag{$\ast$}
+\end{equation}
+If $v$ is the inner-normal of the boundary of the halfspace $\hbar$ that defines the depth value of $p$, then
+\begin{equation}
+  \label{eq:intro.def1}
+  \depth{(p, S)} = \depth{(p \cdot v, S \cdot v)}.
+\end{equation}
+In $\mathbb{R}^{1}$, we rank the points $S \cup \{ p \}$ starting with $0$ from both ends to the median, then the depth of $v$ is its rank. More generally, given any $k$-flat $f$ orthogonal to the boundary of $\hbar$, we have
+\begin{equation}
+  \label{eq:intro.defi}
+  \depth{(p, S)} = \depth{(p \cdot f, S \cdot f)},
+\end{equation}
+where $p \cdot f$ is the the orthogonal projection of $p$ onto $f$, and $S \cdot f$ is the the orthogonal projection of $S$ onto $f$.
+
+%(\textcolor{red}{The projection is not necessary to be orthogonal, since affine transformation does not affect Tukey depth})
+
+In this paper, we analyze the following 2 heuristics for this problem:
+\begin{itemize}
+\item [1] Randomly select a set $Q$ of $d - 1$ points from $S$. Let $\pi$ be the unique hyperplane containing $Q \cup \{p\}$, and let $v$ be a vector orthogonal to $\pi$. Apply~\eqref{eq:intro.def1} to get an upper bound on $\depth{(p, S)}$.\label{page:heuristic1}
+\item [2] Randomly select a set $Q$ of $d - k$ points from $S$. Let $\pi$ be the unique $(d - k)$-flat containing $Q \cup \{p\}$, and let $f$ be a $k$-flat orthogonal to $\pi$. Apply~\eqref{eq:intro.defi} to get an upper bound on $\depth{(p, S)}$.\label{page:heuristic2}
+\end{itemize}
+The first algorithm described above is due to Rousseeuw and Struyf, who experimented with several different techniques for choosing the vector $v$. Notice that when we project the points in $S$ to the vector or $k$-flat, those points in $Q$ can be ignored because we can exclude those points from $\hbar$ by a small perturbation of $\hbar$.
+
+The first algorithm reduces the original problem to a one dimensional Tukey depth problem, but the second reduces to a $k$ dimensional Tukey depth problem. The projection of $S$ to a vector takes $O(dn)$ time. Then the first heuristic requires $O(dn)$ time. In the second heuristic, the projection of $S$ to a $k$-flat takes $O(kdn)$ time, and the $k$ dimensional Tukey depth problem has the following time complexity:
+
+For $k = 1$, the Tukey depth is easily computed in $O(n)$ time by counting the number of points less than $p$ and the number of points greater than $p$, and taking the minimum of those $2$ quantities.
+
+For $k = 2$, the Tukey depth of $p$ can be computed in $O(n\log n)$ time by sorting the points of $S$ radially about $p$ and scanning this sorted list using two pointers~\cite{Rousseeuw98}.
+
+For $k = 3$, the algorithms already become significantly more complicated. A brute-force algorithm runs in $O(n^{2})$ time. An algorithm of Chan~\cite{Chan05} runs in $O((n + k^{2})\log n)$ time.
+
+In the remainder of this paper we analyze how good these upper bounds can be with the following two theorems, which bound the probability that the approximated depth exceeds the true depth by more than $\sigma$.
+\begin{theorem}
+\label{thm:ballofvertices}
+  Let $S$ be a set of $n$ points in general position in $\mathbb{R}^{d}$, $S'$ be a subset of $d-1$ elements chosen at random and without replacement from $S$, $v$ be the vector perpendicular to the plane containing $S'$ and another point $p$, $\sigma$ be an integer such that $0 \leq \sigma \leq \lfloor \frac{n}{d}\rfloor - 1$. Then
+\[ \Pr\{ \depth{(p \cdot v, S \cdot v)} \leq \depth{(p, S)} + \sigma \} \geq \frac{\binom{\sigma+d-1}{d-1}}{\binom{n}{d-1}}.\]
+\end{theorem}
+\begin{theorem}
+\label{thm:ballofflats}
+  Let $S$ be a set of $n$ points in general position in $\mathbb{R}^{d}$, $S'$ be a subset of $d-k$ elements chosen at random and without replacement from $S$, $f$ be the $k$-flat orthogonal to the $(d - k)$-flat containing $S'$ and another point $p$, $\sigma$ be an integer such that $0 \leq \sigma \leq \lfloor \frac{n}{2}\rfloor - 1$. Then
+\[ \Pr\{ \depth{(p \cdot f, S \cdot f)} \leq \depth{(p, S)} + \sigma \} \geq \frac{2^{d-k}\binom{\sigma + d-k}{d-k}}{(d-k)!\binom{n}{d-k}}.\]
+\end{theorem}
+
+%more motivation
+A few approximations have been developed recently
+
+In Section~\ref{sec:arran} we study the combinatorics of arrangements of hyperplanes with goal of developing tools to prove Theorem~\ref{thm:ballofvertices} and~\ref{thm:ballofflats}. In Section~\ref{sec:approx} we show how the results of Section~\ref{sec:arran} apply to the analysis of the the algorithms for approximating Tukey depth. In Section~\ref{sec:experi} we give some experimental results of the two algorithms.
+
+\section{Arrangements of Hyperplanes}
+\label{sec:arran}
+
+Let $H$ be a set of $\ell$ hyperplanes in $\mathbb{R}^{d}$. We say that $H$ is in general position, if every subset of $d$ hyperplanes intersect in one point, no $d + 1$ hyperplanes intersect in one point. We say a hyperplane is \emph{vertical} if it contains a line parallel to the $x_{1}$-axis. Without loss of generality, we assume that no hyperplane in $H$ is vertical. The \emph{arrangement} $\mathcal{A}(H)$ of $H$ is the partitioning of $\mathbb{R}^{d}$ induced by $H$ into \emph{vertices} (intersections of any $d$ hyperplanes in $H$), \emph{faces} (each flat in $\mathcal{A}(H)$ is divided into pieces by the hyperplanes in $H$ that do not contain the flat, a $j$-face is a piece in a $j$-flat), and \emph{regions} (connected components in $\mathbb{R}^{d}$ separated by hyperplanes in $H$). we call $\mathcal{A}(H)$ a simple arrangement, if $H$ is in general position. We use $\delta_{H}$ to denote the \emph{pseudo-distance} for pairs of points (relative to $H$). $\delta_{H}(p,q)$ is defined by the number of hyperplanes in $H$ which have $p$ and $q$ on opposite sides. For a point $p$ and an integer $\sigma$, we define the pseudo-ball $D_{H}(p,\sigma)$ as the set of vertices $v$ in $\mathcal{A}(H)$ with $\delta_{H}(p,v) \leq \sigma$.
+
+Our goal in this section is to show that arrangements have big pseudo-balls. In particular, we will prove
+\begin{lemma}
+\label{lem:ballofvertices}
+  If $H$ is a set of $\ell$ hyperplanes in general position in $\mathbb{R}^{d}$, and $\sigma$ is an integer, $0 \leq \sigma \leq \ell - d$, then $|D_{H}(p,\sigma)| \geq \binom{\sigma+d}{d}$ for all vertices $p$ disjoint from $H$.
+\end{lemma}
+
+To prove this lemma, we need to use a result, due to Clarkson~\cite{Clarkson93}, on the number of \emph{i-bases} in an arrangement. With this result we can prove a lower bound of the size of $D_{H}(p,\sigma)$. The following is a review of Clarkson's theorem (with some modifications) on the number of $i$-bases, which is the main tool used to prove Theorem~\ref{thm:ballofvertices}. The difference between this proof and the original is in the definition of $i$-basis. These bases are quite different from the usual linear programming bases.
+
+Let $\mathcal{P}(H)$ be the convex polytope given by $\mathcal{P}(H) = \cap_{h \in H}(h \cup h^{+})$, where $h^{+}$ is the open halfspace bounded by $h$ and containing point $(\infty, 0, \ldots, 0)$. Let $G \subset H$, $|G| \geq d$. Then we define $x^{*}(G)$ as the vertex of $\mathcal{P}(G)$ with lexicographically smallest coordinates. Note that $x^{*}(G)$ is well defined since $|G| \geq d$ and the hyperplanes in $H$ are in general position. Also note that there exists at least one subset $B \subset G$ with $|B| = d$ and such that $x^{*}(B) = x^{*}(G)$. We call $B$ a \emph{basis} $b(G)$ of $G$. Let $S$ be a set of integers $\{i \mid 1 \leq i \leq n\}$. For $A, B \in \binom{S}{k}$, order $A$ as $\{a_{1}, \ldots, a_{k}\}$ where $a_{1} < a_{2} \cdots < a_{k}$, and order $B$ as $\{b_{1}, \ldots, b_{k}\}$ with the same rule. The lexicographic order of $A$ and $B$ is defined by the following: $A \prec B$ if and only if $a_{i} < b_{i}$ at the smallest index $i$ at which they differ. To define the lexicographic order on subsets of hyperplanes, hyperplanes of $H$ are numbered arbitrarily from $1$ to $n$. For any $A, B \in \binom{H}{d}$, let $A'$ and $B'$ be the sets of associated numbers respectively. $A \prec B$ if and only if $A' \prec B'$. With all these definitions,the basis $b(G)$ of $G$ is defined as the lexicographically minimal $B \in \binom{G}{d}$ with $x^{*}(B) = x^{*}(G)$. For any $B \in \binom{H}{d}$, let
+ \[I_{B} \equiv \{h \in H \mid b(B \cup \{h\}) \neq B\} ,\]
+be the set of hyperplanes that \emph{violate} $b(B)$. If $|I_{B}| = i$, $B$ is called an $i$-basis. This definition has a interesting implication: the linear programming problem $\mathcal{LP}(G)$, $\min\{x_{1} \mid x \in \mathcal{P}(G)\}$, is bounded does not imply that $\mathcal{LP}(b(G))$ is bounded. $b(G)$ is just the lexicographically minimal set of $d$ hyperplanes whose common intersection is $x^{*}(G)$.
+
+Since any random sample $R \in \binom{H}{r}$, where $d \leq r \leq \ell$, has exactly one basis, we have
+\begin{equation}
+  \label{eq:basexp}
+  1 = \sum_{B \in \binom{H}{d}} \Pr\{ B = b(R)\} \quad \forall d \leq r \leq \ell .
+\end{equation}
+ For any $B \in \binom{H}{d}$, it is the basis of $R$ if and only if $B \subseteq R$ and $R$ does not contain any element of $I_{B}$. If $B$ is an $i$-basis, the probability that $B$ is the basis of $R$ is $\frac{\binom{\ell-i-d}{r-d}}{\binom{\ell}{r}}$. Let $g_{i}'(H)$ denote the number of $i$-bases in the arrangement. Equations~\eqref{eq:basexp} can be rewritten as
+ \begin{equation}
+   \label{eq:basexp2}
+   1 = \sum_{0 \leq i \leq \ell-d}\frac{\binom{\ell-i-d}{r-d}}{\binom{\ell}{r}}g_{i}'(H) \quad \forall d \leq r \leq \ell .
+ \end{equation}
+Equation~\eqref{eq:basexp2} gives a system of $l - d + 1$ linear equations in $l - d + 1$ variables. Solving this system gives
+\begin{equation}
+  \label{eq:numibasis}
+  g_{i}'(H) = \binom{i+d-1}{d-1}.
+\end{equation}
+For more details see Clarkson~\cite{Clarkson93}.
+
+%\begin{theorem}
+%\label{thm:ballofvertices}
+%  If $H$ is a set of $\ell$ hyperplanes in general position in $\mathbb{R}^{d}$, and $\sigma$ is an integer, $0 \leq \sigma \leq \lfloor \frac{\ell}{d}\rfloor - 1$, then $|D_{H}(p,\sigma)| \geq \binom{\sigma+d}{d}$ for all points $p$ disjoint from $H$.
+%\end{theorem}
+
+\begin{proof}[Proof (of Lemma~\ref{lem:ballofvertices})]
+By a standard projective transformation, we can assume that all hyperplanes in $H$ are below $p$. %Then $|D_{H}(p,\sigma)|$ is the number of vertices at level no more than $\sigma$.% If any hyperplanes are above $p$, we can use lp transformation or we can simple ignore the hyperplanes above $p$.%\note{Can you remind me how this works?}
+An $i$-basis defines a vertex with distance to $p$ no more than $i$. We know that the number of $i$-bases is $\binom{i+d-1}{d-1}$ in $\mathcal{A}(H)$. The number of vertices with distance to $p$ no more than $\sigma$ is therefore at least
+\[ \sum_{i=0}^{\sigma}\binom{i+d-1}{d-1} = \binom{\sigma+d}{d} .\]
+%\begin{eqnarray}
+%  && \sum_{i=0}^{\sigma}\binom{i+d-1}{d-1} \nonumber \\
+%  &=& \binom{d-1}{d-1} + \binom{d}{d-1} + \cdots + \binom{d-1+\sigma}{d-1} \nonumber \\
+%  &=& 1 + d + \frac{(d+1)d}{2!} + \frac{(d+2)(d+1)d}{3!} + \cdots + \frac{(d-1+\sigma) \cdots d}{\sigma!} \nonumber \\
+%  &=& (d+1)\left[\frac{d+2}{2!} + \frac{(d+2)d}{3!} + \cdots + \frac{(d-1+\sigma) \cdots (d+2)d}{\sigma!}\right] \nonumber \\
+%  &=& (d+1)(d+2)\left[\frac{d+3}{3!} + \cdots + \frac{(d-1+\sigma)\cdots(d+3)d}{\sigma!}\right] \nonumber \\
+%  & \vdots & \nonumber \\
+%  &=& \frac{(d+1)(d+2)\cdots(d+\sigma)}{\sigma!} \nonumber \\
+%  &=& \binom{\sigma+d}{d} \, .\nonumber 
+%\end{eqnarray}
+\end{proof}
+
+The bound in Lemma~\ref{lem:ballofvertices} is a generalization of the second result of Welzl~\cite{welzl92} for the case $d = 2$. It also strengthens the bounds of Chazelle and Welzl~\cite{Chazelle89}. This bound is a lower bound on the number of \emph{$\leq$k-sets}.
+
+%\textcolor{red}{For the ball of $k$-flats, the situations are very different. We need new ideas to define $(i,k)$-basis. The $(0,k)$-basis are not unique. There are at least $\binom{d}{k}$ of them. The meaning of $(i,k)$-level is also different. We need at least $k+1$ hyperplanes to separate a point and a $k$-flat, and at least $2i$ hyperplanes to enforce a distance of $i$ from a point to a $k$-flat when $i$ is greater than some value. In order to form a set of equations like~\eqref{eq:basexp2}, I think we may need some ideas to make every $G \in H$ have exactly $\binom{d}{k}$ $k$-flats.}
+
+
+
+Now we develop the tools needed to prove Theorem~\ref{thm:ballofflats}. We define the distance from $p$ to an $k$-flat $f$ as
+\begin{equation}
+  \label{eq:distflat}
+  \delta_{H}^{k}(p,f) = \min_{q \in f}\delta_{H}(p,q). \nonumber
+\end{equation}
+For a point $p$ and an integer $\sigma$, we let $D_{H}^{k}(p,\sigma)$ denote the set of $k$-flats $f$ in the arrangement of $H$ with $\delta_{H}^{k}(p,f) \leq \sigma$. Notice that $D_{H}(p,\sigma) = D_{H}^{0}(p,\sigma)$.
+
+\begin{proposition}
+\label{prop:planes}
+  For any point $p$ disjoint from $H$ in $\mathbb{R}^{d}$, 
+  \[ |D_{H}^{d-1}(p,\sigma)| \geq 2(\sigma+1) \quad \forall \sigma \in \left\{0, 1, \ldots, \left\lfloor \frac{\ell}{2} \right\rfloor - 1\right\}. \]
+\end{proposition}
+
+\begin{proof}
+  Welzl's proof~\cite{welzl92} for $\mathbb{R}^{2}$ is also valid for $\mathbb{R}^{d}$. We can always find a line through $p$ that intersects $\lfloor \frac{\ell}{2} \rfloor$ hyperplanes on each side of $p$. %(The line through $p$ can be parallel to $d-1$ hyperplanes.)
+\end{proof}
+
+%Based on the proposition, we can get the following theorem:
+%\begin{theorem}
+%\label{thm:ballofflats}
+%  If $H$ is a set of $\ell$ hyperplanes in general position in $\mathbb{R}^{d}$, and $\sigma$ is an integer, $0 \leq \sigma \leq \lfloor \frac{\ell}{d}\rfloor - 1$, then $|D_{H}^{k}(p,\sigma)| \geq \frac{2^{d-k}}{(d-k)!}\binom{\sigma + d-k}{d-k}$ for all points $p$ disjoint from $H$.
+%\end{theorem}
+
+\begin{lemma}
+\label{lem:ballofflats}
+  If $H$ is a set of $\ell$ hyperplanes in general position in $\mathbb{R}^{d}$, and $\sigma$ is an integer, $0 \leq \sigma \leq \lfloor \frac{\ell}{2}\rfloor - 1$, then $|D_{H}^{k}(p,\sigma)| \geq \frac{2^{d-k}}{(d-k)!}\binom{\sigma + d-k}{d-k}$ for all vertices $p$ disjoint from $H$.
+\end{lemma}
+
+\begin{proof}%[Proof (of Lemma~\ref{lem:ballofflats})]
+  We are going to prove this theorem by induction on $d$. The proof is inspired by the proof by Welzl in~\cite{welzl92}. In $\mathbb{R}^{k+1}$, we have, by Proposition~\ref{prop:planes},
+  \begin{equation}
+    |D_{H}^{k}(p,\sigma)| \geq 2(\sigma+1) = \frac{2^{k+1-k}}{(k+1-k)!}\binom{\sigma + k+1-k}{k+1-k} \, . \nonumber
+  \end{equation}
+  Assume that $|D_{H}^{k}(p,\sigma)| \geq \frac{2^{t-k}}{(t-k)!}\binom{\sigma + t-k}{t-k}$ in $\mathbb{R}^{t}$, where $t \geq k + 1$. In $\mathbb{R}^{t+1}$, we have at least $2(\sigma+1)$ $t$-flats with distance to $p$ no more than $\sigma$ according to Proposition~\ref{prop:planes}. Let $h_{j}$ be a $t$-flat with distance of $j$ to $p$. We know that there are at least two such $t$-flats according to Proposition~\ref{prop:planes}. We also know that there is a point $q_{j}$ in $h_{j}$ with $\delta_{H}(p,q_{j}) \leq j$. Then any vertices in $h_{j}$ with distance to $q_{j}$ no more than $\sigma - j$ have distance to $p$ no more than $\sigma$. Since $h_{j}$ is a space of dimension $t$, there are at least $\frac{2^{t-k}}{(t-k)!}\binom{\sigma - j + t-k}{t-k}$ such vertices. Since a $k$-flat is the intersection of $t+1-k$ hyperplanes, a vertex can be counted at most $t+1-k$ times. Therefore, in $\mathbb{R}^{t+1}$, we have
+  \begin{eqnarray}
+    |D_{H}^{k}(p,\sigma)| & \geq & \frac{2}{t+1-k}\sum_{j=0}^{\sigma}\frac{2^{t-k}}{(t-k)!}\binom{\sigma - j + t-k}{t-k} \nonumber \\
+%    & = & \frac{2}{t+1-k}\frac{2^{t-k}}{(t-k)!}\binom{\sigma + t + 1 - k}{t+1-k} \nonumber \\
+    & = & \frac{2^{t+1-k}}{(t+1-k)!}\binom{\sigma + t + 1 - k}{t+1-k} \nonumber
+  \end{eqnarray}
+  Hence, in $\mathbb{R}^{d}$,
+  \begin{equation}
+    |D_{H}^{k}(p,\sigma)| \geq \frac{2^{d-k}}{(d-k)!}\binom{\sigma + d-k}{d-k} \, . \nonumber
+  \end{equation}
+\end{proof}
+
+With these two lemmas, we then suggest two approximation algorithms using the two heuristics in Section~\ref{sec:intro} for the Tukey depth. Our analysis of these algorithms is done by showing that the vector $v$ that minimizes \eqref{eq:intro.1dset} corresponds to a point $h_{v}^{*}$ in an arrangement of $n$ hyperplanes in $\mathbb{R}^{d-1}$. Any vertex in the arrangement that is ``close'' to $h_{v}^{*}$ will provide a good approximation. Thus, the analysis boils down to showing that there are many vertices that are close to $h_{v}^{*}$ so that we have a good chance of picking one these vertices.
+
+\section{Approximations for Tukey Depth}
+\label{sec:approx}
+
+In order to relate the hyperplane arrangements studied in Section~\ref{sec:arran} to the approximation algorithms for Tukey depth, we need to introduce a dual arrangement of a set of points~\cite{Edel87}. Given a set $S$ of $n$ points in $\mathbb{R}^{d}$, we define the dual arrangement $\mathcal{A}(T)$ of $S$ as a set of $n$ hyperplanes $T$ in $\mathbb{R}^{d}$. In the dual arrangement, we say a hyperplane is \emph{vertical} if it contains a line parallel to the $x_{d}$-axis. For a point $a = (a_{1}, a_{2}, \ldots, a_{d})$ in $S$, its dual image $a^{*}$ is a non-vertical hyperplane in $T$ with equation $x_{d} = a_{1}x_{1} + a_{2}x_{2} + \ldots + a_{d-1}x_{d-1} - a_{d}$, and for a non-vertical hyperplane $b$ with equation $x_{d} = b_{1}x_{1} + b_{2}x_{2} + \ldots + b_{d-1}x_{d-1} - b_{d}$, its dual image $b^{*}$ is the point $(b_{1}, b_{2}, \ldots, b_{d})$. This mapping preserves incidences between points and hyperplanes, i.e. $a$ lies on $b$ if and only if $b^{*}$ lies on $a^{*}$; and it reverses the relative position between a point and a hyperplane, i.e. $a$ lies above $b$ if and only if $a^{*}$ lies below $b^{*}$. All the hyperplanes through $p$ in the primal correspond to all the points on the hyperplane $p^{*}$ in the dual. To find the Tukey depth of $p$ is to find a hyperplane $h$ (with inner-normal $v$) through $p$ with the fewest points either above or below, which is the same as finding a point $h_{v}^{*}$ on $p^{*}$ with the fewest hyperplanes either below or above. The hyperplanes in $T$ divide $p^{*}$ into cells. Within a cell, the number of hyperplanes above or below any two points is the same.
+
+Suppose cell $c$ in $T$ contains the optimal points ($h_{v}^{*}$ is a point inside $c$). For any vertex $b^{*}$ in $\mathcal{A}(T)$ with $\delta_{T}(h_{v}^{*},b^{*}) = \sigma$, the normal vector $v_{b}$ of its primal image $b$ gives a depth value $\sigma$ more than the optimal depth value (Heuristic 1 in page~\pageref{page:heuristic1}). Similarly, for any $k$-flat $y^{*}$ in $\mathcal{A}(T)$ with $\delta_{T}^{k}(h_{v}^{*},y^{*}) = \sigma$, the $(k+1)$-flat $f_{y}$ orthogonal to its primal image $y$ gives a depth value $\sigma$ more than optimal depth value (Heuristic 2 in page~\pageref{page:heuristic2}). 
+
+%(\textcolor{red}{how to draw 3d figure?})
+
+Without loss of generality, we assume that no two points in $S$ lie on a vertical line. Thus, $T$ is in general position.
+
+Now let us analyze how well the first heuristic works. Sampling $d - 1$ points from $S$ is the same as sampling $d - 1$ hyperplanes in $T$ which will define a vertex on $p^{*}$. Then we only need to consider the arrangement on $p^{*}$. According to Lemma~\ref{lem:ballofvertices}, $|D_{p^{*}}(h^{*},\sigma)| \geq \binom{\sigma+d-1}{d-1}$, and there are $\binom{n}{d-1}$ vertices on $p^{*}$. So by one sampling, the probability that we get a depth value with an error no more than $\sigma$ is at least
+\begin{equation}
+  \label{eq:prbvertex}
+  \frac{\binom{\sigma+d-1}{d-1}}{\binom{n}{d-1}} = \frac{(\sigma+d-1)!(n-d+1)!}{\sigma!n!} .% \geq \left( \frac{\sigma}{n} \right)^{d-1}.
+\end{equation}
+%Let $P_{\sigma} = \left( \frac{\sigma}{n} \right)^{d-1}$. Repeat the sampling for $s$ times. The probability that the best depth value with an error more than $\sigma$ is at most $(1 - P_{\sigma})^{s}$. Hence, the probability that we get a depth value with an error no more than $\sigma$ is at least
+Let $P_{\sigma} = \frac{(\sigma+d-1)!(n-d+1)!}{\sigma!n!}$. We can repeat this heuristic $s$ times and use the best result as an approximation. The probability that the best depth value with an error more than $\sigma$ is at most $(1 - P_{\sigma})^{s}$. Hence, the probability that we get a depth value with an error no more than $\sigma$ is at least
+\begin{equation}
+  \label{eq:prbappr}
+  1 - (1 - P_{\sigma})^{s} \geq 1 - \frac{1}{e} \textrm{ for } s = \frac{\sigma!n!}{(\sigma+d-1)!(n-d+1)!} .%\left( \frac{n}{\sigma} \right)^{d-1} .
+\end{equation}
+If we set $\sigma$ to $\frac{n}{100}$, this approximation runs in reasonable time for a problem in $4$ or $5$ dimensions.
+
+In the second heuristic, sampling $d - k$ points from $S$ is the same as sampling $d - k$ hyperplanes in $T$ which will define an $(k-1)$-flat on $p^{*}$. According to Lemma~\ref{lem:ballofflats}, we have $|D_{p^{*}}^{k-1}(h^{*},\sigma)| \geq \frac{2^{d-k}}{(d-k)!}\binom{\sigma + d-k}{d-k}$. Since there are $\binom{n}{d-k}$ $(k-1)$-flats on $p^{*}$, by one sampling, the probability that we get a depth value with an error no more than $\sigma$ is at least
+\begin{equation}
+  \label{eq:prbflats}
+  \frac{\frac{2^{d-k}}{(d-k)!}\binom{\sigma + d-k}{d-k}}{\binom{n}{d-k}} = \frac{2^{d-k}(\sigma+d-k)!(n-d+k)!}{(d-k)!\sigma!n!}.
+\end{equation}
+Similar to the above analysis, we let $P'_{\sigma} = \frac{2^{d-k}(\sigma+d-k)!(n-d+k)!}{(d-k)!\sigma!n!}$. Running this heuristic $s$ times, the probability that we get a depth value with an error no more than $\sigma$ is at least
+\begin{equation}
+  \label{eq:prbappr2}
+  1 - (1 - P'_{\sigma})^{s} \geq 1 - \frac{1}{e} \textrm{ for } s = \frac{(d-k)!\sigma!n!}{2^{d-k}(\sigma+d-k)!(n-d+k)!}.
+\end{equation}
+This approximation needs less samples when $d$ is small, but we need to solve $s$ Tukey depth problems in $\mathbb{R}^{k}$.
+
+%Note that cell $c$ is deep inside the arrangement on $p^{*}$ when the depth of $p$ is big, then the size of the pseudo-ball would be greater the lower bound given by Lemma~\ref{lem:ballofvertices} or~\ref{lem:ballofflats}. Hence the approximations should work better for the points with bigger depth values.(not true)
+
+
+%\cite{Amaldi95} may give some ideas of approximation.
+
+\section{Experimental Results}
+\label{sec:experi}
+
+We tested the two approximation algorithms on a Dell Precision 490 workstation with a 2.80 GHz Intel Xeon CPU. For the second approximation, we tested the case of $k=2$, and the $2$ dimensional problems are solved with a scan and sort algorithm~\cite{Rousseeuw98}. The two algorithms are tested with the following $9$ data sets
+\begin{table}[!htb]
+  \centering
+  \begin{tabular}[center]{|r|l|l|p{8cm}|}
+    \hline
+    Name & Item \# & Attrib \# & Source \\
+    \hline
+    Iris &  150 & 4 & UCI MLR. \\
+    Wine4d &  178 & 4 & UCI MLR. 4 attributes of the Wine data set\\
+    Wine5d &  178 & 5 & UCI MLR. 5 attributes of the Wine data set\\
+    Auto4d &  392 & 4 & UCI MLR. 4 attributes of the Auto MPG data set\\
+    Auto5d &  392 & 5 & UCI MLR. 5 attributes of the Auto MPG data set\\
+    Rand4d &  500 & 4 & Randomly generated\\
+    Forest4d &  517 & 4 & UCI MLR. 4 attributes of the Forest Fires data set~\cite{Cortez07}\\
+    Forest5d &  517 & 5 & UCI MLR. 5 attributes of the Forest Fires data set~\cite{Cortez07}\\
+    Pima4d &  768 & 4 & UCI MLR. 4 attributes of the Pima Indians Diabetes data set\\
+    Pima5d &  768 & 5 & UCI MLR. 5 attributes of the Pima Indians Diabetes data set\\
+    Yeast4d &  1484 & 4 & UCI MLR. 4 attributes of the Yeast data set\\
+    \hline
+  \end{tabular}
+  \caption{The data sets}
+  \label{tab:datasets}
+\end{table}
+
+The Rand4d data set is randomly generated, and the data items are uniformly distributed in a unit ball. All other data sets are extracted from some data sets in the University of California, Irvine (UCI) Machine Learning Repository (MLR)~\cite{ucimlr07}. The data sets and the source codes of the two approximation algorithms are available on our website.\footnote{\url{http://cg.scs.carleton.ca/~dchen/}} The data points in data sets extracted from UCI MLR are not in general position. Even worse, there are duplicate data points in some data sets. There are no duplicates in Wine4d, Wine5d, Pima4d, Pima5d, and Rand4d. There are a few duplicates in Iris, Auto4d, and Auto5d. There are many duplicates in Yeast, Forest4d, and Forest5d.
+
+The running time of the algorithms on different data sets is given in Table~\ref{tab:performance}. The second approximation runs faster, but it is more sensitive to rounding error. In order to generate a 2d problem in the second approximation, we first find $2$ perpendicular vectors in the $2$-flat orthogonal to the $(d-2)$-flat containing the $d-2$ sampling points and $p$, then project all points in the data set onto the $2$ vectors. The values are used as the coordinates of points in the $2$ dimensional space. This projection and the sorting of the $2$ dimensional points bring rounding errors. To overcome this problem, exact arithmetic is applied on the Iris data set with GMP (GNU Multiple Precision Library). GMP slows down the algorithm dramatically, hence it is not practical to use it on larger data sets.
+\begin{table}[!htb]
+  \centering
+  \begin{tabular}[center]{|c|c|l|l|l|}
+    \hline
+    Data Set & $\sigma$ value & Algorithm & Running time & Statistical results \\
+    \hline
+    \multirow{2}{*}{Iris} & \multirow{2}{*}{2} & approx 1  & 50s(GMP) & \\
+    & & approx 2 & 7s(GMP) & \\
+    \hline
+    \multirow{2}{*}{Wine4d} & \multirow{2}{*}{2} & approx 1 & 2s & \\
+    & & approx 2 & 1s & \\
+    \hline
+    \multirow{2}{*}{Wine5d} & \multirow{2}{*}{2} & approx 1 & 70s & \\
+    & & approx 2 & 8s & \\
+    \hline
+    \multirow{2}{*}{Auto4d} & \multirow{2}{*}{2} & approx 1 & 31s & \\
+    & & approx 2 & 2s & \\
+    \hline
+    \multirow{2}{*}{Auto5d} & \multirow{2}{*}{2} & approx 1 & 2400s & \\
+    & & approx 2 & 187s & \\
+    \hline
+    \multirow{2}{*}{Rand4d} & \multirow{2}{*}{2} & approx 1 & 77s & \\
+    & & approx 2 & 3s & \\
+    \hline
+    \multirow{2}{*}{Forest4d} & \multirow{2}{*}{2} & approx 1 & 87s & \\
+    & & approx 2 & 4s & \\
+    \hline
+    \multirow{2}{*}{Forest5d} & \multirow{2}{*}{3} & approx 1 & 3880s & \\
+    & & approx 2 & 287s & \\
+    \hline
+    \multirow{2}{*}{Pima4d} & \multirow{2}{*}{2} & approx 1 & 387s & \\
+    & & approx 2 & 12s & \\
+    \hline
+    \multirow{2}{*}{Pima5d} & \multirow{2}{*}{4} & approx 1 & 12350s & \\
+    & & approx 2 & 815s & \\
+    \hline
+    \multirow{2}{*}{Yeast4d} & \multirow{2}{*}{3} & approx 1 & 2400s & \\
+    & & approx 2 & 56s & \\
+    \hline
+  \end{tabular}
+  \caption{The performance of the algorithms}
+  \label{tab:performance}
+\end{table}
+
+The testing results are listed in Appendix~\ref{app:results}.  Each table entry gives the the true depth (depth) the depth value obtained by the first algorithm (Approx 1) and the depth value obtained by the second algorithm (Approx 2) of a point in the data set. The true depth values are computed with the binary search idea in~\cite{Chen07} which requires solving a series of mixed integer program. It takes a long time and large amount of memory to solve the integer programs. Many instances can not be solved due time and memory limitations. We put question marks in the table for the missing results. The time required to solve integer programs is output sensitive which means it takes a long time to solve problems with large depth values. For example, we need a few hours to solve a problem with depth $10$ in Pima5d. On the other hand, the approximation algorithms do not have this sensitivity. They take roughly the same time to solve all the problems in the same data set.
+
+The tests were run with the absolute error $\sigma$ set to 2.  However,
+in the vast majority of cases (at least those in which the true depth
+can be computed exactly), both approximation algorithms computed the
+depth correctly with no error.  In a small number of cases the error is 1 or 2.
+
+
+\section{Concluding Remarks}
+\label{sec:cld}
+
+We have
+%Comparing with the heuristics in~\cite{Afshani07, Cuesta08, Rousseeuw98, Wilcox03}.
+
+%Look up on approximating Tukey depth in low dimensions. These are useful because we can use \eqref{eq:intro.defi} to reduce to a $d' < d$ dimensional problem and then apply the existing results. This might extend the range of dimension for which this technique is applicable.
+
+\begin{enumerate}
+\item Given a rigorous theoretical analysis of the algorithm of Rousseeuw and Struyf~\cite{Rousseeuw98} that explains their experimental results.
+\item Generalized the algorithm of Rousseeuw and Struyf to solve $k$-dimensional subproblems. Using value $k = 2$ gives a substantial improvement in running time while providing the same quality of approximation.
+\item We have done extensive testing of these algorithms on real and synthetic data sets. This testing shows that the algorithms are indeed fast and that, in most cases, they compute the exact Tukey depth, and make an error of $1$ or $2$
+%(\textcolor{red}{it should depend on the value of $\sigma$})
+rather infrequently.
+\end{enumerate}
+
+These algorithms are simple, easy to implement, and our results show that, as well as having theoretical guarantees, they work well in practice.
+
+\bibliographystyle{plain}
+\bibliography{tkapprox}
+
+\appendix
+\nolinenumbers
+
+\section{Tables of Results} \label{app:results}
+\include{rslttabs}
+
+
+\end{document}

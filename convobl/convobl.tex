@@ -1,24 +1,12 @@
 \documentclass [letterpaper] {patmorin}
-%fleqn: left alignment of the equations
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{amsthm}
-%\usepackage [noend] {algorithmic}
-%\usepackage{setspace}
-%\usepackage [letterpaper] {geometry}
-%\usepackage{indentfirst}
-%\usepackage[pdftex]{color}
 \usepackage{graphicx}
-%\usepackage{subfigure}
-%\usepackage{supertabular}
-%\usepackage{multirow}
-%\usepackage[normalem]{ulem}
 \usepackage[mathlines]{lineno}
-%\linenumbers
 \listfiles
 
-%\newcommand{\note}[1]{$\spadesuit$\marginpar{$\spadesuit$ #1}}
 
 \newtheorem{theorem}{Theorem}%[section]
 \newtheorem{definition}{Definition}[section]
@@ -66,21 +54,21 @@ time to route between some pair of vertices.
 \section{Introduction}
 \label{sec:intro}
 
-In recent years, motivated primarily by the proliferation of wireless networks and GPS devices, much research has been done on routing algorithms for geometric networks \cite{gior03}.  In this research a network is modelled as a geometric graph $G=(V,E)$ whose vertex set $V$ is a set of points in $\R^2$. We say that a routing algorithm $\mathcal{A}$ \emph{works} for $G$ if, for any pair of vertices $s,t\in V$, the algorithm always find a path from $s$ to $t$ in a finite number of steps.
+In recent years, motivated primarily by the proliferation of wireless networks and GPS devices, much research has been done on routing algorithms for geometric networks \cite{gior03}.  In this research a network is modelled as a geometric graph $G=(V,E)$ whose vertex set $V$ is a set of points in $\R^2$. We say that a routing algorithm $\mathcal{A}$ \emph{works} for $G$ if, for any pair of vertices $s,t\in V$, the algorithm always finds a walk from $s$ to $t$ in a finite number of steps.
 
-The research on geometric routing algorithms largely focuses on utilizing geometric properties of a class of geometric graphs to reduce the complexity of, and information required by, routing algorithms.  For example, when $G$ is the unit disk graph\footnote{The \emph{unit disk graph} of a point set $V$ contains the edge $uv$ if and only if the Euclidean distance between $u$ and $v$ is at most 1.} of the points in $V$, then an algorithm, called \textsc{Face-1}, of Bose \etal\ \cite{bose01} (see also Karp and Kung \cite{kk00}) works for $G$ and requires no preprocessing of $G$ or additional state information at the vertices of $G$ and requires only a constant size header associated with each packet.  An extremely general result in this vein, based on logspace construction of universal exploration sequences, shows that, using a header containing only $O(\log n)$ bits, one can visit all the vertices of any graph (and hence reach $t$) in a polynomial number of steps \cite{b08}.
+The research on geometric routing algorithms largely focuses on utilizing geometric properties of a class of geometric graphs to reduce the complexity of, and information required by, routing algorithms.  For example, when $G$ is the unit disk graph\footnote{The \emph{unit disk graph} of a point set $V$ contains the edge $uv$ if and only if the Euclidean distance between $u$ and $v$ is at most 1.} of the points in $V$, then an algorithm, called \textsc{Face-1}, of Bose \etal\ \cite{bose01} (see also Karp and Kung \cite{kk00}) works for $G$ and requires no preprocessing of $G$ or additional state information at the vertices of $G$ and requires only a constant size header associated with each packet.  An extremely general result in this vein, based on logspace construction of universal exploration sequences, shows that, using a header containing only $O(\log n)$ bits, one can visit all the vertices of any graph (and hence reach $t$) in a polynomial number of steps \cite{b08}.  These types of routing algorithms, that require only storing $O(\log n)$ bits and $O(1)$ vertex identifiers are sometimes called \emph{constant-memory routing algorithms}.
 
-A particularly interesting and restricted class of routing algorithms are so-called memoryless routing algorithms.  A \emph{memoryless} routing algorithm is one in which the decision about the next edge on the route to $t$ for a packet currently located at node $v$ is based only on the coordinates of $v$, $t$, and the neighbourhood, $N(v)$, of $v$. More precisely, a deterministic memoryless routing algorithm is a function $f:\R^2\times\R^2\times(\R^2)^+\rightarrow \R^2$ that satisfies $f(v,t,N(v)) \in N(v)$ and $f(t,t,N(t)) = t$ for all inputs.
+A particularly interesting and restricted class of routing algorithms are so-called memoryless routing algorithms.  A \emph{memoryless} routing algorithm is one in which the decision about the next edge on the route to $t$ for a packet currently located at node $v$ is based only on the coordinates of $v$, $t$, and the neighbourhood, $N(v)$, of $v$. More precisely, a deterministic memoryless routing algorithm is a function $f:\R^2\times\R^2\times(\R^2)^+\rightarrow \R^2$ that satisfies $f(v,t,N(v)) \in N(v)$.
 
 Note that a memoryless routing algorithm makes each routing step without using information obtained in previous routing steps and without any global information about $G$.  Memoryless algorithms are different from \emph{oblivious} routing algorithm \cite[Section~4.2]{mr95} which select a path from $s$ to $t$ having total knowledge of $G$ (but without knowledge of other source/destination pairs).
  
-Bose and Morin \cite{bose04} show that if $G$ is Delaunay triangulation\footnote{A \emph{triangulation} is a geometric graph all of whose faces, except the outer face, are triangles, and whose outer face is the complement of a triangle. Delaunay triangulations and regular triangulations are special types of triangulations. For details, consult \cite{obs92}.} or a regular triangulation then deterministic memoryless routing algorithms, named \textsc{Greedy} and \textsc{Compass}, respectively, work for $G$. Bose \etal\ \cite{bose02} subsequently show a stronger result; a deterministic memoryless routing algorithm, named \textsc{Greedy-Compass}, works for any triangulation $G$.
+Bose and Morin \cite{bose04} show that if $G$ is Delaunay a triangulation\footnote{A \emph{triangulation} is a geometric graph all of whose faces, except the outer face, are triangles, and whose outer face is the complement of a triangle. Delaunay triangulations and regular triangulations are special types of triangulations. For details, consult \cite{obs92}.} or a regular triangulation then deterministic memoryless routing algorithms, named \textsc{Greedy} and \textsc{Compass}, respectively, work for $G$. Bose \etal\ \cite{bose02} subsequently show a stronger result; a deterministic memoryless routing algorithm, named \textsc{Greedy-Compass}, works for any triangulation $G$.
 
-Memoryless routing algorithms are so simple, elegant, and practical that researchers have spent considerable effort designing geometric embeddings of graphs so that memoryless routing algorithms can be applied to the resulting embeddings.  A famous example in this vein is due to Leighton and Moitra \cite{lm08} who prove that every 3-connected planar graph $\tilde G$ admits an embedding $G$ in $\R^2$ such that \textsc{Greedy} works on $G$.  The combination of the embedding and routing algorithm represents a form of \emph{compact routing} \cite{l94}.
+Memoryless routing algorithms are so simple, elegant, and practical that researchers have spent considerable effort designing geometric embeddings of graphs so that memoryless routing algorithms can be applied to the resulting embeddings.  A famous example in this vein is due to Leighton and Moitra \cite{lm08} who prove that every 3-connected planar (non-geometric) graph $\tilde G$ has an embedding $G$ as a geometric graph with vertices in $\R^2$ such that \textsc{Greedy} works on $G$.  Specifically, there is one embedding, $G$, such that, for every source destination pair $s,t$, the \textsc{Greedy} algorithm always succeeds in routing from $s$ to $t$.  The combination of the embedding and routing algorithm represents a form of \emph{compact routing} \cite{l94}.
 
 Unfortunately, deterministic memoryless routing algorithms have severe limitations.  These stem from the fact that these algorithms can not visit the same vertex more than once without looping forever.  Bose \etal\ \cite[Theorem~2]{bose04} show that there exists 17 convex subdivisions\footnote{A \emph{convex subdivision} is a geometric graph all of whose faces, except the outer face, are convex polygons, and whose outer face is the complement of a convex polygon.}, $G_1,\ldots,G_{17}$, each with 17 vertices such that any deterministic memoryless routing algorithm does not work for at least one of these subdivisions.  Thus, convex subdivisions form a class of geometric graphs that are too rich for deterministic memoryless routing algorithms \cite{bose02}.
 
-The same authors \cite{bose02,bose04} observe that randomization can be used to overcome this limitation.  A \emph{randomized memoryless} routing algorithm is one in which the decision about the next edge on the route to $t$ for a packet currently located at node $v$ is based only on $v$, $t$, the neighbourhood, $N(v)$, of $v$, and a sequence $B$ of fresh random bits.  More precisely, a randomized memoryless routing algorithm is defined by a function $f:\R^2\times\R^2\times(\R^2)^+\times\{0,1\}^\infty\rightarrow \R^2$ that satisfies $f(v,t,N(v),B) \in N(v)$ and $f(t,t,N(v),B) = t$ for all inputs.  The final argument $B$ is a sequence of random bits that are chosen fresh for each step taken by the routing algorithm. Bose \etal\ describe a randomized memoryless algorithm, named \textsc{Random-Compass}, that uses one random bit per step works for any convex subdivision. They do not analyze the efficiency of \textsc{Random-Compass} except to note that, for some convex subdivisions $G$, and some pairs $s,t\in V$, the expected number of steps taken by \textsc{Random-Compass} when routing from $s$ to $t$ is $\Omega(|V|^2)$.  
+The same authors \cite{bose02,bose04} observe that randomization can be used to overcome this limitation.  A \emph{randomized memoryless} routing algorithm is one in which the decision about the next edge on the route to $t$ for a packet currently located at node $v$ is based only on $v$, $t$, the neighbourhood, $N(v)$, of $v$, and a sequence $B$ of fresh random bits.  More precisely, a randomized memoryless routing algorithm is defined by a function $f:\R^2\times\R^2\times(\R^2)^+\times\{0,1\}^\infty\rightarrow \R^2$ that satisfies $f(v,t,N(v),B) \in N(v)$ for all inputs.  The final argument $B$ is a sequence of random bits that are chosen fresh for each step taken by the routing algorithm. Bose \etal\ describe a randomized memoryless algorithm, named \textsc{Random-Compass}, that uses one random bit per step and works for any convex subdivision. They do not analyze the efficiency of \textsc{Random-Compass} except to note that, for some convex subdivisions $G$, and some pairs $s,t\in V$, the expected number of steps taken by \textsc{Random-Compass} when routing from $s$ to $t$ is $\Omega(|V|^2)$.  
 
 Observe that, by the theory of random walks (c.f. \cite[Theorem~6.6]{mr95}), the expected time required for a random walk on $G$ to travel from a particular vertex $s$ to a particular vertex $t$ is $O(n^2)$.  Therefore, a random walk is at least as efficient, in the worst case, as the \textsc{Random-Compass} algorithm. Nevertheless, one might expect that \textsc{Random-Compass} is more likely to find short routes, since it uses geometry to find a route that is specifically directed towards the target vertex $t$.  Thus, we might intuit that \textsc{Random-Compass} is a heuristic that is usually better than a random walk and never much worse.
 
@@ -233,10 +221,10 @@ This argument is easily extended by induction, and we obtain for $1 \le i < n-1$
 \EXP \{ T^+_{i, i} \}  = 2 + Q_{i+1} \EXP \{ T^+_{i+1, i+1} \}
   = 2 \left( 1 + Q_{i+1} + Q_{i+1} Q_{i+2} + \cdots + Q_{i+1} \cdots Q_{n-1} \right).
 \]
-By flipping sides, and denoting by $T^-$ the hitting times for
-the Markov chains on $\{ 1, \ldots i \}$
-with reflecting bariers at $1$ and $i$, we obtain in a similar fashion,
-for $2 < i \le n$,
+By flipping sides, and denoting by $T^-_{i,j}$ the hitting times from
+$i$ to $j$ for the Markov chains on $\{ 1, \ldots i \}$ with reflecting
+barriers at $1$ and $i$, we obtain in a similar fashion, for $2 <
+i \le n$,
 \[
 \EXP \{ T^-_{i, i} \}  = 2 + P_{i-1} \EXP \{ T^-_{i-1, i-1} \}
   = 2 \left( 1 + P_{i-1} + P_{i-1} P_{i-2} + \cdots + P_{i-1} \cdots P_{2} \right).
@@ -354,7 +342,7 @@ rotated by an angle of $\alpha$ about the origin, $t$.
   \label{fig:ab}
 \end{figure}
 
-Define the \emph{color} of a path $A(\alpha)=a_1',\ldots,a_k'$ as
+Define the \emph{color} of a path $A'=A'(\alpha)=a_1',\ldots,a_k'$ as
 follows: Imagine running $\mathcal{A}$ on the graph consisting of $A'$
 and the isolated vertex $t$, starting at $a_{k/2}'$.  If $\mathcal{A}$
 takes $\Omega (k^{2})$ expected time to reach $a_k'$ then color

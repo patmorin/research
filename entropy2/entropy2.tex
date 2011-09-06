@@ -103,14 +103,13 @@ unless otherwise specified.} The following year, Adamy and Seidel
 using $\log n + 2\sqrt{\log n} + O(\log\log n)$ point-line comparisons
 and showed that this result is optimal up to the third term.
 
-Still not done with the problem, several authors considered the point
-location problem under various assumptions about the query
-distribution.  All these solutions compare the expected query time to
-the \emph{entropy bound};  in a planar subdivision $G$ with $m$ faces
-$F_1,\ldots,F_m$, if $\Pr(F_i)$ is the probability that $q$ is
-contained in $F_i$, then no algorithm that makes only binary decisions
-can answer queries using an expected number of decisions that is fewer
-than 
+Still not done with the problem, several authors considered the
+point location problem under various assumptions about the query
+distribution, $D$.  All these solutions compare the expected query time
+to the \emph{entropy bound};  in a planar subdivision $G$ with $m$ faces
+$F_1,\ldots,F_m$, if $\Pr(F_i)$ is the probability that $q$ is contained
+in $F_i$, then no algorithm that makes only binary decisions can answer
+queries using an expected number of decisions that is fewer than
 \begin{equation}
     H = H(G,D) = \sum_{i=1}^m \Pr(F_i)\log(1/\Pr(F_i)) \enspace . 
 	\eqlabelx{entropy-face}
@@ -266,7 +265,7 @@ the union of all shortest paths of the form $\overline{xc}_P$, where
 $x\in\overline{ab}_P$.  Geodesic triangles are closely related to
 pseudotriangles.  In particular, every geodesic triangle $t$ consists
 of a pseudotriangle $\z t$ and three paths joining the three convex
-vertices of $\z t$ to $a$, $b$, and $c$.
+vertices of $\z t$ to $a$, $b$, and $c$ \cite[Section~8.4]{rss06}.
 
 \paragraph{Classification Problems and Classification Trees.}
 
@@ -284,6 +283,11 @@ child of $v$.  We denote by $T(p)$ the label of the final (leaf) node
 in the search path for $p$.  We say that the classification tree $T$
 \emph{solves} the classification problem $\mathcal{P}$ over the domain
 $\mathcal{D}$ if, for every $p\in \mathcal{D}$, $\mathcal{P}(p)=T(p)$.
+
+For each leaf $\ell$ of a classification tree $T$ there is a maximal
+subset $r(\ell)\subseteq \mathcal{D}$ such that the search path for
+any $p\in r(\ell)$ ends at $\ell$.  Thus, the leaves of $T$ partition
+$\mathcal{P}$ into subsets.
 
 In this paper, we are especially concerned with \emph{linear decision
 trees}. These are binary classification trees for a problem
@@ -351,9 +355,7 @@ For a classification tree $T$ that solves a problem
 $P:\mathcal{D}\mapsto\{0,\ldots,k-1\}$ and a probability measure $D$
 over $\mathcal{D}$, the \emph{expected search time} of $T$ is the
 expected length of the search path for $p$ when $p$ is drawn at random
-from $\mathcal{D}$ according to $D$.  Note that, for each leaf $\ell$
-of $T$ there is a maximal subset $r(\ell)\subseteq \mathcal{D}$ such
-that the search path for any $p\in r(\ell)$ ends at $\ell$.  Thus, the
+from $\mathcal{D}$ according to $D$.    Thus, the
 expected search time of $T$ (under distribution $D$) can be written as
 \[
      \mu_D(T) = \sum_{\ell\in L(T)} \Pr(r(\ell))\times \depth(\ell)
@@ -400,6 +402,23 @@ section, we will implicitly condition the distribution $D$ on $P$.
 More precisely, throughout this section the notation $\Pr(X)$ should
 be treated as shorthand for $\Pr(X|P)$.
 
+Our strategy for computing the minimum-entropy triangulation of $P$ is
+top-down.  It is best compared to the top-down algorithm for constructing
+a near-optimal binary search tree \cite{m75}. This algorithm finds a
+value $x$ such that $\Pr\{q < x\} \le 1/2$ and $\Pr\{q > x\}\le 1/2$.
+The value $x$ becomes the root of the tree and the algorithm recursively
+computes the left and right subtrees containing the values less than $x$
+and greater than $x$, respectively.
+
+Our strategy starts with a reflex chain $C$ of $P$ and constructs a
+geodesic triangle $t$ with $C$ on its boundary ($t$ can be viewed as the
+root of a tree).  The geodesic triangle $t$ has the property that it is
+is \emph{probability reducing}; the probability that the query point $q$
+is contained in any particular components of $P\setminus t$ is at most
+$1/2$.  Next, we triangulate the interior of $t$ (a pseudotriangle),
+also using a top-down strategy.  Finally, we recursively triangulate
+the components of $P\setminus t$.
+
 \subsection{The Triangulation $\Delta=\Delta(P,D)$}
 \seclabel{delta}
 
@@ -432,21 +451,28 @@ pieces $P_1,\ldots,P_m$.}
   \figlabel{ii}
 \end{figure}
 
-To complete the triangulation $\Delta$ all that remains is to
-partition $\z t=\closure(t\setminus \boundary t)$ into triangles.  To
-do this, we first partition $\z t$ into at most one triangle $t'$ and
-three
-2-convex pseudotriangles $t_0,t_1,t_2$ as shown in
-\figref{pt-partition}.a. Let $Q_i$ be the connected component of
-$(\interior(P)\setminus \z t)\cup t_i$ that contains $t_i$.  To
-complete the triangulation we will partition $t_i$ into triangles, for
-each $i\in\{0,1,2\}$, using a recursive algorithm.  This algorithm
-selects an edge $e_i$ of the reflex chain in $t_i$ and extends $e_i$
-in both directions until it reaches the boundary of $t_i$ (see
-\figref{pt-partition}.b).  The resulting line segment partitions $t_i$
-into a triangle $t_i'$, and two 2-convex pseudotriangles $t_{i,0}$ and
-$t_{i,1}$ that are triangulated recursively.  At the same time, $Q_i$
-is partitioned into up to 4 pieces (see \figref{pt-partition}.c):
+To complete the triangulation $\Delta$ all that remains is to partition
+the pseudotriangle $\z t=\closure(t\setminus \boundary t)$ into triangles.
+To do this, we first partition $\z t$ into at most one triangle $t'$
+and three 2-convex pseudotriangles. Refer to \figref{pt-partition}.a. Let
+$x_0$, $x_1$, and $x_2$ be the three convex vertices of $\z t$.  We shoot
+a ray $r_i$ from each $x_i$ into the interior of $\z t$ so that it
+bisects the angle at $x_i$.  These three rays bound a triangle $t'$
+in the interior of $\z t$. By removing the infinite segment of $r_i$
+that does not bound $t'$, we obtain three segments $s_0$, $s_1$, and
+$s_2$ that partition the interior of $\z t$ into a triangle $t'$ and
+three 2-convex pseudotriangles $t_0$, $t_1$, and $t_2$.
+
+Let $Q_i$ be the connected component of $(\interior(P)\setminus
+\z t)\cup t_i$ that contains $t_i$.  To complete the triangulation
+we will partition $t_i$ into triangles, for each $i\in\{0,1,2\}$,
+using a recursive algorithm.  This algorithm selects an edge $e_i$
+of the reflex chain in $t_i$ and extends $e_i$ in both directions
+until it reaches the boundary of $t_i$ (see \figref{pt-partition}.b).
+The resulting line segment partitions $t_i$ into a triangle $t_i'$, and
+two 2-convex pseudotriangles $t_{i,0}$ and $t_{i,1}$ that are triangulated
+recursively.  At the same time, $Q_i$ is partitioned into up to 4 pieces
+(see \figref{pt-partition}.c):
 
 \begin{enumerate}
 \item the triangle $t_i'$, and
@@ -455,11 +481,33 @@ is partitioned into up to 4 pieces (see \figref{pt-partition}.c):
 and $Q_{i,1}$ of $Q_i\setminus t_i'$ that contain $t_{i,0}$ and
 $t_{i,1}$, respectively.
 \end{enumerate}
-The edge $e_i$ is selected
-so that $\Pr(Q_{i,b})\le (1/2)\Pr(Q_i)$ for each
-$b\in\{0,1\}$.\footnote{The existence of such an edge $e_i$ is assured
-by yet another continuity argument.}  This
-completes the description of the triangulation $\Delta$.  A partially
+The edge $e_i$ is selected so that $\Pr(Q_{i,b})\le (1/2)\Pr(Q_i)$ for
+each $b\in\{0,1\}$.  To see that such an edge exists, imagine trying
+the edges as they occur, in clockwise order, on the boundary of $t_i'$.
+The first edge we try has $\Pr(Q_{i,1}) = 0$ and the last edge we try has
+$\Pr(Q_{i,0}) = 0$.  Furthermore, as we move from one edge to the next
+$\Pr(Q_{i,1})$ increases, $\Pr(Q_{i,0})$ decreases, and $\Pr(Q_{i,1})
++ \Pr(Q_{i,1}) \le \Pr(Q_i)$.  The only possible obstacle to finding
+the edge $e_i$ we seek could be that, when moving from one edge to the
+next we go from a state in which $Q_{i,0} > (1/2)\Pr(Q_i)$ to a state
+in which $Q_{i,1} > (1/2)\Pr(Q_i)$. However, this can never happen since
+(the old) $Q_{i,0}$ and (the new) $Q_{i,1}$ are disjoint (see \figref{disjointness}), so that
+\[
+   \Pr\{\mbox{old $Q_{i,0}$}\} + \Pr\{\mbox{new $Q_{i,1}$}\} \le \Pr\{Q_i\}
+   \enspace .
+\]
+We conclude that this process therefore finds an edge $e_i$ with the desired
+properties.
+
+\begin{figure}
+  \begin{center}
+    \includegraphics{disjointness}
+  \end{center}
+  \caption{Showing the existence of the edge $e_i$.}
+  \figlabel{disjointness}
+\end{figure}
+
+This completes the description of the triangulation $\Delta$.  A partially
 completed triangulation is show in \figref{delta-example}.
 
 \begin{figure}
@@ -483,7 +531,7 @@ pseudotriangles $t_{i,0}$ and $t_{i,1}$, and (c) $Q_i$ into 4 pieces.}
       \includegraphics{delta-example}
   \end{center}
   \caption{The triangles obtained during the first level of recursive
-triangulation.  The yellow subpolygons are triangulated recursively.}
+triangulation.  The shaded leaves are triangulated recursively.}
   \figlabel{delta-example}
 \end{figure}
 
@@ -524,7 +572,7 @@ obtained recursively from the recursive triangulation of $P_i$.
 
 \begin{figure}
  \begin{center}\includegraphics{delta-tree}\end{center}
-   \caption{The $\Delta$-tree $T$.  Yellow leaves in this tree are the
+   \caption{The $\Delta$-tree $T$.  Shaded leaves in this tree are the
      root of subtrees obtained recursively.  Grey areas show the
 portions of a node not covered by its children. 
 A black edge from a node $x$ to a node $y$ indicates that $\Pr(y)\le
@@ -545,24 +593,43 @@ Let $x$ be a node of $T$ whose depth is $i$. Then $\Pr(x) \le
 \end{lem}
 
 \begin{proof}
-Assume $i\ge 4$, otherwise there is nothing to prove. Let $r'$ be the
-fourth node on the path from the root, $r$, of $T$ to $x$.  Let $P_{r'}$ be
-the path in $T$ from $r$ to $r'$.  If $P_{r'}$ has at least two
-P-nodes, then $\Pr(r')\le (1/2)\Pr(r)=(1/2)\Pr(P)$. Otherwise, the
-second node in $P_{r'}$ is a T-node followed by 2 Q-nodes.  By
-construction, for any Q-node $y$ whose parent is a Q-node $z$,
-$\Pr(y)\le(1/2)\Pr(z)$.  Therefore, $\Pr(r')\le (1/2)\Pr(\prnt(r'))\le
-(1/2)\Pr(r) = (1/2)\Pr(P)$.  If $x=r'$, then $i=4$ and the proof is complete.
-Otherwise, apply the same argument inductively on the path from $r'$ to $x$, to
-obtain
-\[
-   \Pr(x) \le \Pr(r') \cdot 1/2^{\floor{(i-4)/4}} 
-    =  \Pr(r')\cdot 1/2^{\floor{i/4}-1}  
-   \le (1/2^{\floor{i/4}})\Pr(r) 
-    = (1/2^{\floor{i/4}})\Pr(P)  \enspace ,
-\]
-and this completes the proof.
-%Let $P_x$ be the path from the root, $r$, of $T$ to $x$.  Suppose, for
+Assume $i\ge 4$, otherwise there is nothing to prove. 
+Suppose, for now, that there is an additional P-node (distinct from $r$)
+on the path from $r$ to $x$.  Let $r'$ be the first such node.  Then, by
+definition $\Pr(r')\le (1/2)\Pr(r)$. If the length of the path from $r$
+to $r'$ is at most 4, then we can apply induction on the path from $r'$
+to $x$.  
+
+If the length of the path from $r$ to $r'$ is $k>4$, then this path
+contains, $r$, a T-node, and $k-2$ Q-nodes.  By construction, for
+any Q-node $y$ whose parent is a Q-node $z$, $\Pr(y)\le(1/2)\Pr(z)$.
+Therefore, in this case, $\Pr(r') \le (1/2)^{k-3}\Pr(r)\le (1/2)^{k/4}$
+and we can again apply induction on the path from $r'$ to $x$.
+
+Finally, if the path from $r$ to $x$ contains no P-nodes other than
+$r$, then it consists of $r$, a T-node, and $i-2$ Q-nodes.  Therefore,
+$\Pr(x)\le (1/2)^{i-3}\Pr(r)\le (1/2)^{i/4}\Pr(r)$, for $i\ge 4$.
+\end{proof}
+%
+%
+%Assume $i\ge 4$, otherwise there is nothing to prove. Let $r'$ be the
+%fourth node on the path from the root, $r$, of $T$ to $x$.  Let $P_{r'}$ be
+%the path in $T$ from $r$ to $r'$.  If $P_{r'}$ has at least two
+%P-nodes, then $\Pr(r')\le (1/2)\Pr(r)=(1/2)\Pr(P)$. Otherwise, the
+%second node in $P_{r'}$ is a T-node followed by 2 Q-nodes.  By
+%construction, for any Q-node $y$ whose parent is a Q-node $z$,
+%$\Pr(y)\le(1/2)\Pr(z)$.  Therefore, $\Pr(r')\le (1/2)\Pr(\prnt(r'))\le
+%(1/2)\Pr(r) = (1/2)\Pr(P)$.  If $x=r'$, then $i=4$ and the proof is complete.
+%Otherwise, apply the same argument inductively on the path from $r'$ to $x$, to
+%obtain
+%\[
+%   \Pr(x) \le \Pr(r') \cdot 1/2^{\floor{(i-4)/4}} 
+%    =  \Pr(r')\cdot 1/2^{\floor{i/4}-1}  
+%   \le (1/2^{\floor{i/4}})\Pr(r) 
+%    = (1/2^{\floor{i/4}})\Pr(P)  \enspace ,
+%\]
+%and this completes the proof.
+%%Let $P_x$ be the path from the root, $r$, of $T$ to $x$.  Suppose, for
 %now, that $P_x$ contains at least 2 P-nodes (one of which is the root
 %$r$).  Consider the path $P'$ from $r$ to the second P-node $r'$ in
 %$P_x$.  By construction, $\Pr(r') \le (1/2)\Pr(r)$, so if $P'$ is of
@@ -596,7 +663,7 @@ and this completes the proof.
 %   = 1/2^{\floor{i/4}}\Pr(P)
 %\]
 %for all $i\ge 4$.
-\end{proof}
+%\end{proof}
 
 
 Our next lemma says that a single line segment does not intersect
@@ -623,26 +690,27 @@ that remains is to bound the number of Type~0 nodes whose distance
 from the root is at most $i$.
 
 Let $w$ be any P-node such that $\interior(w)$ does not contain either
-endpoint of $s$.  Since $w$ is a P-node, there is a reflex chain $C_w$
-on the boundary of $w$ that is a shortest path between two points on
-the boundary of $P$, and every path in $P$ from $\interior(w)$ to $s$
-intersects $C_w$. Stated another way, the interior of a P-node does
-not intersect $s$ unless it contains at least one endpoint of $s$.
+endpoint of $s$.  Note that $P\setminus w$ is \emph{half-polygon}, i.e.,
+it is defined by some shortest path between two points on the boundary
+of $P$.  For any two points in the closure of $P\setminus w$, the shortest
+path between them remains in the closure of $P\setminus w$.  Therefore,
+if both endpoints of $s$ are in the closure of $P\setminus w$ then so
+is $\interior(s)$.  In other words, $s$ does no intersect $\interior(w)$.
 Therefore, all Type~0 nodes are either T-nodes or Q-nodes.
 
-For every Type~0 node $x$, there is a path $P_x$ in $T$ from $x$ to a
-T-node that is adjacent to a Type~1 or Type~2 node.  Furthermore, the
-path $P_x$ consists of $x$ followed by 0 or more Q-nodes, and
-terminates with a T-node.  Looking more closely at the definition of
-Q-nodes, we see that two sibling Q-nodes $x$ and $y$ are not mutually
-visible, i.e., there is no line segment $s\subseteq P$ that intersects
-both $\interior(x)$ and $\interior(y)$.
+Note that the parent of every T-node is a P-node.  Thus, the parent of a
+Type~0 T-node is a P-node of Type~1 or Type~2.  Furthermore, looking more
+closely at the definition of Q-nodes, we see that two sibling Q-nodes,
+$x$ and $y$, whose parent is also a Q-node, are not mutually visible,
+i.e., there is no line segment $s\subseteq P$ that intersects both
+$\interior(x)$ and $\interior(y)$.  In particular, no two such Q-nodes
+can be both of Type~0.
 
-All of this implies that each of the at most $2i+1$ Type~1 or Type~2 
-nodes is adjacent to at most 1 Type~0 T-node, and this T-node is the
-endpoint of at most 3 paths of Type~0 Q-nodes. Each such path is of
-length at most $i$.  Therefore, the total number of nodes in $T$ that
-intersect $s$ is at most  $2i\cdot 3i=6i^2$.
+All of this implies that each of the at most $2i+1$ Type~1 or Type~2
+P-nodes is adjacent to at most 1 Type~0 T-node, and this T-node produces
+at most 3 paths of Type~0 Q-nodes. Each such path is of length at most
+$i$.  Therefore, the total number of nodes in $T$ that intersect $s$
+is at most  $2i\cdot 3i=6i^2$.
 \end{proof}
 
 \subsection{Minimum-Entropy Triangulation}
@@ -665,7 +733,7 @@ observation allows us to use $\Delta$ to prove a lower bound on the
 entropy of a triangulation $\Delta^*$.  Unfortunately, the condition
 that each triangle of $\Delta^*$ intersect at most $c$ triangles of
 $\Delta$ is too restrictive for our purposes.  Instead, we require
-following stronger result:
+the following stronger result:
 
 \begin{lem}\lemlabel{pieces}
 Let $D$ be a probability measure over $\R^2$.  Let $\Delta$ and
@@ -702,9 +770,8 @@ proof formalizes this:
      & \ge & \sum_{i=1}^m
               \sum_{t\in\Delta_i}
                \sum_{t^*\in\Delta^*}
-                \left(
-                  \Pr(t^*\cap t)\log (1/\Pr(t^*\cap t) - \log c_i
-                \right) \\
+                  \Pr(t^*\cap t)
+                    \left(\log (1/\Pr(t^*\cap t) - \log c_i \right) \\
      & \ge  & \sum_{i=1}^m 
                \sum_{t\in\Delta_i}
                 \Pr(t)\log(1/\Pr(t)) 
@@ -717,10 +784,10 @@ and this completes the proof.
 
 The remainder of our argument involves partitioning the triangles of
 $\Delta$ into subsets $\Delta_1,\ldots,\Delta_m$ and then showing that
-$H(\Delta_1,\ldots,\Delta_m)$ and $\sum_{i=1}^m \Pr(\cup\Delta_i)\log
+$H(\cup\Delta_1,\ldots,\cup\Delta_m)$ and $\sum_{i=1}^m \Pr(\cup\Delta_i)\log
 c_i$ are not too big.  To help us, we will use the $\Delta$-tree $T$.
 For a node $x$ in $T$ with children $x_1,\ldots,x_k$, let $t(x) = x
-\setminus (\bigcup_{i=1}^m x_i)$ be the portion of $x$ not covered by
+\setminus (\bigcup_{i=1}^k x_i)$ be the portion of $x$ not covered by
 $x$'s children.  Note that $t(x)$ is always either the empty set or is
 a triangle in $\Delta$ (see \figref{delta-tree}).  In fact, for every
 triangle $t\in\Delta$, there is exactly one $x\in V(T)$ such that
@@ -778,8 +845,8 @@ terms on the right hand side of \eqrefx{doit}.  First,
 \begin{eqnarray*}
    \sum_{i=1}^{\infty}\Pr(\cup G_{i})\log(288i^2)
    &   =  & \sum_{i=1}^\infty\sum_{t\in G_i}\Pr(t)\log(288i^2) \\
-   &  \le  & \sum_{i=1}^\infty\sum_{t\in G_i}\Pr(t)(O(1)+\log\log(1/\Pr(t))) \\
-    &  =  & \sum_{t\in\Delta} \Pr(t) (O(1)+\log\log(1/\Pr(t))) \\
+   &  \le  & \sum_{i=1}^\infty\sum_{t\in G_i}\Pr(t)(O(1)+2\log\log(1/\Pr(t))) \\
+    &  =  & \sum_{t\in\Delta} \Pr(t) (O(1)+2\log\log(1/\Pr(t))) \\
     &  =  & O(1+\log H(\Delta)) \enspace ,
 \end{eqnarray*}
 where the last equality follows from Jensen's Inequality.

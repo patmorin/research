@@ -54,7 +54,7 @@ presented that preprocesses a connected planar subdivision $G$ of size
 $n$ and a query distribution $D$ to produce a point location data
 structure for $G$. The expected number of point-line comparisons
 performed by this data structure, when the queries are distributed
-according to $D$, is $\tilde H + O(\tilde H^{2/3}+1)$ where $\tilde
+according to $D$, is $\tilde H + O(\tilde H^{1/2}+1)$ where $\tilde
 H=\tilde H(G,D)$ is a lower bound on the expected number of point-line
 comparisons performed by any linear decision tree for point location
 in $G$ under the query distribution $D$.  The preprocessing algorithm
@@ -162,7 +162,7 @@ $H+O(H^{1/2} + 1)$ \cite{ammw07}.
 
 In the current paper, we show that, for any connected planar
 subdivision, there exists a data structure of size $O(n)$ that can
-answer point location queries using $\tilde H + O(\tilde H^{2/3}+1)$
+answer point location queries using $\tilde H + O(\tilde H^{1/2}+1)$
 point/line comparisons.  Here, $\tilde H=\tilde H(G,D)$ is a lower
 bound on the expected cost of any linear decision tree that solves
 this problem.  Note that $\tilde H$ is often greater than the quantity
@@ -810,7 +810,7 @@ Let $P$ be a simple polygon, let $D$ be a probability measure over
 $\R^2$, and consider the triangulation $\Delta=\Delta(P,D)$.
 Then, for any triangulation $\Delta^*$ of $P$,
 \[
-    H(\Delta) \le H(\Delta^*) + O(H(\Delta^*)^{2/3}+1) \enspace .
+    H(\Delta) \le H(\Delta^*) + O(H(\Delta^*)^{1/2}+1) \enspace .
 \]
 \end{lem}
 
@@ -821,12 +821,13 @@ Partition the nodes of $T$ into
 \[
 	G_i = \{x\in V(T) : 1/2^{i} < \Pr(x) \le 1/2^{i-1} \} \enspace .
 \]
-In the following we will fix a value $\alpha$, $0 < \alpha < 1$, to be
-defined later.  A group $G_i$ is \emph{large} if it contains at least
-$2^{\alpha i}$ elements, otherwise $G_i$ is \emph{small}.  Let $I^+$
-denote the index set of the large groups, i.e., $I^{+}=\{i\in\N :
-|G_i| \ge 2^{\alpha i}\}$.  Let $I^{-}= \N\setminus I^+$ be the index
-set of the small groups.
+In the following we will fix a value $\alpha$, $0 < \alpha < 1$,
+to be defined later.  A group $G_i$ is \emph{large} if it contains
+at least $2^{\alpha i}/e$ elements, otherwise $G_i$ is \emph{small}.
+(Euler's constant, $e$, appears here because of a maximization argument
+that appears later.)  Let $I^+$ denote the index set of the large
+groups, i.e., $I^{+}=\{i\in\N : |G_i| \ge 2^{\alpha i}\}$.  Let $I^{-}=
+\N\setminus I^+$ be the index set of the small groups.
 
 Note that, for any group $G_i$, \lemref{t-halving} ensures that all
 elements of $G_i$ have depth at most $4i$ in $T$.  Therefore, 
@@ -852,7 +853,7 @@ terms on the right hand side of \eqrefx{doit}.  First,
 where the last equality follows from Jensen's Inequality.
 Finally, we show that the contribution of $\overline
 H=H(\{\cup\{G_{i}\} : i\in\N\})$ is at most
-$O(H(\Delta)^{2/3})$. 
+$O(H(\Delta)^{1/2})$. 
 \begin{eqnarray*}
 \overline H 
  &  =  & H(\{\cup\{G_{i}\} : i\in\N\}) \\
@@ -860,51 +861,56 @@ $O(H(\Delta)^{2/3})$.
  &  =  & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
          + \sum_{i\in I^-}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) \\
  & \le & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
-         + \sum_{i\in I^-}2^{\alpha i}/2^{i-1}\log(2^{i}) \\
+         + \sum_{i\in I^-}2^{\alpha i}/2^{i-1}\log(2^{i-1}/2^{\alpha i}) 
+\end{eqnarray*}
+This last inequality follows because the expression $x\log (1/x)$ is
+monotonically increasing for $x\in(0,1/e)$.  Continuing, we have
+\begin{eqnarray*}
+\overline H
+   & \le & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
+         + \sum_{i=1}^\infty 2^{\alpha i}/2^{i-1}\log(2^{(1-\alpha)i}) \\
+ &  =  & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
+         + (1-\alpha)\sum_{i=1}^\infty i2^{\alpha i}/2^{i-1} \\
+ &  =  & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
+         + 2(1-\alpha)\cdot\sum_{i=1}^{\infty} i/2^{(1-\alpha)i} \\
+ &  =  & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
+         + 2(1-\alpha)\cdot\left(\frac{(1/2)^{1-\alpha}}{(1-(1/2)^{1-\alpha})^2}\right) \\
  & \le & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
-         + \sum_{i=1}^\infty 2^{\alpha i}/2^{i-1}\log(2^{i}) \\
- &  =  & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
-         + \sum_{i=1}^\infty i2^{\alpha i}/2^{i-1} \\
- &  =  & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
-         + 2\cdot\sum_{i=1}^{\infty} i/2^{(1-\alpha)i} \\
- &  =  & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
-         + 2\cdot\left(\frac{(1/2)^{1-\alpha}}{(1-(1/2)^{1-\alpha})^2}\right) \\
- & \le & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
-         + O(1/(1-\alpha)^2) \enspace ,
+         + (1-\alpha)\cdot O(1/(1-\alpha)^2) \enspace ,
 \end{eqnarray*}
 where the last equality is obtained using the Taylor series expansion
-for $e^{x}$ to obtain the inequality $1-1/2^{x} \ge x\ln 2 - (x^2\ln 2)/2$
+for $e^{x}$ to obtain the inequality $1-1/2^{x} \ge x\ln 2 - (x\ln 2)^2/2$
 for $x$ close to 0.  Continuing, we get 
 \begin{eqnarray*}
 \overline H
   & \le & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
-         + O(1/(1-\alpha)^2) \\
+         + O(1/(1-\alpha)) \\
   & \le & \sum_{i\in I^+}\Pr(\cup G_{i})\log(2^i/|G_i|)
-         + O(1/(1-\alpha)^2) \\
+         + O(1/(1-\alpha)) \\
   & \le & \sum_{i\in I^+}\Pr(\cup G_{i})\log(2^i/2^{\alpha i})
-         + O(1/(1-\alpha)^2) \\
+         + O(1/(1-\alpha)) \\
   &  =  & \sum_{i\in I^+}\Pr(\cup G_{i})(1-\alpha) i
-         + O(1/(1-\alpha)^2) \\
+         + O(1/(1-\alpha)) \\
   &  =  & (1-\alpha)\sum_{i\in I^+}\Pr(\cup G_{i}) i
-         + O(1/(1-\alpha)^2) \\
+         + O(1/(1-\alpha)) \\
   &  =  & (1-\alpha)\sum_{i\in I^+}\Pr(\cup G_{i})\log(2^i)
-         + O(1/(1-\alpha)^2) \\
+         + O(1/(1-\alpha)) \\
   &  =  & (1-\alpha)\sum_{i\in I^+}\sum_{t\in G_i}\Pr(t)\log(2^i)
-         + O(1/(1-\alpha)^2) \\
+         + O(1/(1-\alpha)) \\
   &  =  & (1-\alpha)\sum_{i\in I^+}\sum_{t\in G_i}\Pr(t)\log(1/\Pr(t))
-         + O(1+1/(1-\alpha)^2) \\
-  & \le & (1-\alpha)H(\Delta) + O(1+1/(1-\alpha)^2) \\
-  & \le &  O(H(\Delta)^{2/3}+ 1)
+         + O(1+1/(1-\alpha)) \\
+  & \le & (1-\alpha)H(\Delta) + O(1+1/(1-\alpha)) \\
+  & \le &  O(H(\Delta)^{1/2}+ 1)
 \end{eqnarray*} 
-Where the last inequality is obtained by setting 
-$\alpha=1-1/H(\Delta)^{1/3}$.  Thus, we have shown that
+where the last inequality is obtained by setting 
+$\alpha=1-1/H(\Delta)^{1/2}$.  Thus, we have shown that
 \begin{equation}
-  H(\Delta) \le H(\Delta^*) + O(H(\Delta)^{2/3}+1) \enspace ,
+  H(\Delta) \le H(\Delta^*) + O(H(\Delta)^{1/2}+1) \enspace ,
    \eqlabelx{almost-last}
 \end{equation}
 which implies that $H(\Delta) = O(H(\Delta)^*+1)$.  Applying this to
 the right hand side of \eqrefx{almost-last} yields $H(\Delta) \le
-H(\Delta^*) + O(H(\Delta^*)^{2/3} + 1)$, completing the proof.
+H(\Delta^*) + O(H(\Delta^*)^{1/2} + 1)$, completing the proof.
 \end{proof}
 
 \lemref{min-H-triangulation} shows that the triangulation
@@ -919,7 +925,7 @@ time algorithm that computes a triangulation $\Delta'$ of $P$ having
 $O(n)$ triangles and such that, for any triangulation $\Delta^*$ of
 $P$,
 \[
-    H(\Delta') \le H(\Delta^*) + O(H(\Delta^*)^{2/3}+1) \enspace .
+    H(\Delta') \le H(\Delta^*) + O(H(\Delta^*)^{1/2}+1) \enspace .
 \]
 \end{thm}
 
@@ -961,7 +967,7 @@ different from $\Delta$.  In particular, there may exist one $P_{i,j}$
 with $\Pr(P_{i,j})>\Pr(P_i)/2$.  Despite this, all the proofs of
 Lemmas~\ref{lem:A}--\ref{lem:Z} continue to hold almost without modification.
 The only difference occurs in \lemref{t-halving}, which now only
-guarantees a bound of $2^\floor{i/8}$ on the number of black edges,
+guarantees a bound of $1/2^\floor{i/8}$, 
 but this has almost no effect on subsequent computations.
 
 Finally, to see that $\Delta'$ contains $O(n)$
@@ -1051,7 +1057,7 @@ $F=\{F_1,\ldots,F_m\}$ and let $D$ be a probability measure over
 $\R^2$.  We assume, without loss of generality that the outer face of
 $G$ is the complement of a triangle, since otherwise we can add at
 most 3 vertices and 4 edges to $G$ to make this true.  Adding these
-edges will not increase the entropy the minimum weight triangulation
+edges will not increase the entropy of the minimum weight triangulation
 of $G$ by more than a constant.  With this assumption, testing if the
 query point is in the outer face of $G$ can be done using 3 linear
 comparisons after which we may safely assume that the query point is
@@ -1072,7 +1078,7 @@ constructed in $O(n\log n)$ time that answers point location queries in $G$.
 The expected number of point/line comparisons performed by $R$, 
 for a point $p$ drawn according to $D$ is 
 \[
-  \mu_D(R) \le \mu_D(T^*) + O(\mu_D(T^*)^{2/3}+1) \enspace , 
+  \mu_D(R) \le \mu_D(T^*) + O(\mu_D(T^*)^{1/2}+1) \enspace , 
 \] 
 where $T^*$ is any linear classification tree that answers point
 location queries in $G$.
@@ -1125,24 +1131,23 @@ Similarly, the entropy of $\Delta$ is given by
 By \thmref{min-H-triangulation}, the triangles in $\Delta_i$ form a
 nearly-minimum entropy triangulation of $F_i$.  More specifically, 
 \begin{equation}
-   H(\Delta_i) \le H(\Delta'_i) + O(H(\Delta'_i)^{2/3}+1)  \enspace .
+   H(\Delta_i) \le H(\Delta'_i) + O(H(\Delta'_i)^{1/2}+1)  \enspace .
     \eqlabelx{h-delta-i}
 \end{equation}
 Putting this all together, we have
-\[
- \begin{aligned}
+\begin{align*}
   H(\Delta) 
     &  =  \sum_{i=1}^m\Pr(F_i) H(\Delta_i) + H(F) 
              \\ 
     & \le \sum_{i=1}^m\Pr(F_i) (H(\Delta'_i) 
-             + O(H(\Delta'_i)^{2/3}+1)) + H(F) 
+             + O(H(\Delta'_i)^{1/2}+1)) + H(F) 
              && \text{\hfill{(by \eqrefx{h-delta-i})}} \\ 
-    &  =  H(\Delta') + \sum_{i=1}^m\Pr(F_i) O(H(\Delta'_i)^{2/3}+1)
+    &  =  H(\Delta') + \sum_{i=1}^m\Pr(F_i) O(H(\Delta'_i)^{1/2}+1)
              && \text{(by \eqrefx{h-delta-prime})} \\ 
     &  =  H(\Delta') + 
              \left(
-               \sum_{i=1}^m\Pr(F_i) O(H(\Delta'_i)
-             \right)^{2/3} + O(1)
+               \sum_{i=1}^m\Pr(F_i) O(H(\Delta'_i))
+             \right)^{1/2} + O(1)
              && \text{(by Jensen's Inequality)} \\
     &  =  H(\Delta') + 
              \left(
@@ -1150,7 +1155,7 @@ Putting this all together, we have
                 \sum_{i=1}^m\Pr(F_i)
                  \sum_{t'\in\Delta'_i}
                   \Pr(t'|F_i)\log(1/\Pr(t'|F_i))
-             \right)^{2/3} + O(1)
+             \right)^{1/2} + O(1)
               \\
     &  =  H(\Delta') + 
              \left(
@@ -1158,7 +1163,7 @@ Putting this all together, we have
                 \sum_{i=1}^m
                  \sum_{t'\in\Delta'_i}
                   \Pr(t')\log(\Pr(F_i)/\Pr(t'))
-             \right)^{2/3} + O(1)
+             \right)^{1/2} + O(1)
               \\
     & \le H(\Delta') + 
              \left(
@@ -1166,22 +1171,21 @@ Putting this all together, we have
                 \sum_{i=1}^m
                  \sum_{t'\in\Delta'_i}
                   \Pr(t')\log(1/\Pr(t'))
-             \right)^{2/3} + O(1)
+             \right)^{1/2} + O(1)
              \\
-    &  =  H(\Delta') + O(H(\Delta')^{2/3}+1) 
+    &  =  H(\Delta') + O(H(\Delta')^{1/2}+1) 
              \\
-    & \le \mu_D(T') + O(\mu_D(T')^{2/3}+1) 
+    & \le \mu_D(T') + O(\mu_D(T')^{1/2}+1) 
              && \text{(by \thmref{shannon})} \\
-    & \le \mu_D(T^*) + O(\mu_D(T^*)^{2/3}+1) 
+    & \le \mu_D(T^*) + O(\mu_D(T^*)^{1/2}+1) 
              && \text{(by \eqrefx{t-triangle})} 
- \end{aligned}
-\]
+\end{align*}
 Finally, since we preprocess $\Delta$ using \thmref{ammw07}, the
 expected number of comparisons required to answer a query is
 \begin{eqnarray*}
   \mu_D(R) 
    & = & H(\Delta) + O(H(\Delta)^{1/2} + 1) \\
-   & \le & \mu_D(T^*) +  O(\mu_D(T^*)^{2/3} + 1) 
+   & \le & \mu_D(T^*) +  O(\mu_D(T^*)^{1/2} + 1) 
 \end{eqnarray*}
 and this completes the proof, and the paper.
 \end{proof}

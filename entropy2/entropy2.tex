@@ -487,9 +487,9 @@ the edges as they occur, in clockwise order, on the boundary of $t_i'$.
 The first edge we try has $\Pr(Q_{i,1}) = 0$ and the last edge we try has
 $\Pr(Q_{i,0}) = 0$.  Furthermore, as we move from one edge to the next
 $\Pr(Q_{i,1})$ increases, $\Pr(Q_{i,0})$ decreases, and $\Pr(Q_{i,1})
-+ \Pr(Q_{i,1}) \le \Pr(Q_i)$.  The only possible obstacle to finding
++ \Pr(Q_{i,0}) \le \Pr(Q_i)$.  The only possible obstacle to finding
 the edge $e_i$ we seek could be that, when moving from one edge to the
-next we go from a state in which $Q_{i,0} > (1/2)\Pr(Q_i)$ to a state
+next, we go from a state in which $Q_{i,0} > (1/2)\Pr(Q_i)$ to a state
 in which $Q_{i,1} > (1/2)\Pr(Q_i)$. However, this can never happen since
 (the old) $Q_{i,0}$ and (the new) $Q_{i,1}$ are disjoint (see \figref{disjointness}), so that
 \[
@@ -596,7 +596,7 @@ Let $x$ be a node of $T$ whose depth is $i$. Then $\Pr(x) \le
 Assume $i\ge 4$, otherwise there is nothing to prove. 
 Suppose, for now, that there is an additional P-node (distinct from $r$)
 on the path from $r$ to $x$.  Let $r'$ be the first such node.  Then, by
-definition $\Pr(r')\le (1/2)\Pr(r)$. If the length of the path from $r$
+definition, $\Pr(r')\le (1/2)\Pr(r)$. If the length of the path from $r$
 to $r'$ is at most 4, then we can apply induction on the path from $r'$
 to $x$.  
 
@@ -823,9 +823,9 @@ Partition the nodes of $T$ into
 \]
 In the following we will fix a value $\alpha$, $0 < \alpha < 1$,
 to be defined later.  A group $G_i$ is \emph{large} if it contains
-at least $2^{\alpha i}/e$ elements, otherwise $G_i$ is \emph{small}.
+at least $2^{\alpha i}/2e$ elements, otherwise $G_i$ is \emph{small}.
 (Euler's constant, $e$, appears here because of a maximization argument
-that appears later.)  Let $I^+$ denote the index set of the large
+that appears later in this proof.)  Let $I^+$ denote the index set of the large
 groups, i.e., $I^{+}=\{i\in\N : |G_i| \ge 2^{\alpha i}\}$.  Let $I^{-}=
 \N\setminus I^+$ be the index set of the small groups.
 
@@ -861,22 +861,23 @@ $O(H(\Delta)^{1/2})$.
  &  =  & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
          + \sum_{i\in I^-}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) \\
  & \le & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
-         + \sum_{i\in I^-}2^{\alpha i}/2^{i-1}\log(2^{i-1}/2^{\alpha i}) 
+         + \sum_{i\in I^-}(2^{\alpha i}/2^{i}e)\log(2^{i}e/2^{\alpha i}) 
 \end{eqnarray*}
 This last inequality follows because the expression $x\log (1/x)$ is
-monotonically increasing for $x\in(0,1/e)$.  Continuing, we have
+monotonically increasing for $x\in(0,1/e]$.  Continuing, we have
 \begin{eqnarray*}
 \overline H
    & \le & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
-         + \sum_{i=1}^\infty 2^{\alpha i}/2^{i-1}\log(2^{(1-\alpha)i}) \\
+         + \sum_{i=1}^\infty 2^{(\alpha-1)i}(\log(2^{(1-\alpha)i}+\log e)) \\
+ &  \le  & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
+         + (1-\alpha)\cdot\sum_{i=1}^\infty i2^{(\alpha-1)i}
+         + (\log e) \sum_{i=1}^\infty 2^{(\alpha-1)i} \\
  &  =  & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
-         + (1-\alpha)\sum_{i=1}^\infty i2^{\alpha i}/2^{i-1} \\
- &  =  & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
-         + 2(1-\alpha)\cdot\sum_{i=1}^{\infty} i/2^{(1-\alpha)i} \\
- &  =  & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
-         + 2(1-\alpha)\cdot\left(\frac{(1/2)^{1-\alpha}}{(1-(1/2)^{1-\alpha})^2}\right) \\
+         + (1-\alpha)\cdot\left(\frac{(1/2)^{1-\alpha}}{(1-(1/2)^{1-\alpha})^2}\right) 
+         + \frac{\log e}{1-(1/2)^{1-\alpha}} \\
  & \le & \sum_{i\in I^+}\Pr(\cup G_{i})\log(1/\Pr(\cup G_{i})) 
-         + (1-\alpha)\cdot O(1/(1-\alpha)^2) \enspace ,
+         + (1-\alpha)\cdot O(1/(1-\alpha)^2) 
+         + O(1/(1-\alpha)) \enspace ,
 \end{eqnarray*}
 where the last equality is obtained using the Taylor series expansion
 for $e^{x}$ to obtain the inequality $1-1/2^{x} \ge x\ln 2 - (x\ln 2)^2/2$
@@ -1189,6 +1190,13 @@ expected number of comparisons required to answer a query is
 \end{eqnarray*}
 and this completes the proof, and the paper.
 \end{proof}
+
+\section*{Acknowledgement}
+
+The authors are grateful to anonymous referee who showed us that a small
+modification of our original calculations could be used to reduce the
+lower-order term in our results from $O(\tilde H^{2/3})$ to $O(\tilde
+H^{1/2})$.
 
 \bibliographystyle{plain}
 \bibliography{entropy2}

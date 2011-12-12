@@ -1,0 +1,211 @@
+\documentclass{article}
+\usepackage{fullpage}
+\usepackage{amsfonts}
+
+\setlength{\parindent}{0mm}
+
+\newcommand{\etal}{\emph{et al}}
+
+\title{Responses to Referee 2's Comments on \\
+   Memoryless Routing in Convex Subdivisions:\\Random Walks are Optimal}
+\author{Chen, Devroye, Dujmovi\'c, and Morin}
+\date{}
+
+\newcommand{\R}{\mathbb{R}}
+
+\begin{document}
+\maketitle
+
+Each response is formatted as block-quote containing the referee's comment, followed by our response and, if appropriate, a block quote containing the new modified text.
+
+\hrule
+
+\begin{quote}
+The second result is variously billed as (my comments follow each time in parentheses):
+"at least in the worst case, no algorithm significantly outperforms a random walk"
+
+(misleading; more accurate would be "each [randomized memoryless routing]
+algorithm's performance is in some cases no better than that of a random walk")
+\end{quote}
+
+\noindent This sentence has been rewritten to:
+
+\begin{quote}
+Therefore, $\mathcal{A}$'s performance is, in some cases, no better than that of a random walk.
+\end{quote}
+
+\hrule
+
+\begin{quote}
+"we develop an $\Omega(n^2)$ lower bound for routing on convex subdivisions using any
+randomized memoryless routing algorithm."
+
+(this is NOT a lower bound proof in the sense properly used in theory; the authors
+only show that on some inputs run-time of such algorithms is at least quadratic... where
+input is considered to consist of both graph and specified source-destination pair)
+\end{quote}
+
+\noindent
+This has been rewritten to state exactly what we prove in this section:
+
+\begin{quote}
+In this section we develop an $\Omega(n^2)$ lower bound on the \underline{worst-case}
+performance of any randomized memoryless routing algorithm $\mathcal{A}$.
+In particular, we show that for any such $\mathcal{A}$, there exists a
+geometric graph $G=G(\mathcal{A})$ having two vertices $s$ and $t$ such
+that the expected number of steps taken by $\mathcal{A}$ when routing
+from $s$ to $t$ is $\Omega(n^2)$.
+\end{quote}
+
+\hrule
+
+\begin{quote}
+"any randomized memoryless routing algorithm takes at least quadratic time
+to route on some convex subdivisions."
+
+(this one is almost accurate, but the source-destination pair is not mentioned: the time
+bound is proved only for certain source-destination pairs)
+\end{quote}
+
+Again, this has been rewritten to be more explicit:
+
+\begin{quote}
+We show that, for any randomized memoryless routing algorithm $\mathcal{A}$ and any $n$, there exists a convex subdivision $G=G(\mathcal{A})=(V,E)$ of size $n$ and a pair of vertices $s,t\in V$ such that the expected number of steps taken by $\mathcal{A}$ when routing from $s$ to $t$ is $\Omega(n^2)$. 
+\end{quote}
+
+\hrule
+
+\begin{quote}
+"since this lower bound is matched by a random walk, this result implies
+that the geometric information available in convex subdivisions is not
+helpful for this class of routing algorithms".
+
+(not at all! no such conclusion may be drawn. what would this mean anyway?
+no analysis of the average over all source-destination pairs has been done:
+randomized geometric algorithms could still perform better on many
+source-destination pairs)
+\end{quote}
+
+We have changed this to:
+
+\begin{quote}
+Since this
+lower bound is matched by a random walk, this result implies that the
+geometric information available in convex subdivisions does not reduce the \underline{worst-case} routing time for this class
+of routing algorithms.
+\end{quote}
+
+\hrule
+
+\begin{quote}
+I now address the serious confusion in terminology (which also exists in
+other places in the literature for example in Wattenhofer's "Randomized 3D
+Geographic Routing" as it refers to Durocher et al's "On Routing with Guaranteed
+Delivery in Three-Dimensional Ad Hoc Wireless Networks") -
+
+"memoryless" is used variously in the community to mean
+- truly memoryless (as in Durocher's paper), or
+- allowing info about O(1) nodes (as in Wattenhofer's paper)
+
+The problem is that while the first definition is specified in the present
+paper, the authors then go on to refer to GREEDY and RANDOM-COMPASS as
+memoryless, whereas they are of the second type (Wattenhofer made a similar
+mistake in his paper, falsely concluding from Durocher's work that
+no correct 3D algorithm using memory sufficient to store info about O(1)
+nodes exists - this would contradict Reingold's result - when in fact
+Durocher et al proved that no correct 1-local 3D algorithm exists). The
+"famous" example the authors refer to by Leighton and Moitra deals with
+GREEDY which absolutely requires knowledge of the destination node's ID
+(using $\log n$ space).
+\end{quote}
+
+
+In this paper we are sticking with the definition of memoryless routing algorithm as defined, for example, by one of the authors in 1999 (P. Bose and P. Morin. Online routing in triangulations. 
+\emph{Proceedings of the Tenth International Symposium on Algorithms and Computation (ISAAC'99)}, pages 113-122, LNCS 1741, Springer-Verlag, 1999).  Under this definition, the algorithm knows the destination, $t$, but has no other form of memory.
+
+However, since there is certainly room for confusion about this term, we have made an attempt to clarify that this is not the only definition and to make a distinction between memoryless routing algorithms (where $t$ is known) and memoryless traversal algorithms (where $t$ is unspecified):
+
+\begin{quote}
+ For the purposes of this paper, a \emph{memoryless} routing algorithm is one in which the decision about the next edge on the route to $t$ for a packet currently located at node $v$ is based only on the coordinates of $v$, $t$, and the neighbourhood, $N(v)$, of $v$. More precisely, a deterministic memoryless routing algorithm is a function $f:\R^2\times\R^2\times(\R^2)^+\rightarrow \R^2$ that satisfies $f(v,t,N(v)) \in N(v)$.  
+
+We note that one can find different definitions of the term ``memoryless routing algorithm'' in other papers, some of which do not even allow the routing algorithm to know the destination $t$; these are perhaps better called memoryless traversal algorithms since, in order to work, they must visit every vertex of $G$.
+\end{quote}
+
+\hrule
+
+\begin{quote}
+1) In the Introduction, in the second paragraph where face routing is mentioned
+the fact that this is a logspace algorithm is not made clear. It is only stated "constant memory"
+but in fact the algorithm described needs to remember the identity of a constant
+number of nodes which takes $\Theta(\log n)$ memory. Also it would be more
+appropriate to reference the original paper by E. Kranakis, H. Singh, and J.
+Urrutia from '99.
+\end{quote}
+
+We have clarified this to show that a constant number of vertex positions must be remembered (and cited Kranakis et al).  We can 
+not say that this algorithm uses $\Theta(\log n)$ memory since vertex coordinates may require $\omega(\log n)$ bits to represent. This is, for example, the case with the greedy embeddings found by Leighton and Moitra.  (This is the same reason that \textsc{Greedy}, \textsc{Compass}, and other algorithm that know the destination $t$ can not be called logspace algorithms.)
+
+\begin{quote}
+For example, when $G$ is a planar graph, then an algorithm of Kranakis
+\etal\ \cite{ksu99} works for $G$ and requires no preprocessing of $G$
+or additional state information at the vertices of $G$ and requires only a
+packet header that can store the locations of a constant number of vertices.
+Routing algorithms like this, that require only storing $O(\log n)$ bits and $O(1)$ vertex identifiers are sometimes called \emph{constant-memory routing algorithms}.
+\end{quote}
+
+\hrule
+
+\begin{quote}
+2) In that same paragraph, Reingold's 2005 result on Universal Traversal Sequences is mentioned
+as "an extremely general result in the same vein". It is not in the same
+vein, as it uses no geometric information and is far too slow for practical
+use. It is rather a very important theoretical result which ad hoc
+researchers need to be aware of as a benchmark against which to view
+geometric routing algorithms (placing emphasis on time).
+\end{quote}
+
+We have specified that Reingold's result does not rely on geometry and that, although polynomial, it is too slow for practical use.  
+
+\begin{quote}
+An extremely general result, but that does not rely on geometry, based on logspace construction of universal exploration sequences, shows that, using a header containing only $O(\log n)$ bits, one can visit all the vertices of any graph (and hence reach $t$) in a polynomial number of steps \cite{r05}.  However, this algorithm is far too slow for practical use.
+\end{quote}
+
+\hrule
+
+\begin{quote}
+3) Memoryless routing algorithms are either:
+- of theoretical interest only, if the ID of the destination is assumed
+stored in an input tape which is not counted towards (working) memory or
+- they should more properly be called memoryless traversal algorithms. A
+routing algorithm must know its destination (needing $\log n$ memory).
+Otherwise it is a traversal algorithm. I realize this is a common
+terminology problem and I do not fault the authors for it, however,
+those who wish to study these (memoryless) algorithms should at least not
+attempt to borrow the relevance of (logspace) routing algorithms such as
+GREEDY, which the authors do in the paragraph beginning "memoryless routing
+algorithms are so simple, elegant and practical that researchers have spent
+considerable effort ..."  (page 2)
+\end{quote}
+
+We believe that this has been addressed by making the distinction between memoryless routing algorithms and memoryless traversal algorithms.  To be clear, the things we study in this paper are memoryless routing algorithms.
+
+\hrule
+
+\begin{quote}
+4) In the footnotes 2 and 3, "geometric graph" should be replaced by "plane"
+geometric graph.
+\end{quote}
+
+Changed:
+
+\begin{quote}
+A \emph{triangulation} is a plane geometric graph all of whose faces, except the outer face, are triangles, and whose outer face is the complement of a triangle.
+
+A \emph{convex subdivision} is a plane geometric graph all of whose faces, except the outer face, are convex polygons, and whose outer face is the complement of a convex polygon.
+\end{quote}
+
+
+\hrule
+
+
+\end{document}

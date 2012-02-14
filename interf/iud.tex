@@ -1,0 +1,219 @@
+\documentclass{patmorin}
+%\usepackage{charter}
+\usepackage{textcase}
+\usepackage{amsmath,amsthm}
+\usepackage{pat}
+
+\newcommand{\mst}{\mathit{MST}}
+
+\title{\MakeTextUppercase{A Note on Interference in Random Point Sets}}
+\author{BIRS 12w5004}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  We show that, in any constant dimension $d$, given a set of $n$
+  i.u.d. points in the $d$ dimensional cube, it is possible, with high
+  probability, to construct a connected graph on these points whose
+  maximum interference is $O((\log n)^{1/3})$.
+\end{abstract}
+
+\section{Introduction}
+
+
+Let $V=\{x_1,\ldots,x_n\}$ be a set of $n$ points in $\R^d$ and let
+$G=(V,E)$ be a graph with vertex set $V$.  The graph $G$ defines a set,
+$B(G)$, of closed balls $B_1,\ldots,B_n$, where $B_i$ has center $x_i$
+and radius
+\[
+   r_i = \max\{\|x_ix_j\| : j\in\{1,\ldots,n\}\} \enspace .
+\]
+In words, $B_i$ is just large enough to enclose all of $x_i$'s neighbours
+in $G$.  We define the \emph{interference} at a point, $p$, as the
+number of
+these balls that contain $p$, i.e.,
+\[
+    I(p,G) = |\{B\in B(G) : p\in B\}| \enspace .
+\]
+We define the \emph{(maximum receiver-centric) interference} of $G$ as the
+maximum inteference at any vertex of $G$, i.e.,
+\[
+   I(G) = \max\{I(x,G) : x\in V\} \enspace .
+\]
+One of the goals of network design is to build, given $V$, a connected
+graph $G=(V,E)$ such that $I(G)$ is minimized.  Thus, it is natural to consider the interference as a property of a given point set, $V$, defined as
+\[
+  I(V) = \min\{I(G) : \mbox{$G=(V,E)$ is connected}\} \enspace .
+\]
+The purpose of current paper is to prove the following result:
+\begin{thm}\thmlabel{main}
+  Let $V$ be a set of $n$ points independently and uniformly distributed
+  in $[0,1]^d$.  Then, with high probability, $I(V)\in O((\log n)^{1/3})$.
+\end{thm}
+
+\subsection{Related Work}
+
+In this section, we survey previous work on the problem of bounding
+the interference of worst-case and random point sets.  A summary of the
+results described in this section is given in \figref{related}.  In the statements of all results in this section, $|V|=n$.
+
+\begin{figure}
+\begin{center}
+  \begin{tabular}{|l|l|r@{, }l|}\hline
+    Ref. & Dimension & \multicolumn{2}{c|}{Statement} \\ \hline
+    \cite{vR05} & $d=1$ & for all $V$ & $I(V)\in O(n^{1/2})$ \\
+    \cite{vR05} & $d\ge 1$ & there exists $V$ & $I(V)\in \Omega(n^{1/2})$ \\
+    \cite{ht08} & $d=2$ & for all $V$ & $I(V)\in O(n^{1/2})$ \\
+    \cite{ht08} & $d\ge 3$ & for all $V$ & $I(V)\in O((n\log n)^{1/2})$ \\
+    \cite{kkmns10} & $d= 1$ & for $V$ i.u.d. in $[0,1]$ & $I(\mst(V))\in \Theta((\log n)^{1/2})$ w.h.p. \\
+    \cite{kkmns10,vR05} & $d = 1$ & for $V$ i.u.d. in $[0,1]$  & $I(V)\in\Omega((\log n)^{1/4})$ w.h.p.  \\
+    \cite{kdh11} & $d\ge 2$ & for $V$ i.u.d. in $[0,1]^d$ & $I(\mst(V))\in O(\log n)$ w.h.p.  \\
+    Here & $d\ge 1$ & for $V$ i.u.d. in $[0,1]^d$  & $I(V)\in O((\log n)^{1/3})$ w.h.p.  \\ \hline
+  \end{tabular}
+\end{center}
+\caption{Previous and new results on interference in geometric networks.}
+\figlabel{related}
+\end{figure}
+
+The definition of interference used in this paper was introduced by
+von~Rickenbach \etal\ \cite{vR05} who proved upper and
+lower bounds on the interference of one dimensional point sets:
+\begin{thm}\thmlabel{sqrtnlower}
+For any integer $d\ge 1$, there exists $V\subset\R^{d}$, such
+that $I(V)=\Omega(n^{1/2})$.
+\end{thm}
+The point set, $V$, in this lower-bound consists of any sequence of
+points $x_1,\ldots,x_n$, all on a line, such that $\|x_{i+1}x_i\| \le (1/2)\|x_{i}x_{i-1}\|$,
+for all $i\in\{2,\ldots,n-1\}$.  That is, the gaps between consecutive
+points decrease exponentially.
+
+This lower bound is matched by an upper-bound:
+\begin{thm}\thmlabel{twod-upper}
+For all $V\subset\R$, $I(V)\in O(n^{1/2})$.
+\end{thm}
+The upper bound in \thmref{twod-upper} is obtained by selecting $n^{1/2}$
+vertices to act as \emph{hubs}, connecting the hubs into any connected
+network and then having each of the remaining nodes connect to its
+nearest hub.  This idea was extended to two and higher dimensions
+by Halld\'orsson and Tokuyama \cite{ht08}, by using a special type of
+$(n^{-1/2})$-net as the set of hubs:
+\begin{thm}\thmlabel{sqrtn2d}
+For all $V\subset\R^2$, $I(V)\in O(n^{1/2})$.  
+\end{thm}
+\begin{thm}\thmlabel{sqrtndd}
+  For any constant $d\ge 3$, and for all $V\subset\R^d$, $I(V)=O((n\log
+  n)^{1/2})$.
+\end{thm}
+
+Several authors have shown that the interference of a point set is
+related to the (logarithm of) the ratio between the longest and shortest
+distance defined by the point set.  In particular, different versions
+of the following theorem have been proven by Halld\'orsson and Tokuyama
+\cite{ht08}, and Khabbazian, Durocher, and Haghnegahdar
+\cite{kdh11}:
+\begin{thm}\thmlabel{log}
+  For any constant integer $d\ge 1$, and for all $V\subset\R^d$
+  $I(V)=O(\log D)$, where $D=\max\{\|xy\|: \{x,y\}\subseteq V\}/\min\{\|xy\|:
+  \{x,y\}\subseteq V\}$.
+\end{thm}
+(A version of this theorem even applies when $V$ is a set of elements in a metric space of bounded doubling dimension \cite{msz11}.)
+The \emph{minimum spanning tree} of $V$ is the connected graph, $\mst(V)$,
+of minimum total edge length.  At least two of the proof of \thmref{log} proceed by showing that $I(\mst(V))=O(\log D)$.
+
+\thmref{log} suggests that point sets with very high interference are
+unlikely to occur in practice.  Kranakis \etal\ \cite{kkmns10} show
+that that high interference is unlikely to occur in random point sets
+in one dimension:
+\begin{thm}\thmlabel{sqrtlogn}
+  Let $V$ be a set of $n$ points independently and uniformly distributed
+  in $[0,1]$.  Then, with high probability, $I(\mst(V))\in \Theta((\log
+  n)^{1/2})$.
+\end{thm}
+Note that, in this one-dimensional case, the minimum spanning tree,
+$\mst(V)$, is simply a path that connects the points of $V$ in order,
+from left to right.  The lower-bound in \thmref{sqrtlogn} is proven
+by showing that, with high probability, $V$ contains a subsequence
+of points like that used in the proof of \thmref{sqrtnlower},
+whose length is $\Omega((\log n)^{1/2})$.  Combining the proofs of
+Theorems~\ref{thm:sqrtnlower} and \ref{thm:sqrtlogn} one obtains the
+following result:
+\begin{thm}
+  Let $V$ be a set of $n$ points independently and uniformly distributed
+  in $[0,1]$.  Then, with high probability, $I(V)\in \Omega((\log
+  n)^{1/4})$.
+\end{thm}
+
+In higher dimensions, Khabbazian, Durocher, and Haghnegahdar use their
+version of \thmref{log} to show:
+\begin{thm}
+  Let $V$ be a set of $n$ points independently and uniformly distributed
+  in $[0,1]^d$.  Then, with high probability, $I(\mst(V))\in O(\log n)$.
+\end{thm}
+This result follows from two observations: (1)~no pair of points in $V$
+is at distance greater than $\sqrt{d}$, and (2)~with high probability,
+no pair of points in $V$ is at distance less than $(\pi n)-2$.  Therefore,
+with high probability
+\[
+   D \le \sqrt{d}(\pi n)^2 = O(n^2)
+\]
+and applying \thmref{log} completes the proof.
+
+In the remainder of this paper, we prove \thmref{main}.
+
+\section{Proof of \thmref{main}}
+
+\begin{proof}[Proof of \thmref{main}]
+For ease of exposition, we will prove the theorem for $d=2$, and mention,
+later, the modifications required for the cases $d=1$ and $d\ge 3$.
+Partition $[0,1]^2$ into squares of area $1/nt$ for some value $t$
+to be specified later.  Let $N_i$ denote the number of points that
+are contained in the $i$th such square.  Then $N_i$ is binomial with
+mean $\mu=1/t$.  Recall Chernoff's Bounds \cite{c52} on the tails of
+binomial random variables:
+\[
+  \Pr\{N_i \ge (1+\delta)\mu\} 
+    \le \left(\frac{e^\delta}{(1+\delta)^{1+\delta}}\right)^\mu \enspace .
+\]
+In our setting, we have, 
+\begin{align*}
+  \Pr\{N_i \ge k\} 
+    & = \Pr\{N_i \ge kt\mu\} \\
+    & \le \left(\frac{e^{kt}}{(kt)^{kt}}\right)^{1/t} \\
+    & = \frac{e^{k}}{(kt)^{k}} \\
+    & \le \frac{1}{t^{k}} & \text{for $k\ge e$} \\
+    & \le \frac{1}{n^{c+2}} & \text{for $t=2^{(\log n)^{1/3}}$ and $k=(c+2)(\log n)^{2/3}$.} \\
+\end{align*}
+Note that the number of square in the partition is no more than $nt\le
+n^2$, for sufficiently large $n$.  Therefore, by the union bound, the
+probability that there exists any square containing more than $k$ points
+is at most $n^{-c}$.
+
+Within each square of our partition, we apply the method of Hald\'orsson
+and Tokuyama \cite{htXX} (\thmref{sqrtn2d} or \thmref{sqrtndd}).  This
+connects the vertices in the $i$th square into a connected graph $G_i$
+with $I(G_i)=O(\sqrt{N_i})$.  In fact, a somewhat stronger result holds,
+namely that $\max\{I(x,G_i) : x\in\R^2\}=O(\sqrt{N_i})$.  Notice that
+each edge in $G_i$ has length at most $\sqrt{2/nt}$.  Stated another
+way, in $\bigcup_i G_i$, any point, $x$, receives interference only
+from cells within distance $\sqrt{2/nt}$ of the cell containing $x$.
+There are only 13 such cells, so
+\[
+  \max\left\{I\left(x,\bigcup_iG_i\right) : x\in\R^2\right\}=O(\sqrt{k}) 
+    = O((\log n)^{1/3})
+\]
+with high probability.
+
+Thus far, the points within each square are connected to each other, and
+the maximum interference, over all points in $\R^2$ is $O(\sqrt{k})$.
+To connect the squares to each other, we select one point from each
+non-empty square and connect these using a minimum spanning tree, $T$.
+What remains is to show that the additional interference caused by the
+addition of the edges of $T$ does not exceed $O((\log n)^{1/3})$.
+
+Suppose that $I(x,T)=k$, for some point $x\in\R^2$.  There are at most 4 verticers in $T$ whose distance to $x$ is less than $\sqrt{1/nt}$.  Therefore, by \thmref{log}, $T$ must contain edges of length at least $\sqrt{1}{nt}$.
+
+
+\end{proof}
+
+\end{document}

@@ -163,14 +163,38 @@ In the remainder of this paper, we prove \thmref{main}.
 
 \section{Proof of \thmref{main}}
 
+In this section, we prove \thmref{main}.  However, before we do this,
+we state a slightly modified version of \thmref{log} that is needed in
+our proof.
+
+\begin{lem}\lemlabel{log}
+  Let $V\subset\R^d$ be a set of points such that no ball of unit
+  diameter contains more than $c$ points of $V$, for some constant $c$
+  and suppose that $I(MST(V))=r$ for some integer $r>1$.  Then $MST(V)$
+  contains an edge of length $\Omega(c^r)$, for some constant $c=c(d)>1$
+  depending only on $d$.
+\end{lem}
+
+\begin{proof}[Proof Sketch]
+The case $c=0$ corresponds to the statement that the minimum interpoint
+distance in $V$ is at least 1.  This case is considered in Lemma~3 of
+\cite{msz11}, where the authors show that, for any point, $x$, the set
+of balls $B_i\in B(\mst(V))$ that contain $x$ can be partitioned into
+$O(\log D)$ classes, where the $i$th class contains balls with radii
+in $[2^i,2^{i+1})$.
+
+\noindent\ldots
+\end{proof}
+
+
 \begin{proof}[Proof of \thmref{main}]
 For ease of exposition, we will prove the theorem for $d=2$, and mention,
 later, the modifications required for the cases $d=1$ and $d\ge 3$.
-Partition $[0,1]^2$ into squares of area $1/nt$ for some value $t$
-to be specified later.  Let $N_i$ denote the number of points that
-are contained in the $i$th such square.  Then $N_i$ is binomial with
-mean $\mu=1/t$.  Recall Chernoff's Bounds \cite{c52} on the tails of
-binomial random variables:
+Partition $[0,1]^2$ into square \emph{cells} of area $1/nt$ for some
+value $t$ to be specified later.  Let $N_i$ denote the number of points
+that are contained in the $i$th cell.  Then $N_i$ is binomial
+with mean $\mu=1/t$.  Recall Chernoff's Bounds \cite{c52} on the tails
+of binomial random variables:
 \[
   \Pr\{N_i \ge (1+\delta)\mu\} 
     \le \left(\frac{e^\delta}{(1+\delta)^{1+\delta}}\right)^\mu \enspace .
@@ -184,14 +208,13 @@ In our setting, we have,
     & \le \frac{1}{t^{k}} & \text{for $k\ge e$} \\
     & \le \frac{1}{n^{c+2}} & \text{for $t=2^{(\log n)^{1/3}}$ and $k=(c+2)(\log n)^{2/3}$.} \\
 \end{align*}
-Note that the number of square in the partition is no more than $nt\le
+Note that the number of cells is no more than $nt\le
 n^2$, for sufficiently large $n$.  Therefore, by the union bound, the
-probability that there exists any square containing more than $k$ points
+probability that there exists any cell containing more than $k$ points
 is at most $n^{-c}$.
 
-Within each square of our partition, we apply the method of Hald\'orsson
-and Tokuyama \cite{htXX} (\thmref{sqrtn2d} or \thmref{sqrtndd}).  This
-connects the vertices in the $i$th square into a connected graph $G_i$
+Within each non-empty cell, we apply \thmref{sqrtn2d} to
+connect the vertices in the $i$th cell into a connected graph $G_i$
 with $I(G_i)=O(\sqrt{N_i})$.  In fact, a somewhat stronger result holds,
 namely that $\max\{I(x,G_i) : x\in\R^2\}=O(\sqrt{N_i})$.  Notice that
 each edge in $G_i$ has length at most $\sqrt{2/nt}$.  Stated another
@@ -204,16 +227,44 @@ There are only 13 such cells, so
 \]
 with high probability.
 
-Thus far, the points within each square are connected to each other, and
-the maximum interference, over all points in $\R^2$ is $O(\sqrt{k})$.
-To connect the squares to each other, we select one point from each
-non-empty square and connect these using a minimum spanning tree, $T$.
+Thus far, the points within each cell are connected to each other and
+the maximum interference, over all points in $\R^2$, is $O(\sqrt{k})$.
+To connect the cells to each other, we select one point from each
+non-empty cell and connect these using a minimum spanning tree, $T$.
 What remains is to show that the additional interference caused by the
-addition of the edges of $T$ does not exceed $O((\log n)^{1/3})$.
+addition of the edges in $T$ does not exceed $O((\log n)^{1/3})$.
 
-Suppose that $I(x,T)=k$, for some point $x\in\R^2$.  There are at most 4 verticers in $T$ whose distance to $x$ is less than $\sqrt{1/nt}$.  Therefore, by \thmref{log}, $T$ must contain edges of length at least $\sqrt{1}{nt}$.
+Suppose that $I(x,T)=r$, for some point $x\in\R^2$.  There are at most
+4 vertices in $T$ whose distance to $x$ is less than $1/\sqrt{nt}$.
+Therefore, by \lemref{log}, $T$ must contain an edge of length at least
+$c^r/\sqrt{nt}$, for some $c>1$.  
 
+A well-known property of minimum spanning trees is that, for any edge
+$uv$ in $T$, the open disk with diameter $uv$ does not contain any
+vertices of $T$.  In our setting, this means that there is an open disk,
+$B$, of radius $c^r/2\sqrt{nt}$ such that every cell contained in $B$
+contains no point of $V$.  Inside of $B$ is another empty disk $B'$ of
+radius $c^r/(2\sqrt{nt})-\sqrt{2/nt}$ whose center is also the center
+of some cell.
 
+At least one quarter of the area of $B'$ is contained in $[0,1]^2$,
+so the number of cells completely contained in $B'$ is $\pi c^{2r}/16 -
+O(c^{r}/\sqrt{nt})$.  By decreasing $c$ slightly, and only considering
+$r$ larger than a sufficiently large constant, $r_0$, we can simplify
+this number of cells to $\pi c^{2r}/16$.
+
+For a fixed disk $B'$, the probability that the $\pi c^{2r}/16$ cells
+defined by $B'$ are empty of points in $V$ is at most
+\begin{align*}
+ p 
+  & \le (1-\pi c^{2r}/{16nt})^{n} \\
+  & \le \exp(-\pi c^{2r}/16t) \\
+ & \le 1/n^{2+c'} \enspace ,
+\end{align*}
+for $r\ge(\log_c2)(\log(16/\pi)+\log t + \log(2+c')+\log\ln n)$.  By the union bound, the
+probability that there exists any such $B'$ is at most
+$pnt\le 1/n^{c'}$.  Since we can choose $r\in O(\log t+\log\log n) = O((\log
+n)^{1/3})$, this completes the proof.
 \end{proof}
 
 \end{document}

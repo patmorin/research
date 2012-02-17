@@ -362,14 +362,14 @@ contains a Zeno configuration centered at $x_i$.''  Then we have
       \left(\frac{1}{n3^{2k}}\right)^{k-1}   % ith point lands in D_i 
       \left(1-\frac{1}{n}\right)^{n-k}   \\ % remaining points avoid D 
   & \ge
-      \left(\frac{(n-k)^k}{n}\right) 
-      \left(\frac{1}{n3^{2k}}\right)^{k-1}  
+      \left((n-k)^{k-1}\right) 
+      \left(\frac{1}{n3^{2k(k-1)}}\right)^{k-1}  
       \left(1-\frac{1}{n}\right)^{n-k}   \\ 
   & \ge 
-      (1-k/n)^k % 
-      \left(\frac{1}{3^{2k^2}}\right)
+      (1-k/n)^{k-1} % 
+      \left(\frac{1}{3^{2k(k-1)}}\right)
       \left(1-\frac{1}{n}\right)^{n-k} \\
-  & \ge (1/e-o(1)) \cdot \left(\frac{1}{3^{2k^2}}\right) \\
+  & \ge (1/e-o(1)) \cdot \left(\frac{1}{3^{2k(k-1)}}\right) \\
   & = \Omega(1/n^{\alpha})
 \end{align*}
 for $k=((\alpha/2)(\log_3 n))^{1/2}$, where $\alpha$ is a free parameter in
@@ -380,32 +380,50 @@ uncondition
     (1-4r)\cdot\Pr\{\mathcal{Z}_i\mid x_i\in[r,1-r]^2\}
     = \Omega(1/n^{\alpha})
 \]
-Let $I_i$ be the indicator variable defined as
+Let $Y_i$ be the indicator variable defined as
 \[
-   I_i = \begin{cases} 1 & \text{if $\mathcal{Z}_i$} \\
+   Y_i = \begin{cases} 1 & \text{if $\mathcal{Z}_i$} \\
                        0 & \text{otherwise} 
          \end{cases}
 \]
-and let $N=\sum_{i=1}^n I_i$ count the number of Zeno configurations.  We
+and let $N=\sum_{i=1}^n Y_i$ count the number of Zeno configurations.  We
 have just shown that 
 \[
-   \E[N] = n\E[I_i] = n\Pr\{\mathcal{Z}_i\}=\Omega(n^{1-\alpha}) \enspace .
+   \E[N] = n\E[Y_i] = n\Pr\{\mathcal{Z}_i\}=\Omega(n^{1-\alpha}) \enspace .
 \]
 Unfortunately, this is not quite enough to prove that $N>0$ with high
-probability.  Instead, we finish the proof using the second moment method.
-For this, we need to show that, for any $\{i,j\}\subset\{1,\ldots,n\}$,
+probability.  Instead, we finish the proof using the second moment method
+(c.f., Alon and Spencer \cite[Chapter~4]{asXX}).  For this, we need only 
+show that, for any $\{i,j\}\subset\{1,\ldots,n\}$,
 \[
-   \limsup_{n\rightarrow\infty}\frac{\E[I_i\cdot I_j]}{\E[I_i]\E[I_j]} = 1
+   \limsup_{n\rightarrow\infty}\frac{\E[Y_iY_j]}{\E[Y_i]\E[Y_j]} = 1
 \]
 To do this, we repeat the above argument, but for a pair of Zeno
 configurations, one at $x_i$ and one at $x_j$.  Let $A$ denote the event
 ``$\|x_ix_j\| < 2r$ or $\{x_i,x_j\}\not\subset[r,1-r]^2$''.  Let $A^c$
-denote the complement on $A$.  Conditioning on $A^c$ we obtain
+denote the complement of $A$.  Conditioning on $A^c$ we obtain
 \begin{align*}
-\frac{\E[I_i\cdot I_j]}{\E[I_i]\E[I_j]} 
-& \le \frac{\E[I_i\cdot I_j]}{1/(e3^{2k^2})} \\
-& = e3^{2k^2}(\Pr\{A^c\}\E[I_iI_j|A^c] + \Pr\{A\}\E[I_iI_j|A])
+\frac{\E[Y_iY_j]}{\E[Y_i]\E[Y_j]} 
+& \le \frac{\E[Y_iY_j]}{1/(e3^{2k^2})} \\
+& = (e3^{2k^2})^2(\Pr\{A^c\}\E[Y_iY_j|A^c] + \Pr\{A\}\E[Y_iY_j|A]) \\
+& \le (e3^{2k(k-1)})^2\E[Y_iY_j|A^c]  + (4r+\pi r^2) \\
+& \le (e3^{2k(k-1)})^2 
+    \left(\frac{(n-2)!}{(n-2k)!}\right)
+    \left(\frac{1}{n3^{2k}}\right)^{2k-2}
+    \left(1-\frac{2}{n}\right)^{n-2k} + (4r+\pi r^2) \\
+& \le (e3^{2k(k-1)})^2
+    \left(n^{2k-2}\right)
+    \left(\frac{1}{n3^{2k}}\right)^{2k-2}
+    \left(1-\frac{2}{n}\right)^{n-2k} + (4r+\pi r^2) \\
+& \le (e3^{2k(k-1)})^2
+    \left(\frac{1}{3^{2k}}\right)^{2k-2}
+    \left(1-\frac{2}{n}\right)^{n-2k} + (4r+\pi r^2) \\
+& \le (e3^{2k(k-1)})^2
+    \left(\frac{1}{3^{2k}}\right)^{2k-2}
+    \left(1/e^2-o(1)\right) + (4r+\pi r^2) \\
+& = 1-o(1) + O(1/\sqrt{n}) \rightarrow 1 \enspace ,
 \end{align*}
+as $n\rightarrow\infty$.
 \end{proof}
 
 

@@ -7,7 +7,10 @@
 \newcommand{\mst}{\mathit{MST}}
 
 \title{\MakeTextUppercase{A Note on Interference in Random Point Sets}}
-\author{Luc Devroye \and Pat Morin}
+%\author{Luc Devroye\thanks{School of Computer Science, McGill University}
+%        \ and
+%        Pat Morin\thanks{School of Computer Science, Carleton University}}
+\author{BIRS 12w5004}
 
 \begin{document}
 \maketitle
@@ -61,12 +64,20 @@ graph $G=(V,E)$ such that $I(G)$ is minimized.  Thus, it is natural to consider 
 The purpose of current paper is to prove the following results (here the phrase \emph{with high probability} means with probability that approaches 1 as $n\rightarrow\infty$):
 \begin{thm}\thmlabel{main}
   Let $V$ be a set of $n$ points independently and uniformly distributed
-  in $[0,1]^d$.  Then, with high probability, $I(V)\in O((\log n)^{1/3})$.
+  in $[0,1]^d$.  Then, with high probability,
+\begin{enumerate}
+  \item  $I(\mst(V))\in O((\log n)^{1/2})$;
+  \item  $I(V)\in O((\log n)^{1/3})$, for $d\in\{1,2\}$; and 
+  \item $I(V)\in O((\log n)^{1/3}(\log\log n)^{1/2})$, for $d\ge 3$.
+\end{enumerate}
 \end{thm}
 \begin{thm}\thmlabel{lower-bound}
   Let $V$ be a set of $n$ points independently and uniformly distributed
-  in $[0,1]^d$.  Then, with high probability, $I(\mst(V))\in\Omega((\log
-  n)^{1/2})$ and $I(V)\in \Omega((\log n)^{1/4})$.
+  in $[0,1]^d$.  Then, with high probability, 
+\begin{enumerate}
+  \item $I(\mst(V))\in\Omega((\log n)^{1/2})$ 
+  \item $I(V)\in \Omega((\log n)^{1/4})$.
+\end{enumerate}
 \end{thm}
 
 
@@ -90,7 +101,7 @@ statements of all results in this section, $|V|=n$.
     \cite{kdh11} & $d\ge 2$ & for $V$ i.u.d. in $[0,1]^d$, & $I(\mst(V))\in O(\log n)$ w.h.p.  \\
     Here & $d\ge 1$ & for $V$ i.u.d. in $[0,1]^d$, & $I(V)\in O((\log n)^{1/3})$ w.h.p.  \\
     Here & $d\ge 1$ & for $V$ i.u.d. in $[0,1]^d$,  & $I(V)\in \Omega((\log n)^{1/4})$ w.h.p.  \\ 
-    Here & $d\ge 1$ & for $V$ i.u.d. in $[0,1]^d$, & $I(\mst(V))\in \Omega((\log n)^{1/2})$ w.h.p.  \\ \hline
+    Here & $d\ge 1$ & for $V$ i.u.d. in $[0,1]^d$, & $I(\mst(V))\in \Theta((\log n)^{1/2})$ w.h.p.  \\ \hline
   \end{tabular}
 \end{center}
 \caption{Previous and new results on interference in geometric networks.}
@@ -156,25 +167,14 @@ unlikely to occur in random point sets in one dimension:
 \end{thm}
 Note that, in this one-dimensional case, the minimum spanning tree,
 $\mst(V)$, is simply a path that connects the points of $V$ in order,
-from left to right.  The lower-bound in \thmref{sqrtlogn} is proven
-by showing that, with high probability, $V$ contains a subsequence
-of points like that used in the proof of \thmref{sqrtnlower},
-whose length is $\Omega((\log n)^{1/2})$.  Combining the proofs of
-Theorems~\ref{thm:sqrtnlower} and \ref{thm:sqrtlogn} one immediately
-obtains the following result:
-\begin{thm}\thmlabel{cor}
-  Let $V$ be a set of $n$ points independently and uniformly distributed
-  in $[0,1]$.  Then, with high probability, $I(V)\in \Omega((\log
-  n)^{1/4})$.
-\end{thm}
-Our \thmref{lower-bound} is a generalization of the lower bounds in
-Theorems~\ref{thm:sqrtlogn} and \ref{thm:cor} to any constant dimension
-$d>1$.
+from left to right.  Taken together, Part 1 of Theorems~\ref{thm:main}
+and \ref{thm:lower-bound} generalize \thmref{sqrtlogn} to arbitrary
+constant dimensions $d\ge 1$.
 
 In higher dimensions, Khabbazian, Durocher, and Haghnegahdar \cite{kdh11}
 use their version of \thmref{log} to show that minimum spanning trees
 of random point sets have at most logarithmic interference.
-\begin{thm}
+\begin{thm}\thmlabel{durocher}
   Let $V$ be a set of $n$ points independently and uniformly distributed
   in $[0,1]^d$.  Then, with high probability, $I(\mst(V))\in O(\log n)$.
 \end{thm}
@@ -185,9 +185,20 @@ with high probability one can apply \thmref{log} with
 \[
    D \le \sqrt{d}/\Omega(n^{-2}) = O(n^2) \enspace .
 \]
+Part 1 of \thmref{main} improves the upper bound in \thmref{durocher} to
+$O((\log n)^{1/2})$ and Part 1 of \thmref{lower-bound} gives a matching
+lower bound.
+
+The second parts of Theorems~\ref{thm:main} and \ref{thm:lower-bound}
+show that minimum spanning trees do not minimize interference, even for
+random point sets.  For random point sets, one can construct networks with
+interference $O(\log n)^{1/3})$ and the best networks have interference
+in $\Omega((\log n)^{1/4})$.
 
 The remainder of this paper is devoted to proving Theorems~\ref{thm:main}
-and \ref{thm:lower-bound}
+and \ref{thm:lower-bound}.  For ease of exposition, we only present these
+proofs for the case $d=2$ though they generalize, in a straightforward
+way, to arbitrary (constant) dimensions.
 
 \section{Proof of the Upper Bound (\thmref{main})}
 
@@ -246,10 +257,10 @@ of smaller total edge length.  We conclude that $|S_i|< 2\cdot 45^d$,
 and this completes the proof.
 \end{proof}
 
-With \lemref{log} in hand, we are ready to prove \thmref{main}.
-The sketch of the proof is as follows:  We partition $[0,1]^d$ into
-equals cubes of volume $1/nt$, for some parameter $t$ to be chosen
-later.  Using Chernoff's bounds, we show that each cube contains
+With \lemref{log} in hand, we are ready to prove Parts~2 and 3 of
+\thmref{main}.  The sketch of the proof is as follows:  We partition
+$[0,1]^d$ into equals cubes of volume $1/nt$, for some parameter $t$ to be
+chosen later.  Using Chernoff's bounds, we show that each cube contains
 $O((\log(n))^{2/3})$ points so that the points within each cube can be
 connected, using the results of Halld\'orsson and Tokuyama, with maximum
 interference $O((\log n)^{1/3})$.  Next, the cubes are connected to other
@@ -258,9 +269,7 @@ points with a minimum spanning tree.  \lemref{log} is used to show that
 minimum spanning tree has maximum interference $O((\log n)^{1/3})$.
 Without further ado, we present:
 
-\begin{proof}[Proof of \thmref{main}]
-For ease of exposition, we will prove the theorem for $d=2$ and mention,
-later, the modifications required for the cases $d=1$ and $d\ge 3$.
+\begin{proof}[Proof of \thmref{main}, Parts 2 and 3]
 Partition $[0,1]^2$ into square \emph{cells} of area $1/nt$ for some
 value $t$ to be specified later.  Let $N_i$ denote the number of points
 that are contained in the $i$th cell.  Then $N_i$ is binomial
@@ -288,7 +297,7 @@ is at most $n^{-c}$.
 
 Within each non-empty cell, we apply \thmref{sqrtn2d} to
 connect the vertices in the $i$th cell into a connected graph $G_i$
-with $I(G_i)=O(\sqrt{N_i})$.  In fact, a somewhat stronger result holds,
+with $I(G_i)=O(\sqrt{N_i})$.\footnote{This is where the discrepancy between Parts~2 and 3 of the theorem occurs.  For $d\ge 3$, $I(G_i)=O(\sqrt{N_i\log N_i})$.}  In fact, a somewhat stronger result holds,
 namely that $\max\{I(x,G_i) : x\in\R^2\}=O(\sqrt{N_i})$.  Notice that
 each edge in $G_i$ has length at most $\sqrt{2/nt}$.  Stated another
 way, in $\bigcup_i G_i$, any point, $x$, receives interference only
@@ -338,6 +347,44 @@ for $r\ge(\log_c2)(\log(16/\pi)+\log t + \log(2+c')+\log\ln n)$.  By the union b
 probability that there exists any such $B'$ is at most
 $pnt\le 1/n^{c'}$.  Since we can choose $r\in O(\log t+\log\log n) = O((\log
 n)^{1/3})$, this completes the proof.
+\end{proof}
+
+The proof of Part~1 of \thmref{main} is just a matter of reusing the ideas
+from the previous proof of Parts~2 and 3.
+
+\begin{proof}[Proof of \thmref{main}, Part 1]
+Let $x$ be any point in $\R^2$.  We partition the balls in $B(\mst(V))$
+that contain $x$ into three sets:
+\begin{enumerate}
+  \item the set $B_0$ of balls having area at most $1/nt$;
+  \item the set $B_1$ of balls having area in the range $[1/nt,(c\log
+  n)/n]$; and
+  \item the set $B_2$ of balls having area greater than $(c\log n)/n$.
+\end{enumerate}
+In this proof, the parameter $t=2^{(\log n)^{1/2}}$.
+
+The set $B_0$ consists of points contained in a ball of area $1/nt$
+centered at $x$.  Exactly the same argument used in the first part of
+the previous shows that, with high probability, every such ball contains
+at most $O((\log n)^{1/2})$ points, so
+\[
+     |B_0| \in O((\log n)^{1/2}) \enspace .
+\]
+
+The set $B_1$ consists of balls whose radii are in the range $[\sqrt{1/\pi
+nt},\sqrt{(c\log n)/\pi n}]$.  The same proof used to prove \lemref{log}
+shows that the number of these balls is
+\[
+    |B_1| \in O\left(\log\left(\frac{\sqrt{(c\log n)/\pi n}}{\sqrt{1/\pi nt}}\right)\right) = O(\log\log n + \log t) = O((\log n)^{1/2}) \enspace .
+\]
+
+Finally, any edge in the set $B_2$ implies the existence of an empty ball,
+with center in $[0,1]^2$, having area $c\log n/n$.  The second part of
+previous proof shows that the probability that such a ball exists is
+$O(n^{-c})$.  Therefore, with high probability,
+\[
+   |B_2| = 0 \enspace . \qedhere
+\]
 \end{proof}
 
 \section{Proof of The Lower Bound (\thmref{lower-bound})}
@@ -395,8 +442,6 @@ Therefore, $I(x_0,\mst(V)) \ge k-1$.
   \caption{The ball centered at $x_i$ that contains $x_{i+1}$ also contains $x_0$.}
   \figlabel{zeno-mst}
 \end{figure}
-
-
 
 The next lemma shows that a Zeno configuration causes high interference on
 any connected graph on vertex set $V$.

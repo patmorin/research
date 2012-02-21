@@ -7,33 +7,36 @@
 \newcommand{\mst}{\mathit{MST}}
 
 \title{\MakeTextUppercase{A Note on Interference in Random Point Sets}}
-\author{BIRS 12w5004}
+\author{Luc Devroye \and Pat Morin}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
   We show that, in any constant dimension $d$, given a set of $n$
-  i.u.d. points in the $d$ dimensional cube, it is possible, with high
-  probability, to construct a connected graph on these points whose
-  maximum interference is $O((\log n)^{1/3})$.
+  i.u.d. points in the $d$ dimensional cube, with high probability it is
+  possible to construct a connected graph on these points whose maximum
+  interference is $O((\log n)^{1/3})$ and with high probability it is
+  not possible to construct a connected graph whose maximum interference
+  is $o((\log n)^{1/4})$.
 \end{abstract}
 
 \section{Introduction}
 
 
 Let $V=\{x_1,\ldots,x_n\}$ be a set of $n$ points in $\R^d$ and let
-$G=(V,E)$ be a graph with vertex set $V$.  The graph $G$ defines a set,
-$B(G)$, of closed balls $B_1,\ldots,B_n$, where $B_i$ has center $x_i$
-and radius
+$G=(V,E)$ be a simple undirected graph with vertex set $V$.  The graph
+$G$ defines a set, $B(G)$, of closed balls $B_1,\ldots,B_n$, where $B_i$
+has center $x_i$ and radius
 \[
    r_i = \max\{\|x_ix_j\| : j\in\{1,\ldots,n\}\} \enspace .
 \]
+(Here $\|xy\|$ denotes the Euclidean distance between points $x$ and $y$.)
 In words, $B_i$ is just large enough to enclose all of $x_i$'s neighbours
-in $G$.  We define the \emph{interference} at a point, $p$, as the number
-of these balls that contain $p$, i.e.,
+in $G$.  We define the \emph{interference} at a point, $x$, as the number
+of these balls that contain $x$, i.e.,
 \[
-    I(p,G) = |\{B\in B(G) : p\in B\}| \enspace .
+    I(x,G) = |\{B\in B(G) : x\in B\}| \enspace .
 \]
 We define the \emph{(maximum receiver-centric) interference} of $G$ as the
 maximum interference at any vertex of $G$, i.e.,
@@ -41,7 +44,7 @@ maximum interference at any vertex of $G$, i.e.,
    I(G) = \max\{I(x,G) : x\in V\} \enspace .
 \]
 \figref{interference} shows an example of a geometric graph $G$ and the
-balls $B(G)$.  Each node $x$ is labelled with $I(x,G)$.
+balls $B(G)$.  Each node, $x$, is labelled with $I(x,G)$.
 \begin{figure}
   \begin{center}
     \includegraphics{interference}
@@ -51,16 +54,15 @@ balls $B(G)$.  Each node $x$ is labelled with $I(x,G)$.
 \end{figure}
 
 One of the goals of network design is to build, given $V$, a connected
-graph $G=(V,E)$ such that $I(G)$ is minimized.  Thus, it is natural to consider the interference as a property of a given point set, $V$, defined as
+graph $G=(V,E)$ such that $I(G)$ is minimized.  Thus, it is natural to consider interference as a property of the given point set, $V$, defined as
 \[
   I(V) = \min\{I(G) : \mbox{$G=(V,E)$ is connected}\} \enspace .
 \]
-The purpose of current paper is to prove the following results:
+The purpose of current paper is to prove the following results (here the phrase \emph{with high probability} means with probability that approaches 1 as $n\rightarrow\infty$):
 \begin{thm}\thmlabel{main}
   Let $V$ be a set of $n$ points independently and uniformly distributed
   in $[0,1]^d$.  Then, with high probability, $I(V)\in O((\log n)^{1/3})$.
 \end{thm}
-
 \begin{thm}\thmlabel{lower-bound}
   Let $V$ be a set of $n$ points independently and uniformly distributed
   in $[0,1]^d$.  Then, with high probability, $I(\mst(V))\in\Omega((\log
@@ -68,27 +70,27 @@ The purpose of current paper is to prove the following results:
 \end{thm}
 
 
-
 \subsection{Related Work}
 
-In this section, we survey previous work on the problem of bounding
-the interference of worst-case and random point sets.  A summary of the
-results described in this section is given in \figref{related}.  In the statements of all results in this section, $|V|=n$.
+This section surveys previous work on the problem of bounding the
+interference of worst-case and random point sets.  A summary of the
+results described in this section is given in \figref{related}.  In the
+statements of all results in this section, $|V|=n$.
 
 \begin{figure}
 \begin{center}
-  \begin{tabular}{|l|l|r@{, }l|}\hline
+  \begin{tabular}{|l|l|r@{ }l|}\hline
     Ref. & Dimension & \multicolumn{2}{c|}{Statement} \\ \hline
-    \cite{vR05} & $d=1$ & for all $V$ & $I(V)\in O(n^{1/2})$ \\
-    \cite{vR05} & $d\ge 1$ & there exists $V$ & $I(V)\in \Omega(n^{1/2})$ \\
-    \cite{ht08} & $d=2$ & for all $V$ & $I(V)\in O(n^{1/2})$ \\
-    \cite{ht08} & $d\ge 3$ & for all $V$ & $I(V)\in O((n\log n)^{1/2})$ \\
-    \cite{kkmns10} & $d= 1$ & for $V$ i.u.d. in $[0,1]$ & $I(\mst(V))\in \Theta((\log n)^{1/2})$ w.h.p. \\
-    \cite{kkmns10,vR05} & $d = 1$ & for $V$ i.u.d. in $[0,1]$  & $I(V)\in\Omega((\log n)^{1/4})$ w.h.p.  \\
-    \cite{kdh11} & $d\ge 2$ & for $V$ i.u.d. in $[0,1]^d$ & $I(\mst(V))\in O(\log n)$ w.h.p.  \\
-    Here & $d\ge 1$ & for $V$ i.u.d. in $[0,1]^d$  & $I(V)\in O((\log n)^{1/3})$ w.h.p.  \\
-    Here & $d\ge 1$ & for $V$ i.u.d. in $[0,1]^d$  & $I(V)\in \Omega((\log n)^{1/4})$ w.h.p.  \\ 
-    Here & $d\ge 1$ & for $V$ i.u.d. in $[0,1]^d$  & $I(\mst(V))\in \Omega((\log n)^{1/2})$ w.h.p.  \\ \hline
+    \cite{vR05} & $d=1$ & for all $V$, & $I(V)\in O(n^{1/2})$ \\
+    \cite{vR05} & $d\ge 1$ & there exists $V$ s.t.\ & $I(V)\in \Omega(n^{1/2})$ \\
+    \cite{ht08} & $d=2$ & for all $V$, & $I(V)\in O(n^{1/2})$ \\
+    \cite{ht08} & $d\ge 3$ & for all $V$, & $I(V)\in O((n\log n)^{1/2})$ \\
+    \cite{kkmns10} & $d= 1$ & for $V$ i.u.d. in $[0,1]$, & $I(\mst(V))\in \Theta((\log n)^{1/2})$ w.h.p. \\
+    \cite{kkmns10,vR05} & $d = 1$ & for $V$ i.u.d. in $[0,1]$, & $I(V)\in\Omega((\log n)^{1/4})$ w.h.p.  \\
+    \cite{kdh11} & $d\ge 2$ & for $V$ i.u.d. in $[0,1]^d$, & $I(\mst(V))\in O(\log n)$ w.h.p.  \\
+    Here & $d\ge 1$ & for $V$ i.u.d. in $[0,1]^d$, & $I(V)\in O((\log n)^{1/3})$ w.h.p.  \\
+    Here & $d\ge 1$ & for $V$ i.u.d. in $[0,1]^d$,  & $I(V)\in \Omega((\log n)^{1/4})$ w.h.p.  \\ 
+    Here & $d\ge 1$ & for $V$ i.u.d. in $[0,1]^d$, & $I(\mst(V))\in \Omega((\log n)^{1/2})$ w.h.p.  \\ \hline
   \end{tabular}
 \end{center}
 \caption{Previous and new results on interference in geometric networks.}
@@ -129,16 +131,14 @@ Several authors have shown that the interference of a point set is
 related to the (logarithm of) the ratio between the longest and shortest
 distance defined by the point set.  In particular, different versions
 of the following theorem have been proven by Halld\'orsson and Tokuyama
-\cite{ht08}, and Khabbazian, Durocher, and Haghnegahdar
-\cite{kdh11}:
+\cite{ht08}; Khabbazian, Durocher, and Haghnegahdar
+\cite{kdh11}; and Maheshwari, Smid, and Zeh \cite{msz11}:
 \begin{thm}\thmlabel{log}
   For any constant $d\ge 1$ and for all $V\subset\R^d$,
   $I(V)=O(\log D)$, where $D=\max\{\|xy\|: \{x,y\}\subseteq V\}/\min\{\|xy\|:
   \{x,y\}\subseteq V\}$.
 \end{thm}
-(A version of this theorem even applies when $V$ is a set of elements
-in a metric space of bounded doubling dimension \cite{msz11}.)  The
-\emph{minimum spanning tree} of $V$ is the connected graph, $\mst(V)$,
+A \emph{minimum spanning tree} of $V$ is a connected graph, $\mst(V)$,
 of minimum total edge length.  At least two of the proofs of \thmref{log}
 proceed by showing that $I(\mst(V))=O(\log D)$.  A strengthening of
 this theorem, that is implict in a proof due to Maheshwari, Smid, and
@@ -160,18 +160,20 @@ from left to right.  The lower-bound in \thmref{sqrtlogn} is proven
 by showing that, with high probability, $V$ contains a subsequence
 of points like that used in the proof of \thmref{sqrtnlower},
 whose length is $\Omega((\log n)^{1/2})$.  Combining the proofs of
-Theorems~\ref{thm:sqrtnlower} and \ref{thm:sqrtlogn} one obtains the
-following result:
-\begin{thm}
+Theorems~\ref{thm:sqrtnlower} and \ref{thm:sqrtlogn} one immediately
+obtains the following result:
+\begin{thm}\thmlabel{cor}
   Let $V$ be a set of $n$ points independently and uniformly distributed
   in $[0,1]$.  Then, with high probability, $I(V)\in \Omega((\log
   n)^{1/4})$.
 \end{thm}
-Our \thmref{lower-bound} is a generalization of the previous two results to
-any constant dimension $d>1$.
+Our \thmref{lower-bound} is a generalization of the lower bounds in
+Theorems~\ref{thm:sqrtlogn} and \ref{thm:cor} to any constant dimension
+$d>1$.
 
-In higher dimensions, Khabbazian, Durocher, and Haghnegahdar use their
-version of \thmref{log} to show:
+In higher dimensions, Khabbazian, Durocher, and Haghnegahdar \cite{kdh11}
+use their version of \thmref{log} to show that minimum spanning trees
+of random point sets have at most logarithmic interference.
 \begin{thm}
   Let $V$ be a set of $n$ points independently and uniformly distributed
   in $[0,1]^d$.  Then, with high probability, $I(\mst(V))\in O(\log n)$.
@@ -179,13 +181,13 @@ version of \thmref{log} to show:
 This result follows from two observations: (1)~no pair of points in $V$
 is at distance greater than $\sqrt{d}$, and (2)~with high probability,
 the minimum distance between any pair of points is $\Omega(n^{-2})$.  Therefore,
-with high probability
+with high probability one can apply \thmref{log} with 
 \[
-   D \le \sqrt{d}/\Omega(n^{-2}) = O(n^2)
+   D \le \sqrt{d}/\Omega(n^{-2}) = O(n^2) \enspace .
 \]
-and applying \thmref{log} completes the proof.
 
-The remainder of this paper is devoted to proving \thmref{main} and \thmref{lower-bound}
+The remainder of this paper is devoted to proving Theorems~\ref{thm:main}
+and \ref{thm:lower-bound}
 
 \section{Proof of the Upper Bound (\thmref{main})}
 
@@ -195,8 +197,8 @@ our proof.
 
 \begin{lem}\lemlabel{log}
   Let $V\subset\R^d$ be a set of points such that no ball of unit
-  diameter contains more than $c$ points of $V$, for some constant $c$
-  and suppose that $I(MST(V))=r$ for some integer $r>1$.  Then $MST(V)$
+  diameter contains more than $q$ points of $V$, for some constant $q$,
+  and suppose that $I(MST(V))=r$.  Then $MST(V)$
   contains an edge of length $\Omega(c^r)$, for some constant $c=c(d)>1$
   depending only on $d$.
 \end{lem}
@@ -206,24 +208,25 @@ This proof is similar to the proof of Lemma~3 of \cite{msz11}. Let $x$
 be any point in $\R^d$ and let $D$ be the length of the longest edge in
 $\mst(V)$.  Partition the set of balls $B_i\in B(\mst(V))$ that contain
 $x$ into $O(\log D)$ sets $S_0,\ldots,S_{r'}$. The set $S_0$ contains
-all balls of radius at most $1/2$.  The set $S_i$, $i\in\{1,\ldots,r'\}$
-contains all balls whose radius is in the range $(3^{i-1},2^i]$.  It is
+all balls of radius at most $1/2$.  The set $S_i$, $i\in\{1,\ldots,r'\}$,
+contains all balls whose radius is in the range $(2^{i-1},2^i]$.  It is
 sufficient to show that each set $S_i$ contains $O(1)$ edges, since this
 implies that $r'=\Omega(r)$ and therefore $\mst(V)$ contains an edge
 of length at least $2^{\Omega(r)}$.
 
-The assumption that no unit disk contains more than $c$ points of $V$
-implies that $|S_0|\le c$.  Refer to \figref{packing}.  For any $S_i$, $i\in\{1,\ldots,r'\}$, we
-argue as follows:  All the centers of balls in $S_i$ are contained
-in a ball of radius $2^{i}$ centered at $x$.  Therefore, a simple
-packing argument implies that there exists a ball of radius $2^{i-2}$
-that contains at least $|S_i|/5^d$ centers of balls in $S_i$.  ($5^d$
-is the volume of a ball of radius $5\cdot2^{i-2}$ divided by the volume
-of a ball of radius $2^{i-2}$.)  The center of each of these ball is
-the endpoint of an edge of length at most $2^i$.  The other endpoints
-of these edges are all contained in a ball of radius $2^{i+1}$ centered
-at $x$.  The same packing argument shows that we can find a ball of radius
-$2^{i-2}$ that contains at least $|S_i|/(5\cdot 8)^d$ of these other endpoints.
+The assumption that no unit disk contains more than $q$ points of $V$
+implies that $|S_0|\le q$.  Refer to \figref{packing}.  For any $S_i$,
+$i\in\{1,\ldots,r'\}$, we argue as follows:  All the centers of balls
+in $S_i$ are contained in a ball of radius $2^{i}$ centered at $x$.
+Therefore, a simple packing argument implies that there exists a ball
+of radius $2^{i-2}$ that contains at least $|S_i|/5^d$ centers of balls
+in $S_i$.  ($5^d$ is the volume of a ball of radius $5\cdot2^{i-2}$
+divided by the volume of a ball of radius $2^{i-2}$.)  The center of
+each of these ball is the endpoint of an edge of length at most $2^i$.
+The other endpoints of these edges are all contained in a ball of radius
+$2^{i+1}$ centered at $x$.  The same packing argument shows that we can
+find a ball of radius $2^{i-2}$ that contains at least $|S_i|/(5\cdot
+9)^d$ of these other endpoints.
 
 \begin{figure}
   \begin{center}
@@ -233,29 +236,30 @@ $2^{i-2}$ that contains at least $|S_i|/(5\cdot 8)^d$ of these other endpoints.
   \figlabel{packing}
 \end{figure}
 
-We claim that this implies that $|S_i|/40^d< 2$ (so $|S_i|< 2\cdot
-40^d$). Otherwise, $\mst(V)$ contains two edges, $x_ix_j$ and
+We claim that this implies that $|S_i|/45^d< 2$ (so $|S_i|< 2\cdot
+45^d$). Otherwise, $\mst(V)$ contains two edges, $x_ix_j$ and
 $x_kx_\ell$, each of length greater then $2^{i-1}$ and such that
 $\|x_ix_k\| \le 2^{i-1}$ and $\|x_jx_\ell\|\le 2^{i-1}$.  But this
 contradicts the minimality of $\mst(V)$, since one could replace
 $x_ix_j$ with one of $x_ix_k$ or $x_jx_\ell$ and obtain a spanning tree
-of smaller total edge length.  We conclude that $|S_i|< 2\cdot 40^d$,
+of smaller total edge length.  We conclude that $|S_i|< 2\cdot 45^d$,
 and this completes the proof.
 \end{proof}
 
-With \lemref{log} in hand, we are ready to prove thmref{main}.  The sketch
-of the proof is as follows:  We partition $[0,1]^d$ into equals cubes
-of volume $1/nt$, for some parameter $t$ to be chosen later.  Using
-Chernoff's bounds, we show that all cubes contain $O((\log(n))^{2/3})$
-points and so that each cube can be connected, using the results of
-Halld\'orsson and Tokuyama, with maximum interference $O((\log n)^{1/3})$.
-Next, the cubes are connected by selecting one point in each cube and
-connecting them with a minimum spanning tree.  \lemref{log} is used
-to show that minimum spanning tree has maximum interference $O((\log
-n)^{1/3})$.  Without further ado, we present:
+With \lemref{log} in hand, we are ready to prove \thmref{main}.
+The sketch of the proof is as follows:  We partition $[0,1]^d$ into
+equals cubes of volume $1/nt$, for some parameter $t$ to be chosen
+later.  Using Chernoff's bounds, we show that each cube contains
+$O((\log(n))^{2/3})$ points so that the points within each cube can be
+connected, using the results of Halld\'orsson and Tokuyama, with maximum
+interference $O((\log n)^{1/3})$.  Next, the cubes are connected to other
+cubes by selecting one point in each cube and connecting these selected
+points with a minimum spanning tree.  \lemref{log} is used to show that
+minimum spanning tree has maximum interference $O((\log n)^{1/3})$.
+Without further ado, we present:
 
 \begin{proof}[Proof of \thmref{main}]
-For ease of exposition, we will prove the theorem for $d=2$, and mention,
+For ease of exposition, we will prove the theorem for $d=2$ and mention,
 later, the modifications required for the cases $d=1$ and $d\ge 3$.
 Partition $[0,1]^2$ into square \emph{cells} of area $1/nt$ for some
 value $t$ to be specified later.  Let $N_i$ denote the number of points
@@ -309,11 +313,11 @@ Therefore, by \lemref{log}, $T$ must contain an edge of length at least
 $c^r/\sqrt{nt}$, for some $c>1$.  
 
 A well-known property of minimum spanning trees is that, for any edge
-$uv$ in $T$, the open disk with diameter $uv$ does not contain any
-vertices of $T$.  In our setting, this means that there is an open disk,
-$B$, of radius $c^r/2\sqrt{nt}$ such that every cell contained in $B$
-contains no point of $V$.  Inside of $B$ is another empty disk $B'$ of
-radius $c^r/(2\sqrt{nt})-\sqrt{2/nt}$ whose center is also the center
+$x_ix_j$ in $T$, the open disk with diameter $x_ix_j$ does not contain
+any vertices of $T$.  In our setting, this means that there is an open
+disk, $B$, of radius $c^r/2\sqrt{nt}$ such that every cell contained in
+$B$ contains no point of $V$.  Inside of $B$ is another empty disk $B'$
+of radius $c^r/(2\sqrt{nt})-\sqrt{2/nt}$ whose center is also the center
 of some cell.
 
 At least one quarter of the area of $B'$ is contained in $[0,1]^2$,
@@ -345,9 +349,9 @@ The construction starts with disjoint disks $D_0,\ldots,D_{k-1}$, each
 having radius $u$.  The disk $D_0$ is centered at the $x$.  The center of
 $D_i$, $i\in\{1,\ldots,k-1\}$ is at $x+(u3^i, 0)$.  A final large disk,
 $D$, of radius $r=u3^k$ is centered at $x$ and contains all other disks.
-A Zeno configuration occurs in a point set $V$ when $D$ contains exactly
-$k$ points of $V$ and these occur with exactly one point in each disk
-$D_i$.
+A Zeno configuration occurs at location $x$ in a point set $V$ when $D$
+contains exactly $k$ points of $V$ and these occur with exactly one
+point in each disk $D_i$.
 
 \begin{figure}
   \begin{center}
@@ -370,7 +374,7 @@ Let $x_i$, $i\in\{0,\ldots,k-1\}$, denote the point of $V$ contained
 in $D_i$.  Note that, for $i\in\{1,\ldots,k-1\}$ the closest point to
 $x_i$ in $V$ is $x_{i-1}$.  Since $\mst(V)$ contains the nearest-neighbour
 graph, this implies that $\mst(V)$ contains the edges $x_ix_{i+1}$ for all
-$i\in\{0,\ldots,k-2\}$.  See \figref{zeno}.  We claim that, for all $i\in\{0,\ldots,k-2\}$,
+$i\in\{0,\ldots,k-2\}$.  See \figref{zeno-mst}.  We claim that, for all $i\in\{0,\ldots,k-2\}$,
 the disk $B_i$ centered at $x_i$ that contains $x_{i+1}$ also contains
 $x_0$.  This is clearly true for $i=0$ and $i=1$.  Next, note that
 \[
@@ -421,7 +425,7 @@ probability.
 \begin{proof}[Proof of \thmref{lower-bound}]
 Choose the parameter $u$ in the Zeno configuration so that $\pi r^2=1/n$,
 i.e., $u=1/(\sqrt{\pi n}3^k)$.  Then the area of the small disks is
-$1/(n3^{2k})$.
+$\pi u^2=1/(n3^{2k})$.
 We analyze the probability that a Zeno configuration of length $k=c(\log
 n)^{1/3}$ centered at $x_i$ occurs in a set, $V$, of $n$ i.u.d. points
 $\{x_1,\ldots,x_n\}$ in
@@ -440,6 +444,10 @@ contains a Zeno configuration centered at $x_i$.''  Then we have
       (1-k/n)^{k-1} % 
       \left(\frac{1}{3^{2k(k-1)}}\right)
       \left(1-\frac{1}{n}\right)^{n-k} \\
+  & \ge
+      \left(1-o(1)\right) 
+      \left(\frac{1}{n3^{2k(k-1)}}\right)
+      \left(1/e-o(1)\right)   \\ 
   & \ge (1/e-o(1)) \cdot \left(\frac{1}{3^{2k(k-1)}}\right) \\
   & = \Omega(1/n^{\alpha})
 \end{align*}
@@ -468,6 +476,8 @@ probability.  Instead, we finish the proof using the second moment method
 show that, for any $\{i,j\}\subset\{1,\ldots,n\}$,
 \[
    \limsup_{n\rightarrow\infty}\frac{\E[Y_iY_j]}{\E[Y_i]\E[Y_j]} = 1
+   \enspace .  \footnote{In particular, this shows that the quantity
+  $\Delta$ in \cite[Corollary~4.3.4]{as08} satisfies the condition $\Delta\in o(\E[N]^2)$.}
 \]
 To do this, we repeat the above argument, but for a pair of Zeno
 configurations, one at $x_i$ and one at $x_j$.  Let $A$ denote the event
@@ -494,7 +504,7 @@ denote the complement of $A$.  Conditioning on $A^c$ we obtain
     \left(1/e^2-o(1)\right) + (4r+\pi r^2) \\
 & = 1-o(1) + O(1/\sqrt{n}) \rightarrow 1 \enspace ,
 \end{align*}
-as $n\rightarrow\infty$.
+as $n\rightarrow\infty$.  This completes the proof.
 \end{proof}
 
 \bibliographystyle{plain}

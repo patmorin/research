@@ -1,11 +1,14 @@
 ipes=$(wildcard *.ipe)
 figs=$(ipes:.ipe=.pdf)
 
+LATEX=pdflatex
+LFLAGS=-interaction=nonstopmode -halt-on-error
+ 
 iud.pdf : iud.tex $(figs) iud.bib
-	pdflatex iud
+	$(LATEX) $(LFLAGS) iud
 	bibtex iud
-	pdflatex iud
-	pdflatex iud
+	$(LATEX) $(LFLAGS) iud
+	$(LATEX) $(LFLAGS) iud
 
 %.pdf : %.ipe
 	ipetoipe -pdf $<

@@ -3,7 +3,7 @@ figs=$(ipes:.ipe=.pdf)
 
 LATEX=pdflatex
 LFLAGS=-interaction=nonstopmode -halt-on-error
- 
+
 iud.pdf : iud.tex $(figs) iud.bib
 	$(LATEX) $(LFLAGS) iud
 	bibtex iud
@@ -12,6 +12,9 @@ iud.pdf : iud.tex $(figs) iud.bib
 
 %.pdf : %.ipe
 	ipetoipe -pdf $<
+
+arxiv : 
+	~/bin/arxbundle iud
 
 install : iud.pdf
 	scp iud.pdf morin@cg.scs.carleton.ca:public_html/publications/drafts/iud/iud-`date +"%Y-%m-%d"`.pdf

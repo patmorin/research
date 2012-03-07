@@ -1,0 +1,253 @@
+\documentclass{patmorin}
+\usepackage{amsthm,amsmath}
+\usepackage{pat}
+
+\title{\MakeUppercase{Notes on Robust Spanners}}
+\author{Prosenjit Bose, Vida Dujmovi\'c, Pat Morin, and Michiel Smid}
+
+
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We consider a new definition of fault-tolerance for $t$-spanners that
+we dub robustness.  A $t$-spanner is robust if the removal of any $k$
+vertices leaves $n-f(k)\cdot o(n)$ vertices whose induced subgraph is
+a $t$-spanner.
+\end{abstract}
+
+Let $S\subset \R^d$ be a set of $n$ points in $\R^d$.  A graph $G=(S,E)$
+is an \emph{$(f(k),g(n))$-robust $t$-spanner} of $S$ if, for every subset
+$S'\subseteq S$, there exists a subset $\bar{S'}\subseteq S\setminus S'$
+such that the subgraph of $G$ induced by $\bar{S'}$ is a $t$-spanner
+and $|\bar{S'}|\ge n-f(k)\cdot g(n)$, where $k=|S'|$.  We say, simply,
+that $G$ is \emph{robust} $t$-spanner if $G$ is an $(f(k),g(n))$-robust
+$t$-spanner, with $g(n)\in o(n)$.
+
+Stated yet another way, for any set $S'\subset S$, there exists a set
+$S''\supset S'$, $|S''|\le f(|S|)$, such that $G\setminus S''$ is
+a $t$-spanner.
+
+\section{One Dimensional Point Sets}
+
+This section gives upper and lower-bounds on the number of edges in
+$(f(k),1)$ robust $t$-spanners for 1-dimensional point sets.  We first
+give simple bounds for specific functions $f(k)=ck$ and $f(k)=ck^2$.
+The arguments used to prove these bounds contain the main ideas needed
+to prove bounds for a more general class of functions.
+
+\subsection{Simple Bounds}
+
+\begin{thm}[Simple 1-d Upper Bound]\thmlabel{upper-bound-1d}
+Let $S\subset \R$ be any set of $n$ real numbers.  Then there exists an
+$(O(k^2),1)$-robust $1$-spanner of $S$ of size $O(n\log n)$.
+\end{thm}
+
+\begin{proof}
+Let $x_1<x_2<\cdots<x_n$ be the elements of $S$.  We construct a $(O(k^2),1)$-robust $1$-spanner, $G=(S,E)$, using the edges
+\[
+    E = \{x_ix_{i+2^j} : j\in\{0,\ldots,\floor{\log n}\},\, i\in\{1,\ldots,n-2^j\} \} \enspace .
+\] 
+To  prove that $G$ is a robust $t$-spanner, consider any
+$S'\in\binom{S}{k}$.  Let $d=2^{\ceil{\log (k+1)}}$ and observe
+that $k < d < 2k+2$ and that the edge $x_ix_{i+d}$ is in $G$ for
+every $i\in\{1,\ldots,n-d\}$.  We say that $x_i,\ldots,x_{i+r}$ form
+a \emph{good block} if $r\ge 2d-1$ and $S'$ contains no element of
+$x_i,\ldots,x_{i+r}$.  We focus our attention on the set of maximal
+good blocks.  Note that the number of maximal good blocks is at most
+$k+1$ and that the total number of vertices contained in these blocks
+is at least $n-k(2d-1)=n-O(k^2)$.  We will show that there exists a set
+$\bar{S'}$ that includes all but $2(d-1)$ vertices from each good block,
+and such that $G[S']$ is a 1-spanner.  Therefore, the size of $S'$
+is at least $n-O(k^2)-2(d-1)(k+1)=n-O(k^2)$.
+
+Initially our set $\bar{S'}$ contains all vertices in each good block,
+and we will eliminate at most $d-1$ vertices from the beginning
+and end of each block.  Between any two consecutive good blocks,
+$x_i,\ldots,x_{i+r}$ and $x_j,\ldots,x_{j+s}$, $G$ contains $d$
+vertex disjoint paths, $P_1,\ldots,P_{d-1}$ each of which begins
+at a vertex in $x_{i+r-d+1},\ldots,x_{i+r}$ and ends at a vertex in
+$x_{j},\ldots,x_{j+d-1}$.  (For example, one of these paths consists
+of $x_i,x_{i+d},x_{i+2d},\ldots,x_{i+cd}$, for some integer $c$.)
+
+Since $k < d$, at least one path, say $P_1$, does not use any vertices
+in $S'$.  If $P_1$ begins at $x_k$ and ends at $x_\ell$ then we choose
+the vertices of $P_1$ to be in $\bar{S'}$ but eliminate all other
+vertices in $x_{k+1},\ldots,x_{\ell-1}$.  Observe that this eliminates,
+from $\bar{S'}$, at most $d-1$ of the first $d$ vertices of each block
+and at most $d-1$ of the last $d$ vertices of each block.  Therefore,
+the number of vertices eliminated from all good blocks is at most
+$2(d-1)(k+1)$, as claimed.
+
+Let $x_{i_1},\ldots,x_{i_{n'}}$ denote the vertices in $\bar{S'}$,
+ordered from left to right.  By choice, none of these vertices are in
+$S'$, and for each $j\in\{1,\ldots,n'-1\}$, $i_{j+1}-i_{j}\in\{1,d\}$, so
+the edge $x_{i_j}x_{i_{j+1}}$ is present in $G$.  Therefore $G[\bar{S'}]$
+is a 1-spanner.
+\end{proof}
+
+
+\begin{thm}[Simple Lower Bound]\thmlabel{lower-bound-1d}
+Let $S=\{1,\ldots,n\}$ and let $t\ge 1$ be a constant.  Then any
+$(O(k),1)$-robust $t$-spanner of $S$ has $\Omega(n\log n)$ edges.
+\end{thm}
+
+\begin{proof}
+Fix an even natural number $k$ and consider some $i\in\{ck,\ldots,n-ck\}$.
+We claim that if $G=(S,E)$ is a $(ck,1)$-robust\footnote{Note that we
+have gone from $(O(k),1)$-robust in the statement of the theorem to
+$(ck,1)$-robust in the proof.  This does not cause a problem so long
+as we only consider values of $k$ greater than some constant $k_0$
+hidden in the $O$ notation.} $t$-spanner, then $G$ has at least $k/2$
+edges, $xy$, such that $x < i < i+k/2 < y$ and such that $y-x < ctk$.
+If this is not the case, then there exists a set $S'$, $|S'|\le k$,
+such that all edges of $G$ with one endpoint to the left of $S'$
+and one endpoint to the right of $S'$ have length at least $ctk$.
+A straightforward analysis shows that the existence of such an $S'$
+implies that $G$ is not $(ck,1)$-robust.
+
+Applying the above argument to $i=ck+2jtck$, for
+$j\in\{0,\ldots,(n-ck)/2tck\}$ implies that $G$ contains $\Omega(n/tc)$
+edges whose length is in the range $[k/2,ctk]$.  Applying this
+argument for $k\in\{\ceil{(2tck_0)^{j}} : j\in\{0,\ldots,\floor{(\log
+n)/\log(2tck_0)}\}$ proves that, for any constants $c,k_0,t>1$, $G$
+has $\Omega(n\log n)$ edges.
+\end{proof}
+
+Notice that our upper and lower bounds differ by a factor of $k$ in the
+function $f(k)$.  We conjecture that the lower bound is the true answer:
+
+\begin{conj}
+Let $S\subset \R$ be any set of $n$ real numbers.  Then there exists an
+$(O(k),1)$-robust $1$-spanner of $S$ of size $O(n\log n)$.
+\end{conj}
+
+\subsection{Generalized Bounds}\seclabel{generalized}
+
+Let $k_0\ge 1$ be a constant and let $f(\cdot)$ be any function that is
+weakly convex and increasing over the interval $[k_0,\infty)$, and such
+that $f(k_0+1)-f(k_0) > 1$.  Let $f^{i}(k)$ be function $f$ iterated
+$i$ times on the initial value $k$, i.e.,
+\[
+   f^{i}(k) = \underbrace{f(f(f(\cdots f}_{i}(k)\cdots))) \enspace .
+\]
+Then we define the \emph{iterated
+$f$-inverse function}
+\[
+   f^*(n) = \min\{i : f^{i}(k_0) \ge n\} \enspace .
+\] 
+
+\begin{thm}[Generalized Upper Bound]\thmlabel{general-upper-bound-1d}
+Let $k_0$, $f$, and $f^*$ be defined as above, and let $S\subset \R$ be
+any set of $n$ real numbers.  Then there exists an $(O(kf(k+1)),1)$-robust
+$1$-spanner of $S$ of size $O(nf^*(n))$.
+\end{thm}
+
+\begin{proof}
+The upper bound construction is similar to the graph constructed in the
+proof of \thmref{upper-bound-1d}.  It contains the edge set
+\[
+    E = \{x_ix_{i+f^{j}(k_0)} : j\in\{0,\ldots,f^*(n)-1\} \enspace .
+\] 
+Given a set $S'\in \binom{S}{k}$, we define $d$ as
+\[
+   d=\min\{f^i(k_0) : f^i(k_0)> k+1,\, i\in\Z\} \enspace .
+\]
+Thus, we have the inequalities
+\[
+     f^{-1}(k+1) < d \le f(k+1) \enspace .
+\]
+As before, we define a good block as a sequence of $r>2d-1$ consecutive
+vertices that do not belong to the same block.  The remainder of the
+proof is as before.   There are at most $k+1$ maximal good blocks that
+contain a total of at least $n-k(2d-1)$ vertices.  A path can be found
+from each block to the next block that requires the elimination of at
+most $d=f(k+1)$ vertices from the end of one block and the beginning of
+the next.  In total, this leaves a set $\bar{S'}$ of size at least
+$n-O(kd) = n - O(kf(k+1))$, as required.
+\end{proof}
+
+Taking different functions $f(k)$ in \thmref{general-upper-bound-1d} gives several tradeoffs:
+
+\begin{cor}
+Let $S\subset \R$ be any set of $n$ real numbers.  Then there exists an
+\begin{itemize}
+  \item $(O(k^2),1)$-robust $1$-spanner of $S$ of size $O(n\log n)$
+  [$f(k)=2k$];
+  \item $(O(k^{2+\varepsilon},1)$-robust $1$-spanner of $S$ of size
+  $O(n\log\log n)$ [$f(k)=k^{1+\varepsilon}$];
+  \item $(O(k(1+\varepsilon)^k),1)$-robust $1$-spanner of $S$ of size
+  $O(n\log^* n)$ [$f(k)=(1+\varepsilon)^k$].
+\end{itemize}
+\end{cor}
+
+
+\begin{thm}[Generalized Lower Bound]
+Let $k_0$, $f$, and $f^*$ be defined as above, and let $S\subset \R$
+be any set of $n$ real numbers.  Let $S=\{1,\ldots,n\}$ and let $t\ge
+1$ be a constant.  Then any $(f(k),1)$-robust $t$-spanner of $S$ has
+$\Omega(nf^*(n)$ edges.
+\end{thm}
+
+\begin{proof}[Proof Sketch]
+The proof is similar to the proof of \thmref{lower-bound-1d}.
+We need only consider $f(k)=\omega(n)$ since, otherwise we can apply
+\thmref{lower-bound-1d}.  We group the edges of the graph $G$ into
+$\Omega(f^*(n))$ classes and show that each class contains $\Omega(n)$
+vertices.  In this case, the edges in each class have lengths in a
+range of the form $[f^i(k_0),tcf^{i}(k_0)]$.  For large enough $i$,
+these classes do not overlap since $f(k)=\omega(n)$.
+\end{proof}
+
+
+
+
+
+\section{$d$-Dimensional Point Sets}
+
+\begin{thm}[Generalized Upper Bound in $\R^d$]
+Let $k_0$, $f$, and $f^*$ be defined as in \secref{generalized}.
+Let $S\subset \R^d$ be any set of $n$ points in $\R^d$.  Then, for any
+constant $t>1$,  there exists a $(O(kf(k+1)),1)$-robust $t$-spanner of $S$
+with $O(nf^*(n))$ edges.
+\end{thm}
+
+\begin{proof} 
+This construction makes use of dumbbell tree spanners \cite{X}.
+A dumbbell tree spanner of $S$ is a set of $O(1)$ binary trees
+$\mathcal{T}=\{T_1,\ldots,T_p\}$.  Each binary tree $T_i$ has $n$ leaves,
+one for each vertex of $S$.  Each of $T_i$'s internal nodes also stores
+a point of $S$, and no point of $S$ is stored in more than one internal
+node.  These trees have the property that, for any two points $x,y\in S$,
+there exists some tree $T_i$ such that the path from $x$ to $y$ in $T_i$
+has length at most $t\|xy\|$.  Thus, the graph $G=(S,E)$ obtained by
+taking the union of all edges in all trees is a $t$-spanner.
+
+Fix a value $k$ and recall that, in any binary tree, $T$, with $n$ nodes,
+there exists a vertex whose removal disconnects $T$ into at most 3
+components each of size at most $n/2$ \cite{S}.  Repeatedly applying this
+yields a set of $O(n/k)$ vertices whose removal disconnects $T$ into
+components of size at most $k$.  Perform this decomposition for each of
+the trees $T_1,\ldots,T_p$ in a dumbbell tree spanner to obtain a set
+of $X$ of $O(n/k)$ vertices whose removal disconnects every tree in $T$
+into components each of size at most $k$.
+
+Using any of the $k$-fault tolerant spanner constructions discussed in
+the introduction, we can construct a $k$-fault tolerant spanner for $X$
+having $O(k|X|)=O(n)$ edges. 
+
+Suppose, now that we are given a set $S'\subset S$ of $k$ vertices.
+
+  Now, observe that for any pair of vertices
+$x,y\in S$, there is a tree $T_i$ such that the path from $x$ to $y$ in $T_i$ has length at most $t\|xy\|$.
+
+
+
+\end{proof}
+
+
+
+
+
+\end{document}

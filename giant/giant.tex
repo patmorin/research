@@ -17,132 +17,182 @@ vertices leaves $n-f(k)\cdot o(n)$ vertices whose induced subgraph is
 a $t$-spanner.
 \end{abstract}
 
-Let $S\subset \R^d$ be a set of $n$ points in $\R^d$.  A graph $G=(S,E)$
-is an \emph{$(f(k),g(n))$-robust $t$-spanner} of $S$ if, for every subset
-$S'\subseteq S$, there exists a subset $\bar{S'}\subseteq S\setminus S'$
-such that the subgraph of $G$ induced by $\bar{S'}$ is a $t$-spanner
-and $|\bar{S'}|\ge n-f(k)\cdot g(n)$, where $k=|S'|$.  We say, simply,
-that $G$ is \emph{robust} $t$-spanner if $G$ is an $(f(k),g(n))$-robust
-$t$-spanner, with $g(n)\in o(n)$.
+\section{Introduction}
 
-Stated yet another way, for any set $S'\subset S$, there exists a set
-$S''\supset S'$, $|S''|\le f(|S|)$, such that $G\setminus S''$ is
-a $t$-spanner.
+For a graph $G=(V,E)$ and a subset $S\subseteq V$ of $G$'s vertices,
+$G[S]$ denotes the subraph of $G$ induced by $S$ and $G\setminus
+S=G[V\setminus S]$ is the graph obtained by removing the elements of $S$
+from $V$.
+
+Let $V\subset \R^d$ be a set of $n$ points in $\R^d$.  A graph $G=(V,E)$
+is an \emph{$(f(k),g(n))$-robust $t$-spanner} of $S$ if, for every subset
+$S\subseteq V$, there exists a superset $S'\supseteq S$, $|S'|\le f(|S|)$,
+such that $G\setminus S'$ is a $t$-spanner.  Intuitively, killing the
+vertices in $S$ leaves a small number ($f(|S|)$) of vertices stranded
+but most of the graph remains a $t$-spanner.
+
+Robustness is related to, but different from $k$-fault tolerance.
+A \emph{$k$-fault-tolerant} $t$-spanner $G=(V,E)$ has the property that
+$G\setminus S$ is a $t$-spanner for any subset $S\subseteq V$ of size
+at most $k$.  At a minimum, a $k$-fault-tolerant spanner must remain
+connected after the removal of any $k$ vertices.  This immediately implies
+that any $k$-fault-tolerant spanner with $n$ vertices has $\Omega(kn)$
+edges.  Several constructions of $k$-fault-tolerant spanners having
+$O(kn)$ edges exist.
 
 \section{One Dimensional Point Sets}
 
-This section gives upper and lower-bounds on the number of edges in
-$(f(k),1)$ robust $t$-spanners for 1-dimensional point sets.  We first
-give simple bounds for specific functions $f(k)=ck$ and $f(k)=ck^2$.
-The arguments used to prove these bounds contain the main ideas needed
-to prove bounds for a more general class of functions.
+This section gives upper and lower-bounds on the number of edges
+in $(f(k),1)$ robust $t$-spanners for 1-dimensional point sets.
+We first give a simple construction that is $(O(k\log k),1)$-robust
+and a lower-bound on the number of edges in any $t$-spanner that is
+$(O(k),1)$-robust.
 
-\subsection{Simple Bounds}
+The arguments used to prove these simple bounds contain the main ideas
+needed to prove bounds for a more general class of functions, $f(k)$,
+that are subsequently discussed.
+
+\subsection{A Simple Construction}
+
+In this section, we consider the following graph, $G=(V,E)$ which is
+closely related to the hypercube.  Let $x_1<x_2<\cdots<x_n$ be the
+elements of $V$. The edge set, $E$, of $G$ consists of
+\[
+    E = \{x_ix_{i+2^j} : j\in\{0,\ldots,\floor{\log n}\},\, i\in\{1,\ldots,n-2^j\} \} \enspace .
+\] 
+Notice that $G$ is 1-spanner since it contains every every edge of the
+form $x_i,x_{i+1}$, for $i\in\{1,\ldots,n-1\}$. Furthermore, $G$ has size
+$O(n\log n)$ since every vertex has degree at most $\floor{\log n}+1$.
+
+The following theorem shows that $G$ is also $(O(k^2),1)$-robust.
+This theorem is not tight; later we will show that $G$ is in fact
+$(O(k\log k),1)$-robust. Nevertheless, the proof of this theorem
+can be considered as a warm-up to the proof of the more abstract
+\thmref{general-upper-bound-1d}.
 
 \begin{thm}[Simple 1-d Upper Bound]\thmlabel{upper-bound-1d}
-Let $S\subset \R$ be any set of $n$ real numbers.  Then there exists an
+Let $V\subset \R$ be any set of $n$ real numbers.  Then there exists an
 $(O(k^2),1)$-robust $1$-spanner of $S$ of size $O(n\log n)$.
 \end{thm}
 
 \begin{proof}
-Let $x_1<x_2<\cdots<x_n$ be the elements of $S$.  We construct a $(O(k^2),1)$-robust $1$-spanner, $G=(S,E)$, using the edges
-\[
-    E = \{x_ix_{i+2^j} : j\in\{0,\ldots,\floor{\log n}\},\, i\in\{1,\ldots,n-2^j\} \} \enspace .
-\] 
-To  prove that $G$ is a robust $t$-spanner, consider any
-$S'\in\binom{S}{k}$.  Let $d=2^{\ceil{\log (k+1)}}$ and observe
-that $k < d < 2k+2$ and that the edge $x_ix_{i+d}$ is in $G$ for
-every $i\in\{1,\ldots,n-d\}$.  We say that $x_i,\ldots,x_{i+r}$ form
-a \emph{good block} if $r\ge 2d-1$ and $S'$ contains no element of
-$x_i,\ldots,x_{i+r}$.  We focus our attention on the set of maximal
-good blocks.  Note that the number of maximal good blocks is at most
-$k+1$ and that the total number of vertices contained in these blocks
-is at least $n-k(2d-1)=n-O(k^2)$.  We will show that there exists a set
-$\bar{S'}$ that includes all but $2(d-1)$ vertices from each good block,
-and such that $G[S']$ is a 1-spanner.  Therefore, the size of $S'$
-is at least $n-O(k^2)-2(d-1)(k+1)=n-O(k^2)$.
+We will prove that $G$ is a robust $1$-spanner. Consider any
+$S\in\binom{V}{k}$, with $k\le \sqrt{n}$.  Let $d=2^{\ceil{\log (k+1)}}$
+and observe that $k < d < 2k+2$ and that the edge $x_ix_{i+d}$ is in $G$
+for every $i\in\{1,\ldots,n-d\}$.
 
-Initially our set $\bar{S'}$ contains all vertices in each good block,
-and we will eliminate at most $d-1$ vertices from the beginning
-and end of each block.  Between any two consecutive good blocks,
+We say that $x_i,\ldots,x_{i+r}$ form a \emph{good block} if $r\ge
+2d-1$ and $S$ contains no element of $x_i,\ldots,x_{i+r}$.  We focus
+our attention on the set of maximal good blocks.  Note that the number
+of maximal good blocks is at most $k+1$ and that the total number of
+vertices contained in these blocks is at least $n-k(2d-1)=n-O(k^2)$.
+We will show that there exists a set $S'\supseteq S$ that avoids all but
+$2(d-1)$ vertices from each good block, and such that $G\setminus S'$
+is a 1-spanner.
+Therefore, the size of $S'$ is at most $O(k^2)-2(d-1)(k+1)=O(k^2)$.
+
+Initially our set $S'$ contains all vertices in $S$, and
+we will add at most $d-1$ vertices from the beginning and
+end of each block.  Between any two consecutive good blocks,
 $x_i,\ldots,x_{i+r}$ and $x_j,\ldots,x_{j+s}$, $G$ contains $d$
 vertex disjoint paths, $P_1,\ldots,P_{d-1}$ each of which begins
 at a vertex in $x_{i+r-d+1},\ldots,x_{i+r}$ and ends at a vertex in
-$x_{j},\ldots,x_{j+d-1}$.  (For example, one of these paths consists
-of $x_i,x_{i+d},x_{i+2d},\ldots,x_{i+cd}$, for some integer $c$.)
+$x_{j},\ldots,x_{j+d-1}$.  (For example, one of these paths consists of
+$x_i,x_{i+d},x_{i+2d},\ldots,x_{i+cd}$, for some integer $c$.)
 
-Since $k < d$, at least one path, say $P_1$, does not use any vertices
-in $S'$.  If $P_1$ begins at $x_k$ and ends at $x_\ell$ then we choose
-the vertices of $P_1$ to be in $\bar{S'}$ but eliminate all other
-vertices in $x_{k+1},\ldots,x_{\ell-1}$.  Observe that this eliminates,
-from $\bar{S'}$, at most $d-1$ of the first $d$ vertices of each block
+Since $d > k$, at least one path, say $P_1$, does not use any vertices
+of $S$.  If $P_1$ begins at $x_k$ and ends at $x_\ell$ then we add
+to $S'$ all vertices in 
+$x_{k+1},\ldots,x_{\ell-1}$ that are not included in $P_1$.  Observe that adds,
+to $S'$, at most $d-1$ of the first $d$ vertices of each block
 and at most $d-1$ of the last $d$ vertices of each block.  Therefore,
-the number of vertices eliminated from all good blocks is at most
+the number of vertices added to $S'$ from all good blocks is at most
 $2(d-1)(k+1)$, as claimed.
 
-Let $x_{i_1},\ldots,x_{i_{n'}}$ denote the vertices in $\bar{S'}$,
-ordered from left to right.  By choice, none of these vertices are in
-$S'$, and for each $j\in\{1,\ldots,n'-1\}$, $i_{j+1}-i_{j}\in\{1,d\}$, so
-the edge $x_{i_j}x_{i_{j+1}}$ is present in $G$.  Therefore $G[\bar{S'}]$
+Let $x_{i_1},\ldots,x_{i_{n'}}$ denote the vertices in $V\setminus
+S'$, ordered from left to right.  None of these vertices are in $S'$,
+and for each $j\in\{1,\ldots,n'-1\}$, $i_{j+1}-i_{j}\in\{1,d\}$, so the
+edge $x_{i_j}x_{i_{j+1}}$ is present in $G$.  Therefore $G\setminus S'$
 is a 1-spanner.
 \end{proof}
 
-\begin{thm}[Better 1-d Upper Bound]\thmlabel{upper-bound-1d}
+We now prove a better upper-bound on the robustness of $G$ by using the
+probabilistic method.
+
+\begin{thm}[Better 1-d Upper Bound]\thmlabel{better-upper-bound-1d}
 Let $S\subset \R$ be any set of $n$ real numbers.  Then there exists an
-$(O(k^2),1)$-robust $1$-spanner of $S$ of size $O(n\log n)$.
+$(O(k\log k),1)$-robust $1$-spanner of $S$ of size $O(n\log n)$.
 \end{thm}
 
 \begin{proof}
-Let $x_1<x_2<\cdots<x_n$ be the elements of $S$.  We construct a
-$(O(k^2),1)$-robust $1$-spanner, $G=(S,E)$, using the edges
+As before, consider any set $S\in\binom{V}{k}$.  Let $m=ck\log k$
+for some sufficiently large constant $c$.  Without loss of generality,
+we can assume that $n\le 2km+k = O(k^2\log k)$, since otherwise there
+exists a consecutive sequence $x_i,\ldots,x_{i+q}$ of vertices of length
+$q\ge 2m$, none of which are are in $S$.
+
+We can then independently study the subproblems on
+of $G_1=G[\{x_0,\ldots,x_{i+m}\}]$
+and on
+$G_2=G[\{x_{i+q-m},\ldots,x_{n}\}]$.
+If $S$ contains $k_1$ vertices of $G_1$ and $k_2$ vertices of $G_2$ then
+(by induction on $n$, say) we obtain an induced subgraph of $G\setminus S$
+that is a 1-spanner and has
+\[ n-ck_1\log k_1 - ck_2\log k_2 \ge n - ck\log k
+\]
+vertices.
+
+Therefore, we assume $n = O(k^2\log k)$.  Pick a random integer
+$r\in\{0,\ldots,2^{\floor{\log n}}\}$ and consider the subgraph, $G'$,
+of $G$ consisting only of the edges of the form $(x_i,x_{i+k})$ where
+$i-r$ is a multiple of $k$.  (For readers with a background in data
+structures, this subgraph looks a lot like a skiplist.)
+
+We say that an element $x_i\in S$ \emph{kills} the vertices
+$x_{i-2^{j}+1},\ldots,x_{i+2^{j}-1}$ in $G'$ if $i-r$ is a
+multiple of $2^j$.  Notice that the probability that $x_i$ kills
+$x_{i-2^{j}+1},\ldots,x_{i+2^{j}-1}$ is at most $1/2^j$.  Therefore,
+the expected number of vertices killed by $x$ is at most
 \[
-    E = \{x_ix_{i+2^j} : j\in\{0,\ldots,\floor{\log n}\},\, i\in\{1,\ldots,n-2^j\} \} \enspace .
-\] 
-To  prove that $G$ is a robust $t$-spanner, consider any
-$S'\in\binom{S}{k}$.
-
-Let $\alpha$, $0< \alpha<1$ be a constant.  We say that an interval
-$x_i,\ldots,x_{i+\ell}$ is \emph{$\alpha$-dense} (\emph{$\alpha$-sparse})
-if it contains at least (at most) $\alpha\ell$ elements of $S'$.
-
-We say that $x_i,\ldots,x_{i+\ell}$ is \emph{awesome} if
-it is $\alpha$-dense and $x_{i-2\ell},\ldots,x_{i-1}$ and
-$x_i+\ell,\ldots,x_{i+3\ell}$ are each $\delta$-sparse.
-
-
+    \sum_{j=0}^{\lfloor{\log n}} 2(2^j-1)/2^j \le 2\log n + 2 = O(\log k) \enspace ,
+\]
+since $n=O(k^2\log k)$.  Finally, notice that if we let the set $S'$
+be the set of all vertices killed by elements in $S$, then $G'\setminus
+S'$ is a 1-spanner whose expected number of vertices is $n-O(k\log k)$.
+Therefore, $G\setminus S$ contains, as a vertex induced subgraph,
+a 1-spanner of size $n-O(k\log k)$.  (In particular, some choice of $r$ yields the set $S'$ that demonstrates this.)
 \end{proof}
-
 
 
 
 \begin{thm}[Simple Lower Bound]\thmlabel{lower-bound-1d}
-Let $S=\{1,\ldots,n\}$ and let $t\ge 1$ be a constant.  Then any
+Let $V=\{1,\ldots,n\}$ and let $t\ge 1$ be a constant.  Then any
 $(O(k),1)$-robust $t$-spanner of $S$ has $\Omega(n\log n)$ edges.
 \end{thm}
 
 \begin{proof}
 Fix an even natural number $k$ and consider some $i\in\{ck,\ldots,n-ck\}$.
-We claim that if $G=(S,E)$ is a $(ck,1)$-robust\footnote{Note that we
+We claim that if $G=(V,E)$ is a $(ck,1)$-robust\footnote{Note that we
 have gone from $(O(k),1)$-robust in the statement of the theorem to
 $(ck,1)$-robust in the proof.  This does not cause a problem so long
 as we only consider values of $k$ greater than some constant $k_0$
 hidden in the $O$ notation.} $t$-spanner, then $G$ has at least $k/2$
 edges, $xy$, such that $x < i < i+k/2 < y$ and such that $y-x < ctk$.
-If this is not the case, then there exists a set $S'$, $|S'|\le k$,
-such that all edges of $G$ with one endpoint to the left of $S'$
-and one endpoint to the right of $S'$ have length at least $ctk$.
-A straightforward analysis shows that the existence of such an $S'$
+If this is not the case, then there exists a set $S$, $|S|\le k$,
+such that any edges of $G$ with one endpoint to the left of $S$
+and one endpoint to the right of $S$ have length at least $ctk$.
+A straightforward analysis shows that the existence of such an $S$
 implies that $G$ is not $(ck,1)$-robust.
 
 Applying the above argument to $i=ck+2jtck$, for
-$j\in\{0,\ldots,(n-ck)/2tck\}$ implies that $G$ contains $\Omega(n/tc)$
+$j\in\{0,\ldots,\floor{(n-ck)/2tck}\}$ implies that $G$ contains $\Omega(n/tc)$
 edges whose length is in the range $[k/2,ctk]$.  Applying this
 argument for $k\in\{\ceil{(2tck_0)^{j}} : j\in\{0,\ldots,\floor{(\log
 n)/\log(2tck_0)}\}$ proves that, for any constants $c,k_0,t>1$, $G$
 has $\Omega(n\log n)$ edges.
 \end{proof}
 
-Notice that our upper and lower bounds differ by a factor of $k$ in the
+Notice that our upper and lower bounds differ by a factor of $\log k$ in the
 function $f(k)$.  We conjecture that the lower bound is the true answer:
 
 \begin{conj}

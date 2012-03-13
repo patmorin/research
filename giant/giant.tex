@@ -193,19 +193,19 @@ The set $S'$ contains all the vertices killed by all vertices in $S$.
 As before, there is a monotone path in $G'$ (and hence also in $G$)
 that contains all vertices not in $S'$, so $G\setminus S'$ is a 1-spanner.
 
-The cost, $c(x_i)$, of a vertex $x_i\in S$ is equal to the number
-of vertices it kills.  A vertex in $S$ is expensive if it kills at
-least $m=16k^{2}$ vertices and cheap otherwise.  If the shortest edge
-that passes over a vertex $x$ has length at least $16k^2$, then $x$
-is incident on an edge whose length is at least $4k$ (recall that
-$2^{2^j}=\sqrt{2^{2^{j+1}}}$).  Therefore, the probability that there
-exists any expensive vertex is at most $1/4$.  What remains is to bound
-the expected cost of the cheap vertices.  This is bounded by the sum
+The cost, $c(x_i)$, of a vertex $x_i\in S$ is equal to the number of
+vertices it kills.  A vertex in $S$ is expensive if it kills at least
+$m=16k^{2}$ vertices and cheap otherwise.  If $x$ kills at least $16k^2$
+vertices, then $x$ is incident on an edge whose length is at least $4k$
+(recall that $2^{2^j}=\sqrt{2^{2^{j+1}}}$).  Therefore, the probability
+that there exists any expensive vertex is at most $1/4$.  What remains
+is to bound the expected cost of the cheap vertices.  This is bounded
+by the sum
 \begin{eqnarray*}
   \E\left[\sum_{x\in S} c(x)\right] 
-    & \le & k\sum_{i=0}^{\lfloor\log\log m\rfloor}\frac{2^{2^{j+1}}}{2^{2^{j}}} \\  
-    & = & \sum_{i=0}^{\lfloor \log\log m \rfloor}2^{2^j} \\
-    & \le & 16k^2 + O(k) \in O(k^2) \enspace ,
+    & \le & k\sum_{i=0}^{\lfloor\log\log m\rfloor-1}\frac{2^{2^{j+1}}}{2^{2^{j}}} \\  
+    & = & k\sum_{i=0}^{\lfloor \log\log m \rfloor}2^{2^j} \\
+    & \le & k\sqrt{m} \in O(k^2) \enspace ,
 \end{eqnarray*}
 as required.
 \end{proof}
@@ -236,6 +236,39 @@ Let $S\subset \R$ be any set of $n$ real numbers.  Then, for any $0<\eps
 < 1$, there exists an $(O(k^{1+\eps}),1)$-robust $1$-spanner of $S$
 of size $O(\eps^{-1}n\log\log n)$.
 \end{thm}
+
+\subsection{The Crossover Point}
+
+In this section we consider the graph $G=(V,E)$ with the edge set
+\[
+   E = \{ x_ix_{i+2^{j^2}} : j\in\{0,\ldots,\floor{\sqrt{\log n}}\},\,
+       i\in\{1,\ldots,n-2^{j^2}\} \enspace .
+\]
+This graph has $O(n\sqrt{\log n})$ edges.
+
+\begin{thm}\thmlabel{crossover-1d}
+Let $S\subset \R$ be any set of $n$ real numbers.  Then there exists
+an $(k2^{O(\sqrt{\log k})},1)$-robust $1$-spanner of $S$ of size
+$O(n\sqrt{\log n})$.
+\end{thm}
+
+\begin{proof}
+The proof is, by now, standard.  An expensive vertex kills $2^{\sqrt{\log (ck)}}$ vertices.  Such a vertex 
+
+\[ k=2^{i^2} \]
+\[ 2^{(i+1)^2} = 2^{i^2+2i+1} = k2^{2i+1} = 2k2^{2i} = 2k2^{2\sqrt{\log k}} \]
+
+$2^{(\sqrt{\log k}+1)^2} = $
+\begin{eqnarray*}
+  \E\left[\sum_{x\in S} c(x)\right] 
+    & \le & k\sum_{i=0}^{\lfloor\sqrt{\log k}\rfloor}\frac{2^{(i+1)^{2}}}{2^{i^{2}}} \\  
+    & = & \sum_{i=0}^{\lfloor\sqrt{\log k}\rfloor}2^{2i+1} \\
+    & \in & O(2^{2\sqrt{\log k}}) \enspace ,
+\end{eqnarray*}
+
+\end{proof}
+
+
 
 
 \section{Lower Bounds}

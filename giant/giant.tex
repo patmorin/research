@@ -265,20 +265,24 @@ $G_{2\times}$ by using the probabilistic method.
   S'$ is a 1-spanner.  Therefore, all that remains is to show that the
   probability of success is greater than 0.
   
-  We first note that 
+  We first note that, that the probability that any particular $x_i\in
+  S$ is expensive is at most $1/4k$.  This is $x_i$ is expensive if
+  and only if $(r-i)\equiv 0 \pmod {2^{\ceil{\log(4k)}}}$.
+  The probability of selecting $r$ with this property is only $1/2^{\ceil{\log(4k)}}
+  \le 1/4k$. Therefore, by the union bound,
   \[
-     \Pr\{\mathcal{A}\} \le k/4k = 1/4 \enspace ,
+     \Pr\{\mathcal{A}\} \le k/4k = 1/4 \enspace .
   \]
-  since the number of vertices of $G'$ incident on edges of length
-  greater than $4k$ is at most $n/4k$.
 
   To upper-bound the total expected cost of cheap vertices, we note that,
-  if $x\in S$ kills $2^{j+1}-1$ vertices, then $x$ is incident on an
-  edge of length $2^{j}$.  The probability that this happens is at most
-  $1/2^{j}$.  Letting $S^{c}$ denote the set of cheap vertices in $S$,
-  the total expected cost of all cheap vertices is at most
+  if $x_i\in S$ kills $2^{j+1}-1$ vertices, then $r-i\equiv 0\pmod{2^j}$.
+  The probability that this happens is $1/2^{j}$. 
+  Letting $S^{c}$
+  denote the set of cheap vertices in $S$, the total expected cost of
+  all cheap vertices is at most
   \begin{eqnarray*}
      \E\left[\sum_{x\in S^{c}}c(x) \right] 
+     &\le& \E\left[\sum_{x\in S}\min\{4k,c(x)\} \right]  \\
     &\le&  k\sum_{j=0}^{\floor{\log (4k)}} (2^{j+1}-1)/2^j \\
      &\le& k\sum_{j=0}^{\floor{\log (4k)}} 2^j \\
      &<& 8k\log k \enspace .
@@ -287,9 +291,8 @@ $G_{2\times}$ by using the probabilistic method.
   By the union bound
   \[
      \Pr\{\mbox{$\mathcal{A}$ or $\mathcal{B}$}\} \le 1/4+ 1/2 < 1
-  \enspace .
+  \enspace . \qedhere
   \]
-  for sufficiently large $k$.
 \end{proof}
 
 \subsection{A General Construction}
@@ -349,21 +352,29 @@ The graph $G_f$ clearly has $O(nf^*(n))$ edges.  The following theorem shows tha
   where $i-r$ is an integer multiple of $\ell$.  We say that an edge
   $x_ix_{i+\ell}$ has \emph{span} $\ell$.
 
-  For an integer $i$, let $j$ be the smallest integer such that $i-r$ is
-  not a multiple of $\upen{f^j(k_0)}$.  Informally, if there exists any
-  edge that jumps over $x_i$, then an edge of span $\upen{f^j(k_0)}$
-  jumps over $x_i$.  Then we say that a vertex $x_i\in S$ kills
-  $x_{i-p},\ldots,x_{i+q}$ where
+  For an integer $i$, let $j=j(i)$ be the smallest integer such that
+  $i-r$ is not a multiple of $\upen{f^j(k_0)}$; see \figref{spanjump}.
+  Informally, if there exists any edge that jumps over $x_i$, then an
+  edge of span $\upen{f^j(k_0)}$ jumps over $x_i$.  Then we say that a
+  vertex $x_i\in S$ kills $x_{i-p},\ldots,x_{i+q}$ where
   \begin{eqnarray*}
-     p&=& ((i-r) \bmod \upen{f^j(k_0))}+1 \text{ and } \\
-     q&=& ((r-i) \bmod \upen{f^j(k_0))}-1 \enspace .
+     p&=& \left((i-r) \bmod \upen{f^j(k_0)}\right)+1 \text{ and } \\
+     q&=& \left((r-i) \bmod \upen{f^j(k_0)}\right)-1 \enspace .
   \end{eqnarray*}
+  \begin{figure}
+    \begin{center}
+      \includegraphics{spanjump}
+    \end{center}
+    \caption{The vertices killed by $x_i$.}
+    \figlabel{spanjump}
+  \end{figure}
   
   Define $c(x_i)$ as the number of vertices killed by $x_i$.  We say
   that $x_i$ is \emph{expensive} if $c(x_i) > f(4k)$ and \emph{cheap}
-  otherwise.  Notice that, if $x_i$ is expensive, then $x_i$ is incident
-  on an edge whose span is at least $4k$.  The number of such vertices
-  is only $n/4k$.  Therefore, the probability that $S$ contains any
+  otherwise.  If $x_i$ is expensive, then $f^{j(i)-1}(k_0)\ge 4k$ and
+  $i-r\equiv 0 \pmod {f^{j(i)-1}(k_0)}$.  Therefore, the probability
+  that $x_i$ is expensive is at most $1/f^{j(i)-1}(k_0) \le 1/4k$.
+  Therefore, by the union bound, the probability that $S$ contains any
   expensive vertex is at most $1/4$.  All that remains is to bound the
   expected cost of all cheap vertices. Letting $S^c$ denote the set of
   cheap vertices in $S$, we obtain
@@ -387,12 +398,14 @@ The graph $G_f$ clearly has $O(nf^*(n))$ edges.  The following theorem shows tha
   
   To prove the second part of the theorem, we proceed exactly the
   same way, except that the sequence $f^{j+1}(k_0)/f^j(k_0)$ becomes
-  geometrically increasing,\footnote{This is most easily seen by
+  geometric,\footnote{This is most easily seen by
   taking $f(k) = k\delta^{2\sqrt{(\log k)/(\log\delta)}+1}$.  It is
   straightforward to verify, then that $f^j(\delta) = \delta^{(j+1)^2}$,
   so that $f^{j+1}(\delta)/f^j(\delta)= \delta^{2j+3}$, so the sequence
-  is exponentially increasing.  Taking $\delta = 1+\epsilon$ for a sufficiently small $\epsilon>0$ allows us to lower-bound any function $f(k)\in k2^{\Omega(\sqrt{\log k)}}$ this way.} so it is dominated by its last term.
-  This yields:
+  is exponentially increasing.  Taking $\delta = 1+\epsilon$ for a
+  sufficiently small $\epsilon>0$ allows us to lower-bound any function
+  $f(k)\in k2^{\Omega(\sqrt{\log k})}$ this way.} so it is dominated by
+  its last term.  This yields:
   \begin{align*}
   \E\left[\sum_{x\in S^c} c(x)\right] 
       & \le  k \sum_{j=0}^{f^*(4k)} \upen{f^{j+1}(k_0)}/\upen{f^j(k_0)} \\
@@ -425,7 +438,8 @@ following results.
 
 In this section, we give lower-bounds on the number of edges in
 $f(k)$-robust $t$-spanners.  These lower-bounds hold already for a
-specific 1-dimensional point set, therefore they apply dimensions.
+specific 1-dimensional point set, therefore they apply to all dimensions
+$d\ge 1$.
 
 \subsubsection{A Lower Bound for Linear Robustness}
 

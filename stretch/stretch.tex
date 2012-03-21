@@ -1,0 +1,162 @@
+\documentclass{patmorin}
+\usepackage{amsthm,amsmath,graphicx,stmaryrd}
+\usepackage{pat}
+
+\newcommand{\eps}{\varepsilon}
+
+\title{\MakeUppercase{On the Average Stretch of Theta Graph Paths}}
+\author{Prosenjit Bose,
+        Jean-Lou De Carufel,
+        Nima Hoda, and
+        Pat Morin\thanks{All authors are members of the School of Computer Science at Carleton University.}}
+
+
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  The abstract goes here.
+\end{abstract}
+
+\newcommand{\tkgraph}{$\theta_k$-graph}
+
+\section{Introduction}
+
+For any point set $V\subset\R^2$, the \tkgraph\ of $V$ \cite{keilXX}
+is a geometric graph whose vertex set is $V$.  For $k\ge 6$, this graph
+is known to be a \emph{spanner}:  For any pair of vertices $x$ and $y$,
+\begin{equation}
+     \frac{\|xy\|_\theta}{\|xy\|} \le \frac{1}{1-2\sin(\pi/k)} \eqlabel{spanning}
+\end{equation}
+where $\|xy\|_\theta$ denotes the length of the Euclidean shortest
+path from $x$ to $y$ that uses only edges of the \tkgraph\ graph
+and $\|xy\|$ denotes the Euclidean distance between $x$ and $y$.
+The proof of \eqref{spanning} constructs a path of length at most
+$\|xy\|/(1-2\sin(\pi/k))$ using a simple online algorithm.  Call a path constructed by this algorithm a $\theta$-path and denote by
+$\|xy\|_{\theta'}$ the length of the $\theta$-path from $x$ to $y$.
+
+In this paper, we study the average length of paths found by the online
+routing algorithm in \tkgraph s of random point sets.  In particular, for a set, $V$, of $n$ points independently and uniformly distributed in $[0,1]^2$, we consider the quantity
+\[
+   \E\left[\frac{\|xy\|_{\theta'}}{\|xy\|}\right]
+ =      \binom{n}{2}^{-1}
+        \left(
+          \sum_{x\in V}
+          \sum_{y\in V\setminus\{x\}} \frac{\|xy\|_{\theta'}}{\|xy\|}
+        \right) \enspace .
+\]
+This quantity is the average stretch factor of a $\theta$-paths in a
+random point set.
+
+\section{The First Section}
+
+Like many problems of this sort, care must be taken to handle
+boundary effects.  We call a vertex $x$ if $G_\theta$ \emph{good} if
+$x\in\left[\sqrt{(c\log n)/n},1-\sqrt{(c\log n)/n}\right]^2$.
+
+Our first lemma says that, with high probability, $G_\theta$ does not
+contain long edges except possibly near the boundary of $[0,1]^2$.
+
+\begin{lem}\lemlabel{no-long-edge}
+  With probability $1-\exp(-\Omega(cn))$, $G_\theta$ contains no edge
+  $xy$ such that both $x$ and $y$ are good and $\|xy\|\ge c\sqrt{(\log n)/n}$.
+\end{lem}
+
+\begin{proof}[Proof Sketch]
+  This would imply a triangle of area $\Omega(c(\log n)/n)$ that is
+  contained in $[0,1]^2$ but that contains no points of $V$.
+\end{proof}
+
+
+\begin{lem}\lemlabel{angle}
+  Let $x$ and $y$ be a pair of good vertices in $V$;
+  let $x=x_1,x_2,\ldots,x_r=y$ denote the $\theta$-path from $x$ to $y$; and 
+  let $\alpha_i$ denote the smaller of the two angles between the line
+  through $x_i$ and $x_{i+1}$ and the line through $x$ and $y$.  Then
+  $\E[1/\cos(\alpha_i)] \ge z_k-o(1)$ for all $i\in\{1,\ldots,r-2\}$.
+\end{lem}
+
+\begin{proof}
+  The construction of the $\theta$-path from $x$ to $y$ begins by growing
+  an isosceles triangle with apex at $x$ and apex angle $2\pi/k$; see
+  \figref{grow}.  The growth process stops when the base of this triangle;
+  \begin{enumerate}
+    \item touches the boundary of $[0,1]^2$,
+    \item touches $y$, or
+    \item touches a point $x_2\in V\setminus\{x,y\}$.
+  \end{enumerate}
+  Observe that, in the third case, the point $x_2$ is uniformly
+  distributed on the base of the triangle.  This implies that [with
+  some work to determine the value of $z_k$], in the third case
+  $\E[1/\cos(\alpha_i)] \ge z_k$.  
+
+  \begin{figure}
+    \begin{center}
+      \includegraphics{grow}
+    \end{center}
+    \caption{Routing from $x$ to $y$ starts by growing a triangle.}   
+  \end{figure}
+\end{proof}   
+
+Let $Z$ be the set of pairs $(x,y)\in V$, $x\neq y$, such that both $x$ and $y$ are good and $\|xy\| > r\sqrt{c\log n/n}$. 
+
+\begin{lem}
+  For a random pair $(x,y)\in Z$,
+  \[ 
+    \E\left[\frac{\|xy\|_\theta'}{\|xy\|}\right] \ge (1-O(1/r))f(\theta)
+  \]
+\end{lem}
+
+\begin{proof}[Proof Sketch]
+  Since, by \lemref{no-long-edge}, there are no long edges on the path
+  from $x$ to $y$, the path has at least $r$ edges.  By \lemref{angle},
+  all but the last of these edges deviates by an (expected) angle of $z_k$
+  from the direction of the straight path from $x$ to $y$.
+\end{proof}
+
+
+\begin{lem}
+   With high probability, $|Z| = \binom{n}{2}-O((n^{3/2}+nr^2)\log n)$.
+\end{lem}
+
+\begin{proof}[Proof Sketch]
+  The number of not-good vertices is $O(n^{1/2}\log n)$ w.h.p.  Each of
+  these eliminates $n-1$ possible pairs from $Z$, so these eliminate
+  $O(n^{3/2}\log n)$ possible pairs.   The number of vertices at
+  distance at most $k\sqrt{c(\log n)/n}$ from any vertex is, w.h.p.,
+  $O(r^2\log n)$.  Therefore, this condition eliminates $O(nr^2\log n)$
+  possible pairs from $Z$.  Any of the $\binom{n}{2}$ pairs not eliminated
+  by one of these two conditions is in $Z$.
+\end{proof}
+
+\begin{thm}
+  The average stretch factor of a $\theta$-path in $G_\theta$ is
+  at least $(1-o(1))f(z_k)$.
+\end{thm}
+
+\begin{proof}
+   The expected total stretch factor is
+  \begin{eqnarray*}
+  \E\left[\sum_{\{x,y\} \subset V} \frac{\|xy\|_{\theta'}}{\|xy\|}\right]
+  & \ge & \E\left[\sum_{(x,y)\in Z} \frac{\|xy\|_{\theta'}}{\|xy\|}\right] \\
+  & \ge & \left(\binom{n}{2}-O((n^{3/2}+nr^2)\log n)\right)(1-1/r)f(\theta) \\
+  \end{eqnarray*}
+\end{proof}
+
+\section{The Second Section}
+
+\section{Summary}
+\seclabel{summary}
+
+\section*{Acknowledgement}
+
+The work of Pat Morin was partly funded by NSERC and CFI.
+
+\bibliographystyle{plain}
+\bibliography{stretch}
+
+
+\end{document}
+
+

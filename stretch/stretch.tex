@@ -1,5 +1,5 @@
 \documentclass{patmorin}
-\usepackage{amsthm,amsmath,graphicx,stmaryrd}
+\usepackage{amsthm,amsmath,graphicx,stmaryrd,wasysym}
 \usepackage{pat}
 
 \newcommand{\eps}{\varepsilon}
@@ -49,17 +49,62 @@ routing algorithm in \tkgraph s of random point sets.  In particular, for a set,
 This quantity is the average stretch factor of a $\theta$-paths in a
 random point set.
 
+\section{Theta Graph Paths}
+
+Let $o$ denote the origin and let $p$ denote the point $(1,0)$.  The cone
+$C_i$, $i\in\{1,\ldots,k\}$ is the set of all points $q$ in $\R^2$ such
+that the angle $2\pi/(i-1)\le \angle poq < 2\pi/i$.  The graph $G_k$
+is defined as follows:  Partition $\R^2$ into $k$ cones, where the $i$th
+cone contains all \ldots.
+
+The $y_x$ forbidden region is the union of all $\theta$-cones
+around $y$ that contains a point $z$ such that $z-y\cdot y-z \ge 0$.
+
+\begin{figure}
+  \begin{center}
+    \includegraphics{forbidden}
+  \end{center}
+  \caption{The $y_x$ forbidden region}
+  \figlabel{path}
+\end{figure}
+
+
+
+The $\theta$-path, $x=x_1,\ldots,x_r=y$, from $x$ to $y$ sweeps out a
+sequence of triangles $\Delta_1,\ldots,\Delta_{r-1}$, where $\Delta_i$
+has one corner at $x_i$.  Let $\Delta_{r'}$ be the last triangle in this
+sequence that does not touch the $y_x$ forbidden region.
+
+\begin{figure}
+  \begin{center}
+    \includegraphics{path}
+  \end{center}
+  \caption{The triangles $\Delta_1,\ldots,\Delta_4$ have disjoint
+  interiors since none of $x_1,\ldots,x_4$ are in the $y_x$ forbidden
+  region.}
+  \figlabel{path}
+\end{figure}
+
+\begin{lem}
+  The triangles $\Delta_1,\ldots,\Delta_{r'}$ have disjoint interiors.
+\end{lem}
+
+\begin{proof}
+
+\end{proof}
+
+
 \section{The First Section}
 
 Like many problems of this sort, care must be taken to handle
-boundary effects.  We call a vertex $x$ if $G_\theta$ \emph{good} if
+boundary effects.  We call a vertex $x$ if $G_k$ \emph{good} if
 $x\in\left[\sqrt{(c\log n)/n},1-\sqrt{(c\log n)/n}\right]^2$.
 
-Our first lemma says that, with high probability, $G_\theta$ does not
+Our first lemma says that, with high probability, $G_k$ does not
 contain long edges except possibly near the boundary of $[0,1]^2$.
 
 \begin{lem}\lemlabel{no-long-edge}
-  With probability $1-\exp(-\Omega(cn))$, $G_\theta$ contains no edge
+  With probability $1-\exp(-\Omega(cn))$, $G_k$ contains no edge
   $xy$ such that both $x$ and $y$ are good and $\|xy\|\ge c\sqrt{(\log n)/n}$.
 \end{lem}
 
@@ -68,13 +113,27 @@ contain long edges except possibly near the boundary of $[0,1]^2$.
   contained in $[0,1]^2$ but that contains no points of $V$.
 \end{proof}
 
+\begin{lem}\lemlabel{zk}
+  Let $T$ be an isosceles triangle with apex at the point $x$ and base
+  angle $2\pi/k$.  Let $q\neq x$ be an arbitrary point, and select a
+  random point $x'$ on the uniformly at random (and independent of $q$)
+  on the base of $T$ and let $\alpha$ be the angle $\angle qxx'$.  Then
+  \[
+    \E[1/\cos(\alpha)] \ge z_k
+  \] 
+\end{lem}
+
+\begin{proof}
+This is Jean-Lou's job.
+\end{proof}
+
 
 \begin{lem}\lemlabel{angle}
   Let $x$ and $y$ be a pair of good vertices in $V$;
   let $x=x_1,x_2,\ldots,x_r=y$ denote the $\theta$-path from $x$ to $y$; and 
   let $\alpha_i$ denote the smaller of the two angles between the line
   through $x_i$ and $x_{i+1}$ and the line through $x$ and $y$.  Then
-  $\E[1/\cos(\alpha_i)] \ge z_k-o(1)$ for all $i\in\{1,\ldots,r-2\}$.
+  $\E[1/\cos(\alpha_i)] \ge (1-O(n^{-c}))z_k$ for all $i\in\{1,\ldots,r-2\}$.
 \end{lem}
 
 \begin{proof}
@@ -88,15 +147,40 @@ contain long edges except possibly near the boundary of $[0,1]^2$.
   \end{enumerate}
   Observe that, in the third case, the point $x_2$ is uniformly
   distributed on the base of the triangle.  This implies that [with
-  some work to determine the value of $z_k$], in the third case
+  some work to determine the value of $z_k$], in the third case,
   $\E[1/\cos(\alpha_i)] \ge z_k$.  
-
   \begin{figure}
     \begin{center}
       \includegraphics{grow}
     \end{center}
     \caption{Routing from $x$ to $y$ starts by growing a triangle.}   
+    \figlabel{grow}
   \end{figure}
+  If the third case occurs, then this process continues, by growing
+  a triangle (possibly with a different orientation) at $x_2$.
+  After $i$ steps, this process has generated a sequence of triangles
+  $T_1,\ldots,T_i$ that have no points of $V$ in their interior and
+  where each $T_i$ has $x_i$ and $x_{i+1}$ on its boundary.  
+
+  We claim that the triangles $T_1,\ldots,T_i$ have disjoint interiors.
+  To see why this is so, we can consider the polyhedral distance function
+  $\|\cdot\|_{\hexagon}$ whose unit ball is the regular $k$-gon.\dots [!!! This is not true for all values of $k$ !!!]
+
+  In particular, the triangle, $T_{i+1}$, that begins growing at
+  $x_i$ sweeps out a region that does not intersect $T_1,\ldots,T_i$.
+  The $n-i-1$ points of $V\setminus \{x_1,\ldots,x_i,y\}$ are uniformly
+  distributed in $[0,1]^2\setminus \bigcup_{j=1}^{i} T_i$.  Therefore,
+  conditioning on $x_1,\ldots,x_i$ and $T_1,\ldots,T_i$ does not change
+  the fact that, if Case~3 occurs, then $x_{i+1}$ is uniformly distributed
+  on the base of $T_{i+1}$.  Again, this implies that, if Case~3 occurs, then
+  $\E[1/\cos(\alpha_i)]\ge z_k$.
+
+  All that remains is to consider Cases~1 and 2.  If, at some point,
+  Case~2 occurs, then the routing algorithm has reached $y$, which
+  implies that $i=r-1$, and the lemma claims nothing about this case.
+  Finally, the probability that Case~1 ever occurs is $O(n^{-c})$.
+  Putting this all together, we have that $\E[1/\cos(\alpha_i)]\ge
+  (1-O(n^{-c}))z_k$, for all $i\in\{1,\ldots,r-2\}$.
 \end{proof}   
 
 Let $Z$ be the set of pairs $(x,y)\in V$, $x\neq y$, such that both $x$ and $y$ are good and $\|xy\| > r\sqrt{c\log n/n}$. 
@@ -104,13 +188,20 @@ Let $Z$ be the set of pairs $(x,y)\in V$, $x\neq y$, such that both $x$ and $y$ 
 \begin{lem}
   For a random pair $(x,y)\in Z$,
   \[ 
-    \E\left[\frac{\|xy\|_\theta'}{\|xy\|}\right] \ge (1-O(1/r))f(\theta)
+    \E\left[\frac{\|xy\|_\theta'}{\|xy\|}\right] \ge (1-O(n^{-c}+1/r))z_k
   \]
 \end{lem}
 
 \begin{proof}[Proof Sketch]
   Since, by \lemref{no-long-edge}, there are no long edges on the path
-  from $x$ to $y$, the path has at least $r$ edges.  By \lemref{angle},
+  from $x$ to $y$, the path has at least $r$ edges.  
+  Let $\ell_i=\|x_ix_{i+1}\|$
+  Using the notation from the proof of \lemref{angle}, the length of the path from $x$ to $y$ is lower-bounded by
+\[
+    \sum_{i=1}^{r-1} \ell_i/(\ell_i\cos(\alpha_i))
+    = \sum_{i=1}^{r-1} \ell_i/(\ell_i\cos(\alpha_i))
+\]
+  By \lemref{angle},
   all but the last of these edges deviates by an (expected) angle of $z_k$
   from the direction of the straight path from $x$ to $y$.
 \end{proof}
@@ -131,7 +222,7 @@ Let $Z$ be the set of pairs $(x,y)\in V$, $x\neq y$, such that both $x$ and $y$ 
 \end{proof}
 
 \begin{thm}
-  The average stretch factor of a $\theta$-path in $G_\theta$ is
+  The average stretch factor of a $\theta$-path in $G_k$ is
   at least $(1-o(1))f(z_k)$.
 \end{thm}
 

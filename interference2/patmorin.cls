@@ -24,6 +24,7 @@
 \DeclareOption{10pt}{\OptionNotUsed}
 \DeclareOption{12pt}{\OptionNotUsed}
 
+
 % The default action is to pass options to article class
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
 
@@ -48,18 +49,18 @@
 
 
 % Sectioning commands
-\font\tensfb = cmssbx11
-\newcommand{\@titlestyle}{\normalsize\tensfb}
-\renewcommand\section{\@startsection {section}{1}{\z@}{-3.5ex plus
-    -1ex minus -.2ex}{2.3ex plus .2ex}{\@titlestyle}}
-\renewcommand\subsection{\@startsection{subsection}{2}{\z@}{-3.25ex
-    plus -1ex minus -.2ex}{1.5ex plus .2ex}{\@titlestyle}}
-\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}{-3.25ex
-    plus -1ex minus -.2ex}{1.5ex plus .2ex}{\@titlestyle}}
-\renewcommand\paragraph{\@startsection {paragraph}{4}{\z@}{0ex}{-1em}{\@titlestyle}}
-\renewcommand\subparagraph{\@startsection
-  {subparagraph}{4}{\parindent}{3.25ex plus 1ex minus
-    .2ex}{-1em}{\@titlestyle}}
+%\font\tensfb = cmssbx11
+%\newcommand{\@titlestyle}{\normalsize\tensfb}
+%\renewcommand\section{\@startsection {section}{1}{\z@}{-3.5ex plus
+%    -1ex minus -.2ex}{2.3ex plus .2ex}{\@titlestyle}}
+%\renewcommand\subsection{\@startsection{subsection}{2}{\z@}{-3.25ex
+%    plus -1ex minus -.2ex}{1.5ex plus .2ex}{\@titlestyle}}
+%\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}{-3.25ex
+%    plus -1ex minus -.2ex}{1.5ex plus .2ex}{\@titlestyle}}
+%\renewcommand\paragraph{\@startsection {paragraph}{4}{\z@}{0ex}{-1em}{\@titlestyle}}
+%\renewcommand\subparagraph{\@startsection
+%  {subparagraph}{4}{\parindent}{3.25ex plus 1ex minus
+%    .2ex}{-1em}{\@titlestyle}}
 
 % Commands for typesetting affiliations and email addresses
 \newcommand{\affil}[1]{\textit{#1}}
@@ -139,3 +140,9 @@
 \renewcommand{\headrulewidth}{1pt}
 \renewcommand{\footrulewidth}{1pt}
 \pagestyle{fancy}
+
+
+\RequirePackage[fulloldstylenums]{kpfonts}
+\RequirePackage[sf,bf,small,raggedright,compact]{titlesec}
+
+

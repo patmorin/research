@@ -1,5 +1,5 @@
 \documentclass{patmorin}
-\usepackage{amsthm,amsmath,graphicx,stmaryrd}
+\usepackage{amsthm,amsmath,graphicx,stmaryrd,url}
 \usepackage{pat}
 
 \newcommand{\eps}{\varepsilon}
@@ -14,9 +14,11 @@
 
 \begin{abstract}
   We consider a new definition of fault-tolerance for geometric
-  $t$-spanners that we dub robustness.  A $t$-spanner is $f(k)$-robust
-  if, for all $k$, the removal of any $k$ vertices leaves an induced
-  subgraph with at least $n-f(k)$ vertices that is a $t$-spanner.
+  $t$-spanners that we dub robustness.  
+  % TODO: Fix this
+  % A $t$-spanner is $f(k)$-robust
+  % if, for all $k$, the removal of any $k$ vertices leaves an induced
+  % subgraph with at least $n-f(k)$ vertices that is a $t$-spanner.
   We prove that $f(k)$-robust spanners have a superlinear number of
   edges, even in one dimension, and give upper bounds on the number of
   edges in $f(k)$-robust spanners in any dimension.
@@ -24,15 +26,16 @@
 
 \section{Introduction}
 
-Let $V\subset \R^d$ be a set of $n$ points in $\R^d$.  A graph $G=(V,E)$
-is a (geometric) $t$-spanner of $V$ if $G$ is connected and, for every
-pair $x,y\in V$,
+Let $V\subset \R^d$ be a set of $n$ points in $\R^d$.  An undirected
+graph $G=(V,E)$ is a (geometric) $t$-spanner of $V^-\subseteq V$ if,
+for every pair $x,y\in V^-$,
 \[
   \frac{\|xy\|_G}{\|xy\|} \le t \enspace ,
 \]
 where $\|xy\|$ denote the Euclidean distance between $x$ and $y$ and
 $\|xy\|_G$ denotes the length of the Euclidean shortest path from $x$
-to $y$ that uses only edges in $G$.
+to $y$ that uses only edges in $G$.  Here we use the convention that
+$\|xy\|_G=\infty$ if there is no path, in $G$, from $x$ to $y$.
 
 Geometric $t$-spanners have been studied extensively and have applications
 in robotics, graph theory, data structures, wireless networks, and
@@ -44,14 +47,15 @@ For a graph $G=(V,E)$ and a subset $S\subseteq V$ of $G$'s vertices,
 we denote by $G\setminus S$ the graph obtained by removing the elements
 of $S$ from $V$, and their incident edges from $E$.  A graph $G$ is an
 \emph{$(f(k),g(n))$-robust $t$-spanner} of $V$ if, for every subset
-$S\subseteq V$, there exists a superset $S'\supseteq S$, $|S'|\le
-f(|S|)\cdot g(|V|)$, such that $G\setminus S'$ is a $t$-spanner.
-If $g(n)=1$, then we say simply that $G$ is an $f(k)$-robust $t$-spanner.
+$S\subseteq V$, there exists a superset $S^+\supseteq S$, $|S^+|\le
+f(|S|)\cdot g(|V|)$, such that $G\setminus S$ is a $t$-spanner of
+$V\setminus S^+$.  If $g(n)=1$, then we say simply that $G$ is an
+$f(k)$-robust $t$-spanner.
 
 An example is shown in \figref{grid} which suggests that the
-$\sqrt{n}\times\sqrt{n}$ grid graph is an $O(k^2)$-robust 2-spanner.
-The set $S'$ in this example is obtained by choosing ``disjoint''
-squares that cover the vertices of $S$ and adding to $S'$ any vertices
+$\sqrt{n}\times\sqrt{n}$ grid graph is an $O(k^2)$-robust 3-spanner.
+The set $S^+$ in this example is obtained by choosing ``disjoint''
+squares that cover the vertices of $S$ and adding to $S^+$ any vertices
 contained in these squares.  (A proof that the grid graph is indeed an
 $O(k^2)$-robust spanner is sketched in \secref{summary}.)
 
@@ -60,51 +64,52 @@ $O(k^2)$-robust spanner is sketched in \secref{summary}.)
     \includegraphics{grid}
   \end{center}
   \caption{From the set $S$ (whose elements are denoted by \textbullet)
-  we find a superset $S'$ (whose elements are denoted by $\times$)
-  so that $G\setminus S'$ (whose vertices are denoted by $\circ$) is a 2-spanner.}
+  we find a superset $S^+$ (whose elements are denoted by $\times$)
+  so that $G\setminus S^+$ (whose vertices are denoted by $\circ$) is a 3-spanner.}
   \figlabel{grid}
 \end{figure}
 
 One can think of an $f(k)$-robust $t$-spanner in terms of network
 reliability.  If a network is an $f(k)$-robust $t$-spanner, and $k$ nodes
-of the network fail, then one can disable an additional $f(k)-k$ nodes
-and the remaining network, whose size is $n-f(k)$, remains a $t$-spanner.
-Intuitively, most of the network survives the removal of $k$ nodes,
-provided that $k$ is small enough that $f(k)\ll n$.
+of the network fail, then the graph remains a $t$-spanner of $n-f(k)$
+of its nodes.  Intuitively, most of the network survives the removal of
+$k$ nodes, provided that $k$ is small enough that $f(k)\ll n$.
 
 \subsection{Robustness versus Fault-Tolerance}
 
 Robustness is related to, but different from, $r$-fault tolerance.
-An \emph{$r$-fault-tolerant} $t$-spanner, $G=(V,E)$, has the property that
-$G\setminus S$ is a $t$-spanner for any subset $S\subseteq V$ of size
-at most $r$. At a minimum, an $r$-fault-tolerant spanner must remain
-connected after the removal of any $r$ vertices.  This immediately implies
-that any $r$-fault-tolerant spanner with $n$ vertices has $\Omega(rn)$
-edges.  Several constructions of $r$-fault-tolerant spanners having
-$O(rn)$ edges exist \cite{cz04,lns02,l99}.
+An \emph{$r$-fault-tolerant} $t$-spanner, $G=(V,E)$, has the property
+that $G\setminus S$ is a $t$-spanner of $V\setminus S$ for any subset
+$S\subseteq V$ of size at most $r$. At a minimum, an $r$-fault-tolerant
+spanner must remain connected after the removal of any $r$ vertices.
+This immediately implies that any $r$-fault-tolerant spanner with $n>r$
+vertices has at least $(r+1)n/2$ edges, since every vertex must have
+degree at least $r+1$.  Several constructions of $r$-fault-tolerant
+spanners having $O(rn)$ edges exist \cite{cz04,lns02,l99}.
 
 In contrast, surprisingly sparse $f(k)$-robust $t$-spanners exist.
 For example, we show that for one-dimensional point sets, there exists
 $O(k\log k)$-robust 1-spanners having $O(n\log n)$ edges; the removal of
 any set of $o(n/\log n)$ vertices leaves a subgraph of size $n-o(n)$ that
-is a $t$-spanner.  A $r$-fault tolerant spanner with $r=n/\log n$ also
+is a $t$-spanner.  An $r$-fault tolerant spanner with $r=n/\log n$ also
 has this property, but all such spanners have $\Omega(n^2/\log n)$ edges.
 
-We suggest that in many applications where an $r$-fault tolerant spanner
-is used, an $f(k)$-robust spanner may be a better choice.  For example,
-one might build an $r$-fault tolerant spanner so that a network survives
-up to $r$ faults, perhaps because more than $r$ faults is viewed as
-unlikely.  Using an $f(k)$-robust spanner instead means that, if $r'\le
-r$ faults do occur, then the network can disable $f(r')-r'$ non-faulty
-nodes and continue to operate correctly.  In one case, the network loses
-$r'$ nodes while in the other case the network loses $f(r')$ nodes.
-For slow-growing functions $f$ this may be perfectly acceptable.
+We suggest that in many applications where an $r$-fault tolerant
+spanner is used, an $f(k)$-robust spanner may be a better choice.
+For example, one might build an $r$-fault tolerant spanner so that a
+network survives up to $r$ faults, perhaps because more than $r$ faults is
+viewed as unlikely.  Using an $f(k)$-robust spanner instead means that,
+if $r'\le r$ faults do occur, then the network loses up to $f(r')-r'$
+non-faulty nodes but continues to operate correctly for the remaining
+$n-f(r')$ nodes.  In one case, the network loses $r'$ nodes while in the
+other case the network loses $f(r')$ nodes.  For slow-growing functions
+$f$ this may be perfectly acceptable.
 
 The use of an $f(k)$-robust spanner in place of an $r$-fault tolerant
 spanner has the additional advantage that, in the unlikely event that $r'>
 r$ faults occur, the network continues to remain usable.  In particular,
 after $r'>r$ faults, the usable network has size at least $n-f(r')$. In
-contrast, even with $r'=r+1$ faults, the $r$-fault tolerant spanner may
+contrast, even with $r'=r+1$ faults, an $r$-fault tolerant spanner may
 have no component of size larger than $n/2$; see \figref{rft-problem}
 for an example.
 
@@ -137,7 +142,7 @@ If $G$ is $f(k)$-robust, then $G$ has a magnification function,
 $h$, that satisfies $h(x) \ge k$, for all $x> f(k)-k$ and every
 $k\in\{1,\ldots,|V|\}$; see \figref{magnification}.  If not, then
 there exists, a set $S''$ of size $x>f(k)-k$ such that $|N(S'')|<
-k$.  Taking $S=N(S'')\cup\{x_1,\ldots,x{k-|N(S'')|}\}$, where each
+k$.  Taking $S=N(S'')\cup\{x_1,\ldots,x_{k-|N(S'')|}\}$, where each
 $x_i\in V\setminus N(S'')$ yields a set, $S$, of size $k$ such that
 $G\setminus S$, has no component of size greater than $n-x < n-f(k)$.
 
@@ -168,7 +173,7 @@ These bounds are expressed as a dependence on the function $f(k)$.
 In particular, the number of edges depends on the function $f^*(n)$,
 which is the maximum number of times one can iterate the function $f$ on
 an initial input $k_0$ before exceeding $n$.  As a concrete example, if
-$f(k)=2k$, then  $f^*(n)=\floor{\log n}$ (with the initial input $k_0=1$).
+$f(k)=2k$, then  $f^*(n)=\floor{\log_2 n}$ (with the initial input $k_0=1$).
 
 Our most general lower-bound, \thmref{general-lower-bound-1d},
 states that there exists one-dimensional point sets of size $n$
@@ -235,17 +240,17 @@ $G_{2\times}$ by using the probabilistic method.
   $i-r$ is a multiple of $2^j$.  Then we say that $x_i$ \emph{kills}
   the vertices $x_{i-2^{j}+1},\ldots,x_{i+2^{j}-1}$ in $G'$; see
   \figref{killing}.  When this happens, the \emph{cost} of $x_i$ is
-  $c(x_i)=2^{j+1}-1$.  Observe that, unless $i<2^{j}$ or $i>n-2^{j}$,
-  $G'$ contains the edge $x_{i-2^{j}}x_{i+2^{j}}$ that ``jumps over''
-  all the vertices killed by $x_i$.  Therefore, if we define $S'$ to be
-  the set of all vertices killed by vertices in $S$, then $G'\setminus S'$
-  (and hence also $G_{2\times}\setminus S'$) is a 1-spanner.
+  $c(x_i)=2^{j+1}-1$.  Observe that, unless $i<2^{j}$ or $i>n-2^{j}$, $G'$
+  contains the edge $x_{i-2^{j}}x_{i+2^{j}}$ that ``jumps over'' all the
+  vertices killed by $x_i$.  Therefore, if we define $S^+$ to be the set
+  of all vertices killed by vertices in $S$, then $G'\setminus S$ (and
+  hence also $G_{2\times}\setminus S$) is a 1-spanner of $V\setminus S^+$.
   
   \begin{figure}
     \begin{center}
       \includegraphics{robust-2}
     \end{center}
-    \caption{Constructing the set $S'$ (whose elements are denoted
+    \caption{Constructing the set $S^+$ (whose elements are denoted
     by $\times$)
       from the set $S$ (whose elements are denoted by \textbullet).}
     \figlabel{killing}
@@ -261,14 +266,14 @@ $G_{2\times}$ by using the probabilistic method.
   \end{enumerate}
   We declare our choice of $r$ a \emph{success} if neither $\mathcal{A}$
   nor $\mathcal{B}$ holds.  Observe that, in the case of a success, we
-  obtain a set $S'$, $|S'|\le ck\log k$, such that $G_{2\times}\setminus
-  S'$ is a 1-spanner.  Therefore, all that remains is to show that the
+  obtain a set $S^+$, $|S^+|\le ck\log k$, such that $G_{2\times}\setminus
+  S$ is a 1-spanner of $S^+$.  Therefore, all that remains is to show that the
   probability of success is greater than 0.
   
-  We first note that, that the probability that any particular $x_i\in
-  S$ is expensive is at most $1/4k$.  This is $x_i$ is expensive if
-  and only if $(r-i)\equiv 0 \pmod {2^{\ceil{\log(4k)}}}$.
-  The probability of selecting $r$ with this property is only $1/2^{\ceil{\log(4k)}}
+  We first note that the probability any particular $x_i\in S$ is
+  expensive is at most $1/4k$.  This is because $x_i$ is expensive if and
+  only if $(r-i)\equiv 0 \pmod {2^{\ceil{\log(4k)}}}$.  The probability
+  of selecting $r$ with this property is only $1/2^{\ceil{\log(4k)}}
   \le 1/4k$. Therefore, by the union bound,
   \[
      \Pr\{\mathcal{A}\} \le k/4k = 1/4 \enspace .
@@ -389,12 +394,12 @@ The graph $G_f$ clearly has $O(nf^*(n))$ edges.  The following theorem shows tha
   \end{align*}
   Again, Markov's Inequality implies that the probability that the total
   cost of all cheap vertices exceeds $f(4k)f^*(4k)$ is at most $1/2$.
-  Therefore, the probability of finding a set $S'$ of size at most
+  Therefore, the probability of finding a set $S^+$ of size at most
   $f(4k)f^*(4k)$ is at least
   \[  
      1 - 1/2 - 1/4 > 0 
   \]
-  which proves the existence of such a set $S'$.
+  which proves the existence of such a set $S^+$.
   
   To prove the second part of the theorem, we proceed exactly the
   same way, except that the sequence $f^{j+1}(k_0)/f^j(k_0)$ becomes
@@ -463,10 +468,10 @@ We begin by focusing on the hardest case, $f(k) \in O(k)$.
   endpoint to the left of $S$ and one endpoint to the right of $S$
   have length at least $ctk$.
 
-  In particular, for any $S'\supseteq S$, with $|S'|\le ck$, there will
-  exist two vertices $x,y\not\in S'$, with $\|xy\|\le ck$ such that the
-  only path from $x$ to $y$ in $G\setminus S'$ uses an edge of length
-  greater than $ctk$.  Thus, $G\setminus S'$ is not a $t$-spanner.
+  In particular, for any $S^+\supseteq S$, with $|S^+|\le ck$, there will
+  exist two vertices $x,y\not\in S^+$, with $\|xy\|\le ck$ such that the
+  only path from $x$ to $y$ in $G\setminus S$ uses an edge of length
+  greater than $ctk$.  Thus, $G\setminus S$ is not a $t$-spanner of $S^+$.
 
   Applying the above argument to $i=ck+2jtck$, for
   $j\in\{0,\ldots,\floor{(n-ck)/2tck}\}$ implies that $G$ contains
@@ -485,23 +490,23 @@ class of lower-bounds.
 \begin{thm}\thmlabel{general-lower-bound-1d}
   Let $k_0$, $f$, and $f^*$ be defined as in \secref{iterated}, and let
   $S\subset \R$ be any set of $n$ real numbers.  Let $S=\{1,\ldots,n\}$
-  and let $t\ge 1$ be a constant.  Then any $(f(k),1)$-robust $t$-spanner
+  and let $t\ge 1$ be a constant.  Then any $f(k)$-robust $t$-spanner
   of $S$ has $\Omega(nf^*(n))$ edges.
 \end{thm}
 
 \begin{proof}[Proof Sketch]
   The proof is similar to the proof of \thmref{simple-lower-bound-1d}.
-  We need only consider $f(k)=\omega(n)$ since, otherwise we can apply
+  We need only consider $f(k)\in\omega(k)$ since, otherwise we can apply
   \thmref{simple-lower-bound-1d}.  We group the edges of the graph
   $G$ into $\Omega(f^*(n))$ classes and show that each class contains
   $\Omega(n)$ vertices.  In this case, the edges in each class have
   lengths in a range of the form $[f^i(k_0),tcf^{i}(k_0)]$.  For large
-  enough $i$, these classes do not overlap since $f(k)=\omega(n)$.
+  enough $i$, these classes do not overlap since $f(k)\in\omega(k)$.
 \end{proof}
 
 \begin{cor}
-  Let $V=\{1,\ldots,n\}$ and let $c>1$ be any constant.  Then any
-  $f(k)$-robust 1-spanner with
+  Let $V=\{1,\ldots,n\}$ and let $c>1$ and $t>1$ be constants.  Then any
+  $f(k)$-robust $t$-spanner with
   \begin{enumerate}
     \item $f(k)\in O(k\log k)$ has $\Omega(n\log n/\log\log n)$ edges;
     \item $f(k)\in O(kc^{\sqrt{\log n}})$ has $\Omega(n\sqrt{\log n})$
@@ -520,20 +525,35 @@ factor of $\log\log n$.
 
 In this section, we give a family of constructions for point sets
 $V\subset\R^d$, $d\ge 1$.  These constructions make use of dumbbell
-tree spanners \cite[Chapter~11]{ns07}.  A \emph{dumbbell tree spanner}
-of $V$ is a set of $O(1)$ binary trees $\mathcal{T}=\{T_1,\ldots,T_p\}$.
-Each binary tree $T_i$ has $n$ leaves, one for each vertex of $S$.
-Each of $T_i$'s internal nodes also stores a point of $S$, and no point
-of $S$ is stored in more than one internal node of $T_i$.  These trees
-have the property that, for any two points $x,y\in S$, there exists some
-tree $T_i$ such that the path from $x$ to $y$ in $T_i$ has length at
-most $t'\|xy\|$, where $t'>1$ is a parameter.  Thus, the graph $G=(S,E)$
-obtained by taking the union of all edges in all trees is a $t'$-spanner.
+tree spanners \cite[Chapter~11]{ns07}.  In particular, they make use of
+binary dumbbell trees, first used by Arya \etal\ \cite{admss95} in the
+construction of low-diameter bounded-degree spanners.  A full description
+of the construction (and proof of existence) of binary dumbbell trees
+can be found in the notes by Smid \cite{s12}.
+
+A \emph{(binary) dumbbell tree spanner} of $V$ is defined by a set of
+$O(1)$ binary trees $\mathcal{T}=\{T_1,\ldots,T_p\}$.  Each node, $u$,
+of each binary tree is associated with a point, $r(u)\in V$.  Each tree
+$T_i$ has $n$ leaves, each associated with a unique one for each point
+in $V$.  Each point in $V$ is associated with at most one of $T_i$'s
+internal nodes.  Thus, any point in $V$ is associated with at most 2
+nodes of $T_i$ for each $i\in \{1,\ldots,p\}$.
+
+These trees have the property that, for any two points $x,y\in V$,
+there exists some tree $T_i$ with two leaves $u$ and $v$ such that
+$r(u)=x$, $r(v)=y$ and the path, $u,\ldots,v$ in $T_i$ defines a path
+$r(u),\ldots,r(v)$ whose Euclidean length is at most $t'\|xy\|$, where
+$t'>1$ is a parameter in the construction of the dumbbell tree.  Thus,
+the graph $G=(V,E)$ obtained by taking 
+\[
+   E = \bigcup_{i=1}^p\{r(u)r(v) : \text{$uv$ is an edge of $T_i$} \}
+\]
+is a $t'$-spanner of $V$.
 
 \begin{thm}\thmlabel{dd}
   Let $k_0$, $f$, and $f^*$ be defined as in \secref{iterated}.
-  Let $S\subset \R^d$ be any set of $n$ points in $\R^d$.  Then, for any
-  constant $t>1$,  there exists a $O(kf(k))$-robust $t$-spanner of $S$
+  Let $V\subset \R^d$ be any set of $n$ points in $\R^d$.  Then, for any
+  constant $t>1$,  there exists a $O(kf(k))$-robust $t$-spanner of $V$
   with $O(nf^*(n))$ edges.
 \end{thm}
 
@@ -578,23 +598,24 @@ obtained by taking the union of all edges in all trees is a $t'$-spanner.
     \figlabel{dumbbell-kill}
   \end{figure}
   
-  Let $S'$ be the set of all vertices killed by all vertices in $S$ and
-  consider some pair of vertices $x,y\in V\setminus S'$.  There exists
+  Let $S^+$ be the set of all vertices killed by all vertices in $S$ and
+  consider some pair of vertices $x,y\in V\setminus S^+$.  There exists
   a tree $T_i$ such that the path in $T_i$ from the leaf containing $x$
   to the leaf containing $y$ has length at most $t'\|xy\|$.  If the
   leaves of $T_i$ containing $x$ and $y$ are in the same component of
   $T_i\setminus X$ then the path in $T_i$ from $x$ to $y$ is also a path
-  in $G_k\setminus S'$ and this path has length $t'\|xy\|$.
+  in $G_k\setminus S$ and this path has length $t'\|xy\|$.
 
   If $x$ and $y$ are in different components of $T_i\setminus X$ then
-  $G_k\setminus S'$ contains a path, from $x$ up to the lowest ancestor,
-  $x'$, of $x$ that appears in $X$.  Similarly, $G_k\setminus S'$ contains
-  a path from $y$ up to the lowest ancestor, $y'$, of $y$ that appears
-  in $X$.  Finally, since $G_k$ contains a $k$-fault tolerant $t'$-spanner
-  on the vertices of $X$, and $|S|\le k$, there is a path from $x'$ to
-  $y'$ of length at most $t'\|x'y'\|$.  Therefore, $G_k\setminus S'$,
-  contains a path from $x$ to $y$ of length at most $(t')^2\|xy\|$.
-  Taking $t'=\sqrt{t}$ shows that $G_k\setminus S'$ is a $t$-spanner.
+  $G_k\setminus S$ contains a path, from $x$ up to the lowest ancestor,
+  $x'$, of $x$ that appears in $X$.  Similarly, $G_k\setminus S^+$
+  contains a path from $y$ up to the lowest ancestor, $y'$, of $y$ that
+  appears in $X$.  Finally, since $G_k$ contains a $k$-fault tolerant
+  $t'$-spanner on the vertices of $X$, and $|S|\le k$, there is a path
+  in $G_k\setminus S$ from $x'$ to $y'$ of length at most $t'\|x'y'\|$.
+  Therefore, $G_k\setminus S$, contains a path from $x$ to $y$ of length
+  at most $(t')^2\|xy\|$.  Taking $t'=\sqrt{t}$ shows that $G_k\setminus
+  S$ is a $t$-spanner of $V\setminus S^+$.
 
   We have just shown how to construct a graph $G_k$ that has $O(n)$
   edges and is $O(k^2)$ robust provided that $|S|\le k$.  To obtain
@@ -606,7 +627,7 @@ obtained by taking the union of all edges in all trees is a $t'$-spanner.
   is $(O(kf(k)),1)$-robust.
 \end{proof}
 
-\subsection{Linear Size Robust Spanners}
+\subsection{Linear-Size Robust Spanners}
 
 Finally, we show that linear size robust spanners exist.
 
@@ -623,8 +644,8 @@ Finally, we show that linear size robust spanners exist.
   Construct an $(f(k),g(n))$-robust $t$-spanner on the elements of $X$.
   The same argument used to prove \thmref{dd} shows that the resulting
   construction is $O(f(k),s(n)g(n))$ robust.  (Each vertex of $X$ that
-  belongs to $S$ or $S'$ results in the loss of at most 2 components in
-  each dumbbell tree, each of size at most $s(n)$.)
+  belongs to $S$ results in the loss of at most 2 components in each
+  dumbbell tree, each of size at most $s(n)$.)
 \end{proof}
 
 The following corollary is obtained by combining \thmref{linear-size}
@@ -665,7 +686,7 @@ grid graph; see \figref{grid}.  An argument similar to the proof of
 \thmref{klogk-1d} based on randomly shifting a quadtree shows that this
 graph is an $O(k^2)$-robust $2$-spanner.  Therefore, the vertices of
 the $\sqrt{n}\times\sqrt{n}$ grid admit a linear-size $O(k^2)$-robust
-2-spanner.  In contrast, \thmref{general-lower-bound-1d} shows that any
+3-spanner.  In contrast, \thmref{general-lower-bound-1d} shows that any
 $f(k)$-robust $t$-spanner for the $1\times n$ grid has superlinear size.
 This leads us to the following conjecture:
 
@@ -674,7 +695,7 @@ If $f(k)$-robust $t$-spanners with $s_f(n)$ edges exist for all one-dimensional 
 \end{conj}
 
 Another fundamental open problem has to do with the number of edges needed
-in an $O(k)$-robust $t$-spanner.  We have no upper-bound lower than the
+in an $O(k)$-robust $t$-spanner.  We have no upper-bound better than the
 trivial $O(n^2)$ and the only lower-bound is $\Omega(n\log n)$.  This is
 true even if we restrict our attention to constructing a $t$-spanner
 for the 1-dimensional point set $V=\{1,\ldots,n\}$.
@@ -683,65 +704,9 @@ for the 1-dimensional point set $V=\{1,\ldots,n\}$.
 
 This work was partly funded by NSERC and CFI.
 
-\bibliographystyle{plain}
+\bibliographystyle{plainurl}
 \bibliography{giant}
 
 
 \end{document}
-
-
-
-%This weaker result is no longer used
-%The following theorem shows that $G$ is also $(O(k^2),1)$-robust.
-%This theorem is not tight; later we will show that $G$ is in fact
-%$(O(k\log k),1)$-robust. Nevertheless, the proof of this theorem
-%can be considered as a warm-up to the proof of the more abstract
-%\thmref{general-upper-bound-1d}.
-%
-%\begin{thm}[Simple 1-d Upper Bound]\thmlabel{upper-bound-1d}
-%Let $V\subset \R$ be any set of $n$ real numbers.  Then there exists an
-%$(O(k^2),1)$-robust $1$-spanner of $S$ of size $O(n\log n)$.
-%\end{thm}
-%
-%\begin{proof}
-%We will prove that $G$ is a robust $1$-spanner. Consider any
-%$S\in\binom{V}{k}$, with $k\le \sqrt{n}$.  Let $d=2^{\ceil{\log (k+1)}}$
-%and observe that $k < d < 2k+2$ and that the edge $x_ix_{i+d}$ is in $G$
-%for every $i\in\{1,\ldots,n-d\}$.
-%
-%We say that $x_i,\ldots,x_{i+r}$ form a \emph{good block} if $r\ge
-%2d-1$ and $S$ contains no element of $x_i,\ldots,x_{i+r}$.  We focus
-%our attention on the set of maximal good blocks.  Note that the number
-%of maximal good blocks is at most $k+1$ and that the total number of
-%vertices contained in these blocks is at least $n-k(2d-1)=n-O(k^2)$.
-%We will show that there exists a set $S'\supseteq S$ that avoids all but
-%$2(d-1)$ vertices from each good block, and such that $G\setminus S'$
-%is a 1-spanner.
-%Therefore, the size of $S'$ is at most $O(k^2)-2(d-1)(k+1)=O(k^2)$.
-%
-%Initially our set $S'$ contains all vertices in $S$, and
-%we will add at most $d-1$ vertices from the beginning and
-%end of each block.  Between any two consecutive good blocks,
-%$x_i,\ldots,x_{i+r}$ and $x_j,\ldots,x_{j+s}$, $G$ contains $d$
-%vertex disjoint paths, $P_1,\ldots,P_{d-1}$ each of which begins
-%at a vertex in $x_{i+r-d+1},\ldots,x_{i+r}$ and ends at a vertex in
-%$x_{j},\ldots,x_{j+d-1}$.  (For example, one of these paths consists of
-%$x_i,x_{i+d},x_{i+2d},\ldots,x_{i+cd}$, for some integer $c$.)
-%
-%Since $d > k$, at least one path, say $P_1$, does not use any vertices
-%of $S$.  If $P_1$ begins at $x_k$ and ends at $x_\ell$ then we add
-%to $S'$ all vertices in 
-%$x_{k+1},\ldots,x_{\ell-1}$ that are not included in $P_1$.  Observe that adds,
-%to $S'$, at most $d-1$ of the first $d$ vertices of each block
-%and at most $d-1$ of the last $d$ vertices of each block.  Therefore,
-%the number of vertices added to $S'$ from all good blocks is at most
-%$2(d-1)(k+1)$, as claimed.
-%
-%Let $x_{i_1},\ldots,x_{i_{n'}}$ denote the vertices in $V\setminus
-%S'$, ordered from left to right.  None of these vertices are in $S'$,
-%and for each $j\in\{1,\ldots,n'-1\}$, $i_{j+1}-i_{j}\in\{1,d\}$, so the
-%edge $x_{i_j}x_{i_{j+1}}$ is present in $G$.  Therefore $G\setminus S'$
-%is a 1-spanner.
-%\end{proof}
-
 

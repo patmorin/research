@@ -33,6 +33,9 @@
 % Read the article class
 \LoadClass[11pt,letterpaper]{article}
 
+\RequirePackage{kpfonts}
+\RequirePackage[sf,bf,small,raggedright,compact]{titlesec}
+
 % Page setup
 \setlength{\textheight}{8.5in}
 \setlength{\textwidth}{6in}
@@ -46,20 +49,6 @@
 \setlength{\parindent}{1.25cm}
 \flushbottom
 
-
-% Sectioning commands
-\font\tensfb = cmssbx11
-\newcommand{\@titlestyle}{\normalsize\tensfb}
-\renewcommand\section{\@startsection {section}{1}{\z@}{-3.5ex plus
-    -1ex minus -.2ex}{2.3ex plus .2ex}{\@titlestyle}}
-\renewcommand\subsection{\@startsection{subsection}{2}{\z@}{-3.25ex
-    plus -1ex minus -.2ex}{1.5ex plus .2ex}{\@titlestyle}}
-\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}{-3.25ex
-    plus -1ex minus -.2ex}{1.5ex plus .2ex}{\@titlestyle}}
-\renewcommand\paragraph{\@startsection {paragraph}{4}{\z@}{0ex}{-1em}{\@titlestyle}}
-\renewcommand\subparagraph{\@startsection
-  {subparagraph}{4}{\parindent}{3.25ex plus 1ex minus
-    .2ex}{-1em}{\@titlestyle}}
 
 % Commands for typesetting affiliations and email addresses
 \newcommand{\affil}[1]{\textit{#1}}

@@ -33,7 +33,7 @@
 % Read the article class
 \LoadClass[11pt,letterpaper]{article}
 
-\RequirePackage{kpfonts}
+%\RequirePackage{kpfonts}
 \RequirePackage[sf,bf,small,raggedright,compact]{titlesec}
 
 % Page setup

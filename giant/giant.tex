@@ -14,10 +14,10 @@
 
 \begin{abstract}
   We consider a new definition of fault-tolerance for geometric
-  $t$-spanners that we dub robustness.  A graph is an $f(k)$-robust
-  $t$-spanner if, for all $k$, the removal of any $k$ vertices leaves a
-  set of $n-f(k)$ vertices such that there is a $t$-spanning path between
-  every pair of vertices in this set.  We prove that $f(k)$-robust
+  $t$-spanners that we dub robustness.  An $n$ vertex graph, $G$, is
+  an $f(k)$-robust $t$-spanner if, for all $k$, after removing any $k$
+  vertices from $G$ the remaining subgraph of $G$ is a $t$-spanner
+  of at least $n-f(k)$ of its vertices.  We prove that $f(k)$-robust
   spanners have a superlinear number of edges, even in one dimension,
   and give upper bounds on the number of edges in $f(k)$-robust spanners
   in any dimension.
@@ -26,7 +26,7 @@
 \section{Introduction}
 
 Let $V\subset \R^d$ be a set of $n$ points in $\R^d$.  An undirected
-graph $G=(V,E)$ is a (geometric) $t$-spanner of $V^-\subseteq V$ if,
+graph $G=(V,E)$ is a (geometric) \emph{$t$-spanner of $V^-\subseteq V$} if,
 for every pair $x,y\in V^-$,
 \[
   \frac{\|xy\|_G}{\|xy\|} \le t \enspace ,
@@ -34,21 +34,21 @@ for every pair $x,y\in V^-$,
 where $\|xy\|$ denote the Euclidean distance between $x$ and $y$ and
 $\|xy\|_G$ denotes the length of the Euclidean shortest path from $x$
 to $y$ that uses only edges in $G$.  Here we use the convention that
-$\|xy\|_G=\infty$ if there is no path, in $G$, from $x$ to $y$.
+$\|xy\|_G=\infty$ if there is no path, in $G$, from $x$ to $y$.  We say
+simply that $G$ is a \emph{$t$-spanner} if it is a $t$-spanner of $V$.
 
 Geometric $t$-spanners have been studied extensively and have applications
 in robotics, graph theory, data structures, wireless networks, and
 network design.  The recent book \cite{ns07} and handbook chapter
-\cite{e99} provide extensive discussions of geometric spanners and
+\cite{e99} provide extensive discussions of geometric $t$-spanners and
 their applications.
 
-For a graph $G=(V,E)$ and a subset $S\subseteq V$ of $G$'s vertices,
-we denote by $G\setminus S$ the graph obtained by removing the elements
-of $S$ from $V$, and their incident edges from $E$.  A graph $G$ is an
-\emph{$(f(k),g(n))$-robust $t$-spanner} of $V$ if, for every subset
-$S\subseteq V$, there exists a superset $S^+\supseteq S$, $|S^+|\le
-f(|S|)\cdot g(|V|)$, such that $G\setminus S$ is a $t$-spanner of
-$V\setminus S^+$.  If $g(n)=1$, then we say simply that $G$ is an
+For a graph $G=(V,E)$ and a subset $S\subseteq V$ of $G$'s vertices, we
+denote by $G\setminus S$ the subgraph of $G$ induced by $V\setminus S$.
+A graph $G$ is an \emph{$(f(k),g(n))$-robust $t$-spanner} of $V$ if, for
+every subset $S\subseteq V$, there exists a superset $S^+\supseteq S$,
+$|S^+|\le f(|S|)\cdot g(|V|)$, such that $G\setminus S$ is a $t$-spanner
+of $V\setminus S^+$.  If $g(n)=1$, then we say simply that $G$ is an
 $f(k)$-robust $t$-spanner.
 
 An example is shown in \figref{grid} which suggests that the
@@ -70,7 +70,7 @@ $O(k^2)$-robust spanner is sketched in \secref{summary}.)
 
 One can think of an $f(k)$-robust $t$-spanner in terms of network
 reliability.  If a network is an $f(k)$-robust $t$-spanner, and $k$ nodes
-of the network fail, then the graph remains a $t$-spanner of $n-f(k)$
+of the network fail, then the network remains a $t$-spanner of $n-f(k)$
 of its nodes.  Intuitively, most of the network survives the removal of
 $k$ nodes, provided that $k$ is small enough that $f(k)\ll n$.
 
@@ -79,30 +79,37 @@ $k$ nodes, provided that $k$ is small enough that $f(k)\ll n$.
 Robustness is related to, but different from, $r$-fault tolerance.
 An \emph{$r$-fault-tolerant} $t$-spanner, $G=(V,E)$, has the property
 that $G\setminus S$ is a $t$-spanner of $V\setminus S$ for any subset
-$S\subseteq V$ of size at most $r$. At a minimum, an $r$-fault-tolerant
-spanner must remain connected after the removal of any $r$ vertices.
-This immediately implies that any $r$-fault-tolerant spanner with $n>r$
-vertices has at least $(r+1)n/2$ edges, since every vertex must have
-degree at least $r+1$.  Several constructions of $r$-fault-tolerant
-spanners with $O(rn)$ edges exist \cite{cz04,lns02,l99}.
+$S\subseteq V$ of size at most $r$.  In our terminology, an $r$-fault
+tolerant spanner is $f(k)$-robust with
+\[
+    f(k) = \begin{cases}k & \text{for $k \le r$}  \\
+                   \infty & \text{for $k > r$.}  \\
+   \end{cases}
+\]
+
+At a minimum, an $r$-fault-tolerant spanner must remain connected
+after the removal of any $r$ vertices.  This immediately implies
+that any $r$-fault-tolerant spanner with $n>r$ vertices has at least
+$(r+1)n/2$ edges, since every vertex must have degree at least $r+1$.
+Several constructions of $r$-fault-tolerant spanners with $O(rn)$ edges
+exist \cite{cz04,lns02,l99}.
 
 In contrast, surprisingly sparse $f(k)$-robust $t$-spanners exist.
 For example, we show that for one-dimensional point sets, there exists
 $O(k\log k)$-robust 1-spanners with $O(n\log n)$ edges; the removal of
 any set of $o(n/\log n)$ vertices leaves a subgraph of size $n-o(n)$ that
 is a $t$-spanner.  An $r$-fault tolerant spanner with $r=n/\log n$ also
-has this property, but all such spanners have $\Omega(n^2/\log n)$ edges.
+has this property, but all such graphs have $\Omega(n^2/\log n)$ edges.
 
 We suggest that in many applications where an $r$-fault tolerant
 spanner is used, an $f(k)$-robust spanner may be a better choice.
 For example, one might build an $r$-fault tolerant spanner so that a
-network survives up to $r$ faults, perhaps because more than $r$ faults is
-viewed as unlikely.  Using an $f(k)$-robust spanner instead means that,
-if $r'\le r$ faults do occur, then the network loses up to $f(r')-r'$
-non-faulty nodes but continues to operate correctly for the remaining
-$n-f(r')$ nodes.  In one case, the network loses $r'$ nodes while in the
-other case the network loses $f(r')$ nodes.  For slow-growing functions
-$f$ this may be perfectly acceptable.
+network survives up to $r$ faults, perhaps because more than $r$ faults
+is viewed as unlikely.  Using an $f(k)$-robust spanner instead means
+that, if $r'\le r$ faults do occur, then up to $f(r')-r'$ suffer, but
+the remaining $n-f(r')$ nodes are unaffected.  In one case, the network
+loses $r'$ nodes while in the other case $f(r')$ nodes are affected.
+For slow-growing functions $f$ this may be perfectly acceptable.
 
 The use of an $f(k)$-robust spanner in place of an $r$-fault tolerant
 spanner has the additional advantage that, in the unlikely event that $r'>
@@ -184,7 +191,7 @@ size $n$ has an $O(f(k)f^*(k))$-robust spanner of size $O(nf^*(n))$.
 Furthermore, if $f(k)$ is sufficiently fast-growing, this construction
 is $O(f(k))$-robust, and hence has optimal size.  For point sets in
 dimension $d>1$, our upper and lower bounds diverge by a factor of $k$.
-\thmref{dd} shows that for any set of $n$ points in $\R^d$ there exists
+\thmref{dd} shows that, for any set of $n$ points in $\R^d$, there exists
 an $O(kf(k))$-robust spanner of size $O(nf^*(k))$.
 
 The remainder of the paper is organized as follows:  \Secref{one-d}
@@ -198,7 +205,10 @@ concludes with directions for further research.
 
 In this section, we consider constructions of robust $t$-spanners for
 1-dimensional point sets.  Throughout this section $V=\{x_1,\ldots,x_n\}$
-is a set of real numbers with $x_1<x_2<\cdots<x_n$.
+is a set of real numbers with $x_1<x_2<\cdots<x_n$.  We begin by giving
+a construction of an $O(k\log k)$-robust spanner having $O(n\log n)$
+edges.  This construction contains most of the ideas needed for the
+construction of $O(f(k))$-robust spanners for more general $f$.
 
 \subsection{An $O(k\log k)$-robust spanner with $O(n\log n)$ edges}
 
@@ -236,7 +246,7 @@ $G_{2\times}$ by using the probabilistic method.
     \figlabel{g-prime}
   \end{figure}
 
-  For a vertex $x_i\in S$, let $j$ be the largest integer such that
+  For a vertex $x_i\in S$, let $j=j(i)$ be the largest integer such that
   $i-r$ is a multiple of $2^j$.  Then we say that $x_i$ \emph{kills}
   the vertices $x_{i-2^{j}+1},\ldots,x_{i+2^{j}-1}$ in $G'$; see
   \figref{killing}.  When this happens, the \emph{cost} of $x_i$ is
@@ -245,7 +255,7 @@ $G_{2\times}$ by using the probabilistic method.
   vertices killed by $x_i$.  Therefore, if we define $S^+$ to be the set
   of all vertices killed by vertices in $S$, then $G'\setminus S$ (and
   hence also $G_{2\times}\setminus S$) is a 1-spanner of $V\setminus S^+$;
-  it contains a path that visits all vertices in $V\setminus S^+$ in order.
+  it contains a path that visits all vertices of $V\setminus S^+$ in order.
   
   \begin{figure}
     \begin{center}
@@ -267,7 +277,7 @@ $G_{2\times}$ by using the probabilistic method.
   \end{enumerate}
   We declare our choice of $r$ a \emph{success} if neither $\mathcal{A}$
   nor $\mathcal{B}$ holds.  Observe that, in the case of a success, we
-  obtain a set $S^+$, $|S^+|\le ck\log k$, such that $G_{2\times}\setminus
+  obtain a set $S^+$, $|S^+|\in O(k\log k)$, such that $G_{2\times}\setminus
   S$ is a 1-spanner of $S^+$.  Therefore, all that remains is to show that the
   probability of success is greater than 0.
   
@@ -333,9 +343,9 @@ $f(x+\delta)/(x+\delta) \ge f(x)/x$.
 
 For a positive number $x$, we define $\upen{x}=2^{\ceil{\log x}}$, as
 the smallest power of 2 greater than or equal to $x$.  From the function,
-$f$, we define the graph $G_f=(V,E)$ to have the edge set:
+$f$, we define the graph $G_f=(V,E_f)$ to have the edge set:
 \begin{eqnarray*}
-    E &=& \quad\left\{ x_ix_{i+1} : i\in\{1,\ldots,n-1\} \right\} \\
+    E_f &=& \quad\left\{ x_ix_{i+1} : i\in\{1,\ldots,n-1\} \right\} \\
      && {} \cup \left\{ x_{i}x_{i+\upen{f^j(k_0)}} : j\in\{0,\ldots,f^*(n)\},\,
         i\in\{1,\ldots,n-\upen{f^j(k_0)}\} \right\}
 \end{eqnarray*}
@@ -352,17 +362,17 @@ shows that this graph is a robust spanner:
 \end{thm}
 
 \begin{proof}
-  We proceed as in the proof of \thmref{klogk-1d}.  Select a random
-  integer $r\in\{0,\ldots,\upen{f^{f^*(n)+1}(k_0)}\}$.  We consider the
+  The proof is very similar to the proof of \thmref{klogk-1d}.  Select a random
+  integer $r\in\{0,\ldots,\upen{f^{f^*(n)+1}(k_0)}-1\}$.  We consider the
   subgraph $G'$ of $G_f$ that contains only the edges $x_ix_{i+\ell}$
   where $i-r$ is an integer multiple of $\ell$.  We say that an edge
   $x_ix_{i+\ell}$ has \emph{span} $\ell$.
 
   For an integer $i$, let $j=j(i)$ be the smallest integer such that
   $i-r$ is not a multiple of $\upen{f^j(k_0)}$; see \figref{spanjump}.
-  Informally, if there exists any edge that jumps over $x_i$, then an
-  edge of span $\upen{f^j(k_0)}$ jumps over $x_i$.  Then we say that a
-  vertex $x_i\in S$ kills $x_{i-p},\ldots,x_{i+q}$ where
+  Informally, if $G'$ has any edge that jumps over $x_i$, then it has an
+  edge of span $\upen{f^j(k_0)}$ that jumps over $x_i$.  Then we say that
+   $x_i$ kills $x_{i-p},\ldots,x_{i+q}$ where
   \begin{eqnarray*}
      p&=& \left((i-r) \bmod \upen{f^j(k_0)}\right)+1 \text{ and } \\
      q&=& \left((r-i) \bmod \upen{f^j(k_0)}\right)-1 \enspace .

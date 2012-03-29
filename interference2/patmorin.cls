@@ -142,7 +142,7 @@
 \pagestyle{fancy}
 
 
-\RequirePackage[fulloldstylenums]{kpfonts}
+\RequirePackage{kpfonts}
 \RequirePackage[sf,bf,small,raggedright,compact]{titlesec}
 
 

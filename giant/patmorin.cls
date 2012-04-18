@@ -106,7 +106,7 @@
 
 % Abstract
 \renewenvironment{abstract}
-{\hrule \noindent\textsc{Abstract.}}{\vskip 1em \hrule}
+{\hrule\vskip 1ex \noindent\textsc{Abstract.}}{\vskip 1.8ex \hrule}
 
 
 %------------- Use this so pdflatex outputs US letter pages -------------

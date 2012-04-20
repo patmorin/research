@@ -1,0 +1,99 @@
+\documentclass{patmorin}
+\usepackage{amsthm,amsmath}
+\usepackage{pat}
+
+
+\title{\MakeUppercase{Approximating Majority Depth}}
+\author{Dan Chen and Pat Morin}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We consider algorithms for approximating the majority depth (So and So
+2005) of a point with respect to an $n$-point set, $S$.  At the heart of
+our this approximation is a data structure that can preprocess $n$ lines
+in $O(n\log n)$ time so that we can test, in $O(n^{1/6})$ expected time,
+whether a randomly selected vertex in the arrangement of these lines is
+above or below the median level.
+\end{abstract}
+
+\section{Introduction}
+
+Let $S$ be a set of $n$ points.  For a pair $x,y\in S$, the \emph{major
+side} of $x,y$ is the union of the (at most 2) closed halfplanes with $x$
+and $y$ on their boundary that contain at least $n/2$ points of $S$.
+The \emph{majority depth} of a point $q$ with respect to an $n$ point
+set $S$ is defined as the number of pairs $x,y\in S$ that have $q$
+on their major side.
+
+Under the usual projective duality \cite{eXX}, the set $S$ becomes a
+set, $S^*$, of lines, pairs of points in $S$ becomes vertices in the
+arrangement of $S^*$, $q$ becomes a line, $q^*$ and the majority depth is the number of vertices $z$ in this arrangement such that
+\begin{enumerate}
+\item $z$ is above $q^*$ and $z$ is above the median level; or
+\item $z$ is below $q^*$ and $z$ is below the median level.
+\end{enumerate}
+
+Chen and Morin \cite{X} present an algorithm for computing majority
+depth that works in the dual.  Their algorithm works by computing the
+median level, computing the intersections of $q^*$ with the median level,
+and using fast inversion counting to determine the number of vertices
+of the arrangement sandwiched between $q^*$ and the median level. The
+running time of this algorithm is within a logarithmic factor of $m$,
+the complexity of the median level.
+
+The worst-case complexity the median level of $n$ lines has been the
+subject of intensive study since it was first posed by Erd\"os \cite{s}.
+The current best upper bound is $O(n^{4/3})$, due to Dey \cite{S} and
+the current best lower bound is $2^{\Omega(\sqrt{\log n})}$, due to
+Toth \cite{S}.  Thus, the worst-case running time of our majority depth
+algorithm is $\Omega(n\log^c n)$ for any constant $c$, but no worse than
+$O(n^{4/3}\log n)$.
+
+It seems difficult for any algorithm that computes the exact majority
+depth of a point to avoid (at least implicitly) computing the median
+level of the arrangement of $S^*$.  Therefore, in this paper, we turn
+to approximation by random sampling.  In particular, we use the simple
+technique of sampling vertices of the arrangement and checking whether
+\begin{enumerate}
+  \item each sample lies above or below $q^*$; and
+  \item each sample lies above or below the median level of $S^*$.
+\end{enumerate}
+
+The former test takes constant time but the latter test leads to a data
+structuring problem:  Preprocess the set $S^*$ so that one can quickly
+test, for any query point, $z$, whether $z$ is above or below the median
+level of $q^*$.   We know of two solutions to this problem.  The first
+solution is to compute the median level explicitly, in $O(\min\{m\log
+n,n^{4/3})$ time, after which any query can be answered in $O(\log n)$
+time by binary search on the x-coordinate of $z$.  The second solution
+is to construct a half-space range counting structure in $O(n\log n)$
+time that can answer these queries in $O(\sqrt{n})$ time \cite{hsXX}.
+
+In this paper, we show that the second solution can be improved
+considerably, at least for our application.  In particular, we show that
+when the query point $z$ is a randomly chosen vertex of the arrangement
+of $S^*$, Chan's optimal partition trees can be used to answer queries
+in $O(n^{1/6})$ expected time.  This faster query time means that we
+can use more random samples which leads to a more accurate approximation.
+
+
+\section{Approximate Range Counting}
+
+In this section, we show that Chan's optimal partition trees, which are
+designed for exact range counting are efficient structures for approximate
+range counting.    These partition trees are rooted $b$-ary trees with the
+following properties.  
+
+\begin{enumerate}
+  \item Each node, $v$, of the tree is associated with a triangle $\Delta(v)$.  
+  \item For each node, $v$ and each descendant, $w$, of $v$,
+    $\Delta(w)\subseteq\Delta(v)$.
+  \item For any two nodes $v$ and $w$ at the same level, $\Delta(v)$
+    and $\Delta(w)$ are disjoint
+  \item For a node $v$ at level $i$, $|\Delta(v)\cap S|\le n\alpha^i$.
+  \item 
+\end{document}
+
+

@@ -1,0 +1,153 @@
+\documentclass{patmorin}
+\usepackage{amsthm,amsmath}
+\usepackage{pat}
+
+
+\title{\MakeUppercase{Big Clique Big Line}}
+\author{Vida Dujmovi\'c, Pat Morin, and David R. Wood}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The big-clique or big-line conjecture asserts that, for any integers $k$
+and $\ell$, there exists an integer $n=n(k,\ell)$ such that every planar
+point set of size at least $n$ contains a subset of $k$ points in general
+position or a subset of $\ell$ points contained in a line.
+In this note we confirm this conjecture.
+\end{abstract}
+
+\section{Introduction}
+
+Note to self: This write-up comes from a misunderstanding of the
+big-clique or big-line problem.  In fact, all this shows is that any
+point set contains either a big line or a big general position point set.
+
+The \emph{big-clique or big-line conjecture} asserts that, for any
+integers $k$ and $\ell$, there exists an integer $n=n(k,\ell)$ such
+that every planar point set of size at least $n$ contains a subset of
+$k$ points in general position or a subset of $\ell$ points contained
+in a line.  Here, and throughout, a set of points is in \emph{general
+position} if and only no three points in the set are contained in a line.
+
+
+In this note, we confirm this conjecture by proving the following theorem:
+\begin{thm}\thmlabel{main}
+Let $P$ be any set of $n$ points in $\R^2$, let $k$ be the size of the
+largest subset of $P$ that is in general position, and let $\ell$ be the
+size of the largest subset of $P$ that is contained in a single line.
+Then $k\ell = \Omega(\sqrt{n})$.
+\end{thm}
+
+The main ingredients in the proof of \thmref{main} are a well-known
+observation about the number of collinear triples containing a particular
+point in $P$, the Local Lemma, and a non-standard random sammpling
+method that lies somewhere between Bernoulli sampling and sampling
+without replacement.
+
+\section{The Proof}
+
+We begin with a lemma that is (probably) well-known \cite{?}. We only
+include a proof here for the sake of completeness.  A \emph{collinear
+triplet} of $P$ is a subset of $P$ of size 3 all of whose members lie
+on a common line.
+
+\begin{lem}
+Let $P$ be a set of $n$ points such that no line contains $\ell$ or
+more points of $P$.  For any element $x\in P$, there are at most $n\ell$
+collinear triplets in $P$ that contain $x$.
+\end{lem}
+
+\begin{proof}
+Partition the $n-1$ points of $P\setminus\{x\}$ into groups
+$G_1,\ldots,G_r$, where all the elements of $G_i$ lie on a common line
+that contains $x$.  Let $n_i$ denote the cardinality of $G_i$,
+for each $i\in\{1,\ldots,r\}$.  Then the number of collinear triplets
+that include $x$ is exactly
+\begin{equation}
+   \sum_{i=1}^r \binom{n_i}{2} \eqlabel{triples}
+\end{equation}
+Note each $n_i \le \ell-2$ since any line contains at most $\ell-1$
+points of $P$, and $\sum_{i=1}^r n_i=n-1$.  A straightforward maximization
+argument then shows that \eqref{triples} is maximized when $n_i=\ell-2$,
+for all $i\in\{1,\ldots,r\}$, so that $r=(n-1)/(\ell-2)$.  Therefore,
+the number of collinear triples involving $x$ is at most
+\[
+    \left(\frac{n-1}{\ell-2}\right)\binom{\ell-2}{2} = (n-1)(\ell-3) < n\ell \enspace . 
+    \qedhere
+\]
+\end{proof}
+
+
+Our proof of \thmref{main} makes use of the Local Lemma, which
+we now state (this version is taken from Alon and Spencer
+\cite[Corollary~5.1.2]{as97}):
+
+\begin{lem}[Local Lemma]
+  Let $A_1,\ldots,A_m$ be events in an arbitrary probability space.
+  Suppose that each event $A_i$ is mutually independent of a set of
+  all other events $A_j$ but at most $d$, and that $\Pr\{A_i\} \le p$
+  for all $i\in\{1,\ldots,m\}$.  If
+  \[
+       ep(d+1)\le 1
+  \]
+  then $\Pr\{\bar{A}_1\wedge\cdots\wedge \bar{A}_m\} > 0$.
+\end{lem}
+
+\begin{proof}[Proof of \thmref{main}]
+Let $P$ be a set of $n$ points such that no line contains $\ell$ or more
+points of $P$.  
+% Assume (say, by the removal of less than $\ell$ points) that $n$ is a
+% multiple of $\ell$.
+We will show that $P$ contains a subset $S$ of size $blah$ that is in
+general position.
+
+Partition the elements of $P$ into \emph{groups} $P_1,\ldots,P_{n/r}$,
+each of size $r$. We take the set $S$ to include one element, chosen
+independently and uniformly at random, from each group $P_i$.  In this
+way we obtain a set of size $n/r=blah$.  All that remains is to show that,
+with positive probability, $S$ is in general position.
+
+Let $T$ be the set of collinear triples in $P$.  For each
+triple $\{x,y,z\}\in T$, let $\mathcal{E}_{xyz}$ denote the event
+$\{x,y,z\}\subseteq S$.  Observe that, if we have 
+\begin{equation}
+    \bigwedge_{\{x,y,z\}\in T} \bar{\mathcal{E}}_{xyz}
+    \eqlabel{xyz}
+\end{equation}
+then $S$ is a set of points in general position.  In particular, we need
+only show that \eqref{xyz} holds with non-zero probability;
+this is where we make use of the Local Lemma.
+
+We begin by observing that, for a particular triple $\{x,y,z\}\in T$,
+$p=\Pr\{\mathcal{E}_{xyz}\} \le 1/r^{3}$.  Indeed, if $x$, $y$, and $z$
+belong to three different groups, then this probability is exactly
+$1/r^{3}$, otherwise (two elements belong to the same group) this
+probability is 0.
+
+Next, we must bound the degree of dependence, $d$, to apply the Local
+Lemma.  Let $P(x)$ denote the group that contains the element $x$.
+Note that $\mathcal{E}_{xyz}$ is independent of
+\[
+   T\setminus \{\mathcal{E}_{uvw} : (P(x)\cup P(y)\cup P(z))
+                      \cap (P(u) \cup P(v) \cup P(w)) = \emptyset  \} \enspace .
+\]
+Informally, $\mathcal{E}_{xyz}$ and $\mathcal{E}_{uvw}$ are independent
+provided that the (up to three) random choices that determine
+$\mathcal{E}_{xyz}$ do not overlap with the (up to three) random choices
+that determine $\mathcal{E}_{uvw}$.
+
+Therefore, the events that ``depend on'' $\mathcal{E}_{xyz}$ are exactly
+the events whose collinear triples include an element of $P(x)$, $P(y)$,
+or $P(z)$.  Now,
+\[
+    | P(x)\cup P(y)\cup P(z)| \le 3r \enspace ,
+\]
+the number of events that depend on 
+
+
+
+\end{proof}
+
+\end{document}
+

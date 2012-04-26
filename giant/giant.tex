@@ -1,4 +1,5 @@
 \documentclass{patmorin}
+\listfiles
 \usepackage{amsthm,amsmath,graphicx,stmaryrd,url,dbnsymb}
 \usepackage{pat}
 
@@ -17,7 +18,7 @@ Carleton University}
   studied combinatorial objects.  We initiate the study of such highly
   connected graphs that are, in addition, geometric spanners.  We define
   a property of spanners called robustness.  Informally, when one removes
-  few vertices from a robust spanner, this harms only a small number of
+  a few vertices from a robust spanner, this harms only a small number of
   other vertices.  We show that robust spanners must have a superlinear
   number of edges, even in one dimension.  On the positive side, we give
   constructions, for any dimension, of robust spanners with a near-linear
@@ -73,7 +74,7 @@ such that
   factor; and
   \item The graph has high global connectivity: removing a small number
   of vertices leaves a graph in which a set of vertices of size $n-o(n)$
-  are all in the same component and all vertices in this set having
+  are all in the same component and all vertices in this set have
   spanning paths between them.
 \end{enumerate}
 
@@ -177,13 +178,13 @@ any set of $o(n/\log n)$ vertices leaves a subgraph of size $n-o(n)$ that
 is a $t$-spanner.  An $r$-fault-tolerant spanner with $r=n/\log n$ also
 has this property, but all such graphs have $\Omega(n^2/\log n)$ edges.
 
-We suggest that in many applications where an $r$-fault-tolerant
-spanner is used, an $f(k)$-robust spanner may be a better choice.
-For example, one might build an $r$-fault-tolerant spanner so that a
-network survives up to $r$ faults, perhaps because more than $r$ faults is
-viewed as unlikely.  Using an $f(k)$-robust spanner instead means that,
-if $r'\le r$ faults do occur, then up to $f(r')-r'$ nodes suffer, but
-the remaining $n-f(r')$ nodes are unaffected.  In one case, the network
+We suggest that in many applications where an $r$-fault-tolerant spanner
+is used, an $f(k)$-robust spanner may be a better choice.  For example,
+one might build an $r$-fault-tolerant spanner so that a network survives
+up to $r$ faults, perhaps because more than $r$ faults is viewed as
+unlikely.  Using an $f(k)$-robust spanner instead means that, if $r'\le
+r$ faults do occur, then an additional $f(r')-r'$ nodes suffer, but the
+remaining $n-f(r')$ nodes are unaffected.  In one case, the network
 loses $r'$ nodes while in the other case $f(r')$ nodes are affected.
 For slow-growing functions $f$ this may be perfectly acceptable.
 
@@ -213,7 +214,7 @@ $S\subseteq V$,
 \[
     |N(S)| \ge h(|S|) \enspace ,
 \]
-where $N(S)$ denote the set of vertices in $V\setminus S$ that are
+where $N(S)$ denotes the set of vertices in $V\setminus S$ that are
 adjacent to vertices in $S$.  Of particular interest are graphs
 that have a magnification function $h(x)=cx$, for $c>1$, and
 all $x\in\{0,\ldots,|V|/2\}$.  Such graphs are called \emph{vertex
@@ -225,7 +226,7 @@ $h$, that satisfies $h(x) \ge k$, for all $x> f(k)-k$ and every
 $k\in\{1,\ldots,|V|\}$; see \figref{magnification}.  If not, then
 there exists a set $S''$ of size $x>f(k)-k$ such that $|N(S'')|<
 k$.  Taking $S=N(S'')\cup\{x_1,\ldots,x_{k-|N(S'')|}\}$, where each
-$x_i\in V\setminus N(S'')$ yields a set, $S$, of size $k$ such that
+$x_i\in V\setminus N(S'')$ yields a set, $S$, of size at most $k$ such that
 $G\setminus S$, has no component of size greater than $n-x < n-f(k)$.
 
 \begin{figure}
@@ -260,10 +261,10 @@ $f(k)=2k$, then  $f^*(n)=\floor{\log_2 n}$ (with the initial input $k_0=1$).
 
 Our most general lower-bound, \thmref{general-lower-bound-1d},
 states that there exists one-dimensional point sets of size $n$
-for which any $f(k)$-robust spanner has size $\Omega(nf^*(n))$.
+for which any $f(k)$-robust $t$-spanner has size $\Omega(nf^*(n))$.
 For one-dimensional point sets, we can almost match this lower-bound:
-\thmref{general-1d} states that any one-dimensional point set of
-size $n$ has an $O(f(k)f^*(k))$-robust spanner of size $O(nf^*(n))$.
+\thmref{general-1d} states that any one-dimensional point set of size
+$n$ has an $O(f(k)f^*(k))$-robust 1-spanner of size $O(nf^*(n))$.
 Furthermore, if $f(k)$ is sufficiently fast-growing, this construction
 is $O(f(k))$-robust, and hence has optimal size.  For point sets in
 dimension $d>1$, our upper and lower bounds diverge by a factor of $k$.
@@ -307,10 +308,10 @@ $G_{2\times}$ by using the probabilistic method.
 \end{thm}
 
 \begin{proof}
-  Consider any set $S\in\binom{V}{k}$.  Select a random integer
-  $r\in\{0,\ldots,2^{\ceil{\log n}}-1\}$ and consider the subgraph,
-  $G'$, of $G_{2\times}$ consisting only of the edges of the form
-  $x_ix_{i+\ell}$ where $i-r$ is a multiple of $\ell$.  (For readers
+  Let $S$ be any non-empty subset of $V$ and let $k=|S|$.  Select a
+  random integer $r\in\{0,\ldots,2^{\ceil{\log n}}-1\}$ and consider the
+  subgraph, $G'$, of $G_{2\times}$ consisting only of the edges of the
+  form $x_ix_{i+\ell}$ where $i-r$ is a multiple of $\ell$.  (For readers
   with a background in data structures, this subgraph looks a lot like a
   skiplist in which $x_r$ appears at the top level; see \figref{g-prime}.)
 
@@ -439,11 +440,12 @@ shows that this graph is a robust spanner:
 \end{thm}
 
 \begin{proof}
-  The proof is very similar to the proof of \thmref{klogk-1d}.  Select a random
-  integer $r\in\{0,\ldots,\upen{f^{f^*(n)+1}(k_0)}-1\}$.  We consider the
-  subgraph $G'$ of $G_f$ that contains only the edges $x_ix_{i+\ell}$
-  where $i-r$ is an integer multiple of $\ell$.  We say that an edge
-  $x_ix_{i+\ell}$ has \emph{span} $\ell$.
+  The proof is very similar to the proof of \thmref{klogk-1d}.  Let $S$ be
+  any non-empty subset of $V$ and let $k=|S|$.   Select a random integer
+  $r\in\{0,\ldots,\upen{f^{f^*(n)+1}(k_0)}-1\}$.  We consider the subgraph
+  $G'$ of $G_f$ that contains only the edges $x_ix_{i+\ell}$ where $i-r$
+  is an integer multiple of $\ell$.  We say that an edge $x_ix_{i+\ell}$
+  has \emph{span} $\ell$.
 
   For an integer $i$, let $j=j(i)$ be the smallest integer such that
   $i-r$ is not a multiple of $\upen{f^j(k_0)}$; see \figref{spanjump}.
@@ -465,7 +467,7 @@ shows that this graph is a robust spanner:
   Define $c(x_i)$ as the number of vertices killed by $x_i$.  We say
   that $x_i$ is \emph{expensive} if $c(x_i) > f(4k)$ and \emph{cheap}
   otherwise.  If $x_i$ is expensive, then $f^{j(i)-1}(k_0)\ge 4k$ and
-  $i-r\equiv 0 \pmod {f^{j(i)-1}(k_0)}$.  Therefore, the probability
+  $i-r\equiv 0 \pmod \upen{f^{j(i)-1}(k_0)}$.  Therefore, the probability
   that $x_i$ is expensive is at most $1/f^{j(i)-1}(k_0) \le 1/4k$.
   Therefore, by the union bound, the probability that $S$ contains some
   expensive vertex is at most $1/4$.  All that remains is to bound the
@@ -687,7 +689,7 @@ associated with $u$.  Hopefully the reader can tolerate this informality.
   Any vertex $x\in S$ appears at most twice in each tree $T_i$.  For each
   $i\in\{1,\ldots,p\}$, we say that $x$ \emph{kills} all the vertices
   in any component of $T_i\setminus X$ that contains $x$.  Furthermore,
-  if $x$ an element of $X$, then $x$ kills all the vertices in the
+  if $x$ is an element of $X$, then $x$ kills all the vertices in the
   (at most 2) components of $T_i$ whose roots have $x$ as a parent.
   The total number of vertices killed by $x$ is therefore $O(pk')=O(k')$;
   see \figref{dumbbell-kill}.

@@ -1,15 +1,22 @@
-\documentclass{patmorin}
-\listfiles
-\usepackage{amsthm,amsmath}
+\documentclass{cccg12}
+%\listfiles
+\usepackage{amsmath}
 \usepackage{pat}
 
 
 \newcommand{\eps}{\varepsilon}
 
-\title{\MakeUppercase{Approximating Majority Depth}}
-\author{Dan Chen and Pat Morin}
+\title{Approximating Majority Depth}
+\author{Dan Chen\thanks{School of Computer Science,
+  Carleton University, {\tt dchen4@connect.carleton.ca}}
+  \and Pat Morin\thanks{School of Computer Science,
+  Carleton University, {\tt morin@scs.carleton.ca}}}
+
+\index{Morin, Pat}
+\index{Chen, Dan}
 
 \begin{document}
+\thispagestyle{empty}
 \maketitle
 
 \begin{abstract}
@@ -318,7 +325,9 @@ distribution of the level of a randomly chosen vertex $x$.
   \]
   where $\delta=dn^{4/3}j^{2/3}-\sum_{i=0}^{j}n_i$, also satisifies
   Dey's constraints.  Furthermore, 
-  \[  F(S')-F(S) = \delta Q(j) - \delta Q(j+1) \ge 0 \enspace , \]
+  \[  
+     F(S')-F(S) = \delta Q(j) - \delta Q(j+1) \ge 0 \enspace , 
+  \]
   so $F(S')\ge F(S)$.  Repeatedly applying this type of modification (or
   using induction) shows that the sequence $S=n_0,\ldots,n_{n/2}$ that
   satisifies \eqref{deys-equality} is a sequence that maximizes $F(S)$.
@@ -328,7 +337,7 @@ distribution of the level of a randomly chosen vertex $x$.
   some constant $\alpha>0$ and all $i\in\{1,\ldots,n/2\}$.  Plugging this
   back into \eqref{expected} yields
   \begin{align}
-     F(n_0,\ldots,n_{n/2}) 
+     & \!\!\!\!\! F(n_0,\ldots,n_{n/2}) \notag \\
       & \le \binom{n}{2}^{-1}\left(\alpha n^{4/3} Q(0)+\sum_{i=1}^{n/2} \alpha (n^{4/3}/i^{1/3})Q(i)\right) \notag \\
       & \le O(n^{-1/6}) \notag \\
       & \qquad {} + \binom{n}{2}^{-1}\sum_{i=1}^{n^{1/2}} O(n^{4/3}/i^{1/3})cn^{1/2}  \eqlabel{header}\\
@@ -341,7 +350,7 @@ distribution of the level of a randomly chosen vertex $x$.
   \begin{align*}
     \eqref{header} & = \binom{n}{2}^{-1}\sum_{i=1}^{n^{1/2}} O(n^{4/3}/i^{1/3})cn^{1/2} \\
         & = c\binom{n}{2}^{-1}O(n^{4/3}(n^{1/2})^{2/3})n^{1/2}
-           & \text{(bounding by integral)}  \\
+           %& \text{(bounding by integral)}  \\
         & = O\left(\frac{n^{1/2}}{n^{1/3}}\right) \\
         & = O(n^{1/6})
   \end{align*}
@@ -350,7 +359,7 @@ distribution of the level of a randomly chosen vertex $x$.
     \eqref{trailer} 
       & \le \binom{n}{2}^{-1}\sum_{i=1}^{n/2} O(n^{4/3}/i^{1/3})n^{\eps} \\
       & \le \binom{n}{2}^{-1}\sum_{i=1}^{n/2} O(n^{4/3}n^{2/3})n^{\eps} 
-                & \text{(bounding by integral)} \\
+                %& \text{(bounding by integral)} \\
         & = O(n^{\eps})
   \end{align*}
   The sum in \eqref{middle} is a little more delicate.  To bound it, we
@@ -374,10 +383,11 @@ distribution of the level of a randomly chosen vertex $x$.
       & = O(n^{1/6}) \enspace .
   \end{align*}
   To summarize, the expected running time of the query algorithm is at most
-  \[ 
-     F(n_1,\ldots,n_{n/2}) \le O(n^{-1/6})+\eqref{header} + \eqref{middle} + \eqref{trailer}
-     = O(n^{1/6}) \enspace . \qedhere
-  \]
+  \begin{align*}
+     F(n_1,\ldots,n_{n/2}) 
+     & \le O(n^{-1/6})+\eqref{header} + \eqref{middle} + \eqref{trailer} \\
+     & = O(n^{1/6}) \enspace . \qedhere
+  \end{align*}
 \end{proof}
 
 
@@ -439,13 +449,13 @@ Plugging this data structure into the same machinery used to prove
   \thmref{exp-side-test}, except that the sum that bounds the expected
   running time becomes:
   \begin{align*}
-     F(n_0,\ldots,n_{n/2})
-       & \le \binom{n}{2}^{-1}\left(\sum_{i=1}^{n^{1/4}}\Oh(n^{4/3}n^{1/2}/i^{1/3})
-      + \sum_{i=n^{1/4}+1}^{n/2}\Oh(n^{4/3}(n/i)^{2/3}/i^{1/3}) \right) \\
+     & \!\!\!\! F(n_0,\ldots,n_{n/2}) \\
+       & \le \binom{n}{2}^{-1}\sum_{i=1}^{n^{1/4}}\Oh(n^{4/3}n^{1/2}/i^{1/3}) \\
+      & \qquad {} + \binom{n}{2}^{-1}\sum_{i=n^{1/4}+1}^{n/2}\Oh(n^{4/3}(n/i)^{2/3}/i^{1/3}) \\
      & \le \binom{n}{2}^{-1}\left(\Oh(n^{4/3}n^{1/2}(n^{1/4})^{2/3})
       + \sum_{i=n^{1/4}+1}^{n/2}\Oh(n^{2}/i) \right) \\
-     & \le \binom{n}{2}^{-1}\left(\Oh(n^2) + \Oh(n^{2}) \right) 
-       \qquad \text{(since the second sum is harmonic)} \\
+     & \le \binom{n}{2}^{-1}\left(\Oh(n^2) + \Oh(n^{2}) \right) \\
+       % \qquad \text{(since the second sum is harmonic)} \\
      & \le \Oh(1) \enspace ,
   \end{align*}
   as required.

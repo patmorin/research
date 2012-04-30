@@ -116,6 +116,84 @@ concludes with an open problem.
 \section{Approximate Range Counting}
 \seclabel{range-counting}
 
+In this section, we consider the problem of approximate range counting.
+That is, we study algorithms to preprocess $S$ so that, given a halfplane
+$h$ and an integer $i\ge 0$, we can quickly return an integer $r^*(h,S)$
+such that
+\[
+   \left| |h\cap S| - r^*(h,S)\right| \le i \enspace .
+\]
+This data structure is such that queries are faster the larger allowable
+error, $i$.
+
+There are no new results in this section. Rather it is a review of two
+relevant results on range searching and $\epsilon$-approximations that are
+closely related, but separated by over 20 years.  The reason we do this
+is that, without a guide, it can take some effort to piece together the
+pieces; some of the proofs are existential and some are
+stated in terms of discrepancy theory.
+
+The first tools we need come from a recent result of Chan on optimal
+partition trees \cite[Theorem A.B]{c12}:
+
+\begin{thm}\thmlabel{optimal-partition-trees}
+  There exists a data structure that can preprocess an $n$ point set,
+  $S$, in $O(n\log n)$ time and for any query halfplane, $h$, the data
+  structure can return $|h\cap S|$ in $O(n^{1/2})$ time.
+\end{thm}
+
+\thmref{optimal-partition-trees}, and its $d$-dimensional variant,
+is the culmination of over two decades of research on range searching,
+$\eps$-nets, and $\eps$-approximations.  Not surprisingly, the result,
+and its proof technique have several important consequences.  One of
+these is the following theorem on spanning trees of low stabbing number
+\cite[Theorem X.Y]{c12}:
+
+\begin{thm}\thmlabel{spanning-tree}
+  For any $n$ point set, $S$, it is possible to compute, in $O(n\log n)$
+  time, a spanning tree, $T$, of $S$ such that, for every halfplane, $h$,
+  there are at most $O(\sqrt{n}$ edges $uw$ of $T$ such that $u\in h$
+  and $w\not\in h$.
+\end{thm}
+
+A spanning tree is not quite what is needed for what follows.  Rather,
+we require a matching of size $\lfloor n/2\rfloor$.  
+First we convert the tree, $T$, from \thmref{spanning-tree} into a path by creating a path, $P$, that contains the vertices of $T$ in the order they are encountered by a depth-first traversal.
+It is easy to verify that this at most doubles the
+number of edges ``crossed'' by any halfplane $h$. Next, we take every second edge of $P$ to obtain a matching:
+
+\begin{cor}\corlabel{spanning-path}
+  For any $n$ point set, $S$, it is possible to compute, in $O(n\log n)$
+  time, a matching, $M$, of $S$ of size $\lfloor n/2\rfloor$ such that,
+  for every halfplane, $h$, there are at most $O(\sqrt{n}$ edges $uw$
+  of $T$ such that $u\in h$ and $w\not\in h$.
+\end{cor}
+
+Our next reference is an old result of Matousek, Welzel and Werner
+\cite{mww93}.  It shows that \corlabel{spanning-path} is 
+
+\begin{lem}\lemlabel{yeah}
+  Given a spanning path of $S$ whose crossing number is $O(n^{1/2})$, one can compute, in $O(n)$ time a subset of $S'\subseteq S$ of size $\ceil n/2 \rceil$, such that, with probability at least $1-n^{-c}$, for every halfplane, $h$,
+\[
+    \left| 2|h\cap S'| - |h\cap S| \right| \le O(c\sqrt{n})
+\]
+\end{lem}
+
+The proof of \lemref{yeah} - (can be strengthened).
+
+
+this is so beautiful that it deserves to be mentioned.
+
+
+
+
+
+
+
+
+\section{Approximate Range Counting}
+\seclabel{range-counting}
+
 In this section, we show that Chan's optimal partition trees \cite{c12},
 which are designed for exact range counting, are also good for approximate
 range counting.\footnote{We note that by no means are Chan's partition

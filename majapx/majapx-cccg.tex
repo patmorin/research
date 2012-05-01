@@ -20,33 +20,47 @@
 \maketitle
 
 \begin{abstract}
-We consider algorithms for approximating the majority depth (Liu and
-Singh, 1993) of a point with respect to an $n$-point set, $S$.  At the
-heart of our this approximation is a data structure that can preprocess
-$n$ lines in $O(n\log n)$ time and can test, in $O(n^{1/6})$ expected
-time, whether a randomly selected vertex in the arrangement of these
-lines is above or below the median level.
+We consider the problem of approximating the majority depth (Liu and
+Singh, 1993) of a point $q$ with respect to an $n$-point set, $S$,
+by random sampling.  At the heart of this problem is a data structures
+question: How can we preprocess a set of $n$ lines so that we can quickly
+test whether a randomly selected vertex in the arrangement of these
+lines is above or below the median level.  We describe a Monte-Carlo data
+structure for this problem that can be constructed in $O(n\log n)$ time,
+can answer queries $O((\log n)^{4/3})$ expected time, and answers correctly
+with high probability.
 \end{abstract}
 
 \section{Introduction}
 
+A \emph{data depth measure} quantifies the centrality
+of an individual (a point) with respect to a population (a point set).
+Depth measures are an important part of multivariate statistics and many
+have been defined, include Tukey depth \cite{t74}, Oja
+depth \cite{o83}, simplicial depth \cite{l90}, majority depth \cite{ls93},
+and zonoid depth \cite{dkm96}.  For an overview of data depth from a
+statistician's point of view, refer to the survey by Small \cite{s90}.
+For a computational geometer's point of view refer to Aloupis' survey
+\cite{a06}.
+
+In this paper, we focus on the bivariate majority depth measure.
 Let $S$ be a set of $n$ points in $\R^2$.  For a pair $x,y\in S$,
 the \emph{major side} of $x,y$ is the union of the (at most 2) closed
-halfplanes with $x$ and $y$ on their boundary that contain at least
-$n/2$ points of $S$.  The \emph{majority depth} \cite{ls93,s91} of a
-point $q\in\R^2$ with respect to $S$ is defined as the number of pairs
-$x,y\in S$ that have $q$ in their major side.
+halfplanes with $x$ and $y$ on their boundary that contain at least $n/2$
+points of $S$.  The \emph{majority depth} \cite{ls93,s91} of a point,
+$q$, with respect to $S$, is defined as the number of pairs $x,y\in S$
+that have $q$ in their major side.
 
 Under the usual projective duality \cite{e97}, the set $S$ becomes
 a set, $S^*$, of lines; pairs of points in $S$ becomes vertices
-in the arrangement, $A(S^*)$, of $S^*$; $q$ becomes a line, $q^*$.
+in the arrangement, $A(S^*)$, of $S^*$; and $q$ becomes a line, $q^*$.
 The \emph{median-level} of $A(S^*)$ is the closure of the set of points
 on lines in $S$ that have exactly $\lfloor n/2\rfloor$ lines of $S$
 above them.  Then the majority depth of $q$ with respect to $S$ is equal
-to the number of vertices, $z$, in $A(S^*)$ such that
+to the number of vertices, $x$, in $A(S^*)$ such that
 \begin{enumerate}
-\item $z$ is above $q^*$ and $z$ is above the median level; or
-\item $z$ is below $q^*$ and $z$ is below the median level.
+\item $x$ is above $q^*$ and $x$ is above the median level; or
+\item $x$ is below $q^*$ and $x$ is below the median level.
 \end{enumerate}
 
 Chen and Morin \cite{cm11} present an algorithm for computing majority
@@ -62,34 +76,40 @@ The maximum complexity of the median level of $n$ lines has been the
 subject of intense study since it was first posed.  The current best
 upper bound is $O(n^{4/3})$, due to Dey \cite{d98} and the current best
 lower bound is $2^{\Omega(\sqrt{\log n})}$, due to T\'oth \cite{t00}.
-Thus, the worst-case running time of Chen and Morin's majority depth
-algorithm is at least $\Omega(n\log^c n)$ for any constant $c$, but
-no worse than $O(n^{4/3}\log n)$.  The median level can be computed in
-time $O(\min\{m\log n,n^{4/3}\})$ \cite{bj02,c99}.
+The median level can be computed in time $O(\min\{m\log n,n^{4/3}\})$
+\cite{bj02,c99}.  Thus, the worst-case running time of Chen and Morin's
+majority depth algorithm is $\omega(n(\log n)^c)$ for any constant $c$,
+but no worse than $O(n^{4/3}\log n)$.
 % and even in
 % $O((m\log n)/(\log\log n))$ time in the word-RAM model \cite{dp07}.
 % this last statement is not true - updates take O(log nlog log n) time.
 
 It seems difficult for any algorithm that computes the exact majority
 depth of a point to avoid (at least implicitly) computing the median
-level of $A(S^*)$.  Therefore, in this paper, we turn to approximation by
-random sampling.  In particular, we use the simple technique of sampling
-vertices of $A(S^*)$ and checking whether
+level of $A(S^*)$.  This motivates approximation by random sampling.
+In particular, one can use the simple technique of sampling vertices of
+$A(S^*)$ and checking whether
 \begin{enumerate}
   \item each sample lies above or below $q^*$; and
   \item each sample lies above or below the median level of $S^*$.
 \end{enumerate}
+In the primal, this is equivalent to taking random pairs of points in
+$S$ and checking, for each such pair, $(x,y)$, if, (1)~the closed
+upper halfplane, $h_{xy}$, with $x$ and $y$ on its boundary, contains $q$
+and (2)~if $h_{xy}$ contains
+ $n/2$ or more points of $S$.
 
 The former test takes constant time but the latter test leads to a
 data structuring problem:  Preprocess the set $S^*$ so that one can
-quickly test, for any query point, $z$, whether $z$ is above or below
-the median level of $q^*$.   We know of two immediate solutions to this
-problem.  The first solution is to compute the median level explicitly,
-in $O(\min\{m\log n,n^{4/3}\})$ time, after which any query can be
-answered in $O(\log n)$ time by binary search on the x-coordinate of
-$z$.  The second solution is to construct a half-space range counting
-structure---a partition tree---in $O(n\log n)$ time that can answer
-these queries in $O(n^{1/2})$ time \cite{c12}.
+quickly test, for any query point, $x$, whether $x$ is above or below
+the median level of $A(S^*)$.  (Equivalently, does a query halfplane, $h$,
+contain $n/2$ or more points of $S$.)  We know of two immediate solutions
+to this problem.  The first solution is to compute the median level
+explicitly, in $O(\min\{m\log n,n^{4/3}\})$ time, after which any query
+can be answered in $O(\log n)$ time by binary search on the x-coordinate
+of $z$.  The second solution is to construct a half-space range counting
+structure---a partition tree---in $O(n\log n)$ time that can count the
+number of points of $S$ in $h_{xy}$ in $O(n^{1/2})$ time \cite{c12}.
 
 The first solution is not terribly good, since Chen and Morin's algorithm
 shows that computing the \emph{exact} majority depth of $q$ can be done
@@ -99,23 +119,20 @@ approximate the majority depth for many different points, then this
 method may be the right choice.)
 
 In this paper, we show that the second solution can be improved
-considerably, at least for our application.  In particular, we show that
-when the query point $z$ is a randomly chosen vertex of the arrangement
-$A(S^*)$, a partition tree can be used to answer queries in $O(n^{1/6})$
-expected time.  This faster query time means that we can use more random
-samples which leads to a more accurate approximation.  We further show
-that, by combining partition trees and $\epsilon$-approximations
-\cite{c04} one can obtain a structure that answers queries in
-polylogarithmic, i.e., $\log^{O(1)} n$, expected time.
+considerably, at least when the application is approximating majority
+depth.  In particular, we show that when the query point is a randomly
+chosen vertex of the arrangement $A(S^*)$, a careful combination of
+partition trees \cite{c12} and $\eps$-approximations \cite{mww93}
+can be used to answer queries in $O((\log n)^{4/3}))$ expected time.
+This faster query time means that we can use more random samples which
+leads to a more accurate approximation.
 
 The remainder of this paper is organized as follows.  In
-\secref{range-counting} we review Chan's optimal partition trees
-and show how they can be used for approximate range counting.
-In \secref{fast-testing} we show how these approximate range
+\secref{range-counting} we review results on range counting and
+$\eps$-approximations and show how they can be used for approximate range
+counting.  In \secref{fast-testing} we show how these approximate range
 counting results can be used to quickly answer queries about whether
 a random vertex of $S^*$ is above or below the median level of $S^*$.
-In \secref{faster-queries} we show how $\epsilon$-approximations can
-be used to reduce the query time even further, to $\log^{O(1)} n$.
 In \secref{majority-depth} we briefly mention how all of this applies to
 the problem of approximating majority depth.  Finally, \secref{conclusion}
 concludes with an open problem.
@@ -123,117 +140,320 @@ concludes with an open problem.
 \section{Approximate Range Counting}
 \seclabel{range-counting}
 
-In this section, we show that Chan's optimal partition trees \cite{c12},
-which are designed for exact range counting, are also good for approximate
-range counting.\footnote{We note that by no means are Chan's partition
-trees the only range counting structure we could use.  They do, however,
-offer the current base construction-time/query-time combination.}
-A partition tree, $T=T(S)$, is a rooted $b$-ary tree that can be
-constructed in $O(n\log n)$ time and that has the following properties
-\cite[Theorems~3.2 and 4.2]{c12}:
+In this section, we consider the problem of approximate range counting.
+That is, we study algorithms to preprocess $S$ so that, given a closed
+halfplane $h$ and an integer $i\ge 0$, we can quickly return an integer
+$r_i(h,S)$ such that
+\[
+   \left| |h\cap S| - r_i(h,S)\right| \le i \enspace .
+\]
+This data structure is such that queries are faster when the allowable
+error, $i$, is larger.
 
-\begin{enumerate}
-  \item each node, $v$, of the tree is associated with a triangle
-    $\Delta(v)$, the triangle, $\Delta(r)$, associated with the root
-    contains all of $S$;
-  \item for each node, $v$ and each descendant, $w$, of $v$,
-    $\Delta(w)\subseteq\Delta(v)$;
-  \item for any two nodes, $v$ and $w$, at the same level, $\Delta(v)$
-    and $\Delta(w)$ are disjoint; 
-  \item for each leaf, $v$, $|\Delta(v)\cap S| \le 1$; and 
-  \item For any line $\ell$, and any integer
-    $k\in\{1,\ldots,n/\log^{\omega(1)} n\}$, the number of nodes, $v$,
-    such that $\Delta(v)$ intersects $\ell$ and $|\Delta(v)\cap S|\ge k$
-    is $O((n/k)^{1/2})$.
-\end{enumerate}
+There are no new results in this section. Rather it is a review of two
+relevant results on range searching and $\epsilon$-approximations that are
+closely related, but separated by nearly 20 years.  The reason we do this
+is that, without a guide, it can take some effort to gather and assemble
+the pieces; some of the proofs are existential, some are stated in terms
+of discrepancy theory, and some are stated in terms of VC-dimension.
+The reader who already knows all this, or is uninterested in learning it,
+should skip directly to \lemref{approx-range-counting}.
 
-As a data structure, the partition tree stores $|\Delta(v)\cap S|$
-at each internal node, $v$, and stores $\Delta(w)\cap S$ at each
-leaf, $w$.  Applying Property~4 with $k=1$ is what allows for halfplane
-range counting in $O(n^{1/2})$ time.  The following lemma shows that,
-by choosing larger values of $k$ we can peform approximate range
-counting more quickly.
+The first tools we need come from a recent result of Chan on optimal
+partition trees and their application to exact halfspace range counting
+\cite[Theorems 3.2 and 5.3, with help from Theorem~5.2]{c12}:
 
-\begin{lem}\lemlabel{approx-count}
-  Given any closed halfplane $h$, and any integer $i$, $1\le i\le
-  n/\log^{\omega(1)} n$, a partition tree $T$ can be used to determine,
-  in $O(\min\{n^{1/2},n/i\})$ time, a value $n_h$ such that 
-  \[ |h\cap S| \le n_h \le |h\cap S|+i \enspace .\]
-\end{lem}
+\begin{thm}\thmlabel{optimal-partition-tree}
+  Let $S$ be a set of $n$ points in $\R^2$ and let $N\ge n$ be an integer.
+  There exists a data structure that can preprocess $S$ in $O(n\log
+  N)$ expected time so that, with probability at least $1-1/N$, for
+  any query halfplane, $h$, the data structure can return $|h\cap S|$
+  in $O(n^{1/2})$ time.
+\end{thm}
 
-\begin{proof}
-  Consider performing a standard range-counting  search in $T$, starting
-  at the root and recursing on any node, $v$, such that (1)~the
-  interior of $\Delta(v)$ intersects the bounding line of $h$ and
-  (2)~$|\Delta(v)\cap S| > k$, for a value $k$ to be determined shortly.
+We say that a halfplane, $h$, \emph{crosses} a set, $X$, of points if
+$h$ neither contains $X$ nor is disjoint from $X$.  The partition tree
+of \thmref{optimal-partition-tree} is actually a \emph{binary space
+partition tree}.  Each internal node, $u$, is a subset of $\R^2$ and
+the two children of a node are the subsets of $u$ obtained by cutting
+$u$ with a line.  Each leaf, $w$, in this tree has $|w\cap S| \le 1$.
+The $O(n^{1/2})$ query time is obtained by designing this tree so that,
+with probability at least $1-1/N$, there are only $O(n^{1/2})$ nodes
+crossed by any halfplane.
 
-  By the fourth property of partition trees, this search takes
-  $O((n/k)^{1/2})$ time and the leaves of this recursion are a set, $V$,
-  of $c(n/k)^{1/2}$ nodes.  For each $v\in V$, $\Delta(v)$ contains at
-  most $k$ points of $S$, for a total of at most $c(nk)^{1/2}$ points.
-  These are the only points for which the search has not determined if
-  they are contained in $h$ or not.  Therefore, stopping at this point,
-  the algorithm can return a value that estimates $|h\cap S|$ to within
-  an additive error of $c(nk)^{1/2}$.  Choosing $k$ to be the maximum
-  integer such that $i \le c(nk)^{1/2}$ completes the proof.
-\end{proof}
+For a geometric graph $G=(S,E)$, the \emph{crossing number} of $G$ is the
+maximum, over all halfplanes, $h$, of the number of edges $uw\in E$ such
+that $h$ crosses $\{u,w\}$.  From \thmref{optimal-partition-tree} it is
+easy to derive a spanning tree of $S$ with crossing number $O(n^{1/2})$
+using a bottom-up algorithm:  Perform a post-order traversal of the
+partition tree.  When processing a node $u$ with children $v$ and $w$,
+add an edge to the tree that joins an arbitrary point in $v\cap S$ to
+an arbitrary point in $w\cap S$.  Since a halfplane cannot cross any
+edge unless it also crosses the node at which the edge was created,
+this yields the following result \cite[Corollary~7.1]{c12}:
 
-%We remark that this lemma compares favourably with the use of (the most
-%basic) $\eps$-approximations.  Another way to do approximate range
-%counting with an error of $i$ is to compute an $(i/n)$-approximation
-%of the points, which has size $O((n/i)^2)$ \cite{lls01,t94}.
-%By then building a partition tree of size $O((n/i)^2)$ on this
-%$(i/n)$-approximation, one obtains a data structure that does approximate
-%range-counting with an error of $i$, has size $O((n/i)^2)$, and can
-%answer queries in $O(n/i)$ time.
-%
-%A more sophisticated form of $\eps$-approximation, whose size is only
-%$O((n/i)^{4/3}\log n)$ leads to faster query algorithms.  This is
-%discussed in \secref{faster-queries}.
+\begin{thm}\thmlabel{spanning-tree}
+  For any $n$ point set, $S$, and any $N\ge n$, it is possible to compute,
+  in $O(n\log N)$ expected time, a spanning tree, $T$, of $S$ that,
+  with probability at least $1-1/N$, has crossing number $O(n^{1/2})$.
+\end{thm}
 
-The following result shows that \lemref{approx-count} gives a method of
-testing if a point $x$ is above or below the median level; the running
-time is sensitive to the distance (measured in levels) between $x$ and
-the median level.  The further $x$ is from the median level, the faster
-the test.
+A spanning tree is not quite what is needed for what follows.  Rather,
+we require a matching of size $\lfloor n/2\rfloor$.  To obtain this,
+we first convert the tree, $T$, from \thmref{spanning-tree} into a path
+by creating a path, $P$, that contains the vertices of $T$ in the order
+they are discovered by a depth-first traversal.  It is easy to verify that
+this at most doubles the number of edges of $T$ crossed by any halfplane.
+Next, we take every second edge of $P$ to obtain a matching:
 
-\begin{lem}\lemlabel{side-test}
-  Testing if a point, $x$, which is on the $n/2-i$ level or the $n/2+i$
-  level, is above or below the median level of $S$ can be done in time
+\begin{cor}\corlabel{matching}
+  For any $n$ point set, $S$, and any $N\ge n$, it is possible to
+  compute, in $O(n\log N)$ expected time, a matching, $M$, of $S$ of
+  size $\lfloor n/2\rfloor$ that, with probability at least $1-1/N$
+  has crossing number $O(n^{1/2})$.
+\end{cor}
+
+The following argument is due to Matou\v{s}ek, Welzl and Wernsich
+\cite[Lemma~2.5]{mww93}.  Assume, for simplicity, that $n$ is even and let
+$S'\subset S$ be obtained by taking exactly one endpoint from each edge in
+the matching $M$ obtained by \corref{matching}.  Consider some halfplane
+$h$,  and let $M^{I}_h$ be the subset of the edges of $M$ contained in
+$h$ and let $M^{C}_h$ be the subset of edges crossed by $h$. Then
+\[
+     |h\cap S| = 2|M^{I}_h| + |M^{C}_h|
+\] 
+In particular,
+\[
+     |h\cap S|- |M^{C}_h| \le 2|h\cap S'| \le |h\cap S|- |M^{C}_h| 
+\]
+Since $|M^C_h|\in O(n^{1/2}$, this is good news in terms of approximate
+range counting;  the set $S'$ is half the size of $S$, but $2|h\cap
+S'|$ gives estimate of $|h\cap S|$ that is off by only $O(n^{1/2})$.
+Next we show that this can be improved considerably with almost no effort.
+
+Rather than choose an arbitrary endpoint of each edge in $M$ to
+take part in $S'$, we choose each one of the two endpoints at random
+(and independently of the other $n/2-1$ choices).  Then, each edge in
+$M^{C}_h$ has probability $1/2$ of contributing a point to $h\cap S'$
+and each edge in $M^{I}_h$ contributes exactly one point to $h\cap S'$.
+Therefore,
+\[
+    \E[2|h\cap S'|]
+      = 2\left(1|M^{I}_h| + \frac{1}{2}|M^{C}_h|\right) = |h\cap S| \enspace .
+\]
+That is, $|h\cap S'|$ is an unbiased estimator of $|h\cap
+S|$.  Even better: the error of this estimator is (2 times) a
+binomial$(|M^{C}_h|,1/2)$ random variable, with $|M^{C}_h|\in
+O(n^{1/2})$.  Using standard results the concentration of binomial random
+variables, we immediately obtain:
+\[
+   \Pr\{\left|2|h \cap S'| - |h\cap S|\right| \ge c n^{1/4}(\log N)^{1/2}\} 
+       \le 1/N \enspace ,
+\]
+for some constant $c>0$.  That is, with probability $1-1/N$, $2|h\cap S'|$
+estimates $|h\cap S|$ to within an error of $O(n^{1/4}(\log N)^{1/2})$.
+Putting everything together, we obtain:
+
+\begin{lem}\lemlabel{yeah}
+  For any $n$ point set, $S$, and any $N\ge n$, it is possible to
+  compute, in $O(n\log N)$ expected time, a subset $S'$ of $S$ of 
+  size $\lceil n/2\rceil$ such that, 
+  with probability at least $1-1/N$, for every halfplane $h$,
   \[
-       Q(i) = \begin{cases}
-          O(n^{1/2}) & \text{if $0\le i \le n^{1/2}$} \\
-          O(n/i)      & \text{if $n^{1/2} \le i \le n^{1-\eps}$} \\
-          O(n^{\eps}) & \text{otherwise.}
-       \end{cases}
+     \left|2|h\cap S'| - |h\cap S|\right| \in O(n^{1/4}(\log N)^{1/2}) \enspace .
   \]
 \end{lem}
 
-\begin{proof}
-  Assume, without loss of generality that $x$ is on the $n/2-i$
-  level.  We begin by setting $i'= n^{1-\eps}$ and performing
-  an approximate range counting query with error $i'=n^{1-\eps}$
-  using \lemref{approx-count}.  If $i \ge n^{1-\eps}$, then this
-  determines that the level of $x$ is no more than $n/2$ and we are done.
-  This first query takes $O(n^{\eps})$ time, so this satifies the
-  third case in the running time requirement.
+What follows is another argument by Matou\v{s}ek, Welzl and Wernisch
+\cite[Lemma~2.2]{mww93}.  By repeatedly applying \lemref{yeah}, we
+obtain a sequence of $O(\log n)$ sets $S_0\supset S_1\cdots\supset S_r$,
+$S_0=S$ and $|S_j|=\lceil n/2^j\rceil$.  For $j\ge 1$, the set $S_j$
+can be computed from $S_{j-1}$ in $O(2^{-j}n\log N)$ time and has the
+property that, with probability $1-1/N$, for every halfplane $h$,
+\begin{equation}
+   \left|2^j|h\cap S_j| - |h\cap S|\right| \in O(2^{3j/4}n^{1/4}(\log N)^{1/2}) \enspace .
+  \eqlabel{crap}
+\end{equation}
+At this point, we have come full circle.  We store each
+of the sets $S_0,\ldots,S_r$ in an optimal partition tree
+(\thmref{optimal-partition-tree}) so that we can do range counting
+queries on each set $S_i$ in $O(|S_i|^{1/2})$ time.  This (finally)
+gives the result we need on approximate range counting:
+\begin{lem}\lemlabel{approx-range-counting}
+  Given any set $S$ of $n$ points in $\R^2$ and any $N\ge n$, there exists
+  a data structure that can be constructed in $O(n\log N)$ expected time
+  and, with probability at least $1-1/N$, can, for any halfspace $h$
+  and any integer $i\in\{0,\ldots,n\}$, return a number $r_i(h,S)$ such that
+  \[  \left||h\cap S|-r_i(h,S)\right| \le i \enspace .\]
+  Such a query takes $O(\min\{n^{1/2},(n/i)^{2/3}(\log N)^{1/3}\})$ expected time.
+\end{lem}
 
-  If $i < i'$, then we halve the value of $i'$ and try again, performing
-  an approximate range counting query with error $i$.  This continues
-  until either,
-  \begin{enumerate}
-    \item We reach a value $i' < i$, and determine that $x$ is above the
-      median level; or
-    \item The value of $i'$ falls below $n^{1/2}$, in which case we perform
-      an exact range counting query.
-  \end{enumerate}
-  In the first case, the final query takes $O(n/i)$ time. In the second
-  case, the final query takes $O(n^{1/2})$ time.  In both cases, the cost
-  of all queries leading up the final query form an exponential increasing
-  sequence, so the total cost of all queries is $O(\max\{n/i,n^{1/2}\})$,
-  as required.
+\begin{proof}
+  The data structure is a sequence of optimal partition trees on the
+  sets $S_0,\ldots,S_r$.  All of these structures can be computed in
+  $O(n\log N)$ time, since $|S_0|=n$ and the size of each subsequent
+  set decreases by a factor of 2.
+
+  To answer a query, $(h,i)$, we proceed as follows: If $i\le n^{1/4}$,
+  then we perform exact range counting on the set $S_0=S$ in $O(n^{1/2})$
+  time to return the value $|h\cap S|$.  Otherwise, we perform range
+  counting on the set $S_j$ where $j$ is the largest value that satisfies
+  \[
+      C2^{3j/4} n^{1/4}(\log N)^{1/2} \le i \enspace ,
+  \]
+  where the constant $C$ depends on the constant in the big-Oh notation
+  in \eqref{crap}.  This means $|S_j| = O((n/i)^{4/3}(\log N)^{2/3}))$
+  and the query takes expected time
+  \[
+      O(|S_j|^{1/2}) = O((n/i)^{2/3}(\log N)^{1/3}) \enspace ,
+  \]
+   as required.
 \end{proof}
 
+Our main application of \lemref{approx-range-counting} is a test that
+checks whether a halfspace, $h$, contains $n/2$ or more points of $S$.
+
+\begin{lem}\lemlabel{side-test}
+  Given any set $S$ of $n$ points in $\R^2$ and any $N\ge n$, there
+  exists a data structure that can be constructed in $O(n\log N)$
+  expected time and, with probability at least $1-1/N$, can, for any
+  halfspace $h$ determine if $|h\cap S|\ge n/2$.  Such a query takes
+  expected time 
+  \[  Q(i) = \begin{cases}
+        O(n^{1/2}) & \text{for $0\le i\le n^{1/4}$} \\
+        O((n/i)^{2/3}(\log N)^{1/3}) & \text{otherwise, }
+    \end{cases}
+  \]
+  where $i = ||h\cap S|-n/2|$.
+\end{lem}
+
+\begin{proof}
+  As preprocessing, we construct the data structure of
+  \lemref{approx-range-counting}.  To perform a query, we perform a
+  sequence of queries $(h,i_j)$, for $j=0,1,2,\ldots$, where $i_j=n/2^j$.
+  The $j$th such query takes $O(2^{2j/3}(\log N)^{1/3})$ time and the question,
+  ``is $|h\cap S|\ge n/2$?'' is resolved once $n/2^j < i$.  Since the cost
+  of successive queries is exponentially increasing, this final query
+  takes time $O(\min\{n^{1/2},(n/i)^{2/3}(\log N)^{1/3}\})$ and dominates the
+  total query time.
+\end{proof}
+
+%
+%
+%\section{Approximate Range Counting}
+%\seclabel{range-counting}
+%
+%In this section, we show that Chan's optimal partition trees \cite{c12},
+%which are designed for exact range counting, are also good for approximate
+%range counting.\footnote{We note that by no means are Chan's partition
+%trees the only range counting structure we could use.  They do, however,
+%offer the current base construction-time/query-time combination.}
+%A partition tree, $T=T(S)$, is a rooted $b$-ary tree that can be
+%constructed in $O(n\log n)$ time and that has the following properties
+%\cite[Theorems~3.2 and 4.2]{c12}:
+%
+%\begin{enumerate}
+%  \item each node, $v$, of the tree is associated with a triangle
+%    $\Delta(v)$, the triangle, $\Delta(r)$, associated with the root
+%    contains all of $S$;
+%  \item for each node, $v$ and each descendant, $w$, of $v$,
+%    $\Delta(w)\subseteq\Delta(v)$;
+%  \item for any two nodes, $v$ and $w$, at the same level, $\Delta(v)$
+%    and $\Delta(w)$ are disjoint; 
+%  \item for each leaf, $v$, $|\Delta(v)\cap S| \le 1$; and 
+%  \item For any line $\ell$, and any integer
+%    $k\in\{1,\ldots,n/\log^{\omega(1)} n\}$, the number of nodes, $v$,
+%    such that $\Delta(v)$ intersects $\ell$ and $|\Delta(v)\cap S|\ge k$
+%    is $O((n/k)^{1/2})$.
+%\end{enumerate}
+%
+%As a data structure, the partition tree stores $|\Delta(v)\cap S|$
+%at each internal node, $v$, and stores $\Delta(w)\cap S$ at each
+%leaf, $w$.  Applying Property~4 with $k=1$ is what allows for halfplane
+%range counting in $O(n^{1/2})$ time.  The following lemma shows that,
+%by choosing larger values of $k$ we can peform approximate range
+%counting more quickly.
+%
+%\begin{lem}\lemlabel{approx-count}
+%  Given any closed halfplane $h$, and any integer $i$, $1\le i\le
+%  n/\log^{\omega(1)} n$, a partition tree $T$ can be used to determine,
+%  in $O(\min\{n^{1/2},n/i\})$ time, a value $n_h$ such that 
+%  \[ |h\cap S| \le n_h \le |h\cap S|+i \enspace .\]
+%\end{lem}
+%
+%\begin{proof}
+%  Consider performing a standard range-counting  search in $T$, starting
+%  at the root and recursing on any node, $v$, such that (1)~the
+%  interior of $\Delta(v)$ intersects the bounding line of $h$ and
+%  (2)~$|\Delta(v)\cap S| > k$, for a value $k$ to be determined shortly.
+%
+%  By the fourth property of partition trees, this search takes
+%  $O((n/k)^{1/2})$ time and the leaves of this recursion are a set, $V$,
+%  of $c(n/k)^{1/2}$ nodes.  For each $v\in V$, $\Delta(v)$ contains at
+%  most $k$ points of $S$, for a total of at most $c(nk)^{1/2}$ points.
+%  These are the only points for which the search has not determined if
+%  they are contained in $h$ or not.  Therefore, stopping at this point,
+%  the algorithm can return a value that estimates $|h\cap S|$ to within
+%  an additive error of $c(nk)^{1/2}$.  Choosing $k$ to be the maximum
+%  integer such that $i \le c(nk)^{1/2}$ completes the proof.
+%\end{proof}
+%
+%%We remark that this lemma compares favourably with the use of (the most
+%%basic) $\eps$-approximations.  Another way to do approximate range
+%%counting with an error of $i$ is to compute an $(i/n)$-approximation
+%%of the points, which has size $O((n/i)^2)$ \cite{lls01,t94}.
+%%By then building a partition tree of size $O((n/i)^2)$ on this
+%%$(i/n)$-approximation, one obtains a data structure that does approximate
+%%range-counting with an error of $i$, has size $O((n/i)^2)$, and can
+%%answer queries in $O(n/i)$ time.
+%%
+%%A more sophisticated form of $\eps$-approximation, whose size is only
+%%$O((n/i)^{4/3}\log n)$ leads to faster query algorithms.  This is
+%%discussed in \secref{faster-queries}.
+%
+%The following result shows that \lemref{approx-count} gives a method of
+%testing if a point $x$ is above or below the median level; the running
+%time is sensitive to the distance (measured in levels) between $x$ and
+%the median level.  The further $x$ is from the median level, the faster
+%the test.
+%
+%\begin{lem}\lemlabel{side-test}
+%  Testing if a point, $x$, which is on the $n/2-i$ level or the $n/2+i$
+%  level, is above or below the median level of $S$ can be done in time
+%  \[
+%       Q(i) = \begin{cases}
+%          O(n^{1/2}) & \text{if $0\le i \le n^{1/2}$} \\
+%          O(n/i)      & \text{if $n^{1/2} \le i \le n^{1-\eps}$} \\
+%          O(n^{\eps}) & \text{otherwise.}
+%       \end{cases}
+%  \]
+%\end{lem}
+%
+%\begin{proof}
+%  Assume, without loss of generality that $x$ is on the $n/2-i$
+%  level.  We begin by setting $i'= n^{1-\eps}$ and performing
+%  an approximate range counting query with error $i'=n^{1-\eps}$
+%  using \lemref{approx-count}.  If $i \ge n^{1-\eps}$, then this
+%  determines that the level of $x$ is no more than $n/2$ and we are done.
+%  This first query takes $O(n^{\eps})$ time, so this satifies the
+%  third case in the running time requirement.
+%
+%  If $i < i'$, then we halve the value of $i'$ and try again, performing
+%  an approximate range counting query with error $i$.  This continues
+%  until either,
+%  \begin{enumerate}
+%    \item We reach a value $i' < i$, and determine that $x$ is above the
+%      median level; or
+%    \item The value of $i'$ falls below $n^{1/2}$, in which case we perform
+%      an exact range counting query.
+%  \end{enumerate}
+%  In the first case, the final query takes $O(n/i)$ time. In the second
+%  case, the final query takes $O(n^{1/2})$ time.  In both cases, the cost
+%  of all queries leading up the final query form an exponential increasing
+%  sequence, so the total cost of all queries is $O(\max\{n/i,n^{1/2}\})$,
+%  as required.
+%\end{proof}
+%
 %We remark that the proof of the \lemref{side-test} involves performing
 %up to $\Theta(\log n)$ queries in a partition tree.  In practice, these
 %queries are related and one can start the query for the next value $i'$
@@ -246,17 +466,25 @@ the test.
 \section{Side of Median Level Testing}
 \seclabel{fast-testing}
 
-We are now ready to tackle the main problem that comes up in trying to
-estimate majority depth by random sampling:  Given a random vertex,
+We are now ready to tackle the main problem that comes up in trying
+to estimate majority depth by random sampling:  Given a range pair of
+points $x,y\in S$, determine if there are more than $n/2$ points in
+the upper halfspace, $h_{xy}$, whose boundary is the line through $x$
+and $y$.  In this section, though, it will be more natural to work in
+the dual setting.  Here the question becomes: Given a random vertex,
 $x$, of $A(S^*)$, determine whether $x$ is above or below the median
-level of $S^*$.  Before proving our main theorem, we recall a result of
-Dey \cite[Theorem~4.2]{d98} about the maximum complexity of a sequence
+level of $S^*$.  The data structure in \lemref{side-test} answers these
+queries in time $O((n/i)^{2/3}(\log N)^{1/3})$ when the vertex $x$ is on the
+$n/2-i$ or $n/2+i$ level.
+
+Before proving our main theorem, we recall a result of Dey
+\cite[Theorem~4.2]{d98} about the maximum complexity of a sequence
 of levels.
 
 \begin{lem}\lemlabel{dey}
  Let $L$ be any set of $n$ lines and let $r$ be the number of vertices
  of $A(L)$ that are on levels $k,k+1,\ldots,k+j$.  Then, $r \in
- O(k^{4/3}j^{2/3})$.
+ O(nk^{1/3}j^{2/3})$.
 \end{lem}
 
 We are interested in the special case of \lemref{dey} where $k=n/2-i$
@@ -268,199 +496,184 @@ and $j=2i$:
   $\{n/2-i,\ldots,n/2+i\}$ is $O(n^{4/3}i^{2/3})$.
 \end{cor}
 
-\corref{dey} is useful to us because it allows us to understand the
-distribution of the level of a randomly chosen vertex $x$.
+\corref{dey} is useful because it gives bounds on the distribution of
+the level of a randomly chosen vertex of $A(S^*)$.
 
 \begin{thm}\thmlabel{exp-side-test}
-  Given any set, $L$, of $n$ lines, there exists an $O(n)$ space data
-  structure, that can be constructed in $O(n\log n)$ time, that can test
-  if a point $x$ is above or below the median level of $A(L)$.  When given
-  a random vertex of $A(L)$ as a query, the expected query time of this
-  structure is $O(n^{1/6})$.
+  Given any set, $L$, of $n$ lines and any $c>0$, there exists a data
+  structure that can test if a point $x$ is above or below the median
+  level of $L$.  For any constant, $c$, this structure can be made to
+  have the following properties:
+  \begin{enumerate}\setlength{\itemsep}{0mm}
+    \item It can be constructed in
+       $O(n\log n)$ expected time and uses $O(n)$ space;
+    \item with probability
+       at least $1-n^{-c}$, it answers correctly for all
+       possible queries; and
+    \item when given a random vertex of $A(L)$
+       as a query, the expected query time is $O((\log n)^{4/3})$.
+  \end{enumerate}
 \end{thm}
 
 \begin{proof}
-  The data structure is, of course, a partition tree and the query
-  algorithm is the algorithm given by \lemref{side-test}.  Let $n_i$
-  be the number of vertices of $A(L)$ on levels $n/2-i$ and $n/2+i$.
-  Then the expected query time of this data structure is at most
+  The data structure is, of course, the data structure of
+  \lemref{side-test} with $N=n^c$.  Let $n_i$ be the number of vertices
+  of $A(L)$ on levels $n/2-i$ and $n/2+i$.  Then the expected query time
+  of this data structure is at most
   \begin{equation}
     F(n_0,\ldots,n_{n/2}) 
-      = \binom{n}{2}^{-1}\sum_{i=0}^{n/2} n_i Q(i) \enspace ,
+      = \frac{1}{\binom{n}{2}}\sum_{i=0}^{n/2} n_i Q(i) \enspace ,
      \eqlabel{expected}
   \end{equation}
   where, for sufficiently large $n$, $Q(i)$ is upper-bounded by
   \[
         Q(i) \le \begin{cases}
-          cn^{1/2} & \text{if $0\le i \le n^{1/2}$} \\
-          cn/i      & \text{if $n^{1/2} < i \le n^{1-\eps}$} \\
-          cn^{\eps} & \text{otherwise,}
+          \beta n^{1/2} & \text{if $0\le i \le n^{1/4}$} \\
+          \beta (n/i)^{2/3}(\log N)^{1/3}  & \text{otherwise} .
         \end{cases}
   \]
-  for some constant $c>0$.   Our goal, therefore, is to
-  upper-bound $F(n_0,\ldots,n_{n/2})$ subject to Dey's constraints:
+  for some constant $\beta>0$.   Our goal, therefore, is to upper-bound
+  $F(n_0,\ldots,n_{n/2})$ subject to Dey's constraints (\lemref{dey}):
   \[
-     \sum_{i=0}^{j}n_i \le dn^{4/3}j^{2/3} 
+     \sum_{i=0}^{j}n_i \le \gamma n^{4/3}j^{2/3} 
   \]
-  for some constant $d>0$ and all $i\in\{0,\ldots,n/2\}$.
+  for some constant $\gamma>0$ and all $j\in\{0,\ldots,n/2\}$.
 
   Working in our favour is that $Q(i) \ge Q(i')$ for all $i \le i'$.
-  This implies that, to obtain an upperbound on $F(n_0,\ldots,n_{n/2})$,
+  This implies that, to obtain an upper bound on $F(n_0,\ldots,n_{n/2})$,
   we can set
   \begin{equation}
       \sum_{i=0}^{j}n_i = 
         \begin{cases}
-           dn^{4/3} & \text{if $j=0$} \\
-           dn^{4/3}j^{2/3} & \text{otherwise}
+           \gamma n^{4/3} & \text{if $j=0$} \\
+           \gamma n^{4/3}j^{2/3} & \text{otherwise}
         \end{cases}  \eqlabel{deys-equality}
   \end{equation}
-  for all $i\in\{0,\ldots,n/2\}$.  To see why this is so, suppose we have
+  for all $j\in\{0,\ldots,n/2\}$.  To see why this is so, suppose we have
   a sequence $S=n_0,\ldots,n_{n/2}$ that satisfies Dey's constraints
-  but for which $\sum_{i=0}^{j}n_i < dn^{4/3}j^{2/3}$ for some index
+  but for which $\sum_{i=0}^{j}n_i < \gamma n^{4/3}j^{2/3}$ for some index
   $j$. If $j=n/2$ then we can obviously increase the value of $n_j$, still
   satify Dey's constraints and increase the value of $F(n_0,\ldots,n_j)$.
   Otherwise ($j\in\{0,\ldots,n/2-1\}$) the sequence
   \[
      S'=n_0,\ldots,n_{j}+\delta,n_{j+1}-\delta,\ldots,n_{n/2}
   \]
-  where $\delta=dn^{4/3}j^{2/3}-\sum_{i=0}^{j}n_i$, also satisifies
+  where $\Delta=\gamma n^{4/3}j^{2/3}-\sum_{i=0}^{j}n_i$, also satisfies
   Dey's constraints.  Furthermore, 
-  \[  
-     F(S')-F(S) = \delta Q(j) - \delta Q(j+1) \ge 0 \enspace , 
-  \]
+  \[  F(S')-F(S) = \Delta Q(j) - \Delta Q(j+1) \ge 0 \enspace , \]
   so $F(S')\ge F(S)$.  Repeatedly applying this type of modification (or
   using induction) shows that the sequence $S=n_0,\ldots,n_{n/2}$ that
   satisifies \eqref{deys-equality} is a sequence that maximizes $F(S)$.
 
-  Finally, we can solve for the sequence that satisfies
-  \eqref{deys-equality} to obtain $n_i \le \alpha n^{4/3}/i^{1/3}$, for
-  some constant $\alpha>0$ and all $i\in\{1,\ldots,n/2\}$.  Plugging this
-  back into \eqref{expected} yields
+  Finally, we can bound the sequence that satisfies \eqref{deys-equality}
+  by differentiating $\gamma n^{4/3}j^{2/3}$ with respect to $j$.
+  This yields $n_i \in O(n^{4/3}/i^{1/3})$ for all $i\in\{1,\ldots,n/2\}$.
+  Plugging this back into \eqref{expected} yields
   \begin{align}
-     & \!\!\!\!\! F(n_0,\ldots,n_{n/2}) \notag \\
-      & \le \binom{n}{2}^{-1}\left(\alpha n^{4/3} Q(0)+\sum_{i=1}^{n/2} \alpha (n^{4/3}/i^{1/3})Q(i)\right) \notag \\
-      & \le O(n^{-1/6}) \notag \\
-      & \qquad {} + \binom{n}{2}^{-1}\sum_{i=1}^{n^{1/2}} O(n^{4/3}/i^{1/3})cn^{1/2}  \eqlabel{header}\\
-      & \qquad {} + \binom{n}{2}^{-1}\sum_{i=n^{1/2}+1}^{n^{1-\eps}} (\alpha n^{4/3}/i^{1/3})(cn/i)  \eqlabel{middle} \\
-      & \qquad {} + \binom{n}{2}^{-1}\sum_{i=n^{1-\eps}+1}^{n/2} O(n^{4/3}/i^{1/3})cn^{\eps} \eqlabel{trailer} \enspace .
+     & \!\!\!\! F(n_0,\ldots,n_{n/2}) \\
+      & \le \frac{1}{\binom{n}{2}}\left(O(n^{4/3}Q(0))+\sum_{i=1}^{n/2} O(n^{4/3}Q(i)/i^{1/3})\right) \notag \\
+      & \le o(1) \notag \\
+      & \qquad {} + \frac{1}{\binom{n}{2}}\sum_{i=1}^{n^{1/4}} O(n^{4/3}n^{1/2}/i^{1/3})  \eqlabel{header}\\
+      & \qquad {} + \frac{1}{\binom{n}{2}}\sum_{i=n^{1/4}+1}^{n/2}O(n^{4/3}(n/i)^{2/3}(\log N)^{1/3}/i^{1/3}) \eqlabel{middle} 
   \end{align}
   Recall that $\int_1^n i^{-1/3}\,\mathrm{d}i = \frac{3}{2}(n^{2/3}-1)$.
-  Using this integral allows us to bound the sums in \eqref{header}
-  and \eqref{trailer} as follows:
+  Using this integral to bound the sum in \eqref{header}
+  allows us to just squeak by:
   \begin{align*}
-    \eqref{header} & = \binom{n}{2}^{-1}\sum_{i=1}^{n^{1/2}} O(n^{4/3}/i^{1/3})cn^{1/2} \\
-        & = c\binom{n}{2}^{-1}O(n^{4/3}(n^{1/2})^{2/3})n^{1/2}
-           %& \text{(bounding by integral)}  \\
-        & = O\left(\frac{n^{1/2}}{n^{1/3}}\right) \\
-        & = O(n^{1/6})
+    \eqref{header} & = \frac{1}{\binom{n}{2}}\sum_{i=1}^{n^{1/4}} O(n^{4/3}n^{1/2}/i^{1/3}) \\
+        & = \frac{1}{\binom{n}{2}}O(n^{4/3}n^{1/2}(n^{1/4})^{2/3})
+           & \text{(bounding by integral)}  \\
+        & = O(1) \\
   \end{align*}
-  and 
-  \begin{align*}
-    \eqref{trailer} 
-      & \le \binom{n}{2}^{-1}\sum_{i=1}^{n/2} O(n^{4/3}/i^{1/3})n^{\eps} \\
-      & \le \binom{n}{2}^{-1}\sum_{i=1}^{n/2} O(n^{4/3}n^{2/3})n^{\eps} 
-                %& \text{(bounding by integral)} \\
-        & = O(n^{\eps})
-  \end{align*}
-  The sum in \eqref{middle} is a little more delicate.  To bound it, we
-  use $\int_1^n i^{-4/3}\,\mathrm{d}i = 3-3n^{-1/3}$, as follows:
+  We are not so lucky with the sum in \eqref{middle}, which ends up
+  being harmonic:
   \begin{align*}
     \eqref{middle} 
-      & = \binom{n}{2}^{-1}
-       \sum_{i=n^{1/2}+1}^{n/2} (\alpha n^{4/3}/i^{1/3})(cn/i) \\
-      & = \binom{n}{2}^{-1}
-       c\alpha n^{7/3}\left(\sum_{i=n^{1/2}+1}^{n/2} i^{-4/3} \right) \\
-      & \le \binom{n}{2}^{-1}
-       c\alpha n^{7/3}\int_{n^{1/2}}^{n} i^{-4/3}\,\mathrm{d}i \\
-      & = \binom{n}{2}^{-1} 
-       c\alpha n^{7/3}\left(\int_{1}^{n} i^{-4/3}\,\mathrm{d}i
-         - \int_{1}^{n^{1/2}} i^{-4/3}\,\mathrm{d}i  \right) \\
-      & = \binom{n}{2}^{-1} 
-       3c\alpha n^{7/3}\left(n^{-1/6} - n^{-1/3}\right) \\
-      & \le \binom{n}{2}^{-1} 
-       3c\alpha n^{7/3}n^{-1/6} \\
-      & = \binom{n}{2}^{-1} O(n^{13/6}) \\
-      & = O(n^{1/6}) \enspace .
+      & = \frac{1}{\binom{n}{2}}\sum_{i=n^{1/4}+1}^{n/2}O(n^{4/3}(n/i)^{2/3}(\log N)^{1/3}/i^{1/3}) \\
+      & = 
+       \sum_{i=n^{1/4}+1}^{n/2}O((\log N)^{1/3}/i) \\
+      & = O((\log n)(\log N)^{1/3})  \quad \mbox{(since $\sum_{i=1}^n 1/i=O(\log n)$)} \\
+      & = O((\log n)^{4/3}) \enspace ,
   \end{align*}
+  since $N=n^c$ and $c$ is constant.
   To summarize, the expected running time of the query algorithm is at most
-  \begin{align*}
-     F(n_1,\ldots,n_{n/2}) 
-     & \le O(n^{-1/6})+\eqref{header} + \eqref{middle} + \eqref{trailer} \\
-     & = O(n^{1/6}) \enspace . \qedhere
-  \end{align*}
+  \[ 
+     F(n_0,\ldots,n_{n/2}) \le o(1)+\eqref{header} + \eqref{middle} 
+     = O((\log n)^{4/3}) \enspace . \qedhere
+  \]
 \end{proof}
 
 
-\section{Faster Queries}
-\seclabel{faster-queries}
-
-In this section, we show that the expected query time of $O(n^{1/6})$
-can be reduced further, to $\log^{O(1)} n$, with a linear-space
-data structure.  The cost of this, however, is preprocessing time;
-the preprocessing algorithm has a running time that is only polynomial
-in $n$.  The data structure is based on the use of the following theorem
-\cite[Theorem~1.4 and Corollary~3.3]{mww93}:
-
-\begin{thm}[Matou\v{s}ek, Welzl, and Wernisch 1993]\thmlabel{approx}
-  For any set $S$ of $n$ points in the plane, and any $i\in\{1,\ldots,n\}$,
-  there exists a subset $S'\subseteq S$ so that, for any halfplane $h$,
-  \[  \left|\frac{|h\cap S|}{|S|} - \frac{|h\cap S'|}{|S'|}\right| \le \frac{i}{n} \] 
-  and $|S'| = O(((n/i)\log (n/i))^{4/3})$.  Furthermore, the set $S'$
-  can be computed in time polynomial in $n$.
-\end{thm}
-
-\newcommand{\Oh}{\tilde{O}}
-
-To avoid the typical log pile, we will use the notation $\Oh(f(n))$
-to mean the set $O(f(n)(\log n)^c)$ for some constant $c \ge 0$.
-\thmref{approx} allows us to estimate $|h\cap S|$ to within an error
-of $i$ by computing $|h\cap S'|$ and multiplying by $|S|/|S'|$.  If we
-build a partition tree on $S'$, computing $|h\cap S'|$ can be done in time
-\[
- \Oh(((n/i)^{4/3})^{1/2}) 
-    = \Oh((n/i)^{2/3})
-\]
-Observe that we can construct a sequence $S_0,\ldots,S_r$ of these
-$(i/n)$-approximations, where $S_j$ is constructed with the
-value $i=2^jn^{1/4}/(\log n)^{4/3}$.  The total size of these sets is
-$O(|S_0|)=O(n)$.  Using these approximations in exactly the same way
-as \lemref{approx-count} is used in the proof of \lemref{side-test},
-we obtain the following version of \lemref{side-test}:
-
-\begin{lem}\lemlabel{side-test2}
-  Testing if a point, $x$, which is on the $n/2-i$ level or the $n/2+i$
-  level, is above or below the median level of $S$ can be done in time
-  $Q(i) = O(\min\{n^{1/2},(n/i)^{2/3}\})$.
-\end{lem}
-
-Plugging this data structure into the same machinery used to prove
-\thmref{exp-side-test} we obtain the following result:
-
-\begin{thm}
-  Given any set, $L$, of $n$ lines, there exists an $O(n)$ space data
-  structure, that can be constructed in time polynomial in $n$, that
-  can test if a point $x$ is above or below the median level of $A(L)$.
-  When given a random vertex of $A(L)$ as a query, the expected query
-  time of this structure is $\log^{O(1)} n$.
-\end{thm}
-
-\begin{proof}[Proof Sketch]
-  The proof follows along the same lines as the proof of
-  \thmref{exp-side-test}, except that the sum that bounds the expected
-  running time becomes:
-  \begin{align*}
-     & \!\!\!\! F(n_0,\ldots,n_{n/2}) \\
-       & \le \binom{n}{2}^{-1}\sum_{i=1}^{n^{1/4}}\Oh(n^{4/3}n^{1/2}/i^{1/3}) \\
-      & \qquad {} + \binom{n}{2}^{-1}\sum_{i=n^{1/4}+1}^{n/2}\Oh(n^{4/3}(n/i)^{2/3}/i^{1/3}) \\
-     & \le \binom{n}{2}^{-1}\left(\Oh(n^{4/3}n^{1/2}(n^{1/4})^{2/3})
-      + \sum_{i=n^{1/4}+1}^{n/2}\Oh(n^{2}/i) \right) \\
-     & \le \binom{n}{2}^{-1}\left(\Oh(n^2) + \Oh(n^{2}) \right) \\
-       % \qquad \text{(since the second sum is harmonic)} \\
-     & \le \Oh(1) \enspace ,
-  \end{align*}
-  as required.
-\end{proof}
-
+%\section{Faster Queries}
+%\seclabel{faster-queries}
+%
+%In this section, we show that the expected query time of $O(n^{1/6})$
+%can be reduced further, to $\log^{O(1)} n$, with a linear-space
+%data structure.  The cost of this, however, is preprocessing time;
+%the preprocessing algorithm has a running time that is only polynomial
+%in $n$.  The data structure is based on the use of the following theorem
+%\cite[Theorem~1.4 and Corollary~3.3]{mww93}:
+%
+%\begin{thm}[Matou\v{s}ek, Welzl, and Wernisch 1993]\thmlabel{approx}
+%  For any set $S$ of $n$ points in the plane, and any $i\in\{1,\ldots,n\}$,
+%  there exists a subset $S'\subseteq S$ so that, for any halfplane $h$,
+%  \[  \left|\frac{|h\cap S|}{|S|} - \frac{|h\cap S'|}{|S'|}\right| \le \frac{i}{n} \] 
+%  and $|S'| = O(((n/i)\log (n/i))^{4/3})$.  Furthermore, the set $S'$
+%  can be computed in time polynomial in $n$.
+%\end{thm}
+%
+%\newcommand{\Oh}{\tilde{O}}
+%
+%To avoid the typical log pile, we will use the notation $\Oh(f(n))$
+%to mean the set $O(f(n)(\log n)^c)$ for some constant $c \ge 0$.
+%\thmref{approx} allows us to estimate $|h\cap S|$ to within an error
+%of $i$ by computing $|h\cap S'|$ and multiplying by $|S|/|S'|$.  If we
+%build a partition tree on $S'$, computing $|h\cap S'|$ can be done in time
+%\[
+% \Oh(((n/i)^{4/3})^{1/2}) 
+%    = \Oh((n/i)^{2/3})
+%\]
+%Observe that we can construct a sequence $S_0,\ldots,S_r$ of these
+%$(i/n)$-approximations, where $S_j$ is constructed with the
+%value $i=2^jn^{1/4}/(\log n)^{4/3}$.  The total size of these sets is
+%$O(|S_0|)=O(n)$.  Using these approximations in exactly the same way
+%as \lemref{approx-range-counting} is used in the proof of \lemref{side-test},
+%we obtain the following version of \lemref{side-test}:
+%
+%\begin{lem}\lemlabel{side-test2}
+%  Testing if a point, $x$, which is on the $n/2-i$ level or the $n/2+i$
+%  level, is above or below the median level of $S$ can be done in time
+%  $Q(i) = O(\min\{n^{1/2},(n/i)^{2/3}\})$.
+%\end{lem}
+%
+%Plugging this data structure into the same machinery used to prove
+%\thmref{exp-side-test} we obtain the following result:
+%
+%\begin{thm}
+%  Given any set, $L$, of $n$ lines, there exists an $O(n)$ space data
+%  structure, that can be constructed in time polynomial in $n$, that
+%  can test if a point $x$ is above or below the median level of $A(L)$.
+%  When given a random vertex of $A(L)$ as a query, the expected query
+%  time of this structure is $\log^{O(1)} n$.
+%\end{thm}
+%
+%\begin{proof}[Proof Sketch]
+%  The proof follows along the same lines as the proof of
+%  \thmref{exp-side-test}, except that the sum that bounds the expected
+%  running time becomes:
+%  \begin{align*}
+%     F(n_0,\ldots,n_{n/2})
+%       & \le \binom{n}{2}^{-1}\left(\sum_{i=1}^{n^{1/4}}\Oh(n^{4/3}n^{1/2}/i^{1/3})
+%      + \sum_{i=n^{1/4}+1}^{n/2}\Oh(n^{4/3}(n/i)^{2/3}/i^{1/3}) \right) \\
+%     & \le \binom{n}{2}^{-1}\left(\Oh(n^{4/3}n^{1/2}(n^{1/4})^{2/3})
+%      + \sum_{i=n^{1/4}+1}^{n/2}\Oh(n^{2}/i) \right) \\
+%     & \le \binom{n}{2}^{-1}\left(\Oh(n^2) + \Oh(n^{2}) \right) 
+%       \qquad \text{(since the second sum is harmonic)} \\
+%     & \le \Oh(1) \enspace ,
+%  \end{align*}
+%  as required.
+%\end{proof}
+%
 
 \section{Estimating Majority Depth}
 \seclabel{majority-depth}
@@ -468,33 +681,39 @@ Plugging this data structure into the same machinery used to prove
 Finally, we return to our application, namely estimating majority depth. 
 
 \begin{thm}
-  Given a set $S$ of $n$ points in $\R^2$, there exists a data structure
-  that can preprocess $S$ in $O(n\log n)$ time such that, for any point
-  $q$, the data structure can compute, in $O(rn^{1/6})$ time, a value
-  $d'(q,S)$ such that $\E[d'(q,S)]=d(q,S)$ and
+  Given a set $S$ of $n$ points in $\R^2$ and any constant $c>0$,
+  there exists a data structure that can preprocess $S$ in $O(n\log n)$
+  expected time such that, for any point $q$, the data structure can
+  compute, in $O((\log n)^{4/3})$ expected time, a value $d'(q,S)$
+  such that 
   \[
-     \Pr\left\{|d'(q,S)-d(q,S)| \ge \eps d(q,S)\right\} 
-        \le \exp\left(-\Omega\left(\eps^2rp\right)\right) \enspace ,
+     \Pr\left\{\frac{|d'(q,S)-d(q,S)|}{d(q,S)} \ge \eps \right\} 
+        \le \exp\left(-\Omega\left(\eps^2rp\right)\right) + n^{-c} \enspace ,
   \]
-  where $p=d(q,S)/\binom{n}{2}$ is the normalized majority depth of $q$.
+  where $d(q,S)$ is the majority depth of $p$ with respect to $S$ and
+  $p=d(q,S)/\binom{n}{2}$ is the normalized majority depth of $q$.
 \end{thm}
 
 \begin{proof}
-  Let $p=d(q,S)/\binom{n}{2}$.
-  Select $r$ random vertices of $A(S^*)$ (by taking random pairs of lines
-  in $S^*$) and, for each sample, test if it contributes to $d(q,S)$.  This
-  yields a count $r' \le r$ where
+  The data structure is the one described in \thmref{exp-side-test}.
+  Let $p=d(q,S)/\binom{n}{2}$.  Select $r$ random vertices of $A(S^*)$
+  (by taking random pairs of lines in $S^*$) and, for each sample, test
+  if it contributes to $d(q,S)$.  This yields a count $r' \le r$ where
   \[ 
      \E[r'] = rp \enspace .
   \]
   We then return the value $d'(q,S)=(r'/r)\binom{n}{2}$, so that
   $\E[d'(q,S)]=d(q,S)$, as required.
 
-  To prove the error bound, we use the fact that $r'$ is a binomial$(p,r)$ random variable.  Applying Chernoff's Bounds on $r'$ yields:
+  To prove the error bound, we use the fact that $r'$ is a binomial$(p,r)$
+  random variable.  Applying Chernoff's Bounds on $r'$ yields:
   \[
-     \Pr\{|r' - rp| \ge \eps rp\} \le e^{-\Omega(\eps^2rp)} \enspace ,
+     \Pr\{|r' - rp| \ge \eps rp\} \le \exp(-\Omega(\eps^2rp)) \enspace .
   \]
-  as required.
+  Finally, the algorithm may fail not because of badly chosen samples,
+  but rather, because the data structure of \thmref{exp-side-test} fails.
+  The probability that this happens is at most $n^{-c}$. Therefore,
+  the overall result follows from the union bound.
 \end{proof}
 
 \section{Conclusions}
@@ -518,5 +737,4 @@ trees, which can only answer these queries in $O(n^{1/2})$ time.
 \bibliography{majapx}
 
 \end{document}
-
 

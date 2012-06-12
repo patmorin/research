@@ -1,6 +1,6 @@
 \documentclass{patmorin}
 \listfiles
-\usepackage{amsthm,amsmath,wasysym}
+\usepackage{amsthm,amsmath}
 \usepackage{pat}
 
 
@@ -39,10 +39,10 @@ For a computational geometer's point of view refer to Aloupis' survey
 In this paper, we focus on the bivariate majority depth measure.
 Let $S$ be a set of $n$ points in $\R^2$.  For a pair $x,y\in S$,
 the \emph{major side} of $x,y$ is the union of the (at most 2) closed
-halfplanes with $x$ and $y$ on their boundary that contain at least $n/2$
-points of $S$.  The \emph{majority depth} \cite{ls93,s91} of a point,
-$q$, with respect to $S$, is defined as the number of pairs $x,y\in S$
-that have $q$ in their major side.
+halfplanes having both $x$ and $y$ on their boundary that contain at
+least $n/2$ points of $S$.  The \emph{majority depth} \cite{ls93,s91}
+of a point, $q$, with respect to $S$, is defined as the number of pairs
+$x,y\in S$ that have $q$ in their major side.
 
 Under the usual projective duality \cite{e97}, the set $S$ becomes
 a set, $S^*$, of lines; pairs of points in $S$ becomes vertices
@@ -58,11 +58,12 @@ to the number of vertices, $x$, in $A(S^*)$ such that
 
 Chen and Morin \cite{cm11} present an algorithm for computing majority
 depth that works in the dual.  Their algorithm works by computing the
-median level, computing the intersections of $q^*$ with the median level,
-and counting the number, $t$, of vertices of the arrangement sandwiched
-between $q^*$ and the median level.  The majority depth of $q$ is then
-equal to $\binom{n}{2}-t$.  The running time of this algorithm is within
-a logarithmic factor of $m$, the complexity of the median level.
+median level, computing the intersections of $q^*$ with the median
+level, and using fast inversion counting to determine the number, $t$,
+of vertices of the arrangement sandwiched between $q^*$ and the median
+level.  The majority depth of $q$ is then equal to $\binom{n}{2}-t$.
+The running time of this algorithm is within a logarithmic factor of $m$,
+the complexity of the median level.
 
 The maximum complexity of the median level of $n$ lines has been the
 subject of intense study since it was first posed.  The current best
@@ -115,7 +116,7 @@ considerably, at least when the application is approximating majority
 depth.  In particular, we show that when the query point is a randomly
 chosen vertex of the arrangement $A(S^*)$, a careful combination of
 partition trees \cite{c12} and $\eps$-approximations \cite{mww93}
-can be used to answer queries in $O((\log n)^{4/3}))$ expected time.
+can be used to answer queries in $O((\log n)^{4/3})$ expected time.
 This faster query time means that we can use more random samples which
 leads to a more accurate approximation.
 
@@ -195,7 +196,7 @@ we require a matching of size $\lfloor n/2\rfloor$.  To obtain this,
 we first convert the tree, $T$, from \thmref{spanning-tree} into a path
 by creating a path, $P$, that contains the vertices of $T$ in the order
 they are discovered by a depth-first traversal.  It is easy to verify that
-this at most doubles the number of edges of $T$ crossed by any halfplane.
+the crossing number of $P$ is at most twice the crossing number of $T$.
 Next, we take every second edge of $P$ to obtain a matching:
 
 \begin{cor}\corlabel{matching}
@@ -212,13 +213,13 @@ the matching $M$ obtained by \corref{matching}.  Consider some halfplane
 $h$,  and let $M^{I}_h$ be the subset of the edges of $M$ contained in
 $h$ and let $M^{C}_h$ be the subset of edges crossed by $h$. Then
 \[
-     |h\cap S| = 2|M^{I}_h| + |M^{C}_h|
+     |h\cap S| = 2|M^{I}_h| + |M^{C}_h| \enspace .
 \] 
 In particular,
 \[
-     |h\cap S|- |M^{C}_h| \le 2|h\cap S'| \le |h\cap S| + |M^{C}_h| 
+     |h\cap S| - |M^{C}_h| \le 2|h\cap S'| \le |h\cap S| + |M^{C}_h| 
 \]
-Since $|M^C_h|\in O(n^{1/2}$, this is good news in terms of approximate
+Since $|M^C_h|\in O(n^{1/2})$, this is good news in terms of approximate
 range counting;  the set $S'$ is half the size of $S$, but $2|h\cap
 S'|$ gives estimate of $|h\cap S|$ that is off by only $O(n^{1/2})$.
 Next we show that this can be improved considerably with almost no effort.
@@ -233,11 +234,11 @@ Therefore,
     \E[2|h\cap S'|]
       = 2\left(1|M^{I}_h| + \frac{1}{2}|M^{C}_h|\right) = |h\cap S| \enspace .
 \]
-That is, $|h\cap S'|$ is an unbiased estimator of $|h\cap
+That is, $2|h\cap S'|$ is an unbiased estimator of $|h\cap
 S|$.  Even better: the error of this estimator is (2 times) a
-binomial$(|M^{C}_h|,1/2)$ random variable, with $|M^{C}_h|\in
-O(n^{1/2})$.  Using standard results the concentration of binomial random
-variables, we immediately obtain:
+binomial$(|M^{C}_h|,1/2)$ random variable, with $|M^{C}_h|\in O(n^{1/2})$.
+Using standard results on the concentration of binomial random variables
+(i.e., Chernoff Bounds \cite{c52}), we immediately obtain:
 \[
    \Pr\{\left|2|h \cap S'| - |h\cap S|\right| \ge c n^{1/4}(\log N)^{1/2}\} 
        \le 1/N \enspace ,
@@ -261,7 +262,7 @@ What follows is another argument by Matou\v{s}ek, Welzl and Wernisch
 obtain a sequence of $O(\log n)$ sets $S_0\supset S_1\cdots\supset S_r$,
 $S_0=S$ and $|S_j|=\lceil n/2^j\rceil$.  For $j\ge 1$, the set $S_j$
 can be computed from $S_{j-1}$ in $O(2^{-j}n\log N)$ time and has the
-property that, with probability $1-1/N$, for every halfplane $h$,
+property that, with probability at least $1-1/N$, for every halfplane $h$,
 \begin{equation}
    \left|2^j|h\cap S_j| - |h\cap S|\right| \in O(2^{3j/4}n^{1/4}(\log N)^{1/2}) \enspace .
   \eqlabel{crap}
@@ -323,11 +324,11 @@ checks whether a halfspace, $h$, contains $n/2$ or more points of $S$.
   As preprocessing, we construct the data structure of
   \lemref{approx-range-counting}.  To perform a query, we perform a
   sequence of queries $(h,i_j)$, for $j=0,1,2,\ldots$, where $i_j=n/2^j$.
-  The $j$th such query takes $O(2^{2j/3}(\log N)^{1/3})$ time and the question,
-  ``is $|h\cap S|\ge n/2$?'' is resolved once $n/2^j < i$.  Since the cost
-  of successive queries is exponentially increasing, this final query
-  takes time $O(\min\{n^{1/2},(n/i)^{2/3}(\log N)^{1/3}\})$ and dominates the
-  total query time.
+  The $j$th such query takes $O(2^{2j/3}(\log N)^{1/3})$ time and the
+  question, ``is $|h\cap S|\ge n/2$?'' is resolved once $n/2^j < i/2$.
+  Since the cost of successive queries is exponentially increasing, this
+  final query takes time $O(\min\{n^{1/2},(n/i)^{2/3}(\log N)^{1/3}\})$
+  and dominates the total query time.
 \end{proof}
 
 %
@@ -676,10 +677,10 @@ Finally, we return to our application, namely estimating majority depth.
   Given a set $S$ of $n$ points in $\R^2$ and any constant $c>0$,
   there exists a data structure that can preprocess $S$ in $O(n\log n)$
   expected time such that, for any point $q$, the data structure can
-  compute, in $O((\log n)^{4/3})$ expected time, a value $d'(q,S)$
+  compute, in $O(r(\log n)^{4/3})$ expected time, a value $d'(q,S)$
   such that 
   \[
-     \Pr\left\{|d'(q,S)-d(q,S)| \ge \eps d(q,S)\right\} 
+     \Pr\left\{\frac{|d'(q,S)-d(q,S)|}{d(q,S)} \ge \eps \right\} 
         \le \exp\left(-\Omega\left(\eps^2rp\right)\right) + n^{-c} \enspace ,
   \]
   where $d(q,S)$ is the majority depth of $p$ with respect to $S$ and
@@ -698,7 +699,7 @@ Finally, we return to our application, namely estimating majority depth.
   $\E[d'(q,S)]=d(q,S)$, as required.
 
   To prove the error bound, we use the fact that $r'$ is a binomial$(p,r)$
-  random variable.  Applying Chernoff's Bounds on $r'$ yields:
+  random variable.  Applying Chernoff Bounds \cite{c52} on $r'$ yields:
   \[
      \Pr\{|r' - rp| \ge \eps rp\} \le \exp(-\Omega(\eps^2rp)) \enspace .
   \]

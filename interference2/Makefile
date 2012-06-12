@@ -6,10 +6,7 @@ LATEX=pdflatex
 LFLAGS=-interaction=nonstopmode -halt-on-error
 
 iud.pdf : iud.tex $(figs) iud.bib
-	$(LATEX) $(LFLAGS) iud
-	bibtex iud
-	$(LATEX) $(LFLAGS) iud
-	$(LATEX) $(LFLAGS) iud
+	latexmk -pdf iud
 
 %.pdf : %.ipe
 	ipetoipe -pdf $<

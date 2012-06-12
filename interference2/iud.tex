@@ -75,7 +75,7 @@ $G=(V,E)$ be a simple undirected graph with vertex set $V$.  The graph
 $G$ defines a set, $B(G)$, of closed balls $B_1,\ldots,B_n$, where $B_i$
 has center $x_i$ and radius
 \[
-   r_i = \max\{\|x_ix_j\| : j\in\{1,\ldots,n\}\} \enspace .
+   r_i = \max\{\|x_ix_j\| : x_ix_j\in E\} \enspace .
 \]
 (Here, and throughout, $\|xy\|$ denotes the Euclidean distance between
 points $x$ and $y$.)  In words, $B_i$ is just large enough to enclose
@@ -108,7 +108,7 @@ graph $G=(V,E)$ such that $I(G)$ is minimized.  Thus, it is natural to consider 
 \]
 A \emph{minimum spanning tree} of $V$ is a connected graph, $\mst(V)$,
 of minimum total edge length.  Minimum spanning trees are a natural
-choice for low-interference graphs.  The purpose of current paper
+choice for low-interference graphs.  The purpose of the current paper
 is to prove the following results (here, and throughout, the phrase
 \emph{with high probability} means with probability that approaches 1
 as $n\rightarrow\infty$):
@@ -259,67 +259,60 @@ we state a slightly modified version of \thmref{log} that is needed in
 our proof.
 
 \begin{lem}\lemlabel{log}
-  Let $V\subset\R^d$ be a set of points such that no ball of unit
-  diameter contains more than $q$ points of $V$, for some constant $q$,
-  and suppose that $I(MST(V))=r$.  Then $MST(V)$
-  contains an edge of length $\Omega(c^r)$, for some constant $c=c(d)>1$
-  depending only on $d$.
+  Let $V\subset\R^d$, let $r>0$, and let $\mst^r(V)$ denote the subgraph
+  of $\mst(V)$ containing only the edges whose length is in $(r,2r]$.
+  Then $I(\mst^r(V))\in O(1)$.
 \end{lem}
 
 \begin{proof}
-This proof is similar to the proof of Lemma~3 in Ref.~\cite{msz11}. Let $x$
-be any point in $\R^d$ and let $D$ be the length of the longest edge in
-$\mst(V)$.  Partition the set of balls $B_i\in B(\mst(V))$ that contain
-$x$ into $O(\log D)$ sets $S_0,\ldots,S_{r'}$. The set $S_0$ contains
-all balls of radius at most $1/2$.  The set $S_i$, $i\in\{1,\ldots,r'\}$,
-contains all balls whose radius is in the range $(2^{i-1},2^i]$.  It is
-sufficient to show that each set $S_i$ contains $O(1)$ edges, since this
-implies that $r'=\Omega(r)$ and therefore $\mst(V)$ contains an edge
-of length at least $2^{\Omega(r)}$.
+(This proof is similar to the proof of Lemma~3 in Ref.~\cite{msz11}.)
+Let $x$ be any point in $\R^d$ and let $B$ the set of all
+balls in $B(\mst^r(V))$ that contain $x$ so that, by definition
+$I(x,\mst^r(V))=|B|$.  
 
-The assumption that no unit disk contains more than $q$ points of $V$
-implies that $|S_0|\le q$.  Refer to \figref{packing} for the remainder of
-the proof.  For any $S_i$, $i\in\{1,\ldots,r'\}$, we argue as follows:
-All the centers of balls in $S_i$ are contained in a ball of radius
-$2^{i}$ centered at $x$.  Therefore, a simple packing argument implies
-that there exists a ball of radius $2^{i-2}$ that contains at least
-$|S_i|/5^d$ centers of balls in $S_i$.  ($5^d$ is the volume of a ball
-of radius $5\cdot2^{i-2}$ divided by the volume of a ball of radius
-$2^{i-2}$.)  The center of each of these ball is the endpoint of an
-edge of length at most $2^i$.  The other endpoints of these edges are
-all contained in a ball of radius $2^{i+1}$ centered at $x$.  The same
-packing argument shows that we can find a ball of radius $2^{i-2}$
-that contains at least $|S_i|/(5\cdot 9)^d$ of these other endpoints.
+Refer to \figref{packing} for what follows.  All the centers of balls in
+$B$ are contained in a ball of radius $2r$ centered at $x$.  Therefore,
+a simple packing argument implies that there exists a ball, $b$, of
+radius $r/2$ that contains at least $|B|/5^d$ centers of balls in $B$.
+($5^d$ is the volume of a ball of radius $5r/2$ divided by the volume
+of a ball of radius $r/2$.)  The center of each of these ball is the
+endpoint of an edge of length at most $2r$.  The other endpoints of these
+edges are all contained in a ball of radius $5r/2$ centered around $b$.
+The same packing argument shows that we can find a ball of radius $r/2$
+that contains at least $|B|/(5\cdot 6)^d$ of these other endpoints.
 
 \begin{figure}
   \begin{center}
     \includegraphics{packing}
   \end{center}
-  \caption{Each set $S_i$ contains $O(1)$ edges.}
+  \caption{The proof of \lemref{log}.}
   \figlabel{packing}
 \end{figure}
 
-We claim that this implies that $|S_i|/45^d< 2$ (so $|S_i|< 2\cdot
-45^d$). Otherwise, $\mst(V)$ contains two edges, $x_ix_j$ and
-$x_kx_\ell$, each of length greater then $2^{i-1}$ and such that
-$\|x_ix_k\| \le 2^{i-1}$ and $\|x_jx_\ell\|\le 2^{i-1}$.  But this
-contradicts the minimality of $\mst(V)$, since one could replace
-$x_ix_j$ with one of $x_ix_k$ or $x_jx_\ell$ and obtain a spanning tree
-of smaller total edge length.  We conclude that $|S_i|< 2\cdot 45^d$,
-and this completes the proof.
+We claim that this implies that $|B|/30^d< 2$ (so $|B|< 2\cdot
+30^d$). Otherwise, $\mst(V)$ contains two edges, $x_ix_j$ and $x_kx_\ell$,
+each of length greater than $r$ and such that $\|x_ix_k\| \le r$ and
+$\|x_jx_\ell\|\le r$.  But this contradicts the minimality of $\mst(V)$,
+since one could replace $x_ix_j$ with one of $x_ix_k$ or $x_jx_\ell$
+and obtain a spanning tree of smaller total edge length.  We conclude
+that $|S_i|< 2\cdot 30^d$, and this completes the proof.
 \end{proof}
 
-With \lemref{log} in hand, we are ready to prove Parts~2 and 3 of
-\thmref{main}.  The sketch of the proof is as follows:  We partition
-$[0,1]^d$ into equals cubes of volume $1/nt$, for some parameter $t$
-to be chosen later.  Using Chernoff's bounds, we show that each cube
-contains $O((\log n)^{2/3})$ points so that the points within each cube
-can be connected, using the results of Halld\'orsson and Tokuyama, with
-maximum interference $O((\log n)^{1/3})$.  Next, the cubes are connected
-to other cubes by selecting one point in each cube and connecting these
-selected points with a minimum spanning tree.  \lemref{log} is then
-used to show that this minimum spanning tree has maximum interference
-$O((\log n)^{1/3})$.  Without further ado, we present:
+Note that \lemref{log} implies \thmref{log}, since it implies that we
+can partition the edges of $\mst(V)$ into $\lceil\log_2 D\rceil$ classes,
+based on length, and each class will contain only a constant number of edges.
+
+We are ready to prove Parts~2 and 3 of \thmref{main}.  The sketch of the
+proof is as follows:  We partition $[0,1]^d$ into equal cubes of volume
+$1/nt$, for some parameter $t$ to be chosen later.  Using Chernoff's
+bounds, we show that each cube contains $O((\log n)^{2/3})$ points so
+that the points within each cube can be connected, using the results of
+Halld\'orsson and Tokuyama, with maximum interference $O((\log n)^{1/3})$.
+Next, the cubes are connected to other cubes by selecting one point in
+each cube and connecting these selected points with a minimum spanning
+tree.  \lemref{log} is then used to show that this minimum spanning
+tree has maximum interference $O((\log n)^{1/3})$.  Without further ado,
+we present:
 
 \begin{proof}[Proof of \thmref{main}, Parts 2 and 3]
 Partition $[0,1]^2$ into square \emph{cells} of area $1/nt$ for some
@@ -371,31 +364,31 @@ addition of the edges in $T$ does not exceed $O((\log n)^{1/3})$.
 Suppose that $I(x,T)=r$, for some point $x\in\R^2$.  There are at most
 9 vertices in $T$ whose distance to $x$ is less than $1/\sqrt{nt}$.
 Therefore, by \lemref{log}, $T$ must contain an edge of length at least
-$c^r/\sqrt{nt}$, for some constant $c>1$.  
+$c2^r/\sqrt{nt}$, for some constant $c>1$.  
 
 A well-known property of minimum spanning trees is that, for any edge
-$x_ix_j$ in $T$, the open disk with diameter $x_ix_j$ does not contain
+$x_ix_j$ in $T$, the open ball with diameter $x_ix_j$ does not contain
 any vertices of $T$.  In our setting, this means that there is an open
-disk, $B$, of radius $c^r/2\sqrt{nt}$ such that every cell contained in
-$B$ contains no point of $V$.  Inside of $B$ is another empty disk $B'$
-of radius $c^r/(2\sqrt{nt})-\sqrt{2/nt}$ whose center is also the center
+ball, $B$, of radius $c2^r/2\sqrt{nt}$ such that every cell contained in
+$B$ contains no point of $V$.  Inside of $B$ is another empty ball $B'$
+of radius $c2^r/(2\sqrt{nt})-\sqrt{2/nt}$ whose center is also the center
 of some cell.
 
 At least one quarter of the area of $B'$ is contained in $[0,1]^2$,
-so the number of cells completely contained in $B'$ is $\pi c^{2r}/16 -
-O(c^{r}/\sqrt{nt})$.  By decreasing $c$ slightly, and only considering
+so the number of cells completely contained in $B'$ is at least $\pi c^22^{2r}/16 -
+O(2^{r}/\sqrt{nt})$.  By decreasing $c$ slightly, and only considering
 $r$ larger than a sufficiently large constant, $r_0$, we can simplify
 this number of cells to $\pi c^{2r}/16$.
 
-For a fixed disk $B'$, the probability that the $\pi c^{2r}/16$ cells
+For a fixed ball $B'$, the probability that the $c\pi  2^{2r}/16$ cells
 defined by $B'$ are empty of points in $V$ is at most
 \begin{align*}
  p 
-  & \le (1-\pi c^{2r}/{16nt})^{n} \\
-  & \le \exp(-\pi c^{2r}/16t) \\
+  & \le (1-c\pi 2^{2r}/{16nt})^{n} \\
+  & \le \exp(-c\pi 2^{2r}/16t) \\
  & \le 1/n^{2+c'} \enspace ,
 \end{align*}
-for $r\ge(\log_c2)(\log(16/\pi)+\log t + \log(2+c')+\log\ln n)$.  By the union bound, the
+for $r\ge\log(16/c\pi)+\log t + \log(2+c')+\log\ln n$.  By the union bound, the
 probability that there exists any such $B'$ is at most
 $pnt\le 1/n^{c'}$.  Since we can choose $r\in O(\log t+\log\log n) = O((\log
 n)^{1/3})$, this completes the proof.
@@ -424,11 +417,13 @@ $O((\log n)^{1/2})$ points, so
 \]
 
 The set $B_1$ consists of balls whose radii are in the range $[\sqrt{1/\pi
-nt},\sqrt{(c\log n)/\pi n}]$.  The same proof used to prove \lemref{log}
-shows that the number of these balls is
-\[
-    |B_1| \in O\left(\log\left(\frac{\sqrt{(c\log n)/\pi n}}{\sqrt{1/\pi nt}}\right)\right) = O(\log\log n + \log t) = O((\log n)^{1/2}) \enspace .
-\]
+nt},\sqrt{(c\log n)/\pi n}]$.  \lemref{log} shows that the number of
+these balls is
+\begin{align*}
+    |B_1| & \in O\left(\log\left(\frac{\sqrt{(c\log n)/\pi n}}{\sqrt{1/\pi nt}}\right)\right) \\
+    & = O(\log\log n + \log t) \\
+    & = O((\log n)^{1/2}) \enspace .
+\end{align*}
 
 Finally, any edge in the set $B_2$ implies the existence of an empty ball,
 with center in $[0,1]^2$, having area $c\log n/n$.  The second part of the
@@ -444,13 +439,13 @@ $O(n^{-c})$.  Therefore, with high probability,
 In this section, we prove the lower bounds in \thmref{lower-bound}.
 We define a \emph{Zeno configuration} as follows (see \figref{zeno}):
 A Zeno configuration of size $k$, centered at a point, $x$, is defined
-by a set of $k+1$ disks.  The construction starts with disjoint disks
-$D_0,\ldots,D_{k-1}$, each having radius $u$.  The disk $D_0$ is centered
+by a set of $k+1$ balls.  The construction starts with disjoint balls
+$D_0,\ldots,D_{k-1}$, each having radius $u$.  The ball $D_0$ is centered
 at $x$.  The center of $D_i$, $i\in\{1,\ldots,k-1\}$ is at $x+(u3^i, 0)$.
-A final large disk, $D$, of radius $r=u3^k$ is centered at $x$ and
-contains all other disks.  A Zeno configuration occurs at location $x$
+A final large ball, $D$, of radius $r=u3^k$ is centered at $x$ and
+contains all other balls.  A Zeno configuration occurs at location $x$
 in a point set $V$ when $D$ contains exactly $k$ points of $V$ and these
-occur with exactly one point in each disk $D_i$.
+occur with exactly one point in each ball $D_i$.
 
 \begin{figure}
   \begin{center}
@@ -474,7 +469,7 @@ $D_i$.  Note that, for $i\in\{1,\ldots,k-1\}$ the closest point to $x_i$
 in $V$ is $x_{i-1}$.  Since $\mst(V)$ contains the nearest-neighbour
 graph, this implies that $\mst(V)$ contains the edges $x_ix_{i+1}$ for
 all $i\in\{0,\ldots,k-2\}$.  See \figref{zeno-mst} for what follows.
-We claim that, for all $i\in\{0,\ldots,k-2\}$, the disk $B_i$ centered
+We claim that, for all $i\in\{0,\ldots,k-2\}$, the ball $B_i$ centered
 at $x_i$ that contains $x_{i+1}$ also contains $x_0$.  This is clearly
 true for $i=0$ and $i=1$.  Next, note that
 \[
@@ -522,7 +517,7 @@ probability.
 
 \begin{proof}[Proof of \thmref{lower-bound}]
 Choose the parameter $u$ in the Zeno configuration so that $\pi r^2=1/n$,
-i.e., $u=1/(\sqrt{\pi n}3^k)$.  Then the area of the small disks is
+i.e., $u=1/(\sqrt{\pi n}3^k)$.  Then the area of the small balls is
 $\pi u^2=1/(n3^{2k})$.
 We analyze the probability that a Zeno configuration of length $k=c(\log
 n)^{1/2}$ centered at $x_i$ occurs in a set, $V$, of $n$ i.u.d. points
@@ -633,7 +628,7 @@ ratio of the lengths of the longest and the shortest edges of $\mst(V)$.
 Several of the references consider interference in the \emph{unit
 disk graph model}, in which the graph $G$ is constrained to use
 edges of maximum length $r(n)$.  It is straightforward to verify
-that all of the proofs in this paper continue hold in this model,
+that all of the proofs in this paper continue to hold in this model,
 when $r(n)\in\Omega(\sqrt{(\log n)/n})$.  This is not an unreasonable
 condition; for i.u.d.\ points in $[0,1]^d$, it is known that
 $r(n)\in\Omega(\sqrt{(\log n)/n})$ is a necessary condition to be able to

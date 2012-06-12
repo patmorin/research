@@ -2,7 +2,7 @@
 %%BoundingBox: -41 -46 41 41 
 %%HiResBoundingBox: -40.6331 -45.56168 40.6331 40.6331 
 %%Creator: MetaPost 1.208
-%%CreationDate: 2012.06.12:1302
+%%CreationDate: 2012.06.12:1600
 %%Pages: 1
 %*Font: cmmi10 9.96265 9.96265 64:c0002
 %*Font: cmmi7 6.97385 6.97385 44:8

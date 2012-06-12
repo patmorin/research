@@ -1,0 +1,24 @@
+#!/bin/sh
+
+FIGS_PER_LINE=6
+
+FIGNUM=0
+OTYPE=0
+
+for f in `ls figs/hexagons-*.mps` ; do
+    NOTYPE=`echo $f | sed 's/figs\/hexagons-\([[:digit:]]*\)-[[:digit:]]*\.mps/\1/'`
+    # if [ $NOTYPE -ne $OTYPE ] ; then
+    # 	OTYPE=`expr $NOTYPE + 0`
+    # 	printf "\n\\\subsection*{Order Type $OTYPE}"
+    # 	FIGNUM=0
+    # fi
+    
+    if [ `expr $FIGNUM % $FIGS_PER_LINE` -eq 0 ] ; then
+	printf "\n\n\\\noindent"
+    fi
+    
+    printf "\n\\includegraphics{$f}"
+    
+    FIGNUM=`expr $FIGNUM + 1`
+    
+done

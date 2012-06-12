@@ -1,0 +1,22 @@
+#!/usr/bin/awk -f
+
+function mkpath(vstr) {
+	path = ""
+	split(vstr, vcha, "")
+	for (i = 1; i <= length(vcha); i++) {
+		path = path "v[" vcha[i] "]--"
+	}
+	return path
+}
+
+BEGIN {
+	print "def drawprfpoly(expr o)(suffix v, c) ="
+}
+
+{
+	print "prfpoly(c, o, " $1 ", \"" $2 "\", " mkpath($3) "cycle);"
+}
+
+END {
+	print "enddef;"
+}

@@ -24,7 +24,6 @@
 \DeclareOption{10pt}{\OptionNotUsed}
 \DeclareOption{12pt}{\OptionNotUsed}
 
-
 % The default action is to pass options to article class
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
 
@@ -33,6 +32,9 @@
 
 % Read the article class
 \LoadClass[11pt,letterpaper]{article}
+
+%\RequirePackage{kpfonts}
+\RequirePackage[sf,bf,small,raggedright,compact]{titlesec}
 
 % Page setup
 \setlength{\textheight}{8.5in}
@@ -47,20 +49,6 @@
 \setlength{\parindent}{1.25cm}
 \flushbottom
 
-
-% Sectioning commands
-%\font\tensfb = cmssbx11
-%\newcommand{\@titlestyle}{\normalsize\tensfb}
-%\renewcommand\section{\@startsection {section}{1}{\z@}{-3.5ex plus
-%    -1ex minus -.2ex}{2.3ex plus .2ex}{\@titlestyle}}
-%\renewcommand\subsection{\@startsection{subsection}{2}{\z@}{-3.25ex
-%    plus -1ex minus -.2ex}{1.5ex plus .2ex}{\@titlestyle}}
-%\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}{-3.25ex
-%    plus -1ex minus -.2ex}{1.5ex plus .2ex}{\@titlestyle}}
-%\renewcommand\paragraph{\@startsection {paragraph}{4}{\z@}{0ex}{-1em}{\@titlestyle}}
-%\renewcommand\subparagraph{\@startsection
-%  {subparagraph}{4}{\parindent}{3.25ex plus 1ex minus
-%    .2ex}{-1em}{\@titlestyle}}
 
 % Commands for typesetting affiliations and email addresses
 \newcommand{\affil}[1]{\textit{#1}}
@@ -118,7 +106,7 @@
 
 % Abstract
 \renewenvironment{abstract}
-{\hrule \noindent\textsc{Abstract.}}{\vskip 1em \hrule}
+{\hrule\vskip 1ex \noindent\textsc{Abstract.}}{\vskip 1.8ex \hrule}
 
 
 %------------- Use this so pdflatex outputs US letter pages -------------
@@ -140,9 +128,3 @@
 \renewcommand{\headrulewidth}{1pt}
 \renewcommand{\footrulewidth}{1pt}
 \pagestyle{fancy}
-
-
-%\RequirePackage{kpfonts}
-%\RequirePackage[sf,bf,small,raggedright,compact]{titlesec}
-
-

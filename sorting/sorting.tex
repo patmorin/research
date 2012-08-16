@@ -1,5 +1,8 @@
 \documentclass{patmorin}
-\usepackage{pat}
+\usepackage{pat,amsopn}
+
+\DeclareMathOperator{\height}{height}
+
 
 \title{An Improved Lower Bound for Comparison-Based Sorting}
 \author{\ }
@@ -8,62 +11,150 @@
 \begin{document}
 \maketitle
 
+\begin{abstract}
+We show that any deterministic comparison-based sorting algorithm performs
+at least $\log(n!) + n/9 - O(\log n)$ comparisons for some input.
+\end{abstract}
+
 \section{Introduction}
+
+In this paper, we prove the following theorem:
+
+\begin{thm}\thmlabel{lower-bound}
+  For any deterministic comparison-based sorting algorithm, $\mathcal{A}$,
+  there exists a permutation of $\{1,\ldots,n\}$ on which $\mathcal{A}$
+  performs at least $\log(n!)+n/9-O(\log n)$ comparisons.
+\end{thm}
+
+\section{Preliminaries}
 
 A \emph{comparison tree}, $T$, for sorting $n$ elements is a binary tree.
 Each internal node, $u$, of $T$ is labelled with an ordered pair of
 indices $(i_u,j_u)$.  Each leaf, $\ell$, of $T$ is labelled with a
-permutation, $\pi_\ell$.
+permutation, $\pi_\ell$, of $\{1,\ldots,n\}$.
 
-Every sequence, $a_1,\ldots,a_n$, of numbers defines a root-to-leaf path in the comparison tree as follows:  The path begins at the root.  When situated at an internal node $u$, the path continues to $u$'s left child if $i_u < j_u$ and continues to $u$'s right child otherwise.   The last (leaf) node, $\ell$, on this path is labelled with a permutation $\pi_\ell$ such that:
+Every sequence, $a=a_1,\ldots,a_n$, of numbers defines a root-to-leaf
+path, $T(a)$, in a comparison tree, $T$, as follows:  The first node
+in $T(a)$ is the root.  When situated at an internal node $u$, the path
+$T(a)$ continues to $u$'s left child if $i_u < j_u$ and continues to
+$u$'s right child otherwise.
+
+We say that the comparison tree $T$ \emph{sorts a set of sequences}, $A$,
+if, for every sequence $a_1,\ldots,a_n\in A$, $T(a_1,\ldots,a_n)$ ends at
+a leaf, $\ell$, that is labelled with a permutation $\pi_\ell$ such that:
 \[
-    a_{\pi_\ell(1)} \le a_{\pi_\ell(2)} \le \cdots \le a_{\pi_\ell(n)}
+    a_{\pi_\ell(1)} \le a_{\pi_\ell(2)} 
+        \le \cdots \le a_{\pi_\ell(n)} \enspace .
 \]
+We say, simply, that $T$ \emph{sorts} if it sorts the set $\R^n$.  It is
+not hard to verify that, for $T$ to sort, it is sufficient for $T$ to sort
+the set, $\Pi_n$, of all permutations of the integers $\{1,\ldots,n\}$. We call the elements of $\Pi_n$ \emph{inputs}.
 
-Note that, for any node, $u$, in a comparison tree there exists a
-maximal set of permutations, $A(u)$, of $\{1,\ldots,n\}$ such that
-every permutation in $A(u)$ leads to $u$.  Note that we may assume that
-$A(u)\neq\emptyset$, for all $u$, and that $|A(\ell)|=1$ for every leaf
-$\ell$.  We may also assume that each internal node of $T$ has 2 children.
-This implies that the algorithm does no redundant comparisons: For every
-internal node $u$, $A(u)$ contains inputs in which the $i_u$th
-element is greater than the $j_u$th element as well as inputs in
-which the $i_u$th element is less than the $j_u$th element.
+Note that, for any node, $u$, in a comparison tree, there exists a maximal
+set of inputs, $A(u)$, such that $T(a)$ contains $u$ for all $a\in A$.
+That is, every permutation in $A(u)$ leads to $u$.  In this paper, we
+are interested in comparison trees of minimum height. We can therefore
+assume that our comparison trees have the following properties:
 
-Throughout the remainder of this paper, we assume that all comparison
-trees sort correctly and that they are minimal in the sense of the
-preceding paragraph.
+\begin{prp}[No unreachable nodes]\prplabel{can-reach}
+  For any node $u$ in $T$, $A(u)\neq\emptyset$.
+\end{prp}
 
+\begin{prp}[No useless comparisons]
+  Each internal node $u$ of $T$ has at least 2 children.
+\end{prp}
+
+\begin{prp}[Subtree optimality]
+  For any node, $u$ of $T$, the subtree rooted at $u$ is a comparison tree
+  of minimum height that sorts $A(u)$. 
+\end{prp}
+
+It is well known that, for any deterministic comparison-based sorting
+algorithm, $\mathcal{A}$, the actions of $\mathcal{A}$ can be modelled by
+a comparison tree, $T_\mathcal{A}$.  Thus, to prove \thmref{lower-bound},
+it suffices to prove the following equivalent lemma:
+
+\begin{lem}\lemlabel{lower-bound}
+  Every comparison tree that sorts $\Pi_n$ has height at least
+  $\log(n!)+n/9-O(\log n)$.
+\end{lem}
 
 \section{The Lower Bound}
 
-Assume $n\equiv 0\pmod{3}$ and group the elements of $a$ into $n/3$
-triples, where the $i$th triple, $T_i$, contains the three indices of $a$
-containing $3i+1$, $3i+2$, $3i+3$.
-
-For any triple, $T_i$, on input $a=a_1,\ldots,a_n$, the path for $a$
-in $T$ has a first node, $u$, for which $i_u$ and $j_u$ both belong
-to $T_i$.  There is also a second node, $w$, for which $i_w$ and $j_w$
-both belong to $T_i$.  We say that the $T$ \emph{wins} on triple $T_i$
-if the two comparisons done at $u$ and $w$ are sufficient to determine
-the relative order of the elements in $T_i$.  This happens, for example,
-when $j_u=i_w$ and
+The sketch of our lower-bound argument is as follows:  We first show
+that, for any comparison tree, $T$, that sorts, there exists an input
+$a=a_1,\ldots,a_n$ such that $T(a)$ has length $\log(n!)-O(\log n)$ and
+that there are $n/9-O(\log n)$ comparisons performed along the path $T(a)$
+that are \emph{lucky} (in a formal sense, defined below).  We then use
+the existence of these efficient comparisons to derive another comparison
+tree $T'$ and another permutation $a'$ with the following two properties,
+which establish \lemref{lower-bound}:
+\begin{enumerate}
+  \item The height of $T'$ does not exceed the height of $T$.
+  \item $T'(a')$ has length at least $\log(n!)+n/9-O(\log n)$.
+\end{enumerate}
+In particular, these two properties imply that
 \[
-     a_{i_u} < a_{j_u} = a_{i_w} < a_{j_w} \enspace .
+   \height(T) \ge \height(T') \ge \log(n!)+n/9-O(\log n) \enspace .
 \]
-When this does not happen, $T$ is forced to perform a third comparison
-involving a pair from the triple $T_i$.  In this case, we say that $T$
-\emph{loses} on triple $T_i$.
+(The first inequality is implied by the first property and the second
+inequality is implied by the second property.)  We emphasize that the
+tree $T'$ does not necessarily sort any sequence other than $a'$.
+
+\subsection{Lucky and Unlucky Triples}
+
+Our proof relies on grouping elements of the input $a$ into $n/3$ triples.
+For the remainder of the paper we will assume, only for simplicity,
+that $n\equiv 0\pmod{3}$. 
+
+We need a notation to refer to the position of the item $i$ in an input
+$a=a_1,\ldots,a_n$.  For this purpose, we define the \emph{inverse}
+$\bar{a}=\bar{a}_1,\ldots,\bar{a}_n$ so that $\bar{a}_i$ is the unique
+index $j$ such that $a_j=i$.
+
+We group the indices of $a$ into $n/3$ triples
+(sets of size 3), $t_1,\ldots,t_{n/3}$, where
+$t_i=\{\bar{a}_{3i-2},\bar{a}_{3i-1},\bar{a}_{3i}\}$.  That is, each
+$t_i$ contains the indices of 3 consecutive values in $\{1,\ldots,n\}$.
+Triples are useful, because $T$ can gain no information about the relative
+ordering of the elements in a triple except by comparing two elements,
+both of which are in the triple.
+
+If $T$ sorts then, for any input $a$ and any triple $t_i$ of $a$,
+$T(a)$ must contain at least 2 nodes $u$ such that $i_u$ and $j_u$
+are both in $t_i$.  In some cases, $T(a)$, contains three such nodes.
+In the former case, we say that $T$ \emph{got lucky} for the triple $t_i$
+and we say that $T$ was \emph{unlucky} (for $t_i$) otherwise.  In the
+case where $T$ is lucky for $t_i$, we call the second node on $T(a)$
+that compares two indices in $t_i$ a \emph{lucky node}.
 
 \begin{lem}\lemlabel{triples}
   Let $a_1,\ldots,a_n$ be a random permutation of $\{1,\ldots,n\}$.
-  Then the expected number of triples on which $T$ wins in $n/9$.
-  Equivalently, the expected number of triples on which $T$ loses
-  is $2n/9$.
+  Then the expected number of lucky nodes in $T(a)$ is $n/9$ and the
+  expected number of unlucky nodes in $T(a)$ is $2n/9$.
 \end{lem}
 
 \begin{proof}
-Easy.
+For a triple $t_i=\{i_1,i_2,i_3\}$, let $x=a_{i_1}$, $y=a_{i_2}$, and
+$z=a_{i_3}$.  Assume, without loss of generality that the first comparison
+within $t_i$ determines that $x<y$ and that the second comparison is
+between $y$ and $z$ (other cases are symmetric).  Conditioned only on
+the assumption, $x<y$, each of the tree possibilities for the location
+of $z$ is equally likely.  In particular, the relative ordering
+\[
+   x < y < z
+\]
+occurs with probability $1/3$.  This is the only case in which the total ordering of $x$, $y$, and $z$ can be determined with only two comparisons.  In the other cases (with probability $2/3$), an additional comparison is required to distinguish between 
+\[
+   x < z < y
+\]
+and 
+\[
+   z < x < y \enspace .
+\]
+Thus with probability $1/3$ $T$ is lucky for $t_i$ and with probability
+$2/3$ $T$ is unlucky.  The lemma then follows from linearity of
+expectation.
 \end{proof}
 
 \begin{lem}\lemlabel{permutation}
@@ -120,6 +211,20 @@ be subset of $A(u)$ that respects the triple structure of $a$ and
 
 \end{proof}
 
+\section{Upper Bounds}
+
+Merge sort does $n\log_2n - n +O(1)$ comparisons, in the worst case,
+when $n$ is a power of 2.  How about the average case?  To answer this
+we need to know the answer to the following question: Given a random
+sequence containing $2^i$ red items and $2^i$ blue items, what the
+expected length of the initial monochromatic sequence?
+
+Insertion sort does
+\[
+   \sum_{i=2}^{n}\lceil\log_2 i\rceil \le \log(n!) + n
+\]
+in the worst case.  How much better does it do in the average case?
+(I think it's $\log(n!)+3n/4$.)
 
 
 \end{document}

@@ -4,7 +4,7 @@
 \DeclareMathOperator{\height}{height}
 
 
-\title{An Improved Lower Bound for Comparison-Based Sorting}
+\title{Notes on Comparison-Based Sorting Lower Bounds}
 \author{\ }
 
 
@@ -12,13 +12,12 @@
 \maketitle
 
 \begin{abstract}
-We show that any deterministic comparison-based sorting algorithm performs
-at least $\log(n!) + n/9 - O(\log n)$ comparisons for some input.
+These are some notes from working with John on comparison-based sorting.
 \end{abstract}
 
 \section{Introduction}
 
-In this paper, we prove the following theorem:
+We want to prove the following theorem (which is not true):
 
 \begin{thm}\thmlabel{lower-bound}
   For any deterministic comparison-based sorting algorithm, $\mathcal{A}$,
@@ -56,7 +55,7 @@ That is, every permutation in $A(u)$ leads to $u$.  In this paper, we
 are interested in comparison trees of minimum height. We can therefore
 assume that our comparison trees have the following properties:
 
-\begin{prp}[No unreachable nodes]\prplabel{can-reach}
+\begin{prp}[No unreachable nodes]\prplabel{can-reach}\prplabel{first}
   For any node $u$ in $T$, $A(u)\neq\emptyset$.
 \end{prp}
 
@@ -64,7 +63,7 @@ assume that our comparison trees have the following properties:
   Each internal node $u$ of $T$ has at least 2 children.
 \end{prp}
 
-\begin{prp}[Subtree optimality]
+\begin{prp}[Subtree optimality]\prplabel{last}
   For any node, $u$ of $T$, the subtree rooted at $u$ is a comparison tree
   of minimum height that sorts $A(u)$. 
 \end{prp}
@@ -135,96 +134,104 @@ that compares two indices in $t_i$ a \emph{lucky node}.
 \end{lem}
 
 \begin{proof}
-For a triple $t_i=\{i_1,i_2,i_3\}$, let $x=a_{i_1}$, $y=a_{i_2}$, and
-$z=a_{i_3}$.  Assume, without loss of generality that the first comparison
-within $t_i$ determines that $x<y$ and that the second comparison is
-between $y$ and $z$ (other cases are symmetric).  Conditioned only on
-the assumption, $x<y$, each of the tree possibilities for the location
-of $z$ is equally likely.  In particular, the relative ordering
-\[
-   x < y < z
-\]
-occurs with probability $1/3$.  This is the only case in which the total ordering of $x$, $y$, and $z$ can be determined with only two comparisons.  In the other cases (with probability $2/3$), an additional comparison is required to distinguish between 
-\[
-   x < z < y
-\]
-and 
-\[
-   z < x < y \enspace .
-\]
-Thus with probability $1/3$ $T$ is lucky for $t_i$ and with probability
-$2/3$ $T$ is unlucky.  The lemma then follows from linearity of
-expectation.
+  For a triple $t_i=\{i_1,i_2,i_3\}$, let $x=a_{i_1}$, $y=a_{i_2}$,
+  and $z=a_{i_3}$.  Assume, without loss of generality that the
+  first comparison within $t_i$ determines that $x<y$ and that
+  the second comparison is between $y$ and $z$ (other cases are
+  symmetric).  Conditioned only on the assumption, $x<y$, each of
+  the tree possibilities for the location of $z$ is equally likely.
+  In particular, the relative ordering
+  \[
+     x < y < z
+  \]
+  occurs with probability $1/3$.  This is the only case in which the
+  total ordering of $x$, $y$, and $z$ can be determined with only
+  two comparisons.  In the other cases (with probability $2/3$), an
+  additional comparison is required to distinguish between
+  \[
+     x < z < y
+  \]
+  and 
+  \[
+     z < x < y \enspace .
+  \]
+  Thus with probability $1/3$ $T$ is lucky for $t_i$ and with probability
+  $2/3$ $T$ is unlucky.  The lemma then follows from linearity of
+  expectation.
 \end{proof}
 
 \begin{lem}\lemlabel{permutation}
   For any decision tree $T$, the exists an input $a=a_1,\ldots,a_n$
   such that the root-to-leaf path defined by $a$ has length at least
-  $\log(n!)-4$ and the number of triples on which $T$ wins is at least
-  $n/12$.
+  $\log(n!)-O(\log n)$ and the number of triples in $a$ on which $T$
+  gets lucky is at least $n/9-O(\log n)$.
 \end{lem}
 
 \begin{proof}
-Let $a$ be a random input.  Then, with probability at least $15/16$, the
-length of the path defined by $a$ is at least $\log(n!)-4$.  (Any binary
-tree contains at most $k/16$ leaves of depth at most $\log(k)-4$.)
-
-On the other hand, the probability that $T$ wins on fewer than $n/12$
-triples is equal to the probability that $T$ loses on more than $3n/12$
-triples.  Letting $X$ denote the number of triples on which $T$ loses
-we have, By Markov's Inequality and \lemref{triples},
-\[
-   \Pr\{X\ge (3/4)(n/3)\} = \Pr\{X \ge (9/8)\E[X]\} \le 8/9 \enspace . 
-\]
-Therefore, with probability at least $15/16$ the path defined by $a$
-has length at least $\log(n!)-4$ and with probability at least $1/9$, $T$
-wins on at least $n/12$ triples of $a$.  Since $15/16+1/9 > 1$ we conclude
-that there exists some $a$ that satisfy the conditions of the lemma. (In
-fact, a constant fraction of all permutations satisfy the lemma.)
+  Let $a$ be a random input and fix an integer constant, $c\ge $, to be
+  defined later.  Let $\mathcal{E}_1$ be the event
+  ``the length of $T(a)$ is at least $\log(n!)-c$.''  Then,
+  \[
+     \Pr\{\mathcal{E}_1\} \ge 1-2^{-c} \enspace ,
+  \]
+  since any binary tree contains at most $k/2^c$ leaves of depth at most
+  $\log(k)-c$.)
+  
+  Let $\mathcal{E}_2$ be the event ``$T$ is lucky on at least
+  $(1/3-2\epsilon)n/3$ triples of $a$.'' Then, by Markov's Inequality and
+  \lemref{triples}
+  \[
+     \Pr\{\mathcal{E}_2\} \ge \epsilon \enspace .
+  \]
+  
+  Therefore, if $\epsilon > 2^{-c}$, then this implies that
+  \[
+      \Pr\{\mbox{$\mathcal{E}_1$ and $\mathcal{E}_2$}\} > 0 \enspace ,
+  \]
+  and hence there exists at least one input $a'$ for which both
+  conditions hold.  We complete the proof by taking $\epsilon=\log n/ n$
+  and $c=\log(1/\epsilon)+1$.
 \end{proof}
 
 \subsection{Finding a Long Path in $T$}
 
 Next, we show how the permutation, $a$, guaranteed by
-\lemref{permutation}, can be used to find a root-to-leaf path of length
-$\log(n!)+\Omega(n)$ in any comparison tree.  The construction works
-by starting with the permutation $a$ and modifying the relative order
-of pairs of elements within winning triples so that they become losing
-triples.
+\lemref{permutation}, can be used to show that $T$ has height
+$\log(n!)+n/9-O(\log n)$.  Recall that $T$ is a decision tree that
+sorts and that satisfies Properties~\ref{prp:first}--\ref{prp:last}.
+This means that $T$ contains no unreachable nodes, never performs a
+comparison that can be deduced from previous comparisons, and every
+subtree rooted at any node $u$ or $T$ has minimum height among all
+comparison trees that sort $A(u)$.
 
-For this strategy to work, we also modify the decision tree, $T$, in
-ways that do not increase the length of the original search path root
-to leaf path.  We do this with two kinds of operations.  The first such
-operation is a \emph{lifting}.  The second is a \emph{switcheroo}.
+Sticking to our plan, we now construct the tree $T'$ whose height
+does not exceed that of $T$ and that contains a root to leaf path of
+length $\log(n!)+n/9-O(\log n)$.  We emphasize, again, that $T'$ does
+not necessarily sort any inputs with the exception of one input $a'$
+that we derive from $a$ during the construction of $T'$.  The input $a'$
+will have the same triple structure as $a$; The $i$th triple of $a$ is the
+same as the $i$th triple in $a'$. However, the ordering of the elements
+compared at every node $u$ at which $T$ gets lucky will be reversed.
+That is, if $T$ gets lucky at node $u$ then $a'$ swaps the values of
+$a_{i_u}$ and $a_{j_u}$ so that $a'_{i_u}=a_{j_u}$ and $a'_{i_u}=a_{j_u}$.
 
-\subsection{Lifting}
+To construct $T'$ we copy the path $T(a)$ up to and including the first
+vertex $u$ at which $T$ gets lucky for some triple, $t_i$.  At this
+point, $T(a)$ continues to $u$'s (say) left child, $w$, since (say) $i_u
+< j_u$.  The path $T'(a')$ will now continue to the right child of $w$ since
+$a'$ swaps the values $a_{i_u}$ and $a_{j_u}$.
 
-Let $a$ be an input on which a search tree loses on the triple $T_i$.
-Let $u$ be the node at which this triple loses and, suppose that the
-search path for $a$ proceeds to $u$'s left child.  Let $A\subset A(u)$
-be subset of $A(u)$ that respects the triple structure of $a$ and
- that do not modify the triple $T_i$.  Then, every root-to-leaf path
- defined by elements of $A$ contains $u$ and, furthermore, contains a
- node in the subtree of $u$ that contains that compares the third pair
- in $T_i$.
-\begin{proof}
+Note that $A(w)$ contains only inputs in which the relative order of the
+three elements in $t_i$ is fixed.  On the other hand, for $u$'s right
+child, $w'$, $A(w')$ contains inputs in which the three elements of $t_i$
+occur in two different orders.
 
-\end{proof}
-
-\section{Upper Bounds}
-
-Merge sort does $n\log_2n - n +O(1)$ comparisons, in the worst case,
-when $n$ is a power of 2.  How about the average case?  To answer this
-we need to know the answer to the following question: Given a random
-sequence containing $2^i$ red items and $2^i$ blue items, what the
-expected length of the initial monochromatic sequence?
-
-Insertion sort does
-\[
-   \sum_{i=2}^{n}\lceil\log_2 i\rceil \le \log(n!) + n
-\]
-in the worst case.  How much better does it do in the average case?
-(I think it's $\log(n!)+3n/4$.)
-
-
+This is where the argument breaks: Our plan was to have $T'$ do a
+comparison at $w'$ and then copy the subtree rooted at $w$.  This was
+supposed to work, since after performing this extra comparison, the
+information known about the permutation is exactly the same as it was
+in $w$.  Unfortunately, this doesn't work.  The height of the subtree at
+$w'$ may be less than or equal to the height of the subtree rooted at $w$.
+In which case, performing the extra comparison yields a tree $T'$ whose
+height is greater than that of $T$.
 \end{document}

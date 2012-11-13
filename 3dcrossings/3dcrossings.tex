@@ -1,5 +1,5 @@
 \documentclass{patmorin}
-\usepackage{amsthm,amsmath,graphicx,stmaryrd}
+\usepackage{amsthm,amsmath,graphicx,stmaryrd,amsopn}
 \usepackage{pat}
 
 \newcommand{\eps}{\varepsilon}
@@ -8,79 +8,132 @@
 \author{Sheldon Cooper, Pat Morin,\thanks{School of Computer Science, Carleton University, \email{morin@scs.carleton.ca}}\ and Howard Wolowitz}
 
 
+\DeclareMathOperator{\x}{x}
+\DeclareMathOperator{\y}{y}
+\DeclareMathOperator{\z}{z}
+\DeclareMathOperator{\crs}{cr}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-   We show that when a graph with $m\ge cq$ edges is drawn on a 3D-grid
-   with volume $q$, the resulting drawing contains $\Omega(m^3/n^2)$
-   crossings.
+   We study crossing number inequalities for 3d-grid drawings.
 \end{abstract}
 
 \section{Introduction}
 
 The \emph{$X\times Y\times Z$ grid} is the point set $\{(x,y,z):
-x\in\{1,\ldots,x\},\, y\in\{1,\ldots,Y\},\, z\in\{1,\ldots,Z\}\}$.
+x\in\{1,\ldots,X\},\, y\in\{1,\ldots,Y\},\, z\in\{1,\ldots,Z\}\}$.
 The volume an an $X\times Y\times Z$ grid is $XYZ$. A \emph{(proper)
-drawing}, $\varphi:V(G)\rightarrow R$, of a graph, $G$, on a grid,
-$R$, is a one-to-one mapping such that, for every edge $uw\in E(G)$ and
-every vertex $x\in V(G)$, the open line segment with endpoints $\varphi(u)$ and $\varphi(w)$
-does not contain $x$.
+drawing}, $\varphi:V(G)\rightarrow R$, of a graph, $G$, on a grid, $R$,
+is a one-to-one mapping such that, for every edge $uw\in E(G)$ and every
+vertex $x\in V(G)$, the open line segment with endpoints $\varphi(u)$
+and $\varphi(w)$ does not contain $\varphi(x)$.
 
-Define $\chi(G,q)$ to be the minimum number of edge crossings in a drawing of $G$ on a grid whose volume is $q$.
+Define $\crs(G,n)$ to be the minimum number of edge crossings
+in a drawing of $G$ on a grid whose volume is $n$.  Define
+$g(n,m)=\min\{\crs(G,n):\text{$G$ is a graph with $m$ edges}\}$.
 
-Define $g(n,m,q)=\min\{\chi(G,q):\text{$G$ is a graph with
-$n$ vertices and $m$ edges}\}$.
+
+\section{A Lower Bound}
 
 \begin{thm}
-  $g(n,m,q)=\Omega(m^3/q^2)$ 
+  $g(n,m) \in \Omega((m^2/n)\log\log (m/n))$.
 \end{thm}
 
 \begin{proof}
-The weaker inequality ,
-\begin{equation}
-  g(n,m,q)\ge m-7q \enspace ,\eqlabel{weak}
-\end{equation}  
-is easily shown by induction
-on $m$, using the result of Cyzowicz \etal\ \cite{X} which states that
-$g(n,m,q) > 0$ if $m> 7q$ (any drawing with more than $7q$ edges contains
-at least one crossing).
+Let $G$ be a drawing of a graph on the $X\times Y\times Z$ grid, with
+$n=XYZ$, that has $m$ edges and for which $\crs(G,n)=g(n,m)$. ($G$
+has the minimum number of crossings over all drawings of graphs with
+$m$ edges.)  We may assume, without loss of generality, that no edge of
+$G$ contains any point of the $X\times Y\times Z$ grid in its interior;
+such an edge could be replaced with a shorter edge without introducing
+any additional crossings.
 
-Next we show that, using induction on $n$, that 
+For a prime number, $p$, define the $X\times Y\times Z$ \emph{$p$-grid} as the set of points
 \[
-   g(n,m,q) \ge Cm^3/q^2
+  \{(x/p,y/p,z/p): x\in\{1,\ldots,pX\},\, y\in\{1,\ldots,pY\},\,
+  z\in\{1,\ldots,pZ\}\} \enspace .
 \]
-for any $m\ge 8q$.  Note that the case 
-
-
-First, note that the result is easily established
-using \eqref{weak} for any $m$ such that $8q\le m\le 9q$ for $C\le 1/81$.
-
-Next, consider the case $m> 9q$.  Consider some drawing, $\varphi$, of
-$G$ with $\chi(G,q)$ crossings.  Count the pairs $(c,w)$ where $c$ is
-a crossing and $w$ is a vertex not incident to either of the two edges
-involved in $c$.  Each crossing, $c$, appears in $n-4$ such pairs so
-the total number of those pairs is $(n-4)\chi(G,q)$.  On the other hand,
-each vertex, $w$, occurs in at least $\chi(G\setminus w,q)$ such pairs.
-Therefore,
+Note that the number of points in the $X\times Y\times Z$ $p$-grid is
+no more than $np^3$.  Note, furthermore, that each edge $uw$ of $G$
+contains the $p$-grid points
 \[
-   (n-4)\chi(G,q) \ge \sum_{w\in V(G)} \chi(G\setminus w, q) \enspace .
+    P_{uw}^p = \{ (i/p)u + ((p-i)/p)w : i\in\{1,\ldots,p-1\} \} \enspace .
 \]
-The number, $m_w$, of edges in $G\setminus w$ is at least $m-(n-1)
-\ge m-q\ge 8q$ so, by induction, $\chi(G\setminus w,q)\ge Cm_w^3/q^2$.
-Putting everything together, we have
-\begin{align*}
-  (n-4)\chi(G,q) 
-    & \ge  \sum_{w\in V(G)} \chi(G\setminus w, q) \\
-    & \ge  C\sum_{w\in V(G)} m_w^3/q^2  \\
-    & \ge  Cn((n-2)m/n)^3/q^2 & \left(\mbox{since $\sum_{w\in V(G)} m_w^3\ge n((n-2)m/n)^2$}\right) \\
-    & =  (Cm^3/q^2)\cdot(n(n-2)^3/n^3)  \\
-\end{align*}
-Damn! The second factor in the last line is less than 1 and I don't see any
-way to fix it.
+Finally, observe that $P_{uw}^p$ does not contain any $q$-grid points
+for any prime $q\neq p$.  (This follows from the assumption that no edge
+contains a grid point in its interior, so $\gcd(\x(u)-\x(w), \y(u)-\y(w),
+\z(u)-\z(w))=1$.  In particular, at least one of $\x(u)-\x(w)$,
+$\y(u)-\y(w)$, $\z(u)-\z(w)$ does not have $p$ as a divisor.)
+
+Therefore, there are at least $(p-1)m$ incidences between edges of $G$
+and points of the $p$-grid that are not points of any $q$-grid for $q\neq p$.
+Any point of the $p$ grid incident
+on $k$ edges contributes $\binom{k}{2}$ to $\crs(G)$.  Therefore, the
+total contribution of the $p$-grid to $\crs(G)$ is at least
+\[
+    np^3\binom{m(p-1)/np^3}{2} \ge cm^2/np
+\]
+for $c<blah$ and $m(p-1)/np^3 \ge 2$.  This latter condition can be rewritten
+as $p \le c'(m/n)^{1/2}$ for a sufficiently small $c'>0$.
+Finally, we finish by summing over primes $p$ smaller than $c'p^{1/2}$:
+\[
+   \crs(G) \ge \sum_{p} cm^2/np = (cm^2/n) \sum_{p} 1/p = ((cm^2/n)(\ln\ln(m/n)-O(1))
+\]
+where the last inequality is Euler's result on the sums of reciprocals
+of primes. (This sum is also known as a harmonic series of primes).
 \end{proof}
 
+%\To see this, notice that 
+%\begin{thm}
+%  $g(n,m,q)=\Omega(m^3/q^2)$ 
+%\end{thm}
+%
+%\begin{proof}
+%The weaker inequality ,
+%\begin{equation}
+%  g(n,m,q)\ge m-7q \enspace ,\eqlabel{weak}
+%\end{equation}  
+%is easily shown by induction
+%on $m$, using the result of Cyzowicz \etal\ \cite{X} which states that
+%$g(n,m,q) > 0$ if $m> 7q$ (any drawing with more than $7q$ edges contains
+%at least one crossing).
+%
+%Next we show that, using induction on $n$, that 
+%\[
+%   g(n,m,q) \ge Cm^3/q^2
+%\]
+%for any $m\ge 8q$.  Note that the case 
+%
+%
+%First, note that the result is easily established
+%using \eqref{weak} for any $m$ such that $8q\le m\le 9q$ for $C\le 1/81$.
+%
+%Next, consider the case $m> 9q$.  Consider some drawing, $\varphi$, of
+%$G$ with $\crs(G,q)$ crossings.  Count the pairs $(c,w)$ where $c$ is
+%a crossing and $w$ is a vertex not incident to either of the two edges
+%involved in $c$.  Each crossing, $c$, appears in $n-4$ such pairs so
+%the total number of those pairs is $(n-4)\crs(G,q)$.  On the other hand,
+%each vertex, $w$, occurs in at least $\crs(G\setminus w,q)$ such pairs.
+%Therefore,
+%\[
+%   (n-4)\crs(G,q) \ge \sum_{w\in V(G)} \crs(G\setminus w, q) \enspace .
+%\]
+%The number, $m_w$, of edges in $G\setminus w$ is at least $m-(n-1)
+%\ge m-q\ge 8q$ so, by induction, $\crs(G\setminus w,q)\ge Cm_w^3/q^2$.
+%Putting everything together, we have
+%\begin{align*}
+%  (n-4)\crs(G,q) 
+%    & \ge  \sum_{w\in V(G)} \crs(G\setminus w, q) \\
+%    & \ge  C\sum_{w\in V(G)} m_w^3/q^2  \\
+%    & \ge  Cn((n-2)m/n)^3/q^2 & \left(\mbox{since $\sum_{w\in V(G)} m_w^3\ge n((n-2)m/n)^2$}\right) \\
+%    & =  (Cm^3/q^2)\cdot(n(n-2)^3/n^3)  \\
+%\end{align*}
+%Damn! The second factor in the last line is less than 1 and I don't see any
+%way to fix it.
+%\end{proof}
+%
 
 \section{The First Section}
 

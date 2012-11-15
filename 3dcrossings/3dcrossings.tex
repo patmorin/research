@@ -5,13 +5,16 @@
 \newcommand{\eps}{\varepsilon}
 
 \title{\MakeUppercase{A Crossing Number Inequality for 3D Grid Drawings}}
-\author{Sheldon Cooper, Pat Morin,\thanks{School of Computer Science, Carleton University, \email{morin@scs.carleton.ca}}\ and Howard Wolowitz}
+\author{Vida Dujmovi\'c,\thanks{Department of Mathematics and Statistics
+and Department of Systems and Computer Engineering, Carleton University}\, Pat Morin,\thanks{School of Computer Science, Carleton University}\, and Howard Wolowitz}
 
 
 \DeclareMathOperator{\x}{x}
 \DeclareMathOperator{\y}{y}
 \DeclareMathOperator{\z}{z}
 \DeclareMathOperator{\crs}{cr}
+\DeclareMathOperator{\len}{len}
+\DeclareMathOperator{\skp}{skip}
 
 \begin{document}
 \maketitle
@@ -25,17 +28,26 @@
 The \emph{$X\times Y\times Z$ grid} is the point set $\{(x,y,z):
 x\in\{1,\ldots,X\},\, y\in\{1,\ldots,Y\},\, z\in\{1,\ldots,Z\}\}$.
 The volume of the $X\times Y\times Z$ grid is $XYZ$. A \emph{(proper)
-drawing}, $\varphi:V(G)\rightarrow R$, of a graph, $G$, on a grid,
-$R$, is a one-to-one mapping such that, for every edge $uw\in E(G)$ and
-every vertex $x\in V(G)$, the open line segment with endpoints $\varphi(u)$ and $\varphi(w)$
-does not contain $x$.
+drawing}, $\varphi:V(G)\rightarrow R$, of a graph, $G$, on a grid, $R$,
+is a one-to-one mapping such that, for every edge $uw\in E(G)$ and every
+vertex $x\in V(G)$, the open line segment with endpoints $\varphi(u)$
+and $\varphi(w)$ does not contain $x$.
 
-Define $\crs(G,n)$ to be the minimum number of edge crossings
-in a drawing of $G$ on a grid whose volume is $n$.  Define
+Define $\crs(G,n)$ to be the minimum number of edge crossings in
+a drawing of $G$ on a grid whose volume is at most $n$.  Define
 $g(n,m)=\min\{\crs(G,n):\text{$G$ is a graph with $m$ edges}\}$.
+In this paper, we show that there exists constant $c_1,c_2,c_3>0$ such that, 
+for all $m> c_3n$
+\[
+   c_1(m^2/n)\log\log(m/n) \le g(n,m) \le c_2(m^2/n)\log(m/n) \enspace .
+\]
+The proof of the lower bound is given in \secref{lower-bound} and the
+upper bound is given in \secref{upper-bound}.
 
 
-\section{A Lower Bound}
+
+\section{The Lower Bound}
+\seclabel{lower-bound}
 
 \begin{thm}
   $g(n,m) \in \Omega((m^2/n)\log\log (m/n))$.
@@ -50,7 +62,8 @@ $G$ contains any point of the $X\times Y\times Z$ grid in its interior;
 such an edge could be replaced with a shorter edge without introducing
 any additional crossings.
 
-For a prime number, $p$, define the $X\times Y\times Z$ \emph{$p$-grid} as the set of points
+For a prime number, $p$, define the $X\times Y\times Z$ \emph{$p$-grid}
+as the set of points
 \[
   \{(x/p,y/p,z/p): x\in\{1,\ldots,pX\},\, y\in\{1,\ldots,pY\},\,
   z\in\{1,\ldots,pZ\}\} \enspace .
@@ -135,12 +148,70 @@ of primes. (This sum is also known as a harmonic series of primes).
 %\end{proof}
 %
 
-\section{The First Section}
+\section{The Upper Bound}
+\seclabel{upper-bound}
 
-\section{The Second Section}
+In this section, we prove the following result:
+
+\begin{thm}\thmlabel{upper-bound}
+  $g(n,m) \in O((m^2/n)\log (m/n))$.
+\end{thm}
+
+The proof of \thmref{upper-bound} follows easily from the following lemma:
+\begin{lem}\lemlabel{2-layer}
+  There exists a drawing of the complete bipartite graph $K_{k^2,k^2}$
+  on the $k\times k\times 2$ grid with $O(k^6\log k)$ crossings.
+\end{lem}
+
+Before proving the lemma, we first show how it implies
+\thmref{upper-bound}: For simplicity, in what follows, assume $\sqrt{n}$,
+$\sqrt{m/n}$, and $\sqrt{m}/n$ are each integers.  Apply \lemref{2-layer},
+with $k=\sqrt{m/n}$ and tile the $\sqrt{n}\times\sqrt{n}\times 2$ grid
+with $n/k^2$ copies of this drawing. The resulting geometric graph has
+$2n$ vertices, $nk^4/k^2=m$ edges and
+\[ O((n/k^2)k^6\log k) = O(nk^4\log k) = O((m^2/n)\log(m/n))
+\] 
+crossings, as required by \thmref{upper-bound}.
+
+\begin{proof}[Proof of \lemref{2-layer}]
+The drawing of $K_{k^2,k^2}$ is the obvious one; each point with
+$z$-coordinate 1 is connected by an edge to every point with
+$z$-coordinate 2.  
+
+We start by considering some edge $uw$ with $\z(u)=1$ and counting
+the number of edges that intersect $uw$.  Let $\pi_1,\ldots,\pi_k$ be
+the planes that contain $uw$ and at least one additional grid point.
+Observe that each plane $\pi_j$ contains, and is uniquely determined by,
+a line in the plane $z=1$ that passes through some point, $p_j$ of the
+integer lattice $\N^2$ and such that $up_j$ does not contain any other
+lattice points, i.e., $\gcd(\x(u)-\x(p_j),\y(u)-\y(p_j))=1$ (see \figref{planes}).
+\begin{figure}
+  \centering{\includegraphics{planes}}
+  \caption{A plane $\pi_j$, defined by a point $p_j$, with $\skp(\pi_j)=2$.}
+  \figlabel{planes}
+\end{figure}
+Define the \emph{skip} of $\pi_j$ as
+\[
+   \skp(\pi_j)=\max\{|\x(u)|-\x(p_j)|,|\y(u)-\y(p_j)|\} \enspace .
+\]
+Observe that, if $\skp(\pi_j)=r$, then $\pi_j$ contains at most $2k/r$
+points other than $u$ and $w$ and therefore contains at most $(k/r)^2$
+edges that cross $uw$.  Furthermore, the number of planes $\pi_j$ such
+that $\skp(\pi_j)=r$ is at most $4r+1$.  Therefore, the total number
+of edges that cross $uw$ is at most
+\[
+   \sum_{r=1}^k (4r+1)(k/r)^2 \le 4k^2\ln k + O(k) \enspace .
+\]
+Since this is true for each of the $k^4$ edges, $uw$, we conclude that
+the total number of crossings in this drawing of $K_{k^2,k^2}$ is at
+most $4k^6\ln k+O(k^3)\in O(k^6\log k)$, as required.
+\end{proof}
 
 \section{Summary}
 \seclabel{summary}
+
+
+Open problem: our lower-bound argument fails for $d\ge 4$.
 
 \section*{Acknowledgement}
 

@@ -15,6 +15,7 @@ and Department of Systems and Computer Engineering, Carleton University}\, Pat M
 \DeclareMathOperator{\crs}{cr}
 \DeclareMathOperator{\len}{len}
 \DeclareMathOperator{\skp}{skip}
+\DeclareMathOperator{\ncs}{G}
 
 \begin{document}
 \maketitle
@@ -25,25 +26,66 @@ and Department of Systems and Computer Engineering, Carleton University}\, Pat M
 
 \section{Introduction}
 
-The \emph{$X\times Y\times Z$ grid} is the point set $\{(x,y,z):
-x\in\{1,\ldots,X\},\, y\in\{1,\ldots,Y\},\, z\in\{1,\ldots,Z\}\}$.
-The volume of the $X\times Y\times Z$ grid is $XYZ$. A \emph{(proper)
-drawing}, $\varphi:V(G)\rightarrow R$, of a graph, $G$, on a grid, $R$,
-is a one-to-one mapping such that, for every edge $uw\in E(G)$ and every
-vertex $x\in V(G)$, the open line segment with endpoints $\varphi(u)$
-and $\varphi(w)$ does not contain $x$.
+The $d$-dimensional \emph{$X_1\times\cdots\times X_d$ grid} is the
+point set 
+\[  \{(x_1,\ldots,x_d): 
+      \mbox{$x_i\in\{1,\ldots,X_i\}$ for all $i\in\{1,\ldots,d\}$}\}
+	\enspace .\]
+The \emph{volume} of the $X_1\times\cdots\times X_d$
+grid is $\prod_{i=1}^d X_i$, i.e,. the number of points in the grid.
+A \emph{(proper) drawing}, $\varphi:V(G)\rightarrow R$, of a graph, $G$,
+on a grid, $R$, is a one-to-one mapping such that, for every edge $uw\in
+E(G)$ and every vertex $x\in V(G)$, the open line segment with endpoints
+$\varphi(u)$ and $\varphi(w)$ does not contain $x$.
 
-Define $\crs(G,n)$ to be the minimum number of edge crossings in
-a drawing of $G$ on a grid whose volume is at most $n$.  Define
-$g(n,m)=\min\{\crs(G,n):\text{$G$ is a graph with $m$ edges}\}$.
-In this paper, we show that there exists constant $c_1,c_2,c_3>0$ such that, 
-for all $m> c_3n$
-\[
-   c_1(m^2/n)\log\log(m/n) \le g(n,m) \le c_2(m^2/n)\log(m/n) \enspace .
+We extend the notation $\varphi$ to edges, so that $\varphi(uw)$ denotes
+the open line segment with endpoints $\varphi(u)$ and $\varphi(w)$.
+Two edges $uw$ and $xy$ in a drawing \emph{cross} if $\varphi(uw)$
+and $\varphi(xy)$ have a point in common.  When this happens, we
+say that $uw$ and $xy$ generate a \emph{crossing}.  For a graph $G$,
+define $\crs_d(G,n)$ to be the minimum number of crossings in a drawing
+of $G$ on a $d$-dimensional grid of volume at most $n$.  Define
+\[ g_d(n,m)=\min\{\crs_d(G,n):\text{$G$ is a graph with $m$ edges}\} \enspace .
 \]
-The proof of the lower bound is given in \secref{lower-bound} and the
-upper bound is given in \secref{upper-bound}.
+Define $\ncs_d(n)$ as the maximum number of non-crossing graphs that
+can be drawn on any $d$-dimensional grid of volume at most $n$.
 
+The study of crossings in graph drawing has a long history.  Euler's
+Formula states that the maximum number of edges in a planar graph
+with $n$ vertices is $3n-6$; this implies that $g_2(n,3n-5)\ge 1$.
+Using Euler's Formula and careful counting, Ajtai \etal\ \cite{S}
+showed that any plane drawing of a graph with $n$ vertices and
+$m\ge 4n$ edges has $\Omega(m^3/n^2)$ crossings;  this implies that
+$g_2(n,m)\in\Omega(m^3/n^2)$ for $m\ge 4n$.  Using this result, the
+same authors showed that the maximum number of planar graphs that can
+be embedded any set of $n$ points is $2^{O(n)}$;  this implies that
+$\ncs_2(n)\in 2^{O(n)}$.
+
+Czyzowicz \etal\ \cite{cXX} show that the maximum number of edges in
+a non-crossing $d$-dimensional grid drawing is at most $n2^d-TWIDDLE$;
+this implies that $g_d(n,n2^d-TWIDDLE+1)\ge 1$.
+
+In this paper, we study $g_d(n,m)$ and $\ncs_d(n)$ for $d\ge 3$.  
+
+
+%In this paper, we show that there exists constant $c_1,c_2,c_3>0$ such that, 
+%for all $m> c_3n$
+%\[
+%   c_1(m^2/n)\log\log(m/n) \le g(n,m) \le c_2(m^2/n)\log(m/n) \enspace .
+%\]
+%The proof of the lower bound is given in \secref{lower-bound} and the
+%upper bound is given in \secref{upper-bound}.
+
+\begin{center}
+\begin{tabular}{rlccc}
+$d$ & $g_d(n,m)$ & $\ncs(n)$ & Refs \\ \hline
+1 & --- & $2^{n-1}$ & \\
+2 & $g_d(n,m)\in\Theta(m^{3}/n^2)$ & $2^{\Theta(n)}$ & \cite{aiisjsXX} \\
+3 & $g_d(n,m) \in \Omega((m^2/n)\log\log(m/n))$ & ?  & here \\
+3 & $g_d(n,m) \in O((m^2/n)\log(m/n))$ & ?  & here \\
+$\ge 4$ & $g_d(n,m)\in\Theta(m^{2}/n)$ & $2^{\Theta(n\log n)}$ & here \\
+\end{tabular}
+\end{center}
 
 
 \section{The Lower Bound}
@@ -68,17 +110,27 @@ as the set of points
   \{(x/p,y/p,z/p): x\in\{1,\ldots,pX\},\, y\in\{1,\ldots,pY\},\,
   z\in\{1,\ldots,pZ\}\} \enspace .
 \]
+Observe that, for two distinct primes $p$ and $q$, the intersection
+of the $p$-grid and the $q$-grid is exactly the $X\times Y\times Z$
+grid. (This is because the only integers $a$ and $b$ that satisfy the
+equation $a/p = b/q$ have $a\equiv 0 \pmod{p}$ and $b\equiv 0\pmod q$,
+so $a/p$ and $b/q$ are each integers.)
+
 Note that the number of points in the $X\times Y\times Z$ $p$-grid is
 no more than $np^3$.  Note, furthermore, that each edge $uw$ of $G$
 contains the $p$-grid points
 \[
-    P_{uw}^p = \{ (i/p)u + ((p-i)/p)w : i\in\{1,\ldots,p-1\} \} \enspace .
+    P_{uw}^p = \{ (i/p)(u-w) : i\in\{1,\ldots,p-1\} \} \enspace .
 \]
-Finally, observe that $P_{uw}^p$ does not contain any $q$-grid points
-for any prime $q\neq p$.  (This follows from the assumption that no edge
-contains a grid point in its interior, so $\gcd(\x(u)-\x(w), \y(u)-\y(w),
-\z(u)-\z(w))=1$.  In particular, at least one of $\x(u)-\x(w)$,
-$\y(u)-\y(w)$, $\z(u)-\z(w)$ does not have $p$ as a divisor.)
+Next, we claim that $P_{uw}^p$ does not contain any $q$-grid points for
+any prime $q\neq p$.  In fact, $P_{uw}^p$ does not contain any point of
+the $X\times Y\times Z$ grid.  This follows from the assumption that
+no edge contains a grid point in its interior, so $\gcd(\x(u)-\x(w),
+\y(u)-\y(w), \z(u)-\z(w))=1$.  In particular, at least one of
+$\x(u)-\x(w)$, $\y(u)-\y(w)$, $\z(u)-\z(w)$ does not have $p$ as a
+divisor.  If, say, $\x(u)-\x(w)$ does not have $p$ as a divisor then
+$i(\x(u)-\x(w))/p$ is not an integer and therefore $(i/p)(u-w)$ is not
+on the $X\times Y\times Z$ grid.
 
 Therefore, there are at least $(p-1)m$ incidences between edges of $G$
 and points of the $p$-grid that are not points of any $q$-grid for $q\neq p$.
@@ -95,7 +147,8 @@ Finally, we finish by summing over primes $p$ smaller than $c'p^{1/2}$:
    \crs(G) \ge \sum_{p} cm^2/np = (cm^2/n) \sum_{p} 1/p = ((cm^2/n)(\ln\ln(m/n)-O(1))
 \]
 where the last inequality is Euler's result on the sums of reciprocals
-of primes. (This sum is also known as a harmonic series of primes).
+of primes. (This sum is also known as a harmonic series of primes.  See,
+e.g., Graham, Knuth and Patashnik \cite[pages~22--25]{gkpXX}.)
 \end{proof}
 
 %\To see this, notice that 
@@ -176,7 +229,8 @@ crossings, as required by \thmref{upper-bound}.
 \begin{proof}[Proof of \lemref{2-layer}]
 The drawing of $K_{k^2,k^2}$ is the obvious one; each point with
 $z$-coordinate 1 is connected by an edge to every point with
-$z$-coordinate 2.  
+$z$-coordinate 2.  We shall denote the resulting geometric graph
+by $G_{k^2}$.
 
 We start by considering some edge $uw$ with $\z(u)=1$ and counting
 the number of edges that intersect $uw$.  Let $\pi_1,\ldots,\pi_k$ be
@@ -199,13 +253,215 @@ points other than $u$ and $w$ and therefore contains at most $(k/r)^2$
 edges that cross $uw$.  Furthermore, the number of planes $\pi_j$ such
 that $\skp(\pi_j)=r$ is at most $4r+1$.  Therefore, the total number
 of edges that cross $uw$ is at most
-\[
-   \sum_{r=1}^k (4r+1)(k/r)^2 \le 4k^2\ln k + O(k) \enspace .
-\]
+\begin{equation}
+   \sum_{r=1}^k (4r+1)(k/r)^2 \le 4k^2\ln k + O(k) \enspace . \eqlabel{critical}
+\end{equation}
 Since this is true for each of the $k^4$ edges, $uw$, we conclude that
 the total number of crossings in this drawing of $K_{k^2,k^2}$ is at
 most $4k^6\ln k+O(k^3)\in O(k^6\log k)$, as required.
 \end{proof}
+
+We finish this section with a strengthening of \thmref{upper-bound}
+that will be used to prove a lower bound on the number of non-crossing
+graphs that can be drawn on the $\sqrt{n}\times\sqrt{n}\times 2$ grid.
+Let $G_n$ denote the drawing of the bipartite graph $K_{n,n}$ on the
+$\sqrt{n}\times\sqrt{n}\times 2$ grid, as described in the proof of
+\thmref{upper-bound}.
+Define the \emph{length} of an edge $uw$ in $G_n$ as
+\[
+   \len(uw) = \max\{|\x(u)-x(w)|, |y(u)-y(w)|\} \enspace .
+\]
+Note that this definition of length defines a partial order on the edges
+of $G_n$. Extend this to a total order by breaking ties arbitrarily so
+that for any two edges we can refer to the longer or the shorter of the
+two without ambiguity.  For any integer $M\in\{0,\ldots,n^2\}$,
+let $G_{n,M}$ denote the subgraph of $G_n$ that contains only the $M$
+shortest edges of $G_n$.
+
+\begin{lem}\lemlabel{gross-upper-bound}
+  Each edge of $G_{n,M}$ crosses at most $O((n/M)\log(n/M))$ other edges.
+\end{lem}
+
+\begin{proof}[Proof sketch]
+The proof is a straightforward generalization of the proof of
+\lemref{2-layer}.  The number of edges in $G_n$ whose length is at
+most $r$ is $\Omega(nr^2)$.  Therefore, the longest edge in $G_{n,M}$
+has length $O(\sqrt{M/n})$.
+
+Observe that, if two crossing edges are contained in a plane $\pi_j$
+with $\skp(\pi_j)=r$, then at least one of the two edges has length at
+least $r$.  Therefore, when counting crossings in $G_{n,M}$,
+ it is unnecessary to consider any plane $\pi_j$ with $\skp(\pi_j)>
+ c\sqrt{M/n}$.  In this way the sum, \eqref{critical}, which counts the
+ maximum number of edges intersecting any other edge, becomes
+\[
+   \sum_{r=1}^{c\sqrt{M/n}} (4r+1)(k/r)^2 \le 4c(M/n)\ln(M/n) + O(M/n)  \enspace .
+\qedhere
+\]
+\end{proof}
+
+\section{The Number of Non-Crossing Graphs}
+
+%Next we show that the number of non-crossing subgraphs of $G_n$ is at
+%least $2^{\Omega(n\log n)}$.  A corresponding upper bound on the number of
+%non-crossing graphs that can be drawn on any grid of volume $n$ follows
+%from the fact that any such graph has at most $7n$ edges (Czyzowicz
+%\etal\ \cite[Lemma Y]{X}); so any non-crossing graph corresponds to one
+%of the ways of choosing at most $7n$ edges from among the $\binom{n}{2}$
+%possible edges.  Therefore, the number of such graphs is at most
+%\[
+%    2^{7n}\binom{\binom{n}{2}}{7n} \le 2^{7n} n^{14n} = 2^{14n\log n+7n}
+%\]
+%
+%We now prove a lower-bound of the same form:
+
+\begin{thm}
+  There are $2^{\Omega(n\log\log n)}$ subgraphs of $G_n$ that have
+  no crossings.
+\end{thm}
+
+\begin{proof}
+For a geometric graph $G$, let $\ncs(G)$ denote the number of non-crossing
+subgraphs of $G$ and define
+\[
+   f(m,M) = \min\{ \ncs(G) : \mbox{$G$ is a subgraph of $G_{n,M}$ with $m$ edges} \}
+   \enspace . 
+\]
+Our goal is to lower-bound $f(n^2,n^2)$.  In order to do this, we first establish some preliminary recurrence inequalities and base cases.
+
+For our base cases, we have 
+\[ 
+   f(m,M)\ge 1 \enspace ,
+\]
+for all $m\in\{0,\ldots,cN\}$ since the subgraph of $G_{n,M}$ with no
+edges is non-crossing.
+
+Fix any geometric subgraph, $G$, of $G_{n,M}$ that has $m> cn$
+edges and select an edge $e$ from $G$. Then there are at least
+$f(m-1,M)$ subgraphs of $G$ that do not include $e$.  Furthermore, by
+\lemref{gross-upper-bound}, $e$ intersects at most $c(M/n)\log(M/n)$
+edges of $G$, so there are at least $f(m-c(M/n)\log(M/n),M)$ subgraphs
+of $G$ that include $e$.  Therefore,
+\[  f(m,M) \ge f(m-1,M) + f(m-c(M/n)\log(M/n)) \enspace ,
+\]
+for $m\ge c(M/n)\log(M/n)$.  Repeatedly expanding the first term gives:
+\begin{eqnarray*}
+f(m,M) & \ge & f(m-1,M) + f(m-c(M/n)\log(M/n), M) \\
+       & \ge & f(m-1,M) + f(m-2c(M/n)\log(M/n), M) \\
+       & \ge & f(m-2,M) + 2f(m-2c(M/n)\log(M/n), M) \\
+       & \ge & f(m-3,M) + 3f(m-2c(M/n)\log(M/n), M) \\
+       & \vdots & \\
+       & \ge & (c(M/n)\log(M/n))\times f(m-2c(M/n)\log(M/n), M) \enspace ,
+\end{eqnarray*}
+for $m\ge 2c(M/n)\log(M/n)$.
+
+For an integer $t$, we can iterate the preceding $t$ times to obtain
+\begin{equation}
+   f(m,M) \ge (c(M/n)\log(M/n))^t\times f(m-2ct(M/n)\log(M/n), M)) \enspace ,
+   \eqlabel{recur-a}
+\end{equation} 
+for $m\ge 2ct(M/n)\log(M/n)$.
+
+Our next recurrence inequality is trivial: fix any subgraph, $G$,
+of $G_{n,M}$ and observe that the subgraph, $G\cap G_{n,M/2}$, of $G$
+that contains only the edges that appear in $G_{n,M/2}$ is a subgraph
+of $G_{n,M}$ and this subgraph contains at most $M/2$ fewer edges.  Thus
+\begin{equation}
+  f(m,M) \ge f(m-M/2,M/2) \enspace .
+  \eqlabel{recur-b}
+\end{equation}
+
+Our strategy is to prove that $f(n^2,n^2) \ge 2^{\Omega(n\log\log n)}$ by
+repeatedly applying \eqref{recur-a} and \eqref{recur-b}.  Each application of
+these inequalities gives reduced values of $m$ and $M$.  Let $m_i$ and $M_i$ be
+these values, respectively, after applying these inequalities $i$ times each.  Initially $m_0=M_0=n^2$.  After $i$ iterations, we will have $m_i=n^2/i2^i$ and $M_i=n^2/2^i$.  The first thing to understand is the decrease in the value of $m$ from one round to the next (slow and careful):
+\[
+    m_1 - m_0 = n^2/2
+\]
+and, for $i \ge 2$, 
+\begin{align*}
+  m_{i-1}-m_i
+      & = \frac{n^2}{(i-1)2^{i-1}} - \frac{n^2}{i2^{i}} \\
+      & = \frac{2n^2}{(i-1)2^{i}} - \frac{n^2}{i2^{i}} \\
+      & = \frac{2n^2}{(i-1)2^{i}} - \frac{n^2}{i2^{i}} \\
+      & = \frac{2in^2}{i(i-1)2^{i}} - \frac{(i-1)n^2}{i(i-1)2^{i}} \\
+      & = \frac{n^2(i+1)}{i(i-1)2^{i}} \\
+      & = n^2/i2^i + \Theta(n^2/i^22^i)\\
+\end{align*}
+The difference $m_i-m_{i-1}$ comes from two parts.  One part, $n^2/2^i$,
+comes from applying \eqref{recur-b}.  The second part,
+\[
+     n^2/i2^i 
+\]
+
+\end{proof}
+
+%\begin{proof}
+%Consider the following the method of enumerating some of the subgraphs
+%of $G_n$, which takes as input a subgraph, $G_{n,M}$, of $G_n$.
+%We select an 
+%
+%
+% that has $m$
+%edges and which .  We select the longest edge
+%
+%
+%We get the recurrence
+%\[ f(m) \ge  
+% \begin{cases} 1 & \text{if $0< m < Cn$} \\
+%               f(m-2) + f(m-c(m/n)\log(m/n)) & \text{otherwise} 
+% \end{cases}
+%\]
+%If we focus on the second case, we can expand the first term
+%$c(m/n)\log(m/n)$ times:
+%\begin{align*}
+%   f(m) & \ge f(m-2) + f(m-2c(m/n)\log(m/n)) \\
+%        & \ge f(m-4) + 2f(m-2c(m/n)\log(m/n)) \\
+%        & \ge f(m-6) + 3f(m-2c(m/n)\log(m/n)) \\
+%        & \,\,\vdots \\
+%        & \ge (cm/n)\log(m/n)\times f(m-2c(m/n)\log(m/n))
+%\end{align*}
+%By iterating this process $x=n/(2c\log(m/n))$ times, we obtain
+%\[
+%   f(m) \ge ((cm/n)\log(m/n))^x\times f(m/2)
+%\]
+%Next, notice that
+%\begin{align*}
+%((cm/n)\log(m/n))^x 
+%   &= (c\log(m/n))^x2^{\log(m/n)x} \\
+%   &= (c\log(m/n))^x2^{n/2c} \\
+%   & \ge 2^{n/2c}
+%\end{align*}
+%for $m>n2^{1/c}$.  Thus far, we have
+%\[
+%   f(m) \ge 2^{n/2c}\times f(m/2) \enspace .
+%\]
+%We can now iterate this process $\alpha\log(m/n)$ times to obtain
+%\[
+%   f(m) \ge 2^{\alpha n\log(m/n)/2c}\times f(O(n)) 
+%        \ge 2^{\alpha n\log(m/n)/2c} 
+%        = 2^{\Omega(n\log n)}
+%\]
+%for $m=n^2$, as required.
+%\end{proof}
+%
+%
+%BLAAAHAAHAHAHAHAHAH
+%
+%Now we prove, by induction on $m$ that 
+%\[  \log(f(m)) \ge \alpha(m/n)\log(m/n) \]
+%for some constant $\alpha > 0$.  The base cases occur when $m<cn$, in
+%which case $\log(f(m))=1>\alpha c\log c$ for sufficiently small $\alpha$.
+%For the inductive step, we have
+%\begin{align}
+%  \log(f(m)) 
+%  & \ge \log(cm/2n)\log(m/n))+\log(f(m-(2cm/n)\log(m/n))) \\
+%  & \ge \log(cm/2n)\log(m/n))+\alpha\left(\frac{m-\frac{2cm\log(m/n)}{n}}{n}\right)\log\left(\frac{m-\frac{2cm\log(m/n)}{n}}{n}\right) \\
+%  & = \log(2cm/2n)\log(m/n))
+%        +\alpha\left(\frac{m}{n} 
+%                      - \frac{2cm\log(m/n)}{n^2}\right)
+%        \log\left(\frac{m-\frac{2cm\log(m/n)}{n}}{n}\right) 
+%\end{align}
 
 \section{Summary}
 \seclabel{summary}

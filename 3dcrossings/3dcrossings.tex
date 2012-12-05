@@ -15,26 +15,28 @@ and Department of Systems and Computer Engineering, Carleton University}\, Pat M
 \DeclareMathOperator{\crs}{cr}
 \DeclareMathOperator{\len}{len}
 \DeclareMathOperator{\skp}{skip}
-\DeclareMathOperator{\ncs}{G}
+\DeclareMathOperator{\ncs}{ncs}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-   We study crossing number inequalities drawings of graphs on
-   $d$-dimensional grids.
+   We study crossing number inequalities for geometric graphs whose
+   vertex sets are points of the $d$-dimensional grid of volume $n$
+   and give applications of these inequalities to counting the number
+   of non-crossing geometric graphs that can be drawn on such grids.
 \end{abstract}
 
 \section{Introduction}
 
-The study of crossings in graph drawing has a long history.  \emph{Euler's
-Formula} states that the maximum number of edges in a planar graph with
-$n$ vertices is $3n-6$.  Using Euler's Formula and careful counting,
-Ajtai \etal\ \cite{S} showed that any plane drawing of a graph with $n$
-vertices and $m\ge 4n$ edges has at least $c m^3/n^2$ crossings, for
-some constant $c$.  Using this result, the same authors showed that the
-maximum number of different planar graphs that can be embedded any set
-of $n$ points is $2^{O(n)}$
+The study of crossings drawings of graphs has a long history.
+\emph{Euler's Formula} states that the maximum number of edges in a
+planar graph with $n$ vertices is $3n-6$.  Using Euler's Formula and
+careful counting, Ajtai \etal\ \cite{S} showed that any plane drawing of
+a graph with $n$ vertices and $m\ge 4n$ edges has at least $c m^3/n^2$
+crossing pairs of edges, for some constant $c$.  Using this result,
+the same authors showed that the maximum number of planar graphs that
+can be embedded any fixed set of $n$ points is $2^{O(n)}$
 
 The lower bound, $cm^3/n^2$, on the number of crossings in a plane drawing
 has since become known as the ``the \emph{Crossing Lemma}'' or ``the Crossing
@@ -48,57 +50,81 @@ result of Dey \cite{d98} on the maximum number $k$-sets of a point set.
 Ajtai \etal's proof of the Crossing Lemma uses the probabilistic method
 in the sense of Chvatal \cite{cXX}: The proof works by counting the
 number of crossings in two different ways.  More recently, a ``from the
-book'' proof of the Crossing Lemma that uses a more obvious application
-of the probabilistic method and has a better constant was discovered
-by Chazelle, Sharir, and Welzl (See Aigner and Ziegler \cite{azXX}).
-Pushing this technique even further, Pach \etal\ currently hold the
-record for the largest constant, $c$.
+book'' proof of the Crossing Lemma that uses a more literal application
+of the probabilistic method to obtain a better constant, $c$, was
+discovered by Chazelle, Sharir, and Welzl (See Aigner and Ziegler
+\cite[Theorem~XX]{azXX}).  Pushing this technique even further, Pach
+\etal\ \cite{pdxx} currently hold the record for the largest constant,
+$c$.
 
-Our goal in this paper is to extend the results of Ajtai \etal\ to graph
-drawings in higher dimensions and, in particular, to graphs drawn on
-the grid.  The $d$-dimensional \emph{$X_1\times\cdots\times X_d$ grid}
-is the point set
-\[  \{(x_1,\ldots,x_d): 
+The goal of the present paper is to extend the results of Ajtai
+\etal\ to graph drawings in higher dimensions.  In particular, we
+extend their results to graphs drawn on grids.  The $d$-dimensional
+\emph{$X_1\times\cdots\times X_d$ grid} is the point set
+\[  \Z(X_1,\ldots,X_d) = \{(x_1,\ldots,x_d): 
       \mbox{$x_i\in\{1,\ldots,X_i\}$ for all $i\in\{1,\ldots,d\}$}\}
 	\enspace .\]
-The \emph{volume} of the $X_1\times\cdots\times X_d$
-grid is $\prod_{i=1}^d X_i$, i.e,. the number of points in the grid.
-A \emph{(proper) drawing}, $\varphi:V(G)\rightarrow R$, of a graph, $G$,
-on a grid, $R$, is a one-to-one mapping such that, for every edge $uw\in
-E(G)$ and every vertex $x\in V(G)$, the open line segment with endpoints
-$\varphi(u)$ and $\varphi(w)$ does not contain $x$.
+The \emph{volume} of the $X_1\times\cdots\times X_d$ grid is
+$\prod_{i=1}^d X_i$, i.e,. the number of points in the grid.
+A ($d$-dimensional) \emph{geometric (grid) graph}, $G$, is a graph with
+vertex set $V(G)\subseteq \Z(x_1,\ldots,x_d)$ and such that, for any
+edge $uw\in E(G)$, the open line segment with endpoints $u$ and $w$
+does not include any point in $V(G)$.
 
-We extend the notation $\varphi$ to edges, so that $\varphi(uw)$ denotes
-the open line segment with endpoints $\varphi(u)$ and $\varphi(w)$.
-Two edges $uw$ and $xy$ in a drawing \emph{cross} if $\varphi(uw)$
-and $\varphi(xy)$ have a point in common.  When this happens, we
-say that $uw$ and $xy$ generate a \emph{crossing}.  For a graph $G$,
-define $\crs_d(G,n)$ to be the minimum number of crossings in a drawing
-of $G$ on a $d$-dimensional grid of volume at most $n$.  Define
-\[ g_d(n,m)=\min\{\crs_d(G,n):\text{$G$ is a graph with $m$ edges}\} \enspace .
+Throughout this paper, for two vertices $u$ and $w$ in a geometric graph,
+$G$, we will use the notation $uw$ to refer to the open line segment
+with endpoints $u$ and $w$ and to the edge $uw\in E(G)$, if present.
+Two edges $uw$ and $xy$ in a geometric graph \emph{cross} if they have a
+point in common.  When this happens, we say that $uw$ and $xy$ generate
+a \emph{crossing}.  We define $\crs(G)$ as the number of crossings
+in $G$.\footnote{Note that this is different from the planar crossing
+number, usually denoted $\mathrm{cr}(G)$, that is the minimum number of
+crossings in any drawing of the (non-geometric) graph $G$.}  We say that
+$G$ is \emph{non-crossing} if $\crs(G)=0$.  Finally, we define
+\[ \crs_d(n,m)=\min\left\{\crs(G):\mbox{%
+   $V(G)\subseteq\Z(x_1,\ldots,x_d)$,
+   $\prod_{i=1}^d x_i\le n$,
+   and $|E(G)|=m$}
+   \right\} \enspace .
 \]
-Define $\ncs_d(n)$ as the maximum number of non-crossing graphs that
-can be drawn on any $d$-dimensional grid of volume at most $n$.
+That is, $\crs_d(n,m)$ is the minimum number of crossings in any geometric
+graph having $m$ edges and whose vertices are contained in a grid of
+volume at most $n$.
 
-The results of Ajtai \etal\ \cite{S} on crossings in 2-dimensions all
-have implications for $g_2(n,m)$ and $G_2(n)$. Euler's Formula implies
-that implies that $g_2(n,3n-5)\ge 1$.  The Crossing Lemma implies that
-$g_2(n,m)\in\Omega(m^3/n^2)$ for $m\ge 4n$.  The bound of $2^{O(n)}$ on
-the number of planar graphs that can be drawn on any point set implies
-that $\ncs_2(n)\in 2^{O(n)}$.
+We are also interested in the maximum number, $\ncs_d(n)$, of non-crossing
+geometric graphs that can be drawn on any particular grid of volume $n$.
+That is,
+\[
+  \ncs_d(n) = \max\left\{
+     \left|\left\{G:\mbox{$V(G)\subseteq\Z(x_1,\ldots,x_d)$
+            and $\crs(G)=0$} \right\}\right| :
+    \mbox{$\prod_{i=1}^d x_i \le n$} \right\} \enspace .
+\]
+
+Results on plane drawings of graphs have immediate implications
+for $\crs_2(n,m)$ and $\ncs_2(n)$:
+\begin{enumerate}
+  \item  Euler's Formula implies that $\crs_2(n,3n-5)\ge 1$,
+  \item  Ajtai \etal's Crossing Lemma implies that $\crs_2(n,m)\ge
+  cm^3/n^2$ for $m\ge 4n$, and
+  \item  Ajtai \etal's upper-bound of $2^{O(n)}$ on the number of planar
+  graphs that can be drawn on any point set implies that $\ncs_2(n)\le
+  2^{O(n)}$.
+\end{enumerate}
 
 Czyzowicz \etal\ \cite{cXX} show that the maximum number of
 edges in a non-crossing $d$-dimensional grid drawing is at most
 $(2^d-1)n-\Theta(n^{(d-1)/d})$. This result is analagous to Euler's
 Formula in that it shows that such graphs have a linear number of edges.
-It also implies, for example, that $g_2(n,(2^d-1)n)\ge 1$.
+It also implies, for example, that $\crs_d(n,(2^d-1)n)\ge 1$.  Since
+Euler's Formula is the main property of planar graphs used by Ajtai \etal\
+to prove their results, it seems reasonable that bounds similar to those
+of Ajtai \etal\ should hold for $d$-dimensional geometric grid graphs.
 
-Since Euler's Formula is the main property used by Ajtai \etal\ to
-prove their results, it seems reasonable that similar bounds should
-hold for $d$-dimensional grid drawings.  In the current paper, we study
-$g_d(n,m)$ and $\ncs_d(n)$ for $d\ge 3$ and prove the results shown
-in \tabref{results}.  Talk some more about these results\ldots
+\subsection{New Results}
 
+In the current paper, we study $\crs_d(n,m)$ and $\ncs_d(n)$ for $d\ge 3$
+and prove the results shown in \tabref{results}.
 
 %In this paper, we show that there exists constant $c_1,c_2,c_3>0$ such that, 
 %for all $m> c_3n$
@@ -110,38 +136,58 @@ in \tabref{results}.  Talk some more about these results\ldots
 
 \begin{table}
   \begin{center}
-    \begin{tabular}{rlccc}
-      $d$ & $g_d(n,m)$ & $\ncs(n)$ & Refs \\ \hline
-      1 & --- & $2^{n-1}$ & \\
-      2 & $\Theta(m^{3}/n^2)$ & $2^{\Theta(n)}$ & \cite{aiisjsXX} \\
-      3 & $\Omega((m^2/n)\log\log(m/n))$ & ?  & here \\
-      3 & $O((m^2/n)\log(m/n))$ & ?  & here \\
-      $\ge 4$ & $\Theta(m^{2}/n)$ & $2^{\Theta(n\log n)}$ & here \\
+    \begin{tabular}{r|lllc}
+      $d$ & $\crs_d(n,m)$ & $\ncs(n)$ & References \\ \hline
+      % 1 & --- & $2^{n-1}$ & trivial \\
+      2 & $\Theta(m^{3}/n^2)$, for $m\ge 4n$ & $2^{\Theta(n)}$ & \cite{aiisjsXX} \\
+      3 & $\Omega((m^2/n)\log\log(m/n))$, for $m\ge 2(2^d-1)n$ &   & \thmref{3d-lower-bound} \\
+      3 & $O((m^2/n)\log(m/n))$ &   & \thmref{3d-upper-bound} \\
+      $\ge 4$ & $\Theta(m^{2}/n)$ & $2^{\Theta(n\log n)}$ & Theorems~\ref{thm:4d-lower-bound} and \ref{thm:4d-upper-bound} \\
     \end{tabular}
   \end{center}
-  \caption{Old and new results on crossings in grid drawings.}
+  \caption{Old and new results on crossings in geometric grid graph.}
   \tablabel{results}
 \end{table}
 
+These results show that the situation in three and higher dimensions is
+significantly different than in two dimensions. For all $d \ge 4$, and
+$m\ge 2(2^d-1)n$, $\crs_d(n,m)\in \Theta(m^2/n)$ and even $\crs_3(n,m)$
+is with a logarithmic factor of $\Theta(m^2/n)$.  For $d\ge 4$, the
+bounds on $\crs_d(n,m)$ are strong enough to show that $\ncs_d(n)\in
+2^{\Theta(n\log n)}$.  Thus, the number, $2^{\Theta(n\log n)}$, of
+non-crossing graphs that can be drawn on a $d$-dimensional grid having $n$
+points is much more than the number,  $2^{\Theta(n)}$,  of non-crossing
+graphs that can be drawn on any planar point set of size $n$.
+
+In three dimensions, our bounds on $\crs_3(m,n)$ differ by a factor of
+$\log(m/n)/\log\log(m/n)$.  We have also been unable to determine any
+non-trivial bounds on $\ncs_3(n)$.  (The trivial bounds $\ncs_3(n)\ge
+2^{\Omega(n)}$ and $\ncs_3(n)\le 2^{O(n\log n)}$ are inherited by
+the (easy to prove directly) lower and upper bounds on $\ncs_2(n)$
+and $\ncs_4(n)$, respectively.)  These gaps in our knowlege are an
+intriguing direction for future research that is discussed further in
+\secref{summary}.
+
+\subsection{Related Work}
+
+
 \section{3-Dimensional Grid Drawings}
 
-In this section, we present upper and lower bounds on $g_3(n,m)$.
+In this section, we present upper and lower bounds on $\crs_3(n,m)$.
 
 \subsection{The Lower Bound}
 \seclabel{3d-lower-bound}
 
-\begin{thm}
-  $g(n,m) \in \Omega((m^2/n)\log\log (m/n))$.
+\begin{thm}\thmlabel{3d-lower-bound}
+  $\crs_3(n,m) \in \Omega((m^2/n)\log\log (m/n))$.
 \end{thm}
 
 \begin{proof}
-Let $G$ be a drawing of a graph on the $X\times Y\times Z$ grid, with
-$n=XYZ$, that has $m$ edges and for which $\crs(G,n)=g(n,m)$. ($G$
-has the minimum number of crossings over all drawings of graphs with
-$m$ edges.)  We may assume, without loss of generality, that no edge of
-$G$ contains any point of the $X\times Y\times Z$ grid in its interior;
-such an edge could be replaced with a shorter edge without introducing
-any additional crossings.
+Let $G$ be any geometric graph with $V(G)\subseteq\Z(X,Y,Z)$, with $XYZ\le
+n$, $|E(G)|=m$, and for which $\crs_3(G,n)=\crs_3(n,m)$.  We may assume,
+without loss of generality, that no edge of $G$ contains any point of the
+$X\times Y\times Z$ grid in its interior; any such edge can be replaced
+with a shorter edge without introducing any additional crossings.
 
 For a prime number, $p$, define the $X\times Y\times Z$ \emph{$p$-grid}
 as the set of points
@@ -171,23 +217,23 @@ divisor.  If, say, $\x(u)-\x(w)$ does not have $p$ as a divisor then
 $i(\x(u)-\x(w))/p$ is not an integer and therefore $(i/p)(u-w)$ is not
 on the $X\times Y\times Z$ grid.
 
-Therefore, there are at least $(p-1)m$ incidences between edges of $G$
-and points of the $p$-grid that are not points of any $q$-grid for $q\neq p$.
-Any point of the $p$ grid incident
-on $k$ edges contributes $\binom{k}{2}$ to $\crs(G)$.  Therefore, the
-total contribution of the $p$-grid to $\crs(G)$ is at least
+Therefore, there are at least $(p-1)m$ incidences between edges of $G$ and
+points of the $p$-grid that are not points of any $q$-grid for $q\neq p$.
+Any point of the $p$ grid incident on $k$ edges contributes $\binom{k}{2}$
+to $\crs_3(G)$.  Therefore, the total contribution of the $p$-grid to
+$\crs_3(G)$ is at least
 \[
     np^3\binom{m(p-1)/np^3}{2} \ge cm^2/np
 \]
-for $c<blah$ and $m(p-1)/np^3 \ge 2$.  This latter condition can be rewritten
-as $p \le c'(m/n)^{1/2}$ for a sufficiently small $c'>0$.
+for $c<blah$ and $m(p-1)/np^3 \ge 2$.  This latter condition can be
+rewritten as $p \le c'(m/n)^{1/2}$ for a sufficiently small $c'>0$.
 Finally, we finish by summing over primes $p$ smaller than $c'p^{1/2}$:
 \[
    \crs(G) \ge \sum_{p} cm^2/np = (cm^2/n) \sum_{p} 1/p = ((cm^2/n)(\ln\ln(m/n)-O(1))
 \]
 where the last inequality is Euler's result on the sums of reciprocals
 of primes. (This sum is also known as a harmonic series of primes.  See,
-e.g., Graham, Knuth and Patashnik \cite[pages~22--25]{gkpXX}.)
+e.g., Hardy and Wright \cite{hw79}.
 \end{proof}
 
 %\To see this, notice that 
@@ -245,8 +291,8 @@ e.g., Graham, Knuth and Patashnik \cite[pages~22--25]{gkpXX}.)
 
 In this section, we prove the following result:
 
-\begin{thm}\thmlabel{upper-bound}
-  $g(n,m) \in O((m^2/n)\log (m/n))$.
+\begin{thm}\thmlabel{3d-upper-bound}
+  $\crs_3(n,m) \in O((m^2/n)\log (m/n))$.
 \end{thm}
 
 The proof of \thmref{upper-bound} follows easily from the following lemma:
@@ -341,8 +387,8 @@ most $4k^6\ln k+O(k^3)\in O(k^6\log k)$, as required.
 
 \section{Higher Dimensions}
 
-\begin{thm}
-  For all $m\ge 2(2^d-1)n$, $g_d(n,m)\in\Omega(m^2/n)$.
+\begin{thm}\thmlabel{4d-lower-bound}
+  For all $m\ge 2(2^d-1)n$, $\crs_d(n,m)\in\Omega(m^2/n)$.
 \end{thm}
 
 \begin{proof}
@@ -350,7 +396,7 @@ most $4k^6\ln k+O(k^3)\in O(k^6\log k)$, as required.
   due to Chazelle, Sharir, and Welzl \cite{S}.  We begin by arguing that
   the preliminary inequality 
   \begin{equation}
-    g_d(n,m) \ge m - (2^d-1)n  \eqlabel{prelim}
+    \crs_d(n,m) \ge m - (2^d-1)n  \eqlabel{prelim}
   \end{equation}
   holds for all $m \ge 0$.  To see this, recall that Czyzowicz \etal\
   \cite{s} showed that the maximum number of edges in a non-crossing
@@ -374,8 +420,8 @@ most $4k^6\ln k+O(k^3)\in O(k^6\log k)$, as required.
 \end{proof}
 
 
-\begin{thm}
-  $g_d(n,m)\in O(m^2/n)$.
+\begin{thm}\thmlabel{4d-upper-bound}
+  $\crs_d(n,m)\in O(m^2/n)$.
 \end{thm}
 
 \begin{proof}
@@ -384,100 +430,104 @@ The proofs is like the proof of \thmref{3d-upper-bound}, but different.
 
 \section{The Number of Non-Crossing Graphs}
 
-Next we show that the number of non-crossing subgraphs that can be drawn 
-on the $n^{1/d}\times \cdots\times n^{1/d}\times 2$ grid is at
-least $2^{\Omega(n\log n)}$.  A corresponding upper bound on the number of
-non-crossing graphs that can be drawn on any grid of volume $n$ follows
-from the fact that any such graph has at most $(2^d-1)n$ edges (Czyzowicz
-\etal\ \cite[Lemma Y]{X}); so any non-crossing graph corresponds to one
-of the ways of choosing at most $(2^d-1)n$ edges from among the $\binom{n}{2}$
+Next we show that the number of non-crossing geometric graphs that can
+be drawn on the $n^{1/d}\times \cdots\times n^{1/d}\times 2$ grid is
+at least $2^{\Omega(n\log n)}$.  
+
+In this section, we show that, for dimensions $d\ge 4$, $\crs_d(n)\in
+2^{\Theta(n\log n)}$, i.e., the maximum number of non-crossing graphs
+that can be drawn on any grid of volume $n$ is $2^{\Theta(n\log n)}$.
+
+The upper bound follows from the fact that any such graph drawn on
+a grid of volume $n$ has at most $(2^d-1)n$ edges (Czyzowicz \etal\
+\cite[Lemma Y]{X}); so any non-crossing graph corresponds to one of the
+ways of choosing at most $(2^d-1)n$ edges from among the $\binom{n}{2}$
 possible edges.  Therefore, the number of such graphs is at most
 \[
     2^{(2^d-1)n}\binom{\binom{n}{2}}{(2^d-1)n} \le 2^{(2^d-1)n} (n^{2})^{(2^d-1)n} = 2^{2(2^d-1)n\log n+(2^d-1)n}
 \]
 
 We now prove a lower-bound of the same form:
-
-\begin{thm}
-  There are $2^{\Omega(n\log\log n)}$ subgraphs of $G_n$ that have
-  no crossings.
+\begin{thm}\thmlabel{4d-counting}
+  $\ncs_d(n) \ge 2^{\Omega(n\log n)}$.
 \end{thm}
 
 \begin{proof}
-For a geometric graph $G$, let $\ncs(G)$ denote the number of non-crossing
-subgraphs of $G$ and define
-\[
-   f(m,M) = \min\{ \ncs(G) : \mbox{$G$ is a subgraph of $G_{n,M}$ with $m$ edges} \}
-   \enspace . 
-\]
-Our goal is to lower-bound $f(n^2,n^2)$.  In order to do this, we first establish some preliminary recurrence inequalities and base cases.
-
-For our base cases, we have 
-\[ 
-   f(m,M)\ge 1 \enspace ,
-\]
-for all $m\in\{0,\ldots,cN\}$ since the subgraph of $G_{n,M}$ with no
-edges is non-crossing.
-
-Fix any geometric subgraph, $G$, of $G_{n,M}$ that has $m> cn$
-edges and select an edge $e$ from $G$. Then there are at least
-$f(m-1,M)$ subgraphs of $G$ that do not include $e$.  Furthermore, by
-\lemref{gross-upper-bound}, $e$ intersects at most $c(M/n)\log(M/n)$
-edges of $G$, so there are at least $f(m-c(M/n)\log(M/n),M)$ subgraphs
-of $G$ that include $e$.  Therefore,
-\[  f(m,M) \ge f(m-1,M) + f(m-c(M/n)\log(M/n)) \enspace ,
-\]
-for $m\ge c(M/n)\log(M/n)$.  Repeatedly expanding the first term gives:
-\begin{eqnarray*}
-f(m,M) & \ge & f(m-1,M) + f(m-c(M/n)\log(M/n), M) \\
-       & \ge & f(m-1,M) + f(m-2c(M/n)\log(M/n), M) \\
-       & \ge & f(m-2,M) + 2f(m-2c(M/n)\log(M/n), M) \\
-       & \ge & f(m-3,M) + 3f(m-2c(M/n)\log(M/n), M) \\
-       & \vdots & \\
-       & \ge & (c(M/n)\log(M/n))\times f(m-2c(M/n)\log(M/n), M) \enspace ,
-\end{eqnarray*}
-for $m\ge 2c(M/n)\log(M/n)$.
-
-For an integer $t$, we can iterate the preceding $t$ times to obtain
-\begin{equation}
-   f(m,M) \ge (c(M/n)\log(M/n))^t\times f(m-2ct(M/n)\log(M/n), M)) \enspace ,
-   \eqlabel{recur-a}
-\end{equation} 
-for $m\ge 2ct(M/n)\log(M/n)$.
-
-Our next recurrence inequality is trivial: fix any subgraph, $G$,
-of $G_{n,M}$ and observe that the subgraph, $G\cap G_{n,M/2}$, of $G$
-that contains only the edges that appear in $G_{n,M/2}$ is a subgraph
-of $G_{n,M}$ and this subgraph contains at most $M/2$ fewer edges.  Thus
-\begin{equation}
-  f(m,M) \ge f(m-M/2,M/2) \enspace .
-  \eqlabel{recur-b}
-\end{equation}
-
-Our strategy is to prove that $f(n^2,n^2) \ge 2^{\Omega(n\log\log n)}$ by
-repeatedly applying \eqref{recur-a} and \eqref{recur-b}.  Each application of
-these inequalities gives reduced values of $m$ and $M$.  Let $m_i$ and $M_i$ be
-these values, respectively, after applying these inequalities $i$ times each.  Initially $m_0=M_0=n^2$.  After $i$ iterations, we will have $m_i=n^2/i2^i$ and $M_i=n^2/2^i$.  The first thing to understand is the decrease in the value of $m$ from one round to the next (slow and careful):
-\[
-    m_1 - m_0 = n^2/2
-\]
-and, for $i \ge 2$, 
-\begin{align*}
-  m_{i-1}-m_i
-      & = \frac{n^2}{(i-1)2^{i-1}} - \frac{n^2}{i2^{i}} \\
-      & = \frac{2n^2}{(i-1)2^{i}} - \frac{n^2}{i2^{i}} \\
-      & = \frac{2n^2}{(i-1)2^{i}} - \frac{n^2}{i2^{i}} \\
-      & = \frac{2in^2}{i(i-1)2^{i}} - \frac{(i-1)n^2}{i(i-1)2^{i}} \\
-      & = \frac{n^2(i+1)}{i(i-1)2^{i}} \\
-      & = n^2/i2^i + \Theta(n^2/i^22^i)\\
-\end{align*}
-The difference $m_i-m_{i-1}$ comes from two parts.  One part, $n^2/2^i$,
-comes from applying \eqref{recur-b}.  The second part,
-\[
-     n^2/i2^i 
-\]
-
+%For a geometric graph $G$, let $\ncs(G)$ denote the number of non-crossing
+%subgraphs of $G$ and define
+%\[
+%   f(m,M) = \min\{ \ncs(G) : \mbox{$G$ is a subgraph of $G_{n,M}$ with $m$ edges} \}
+%   \enspace . 
+%\]
+%Our goal is to lower-bound $f(n^2,n^2)$.  In order to do this, we first establish some preliminary recurrence inequalities and base cases.
+%
+%For our base cases, we have 
+%\[ 
+%   f(m,M)\ge 1 \enspace ,
+%\]
+%for all $m\in\{0,\ldots,cN\}$ since the subgraph of $G_{n,M}$ with no
+%edges is non-crossing.
+%
+%Fix any geometric subgraph, $G$, of $G_{n,M}$ that has $m> cn$
+%edges and select an edge $e$ from $G$. Then there are at least
+%$f(m-1,M)$ subgraphs of $G$ that do not include $e$.  Furthermore, by
+%\lemref{gross-upper-bound}, $e$ intersects at most $c(M/n)\log(M/n)$
+%edges of $G$, so there are at least $f(m-c(M/n)\log(M/n),M)$ subgraphs
+%of $G$ that include $e$.  Therefore,
+%\[  f(m,M) \ge f(m-1,M) + f(m-c(M/n)\log(M/n)) \enspace ,
+%\]
+%for $m\ge c(M/n)\log(M/n)$.  Repeatedly expanding the first term gives:
+%\begin{eqnarray*}
+%f(m,M) & \ge & f(m-1,M) + f(m-c(M/n)\log(M/n), M) \\
+%       & \ge & f(m-1,M) + f(m-2c(M/n)\log(M/n), M) \\
+%       & \ge & f(m-2,M) + 2f(m-2c(M/n)\log(M/n), M) \\
+%       & \ge & f(m-3,M) + 3f(m-2c(M/n)\log(M/n), M) \\
+%       & \vdots & \\
+%       & \ge & (c(M/n)\log(M/n))\times f(m-2c(M/n)\log(M/n), M) \enspace ,
+%\end{eqnarray*}
+%for $m\ge 2c(M/n)\log(M/n)$.
+%
+%For an integer $t$, we can iterate the preceding $t$ times to obtain
+%\begin{equation}
+%   f(m,M) \ge (c(M/n)\log(M/n))^t\times f(m-2ct(M/n)\log(M/n), M)) \enspace ,
+%   \eqlabel{recur-a}
+%\end{equation} 
+%for $m\ge 2ct(M/n)\log(M/n)$.
+%
+%Our next recurrence inequality is trivial: fix any subgraph, $G$,
+%of $G_{n,M}$ and observe that the subgraph, $G\cap G_{n,M/2}$, of $G$
+%that contains only the edges that appear in $G_{n,M/2}$ is a subgraph
+%of $G_{n,M}$ and this subgraph contains at most $M/2$ fewer edges.  Thus
+%\begin{equation}
+%  f(m,M) \ge f(m-M/2,M/2) \enspace .
+%  \eqlabel{recur-b}
+%\end{equation}
+%
+%Our strategy is to prove that $f(n^2,n^2) \ge 2^{\Omega(n\log\log n)}$ by
+%repeatedly applying \eqref{recur-a} and \eqref{recur-b}.  Each application of
+%these inequalities gives reduced values of $m$ and $M$.  Let $m_i$ and $M_i$ be
+%these values, respectively, after applying these inequalities $i$ times each.  Initially $m_0=M_0=n^2$.  After $i$ iterations, we will have $m_i=n^2/i2^i$ and $M_i=n^2/2^i$.  The first thing to understand is the decrease in the value of $m$ from one round to the next (slow and careful):
+%\[
+%    m_1 - m_0 = n^2/2
+%\]
+%and, for $i \ge 2$, 
+%\begin{align*}
+%  m_{i-1}-m_i
+%      & = \frac{n^2}{(i-1)2^{i-1}} - \frac{n^2}{i2^{i}} \\
+%      & = \frac{2n^2}{(i-1)2^{i}} - \frac{n^2}{i2^{i}} \\
+%      & = \frac{2n^2}{(i-1)2^{i}} - \frac{n^2}{i2^{i}} \\
+%      & = \frac{2in^2}{i(i-1)2^{i}} - \frac{(i-1)n^2}{i(i-1)2^{i}} \\
+%      & = \frac{n^2(i+1)}{i(i-1)2^{i}} \\
+%      & = n^2/i2^i + \Theta(n^2/i^22^i)\\
+%\end{align*}
+%The difference $m_i-m_{i-1}$ comes from two parts.  One part, $n^2/2^i$,
+%comes from applying \eqref{recur-b}.  The second part,
+%\[
+%     n^2/i2^i 
+%\]
+%
 \end{proof}
+
 
 %\begin{proof}
 %Consider the following the method of enumerating some of the subgraphs
@@ -549,15 +599,30 @@ comes from applying \eqref{recur-b}.  The second part,
 \section{Summary}
 \seclabel{summary}
 
+We have given upper and lower bounds on the minimum number of crossings
 
-Open problem: our lower-bound argument fails for $d\ge 4$.
+
+The upper-bound $\crs_d(n,m)\in O(m^2/n)$ allows the application of
+a recursive counting technique to show the lower-bound $\ncs_d(n)\ge
+2^{\Omega(n\log n)}$; this is similar to way in which Ajtai \etal\ used
+the lower-bound $\crs(n,m)\in\Omega(m^3/n^2)$ to show that that the maximum
+number of planar graphs that can be drawn on any point set of size $n$
+is $2^{O(n)}$.
+
+In what appears to be a remarkable coincidence, neither the upper-bound
+$\crs_3(n,m)\le O((m^2/n)\log (m/n))$ nor the lower-bound $\crs_3(n,m)\ge
+\Omega((m^2/n)\log\log(m/n))$ is sufficiently strong to apply this
+recursive counting technique to determine any non-trivial bound
+on $\ncs_3(n)$.  If the upper-bound were slightly stronger, say
+$\crs_3(n,m)\le O((m^2/n)\log^{1-\varepsilon}(m/n))$, then this would
+be sufficient to prove that $\ncs_3(n)\ge 2^{\Omega(n\log^{\epsilon} n)}$.
 
 \section*{Acknowledgement}
 
 The work of Pat Morin was partly funded by NSERC and CFI.
 
 \bibliographystyle{plain}
-\bibliography{template}
+\bibliography{3dcrossings}
 
 
 \end{document}

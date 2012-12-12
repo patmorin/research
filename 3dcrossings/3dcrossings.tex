@@ -274,10 +274,19 @@ will make use of it later.
   then $|E(G)|\le(2^d-1)n - O(n^{(d-1)/d})$.
 \end{lem}
 
-Finally, we note that Bukh and Hubard \cite{bhXX} have defined a form of
-crossing number of 3-dimensional geometric graphs that are not necessarily
-grid graphs.  In their definition, a 4-tuple of edges \emph{cross}
-if there is a line that intersects every edge in the 4-tuple.
+Finally, we note that Bukh and Hubard \cite{bukh.hubard:space} have
+defined a form of crossing number for 3-dimensional geometric graphs
+that are not necessarily grid graphs.  In their definition, a 4-tuple
+of vertex-disjoint edges form a \emph{space crossing} if there is
+a line that intersects every edge in the 4-tuple.  The \emph{space
+crossing number}, $\crs_4(G)$, of a 3-d geometric graph, $G$, is the
+number of space crossings formed by $G$'s edges.  They show that a
+3-d geometric graph $G$ with $n$ vertices and $m\ge 4^{41}n$ edges
+has a space crossing number $\crs_4(G) \in \Omega(m^6/(n^4\log^2 n))$.
+An easy lifting argument shows that this bound on the space crossing
+number almost implies the Crossing Lemma; specifically, it shows that
+the number of crossings in a graph with $m$ vertices and $n$ edges drawn
+in the plane is $\Omega(m^3/(n^2\log n))$.
 
 \section{3-Dimensional Geometric Grid Graphs}
 
@@ -359,7 +368,7 @@ and $u_3$ are $u$'s x-, y-, and z-coordinates, respectively.
 In this section, we prove the following result:
 
 \begin{thm}\thmlabel{3d-upper-bound}
-  $\crs_3(n,m) \in O((m^2/n)\log (m/n))$.
+  For all $m\le n^2/4$, $\crs_3(n,m) \in O((m^2/n)\log (m/n))$.
 \end{thm}
 
 The proof of \thmref{3d-upper-bound} follows easily from the following
@@ -392,9 +401,9 @@ crossings, as required by \thmref{3d-upper-bound}.
   number of edges that intersect $uw$.  Let $\pi_1,\ldots,\pi_k$ be
   the planes that contain $uw$ and at least one additional grid point.
   Observe that each plane $\pi_j$ contains, and is uniquely determined
-  by, a line in the plane $\{z\in\R^3: x_3=1\}$ that contains $u$ and
+  by, a line in the plane $\{z\in\R^3: z_3=1\}$ that contains $u$ and
   some lattice point, $x\in\N^3$ on this plane and such that $ux$ does
-  not contain any other point of $\N^3$ i.e., $\gcd(u_1-p_1,u_2-p_2)=1$
+  not contain any other point of $\N^3$ i.e., $\gcd(u_1-x_1,u_2-x_2)=1$
   (see \figref{planes}).
   \begin{figure}
     \centering{\includegraphics{planes}}
@@ -478,7 +487,7 @@ $d\ge 4$.
 \subsection{The Upper Bound}
 
 \begin{thm}\thmlabel{4d-upper-bound}
-  For all $d\ge 4$, $\crs_d(n,m)\in O(m^2/n)$.
+  For all $d\ge 4$ and all $m\le n^2/4$, $\crs_d(n,m)\in O(m^2/n)$.
 \end{thm}
 
 \begin{proof}
@@ -510,25 +519,29 @@ $d\ge 4$.
   \[
      \pi_{uwx} = \{ u + t(w-u) + s(x'-u) : s,t\in\R\} \enspace .
   \]
-  Restricted to the subspace $S_1=\{z\in\R^d: z_d=1\}$, $\pi_{uwp}$
+  Restricted to the subspace $S_u=\{z\in\R^d: z_d=1\}$, $\pi_{uwp}$
   becomes a line
   \[
-     \pi_{uwp}\cap S_1 = \{ u + s(x'-u) : s\in\R\} \enspace .
+     L_u = \pi_{uwp}\cap S_u = \{ u + s(x'-u) : s\in\R\} \enspace .
   \]
-  Similarly, restricted to the subspace $S_2=\{z\in\R^d: z_d=2\}$,
+  Similarly, restricted to the subspace $S_w=\{z\in\R^d: z_d=2\}$,
   $\pi_{uwp}$ becomes the parallel line:
   \[
-     \pi_{uwp}\cap S_1 = \{ w + s(x'-u) : s\in\R\} \enspace .
+     L_w = \pi_{uwp}\cap S_w = \{ w + s(x'-u) : s\in\R\} \enspace .
   \]
   Observe that, since there is no point on the segment $ux'$, the only
-  points of the integer lattice $\Z^d$ contained in this line are obtained
+  points of the integer lattice $\Z^d$ contained in $L_u$ are obtained
   when the parameter $s$ is an integer:
   \[
-     \pi_{uwp}\cap S_1\cap\N^d = \{ u + s(p-u) : s\in\Z\} \enspace .
+     L_u\cap\Z^d = \{ u + s(x'-u) : s\in\Z\} \enspace 
   \]
-  If we define $r=\max\{|u_i-p_i| : i\in\{1,\ldots,d-1\}\}$, then
-  we see that the number of vertices of $G$, other than $u$ and $w$,
-  intersected by this line is at most $2k/r$ (since $G$'s vertices are
+  and, similarly,
+  \[
+     L_w\cap\Z^d = \{ w + s(x'-u) : s\in\Z\} \enspace 
+  \]
+  If we define $r=\max\{|x'_i-u_i| : i\in\{1,\ldots,d-1\}\}$, then we see
+  that the number of vertices of $G$, other than $u$ and $w$, intersected
+  by each of $L_u$ and $L_w$ is at most $k/r$ (since $G$'s vertices are
   contained in a box whose longest side has length $k$).  In this case,
   we define the \emph{skip} of the plane $\pi_{uwx}$ to be $r$.
   
@@ -537,10 +550,9 @@ $d\ge 4$.
   $(d-1)(2r)^{d-2}$ since each such plane is defined by two grid points on
   the boundary of a hypercube of side length $2r$, centered at $u$, that
   is contained in the $(d-1)$-dimensional subspace $\{z\in\R^d:z_d=1\}$.
-  Each plane with skip $r$ contains at most $2k/r=2\ell^{1/(d-1)}/r$
-  vertices of $G$ other than $u$ and $w$ and therefore contains at most
-  $(k/r)^2$ edges that cross $uw$.  Therefore, the number, $X_{uw}$,
-  of edges that cross $uw$ is at most
+  Each plane with skip $r$ contains at most $(k/r)^2$ edges that cross
+  $uw$.  Therefore, the number, $X_{uw}$, of edges that cross $uw$
+  is at most
   \begin{align*}
      X_{uw} & \le \sum_{r=1}^k(d-1)(2r)^{d-2}(k/r)^2 \\
          & = (d-1)2^{d-2}k^2\sum_{r=1}^k r^{d-4} \\
@@ -582,7 +594,7 @@ be drawn on the $n^{1/(d-1)}\times \cdots\times n^{1/(d-1)}\times 2$
 grid is at least $2^{\Omega(n\log n)}$.
 
 \begin{thm}\thmlabel{4d-counting}
-  For all $d\ge 4$, $\ncs_d(n) \ge 2^{\Omega(n\log n)}$.
+  For all $d\ge 4$, $\ncs_d(n) \in 2^{\Omega(n\log n)}$.
 \end{thm}
 
 \begin{proof}
@@ -605,14 +617,14 @@ grid is at least $2^{\Omega(n\log n)}$.
   for all $m\ge 0$, since the subgraph of $G_{n}$ with no edges is
   non-crossing.
   
-  Let $c$ be a constant so that $cn$ is an integer and, for all sufficiently
-  large $n$ every edge of $G_n$ intersects at most $cn-1$ other edges.
-  By the proof of \thmref{4d-upper-bound} such a constant $c$ exists.
-  Fix any subgraph, $G$, of $G_{n}$ that has $m> cn$ edges for some
-  sufficiently large constant $c=c(d)$.  From $G$, select any edge $e$. Then
-  there are at least $f(m-1)$ subgraphs of $G$ that do not include $e$.
-  Furthermore, $e$ intersects at most $cn-1$ other edges of $G$, so there
-  are at least $f(m-cn)$ subgraphs of $G$ that include $e$.  Therefore,
+  Let $c$ be a constant so that $cn$ is an integer and, for all
+  sufficiently large $n$ every edge of $G_n$ intersects at most $cn-1$
+  other edges.  By the proof of \thmref{4d-upper-bound} such a constant
+  $c$ exists.  Fix any subgraph, $G$, of $G_{n}$ that has $m\ge cn$ edges.
+  From $G$, select any edge $e$. Then there are at least $f(m-1)$
+  subgraphs of $G$ that do not include $e$.  Furthermore, $e$ intersects
+  at most $cn-1$ other edges of $G$, so there are at least $f(m-cn)$
+  subgraphs of $G$ that include $e$.  Therefore,
   \[  
      f(m) \ge f(m-1) + f(m-cn) \enspace ,
   \]

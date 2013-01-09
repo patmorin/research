@@ -48,15 +48,15 @@ the $\theta_k$ graph is
 \[
     d_k = (2-p_k)k \enspace .
 \]
-Thus, understanding the average degree of a $\theta_k$ graph boils down
+Thus, understanding the average degree of a $\theta_k$-graph boils down
 to computing $p_k$.
 
-\section{An Analysis of $\theta_k$ for even $k$}
+\section{An Analysis of $p_k$ for even $k$}
 
 In this section we determine the value of $p_k$ for even values of $k$.
-Surprisigly, the value of $p_k$ in this does not depend on $k$.
+Surprisingly, the value of $p_k$ in this case does not depend on $k$.
 
-\begin{lem}
+\begin{lem}\lemlabel{even}
  For even integers $k\ge 4$, $p_k=\frac{\pi\sqrt{3}}{9}\approx 0.6045997883$.
 \end{lem}
 
@@ -105,9 +105,7 @@ Surprisigly, the value of $p_k$ in this does not depend on $k$.
   \end{align*}
   where 
   \[ \erf(x)=\frac{2}{\sqrt{\pi}}\int_0^x e^{-t^2}\,\mathrm{d}t \]
-  is the \emph{Gauss error function} \cite{gauss-error}.  (The derivation
-  of the integrals and derivatives in this proof using Maple are given
-  in \appref{derivations}.)
+  is the \emph{Gauss error function} \cite{gauss-error}.  
 
   Next, we remove the conditioning on $\ell$.  The triangle $T$ defines a
   region of area $c\ell^2$ that is empty of points.  Therefore,
@@ -130,12 +128,144 @@ Surprisigly, the value of $p_k$ in this does not depend on $k$.
 \end{proof}
 
 Thus, for even $k$, the average degree of the $\theta_k$-graph is 
-\[ d_k = \left(2-\frac{\pi\sqrt{3}}{9}\right)k \approx 1.395400212k \enspace . \]
+\[ d_k = \left(2-\frac{\pi\sqrt{3}}{9}\right)k \approx 1.395400212\cdot k \enspace . \]
 
-\section{The Second Section}
+\section{An Analysis of $p_k$ for $k$}
 
-\section{Summary}
+Next, we determine the value of $p_k$ for odd values of
+$k\ge 5$.  Although the strategy for doing this is the same as the even
+case, the odd case turns out to be considerably more complicated, and
+we rely heavily on Maple for our calculations.
+
+For the odd case the value of $p_k$ does, indeed depend on $k$.
+
+\begin{lem}\lemlabel{odd}
+  For odd $k\ge 5$,
+\[
+p_k = 
+2
+\left(\begin{array}{l}
+  \arctan\left(
+     2\left(\cos\left(\frac{\pi }{k}\right)
+       +\cos\left(\frac{3 \pi }{k}\right)\right)^2 / (\alpha\beta) 
+  \right) \\
+   + \arctan\left(
+       4 \left(2 \cos\left(\frac{2 \pi }{k}\right)
+       +\sin\left(\frac{2 \pi }{k}\right)^2\right)/(\alpha\beta) 
+     \right)
+  \end{array}
+\right)
+%\\
+\cot\left(\frac{\pi }{k}\right) 
+\beta
+%\right)
+/
+\left(\gamma \alpha\right)\enspace ,
+\]
+where
+\[
+\gamma =4+11 \cos\left(\frac{2 \pi }{k}\right)+\cos\left(\frac{6 \pi }{k}\right) \enspace ,
+\]
+\[
+\alpha = 
+\sqrt{\frac{\left(27 \cos\left(\frac{\pi }{k}\right)+17 \cos\left(\frac{3 \pi }{k}\right)+3 \cos\left(\frac{5 \pi }{k}\right)+\cos\left(\frac{7 \pi }{k}\right)\right) \csc\left(\frac{\pi }{k}\right)}{\gamma}} \enspace ,
+\]
+and
+\[
+\beta = \sqrt{\left(18 \sin\left(\frac{2 \pi }{k}\right)+18 \sin\left(\frac{4 \pi }{k}\right)+11 \sin\left(\frac{6 \pi }{k}\right)+\sin\left(\frac{8 \pi }{k}\right)+\sin\left(\frac{10 \pi }{k}\right)\right)} \enspace .
+\]
+\end{lem}
+
+\begin{proof}
+  The proof proceeds in the same manner as the proof of \lemref{even}.
+  Let $u$ be an arbitrary vertex in a $\theta_k$ graph and let $w$ be
+  a vertex that $u$ has chosen as a neighbour in one of its cones, $C$.
+  Let $T$ be the open isosceles triangle defined by $C$ and a line through
+  $w$ that is orthogonal to the axis of $C$. See \figref{mutual-odd}.
+  Assume that the side of $T$ opposite $u$ has length $2\ell$.  Using a
+  suitable rotation, we may assume that the axis of $C$ is horizontal and,
+  by symmetry, we may assume that $w$ is on or above the axis of $C$.
+ 
+  \begin{figure}
+    \includegraphics{calcs}
+    \caption{The derivation of the $\Pr\{\mbox{$uw$ is mutual}\mid \ell,r\}$
+             for odd $k$.}
+    \figlabel{mutual-odd}
+  \end{figure}
+  Under the preceding assumptions, $w$ is then uniformly distributed on
+  a vertical segment of length $\ell$ whose endpoints are on the axis
+  of $C$ and the upper boundary of $C$.  Suppose that the distance from
+  $w$ to the axis of $C$ is $r$.  Then a straightforward, but tedious,
+  calculation that mainly uses the law of sines shows that
+  \[
+      \Pr\{\mbox{$uw$ is mutual}\mid \ell, r\} = \exp(-A-B) \enspace ,
+  \]
+  where
+  \[ 
+      A = r^2\left(\frac{\cos(\pi/k)}{2\sin(\pi/k)}+\frac{\sin(\pi/k)}{\cos(\pi/k)}\right)
+  \]
+  and
+  \[
+      B = \frac{\left(\frac{\ell\cos(\pi/k)\sin(2\pi/k)}{\sin(3\pi/k)\sin(\pi/k)}-\frac{r\cos(2\pi/k)}{\sin(3\pi/k)}\right)^2\cos(2\pi/k)}{2\cos(\pi/k)}
+  \]
+  This calculation is illustrated in \figref{mutual-odd} and the
+  accompanying Maple worksheet shows the simplifications that lead to
+  the expressions for $A$ and $B$.  Integrating over $r$ gives us
+  \begin{equation}
+    \Pr\{\mbox{$uw$ is mutual}\mid \ell\} = 
+      \int_0^\ell (1/\ell)\exp(-A-B)\,\mathrm{d}r . \eqlabel{odd-f}
+  \end{equation}
+  Like the corresponding integral in the proof of \lemref{even},
+  \eqref{odd-f} has a closed-form that includes the Gauss error function.
+
+  In order to remove the conditioning on $\ell$, we need the probability
+  density function for $\ell$.  Proceeding as before, we have the
+  cumulative distribution function
+  \[
+     P(x) \equiv \Pr\{\ell\le x\} 
+          = 1 - \exp(\ell^2(\sin((\pi-\theta)/2)/\sin(\theta/2))) \enspace ,
+  \]
+  and the probability density function
+  \[
+    p(x)\equiv \frac{d}{dx}P(x) = 
+     \left(\frac{2x\cos(\pi/k)}{\sin(\pi/k)}\right)
+      \exp(x^2\cos(\pi/k)/\sin(\pi/k))
+  \]
+  Finally, we determine $p_k$ by integrating over $\ell$:
+  \[
+     p_k = \int_0^\infty p(\ell)\cdot f(\ell)\, \mathrm{d}{\ell} \enspace ,
+  \]
+  which (after introducing the variables $\alpha$, $\beta$, and $\gamma$)
+  yields the expression for $p_k$ given in the statement of the lemma.
+\end{proof}
+
+\section{Discussion}
 \seclabel{summary}
+
+We have given closed-form expressions for the average degree of $\theta_k$
+graphs for all $k\ge 4$.  It is known that $\theta_k$-graphs with
+$k=1,2,3$ do not have constant spanning ratios \cite{S}, so the cases
+$k\ge 4$ are the most important.
+
+\tabref{values} gives the numerical values of $d_k$, $p_k$, and $d_k/k$,
+for $k\in\{4,\ldots,20\}$.  This table shows that odd values of $k$
+
+\subsection{Points in a Unit Square}
+Although we derive our results under the a Poisson model, similar results,
+albeit with lower-order error terms, hold under the model of $n$ points
+independently and uniformly distributed in the unit square $[0,1]^2$.
+To see this, observe that points sufficiently far from the boundary of
+the unit square, say in $[c/\sqrt{n\log n},1-c/\sqrt{n\log n}]^2$ behave
+essentially the same as points in the Poisson model.  In particular,
+one obtains a probability, $p_k'$, for these points where $p_k'=p_k\pm
+n^{-\Omega(c)}$.  On the other hand, with high probability, the number
+of points near the boundary of $[0,1]^2$ is only $\sqrt{n\log n}$.
+The influence of these points on the average degree of the $\theta_k$-graph
+is therefore at most $O((k\log n)/\sqrt{n})$.  Thus,
+the average degree of the $\theta_k$-graph of points in the unit square is
+\[  (2-p_k')k\pm O((k\log n)/\sqrt{n}) 
+ = (2-p_k)k\pm kn^{-\Omega(c)}+O((k\log n)/\sqrt{n}) 
+\]
 
 \section*{Acknowledgement}
 
@@ -144,13 +274,23 @@ The authors of this paper are partly funded by NSERC and CFI.
 \bibliographystyle{plain}
 \bibliography{template}
 
+
+
+
 \appendix
 
-\section{Derivations in Maple}
-\applabel{derivations}
+\section{Derivations for Even $k$}
+\applabel{derivations-even}
 
-\noindent\includegraphics{even}
 
+\section{Derivations for Odd $k$}
+\applabel{derivations-odd}
+%\renewcommand{\left}[1]{#1}
+%\renewcommand{\right}[1]{#1}
+
+
+
+%\noindent\includegraphics{even}
 
 
 \end{document}

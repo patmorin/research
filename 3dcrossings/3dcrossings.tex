@@ -198,7 +198,7 @@ and $\Theta$ notations hide factors that depend only on $d$.
       $d$ & $\crs_d(\n,m)$ & $\ncs_d(\n)$ & References \\ \hline
       % 1 & --- & $2^{\n-1}$ & trivial \\
       2 & $\Theta(m^{3}/\n^2)$, for $m\ge 4\n$ & $2^{\Theta(\n)}$ &~\cite{ajtai.chvatal.ea:crossing-free} \\
-      3 & $\Omega((m^2/\n)\log\log(m/\n))$, for $m\ge 2(2^d-1)\n$ &   & \thmref{3d-lower-bound} \\
+      3 & $\Omega((m^2/\n)\log(m/\n)/\log\log(m/\n))$, for $m\ge 2(2^d-1)\n$ &   & \thmref{3d-lower-bound} \\
       3 & $O((m^2/\n)\log(m/\n))$ &   & \thmref{3d-upper-bound} \\
       $\ge 4$ & $\Theta(m^{2}/\n)$ & $2^{\Theta(\n\log\n)}$ & Theorems~\ref{thm:4d-lower-bound}, \ref{thm:4d-upper-bound}, and \ref{thm:4d-counting} \\
     \end{tabular}
@@ -342,8 +342,9 @@ and $u_3$ are $u$'s x-, y-, and z-coordinates, respectively.
 \subsection{The Lower Bound}
 \seclabel{3d-lower-bound}
 
+
 \begin{thm}\thmlabel{3d-lower-bound}
-  For all $m\ge 16\n$, $\crs_3(\n,m) \in \Omega((m^2/\n)\log\log (m/\n))$.
+  For all $m\ge BLAH\n$, $\crs_3(\n,m) \in \Omega((m^2/\n)\log(m/\n))$.
 \end{thm}
 
 \begin{proof}
@@ -355,60 +356,204 @@ and $u_3$ are $u$'s x-, y-, and z-coordinates, respectively.
   be replaced with a shorter edge without introducing any additional
   crossings and without changing $m$ or $\n$.
 
-  For a prime number, $p$, define the $X\times Y\times Z$ \emph{$p$-grid}
-  as the set of points
+  For any integer, $p\ge 1$, define the $X\times Y\times Z$
+  \emph{$p$-grid} as the set of points
   \[
     \{(x/p,y/p,z/p): x\in\{p,p+1,\ldots,pX\},\,
     y\in\{p,p+1,\ldots,pY\},\, z\in\{p,p+1,\ldots,pZ\}\} \enspace ,
   \]
-  which we denote by $\N(pX,pY,pZ)/p$.
-  Observe that, for two distinct primes $p$ and $q$, the intersection
-  of the $p$-grid and the $q$-grid is exactly the $X\times Y\times Z$
-  grid. (This is because the only integers $a$ and $b$ that satisfy the
-  equation $a/p = b/q$ have $a\equiv 0 \pmod{p}$ and $b\equiv 0\pmod q$,
-  so $a/p$ and $b/q$ are each integers.)
+  which we denote by $\N(pX,pY,pZ)/p$.  Observe that the size of the
+  $p$-grid is at most $\n p^3$.
 
-  Note that the number of points in the $X\times Y\times Z$ $p$-grid is
-  less than $\n p^3$.  Note, furthermore, that each edge $uw$ of $G$
+  In order to avoid double-counting later on, we need to define a
+  sequence of point sets that are disjoint.  To achieve this, we define
+  the \emph{essential $p$-grid} as follows: Let $p_1,\ldots,p_k$ be the
+  primes in the prime factorization of $p$.  We begin with the points
+  of the $p$-grid and then remove all points that are contained in
+  the $p_i$-grid, for each $i\in\{1,\ldots,k\}$.  Finally, we remove
+  all points of the 1-grid.  What remains is the essential $p$-grid.
+  Observe that the essential $p$-grid and the essential $q$-grid have no
+  points in common for any $p\neq q$.
+
+%  How large is the essential $p$-grid?  To understand this, we need the
+%  \emph{Euler's totient function}, $\varphi(p)=p\prod_{p|n}(1-1/p)$,
+%  which counts the number of integers in $q\in\{1,\ldots,p\}$ that are
+%  coprime with $p$, i.e., such that $\gcd(q,p)=1$.
+%  Let $\ell$ be the size of the essential $p$-grid.
+%
+%  It is of size at
+%  least $\n p^2\varphi(p)$ and at most $2\n p^2\varphi(p)$,
+%  where $\varphi(p)$ is \emph{Euler's totient function},
+%  $\varphi(p)=p\prod_{p|n}(1-1/p)$, which satisifies the inequalities
+%  \cite[Section~8.8.7]{bach.shallit:algorithmic}:
+%   \[ 
+%      \Omega(p/\log\log p) \le \varphi(p) \le p \enspace ,
+%   \]
+%   for all $p\ge 2$.     
+%
+%  Note that the number of points in the $X\times Y\times Z$ $p$-grid is
+%  less than $\n p^3$.  
+
+  Next, observe that each edge $uw$ of $G$
   contains the $p$-grid points
   \[
-      P_{uw}^p = \{ u+(i/p)(w-u) : i\in\{1,\ldots,p-1\} \} \enspace .
+      P_{uw}^p = \{ u+(i/p)(w-u) : i\in\{1,\ldots,p-1\} \} \enspace 
   \]
-  Next, we claim that $P_{uw}^p$ does not contain any $q$-grid points for
-  any prime $q\neq p$.  In fact, $P_{uw}^p$ does not contain any point
-  of the $X\times Y\times Z$ grid.  This follows from the assumption that
-  $uw$ contains no grid point in its interior, so $\gcd(u_1-w_1, u_2-w_2,
-  u_3-w_3)=1$.  In particular, at least one of $u_1-w_1$, $u_2-w_2$,
-  or $u_3-w_3$ does not have $p$ as a divisor.  If, say, $w_1-u_1$ does
-  not have $p$ as a divisor then $(i/p)(w_1-u_1)$ is not an integer for
-  any $i\in\{1,\ldots,p-1\}$ and therefore $u+(i/p)(w-u)$ is not on the
-  $X\times Y\times Z$ grid.
+  and the essential $p$-grid points
+  \[
+      Q_{uw}^p = \{ u+(i/p)(w-u) : i\in\{1,\ldots,p-1\}\mbox{
+         s.t. }\gcd(i,p)=1 \} \enspace .
+  \]
+  The fact that $Q_{uw}^p$ contains only essential $p$-grid points follows
+  from the assumption that $uw$ contains no grid point in its interior,
+  so $\gcd(u_1-w_1, u_2-w_2, u_3-w_3)=1$.  The points in $Q_{uw}^p$
+  are clearly on the $p$-grid, so the only concern is that some of
+  these points are on the $q$-grid for some $q<p$.  To see why this is
+  not possible, observe that, if some point in $Q_{uw}^p$ were on the
+  $q$-grid, for some $q<p$, this would imply that
+  \[  ((i/p)x,(i/p)y,(i/p)z) = (a/q,b/q,c/q) \]
+  for some integers $x,y,z,a,b,c$ such that $\gcd(i,p)=1$ and
+  $\gcd(x,y,z)=1$. Rewriting this gives
+  \begin{equation}
+     (ixq,iyq,izq) = (pa,pb,pc) \enspace .   \eqlabel{snapper}
+  \end{equation}
+  But $\gcd(ixq,iyz,izq)=iq$ (since $\gcd(x,y,z)=1$).  Furthermore,
+  $\gcd(iq,p) \le q < p$ (since $\gcd(i,p)=1$).  Therefore, one of the
+  quantities on the left-hand side of \eqref{snapper} is not divisible
+  by $p$ and is therefore the left-hand side can not equal the
+  right-hand side.
 
-  Let $x_1,\ldots,x_\ell$ denote the $p$-grid points that are incident
-  on at least one edge and let $R_i$, $i\in\{1,\ldots,\ell\}$, denote
-  the number of edges incident to $x_i$.  Observe, then, that there
-  are $\binom{R_i}{2}$ crossing pairs of edges that cross at $x_i$.
-  From the preceding discussion, we have $\sum_{i=1}^\ell R_i \ge (p-1)m$
-  and $\ell\le\n p^3$.  Therefore the total contribution of crossings
-  that occur on the $p$-grid to $\crs_3(G)$ is at least
+  The size of the set $Q_{uw}^p$ is a well-studied quantity and is given
+  by the \emph{Euler totient function} $\varphi(p)=p\prod_{q|p}(1-1/q)$
+  \cite[Section~5.5]{hardy.wright:introduction}.  Therefore, the total
+  number of incidences between points of the essential $p$-grid and
+  edges of $G$ is at least $m\cdot\varphi(p)$.
+
+  Let $x_1,\ldots,x_\ell$ denote the essential $p$-grid points that are
+  incident on at least one edge and let $R_i$, $i\in\{1,\ldots,\ell\}$,
+  denote the number of edges incident to $x_i$.  Observe, then, that
+  there are $\binom{R_i}{2}$ crossing pairs of edges that cross at
+  $x_i$.  From the preceding discussion, we have $\sum_{i=1}^\ell R_i
+  \ge m\cdot\varphi(p)$.  Therefore the total contribution of crossings that
+  occur on the essential $p$-grid to $\crs_3(G)$ is at least
+  \begin{equation}
+      \sum_{i=1}^\ell\binom{R_i}{2} \ge \ell \binom{m\cdot\varphi(p)/\ell}{2}
+      \ge \Omega(\ell (m\cdot\varphi(p)/\ell)^2)
+      = \Omega((m\cdot\varphi(p))^2/\ell) \enspace . \eqlabel{condition-a}
+  \end{equation}
+  provided that $m\cdot\varphi(p)/\ell \ge 1$.  We can easily verify
+  that the size, $\ell$, of the essential $p$-grid satisfies $\ell \le
+  3\n p^2\varphi(p)$, so \eqref{condition-a} is satisfied provided that
   \[
-      \sum_{i=1}^\ell\binom{R_i}{2} \ge \ell \binom{m(p-1)/\ell}{2}
-      \ge\n p^3\binom{m(p-1)/(\n p^3)}{2} \ge cm^2/(\n p) \enspace ,
+     m\cdot\varphi(p)/\ell \ge 1 \Leftarrow \frac{m\varphi(p)}{3\n p^2\varphi(p)} \ge 1 \Leftrightarrow \frac{m}{3\n} \ge p^2 \enspace \Leftrightarrow
+   p \le \sqrt{m/3\n}.
   \]
-  for $c=2$ and $m(p-1)/(\n p^3) \ge 2$.  This latter condition is satisfied
-  for $p \le \sqrt{m/(4\n)}$. Since $p=2$ is the smallest prime
-  number, the conditions $2\le p\le\sqrt{m/(4\n)}$ yield the
-  condition $m\ge 16\n$ found in the statement of the theorem. Finally,
-  we finish by summing over primes $p$ not exceeding $\sqrt{m/(4\n)}$:
+%  that we have
+%  \[
+%     \Omega((m\cdot\varphi(p))^2/\ell) \ge \Omega(m^2\varphi(p)/(\n p^2)) \ge \Omega(m^2/(\n p\log\log p)) 
+%  \]
+%  Finally, 
+  Summing over $p$ we obtain:
+  \begin{align}
+     \crs(G) & \ge \sum_{p=1}^{\lfloor\sqrt{m/3\n}\rfloor} \Omega((m^2/\n)(\varphi(p)/p^2)) \\
+             & = \Omega(m^2/\n)\sum_{p=1}^{\lfloor\sqrt{m/3\n}\rfloor} \varphi(p)/p^2 \eqlabel{a} \\
+             & = \Omega(m^2/\n)\log(m/\n) \enspace . \eqlabel{b}
+  \end{align}
+  The step from \eqref{a} to \eqref{b}, in which we claim that
+  $\sum_{i=1}^k \varphi(i)/i^2\in\Omega(\log k)$, is not immediately
+  obvious.
+  This step follows from the following result on Euler's
+  totient function \cite[Theorem~330]{hardy.wright:introduction}:
   \[
-     \crs(G) \ge \sum_{p\le \sqrt{m/(4\n)}} cm^2/(\n p) 
-             = (cm^2/\n) \sum_p 1/p 
-             = (cm^2/\n)(\ln\ln(m/\n)-O(1)) \enspace ,
+      \sum_{i=1}^n \varphi(i) = (3/\pi^2)n^2 + O(n\log n) \enspace .
   \]
-  where the last equality is Euler's result on the sum of reciprocals
-  of primes. (This sum is also known as a harmonic series of primes.
-  See Hardy and Wright~\cite[Section~22.7]{hardy.wright:introduction}.
+  Using this result, we can justify the step from \eqref{a} to \eqref{b}
+  as follows:
+  \begin{align*}
+    \sum_{i=1}^k \varphi(i)/i^2 
+      &\ge \sum_{j=1}^{\lfloor\log k\rfloor}
+             \sum_{i=2^{j-1}+1}^{2^j} \varphi(i)/i^2  \\
+      &\ge \sum_{j=1}^{\lfloor\log k\rfloor}\frac{1}{2^{2j}}
+             \left(\sum_{i=2^{j-1}+1}^{2^j} \varphi(i)\right)  \\
+      &= \sum_{j=1}^{\lfloor\log k\rfloor}\frac{1}{2^{2j}}
+             \left(\sum_{i=1}^{2^j}\varphi(i)-\sum_{i=1}^{2^{j-1}} \varphi(i)\right)  \\
+      &= \sum_{j=1}^{\lfloor\log k\rfloor}\frac{1}{2^{2j}}
+             \left((3/\pi^2)(2^{2j}-2^{2j-2})\pm O(j2^j)\right)  \\
+      &= \sum_{j=1}^{\lfloor\log k\rfloor}
+             \left(9/(4\pi^2)\pm O(j/2^{j})\right)  \\
+      &= \sum_{j=1}^{\lfloor\log k\rfloor} \Omega(1) = \Omega(\log k) \enspace . \qedhere
+  \end{align*}
 \end{proof}
+
+
+% This is the old (m^2/\n)loglog(m/\n) lower bound
+%\begin{thm}\thmlabel{3d-lower-bound}
+%  For all $m\ge 16\n$, $\crs_3(\n,m) \in \Omega((m^2/\n)\log\log (m/\n))$.
+%\end{thm}
+%
+%\begin{proof}
+%  Let $G$ be any geometric grid graph with $V(G)\subseteq\N(X,Y,Z)$,
+%  with $XYZ\le\n$, and $|E(G)|=m$. (That is, $G$ is a 3-D geometric
+%  grid graph with $m$ edges and volume at most $\n$.)  We may assume,
+%  without loss of generality, that no edge of $G$ contains any point
+%  of the $X\times Y\times Z$ grid in its interior; any such edge can
+%  be replaced with a shorter edge without introducing any additional
+%  crossings and without changing $m$ or $\n$.
+%
+%  For a prime number, $p$, define the $X\times Y\times Z$ \emph{$p$-grid}
+%  as the set of points
+%  \[
+%    \{(x/p,y/p,z/p): x\in\{p,p+1,\ldots,pX\},\,
+%    y\in\{p,p+1,\ldots,pY\},\, z\in\{p,p+1,\ldots,pZ\}\} \enspace ,
+%  \]
+%  which we denote by $\N(pX,pY,pZ)/p$.
+%  Observe that, for two distinct primes $p$ and $q$, the intersection
+%  of the $p$-grid and the $q$-grid is exactly the $X\times Y\times Z$
+%  grid. (This is because the only integers $a$ and $b$ that satisfy the
+%  equation $a/p = b/q$ have $a\equiv 0 \pmod{p}$ and $b\equiv 0\pmod q$,
+%  so $a/p$ and $b/q$ are each integers.)
+%
+%  Note that the number of points in the $X\times Y\times Z$ $p$-grid is
+%  less than $\n p^3$.  Note, furthermore, that each edge $uw$ of $G$
+%  contains the $p$-grid points
+%  \[
+%      P_{uw}^p = \{ u+(i/p)(w-u) : i\in\{1,\ldots,p-1\} \} \enspace .
+%  \]
+%  Next, we claim that $P_{uw}^p$ does not contain any $q$-grid points for
+%  any prime $q\neq p$.  In fact, $P_{uw}^p$ does not contain any point
+%  of the $X\times Y\times Z$ grid.  This follows from the assumption that
+%  $uw$ contains no grid point in its interior, so $\gcd(u_1-w_1, u_2-w_2,
+%  u_3-w_3)=1$.  In particular, at least one of $u_1-w_1$, $u_2-w_2$,
+%  or $u_3-w_3$ does not have $p$ as a divisor.  If, say, $w_1-u_1$ does
+%  not have $p$ as a divisor then $(i/p)(w_1-u_1)$ is not an integer for
+%  any $i\in\{1,\ldots,p-1\}$ and therefore $u+(i/p)(w-u)$ is not on the
+%  $X\times Y\times Z$ grid.
+%
+%  Let $x_1,\ldots,x_\ell$ denote the $p$-grid points that are incident
+%  on at least one edge and let $R_i$, $i\in\{1,\ldots,\ell\}$, denote
+%  the number of edges incident to $x_i$.  Observe, then, that there
+%  are $\binom{R_i}{2}$ crossing pairs of edges that cross at $x_i$.
+%  From the preceding discussion, we have $\sum_{i=1}^\ell R_i \ge (p-1)m$
+%  and $\ell\le\n p^3$.  Therefore the total contribution of crossings
+%  that occur on the $p$-grid to $\crs_3(G)$ is at least
+%  \[
+%      \sum_{i=1}^\ell\binom{R_i}{2} \ge \ell \binom{m(p-1)/\ell}{2}
+%      \ge\n p^3\binom{m(p-1)/(\n p^3)}{2} \ge cm^2/(\n p) \enspace ,
+%  \]
+%  for $c=2$ and $m(p-1)/(\n p^3) \ge 2$.  This latter condition is satisfied
+%  for $p \le \sqrt{m/(4\n)}$. Since $p=2$ is the smallest prime
+%  number, the conditions $2\le p\le\sqrt{m/(4\n)}$ yield the
+%  condition $m\ge 16\n$ found in the statement of the theorem. Finally,
+%  we finish by summing over primes $p$ not exceeding $\sqrt{m/(4\n)}$:
+%  \[
+%     \crs(G) \ge \sum_{p\le \sqrt{m/(4\n)}} cm^2/(\n p) 
+%             = (cm^2/\n) \sum_p 1/p 
+%             = (cm^2/\n)(\ln\ln(m/\n)-O(1)) \enspace ,
+%  \]
+%  where the last equality is Euler's result on the sum of reciprocals
+%  of primes. (This sum is also known as a harmonic series of primes.
+%  See Hardy and Wright~\cite[Section~22.7]{hardy.wright:introduction}.
+%\end{proof}
 
 \subsection{The Upper Bound}
 \seclabel{3d-upper-bound}

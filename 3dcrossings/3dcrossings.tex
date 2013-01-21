@@ -355,7 +355,9 @@ and $u_3$ are $u$'s x-, y-, and z-coordinates, respectively.
   without loss of generality, that no edge of $G$ contains any point
   of the $X\times Y\times Z$ grid in its interior; any such edge can
   be replaced with a shorter edge without introducing any additional
-  crossings and without changing $m$ or $\n$.
+  crossings and without changing $m$ or $\n$. This assumption is subtle,
+  but important, and is equivalent to assuming that, for every edge $uw$
+  of $G$, $\gcd(u_1-w_1, u_2-w_2, u_3-w_3)=1$.
 
   For any integer, $p\ge 1$, define the $X\times Y\times Z$
   \emph{$p$-grid} as the set of points
@@ -372,9 +374,19 @@ and $u_3$ are $u$'s x-, y-, and z-coordinates, respectively.
   primes in the prime factorization of $p$.  We begin with the points
   of the $p$-grid and then remove all points that are contained in
   the $p_i$-grid, for each $i\in\{1,\ldots,k\}$.  Finally, we remove
-  all points of the 1-grid.  What remains is the essential $p$-grid.
+  all points of the 1-grid.  What remains is the essential $p$-grid. (See \figref{grid} for a 2-dimensional illustration.)
   Observe that the essential $p$-grid and the essential $q$-grid have no
   points in common for any $p\neq q$.
+
+  \begin{figure}
+    \begin{center}
+      \includegraphics{grid}
+    \end{center}
+    \caption{A 2-dimensional piece of the essential 6-grid.  Removing
+     the 1-grid, 2-grid, and 3-grid from the 6-grid leaves the
+     essential 6-grid.}
+    \figlabel{grid}
+  \end{figure}
 
 %  How large is the essential $p$-grid?  To understand this, we need the
 %  \emph{Euler's totient function}, $\varphi(p)=p\prod_{p|n}(1-1/p)$,
@@ -403,50 +415,52 @@ and $u_3$ are $u$'s x-, y-, and z-coordinates, respectively.
   and the essential $p$-grid points
   \[
       Q_{uw}^p = \{ u+(i/p)(w-u) : i\in\{1,\ldots,p-1\}\mbox{
-         s.t. }\gcd(i,p)=1 \} \enspace .
+         and  }\gcd(i,p)=1 \} \enspace .
   \]
   The fact that $Q_{uw}^p$ contains only essential $p$-grid points follows
-  from the assumption that $uw$ contains no grid point in its interior,
-  so $\gcd(u_1-w_1, u_2-w_2, u_3-w_3)=1$.  The points in $Q_{uw}^p$
-  are clearly on the $p$-grid, so the only concern is that some of
-  these points are on the $q$-grid for some $q<p$.  To see why this is
-  not possible, observe that, if some point in $Q_{uw}^p$ were on the
-  $q$-grid, for some $q<p$, this would imply that
+  from the assumption that
+  $\gcd(u_1-w_1, u_2-w_2, u_3-w_3)=1$.  More specifically, the points
+  in $Q_{uw}^p$ are clearly on the $p$-grid, so the only concern is
+  that some of these points are on the $q$-grid for some $q<p$.  To see
+  why this is not possible, observe that, if some point in $Q_{uw}^p$
+  were on the $q$-grid, for some $q<p$, this would imply that
   \[  ((i/p)x,(i/p)y,(i/p)z) = (a/q,b/q,c/q) \]
-  for some integers $x,y,z,a,b,c$ such that $\gcd(i,p)=1$ and
-  $\gcd(x,y,z)=1$. Rewriting this gives
+  for some integers $x=w_1-u_1$, $y=w_2-u_2$, $z=w_3-u_3$, $a$, $b$, and
+  $c$ such that $\gcd(i,p)=1$ and $\gcd(x,y,z)=1$. Rewriting this gives
   \begin{equation}
-     (ixq,iyq,izq) = (pa,pb,pc) \enspace .   \eqlabel{snapper}
+     (x,y,z) = (pa/(iq),pb/(iq),pc/(iq)) \enspace .   \eqlabel{snapper}
   \end{equation}
-  But $\gcd(ixq,iyz,izq)=iq$ (since $\gcd(x,y,z)=1$).  Furthermore,
-  $\gcd(iq,p) \le q < p$ (since $\gcd(i,p)=1$).  Therefore, one of the
-  quantities on the left-hand side of \eqref{snapper} is not divisible
-  by $p$ and is therefore the left-hand side can not equal the
-  right-hand side.
+  Each value on the right hand side has a factor of $p$ in the numerator,
+  so they must also have a factor of $p$ in the denominator, $iq$.
+  Otherwise, $\gcd(pa/(iq),pb/(iq),pc/(iq)) > 1 = \gcd(x,y,z)$.  But this
+  is not possible since $\gcd(i,p)=1$ and $q<p$, so $\gcd(iq,p)\le q < p$.
 
   The size of the set $Q_{uw}^p$ is a well-studied quantity and is given
   by the \emph{Euler totient function} $\varphi(p)=p\prod_{q|p}(1-1/q)$
   \cite[Section~5.5]{hardy.wright:introduction}.  Therefore, the total
   number of incidences between points of the essential $p$-grid and
   edges of $G$ is at least $m\cdot\varphi(p)$.  In understanding the
-  calculations that follow, it is helpful (though not strictly correct)
-  to think of $\varphi(p)$ as $cp$ for some constant $0<c<1$.
+  calculations that follow, it is helpful to pretend that $\varphi(p)\ge
+  cp$ for some constant $0<c<1$, though this is not strictly correct
+  since, for some $p$, $\varphi(p)\in O(p/\log\log p)$.
 
   Let $x_1,\ldots,x_\ell$ denote the essential $p$-grid points that are
   incident on at least one edge and let $R_i$, $i\in\{1,\ldots,\ell\}$,
   denote the number of edges incident to $x_i$.  Observe, then, that
   there are $\binom{R_i}{2}$ crossing pairs of edges that cross at
   $x_i$.  From the preceding discussion, we have $\sum_{i=1}^\ell R_i
-  \ge m\cdot\varphi(p)$.  Therefore the total contribution of crossings that
+  \ge m\cdot\varphi(p)$.  Therefore, the total contribution of crossings that
   occur on the essential $p$-grid to $\crs_3(G)$ is at least
-  \begin{equation}
+  \[
       \sum_{i=1}^\ell\binom{R_i}{2} \ge \ell \binom{m\cdot\varphi(p)/\ell}{2}
       \ge \Omega(\ell (m\cdot\varphi(p)/\ell)^2)
-      = \Omega((m\cdot\varphi(p))^2/\ell) \enspace . \eqlabel{condition-a}
-  \end{equation}
-  provided that $m\cdot\varphi(p)/\ell \ge 1$.  Since $\ell\le \n
-  p^3$, the condition $m\cdot\varphi(p)/\ell \ge 1$ is satisified for
-  $p\le\sqrt[3]{m/\n}$.
+      = \Omega\left(\frac{m^2\varphi(p)^2}{p^3N}\right) \enspace . 
+  \]
+  The first inequality is an application of Jensen's Inequality
+  to the function $f(x)=x(x-1)/2$.  Since $\ell\le \n p^3$,
+  $\binom{m\cdot\varphi(p)/\ell}{2}\ge 0$ for $p\le \sqrt[3]{m/\n}$
+  and the second inequality holds
+   for $p\le \sqrt[3]{m/\n}$.
 %  On the other hand, we have the lower-bound $p\ge 2$ since the essential
 %  1-grid is empty.  This combines with the preceding conditions to
 %  yield the condition $m\ge 12n$.  (Note that the cases $8\n\le m< 12\n$
@@ -462,27 +476,30 @@ and $u_3$ are $u$'s x-, y-, and z-coordinates, respectively.
   \begin{align}
      \crs(G) 
        & \ge \sum_{p=1}^{\lfloor\sqrt[3]{m/\n}\rfloor} 
-                \Omega(\ell (m\cdot\varphi(p)/\ell)^2) \\
+                \Omega\left(\frac{m^2\varphi(p)^2}{p^3N}\right) \notag \\
        & = \Omega(m^2/\n)\sum_{p=1}^{\lfloor\sqrt[3]{m/\n}\rfloor} 
                  \varphi(p)^2/p^3 \eqlabel{a} \\
              & = \Omega(m^2/\n)\log(m/\n) \enspace . \eqlabel{b}
   \end{align}
   The step from \eqref{a} to \eqref{b}, in which we claim that
-  $\sum_{i=1}^k \varphi(i)^2/i^3\in\Omega(\log k)$, is not immediately
-  obvious.
-  This step follows from the following result on Euler's
-  totient function \cite[Theorem~330]{hardy.wright:introduction}:
+  $\sum_{i=1}^k \varphi(i)^2/i^3\in\Omega(\log k)$, is not immediate.
+  To justify this step, recall the following result on Euler's totient
+  function \cite[Theorem~330]{hardy.wright:introduction}:
   \[
       \sum_{i=1}^n \varphi(i) = (3/\pi^2)n^2 + O(n\log n) \enspace .
   \]
   Using this result, and the Cauchy-Schwartz Inequality, we obtain
   \[
-    (3/\pi^2)n^2 + O(n\log n) = \sum_{i=1}^n \varphi(i) \le \sqrt{\sum_{i} \varphi(i)^2}\cdot\sqrt{n} \enspace .
+    (3/\pi^2)n^2 + O(n\log n) = \sum_{i=1}^n \varphi(i) 
+     = \sum_{i=1}^n\varphi(i)\cdot 1 \le \sqrt{\sum_{i=1}^n \varphi(i)^2}\cdot\sqrt{\sum_{i=1}^n 1}
+     = \sqrt{\sum_{i=1}^n \varphi(i)^2}\cdot\sqrt{n} \enspace .
   \]
   Dividing by $\sqrt{n}$ and squaring, we obtain
   \[
-    \sum_{i=1}^n \varphi(i)^2 \ge (9/\pi^4)n^3 + O(n^{3/2}\log^2 n) \ge n^3/11 \enspace .
+    \sum_{i=1}^n \varphi(i)^2 \ge (9/\pi^4)n^3 + O(n\log^2 n) \ge (9/\pi^4)n^3 \ge n^3/11 \enspace .
   \]
+  On the other hand, $\varphi(i) < i$, so
+  \[  \sum_{i=1}^n \varphi(i)^2 < \sum_{i=1}^n i^2\le \sum_{i=1}^n n^2 = n^3 \enspace . \]
   We can now justify the step from \eqref{a} to \eqref{b}
   as follows:
   \begin{align*}

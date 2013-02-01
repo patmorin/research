@@ -34,29 +34,47 @@ set $V$ of $n$ points consists of a set, $D$,
 of disks and an assignment $f:V\to D$ such that
 \begin{enumerate}
   \item $|D|\in O(n/k)$,
-  \item for each $u\in V$, $u\in f(u)$,
-  \item for each $\Delta\in D$, $|\{u\in V: f(u)=\Delta\}|\le k$,
+  \item for each $u\in V$, $u\in f(u)$ (i.e., $u$ is a assigned to a
+    disk that contains $u$),
+  \item for each $\Delta\in D$, $|\{u\in V: f(u)=\Delta\}|\le k$ (i.e.,
+   at most $k$ points are assigned to each disk),
   \item for every $r> 0$, $c\ge 2$, and $p\in\R^2$, the number of disks
-   whose radius is in the range $[r,cr]$ that contain $p$ is $O(c)$.
+   whose radius is in the range $[r,2r)$ and that contain $p$ is $O(1)$.
 \end{enumerate}
-For any set $V$ of $n$ points, a $k$-partition exists and can be found
-in $O(n\log n)$ time. [Prove this.]
+For any set $V$ of $n$ points, a $k$-partition exists and can be found in
+$O(n\log n)$ time. [Prove this---I think you get it from Michiel's trick
+of separating the fair split tree into components of maximum size $k$.]
+Note that, aside of Property~4, there is very little structure to
+the disks in $D$. In particular, disks in $D$ may overlap and may
+even contain each other.
 
 \begin{thm}
   For every set, $V$, of $n<\infty$ points in $\R^2$, there exists a
-  geometric graph $G$ with $V(G)$, $|E(G)|\in O(n)$ and $\asf(G)=1+o(1)$.
-  Given $V$, the graph $G$ can be constructed in \ldots time.
+  geometric graph $G$ with $V(G)=V$, $|E(G)|\in O(n)$ and $\asf(G)=1+o(1)$.
 \end{thm}
 
 \begin{proof}
+  Our construction uses values $c,k\in\omega_n(1)$ and $\epsilon\in
+  o_n(1)$ that I haven't optimized yet.
+
   We begin with a $k$-partition $(\{\Delta_1,\ldots,\Delta_{n'}\},f)$
-  of $V$, $\Delta_1,\ldots,\Delta_{n'}$ are ordered by decreasing size.
-  For each $i\in \{1,\ldots,n'\}$, let $V_i=\{u\in V :
-  f(u)=\Delta_i\}$; that is, $V_i$ is the set of points assigned to
-  disk $\Delta_i$.  For each set $V_i$, we choose a representative vertex,
-  $u_i$ and add edge joining $u_i$ to each other vertex in $V_i$. Let
-  $N=\{u_1,\ldots,u_{n'}\}$ denote the set of representative vertices
-  and recall that $|N|=n'\in O(n/k)$
+  of $V$, and we use the convention that $\Delta_1,\ldots,\Delta_{n'}$
+  are ordered by decreasing size.  For each $i\in \{1,\ldots,n'\}$,
+  let $V_i=\{u\in V : f(u)=\Delta_i\}$; that is, $V_i$ is the set of
+  points assigned to disk $\Delta_i$.  For each set $V_i$, we choose a
+  representative vertex, $u_i$ and add edges joining $u_i$ to each other
+  vertex in $V_i$ (see \figref{overview}). Let $N=\{u_1,\ldots,u_{n'}\}$
+  denote the set of representative vertices and recall that $|N|=n'\in
+  O(n/k)$.
+  
+  \begin{figure}
+    \begin{center} 
+      \includegraphics{overview}
+    \end{center} 
+    \caption{Using a $k$-partition, $G$ contains $O(n/k)$ stars whose
+      centers are interconnected by a $(1+1/k)$-spanner}
+    \figlabel{overview}
+  \end{figure}
 
   Next, we add two spanner constructions to $G$.  The first is a
   $(1+1/k)$-spanner of $N$ and the second is a $2$-spanner of $V$.
@@ -64,26 +82,34 @@ in $O(n\log n)$ time. [Prove this.]
   \[
      \frac{\|uw\|_G}{\|uw\|} \le \begin{cases}
            1+1/k & \text{if $u,w\in N$} \\
-           2 & \text{otherwise .}
+           2 & \text{in any case.}
          \end{cases}
   \]
   
   Let $r_i$ denote the radius of $\Delta_i$ and let $D_i$ be a disk
   centered at the center of $\Delta_i$ and having radius $cr_i$.
-  Points of $V$ that are in $D_i\setminus \Delta_i$ can be problematic;
-  there is no guarantee that such points have a $1+o(1)$ spanning path
-  to the points in $V_i$.
+  Points of $V$ that are in $D_i\setminus \Delta_i$ can be problematic
+  for $V_i$; there is no guarantee that such points have a $1+o(1)$
+  spanning path to the points in $V_i$.
 
-  The final step in our spanner construction is to find a set of $d\in
-  O(1)$ disks $D_{i,1},\ldots,D_{i,d}$, each having radius $r_i/c$ and
-  whose union contains the maximum number of points in $V\cap D_i\setminus
-  \Delta_i$.  [FIXME: an approximation will do here.]  We then connect
-  each of the points in $V_i$ to some point in $D_{i,\ell}$, for each
-  $\ell\in\{1,\ldots,d\}$.
+  The final step in our spanner construction is to find, for each
+  $i\in\{1,\ldots,n'\}$,  a disk, $E_i$, of radius $r_i/c$, with center
+  in $D_i$, and that contains the maximum number of points of $V$.
+  (Note that this may include points of $V$ in $V_i$ or outside of $D_i$.)
+  We then add edges joining each of the points in $V_i$ to some point
+  in $E_i$.  See \figref{hitter}.
+
+  \begin{figure}
+    \begin{center}
+      \includegraphics{hitter}
+    \end{center}
+    \caption{The disk $E_i$ captures as many points of $V$ as possible
+     while still having center in $D_i$.}
+    \figlabel{hitter}
+  \end{figure}
 
   As we will see, the only problematic points that remain for $V_i$
-  are those contained in $D_i'=D_i\setminus\bigcup_{i=1}^d D_{i,d}$.
-  ($D_i'$ looks like a round piece of swiss cheese.)  The average stretch
+  are those contained in $D_i'=D_i\setminus E_i$.  The average stretch
   factor of $G$ can be expressed as
   \begin{align*}
     \asf(G) 
@@ -110,11 +136,24 @@ in $O(n\log n)$ time. [Prove this.]
           \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|}
           \eqlabel{blah}
    \end{equation}
-   that appears above.
-   Partition the index set $\{i+1,\ldots,n'\}$ into two sets $I_i$
-   and $I_i'$, where $I_i$ contains exactly the indices $j$ such that
-   $\Delta_j$ intersects $D_i$.
+   that appears above.  Partition the index set $\{i+1,\ldots,n'\}$
+   into two sets $I_i$ and $I_i'$, where $I_i$ contains exactly the
+   indices $j$ such that $\Delta_j$ intersects $D_i$, so that $I_i$
+   indexes the subsets of $V$ that are problematic for $V_i$ (see \figref{indexer}). 
    Then we have
+
+   \begin{figure}
+    \begin{center}
+      \includegraphics{indexer}
+    \end{center}
+    \caption{$I_i$ indexes the (red) sets that are problematic for $V_i$
+     while $I_i'$ indexes the (green) sets for which there is a $1+o(1)$
+     spanning path to the points in $V_i$.}
+    \figlabel{hitter}
+  \end{figure}
+
+
+   
    \begin{align*}
      \eqref{blah} 
       & = \sum_{j\in I_i}
@@ -168,16 +207,73 @@ in $O(n\log n)$ time. [Prove this.]
       \epsilon n^2/k \le  \sum_{i=1}^{n'}\sum_{j\in I_i} |V_j\cap D_i'| 
          \le \sum_{i=1}^{n'} |V\cap D_i'| \enspace . \eqlabel{kicker}
    \end{equation}
-   The right hand side of \eqref{kicker} has $n'\le \alpha n/k$ terms,
-   for some constant $\alpha >0$ and each of these terms is which is at
-   most $n$.  Therefore, there must exist at least $(\epsilon/\alpha)n/k$ 
-   values of $i$ such that $|V\cap D_i'|\ge (\epsilon/\alpha)n$.  This
-   implies that there exists $i_1,\ldots,i_t$, with $t\in\Omega(\log n)$
-   such that 
-   \[  
-      \left|V\cap\bigcap_{\ell=1}^t D_{i_{\ell}}\right| \in \Omega(n^{\delta})
+   The right hand side of \eqref{kicker} has $n'\le \alpha n/k$
+   terms, for some constant $\alpha >0$ and each of these terms
+   is at most $n$.  Therefore, there must exist at least
+   $(\epsilon/\alpha)n/k$ values of $i$ such that $|V\cap D_i'|\ge
+   (\epsilon/\alpha)n$.  In particular, there exists a point $u\in V$
+   and indices $i_1,\ldots,i_\ell$ such that:
+   \begin{enumerate}
+     \item $u\in V\cap D_{i_j}'$ for all $j\in\{1,\ldots,\ell\}$,
+     \item $|V\cap D_{i_j}'|\ge \delta n$ for some constant $\delta>0$
+       and all $j\in\{1,\ldots,\ell\}$, and
+     \item $\ell\in\Omega(n/k)$.
+   \end{enumerate}
+
+   Suppose, without loss of generality, that the smallest disk
+   in $D_{i_1},\ldots,D_{i_\ell}$ has unit radius.  Partition
+   $i_1\ldots,i_\ell$ into groups $G_0,G_1,\ldots$ such that $G_t$
+   contains all indices $i_j$ such that $D_{i_j}$ has radius in the
+   interval $[2^t,2^{t+1})$.
+   We claim that each such group, $G_t$, has size $O(c^2)$.  To see
+   why this is so, observe that, for each group $G_t$, there exists a
+   point $u\in V$ that is contained in $\Omega(|G_t|)$ regions $D_{i}'$
+   where $i\in G_t$.  $D_{i}'$ has radius at most $c2^{t+1}$.  This means
+   that the set of disks
+   \[
+      \{ \Delta_i : i\in G_t\}
    \]
-   for some $\delta > 0$. [FIXME: Can we make this stronger?  These aren't arbitrary sets.  For one, they have finite VC-dimension.]
+   is contained in a disk, centered at $u$, of radius at most
+   $(c+1)2^{t+1}$.  But then, Property~4 of $k$-partitions ensures that
+   the size of $G_t$ is $O(c^2)$.
+
+   Thus far, we have that each group $G_t$ has size $O(c^2)$
+   and the total size of all groups is $\Omega(n/k)$.
+   Therefore, there must be at least $\Omega(n/(kc^2))$ groups.
+   In particular, we can find $h\in\Omega(n/(kc^2\log c))$ groups,
+   $G_{t_1},\ldots,G_{t_h}$, such that $t_{i+1} \ge
+   t_{i}+2\log c+2$.  By selecting a representative element from each
+   of these groups, we obtain a sequence of indices $i_1,\ldots,i_h$
+   such that the radius of $\Delta_{i_{j+1}}$ is at least $4c^2$ times the
+   radius of $\Delta_{i_j}$ for each $j\in\{1,\ldots,h-1\}$.
+
+   By choice, $D_{i_1}'$ contains at least $\delta n$ elements of $V$
+   including the point $u$.  Also by choice, $D_{i_2}'$ contains at least
+   $\delta n$ elements of $V$, including $u$.  We claim that $E_{i_2}$
+   contains at least $\delta n$ elements of $V$ as well since there
+   exists a disk, $E_{i_2}'$, centered at $u$, of radius $r_{i_2}/c >
+   4cr_{i_1}$, that contains $D_{i_1}$ and therefore contains all the
+   (at least $\delta n$) points in $D_{i_1}'$ (see \figref{containment}).
+   The disk $E_{i_2}$ is chosen to contain as many elements of $V$ as
+   possible, so it contains at least as many elements as $E_{i_2}'$.
+   Therefore, $D_{i_2}'\cup E_{i_2}$ contains at least $2\delta n$
+   points of $V$.
+
+   \begin{figure}
+     \begin{center}
+       \includegraphics{containment}
+     \end{center}
+     \caption{$D_{i_2}\cup E_{i_2}$ contains at least $2\delta n$ 
+              points of $V$.}
+     \figlabel{containment}
+   \end{figure}
+
+   We can now argue similarly to show that $E_{i_3}$ contains at least
+   $2\delta n$ points of $V$ so $D_{i_3}'\cup E_{i_3}$ contains at least
+   $3\delta n$ points of $V$.  In general, this argument shows that
+   $D_{i_h}\cup E_{i_h}$ contains at least $h\delta n$ points of $V$.
+   But this yields a contradiction for $h> 1/\delta$, since $V$
+   contains only $n$ points.
 \end{proof}
 
 

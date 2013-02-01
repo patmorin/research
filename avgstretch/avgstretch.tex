@@ -29,6 +29,19 @@ set $V(G)\subset \R^d$ and edge set $E(G)$ is
 
 \section{The Construction}
 
+We make use of the following construct:  A \emph{$k$-partition} of a
+set $V$ of $n$ points consists of a set, $D$,
+of disks and an assignment $f:V\to D$ such that
+\begin{enumerate}
+  \item $|D|\in O(n/k)$,
+  \item for each $u\in V$, $u\in f(u)$,
+  \item for each $\Delta\in D$, $|\{u\in V: f(u)=\Delta\}|\le k$,
+  \item for every $r> 0$, $c\ge 2$, and $p\in\R^2$, the number of disks
+   whose radius is in the range $[r,cr]$ that contain $p$ is $O(c)$.
+\end{enumerate}
+For any set $V$ of $n$ points, a $k$-partition exists and can be found
+in $O(n\log n)$ time. [Prove this.]
+
 \begin{thm}
   For every set, $V$, of $n<\infty$ points in $\R^2$, there exists a
   geometric graph $G$ with $V(G)$, $|E(G)|\in O(n)$ and $\asf(G)=1+o(1)$.
@@ -36,59 +49,124 @@ set $V(G)\subset \R^d$ and edge set $E(G)$ is
 \end{thm}
 
 \begin{proof}
-  We construct the graph $G$ by first adding the edges of some 2-spanner
-  of $V$.  Next, we find a $(k/n)$-net $N\subset V$ with respect to
-  equilateral triangles. The set $N$ has the property that any equilateral
-  triangle that contains at least $k$ points of $S$ contains at least
-  one point of $N$.  Halld\'orson and Tokuyama show that there exists
-  such a set, $N$, of size $O(n/k)$, and this set can be computed in
-  $O(n\log n)$ time.
+  We begin with a $k$-partition $(\{\Delta_1,\ldots,\Delta_{n'}\},f)$
+  of $V$, $\Delta_1,\ldots,\Delta_{n'}$ are ordered by decreasing size.
+  For each $i\in \{1,\ldots,n'\}$, let $V_i=\{u\in V :
+  f(u)=\Delta_i\}$; that is, $V_i$ is the set of points assigned to
+  disk $\Delta_i$.  For each set $V_i$, we choose a representative vertex,
+  $u_i$ and add edge joining $u_i$ to each other vertex in $V_i$. Let
+  $N=\{u_1,\ldots,u_{n'}\}$ denote the set of representative vertices
+  and recall that $|N|=n'\in O(n/k)$
 
-  We then connect each point $u\in V\setminus N$ to its nearest neighbour
-  in $N$.  For each point $w\in N$, consider a partition of $\R^2$
-  into six 60 degree cones, $C_1(w)$,\ldots,$C_6(w)$, each having an
-  apex at $w$.  For each $i\in \{1,\ldots,6\}$, let $\Delta_i(w)$ denote
-  the minimal equilateral triangle with two sides bounded by $C_i(w)$
-  that contains all the neighbours of $w$ in $C_i(w)$.  Since $N$ is a
-  $(k/n)$-net for equilateral triangles, it follows that $\Delta_i(w)$ 
-  contains at most $k$ points.
-
-  Finally, we add to $G$ two spanner constructions.  The first is a
+  Next, we add two spanner constructions to $G$.  The first is a
   $(1+1/k)$-spanner of $N$ and the second is a $2$-spanner of $V$.
-  Thus, for any $u,w\in N$ we have
+  Thus, for any $u,w\in V$ we have
   \[
      \frac{\|uw\|_G}{\|uw\|} \le \begin{cases}
            1+1/k & \text{if $u,w\in N$} \\
            2 & \text{otherwise .}
          \end{cases}
   \]
+  
+  Let $r_i$ denote the radius of $\Delta_i$ and let $D_i$ be a disk
+  centered at the center of $\Delta_i$ and having radius $cr_i$.
+  Points of $V$ that are in $D_i\setminus \Delta_i$ can be problematic;
+  there is no guarantee that such points have a $1+o(1)$ spanning path
+  to the points in $V_i$.
 
-  Let $\Delta_1,\ldots,\Delta_{n'}$ denote the triangles in the set
-  $\{\Delta_i(w):i\in\{1,\ldots,k\}, w\in N\}$ ordered by decreasing size.
-  Note that $n'\le 6|N|\in O(n/k)$.  The average stretch factor of $G$
-  can be expressed as
+  The final step in our spanner construction is to find a set of $d\in
+  O(1)$ disks $D_{i,1},\ldots,D_{i,d}$, each having radius $r_i/c$ and
+  whose union contains the maximum number of points in $V\cap D_i\setminus
+  \Delta_i$.  [FIXME: an approximation will do here.]  We then connect
+  each of the points in $V_i$ to some point in $D_{i,\ell}$, for each
+  $\ell\in\{1,\ldots,d\}$.
+
+  As we will see, the only problematic points that remain for $V_i$
+  are those contained in $D_i'=D_i\setminus\bigcup_{i=1}^d D_{i,d}$.
+  ($D_i'$ looks like a round piece of swiss cheese.)  The average stretch
+  factor of $G$ can be expressed as
   \begin{align*}
-    \asf(G) & = 
-         \binom n2^{-1}\left(\sum_{i=1}^{n'}\sum_{u,w\in\Delta_i\cap S}\frac{\|uw\|_G}{\|uw\|}  
-             + \sum_{i=1}^{n'-1}\sum_{j={i+1}}^{n'}\sum_{u\in\Delta_i\cap S}\sum_{w\in\Delta_j\cap S}\frac{\|uw\|_G}{\|uw\|}\right)  \\
+    \asf(G) 
+      & = 
+      \binom n2^{-1}\left(
+        \sum_{i=1}^{n'}\sum_{u,w\in V_i}\frac{\|uw\|_G}{\|uw\|}  
+         + \sum_{i=1}^{n'-1}\sum_{j={i+1}}^{n'}
+            \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|}
+      \right)  \\
+      & \le 
+         \binom n2^{-1}\left(n'k^2 
+          + \sum_{i=1}^{n'-1}\sum_{j={i+1}}^{n'}
+           \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|}
+      \right)  \\
       & = 
          O(k/n) + \binom n2^{-1}\left(  
-             \sum_{i=1}^{n'-1}\sum_{j={i+1}}^{n'}\sum_{u\in\Delta_i\cap S}\sum_{w\in\Delta_j\cap S}\frac{\|uw\|_G}{\|uw\|}\right)  \\
+          \sum_{i=1}^{n'-1}\sum_{j={i+1}}^{n'}
+           \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|}
+      \right)  \\
    \end{align*}
    Next, we fix a particular value of $i$ and focus on the sum
    \begin{equation}
        \sum_{j={i+1}}^{n'}
-          \sum_{u\in\Delta_i\cap S}
-          \sum_{w\in\Delta_j\cap S}\frac{\|uw\|_G}{\|uw\|}
+          \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|}
           \eqlabel{blah}
    \end{equation}
-   Partition $\Delta_{i+1},\ldots,\Delta_{n'}$ into two sets $D_i$ and
-   $D_i'$, where $D_i'$ contains triangles whose distance from $\Delta_i$
-   is greater than $r$ and $D_i$ contains the remaining triangles.
+   that appears above.
+   Partition the index set $\{i+1,\ldots,n'\}$ into two sets $I_i$
+   and $I_i'$, where $I_i$ contains exactly the indices $j$ such that
+   $\Delta_j$ intersects $D_i$.
    Then we have
    \begin{align*}
-     \eqref{blah} = \sum_{\Delta\in D_i} + 
+     \eqref{blah} 
+      & = \sum_{j\in I_i}
+           \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|}
+         + \sum_{j\in I_i'}
+           \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|} \\
+      & = \sum_{j\in I_i}
+          \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|} 
+         + \sum_{j\in I_i'} |V_i||V_j|(1+1/c)(1+1/k) \enspace .
    \end{align*}
+   Putting these pieces back together, we have
+   \begin{align*}
+     \asf(G) & \le O(k/n) + \binom{n}{2}^{-1}\left(
+       \sum_{i=1}^{n'}\left(\sum_{j\in I_i}
+          \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|} 
+         + \sum_{j\in I_i'} |V_i||V_j|(1+1/c)(1+1/k)\right)\right) \\
+      & = O(k/n) +\binom{n}{2}^{-1}
+       \sum_{i=1}^{n'}\left(\sum_{j\in I_i}
+          \sum_{u\in V_i}\left(
+             \sum_{w\in V_j\cap D_i'}
+               \frac{\|uw\|_G}{\|uw\|}
+             +\sum_{w\in V_j\cap D_i\setminus D_i'}
+               \frac{\|uw\|_G}{\|uw\|}
+           \right)
+          + \sum_{j\in I_i'} |V_i||V_j|(1+1/c)(1+1/k) \right) \\
+      & = O(k/n) +\binom{n}{2}^{-1}
+       \sum_{i=1}^{n'}\left(\sum_{j\in I_i}
+          \sum_{u\in V_i}\left(
+             \sum_{w\in V_j\cap D_i'}
+               \frac{\|uw\|_G}{\|uw\|}
+             +\sum_{w\in V_j\cap D_i\setminus D_i'}
+               (1+1/c)
+           \right)
+          + \sum_{j\in I_i'} |V_i||V_j|(1+1/c)(1+1/k) \right) \\
+     & \le O(k/n) + (1+1/c)(1+1/k) +\binom{n}{2}^{-1}
+       \sum_{i=1}^{n'}\sum_{j\in I_i}
+          \sum_{u\in V_i}
+             \sum_{w\in V_j\cap D_i'}
+               \frac{\|uw\|_G}{\|uw\|} \\
+     & \le O(k/n) + (1+1/c)(1+1/k) +\binom{n}{2}^{-1}
+       \sum_{i=1}^{n'}\sum_{j\in I_i} 2 |V_i||V_j\cap D_i'| \\
+     & \le O(k/n) + (1+1/c)(1+1/k) +\binom{n}{2}^{-1}
+       2k\sum_{i=1}^{n'}\sum_{j\in I_i} |V_j\cap D_i'| \\
+     \enspace .
+   \end{align*}
+   Thus, all that remains is to show that
+   $\sum_{i=1}^{n'}\sum_{j\in I_i} |V_j\cap D_i'| \in o(n^2/k)$.
+   Suppose, for the same of contradiction that this is not the case
+   and that
+   \[
+      \epsilon n^2/k \le  
+   \]
 \end{proof}
 
 

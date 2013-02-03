@@ -13,7 +13,12 @@
 \maketitle
 
 \begin{abstract}
-  The abstract goes here.
+  We show that, for any set $V$ of $n$ points, there exists a geometric
+  graph with vertex set $V$, $O(n)$ edges, and that has average stretch
+  factor $1+f(n)$, where $f(n)\in o_n(1)$.  This result holds, with
+  differing values of $f(n)$, when $V$ is a planar point set, a set
+  of points in $\R^d$, or the elements of a metric space with bounded
+  doubling dimension.
 \end{abstract}
 
 \end{titlepage}
@@ -49,8 +54,9 @@ the disks in $D$. In particular, disks in $D$ may overlap and may
 even contain each other.
 
 \begin{thm}
-  For every set, $V$, of $n<\infty$ points in $\R^2$, there exists a
-  geometric graph $G$ with $V(G)=V$, $|E(G)|\in O(n)$ and $\asf(G)=1+o_n(1)$.
+  For every set, $V$, of $n<\infty$ points in $\R^2$, there
+  exists a geometric graph $G$ with $V(G)=V$, $|E(G)|\in O(n)$ and
+  $\asf(G)=1+o_n(1)$.  More precisely, $\asf(G)=1+O((\log n/n)^{1/4})$.
 \end{thm}
 
 \begin{proof}
@@ -68,7 +74,7 @@ even contain each other.
   vertex in $V_i$ (see \figref{overview}). Let $N=\{u_1,\ldots,u_{n'}\}$
   denote the set of representative vertices and recall that $|N|=n'\in
   O(n/k)$.
-  
+
   \begin{figure}
     \begin{center} 
       \includegraphics{overview}
@@ -92,9 +98,8 @@ even contain each other.
   centered at the center of $\Delta_i$ and having radius $cr_i$.
   Points of $V$ that are in $D_i\setminus \Delta_i$ can be problematic
   for $V_i$; there is no guarantee that such points have a $1+o(1)$
-  spanning path to the points in $V_i$.
-  The final step in the spanner construction attempts to deal with
-  most of these problematic points.
+  spanning path to the points in $V_i$.  The final step in the spanner
+  construction attempts to deal with most of these problematic points.
 
   For each $i\in\{1,\ldots,n'\}$, we find a disk, $E_i$, of radius
   $r_i/c$, with center in $D_i$, and that contains the maximum number
@@ -111,100 +116,141 @@ even contain each other.
     \figlabel{hitter}
   \end{figure}
 
-  As we will see, the only problematic points that remain for $V_i$
-  are those contained in $D_i'=D_i\setminus E_i$.  The average stretch
-  factor of $G$ can be expressed as
-  \begin{align*}
-    \asf(G) 
-      & = 
-      \binom n2^{-1}\left(
-        \sum_{i=1}^{n'}\sum_{u,w\in V_i}\frac{\|uw\|_G}{\|uw\|}  
-         + \sum_{i=1}^{n'-1}\sum_{j={i+1}}^{n'}
-            \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|}
-      \right)  \\
-      & \le 
-         \binom n2^{-1}\left(n'k^2 
-          + \sum_{i=1}^{n'-1}\sum_{j={i+1}}^{n'}
-           \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|}
-      \right)  \\
-      & = 
-         O(k/n) + \binom n2^{-1}\left(  
-          \sum_{i=1}^{n'-1}\sum_{j={i+1}}^{n'}
-           \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|}
-      \right)  \\
-   \end{align*}
-  Next, we fix a particular value of $i$ and focus on the sum
+  This concludes the description of the graph $G$.  In determining the
+  average stretch factor of $G$, there are four types of pairs of points,
+  $u\in V_i$, $w\in V_j$, $j\ge i$, to consider:
+  \begin{enumerate}
+    \item Pairs that are both from the same set; i.e., where $i=j$.  Each such
+      pair has $\|uw\|_G/\|uw\|\le 2$ and each set $V_i$ contributes at
+      most $\binom{k}{2}$ pairs to average, so their total contribution
+      to the average is at most
+      \[
+        2\cdot\binom{n}{2}^{-1}\cdot\binom{k}{2}\cdot O(n/k) \in O(k/n)
+        \enspace .
+      \]
+    \item Pairs for which $w$ is outside of $D_i$.  For each
+      such pair, 
+      \[
+        \|uw\|_G/\|uw\|\le (1+1/k)(1+O(1/c)) \in O(1+1/k+1/c) \enspace .
+      \]
+    \item Pairs for which $w$ is contained in $E_i$.  For each
+      such pair, 
+      \[
+        \|uw\|_G/\|uw\|\le 1+O(1/c) \enspace .
+      \]
+    \item Pairs for which $w$ is contained in $D_i'$.  For each
+      such pair, $\|uw\|_G/\|uw\|\le 2$.  The number of such pairs is
+      $\sum_{i=1}^{n'} |V\cap D_i'|$, so the total contribution of such
+      pairs to the average stretch factor is at most
+      \[
+            2\cdot\binom{n}{2}^{-1}\cdot k\cdot\left(\sum_{i=1}^{n'} |V\cap D_i'|\right) \enspace .
+      \]
+  \end{enumerate}
+
+%  As we will see, the only problematic points that remain for $V_i$
+%  are those contained in $D_i'=D_i\setminus E_i$.  The average stretch
+%  factor of $G$ can be expressed as
+%  \begin{align*}
+%    \asf(G) 
+%      & = 
+%      \binom n2^{-1}\left(
+%        \sum_{i=1}^{n'}\sum_{u,w\in V_i}\frac{\|uw\|_G}{\|uw\|}  
+%         + \sum_{i=1}^{n'-1}\sum_{j={i+1}}^{n'}
+%            \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|}
+%      \right)  \\
+%      & \le 
+%         \binom n2^{-1}\left(n'k^2 
+%          + \sum_{i=1}^{n'-1}\sum_{j={i+1}}^{n'}
+%           \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|}
+%      \right)  \\
+%      & = 
+%         O(k/n) + \binom n2^{-1}\left(  
+%          \sum_{i=1}^{n'-1}\sum_{j={i+1}}^{n'}
+%           \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|}
+%      \right)  \\
+%   \end{align*}
+%  Next, we fix a particular value of $i$ and focus on the sum
+%  \begin{equation}
+%       \sum_{j={i+1}}^{n'}
+%          \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|}
+%          \eqlabel{blah}
+%  \end{equation}
+%  that appears above.  Partition the index set $\{i+1,\ldots,n'\}$ into
+%  two sets $I_i$ and $I_i'$, where $I_i$ contains exactly the indices
+%  $j$ such that $\Delta_j$ intersects $D_i$, so that $I_i$ indexes the
+%  subsets of $V$ that are problematic for $V_i$ (see \figref{indexer}).
+%  Then we have
+%  \begin{figure}
+%    \begin{center}
+%      \includegraphics{indexer}
+%    \end{center}
+%    \caption{$I_i$ indexes the (red) sets that are problematic for $V_i$
+%     while $I_i'$ indexes the (green) sets for which there is a $1+o(1)$
+%     spanning path to the points in $V_i$.}
+%    \figlabel{indexer}
+%  \end{figure}
+%  \begin{align*}
+%     \eqref{blah} 
+%      & = \sum_{j\in I_i}
+%           \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|}
+%         + \sum_{j\in I_i'}
+%           \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|} \\
+%      & = \sum_{j\in I_i}
+%          \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|} 
+%         + \sum_{j\in I_i'} |V_i||V_j|(1+O(1/c+1/k)) \enspace .
+%  \end{align*}
+%  Putting these pieces back together, we have
+%  \begin{align}
+%     \asf(G) & \le O(k/n) + \binom{n}{2}^{-1}\left(
+%       \sum_{i=1}^{n'}\left(\sum_{j\in I_i}
+%          \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|} 
+%         + \sum_{j\in I_i'} |V_i||V_j|(1+O(1/c+1/k))\right)\right) \notag\\
+%      & = O(k/n) +\binom{n}{2}^{-1}
+%       \sum_{i=1}^{n'}\left(\sum_{j\in I_i}
+%          \sum_{u\in V_i}\left(
+%             \sum_{w\in V_j\cap D_i'}
+%               \frac{\|uw\|_G}{\|uw\|}
+%             +\sum_{w\in V_j\cap D_i\setminus D_i'}
+%               \frac{\|uw\|_G}{\|uw\|}
+%           \right)
+%          + \sum_{j\in I_i'} |V_i||V_j|(1+O(1/c+1/k)) \right) \notag\\
+%      & = O(k/n) +\binom{n}{2}^{-1}
+%       \sum_{i=1}^{n'}\left(\sum_{j\in I_i}
+%          \sum_{u\in V_i}\left(
+%             \sum_{w\in V_j\cap D_i'}
+%               \frac{\|uw\|_G}{\|uw\|}
+%             +\sum_{w\in V_j\cap D_i\setminus D_i'}
+%               (1+O(1/c))
+%           \right)
+%          + \sum_{j\in I_i'} |V_i||V_j|(1+O(1/c+1/k)) \right) \notag\\
+%     & \le 1+O(k/n+1/c+1/k)) +\binom{n}{2}^{-1}
+%       \sum_{i=1}^{n'}\sum_{j\in I_i}
+%          \sum_{u\in V_i}
+%             \sum_{w\in V_j\cap D_i'}
+%               \frac{\|uw\|_G}{\|uw\|} \notag\\
+%     & \le 1+O(k/n+1/c+1/k) +\binom{n}{2}^{-1}
+%       \sum_{i=1}^{n'}\sum_{j\in I_i} 2 |V_i||V_j\cap D_i'| \notag\\
+%     & \le 1+O(k/n+1/c+1/k) +\binom{n}{2}^{-1}
+%       2k\sum_{i=1}^{n'}\sum_{j\in I_i} |V_j\cap D_i'| \eqlabel{huff} 
+%     \enspace .
+%  \end{align}
+%  Thus, all that remains is to show that
+%  $\sum_{i=1}^{n'}\sum_{j\in I_i} |V_j\cap D_i'| \in o(n^2/k)$.
+%  Suppose, for the sake of contradiction, that this is not the case
+%  and that
+
+  The total number of pairs of Type~2 and 3 is at most $\binom{n}{2}$,
+  thus the total contribution of these pairs to the average spanning ratio
+  is at most
+  \[
+    \binom{n}{2}^{-1}\cdot\binom{n}{2}\cdot(1+O(1/k+1/c)) = 1+O(1/k+1/c) \enspace .
+  \]
+  Thus, all that remains is to show that $\sum_{i=1}^{n'}|V\cap D_i'|
+  \in o(n^2/k)$.  Suppose, for the sake of contradiction,
+  that this is not the case and that
   \begin{equation}
-       \sum_{j={i+1}}^{n'}
-          \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|}
-          \eqlabel{blah}
-  \end{equation}
-  that appears above.  Partition the index set $\{i+1,\ldots,n'\}$ into
-  two sets $I_i$ and $I_i'$, where $I_i$ contains exactly the indices
-  $j$ such that $\Delta_j$ intersects $D_i$, so that $I_i$ indexes the
-  subsets of $V$ that are problematic for $V_i$ (see \figref{indexer}).
-  Then we have
-  \begin{figure}
-    \begin{center}
-      \includegraphics{indexer}
-    \end{center}
-    \caption{$I_i$ indexes the (red) sets that are problematic for $V_i$
-     while $I_i'$ indexes the (green) sets for which there is a $1+o(1)$
-     spanning path to the points in $V_i$.}
-    \figlabel{indexer}
-  \end{figure}
-  \begin{align*}
-     \eqref{blah} 
-      & = \sum_{j\in I_i}
-           \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|}
-         + \sum_{j\in I_i'}
-           \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|} \\
-      & = \sum_{j\in I_i}
-          \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|} 
-         + \sum_{j\in I_i'} |V_i||V_j|(1+O(1/c+1/k)) \enspace .
-  \end{align*}
-  Putting these pieces back together, we have
-  \begin{align}
-     \asf(G) & \le O(k/n) + \binom{n}{2}^{-1}\left(
-       \sum_{i=1}^{n'}\left(\sum_{j\in I_i}
-          \sum_{u\in V_i}\sum_{w\in V_j}\frac{\|uw\|_G}{\|uw\|} 
-         + \sum_{j\in I_i'} |V_i||V_j|(1+O(1/c+1/k))\right)\right) \notag\\
-      & = O(k/n) +\binom{n}{2}^{-1}
-       \sum_{i=1}^{n'}\left(\sum_{j\in I_i}
-          \sum_{u\in V_i}\left(
-             \sum_{w\in V_j\cap D_i'}
-               \frac{\|uw\|_G}{\|uw\|}
-             +\sum_{w\in V_j\cap D_i\setminus D_i'}
-               \frac{\|uw\|_G}{\|uw\|}
-           \right)
-          + \sum_{j\in I_i'} |V_i||V_j|(1+O(1/c+1/k)) \right) \notag\\
-      & = O(k/n) +\binom{n}{2}^{-1}
-       \sum_{i=1}^{n'}\left(\sum_{j\in I_i}
-          \sum_{u\in V_i}\left(
-             \sum_{w\in V_j\cap D_i'}
-               \frac{\|uw\|_G}{\|uw\|}
-             +\sum_{w\in V_j\cap D_i\setminus D_i'}
-               (1+O(1/c))
-           \right)
-          + \sum_{j\in I_i'} |V_i||V_j|(1+O(1/c+1/k)) \right) \notag\\
-     & \le 1+O(k/n+1/c+1/k)) +\binom{n}{2}^{-1}
-       \sum_{i=1}^{n'}\sum_{j\in I_i}
-          \sum_{u\in V_i}
-             \sum_{w\in V_j\cap D_i'}
-               \frac{\|uw\|_G}{\|uw\|} \notag\\
-     & \le 1+O(k/n+1/c+1/k) +\binom{n}{2}^{-1}
-       \sum_{i=1}^{n'}\sum_{j\in I_i} 2 |V_i||V_j\cap D_i'| \notag\\
-     & \le 1+O(k/n+1/c+1/k) +\binom{n}{2}^{-1}
-       2k\sum_{i=1}^{n'}\sum_{j\in I_i} |V_j\cap D_i'| \eqlabel{huff} 
-     \enspace .
-  \end{align}
-  Thus, all that remains is to show that
-  $\sum_{i=1}^{n'}\sum_{j\in I_i} |V_j\cap D_i'| \in o(n^2/k)$.
-  Suppose, for the sake of contradiction, that this is not the case
-  and that
-  \begin{equation}
-      \epsilon n^2/k \le  \sum_{i=1}^{n'}\sum_{j\in I_i} |V_j\cap D_i'| 
-         \le \sum_{i=1}^{n'} |V\cap D_i'| \enspace . \eqlabel{kicker}
+    \epsilon n^2/k \le \sum_{i=1}^{n'} |V\cap D_i'| 
+         \enspace . \eqlabel{kicker}
   \end{equation}
   The right hand side of \eqref{kicker} has $n'\le \alpha n/k$
   terms, for some constant $\alpha >0$ and each of these terms
@@ -275,18 +321,30 @@ even contain each other.
   But this yields a contradiction for $h> 1/\delta$, since $V$
   contains only $n$ points.  This condition is satisified for $\epsilon > 1/h \in O(kc^2\log c/n)$. We conclude that 
   \[
-    \sum_{i=1}^{n'}\sum_{j\in I_i} |V_j\cap D_i'| 
+    \sum_{i=1}^{n'}|V\cap D_i'| 
        \le \epsilon n^2/k  \in O(nc^2\log c)
   \]
-  and, picking up from where \eqref{huff} left off, 
+  so the total contribution of Type~4 pairs to the average stretch factor
+  is at most
   \[
-     \asf(G) = 1 + O(k/n + 1/k + 1/c + kc^2\log c/n)
+    2\cdot\binom{n}{2}^{-1}\cdot k\cdot O(nkc^2\log c) \in O(kc^2\log c/n) \enspace .
+  \]
+  Putting all four cases together, we obtain
+  \[
+     \asf(G) = 1 + O(k/n + 1/k + 1/c + kc^2\log c/n) \enspace .
   \]
   Taking $c=k=(n/\log n)^{1/4}$ and $\epsilon = \gamma (\log n/n)^{1/4}$,
   for a sufficiently large constant $\gamma >0$ gives $\asf(G)=1+O((\log
   n/n)^{1/4})$.
 \end{proof}
 
+[Here we should discuss what's needed to make this work in $\R^d$ and in
+metric spaces of bounded doubling dimension.]
+
+
+\section{Lower Bounds}
+
+[We should be able to get some lower bounds on the $o(1)$ term.]
 
 
 \section*{Acknowledgement}

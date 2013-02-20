@@ -10,9 +10,12 @@
 \newcommand{\LittleOmega}[1]{\omega\!\left(#1\right)}
 \newcommand{\BigTheta}[1]{\Theta\!\left(#1\right)}
 \newcommand{\SU}[1]{\textsf{SU}_i\!\left(#1\right)}
+\newcommand{\su}[1]{\textsf{SU}\!\left(#1\right)}
 \DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\E}{E}
 
 \newcommand{\ji}[1]{\textcolor{red}{(JI Says: #1)}}
+\newcommand{\pat}[1]{\textcolor{red}{(PM Says: #1)}}
 
 
 \title{Strengthening the Unified Property\thanks{This research was partially supported by NSERC and MRI.}}
@@ -109,7 +112,7 @@ Next, consider the following access sequence:
 \end{equation}
 where $n$ is a multiples of $K$, $mK$ is a multiple of $n$, and $n^{1/4}\le K\le\sqrt{n}$. For this sequence, the unified bound is useless; any element accessed less than $K/2$ time units in the past is at distance at least $K$ from the currently accessed element, so the cost of every access is $\Omega(\log K) = \Omega(\log n)$.
 
-On the other hand, sequence $A'$ is not very different from sequence $A$.  Indeed $A'$ can be viewed as the sequence $A$ over a larger set, $S$, in which a $(1-1/k)$ fraction of the elements are never accessed.  Intuitively, in a good data structure these irrelevant elements should ``fall out of the way'' in order to speed up accesses to the important elements (multiples of $K$).
+On the other hand, the sequence $A'$ is not very different from $A$.  Indeed $A'$ can be viewed as the sequence $A$ over a larger set, $S$, in which a $(1-1/K)$ fraction of the elements are never accessed.  Intuitively, in a good data structure these irrelevant elements should ``fall out of the way'' in order to speed up accesses to the important elements (multiples of $K$).
 
 %What seems to be needed is this access sequence still seems do demonstrate locality: each access is close \emph{amongst recently accessed elements} to a recently accessed element.
 
@@ -148,29 +151,28 @@ Finally, define
 	y_i(x, T) = \argmin_{y \in T} w_i(y) + d_T(x,y)
 \end{displaymath}
 
-We are now ready to attempt to define the strong unified property. In terms of the preceding notation, the unified property states that the time to access the element $x \in S$ at time $i$ is 
-\begin{displaymath}
+We are now ready to define the strong unified property. In terms of the preceding notation, the unified property states that the time to access the element $x \in S$ at time $i$ is 
+\begin{equation}
 	\BigOh{\log (w_i(y_i(x,S)) + d_S(x,y_i(x,S)))}
-\end{displaymath}
+        \label{eq:u}
+\end{equation}
 %
 A first attempt at defining a stronger unified property might be 
 \begin{equation}
 	\BigOh{\log (w_i(y_i(x,W_i(w_i(x)))) + d_{W_i(w_i(x))}(x,y_i(x,W_i(w_i(x)))))}. \label{eq:su-1}
 \end{equation}
-Equation~\ref{eq:su-1} should be contrasted with the definition of the unified property given above.  In \ref{eq:su-1}, the rank distance between $x$ and other elements is measured only with respect to the set $W_i(w_i(x))$, the set of elements that have been accessed since the last access to $x$.  In the unified bound, the rank distance is measured with respect to $S$, the entire set of elements stored in the data structure.
+Equation~\eqref{eq:su-1} should be contrasted with the definition of the unified property defined by \eqref{eq:u}.  In \eqref{eq:su-1}, the rank distance between $x$ and other elements is measured only with respect to the set $W_i(w_i(x))$, the set of elements that have been accessed since the last access to $x$.  In \eqref{eq:u}, the rank distance is measured with respect to $S$, the entire set of elements stored in the data structure.
 
-Since $W_i(w_i(x))\subseteq S$, \ref{eq:su-1} is certainly a stronger requirement.  Unfortunately, it is too strong, and there is no comparison-based data structure that can achieve this bound in the worst-case. To see this, consider the access sequence
+Since $W_i(w_i(x))\subseteq S$, \eqref{eq:su-1} is certainly a stronger requirement.  Unfortunately, it is too strong, and there is no comparison-based data structure that can achieve this bound in the worst-case. To see this, consider the access sequence
 \begin{displaymath}
 	\left\langle 1,2,3,\ldots,n,1,x \right\rangle
 \end{displaymath}
 where $x \in \{1,\ldots,n\}$.  Let $i={n+2}$ (so that $a_i =x$ represents the second access to $x$).  Then $W_i(w_i(x)) = \{1,x,x+1,x+2,\ldots,n\}$.  But then the rank difference, $d_{W_i(w_i)}(x,1)$, between $x$ and $1$ is at most 1 and $w_i(1)=1$, so, according to \eqref{eq:su-1}, the time to accessing $x$ is at most\[
    O(\log(w_i(1)+d_{W_i(w_i)}(x,1)) = O(1) \enspace .
 \]
-But this is true for any $x\in\{1,\ldots,n\}$, so for \emph{any} of the $n$ choices for $x$, we must execute the access in constant time; this is not information-theoretically possible.
-Whether the bound in \eqref{eq:su-1} is even possible in the amortized
-sense remains open.
+But this is true for any $x\in\{1,\ldots,n\}$, so for \emph{any} of the $n$ choices for $x$, \eqref{eq:su-1} requires that a data structure execute the access in constant time. This is not information-theoretically possible; accessing a randomly chosen $x\in\{1,\ldots,n\}$ requires at least $\log_2 n$ comparisons in expectation.  %Whether the bound in \eqref{eq:su-1} is even possible in the amortized sense remains open.
 
-We therefore define the strong unified property to require the following access time:
+From the preceding discussion, we conclude that the set in which we measure rank distance should be expanded.  This leads to the following definition:
 
 \begin{definition} A data structure has the strong unified property if its runtime for an access is bounded by
 \begin{displaymath}
@@ -195,6 +197,47 @@ As an example, consider the following access sequence, where $15$ is the element
 \end{displaymath}
 
 The original definition of the strong unified property uses $W_i(w_i(15))$, while the modified definition uses $W_i(w_i(15)^2)$. This modified definition allows for $9,10,11,12,13$ to contribute to the rank distance. This results in a query time that does not violate information-theoretic lower bounds, since it does not result in a situation where all $n$ queries must be executed in constant time. 
+Before presenting a data structure that (nearly) achieves the strong unified property, it is worth doing a sanity-check of this definition.  In particular, we confirm that, there exists (distributions over) sequences $A=a_1,\ldots,a_m$ such that
+\[
+   \su{a_1,\ldots,a_m} = \sum_{i=1}^m \SU{a_i}
+\]
+is a lower-bound for accessing $a_1,\ldots,a_m$.
+
+\begin{theorem}
+  For all positive integers $n$, $r\le n$, and $m\ge 2r\log n$, there exists a distribution, $\mathcal{A}$, over $\{1,\ldots,n\}^m$ such that, for any comparison-based dictionary data structure, $D$, that stores $\{1,\ldots,n\}$, and an access sequence $A=a_1,\ldots,a_m$ drawn from $\mathcal{A}$
+\begin{enumerate}
+ \item $\su{a_1,\ldots,a_m}=\BigOh{m\log r}$.
+ \item the expected number of comparisons performed by $D$ while accessing $A$ is $\Omega(m\log r)$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+  The sequence $A$ is defined as $a_i=i$ for $i\le r$ or $a_i$ is selected
+  uniformly at random from the set $\{1,\ldots,r\}$ for $r< i\le m$.  This
+  choice of $A$ immediately implies that 
+  \[
+     (m-r)\log_2 r\ge (m/2)\log_2 r = \Omega(m\log r)
+  \]
+  is a lower-bound on the expected number of comparisons performed by $D$
+  while accessing the (randomly chosen values) $a_{r+1},\ldots,a_m$.
+  This establishes Part~2 of the result.
+
+  On the the other hand, to establish Part~1, we have
+  \[
+      w_i(a_i) 
+        \le \begin{cases}
+          n & \text{for $i\le r$} \\
+          r & \text{for $r< i\le m$}
+        \end{cases}
+  \]
+  Thus,
+  \[
+     \su{a_1,\ldots,a_m} \le r\log n + (m-r)\log(2r) = O(m\log r)
+  \]
+  since $m\ge 2r\log n$.
+\end{proof}
+
+
 
 \section{Towards the Strong Unified Property}
 \label{section:main}
@@ -224,11 +267,54 @@ Consider a search for $x$ at time $i$, and consider the element $y_i(x)$. Suppos
 
 If $j \le j'$ (\ie, $x$ appears no later than $y_i(x)$), then the running time follows easily: $x$ has working-set number $w_i(x) \le w_i(y_i(x))$. The element $x$ can thus be found in time $\sum_{l=1}^j 2^l = \BigOh{2^j}$, which is $\BigOh{2^{j'}} = \BigOh{\log w_i(y_i(x))}$.
 
-The more interesting case occurs when $j > j'$ (\ie, $x$ appears after $y_i(x)$). The algorithm will reach $y_i(x)$ in time $\sum_{l=1}^{j'} 2^l = \BigOh{2^{'j}} = \BigOh{\log w_i(y_i(x))}$. All remaining searches will cover a rank distance of at most $d_{W_i(w_i(x))}(x,y_i(x))$ (recall that we start from either the predecessor of successor of the previous result), and therefore take $\BigOh{\log d_{W_i(w_i(x))}(x,y_i(x))}$ time (except for the last search which is over a rank distance of at most $d_{W_i(w_i(x)^2)}(x,y_i(x))$). Since $x \in T_j$ and $j \log \log w_i(x) + \BigOh{1}$, there are $\BigOh{\log \log w_i(x)}$ such searches to be performed.
+\pat{I don't see how the preceding case can happen except when $j'=j$.  We should mention this in order to not confuse the reader, no?}
+
+
+The more interesting case occurs when $j > j'$ (\ie, $x$ appears after $y_i(x)$).  In this case, the algorithm will reach the tree, $T_{j'}$, containing $y_i(x)$ in time 
+\[  
+    \sum_{\ell=1}^{j'} O(\log 2^{2^\ell})=\sum_{\ell=1}^{j'} 2^\ell = \BigOh{2^{j'}} = \BigOh{\log w_i(y_i(x))}
+    \enspace .
+\]
+The search in $T_{j'}$ finds both the predecessor and and successor, $y_1$ and $y_2$ of $x$ in $T_{j'}$.  That is,
+\[
+       y_1 \le x \le y_2
+\]
+and $y_i(x)$ is not in the open interval $(y_1,y_2)$.  In particular,
+for any set $T$ one of $y_1$ or $y_2$, say $y_1$, has
+\[
+    d_{T}(x,y_1) \le d_{T}(x,y_i(x))
+\]
+Indeed, from this point onwards, every search in $T_{\ell}$, for each $\ell\in\{j'+1,\ldots,j\}$, $y_\ell'$ such that
+\[
+    d_{T}(x,y_\ell') \le d_{T}(x,y_i(x)) \enspace .
+\]
+
+The elements in $T_{j'+1},\ldots,T_{j-1}$ are all in $W_i(w_i(x))$, so
+the remaining searches in $T_{j'+1},\ldots,T_{j-1}$ therefore take a total of at most
+\[
+  (j-j'-1)\BigOh{\log d_{W_i(w_i(x))}(x,y_i(x))}
+  =\BigOh{(\log d_{W_i(w_i(x))}(x,y_i(x)))(\log\log w_i(x))}
+\]
+time.
+
+\pat{This can be strengthened to 
+\[
+  (j-j'-1)\BigOh{\log d_{W_i(w_i(x))}(x,y_i(x)) - \log (j-j'-1)} \enspace ,
+\]
+but who cares.}
+
+
+At last, the final search, in $T_j$ is the expensive one, since the only
+guarantee we have on the elements of $T_j$ are that their working-set number
+is at most $w_i(x)^2$.  Thus, the elements in $T_j$ are a subset of the elements in $W_i(w_i(x)^2)$ and the time to search in $T_j$ is at most
+\[
+    d_{W_i(w_i(x)^2)}(x,y_i(x)) \enspace .
+\]
 
 In either case, the total search time thus far is at most 
+
 \begin{displaymath}
-	\BigOh{\log w_i(x) + (\log d_{W_i(w_i(x))}(x,y_i(x)))(\log \log w_i(x)) + \log d_{W_i(w_i(x)^2)}(x,y_i(x))}
+	\BigOh{\log w_i(y_i(x)) + (\log d_{W_i(w_i(x))}(x,y_i(x)))(\log \log w_i(x)) + \log d_{W_i(w_i(x)^2)}(x,y_i(x))}
 \end{displaymath}
 
 At this point, $x$ has been found and we must now adjust the data structure. First, $x$ must be inserted in $T_1,T_2,\ldots,T_{j-1}$. Because we have a finger for $x$ inside each of these structures, this takes total time $\BigOh{\log \log w_i(x)}$. Enqueuing $x$ in each of $Q_1,Q_2,\ldots,Q_{j-1}$ also takes $\BigOh{j} = \BigOh{\log \log w_i(x)}$. The subsequent deletions and dequeueings of the oldest elements in $Q_1,Q_2,\ldots,Q_{j-1}$ and $T_1,T_2,\ldots,T_{j-1}$ take a total of $\BigOh{j} = \BigOh{\log \log w_i(x)}$ time as well, since the dequeueing operation takes $\BigOh{1}$ time and provides a pointer to the node in the corresponding tree where the deletion must be performed. Therefore, all restructing operations take time $\BigOh{\log \log w_i(x)}$.

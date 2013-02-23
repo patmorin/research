@@ -1,0 +1,80 @@
+== Exponential Search ==
+Bentley and Yao's exponential search paper
+[http://goo.gl/VxcQY,http://goo.gl/BWhG7] shows that finger search in
+static sets can be done in
+
+log f + loglog f + logloglog f + ... + O(log^{(i)} f)
+
+comparisons for i = log^* f.
+
+An easy implementation of their idea can do log f + 2loglog f + O(1) comparisons.
+
+== Results from Biased Binary Search Trees ==
+
+More generally, given any assignment of weights w_1,...,w_n to the
+elements of a sorted set x_1,...,x_n, we can build a biased binary search
+tree so that the number of comparisons needed to access x_i is log W/w_i
++ O(1)  [http://goo.gl/qvenx].
+
+Notice that both the working set property and the finger search property
+assign priorities p_1,...,p_n to x_1,...,x_n.
+
+For working set, these priorities are a permutation of 1...n For finger
+search these priorities are f, f-1, f-2,...1,0,1,2,...,n-f-1.
+
+In either case, we assign weights w_i = 1/(p_i(\log p_i)^2) and build
+a biased search tree using Mehlhorn's structure.  The search time for
+somebody whose priority is k will be
+
+log k + 2loglog k + O(1)
+
+This means that, if we only count comparisons, then there exists data
+structures that have the finger property and the working-set property
+where each search uses only
+
+log f + 2loglog f + O(1) 
+
+and 
+
+log w(x) + 2loglog w(x)  + O(1)
+
+comparisons, respectively.
+
+The caveat is that this only counts comparisons and not the time required
+to build the biased binary search tree.  For finger search we can build
+an approximate version of this tree implicitly and on the fly. (This
+is one way to view Bentley and Yao's result.)  For working sets, this
+isn't so easy.
+
+Open Problem: Make a working set structure for a static data set that has
+O(log w(x)) search time and that does log w(x) + o(log w(x)) comparisons.
+
+Currently, the best worst-case search time is Iacono's structure, that
+does about 6log w(x) comparisons (4log w(x) for the search and 2log w(x)
+for the insertions).  Splay trees do about 3log w(x) in the amortized
+sense, see below.
+
+== Dynamic Sets ==
+
+We can ask the same questions for dynamic sets.  Here, one can probably
+use leaf-oriented level-linked scapegoat trees to achieve O(log n)
+time updates and
+
+(1+eps)log f + 2loglog f + O(1)
+
+time finger search, for any eps > 0: Store the path to the finger in an
+array and use binary search in the array to find the search's staring
+point.  Check this.  Also, can Rolf Fagerberg's thesis results be used
+to get rid of the (1+eps) factor?
+
+Open Problem: Give a dynamic data structure for working sets that has
+O(log n) update time and does log w(x) + o(log w(x)) comparisons during
+a search.
+
+The splay tree Working-Set theorem [Theorem~4 in the splay tree paper]
+can be improved slightly to give an (amortized) bound of
+
+3(log w(x) + 2loglog w(x) + O(1))
+
+This is the best leading constant I know of.
+

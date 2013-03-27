@@ -33,7 +33,7 @@
 % Read the article class
 \LoadClass[11pt,letterpaper]{article}
 
-%\RequirePackage{kpfonts}
+\RequirePackage{kpfonts}
 \RequirePackage[sf,bf,small,raggedright,compact]{titlesec}
 
 % Page setup
@@ -106,7 +106,7 @@
 
 % Abstract
 \renewenvironment{abstract}
-{\hrule\vskip 1ex \noindent\textsc{Abstract.}}{\vskip 1.8ex \hrule}
+{\hrule \noindent\textsc{Abstract.}}{\vskip 1ex \hrule}
 
 
 %------------- Use this so pdflatex outputs US letter pages -------------

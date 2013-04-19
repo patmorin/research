@@ -33,8 +33,8 @@
 % Read the article class
 \LoadClass[11pt,letterpaper]{article}
 
-%\RequirePackage{kpfonts}
-%\RequirePackage[sf,bf,small,raggedright,compact]{titlesec}
+\RequirePackage{kpfonts}
+\RequirePackage[sf,bf,small,raggedright,compact]{titlesec}
 
 % Page setup
 \setlength{\textheight}{8.5in}

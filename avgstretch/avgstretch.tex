@@ -10,7 +10,7 @@
 \newcommand{\mand}{\mathrm{,\,\,and\,}}
 \newcommand{\oand}{\mathrm{,\,\,}}
 
-\title{\MakeUppercase{Good-Average-Stretch Geometric Spanners}}
+\title{\MakeUppercase{Average Stretch Factor: How Low Does It Go?}}
 \author{Vida Dujmovi\'c, Pat Morin, and Michiel Smid}
 
 
@@ -20,12 +20,17 @@
 %\cofeAm{0.7}{0.38}{0}{5.5cm}{3.5in}
 
 \begin{abstract}
-  We show that, for any set $V$ of $n$ points in $\R^d$, there exists
-  a geometric graph with vertex set $V$, $O(n)$ edges, and that has
-  average stretch factor $1+ O((\log n/n)^{1/2d})$.
-  We also show that, even in $\R^2$, there exists point sets for which
-  any graph with a linear number of edges has average stretch factor
-  at least $1+\Omega(1/\sqrt{n})$.
+  In a geometric graph, $G$, the \emph{stretch factor} between two
+  vertices, $u$ and $w$, is the ratio of the shortest path from $u$ to $w$
+  in $G$ to the Euclidean distance between $u$ and $w$.  The \emph{average
+  stretch factor} of $G$ is the average stretch factor taken over all
+  pairs of vertices in $G$.  We show that, for any set $V$ of $n$ points
+  in $\R^d$, there exists a geometric graph with vertex set $V$, that
+  has $O(n)$ edges, and that has average stretch factor $1+ o_n(1)$.
+  More precisely, the stretch factor is $1+O(n^{-\alpha})$ where
+  $\alpha=\alpha(d)$ depends only on $d$.  We also show that, even in
+  $\R^2$, there exists point sets for which any graph with a linear number
+  of edges has average stretch factor at least $1+\Omega(1/\sqrt{n})$.
 \end{abstract}
 
 \end{titlepage}
@@ -48,10 +53,10 @@ having $|E|=O(n)$ edges and such that $\asf(G)=1+o_n(1)$.
 \section{The Construction}
 
 The construction of a good average stretch factor graph, $G=(V,E)$,
-makes use of a clustering of the points of $V$ into $O(n/k)$ clusters of
-size at most $k$ that we call a $k$-partition.  In the next subsection,
-we define $k$-partitions and show how to compute them.  In the following
-subsection we show how to construct the graph $G$.
+makes use of a clustering of the points of $V$ into $O(n/k)$ clusters,
+each of size at most $k$, that we call a $k$-partition.  In the next
+subsection, we define $k$-partitions and show how to compute them.
+In the following subsection we show how to construct the graph $G$.
 
 \subsection{$k$-Partitions}
 
@@ -64,17 +69,22 @@ assignment $f:V\to D$ such that
     ball that contains $u$);
   \item for each $\Delta\in D$, $|\{u\in V: f(u)=\Delta\}|\le k$ (i.e.,
    at most $k$ points are assigned to each ball);
-  \item for every $r> 0$, $c\ge 2$, and $p\in\R^2$, the number of balls
+  \item for every $r> 0$ and $p\in\R^d$, the number of balls
    in $D$ whose radius is in the range $[r,2r)$ and that contain $p$
    is $O(1)$; and
-  \item for every $r\ge 0$, $c>1$ and every ball, $B$, of radius $r$, the set
-    \[  \{ u\in V : u\in B\oand \Delta\in D\oand \radius(\Delta)\ge\radius(B)/c\oand f(u)=\Delta\mand \Delta\cap B\neq\emptyset\} \]
-   has cardinality $O(k\log c)$.
+  \item for every $r\ge 0$ and every ball, $B$, of radius $r$, 
+   \[
+      |\{ u\in V : u\in B \oand \Delta\in D
+        \oand \radius(\Delta)\ge r \mand f(u)=\Delta\}| \in O(k)
+   \] 
+   (i.e., there are only $O(k)$ points
+   of $V$ that are in $B$ and that are assigned to balls of radius at
+   least $r$).
 \end{enumerate}
 
-Note that, aside from Properties~4 and 5, there is very little structure to
-the balls in $D$. In particular, balls in $D$ may overlap and may even
-contain each other.
+Note that, aside from Properties~4 and 5, there is very little structure
+to the balls in $D$. In particular, balls in $D$ may overlap and may
+even contain each other.
 
 \begin{lem}
   For any set $V$ of $n$ points, a $k$-partition of $V$ exists and can
@@ -136,17 +146,21 @@ contain each other.
   \cite{callahan.kosaraju:decomposition}.  The partition of the vertices
   of $T$ into components $C_1,\ldots,C_t$ can easily be done in $O(n\log
   n)$ time by repeatedly finding an edge of a component of size $k'>k$
-  that partitions that component into two pieces each of size at most
-  $\lceil 2k'/3\rceil$.  Thus, the construction of $D$ and $f$ can be
-  accomplished in $O(n\log n)$ time.
+  whose removal partitions that component into two pieces each of size
+  at most $\lceil 2k'/3\rceil$.  Thus, the construction of $D$ and $f$
+  can be accomplished in $O(n\log n)$ time.
 
   The set of balls $D=\{\Delta_1,\ldots,\Delta_t\}$ and the mapping
   $f:V\to D$ described in the preceding paragraphs clearly satisfy
   Properties~1--3 in the definition of a $k$-partition.  What remains
-  is to show that they also satisfy Properties~4 and 5. For a node
-  $u$ in $T$, let $L(u)$ denote the length of the longest side of
-  $B(u)$.  We make use of the following result on fair split trees
-  \cite[Lemma~9.4.3]{narasimhan.smid:geometric}:
+  is to show that they also satisfy Properties~4 and 5. 
+
+  For a node $u$ in $T$, with $B(u)=[a_1,b_1]\times\cdots\times[a_d,b_d]$,
+  define $L_i(u)=b_i-a_i$ and let $L(u)=\max\{L_i(i):i\in\{1,\ldots,d\}\}$
+  denote the length of $B(u)$'s longest side.  We call $\sum_{i=1}^d
+  L_i(u)$ the \emph{total side length} of $B(u)$.  To establish
+  Properties~4 and 5, we make use of the following result on fair split
+  trees \cite[Lemma~9.4.3]{narasimhan.smid:geometric}:
 
   \begin{lem}\lemlabel{box-packing}
      Let $C$ be a box whose longest side has length $\ell$ and let
@@ -227,18 +241,87 @@ contain each other.
   in the definition of a $k$-partition.
 
   \paragraph{Property 5.}
-  TODO: Prove this.
+  To study Property~5, it is easier to work with the bounding boxes,
+  $B(u)$, associated with each node, $u$, in the fair split tree as
+  well as the box, $C$, of side length $2r$ that contains the ball $B$.
+  See \figref{property-5}.  Observe that, if some ball $\Delta_i$
+  is assigned a point in $B$, then the box $B(u_i)$ intersects $C$.
+  Thus, we need only consider the set $U\subseteq\{u_1,\ldots,u_t\}$
+  that contains only those nodes $u_i$ such that $\radius(\Delta_i)\ge r$
+  and $B(u_i)$ intersects $C$.
+
+  \begin{figure}
+    \begin{center}
+      \includegraphics{property-5}
+    \end{center}
+    \caption{Proving Property~5 of $k$-partitions.}
+    \figlabel{property-5}
+  \end{figure}
+
+  For each $u\in U$, \eqref{bounds} implies that $L(u)\ge r/\sqrt{d}$.
+  Therefore, by \lemref{box-packing}, $U$ contains a subset, $U'$,
+  of size at most $(4\sqrt{d}+2)^d\in O(1)$ such that every node in
+  $U$ is an ancestor of some node in $U'$.  Thus, the elements of $U$
+  can be partitioned into $O(1)$ sets $U_1,\ldots,U_p$ such that, for
+  every $i\in\{1,\ldots,p\}$ and every $u,w\in U_i$, $u$ is an ancestor
+  of $w$ or $w$ is an ancestor of $u$.  Therefore, it is sufficient to
+  consider a single one of the sets $U_i$, which is a sequence of vertices
+  $w_1,\ldots,w_\ell$ where $w_j$ is an ancestor of $w_i$ for all $j>i$.
+
+  For each $i\in\{1,\ldots,\ell\}$, let $C_{i}$, denote the box $C\cap
+  B(w_{i})$.  Since $B(w_1)\subset\cdots\subset B(w_\ell)$, we have that
+  $C_1\subseteq\cdots\subseteq C_\ell$. Observe that, for each $w_i$, the
+  ball associated with $w_i$ is not assigned any points in $B(w_{i-1})$.
+  Thus, it is sufficient to show that there are $O(1)$ values of $i$
+  for which $V\cap C_i\neq V\cap C_{i-1}$; for each such $i$, the number
+  of elements assigned to the corresponding ball of the $k$-partition
+  is at most $k$.
+
+  We will show that, for each $i\in\{2,\ldots,\ell\}$, at least one of
+  the following statements is true
+  \begin{enumerate}
+    \item $V\cap C_i = V\cap C_{i-1}$; 
+    \item the total side length of $C_i$ exceeds that of $C_{i-1}$ by at least
+      $L(w_1)/2$; or
+    \item $C_i$ intersects a side of $C$ that is not intersected by $C_{i-1}$.
+  \end{enumerate}
+  This is sufficient to prove the result since Case~1 does not result in
+  any new points included in $B$, Case~2 can occur at most $4rd/L(w_1)\in
+  O(1)$ times, and Case~3 can occur at most $2d\in O(1)$ times.
+
+  To see why one of the preceding cases must occur, suppose that neither
+  Case~1 nor Case~3 applies.  Since Case~1 does not apply, there is
+  some point $q\in V\cap C_i$ that is not in $C_{i-1}$.  Let $w'$ be the
+  first node on the path from $w_{i-1}$ to $w_i$ such that $q\in B(w')$.
+  Without loss of generality, assume that the fair split tree cuts
+  $B(w')$ with a plane, $\Pi$, that is perpendicular to the $x_0$-axis.
+  Let $\Pi^+$ and $\Pi^-$ denote the closed halfspaces bounded by $\Pi$
+  that contain $q$ and $B(w_{i-1})$, respectively.  Then we have that
+  \[
+      L_0(B(w')\cap \Pi^+) = L_0(w')/2 \ge L(w_{i-1})/2 \ge L(w_{1})/2  \enspace .
+  \]
+  Observe that $B(w_{i-1})$ does not intersect the side of $C$ that is
+  parallel to $\Pi$ and contained in $\Pi^+$ and neither does $B(w')$
+  (since, otherwise, Case~3 would apply).  This implies that
+  \[
+      L_0(C_i) \ge L_0(C_{i-1}) + L(w_1)/2 \enspace .
+  \] 
+  Thus, if neither Case~1 nor Case~3 applies to $u_i$, then Case~2
+  applies.  This completes the proof.
 \end{proof}
 
 \subsection{The Graph $G$}
 
-With the availability of $k$-partitions, we are now ready to prove
-construct a graph $G$ with low average stretch.  In the following
-construction, positive valued variables $c,k\in\omega_n(1)$ and
-$\epsilon\in o_n(1)$ are used without being specified.  Values of these
-variables that optimize the average spanning ratio of $G$ will be given
-in the proof that $\asf(G)\in 1+o_n(1)$.
+With the availability of $k$-partitions, we are now ready to construct
+a graph $G$ with low average stretch.  In the following construction,
+positive valued variables $c,k\in\omega_n(1)$ and $\epsilon\in o_n(1)$
+are used without being specified.  Values of these variables that
+optimize the average spanning ratio of $G$ will be given in the proof
+of \thmref{upper-bound}.  In the meantime, the reader can mentally assign the
+values $c=k=\log n$ and $\epsilon = 1/\log n$, which are sufficient to
+prove that $\asf(G)=1+o_n(1)$.
 
+\paragraph{A Net of Stars.}
 We begin with a $k$-partition $(\{\Delta_1,\ldots,\Delta_{n'}\},f)$
 of $V$, and we use the convention that $\Delta_1,\ldots,\Delta_{n'}$
 are ordered by decreasing size.  For each $i\in \{1,\ldots,n'\}$,
@@ -258,6 +341,7 @@ O(n/k)$.
   \figlabel{overview}
 \end{figure}
 
+\paragraph{The Two Spanners.}
 Next, we add two spanner constructions to $G$.  The first is a
 $(1+1/k^{1/(d-1)})$-spanner of $N$ and the second is a $2$-spanner
 of $V$.  The first construction adds $O(k|N|)=O(n)$ edges to $G$
@@ -278,19 +362,21 @@ is no guarantee that such points have a $1+o(1)$ spanning path to the
 points in $V_i$.  The final step in the spanner construction attempts
 to deal with most of these problematic points.
 
+\paragraph{Covering with Pennies.}
 For each $i\in\{1,\ldots,n'\}$, we find a ball, $E_i$, of radius $r_i/c$,
 that intersects $D_i$, and that contains the maximum number of points
 of $V$.  (Note that this may include points of $V$ in $V_i$ or outside
 of $D_i$.)  We then add edges joining each of the points in $V_i$ to
-some point, $w_i$, in $E_i$.  See \figref{hitter}.
+a carefully chosen point $w_i\in E_i$.  See \figref{hitter}.
 
-The point $w_i\in E_i$ is carefully chosen as follows: For each point
-$w\in V$, let $i(w)\in \{1,\ldots,n'\}$ denote the smallest index such
-that $w\in E_{i(w)}$ and $|E_{i(w)}\cap V| \ge \epsilon n$; if no such
-index exists, let $i(w)=\infty$.  The point $w_i\in E_i$ is selected
-to be any of the points in $E_i$ that minimizes $i(w)$.  This concludes
-the description of the graph, $G$.  The following theorem shows that $G$
+The point $w_i$ is chosen as follows: For each point $w\in V$, let
+$i(w)\in \{1,\ldots,n'\}$ denote the smallest index such that $w\in
+E_{i(w)}$ and $|E_{i(w)}\cap V| \ge \epsilon n$; if no such index
+exists, let $i(w)=\infty$.  The point $w_i\in E_i$ is selected to be
+any of the points in $E_i$ that minimizes $i(w)$.  This concludes the
+description of the graph, $G$.  The following theorem shows that $G$
 is a good-average-stretch spanner.
+
 
 \begin{figure}
   \begin{center}
@@ -301,10 +387,91 @@ is a good-average-stretch spanner.
   \figlabel{hitter}
 \end{figure}
 
+\paragraph{Two Illustrative Examples.}
+
+Before delving into the proof that $G$ has low average stretch factor,
+it may be helpful to study two examples that illustrate why the disks
+$E_1,\ldots,E_n$ are important and why the choice of the representative
+vertices, $w_i\in E_i$, is  important.
+
+The first example is a set of points arranged as a sequence of
+$\sqrt{k}\times\sqrt{k}$ grids, $G_0,\ldots,G_{n/k-1}$.  The grid $G_i$
+has its center on the x-axis at x-coordinate $2^{i+1}-1$, and has side
+length $2^i$ (see \figref{grid}). The natural $k$-partition of this
+grid is the one that assigns all points in each $G_i$ to a single ball,
+$\Delta_i$.  In this grid, if we consider $G_i$, for some large value
+of $i$, we see that all the points in $G_0,\ldots,G_{i-1}$ are within
+distance $O(2^{i})$ of all the points in $G_i$.
+Forcing every path from any $u\in G_i$ to any $w\in G_{j}$, $j<i$,
+to go through a central vertex $u_i$ in $G_i$ would be too costly; on
+average the detour through $u_i$ would increase the length of this path
+by $\Omega(2^{i})$.
+
+\begin{figure}
+  \begin{center}
+    \includegraphics{grids}
+  \end{center}
+  \caption{A sequence of exponentially increasing grids illustrates the
+   need for connecting all points in $V_i$ to some point in $E_i$.}
+  \figlabel{grid}
+\end{figure}
+
+The disk $E_i$ solves the preceding problem; $E_i$ is large enough to
+cover all points in $G_0,\ldots,G_{i-\Theta(\log c)}$.  All of the points
+in $E_i$ are at distance $\Omega(2^i)$ from all the points in $G_i$,
+so the path from $u\in G_i$ directly to $w_i\in E_i$ and onto any $w\in
+E_i$ has length at most
+\[
+    \|uw\|(1+O(1/c)) \enspace ,
+\]
+so $\|uw\|_G/\|uw\| = 1+O(1/c)$.  Part~3 of the proof of
+\thmref{upper-bound} is dedicated to showing that, in general, the disks
+$E_1,\ldots,E_{n'}$ cover many pairs of points that might otherwise
+be problematic.
+
+Our second example is intended to illustrate the importance of carefully
+choosing the representative vertex $w_i\in E_i$.   In this example,
+there is a dense cluster of $n/2$ points that is small enough that it
+is just barely contained in some disk $E_j$ (see \figref{example2}).
+Consider now some $i>j$ such that $r_i$ is much greater than $r_j$.
+It is easy to make a configuration of points so that, for some cluster
+$V_i$, the corresponding disk $E_i$ contains $E_j$ as well as one (or a
+small number of) other points that are far from $E_j$. If one of these
+points as the representative vertex $w_i$ then all $kn/2$ paths from
+$u$ in $V_i$ to $w\in E_j$ will have to make a detour through $w_i$.
+By repeating this for many different values of $i$, this is enough to
+produce an average stretch factor significantly larger than 1.
+
+\begin{figure}
+  \begin{center}
+    \includegraphics{example2}
+  \end{center}
+  \caption{An illustration of why it is important to choose $w_i$ carefully.
+    A bad choice (like the one illustrated) leads to a significant detour
+    on the paths from every $u\in V_i$ to every $w\in E_j$.}
+  \figlabel{example2}
+\end{figure}
+
+
+
+
+The choice of $w_i$ is designed to avoid the preceding problem.  In this
+example, $w_i$ would be chosen from the points in the $E_j$ such $r_j <
+r_i$ and $E_i$ contains $n/2\ge \epsilon n$ points of $V$.  Part~4 of
+the proof of \thmref{upper-bound} is dedicated to showing this careful
+choice of $w_i$ works.  In particular, it ensures that, for most pairs
+$u\in V_i$, $w\in E_i$,
+\[
+    \|uw_i\| + O(\|w_iw\|) = \|uw\|(1+O(1/c)) \enspace .
+\]
+
+Without further ado, we now prove that $G$ has low average stretch factor.
+
 \begin{thm}\thmlabel{upper-bound}
   For every constant dimension, $d$, and every set, $V$, of
   $n<\infty$ points in $\R^d$, the graph $G=(V,E)$ described above
-  has $O(n)$ edges and $\asf(G)=1+o_n(1)$.
+  has $O(n)$ edges and $\asf(G)=1+o_n(1)$.  More precisely,
+  $\asf(G)=1+O((\log n)/n^{1/(4d-1)})$.
   % there exists a geometric graph $G$ with
   % $V(G)=V$, $|E(G)|\in O(n)$ and $\asf(G)=1+o_n(1)$. 
   % More precisely, $\asf(G)=1+O((\log n/n)^{1/2d})$.
@@ -318,13 +485,13 @@ is a good-average-stretch spanner.
   \begin{enumerate}
     \item pairs that are both from the same set; i.e., where $i=j$;
     \item pairs for which $w$ is outside of $D_i$;
-    \item pairs for which $w$ is contained in $E_i\cap D$; and
+    \item pairs for which $w$ is contained in $E_i\cap D_i$; and
     \item pairs for which $w$ is contained in $D_i\setminus E_i$.
   \end{enumerate}
-  In the next few section we consider each of these pairs in turn.
-  Our strategy is to study the $\binom{n}{2}$ terms that define $\asf(G)$
-  in \eqref{asf}.  We will show that $o(n^2)$ of these terms are at most
-  2 while the remaining terms are at most $1+o_n(1)$.  Thus,
+  In the next few section we consider each of these types of pairs in
+  turn.  Our strategy is to study the $\binom{n}{2}$ terms that define
+  $\asf(G)$ in \eqref{asf}.  We will show that $o(n^2)$ of these terms
+  are at most 2 while the remaining terms are at most $1+o_n(1)$.  Thus,
   \[
      \asf(G)\le \binom{n}{2}^{-1}\left(2\cdot o(n^2)
                                        +\binom{n}{2}(1+o_n(1))\right)
@@ -334,9 +501,10 @@ is a good-average-stretch spanner.
   \paragraph{Type~1 Pairs.}
   For each Type~1 pair $u,w\in V_i$, $\|uw\|_G/\|uw\|\le 2$ and each set
   $V_i$ contributes at most $\binom{k}{2}$ Type~1 terms to \eqref{asf},
-  so the total contribution of Type~1 pairs to the sum in \eqref{asf} is at most
+  so the total number of Type~1 pairs that contribute a term to the sum
+  in \eqref{asf} is at most
   \[
-    \binom{k}{2}\cdot 2 \cdot O(n/k) \in O(nk)
+    \binom{k}{2}\cdot O(n/k) \in O(nk)
       \enspace .
   \]
 
@@ -349,29 +517,29 @@ is a good-average-stretch spanner.
       \le (1+1/k^{1/(d-1)})(\|uw\| + 8r_i) \enspace .
   \]
   Furthermore, $\|uw\|\ge (c-1)r_i$ since $w$ is outside of $D_i$.
-  Therefore,
+  Therefore, for each Type~2 pair, the term that appears in \eqref{asf}
+  is of the form
   \[
     \frac{\|uw\|_G}{\|uw\|}\le (1+1/k^{1/(d-1)})(1+O(1/c)) 
-       \in 1+O(1/k^{1/(d-1)}+1/c) \enspace .
+       = 1+O(1/k^{1/(d-1)}+1/c) \enspace .
   \]
 
   \paragraph{Type~3 Pairs.}
-  The number of Type~3 pairs is no more than $k\sum_{i=1}^{n'}|V\cap
-  D_i\setminus E_i|$, so the total contribution of Type~3 pairs to 
-  the sum in \eqref{asf} is at most
-  \[
-      2\cdot\left(k\sum_{i=1}^{n'} |V\cap D_i\setminus E_i|\right) \enspace .
+  The number of Type~3 pairs is no more than 
+  \[  
+     k\cdot\sum_{i=1}^{n'}|V\cap D_i\setminus E_i| \enspace .
   \]
-  We intend to prove, by contradiction, that the preceding quantity
-  is $o(n^2)$.  Suppose, for the sake of contradiction, that this is
-  not the case and that
+  We will prove, by contradiction, that this quantity is $o(n^2)$.
+  Suppose, for the sake of contradiction, that this is not the case
+  and that
   \begin{equation}
-    \delta n^2/k \le \sum_{i=1}^{n'} |V\cap D_i\setminus E_i| 
-         \enspace . \eqlabel{kicker}
+    \sum_{i=1}^{n'} |V\cap D_i\setminus E_i| \ge \frac{\delta n^2}{k}
+         \enspace , \eqlabel{kicker}
   \end{equation}
-  Each term on the right hand side of \eqref{kicker} is at most $n$
+  where $\delta>0$ will be determined later.
+  Each term on the left hand side of \eqref{kicker} is at most $n$
   and there are at most $\alpha n/k$ terms, for some constant $\alpha
-  >0$.  We say that a term on the right hand side of \eqref{kicker} is
+  >0$.  We say that a term on the left hand side of \eqref{kicker} is
   \emph{small} if it is less than $\delta n/2\alpha$ and \emph{large}
   otherwise.  The sum of the small terms is at most $\delta n^2/2k$
   and therefore the sum of the large terms is at least $\delta n^2/2k$.
@@ -380,36 +548,36 @@ is a good-average-stretch spanner.
     \sum_{i\in I} |V\cap D_i\setminus E_i| \ge \frac{\delta n^2}{2k} \enspace .
   \]
   By the pigeonhole principle, there must exist some point $w^*\in V$
-  such that there are at least $\delta n/2k$ indices $i\in I$ such
-  that $w^*\in V\cap D_i\setminus E_i$.  To summarize: There exists a
-  point $w^*\in V$ and indices $i_1,\ldots,i_\ell$ such that:
+  such that there are at least $\delta n/2k$ indices $i\in I$ such that
+  $w^*\in V\cap D_i\setminus E_i$.  To summarize the discussion so far:
+  There exists a point $w^*\in V$ and index set $I$
+  such that:
   \begin{enumerate}
-     \item $w^*\in V\cap D_{i_j}\setminus E_{i_j}$, for all
-        $j\in\{1,\ldots,\ell\}$;
-     \item $|V\cap D_{i_j}\setminus E_{i_j}|\in \Omega(\delta n)$,
-       for all $j\in\{1,\ldots,\ell\}$; and
-     \item $\ell\in\Omega(\delta n/k)$.
+     \item $w^*\in V\cap D_{i}\setminus E_{i}$, for all
+        $i\in I$
+     \item $|V\cap D_{i}\setminus E_{i}|\in \Omega(\delta n)$,
+       for all $i\in I$; and
+     \item $|I|\in\Omega(\delta n/k)$.
   \end{enumerate}
 
   Suppose, without loss of generality, that the smallest ball
-  in $D_{i_1},\ldots,D_{i_\ell}$ has unit radius.  Partition
-  $i_1\ldots,i_\ell$ into groups $G_0,G_1,\ldots$ such that $G_t$
-  contains all indices $i_j$ such that $D_{i_j}$ has radius in the
-  interval $[2^t,2^{t+1})$.  We claim that each such group, $G_t$, has
-  size $O(c^d)$.  To see why this is so, observe that, for each group
-  $G_t$, there exists a point $w^*\in V$ that is contained in $|G_t|$
-  balls $D_{i}$ where $i\in G_t$.  $D_{i}$ has radius at most $c2^{t+1}$.
-  This means that the set of balls
+  $\Delta_i$ with $i\in I$ has unit radius.  Partition $I$ into groups
+  $G_0,G_1,\ldots$ such that $G_t$ contains all indices $i\in I$ such
+  that $\Delta_{i}$ has radius in the interval $[2^t,2^{t+1})$.  We claim
+  that each such group, $G_t$, has size $O(c^d)$.  To see why this is
+  so, observe that, for each group $G_t$, there exists a point---namely
+  $w^*$---that is contained in $|G_t|$ balls $D_{i}$ where $i\in G_t$.
+  $D_{i}$ has radius at most $c2^{t+1}$.  This means that the set of balls
   \[
      \{ \Delta_i : i\in G_t\}
   \]
   is contained in a ball, centered at $w^*$, of radius at most
-  $(c+1)2^{t+1}$.  Since each ball in this set has radius in
+  $(c+2)2^{t+1}$.  Since each ball in this set has radius in
   $[2^t,2^{t+1})$, a simple packing argument that uses Property~4 of
   $k$-partitions implies that the size of $G_t$ is $O(c^d)$.
 
   Thus far, we have shown that each group, $G_t$, has size $O(c^d)$
-  and the total size of all groups is $\ell\in\Omega(\delta n/k)$.
+  and the total size of all groups is $|I|\in\Omega(\delta n/k)$.
   Therefore, there must be at least $\Omega(\delta n/(kc^d))$ groups.
   In particular, we can find $h\in\Omega(\delta n/(kc^d\log c))$ groups,
   $G_{t_1},\ldots,G_{t_h}$, such that $t_{i+1} \ge t_{i}+2\log c+2$ for
@@ -425,7 +593,7 @@ is a good-average-stretch spanner.
   that $E_{i_2}$ contains at least $ a \delta n$ elements of $V$
   as well since there exists a ball, $E_{i_2}'$, centered at $w^*$,
   of radius $r_{i_2}/c > 4cr_{i_1}$, that contains $D_{i_1}$ and
-  therefore contains all the (at least $ a  n$) points in $D_{i_1}$
+  therefore contains all the (at least $ a\delta n$) points in $D_{i_1}$
   (see \figref{containment}).  The ball $E_{i_2}$ was chosen to contain
   as many elements of $V$ as possible, so it contains at least as many
   elements as $E_{i_2}'$.  Therefore, $D_{i_2}\cup E_{i_2}$ contains at
@@ -445,28 +613,28 @@ is a good-average-stretch spanner.
   contains at least $3 a \delta n$ points of $V$.  In general,
   this argument shows that $D_{i_h}\cup E_{i_h}$ contains at least
   $h a \delta n$ points of $V$.  But this yields a contradiction for
-  $h> 1/ a \delta$, since $V$ contains only $n$ points.  This means
-  that our choice of $\delta$, $c$, and $k$ must satisfy
+  $h> 1/ a \delta$, since $V$ contains only $n$ points.  To obtain
+  this contradiction, our choice of $\delta$, $c$, and $k$ must satisfy
   \[
        h\in\Omega\left(\frac{\delta n}{kc^d\log c}\right) \ge
           \frac{1}{ a  \delta}
   \]
   which is satisfied by any choice of $\delta$, $c$, and $k$ such that
   \[
-       \frac{\delta^2 n}{kc^d\log c} \ge \frac{1}{a}
+       \frac{\delta^2 n}{kc^d\log c} \ge \frac{C}{a}
   \]
   for some sufficiently large constant $C$.  In particular, the value
   \[
-       \delta \ge \frac{1}{a}\sqrt{\frac{kc^d\log c}{n}}
+       \delta \ge \frac{C}{a}\sqrt{\frac{kc^d\log c}{n}}
   \]
-  works.
-  So the total contribution of Type~3 pairs to the sum in \eqref{asf}
-  is at most
+  works.  So the total number of terms of the sum in \eqref{asf}
+  contributed by Type~3 pairs is at most
   \[
-    2k\delta n^2 \in O(k^{3/2}n^{3/2}c^{d/2}\log c) \enspace .
+    k\delta n^2 \in O(k^{3/2}n^{3/2}c^{d/2}\log c) \enspace .
   \]
 
   \paragraph{Type~4 Pairs.}  
+  Let $\alpha > 0$ be a constant whose value will be discussed later.
   We say that a Type~4 pair of points $u\in V_i$, $w\in E_i$ is
   \emph{bad} if
   \[
@@ -478,9 +646,8 @@ is a good-average-stretch spanner.
     \frac{\|uw\|_G}{\|uw\|} = 1+O(1/c) \enspace ,
   \]
   so we can focus our effort on upper-bounding the number of bad pairs.
-  The remainder of this proof is a proof by contradiction that will
-  assume, for the sake of contradiction, that the number of bad Type~4
-  pairs is at least $\epsilon n^2$.
+  The remainder of this will assume, for the sake of contradiction,
+  that the number of bad Type~4 pairs is at least $\epsilon n^2$.
 
   Let $b_i$ denote the number of number of bad pairs $(u,w)$ with
   $u\in V_i$ and $w\in E_i$.  Then, by assumption,
@@ -492,8 +659,6 @@ is a good-average-stretch spanner.
   \begin{enumerate}
     \item $w^*\in E_{i_j}$, for all $j\in\{1,\ldots,\ell\}$;
     \item $b_{i_j} \in \Omega(\epsilon kn)$, for all $j\in\{1,\ldots,\ell\}$;
-    %\item $|E_{i_j}\cap V|\in \Omega(\epsilon n)$, for all 
-    %    $j\in\{1,\ldots,\ell\}$; and 
     \item $\ell\in \Omega(\epsilon n/k)$.
   \end{enumerate}
 
@@ -505,60 +670,86 @@ is a good-average-stretch spanner.
   E_{i_j}$ and, in particular, $|E'_{i_j}\cap V|\ge |E_{i_j}\cap V|$,
   for each $j\in\{1,\ldots,\ell\}$.
 
-  Fix some positive integer $C\in O(1)$ and $t$ to be specified later.
-  For each $j\in\{2,\ldots,\ell\}$, let $n_{i_j}=|E'_{i_j}\cap V\setminus
-  E'_{i_{j-1}}|$. We have that $\sum_{i=2}^{\ell} n_{i_j} \le n$ and
-  $\ell \in\Omega(\epsilon n/k)$.  Using these two bounds, a simple
-  averaging argument is sufficient to show that there must exist an
-  index $i\in\{2,\ldots,\ell-t-C\}$ such that
+  Fix some positive integers $C\in O(1)$ and $t< \ell - C$
+  to be specified later.  For each $j\in\{2,\ldots,\ell\}$, let
+  $n_{i_j}=|E'_{i_j}\cap V\setminus E'_{i_{j-1}}|$. We have that
+  $\sum_{i=2}^{\ell} n_{i_j} \le n$ and $\ell \in\Omega(\epsilon n/k)$.
+  Using these two bounds, a simple averaging argument is sufficient
+  to show that there must exist an index $j^*\in\{2,\ldots,\ell-t-C\}$
+  such that
   \begin{equation}
-     \sum_{j=i}^{i+t+C} n_{i_j}
-        = |V\cap E'_{i_{i+t+C}}\setminus \E'_{i_{i}}| 
+     \sum_{j=j^*}^{j^*+t+C} n_{i_j}
+        = |V\cap E'_{i_{j^*+t+C}}\setminus \E'_{i_{j^*}}| 
           \in O((t+C)k/\epsilon) \enspace . \eqlabel{sparse}
   \end{equation}
 
-  Next we observe that the sequence of radii $r_{i_1},\ldots,r_{i_\ell}$
-  is exponentially increasing.  More precisely, by Property~4 of
-  $k$-partitions\footnote{FIXME: Property 4 needs to be extended a little
-  bit.}, there exists an integer constant $\mu$ such that $r_{i_{j+\mu}}
-  \ge 2r_{i_j}$ for all $j\in\{1,\ldots,\ell-\mu\}$.  This property,
-  and the careful choice of $w_i$'s implies the following claim, whose
-  proof is deferred until later.
+
+  The careful choice of $w_i$'s implies the following claim, whose proof
+  is deferred until later.
   \begin{clm}\clmlabel{zuper}
-    For every $j\in\{1,\ldots,t\}$, every $u\in V_{i_{i+j}}$, and
-    every $w\in E_{i_i}\cap V$, $G$ contains a path of length at most
-    $\|uw\|+O(r_{i_i})$.
+    For every $j\in\{j^*,\ldots,j^*+t\}$, every $u\in V_{i_j}$, and
+    every $w\in E_{i_{j^*}}\cap V$, $G$ contains a path of length at most
+    $\|uw\|+O(r_{i_{j^*}}/c)$.
   \end{clm}
 
-  Let $E$ denote the disk centered at $w^*$ and having radius $cr_{i_i}$.
-  Note that any point $u\not\in E$ is at distance at least $(c-1)r_{i_i}$
-  from any point $w\in E_{i_i}$.  Therefore, by \clmref{zuper}, for any
-  $j\in\{1,\ldots,t\}$ and any $u\in V_{i_{i+j}}\setminus E$,
+  
+  \begin{figure}
+    \begin{center}
+      \includegraphics{type4}
+    \end{center}
+    \caption{The number of points in $E$ that are assigned to
+      $\Delta_{i_{j^*+\lceil\mu\log c\rceil}},\ldots,\Delta_{i_{j^*+t}}$
+      is only $O(k)$.}
+    \figlabel{type4}
+  \end{figure}
+
+  Refer to \figref{type4}.  Let $E$ denote the disk centered at $w^*$
+  and having radius $r_{i_{j^*}}=c\radius(E_{i_{j^*}})$.  Note that
+  any point $u\not\in E$ is at distance at least $r_{i_{j^*}}$ from
+  any point $w\in E_{i_{j^*}}$.  Therefore, by \clmref{zuper}, for any
+  $w\in E_{i_{j^*}}\cap V$, any $j\in\{j^*,\ldots,j^*+t\}$ and any $u\in
+  V_{i_{j}}\setminus E$,
   \[  
      \frac{\|uw\|_G}{\|uw\|} = 1+O(1/c) \enspace . 
   \]
   In other words, by choosing an appropriate constant $\alpha$ in the
   definition of bad pairs, $u$ can not form a bad pair with a point
-  $w\in E_{i_i}$ unless $u$ is contained in $E$.  Consider the disks
-  $\Delta_{i_{i+\lceil\mu\log c\rceil}},\ldots,\Delta_{i_{i+t}}$; each
-  of which has radius at least $cr_{i_i}$.  By Property~5 of $k$-partitions,
+  $w\in E_{i_{j^*}}$ unless $u$ is contained in $E$.
+
+%  Next we show that the sequence of radii $r_{i_1},\ldots,r_{i_\ell}$
+%  is, in a weak sense, exponentially increasing. Specifically,
+%  there exists an integer constant $\mu$ such that $r_{i_{j+\mu}}
+%  \ge 2r_{i_j}$ for all $j\in\{1,\ldots,\ell-\mu\}$.  To show
+%  this, we first observe that, if $u\in V_i$ and $w\in E_i$ form
+%  a bad pair, then the distance from $\Delta_i$ to $E_i$ is less
+%  than $r_i$.  Next, suppose that $r_{i_{j+\mu}} < 2r_{i_j}$.  Then
+%  $\Delta_{i_j},\ldots,\Delta_{i_{j+\mu}}$ is a set of $\mu+1$ disks
+%  all having radii in $[r_{i_j},2r_{i_j})$ and that are all contained
+%  in a ball of radius $6r_{i_j}$ centered at $w^*$.  Therefore, some
+%  point, $p$, in this ball is contained in $\Omega(\mu)$ of these disks.
+%  But then Property~4 of $k$-partitions implies that $\mu\in O(1)$.
+
+  Now consider the disks
+  $\Delta_{i_{j^*}},\ldots,\Delta_{i_{j^*+t}}$. Each of these disks
+  has radius at least $r_{i_{j^*}}=\radius(E)$.  By Property~5 of
+  $k$-partitions,
   \[
-    \left|\bigcup_{j=\lceil\mu\log c\rceil}^t V_{i_{i+j}}\cap E\right|
+    \left|\bigcup_{j=j^*}^{j^*+t} V_{i_{j}}\cap E\right|
       \in O(k)
   \]
   Combining this with \eqref{sparse}, we find that the total number
-  of bad pairs of the form $u\in V_{i_{i+j}}$, $w\in E_{i_{i+j}}$,
-  and $j\in\{\lceil\mu\log c\rceil,\ldots,t\}$ is upper bounded by
+  of bad pairs of the form $u\in V_{i_{j}}$, $w\in E_{i_{j}}$,
+  and $j\in\{j^*,\ldots,j^*+t\}$ is upper bounded by
   \begin{equation}
-     \sum_{j=\lceil\mu\log c\rceil}^t b_{i_{i+j}} 
+     \sum_{j=j^*}^{j^*+t} b_{i_{j}} 
         \in O((t+C)k^2/\epsilon) \enspace . \eqlabel{ub-4}
   \end{equation}
   On the other hand, the indices $i_1,\ldots,i_\ell$ are chosen
   so that $b_{i_j}\in\Omega(\epsilon kn)$, for \emph{every}
   $j\in\{1,\ldots,\ell\}$.  Therefore
   \begin{equation}
-    \sum_{j=\lceil\mu\log c\rceil}^t b_{i_{i+j}} 
-        \in \Omega((t-\lceil\mu\log c\rceil)\epsilon kn) \enspace .
+    \sum_{j=j^*}^{j^*+t} b_{i_{j}} 
+        \in \Omega(t\epsilon kn) \enspace .
         \eqlabel{lb-4}
   \end{equation}
  
@@ -576,28 +767,37 @@ is a good-average-stretch spanner.
   All that remains in handling Type~4 pairs is to prove \clmref{zuper}.
 
   \begin{proof}[Proof of \clmref{zuper}]
-  Let $u$ by any point $V_{i_{i+j}}$, for any $j\in\{1,\ldots,t\}$.
-  It is sufficient to prove that $\|w^*w_{i_{i+j}}\|\in O(r_{i_i})$.
-  If $w_{i_{i+j}}=w^*$, then we are done, so assume $w_{i_{i+j}}\neq
-  w^*$.  Since $w^*\in E_{i_{i+j}}$ but was not chosen to act as
-  $w_{i_{i+j}}$, there must exist some index $i'$ such that $E_{i'}\cap
-  E_{i_{i+j}}\neq\emptyset$, $|E_{i'}\cap V|\ge\epsilon n$, $r_{i'}\le
-  r_{i_i}$, and $w_{i_{i+j}}\in E_{i'}$.
+  Let $u$ by any point $V_{i_{j}}$, for any $j\in\{j^*,\ldots,j^*+t\}$.
+  It is sufficient to prove that $\|w^*w_{i_{j}}\|\in O(r_{i_{j^*}})$.
+  If $w_{i_{j}}=w^*$, then we are done, so assume $w_{i_{j}}\neq
+  w^*$.  Since $w^*\in E_{i_{j}}$ but was not chosen to act as
+  $w_{i_{j}}$, there must exist some index $i'$ such that $E_{i'}\cap
+  E_{i_{j}}\neq\emptyset$, $|E_{i'}\cap V|\ge\epsilon n$, $r_{i'}\le
+  r_{i_{j^*}}$, and $w_{i_{j}}\in E_{i'}$.
 
   There are two cases to consider:
-  If $E_{i_i}$ intersects $E_{i'}$, then 
+  If $E'_{i_{j^*}}$ intersects $E_{i'}$, then (see \figref{jstar-a})
   \[
-     \|w^*w'\|\le r_{i_i} + 2r_{i'} \le 3r_{i_i} \in O(r_{i_i}) \enspace ,
+     \|w^*w_{i_j}\|\le 4r_{i_{j^*}} + 2r_{i'} \le 3r_{i_{j^*}} \in O(r_{i_{j^*}}) \enspace ,
   \]
-  and we are done.  On the other hand, if $E_{i'}$ and $E_{i_i}$
+  and we are done. 
+  \begin{figure}
+    \begin{center}
+      \includegraphics{gummo-a}
+      \caption{If $E_{i'}$ intersects $E'_{i_j^*}$ then $\|w^*w_{i_j}\|\le 4r_{i_{j^*}}/c$.}
+      \figlabel{jstar-a}
+    \end{center}
+  \end{figure}
+  On the other hand, if $E_{i'}$ and $E_{i_{j^*}}$
   are disjoint, then all the points in $E_{i'}$ are contained in
-  $E_{i+t+2\mu}$.  Then
+  $E_{i_{j^*+t+2\mu}}$ (see \figref{jstar-b}).  Then
   \[
-      |V\cap E_{i+t+2\mu}\setminus E_i| \ge |V\cap\E_{i'}| \ge \epsilon n \enspace .
+      |V\cap E_{i_{j^*+t+2\mu}}\setminus E_{i_{j^*}}| 
+          \ge |V\cap\E_{i'}| \ge \epsilon n \enspace .
   \]
   But, by definition, 
   \[
-      |V\cap E_{i+t+2\mu}\setminus E_i| \in O(tk/\epsilon) \enspace .
+      |V\cap E_{i_{j^*+t+2\mu}}\setminus E_i| \in O(tk/\epsilon) \enspace .
   \]
   This yields a contradiction when $t<D \epsilon^2 n/k$, for a
   sufficiently small constant $D>0$.
@@ -621,13 +821,24 @@ is a good-average-stretch spanner.
     \item The number of bad Type~4 pairs is at most 
        $O(k^{1/2}n^{3/2})$.
   \end{enumerate}
-  Putting all four types of pairs together, we obtain
+  The contributions of Type~2 and Type~3 pairs dominate the others, and
+  we obtain
   \[
      \asf(G) = 1 + O\left(1/k^{1/(d-1)} + 1/c 
-       + \binom{n}{2}^{-1}\left(kn+k^{3/2}n^{3/2}c^d\log c+k^{1/2}n^{3/2}\right)\right) \enspace .
+       + \binom{n}{2}^{-1}\left(k^{3/2}n^{3/2}c^{d/2}\log c\right)\right) \enspace .
   \]
-  Taking $k=(n/\log n)^{(d-1)/x}$ and $c=(n/\log n)^{1/x}$
-  \ldots 
+  Taking 
+  \[ 
+       c = (n/\log n)^{1/(4d-1)}
+  \]
+  and
+  \[
+       k = (n/\log n)^{(d-1)/(4d-1)} 
+  \]
+  yields
+  \[
+     \asf(G) = 1+ O\left((\log n/n)^{1/(4d-1)}\right) \enspace . \qedhere
+  \]
 \end{proof}
 
 

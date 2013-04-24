@@ -3,12 +3,25 @@
 \usepackage{pat}
 %\usepackage{coffee4}
 
+\usepackage{tikz,hyphenat}
+\let\oldmarginpar\marginpar
+% renew the \marginpar command to draw 
+% a node; it has a default setting which 
+% can be overwritten
+\renewcommand{\marginpar}[2][rectangle,draw,fill=yellow,rounded corners,text width=2.21cm]{%
+        \oldmarginpar{%
+        \tikz \node at (0,0) [#1]{#2};}%
+        }
+\newcommand{\note}[1]{\marginpar{\raggedright\footnotesize\nohyphens{#1}}}
 
 \DeclareMathOperator{\asf}{asf}
+\DeclareMathOperator{\strf}{sf}
 \DeclareMathOperator{\depth}{depth}
 \DeclareMathOperator{\radius}{radius}
+\DeclareMathOperator{\msst}{msst}
 \newcommand{\mand}{\mathrm{,\,\,and\,}}
 \newcommand{\oand}{\mathrm{,\,\,}}
+\newcommand{\eps}{\varepsilon}
 
 \title{\MakeUppercase{Average Stretch Factor: How Low Does It Go?}}
 \author{Vida Dujmovi\'c, Pat Morin, and Michiel Smid}
@@ -24,33 +37,114 @@
   vertices, $u$ and $w$, is the ratio of the shortest path from $u$ to $w$
   in $G$ to the Euclidean distance between $u$ and $w$.  The \emph{average
   stretch factor} of $G$ is the average stretch factor taken over all
-  pairs of vertices in $G$.  We show that, for any set $V$ of $n$ points
-  in $\R^d$, there exists a geometric graph with vertex set $V$, that
-  has $O(n)$ edges, and that has average stretch factor $1+ o_n(1)$.
-  More precisely, the stretch factor is $1+O(n^{-\alpha})$ where
-  $\alpha=\alpha(d)$ depends only on $d$.  We also show that, even in
-  $\R^2$, there exists point sets for which any graph with a linear number
-  of edges has average stretch factor at least $1+\Omega(1/\sqrt{n})$.
+  pairs of vertices in $G$.  We show that for any set, $V$, of $n$
+  points in $\R^d$, there exists a geometric graph with vertex set $V$,
+  that has $O(n)$ edges, and that has average stretch factor $1+ o_n(1)$.
+  More precisely, the average stretch factor of this graph is $1+O((\log
+  n/n)^{4d-1})$.  We complement this upper-bound with a lower bound
+  which shows that, even in $\R^2$, there are point sets for which
+  any graph with a linear number of edges has average stretch factor
+  $1+\Omega(1/\sqrt{n})$.
 \end{abstract}
 
 \end{titlepage}
 
 \section{Introduction}
 
-The \emph{average stretch factor} of a geometric graph, $G$, with vertex
-set $V(G)\subset \R^d$ and edge set $E(G)$ is
-\[
-    \asf(G) = \binom{|V(G)|}{2}^{-1}\sum_{\{u,w\}\in\binom{V(G)}{2}}\frac{\|uw\|_G}{\|uw\|} \eqlabel{asf}
-\]
+A \emph{geometric graph} is a simple undirected graph whose vertex set
+is made up of  points in $\R^d$.  The \emph{average stretch factor}
+of a geometric graph, $G=(V,E)$, with vertex set $V\subset \R^d$ and
+edge set $E$ is
+\begin{equation}
+    \asf(G) = \binom{|V|}{2}^{-1}\sum_{\{u,w\}\in\binom{V}{2}}\frac{\|uw\|_G}{\|uw\|} \eqlabel{asf}
+\end{equation}
 where $\|uw\|$ denotes the Euclidean distance between $u$ and $w$
 and $\|uw\|_G$ denotes the shortest Euclidean path from $u$ to $w$
 that uses only edges of $G$.
 
-In this paper we show that, for any constant dimension, $d$, and any
-finite set $V\subset \R^d$, there exists a geometric graph $G=(V,E)$
-having $|E|=O(n)$ edges and such that $\asf(G)=1+o_n(1)$.
+In this paper we are interested in the following question: Given
+$V\subset\R^d$, with $|V|=n<\infty$, how does one construct a graph,
+$G=(V,E)$, with $O(n)$ edges, such that $\asf(G)$ is small, and how small
+can we make $\asf(G)$?  Clearly, $\asf(G)\ge 1$, but how close to 1 can
+we get with a graph $G$ that has only $Cn$ edges?
+
+The related question of finding graphs with small \emph{(worst-case)
+stretch factor}
+\[
+    \strf(G) = \max_{\{u,w\}\in\binom{V}{2}}\frac{\|uw\|_G}{\|uw\|} 
+\]
+has been studied extensively.  It is known that, for any $\eps >0$,
+it is possible to construct a graph with $O(n/\eps^{d-1})$ edges such
+that $\strf(G)\le 1+\eps$ \cite{x} and this dependence on $\epsilon$
+and $d$ is optimal \cite{Y}.\note{what are the correct references?}
+This upper-bound on (worst-case) stretch factor certainly implies the
+same upper-bound for average stretch factor.  Intuitively, though, one
+might think that it is possible to obtain improved results for average
+stretch factor that, say, reduce the dependence on $\epsilon$ and/or $d$.
+
+\subsection{New Results}
+
+In this paper, we show that much stronger results are possible for
+average stretch factor than for (worst-case) stretch factor by proving
+the following result: For any constant dimension, $d$, and any set
+$V\subset \R^d$, with $|V|=n<\infty$, there exists a geometric graph
+$G=(V,E)$ having $|E|\in O(n)$ edges and such that $\asf(G)=1+o_n(1)$.
+More precisely,
+\[
+   \asf(G)=1+O((\log n/n)^{4d-1}) \enspace .
+\]
+The proof of this result is in \secref{upper-bound} and constitutes the
+bulk of the paper.
+
+In \secref{lower-bound} we prove a simple lower-bound that shows our
+upper-bound is at least of the right flavour:  For every positive integer
+$n$, there exists an $n$ point set in $\R^2$ for which any graph with
+$O(n)$ edges has average stretch factor $1+\Omega(1/\sqrt{n})$.
+
+\subsection{Related Work}
+
+General results on embedding metric spaces into ultrametrics
+\cite{bartal:graph,fakcharoenphol.rao.ea:tight} implies that, for
+every point set $V$ in $\R^d$, there exists a tree $T=(V,E)$ such that
+$\asf(T)\in O(\log n)$.  More recently, this was improved by Abraham
+\etal\ \cite{abraham.bartal.ea:metric,abraham.bartal.ea:embedding}
+to show that there exists a spanning tree, $T$, with $\asf(T)\in O(1)$.
+
+Aldous and Kendall \cite{aldous.kendall:short} show that, for any
+set, $V\subset[0,\sqrt{n}]^2$, and any $\epsilon > 0$, there exists a
+Steiner network, $N=(V',E)$, with $V'\supseteq V$, of total edge length
+$\sum_{uw\in E}\|uw\| \le \msst(V) + \epsilon n$ and in which,
+\[
+    \sum_{\{u,w\}\in \binom{V}{2}}\frac{\|uw\|_N}{\|uw\|} = 1 + O(\log n/n) .
+\]
+Here $\msst(V)$ denotes the length of the minimum Steiner spanning
+tree of the points in $V$.  For most well distributed\footnote{For
+example, any family of point sets that satisfies the quantitative
+equidistribution condition \cite{aldous.kendall:short}.} point sets,
+$V$, $\msst(V)\in\Omega(n)$, so $N$ is a graph that is only slightly
+longer than the minimum Steiner spanning tree of $V$ and for which the
+average stretch factor (taken over pairs in $V$) tends to 1.
+
+We call the points in $V'\setminus V$ \emph{Steiner points}.  The work
+of Aldous and Kendall, which was the starting point for the current work,
+immediately raises two questions: (1)~Is there always a graph, $G=(V,E)$,
+that does not use Steiner points and has $\asf(G)=1+o_n(1)$? (2)~Does
+this result generalize to point sets in $\R^d$?  Our results answer both
+of these questions in the affirmative.
+
+We note that it does not seem easy to answer either of the preceding two
+questions using a modification of Aldous and Kendall's construction, which
+consists of a minimum Steiner spanning tree of $V$, some additional random
+line segments, and some additional segments that form a grid.  Anywhere
+two segments cross, a vertex is added to $V'$, so this construction makes
+essential use of Steiner points.  Furthermore, the main technical tool
+used by Aldous and Kendall is a new result on the lengths of boundaries
+of certain cells in arrangements of random lines \cite[Theorems~3 and 4]{aldous.kendall:short}.  In dimensions greater
+than 2, arrangements of lines do not decompose space into cells, so it
+seems difficult to generalize this result to higher dimensions.
 
 \section{The Construction}
+\seclabel{upper-bound}
 
 The construction of a good average stretch factor graph, $G=(V,E)$,
 makes use of a clustering of the points of $V$ into $O(n/k)$ clusters,
@@ -213,7 +307,7 @@ even contain each other.
   to the statement that no $w_i$ is an ancestor of $w_j$ for any
   $\{i,j\}\subseteq\{1,\ldots,s\}$.  A key observation is that, if $u$
   is an ancestor of $w$ in a fair-split tree, $T$, and the difference
-  in depth between $u$ and $w$ is $d$, then
+  in depth between $u$ and $w$ is at least $d$, then
   \[
       L(u) \ge 2L(w) \enspace .
   \]
@@ -355,7 +449,7 @@ have, for any $u,w\in V$
        \end{cases}
 \]
 
-Let $r_i$ denote the radius of $\Delta_i$ and let $D_i$ be a ball centered
+Let $r_i$ denote the radius of $\Delta_i$ and let $D_i$ be the ball centered
 at the center of $\Delta_i$ and having radius $cr_i$.  Points of $V$
 that are in $D_i\setminus \Delta_i$ can be problematic for $V_i$; there
 is no guarantee that such points have a $1+o(1)$ spanning path to the
@@ -374,8 +468,7 @@ $i(w)\in \{1,\ldots,n'\}$ denote the smallest index such that $w\in
 E_{i(w)}$ and $|E_{i(w)}\cap V| \ge \epsilon n$; if no such index
 exists, let $i(w)=\infty$.  The point $w_i\in E_i$ is selected to be
 any of the points in $E_i$ that minimizes $i(w)$.  This concludes the
-description of the graph, $G$.  The following theorem shows that $G$
-is a good-average-stretch spanner.
+description of the graph, $G$.  
 
 
 \begin{figure}
@@ -417,17 +510,17 @@ by $\Omega(2^{i})$.
 \end{figure}
 
 The disk $E_i$ solves the preceding problem; $E_i$ is large enough to
-cover all points in $G_0,\ldots,G_{i-\Theta(\log c)}$.  All of the points
-in $E_i$ are at distance $\Omega(2^i)$ from all the points in $G_i$,
-so the path from $u\in G_i$ directly to $w_i\in E_i$ and onto any $w\in
-E_i$ has length at most
+cover all points in $G_0,\ldots,G_{i-\Theta(\log c)}$.  The path from
+$u\in G_i$ directly to $w_i\in E_i$ and onto any $w\in E_i$ has length
+at most
 \[
-    \|uw\|(1+O(1/c)) \enspace ,
+    \|uw\| + O(2^{i}/c) \enspace ,
 \]
-so $\|uw\|_G/\|uw\| = 1+O(1/c)$.  Part~3 of the proof of
-\thmref{upper-bound} is dedicated to showing that, in general, the disks
-$E_1,\ldots,E_{n'}$ cover many pairs of points that might otherwise
-be problematic.
+Furthermore, all of the points in $E_i$ are at distance $\Omega(2^i)$ from
+all the points in $G_i$, so $\|uw\|_G/\|uw\| = 1+O(1/c)$.  Part~3 of the
+proof of \thmref{upper-bound} is dedicated to showing that, in general,
+the disks $E_1,\ldots,E_{n'}$ cover many pairs of points that might
+otherwise be problematic.
 
 Our second example is intended to illustrate the importance of carefully
 choosing the representative vertex $w_i\in E_i$.   In this example,
@@ -480,8 +573,9 @@ Without further ado, we now prove that $G$ has low average stretch factor.
 \begin{proof}
   That $G$ has $O(n)$ edges follows immediately from its definition.
 
-  To determine the average stretch factor of $G$, there are four types
-  of pairs of points, $u\in V_i$, $w\in V_j$, $j\ge i$, to consider:
+  To upper-bound the average stretch factor of $G$, there are four types
+  of pairs of points, $u\in V_i$, $w\in V_j$, $j\ge i$, to consider
+  (recall that $r_i \ge r_j)$:
   \begin{enumerate}
     \item pairs that are both from the same set; i.e., where $i=j$;
     \item pairs for which $w$ is outside of $D_i$;
@@ -499,21 +593,20 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   \]
 
   \paragraph{Type~1 Pairs.}
-  For each Type~1 pair $u,w\in V_i$, $\|uw\|_G/\|uw\|\le 2$ and each set
-  $V_i$ contributes at most $\binom{k}{2}$ Type~1 terms to \eqref{asf},
-  so the total number of Type~1 pairs that contribute a term to the sum
-  in \eqref{asf} is at most
+  Each $V_i$, for $i\in\{1,\ldots,n'\}$ defines at most $\binom{k}{2}$
+  Type~1 pairs, so the total number of Type~1 pairs that contribute a
+  term to the sum in \eqref{asf} is at most
   \[
     \binom{k}{2}\cdot O(n/k) \in O(nk)
       \enspace .
   \]
 
   \paragraph{Type~2 Pairs.}
-  For Type~2 pair $u\in V_i$, $w\in V\setminus D_i$, there is a path
+  For each Type~2 pair $u\in V_i$, $w\in V\setminus D_i$, there is a path
   from $u$ to $u_i$ and then onto $u_j$ and finally to $w$ whose length
   is at most
   \[
-     r_i + \|u_iu_j\|_G + r_j
+     2r_i + \|u_iu_j\|_G + 2r_j
       \le (1+1/k^{1/(d-1)})(\|uw\| + 8r_i) \enspace .
   \]
   Furthermore, $\|uw\|\ge (c-1)r_i$ since $w$ is outside of $D_i$.
@@ -538,7 +631,7 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   \end{equation}
   where $\delta>0$ will be determined later.
   Each term on the left hand side of \eqref{kicker} is at most $n$
-  and there are at most $\alpha n/k$ terms, for some constant $\alpha
+  and there are $n'\le \alpha n/k$ terms, for some constant $\alpha
   >0$.  We say that a term on the left hand side of \eqref{kicker} is
   \emph{small} if it is less than $\delta n/2\alpha$ and \emph{large}
   otherwise.  The sum of the small terms is at most $\delta n^2/2k$
@@ -587,7 +680,7 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   the radius of $\Delta_{i_j}$ for each $j\in\{1,\ldots,h-1\}$.
 
   By choice, $D_{i_1}$ contains at least $ a \delta n$ elements of
-  $V$, for some constant $ a  >0$.  Also by choice, $D_{i_2}\setminus
+  $V$, for the constant $a=1/2\alpha$.  Also by choice, $D_{i_2}\setminus
   E_{i_2}$ contains at least $ a \delta n$ elements of $V$.
   Both $D_{i_1}$ and $D_{i_2}$ contain the point $w^*$.  We claim
   that $E_{i_2}$ contains at least $ a \delta n$ elements of $V$
@@ -625,7 +718,7 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   \]
   for some sufficiently large constant $C$.  In particular, the value
   \[
-       \delta \ge \frac{C}{a}\sqrt{\frac{kc^d\log c}{n}}
+       \delta = \frac{C}{a}\sqrt{\frac{kc^d\log c}{n}}
   \]
   works.  So the total number of terms of the sum in \eqref{asf}
   contributed by Type~3 pairs is at most
@@ -634,11 +727,11 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   \]
 
   \paragraph{Type~4 Pairs.}  
-  Let $\alpha > 0$ be a constant whose value will be discussed later.
+  Let $\beta > 0$ be a constant whose value will be discussed later.
   We say that a Type~4 pair of points $u\in V_i$, $w\in E_i$ is
   \emph{bad} if
   \[
-      \|uw_i\|+2\|w_iw\| \ge (1+\alpha/c)\|uw\| \enspace ,
+      \|uw_i\|+2\|w_iw\| \ge (1+\beta/c)\|uw\| \enspace ,
   \]
   and otherwise the pair is \emph{good}.
   For any good pair $(u,w)$,
@@ -684,10 +777,10 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   let $n_{i_j}=|E'_{i_j}\cap V\setminus E'_{i_{j-1}}|$. We have that
   $\sum_{i=2}^{\ell} n_{i_j} \le n$ and $\ell \in\Omega(\epsilon n/k)$.
   Using these two bounds, a simple averaging argument is sufficient
-  to show that there must exist an index $j^*\in\{2,\ldots,\ell-t-C\}$
+  to show that there must exist an index $j^*\in\{1,\ldots,\ell-t-C\}$
   such that
   \begin{equation}
-     \sum_{j=j^*}^{j^*+t+C} n_{i_j}
+     \sum_{j=j^*+1}^{j^*+t+C} n_{i_j}
         = |V\cap E'_{i_{j^*+t+C}}\setminus \E'_{i_{j^*}}| 
           \in O((t+C)k/\epsilon) \enspace . \eqlabel{sparse}
   \end{equation}
@@ -695,7 +788,7 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   The careful choice of $w_i$'s implies the following claim, whose proof
   is deferred until later.
   \begin{clm}\clmlabel{zuper}
-    For every $j\in\{j^*,\ldots,j^*+t\}$, every $u\in V_{i_j}$, and
+    For every $j\in\{j^*+1,\ldots,j^*+t\}$, every $u\in V_{i_j}$, and
     every $w\in E_{i_{j^*}}\cap V$, $G$ contains a path of length at most
     $\|uw\|+O(r_{i_{j^*}}/c)$.
   \end{clm}
@@ -720,7 +813,7 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   \[  
      \frac{\|uw\|_G}{\|uw\|} = 1+O(1/c) \enspace . 
   \]
-  In other words, by choosing an appropriate constant $\alpha$ in the
+  In other words, by choosing an appropriate constant $\beta$ in the
   definition of bad pairs, $u$ can not form a bad pair with a point
   $w\in E_{i_{j^*}}$ unless $u$ is contained in $E$.
 
@@ -738,25 +831,25 @@ Without further ado, we now prove that $G$ has low average stretch factor.
 %  But then Property~4 of $k$-partitions implies that $\mu\in O(1)$.
 
   Now consider the disks
-  $\Delta_{i_{j^*}},\ldots,\Delta_{i_{j^*+t}}$. Each of these disks
+  $\Delta_{i_{j^*+1}},\ldots,\Delta_{i_{j^*+t}}$. Each of these disks
   has radius at least $r_{i_{j^*}}=\radius(E)$.  By Property~5 of
   $k$-partitions,
   \[
-    \left|\bigcup_{j=j^*}^{j^*+t} V_{i_{j}}\cap E\right|
+    \left|\bigcup_{j=j^*+1}^{j^*+t} V_{i_{j}}\cap E\right|
       \in O(k)
   \]
   Combining this with \eqref{sparse}, we find that the total number
   of bad pairs of the form $u\in V_{i_{j}}$, $w\in E_{i_{j}}$,
   and $j\in\{j^*,\ldots,j^*+t\}$ is upper bounded by
   \begin{equation}
-     \sum_{j=j^*}^{j^*+t} b_{i_{j}} 
+     \sum_{j=j^*+1}^{j^*+t} b_{i_{j}} 
         \in O((t+C)k^2/\epsilon) \enspace . \eqlabel{ub-4}
   \end{equation}
   On the other hand, the indices $i_1,\ldots,i_\ell$ are chosen
   so that $b_{i_j}\in\Omega(\epsilon kn)$, for \emph{every}
   $j\in\{1,\ldots,\ell\}$.  Therefore
   \begin{equation}
-    \sum_{j=j^*}^{j^*+t} b_{i_{j}} 
+    \sum_{j=j^*+1}^{j^*+t} b_{i_{j}} 
         \in \Omega(t\epsilon kn) \enspace .
         \eqlabel{lb-4}
   \end{equation}
@@ -775,7 +868,7 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   All that remains in handling Type~4 pairs is to prove \clmref{zuper}.
 
   \begin{proof}[Proof of \clmref{zuper}]
-  Let $u$ by any point $V_{i_{j}}$, for any $j\in\{j^*,\ldots,j^*+t\}$.
+  Let $u$ by any point $V_{i_{j}}$, for any $j\in\{j^*+1,\ldots,j^*+t\}$.
   It is sufficient to prove that $\|w^*w_{i_{j}}\|\in O(r_{i_{j^*}}/c)$.
   If $w_{i_{j}}=w^*$, then we are done, so assume $w_{i_{j}}\neq
   w^*$.  Since $w^*\in E_{i_{j}}$ but was not chosen to act as
@@ -799,19 +892,24 @@ Without further ado, we now prove that $G$ has low average stretch factor.
       \end{center}
     \end{figure}
   
-    \item If $E_{i'}$ and $E_{i_{j^*}}$ are disjoint, then we claim that
-    $E_{i'}\subset E_{i_{j^*+t+C}}$ (see \figref{gummo-b}).  To see why
+    \item If $E_{i'}$ and $E'_{i_{j^*}}$ are disjoint, then we claim that
+    $E_{i'}\subset E'_{i_{j^*+t+C}}$ (see \figref{gummo-b}).  To see why
     this is so, we argue that, when $C$ is a sufficiently large constant,
-    $r_{i_{j^*+t+C}} > 2r_{i_{j^*+t}}$.  To show this, we first observe
+    \[
+      r_{i_{j^*+t+C}} > 2r_{i_{j^*+t}} 
+          \ge 2r_{i_j} \ge r_{i_j} + r_{i'} \enspace .
+    \]  
+    To see why this first inequality holds, we first observe
     that, for any $i\in\{1,\ldots,n'\}$, if $u\in V_i$ and $w\in E_i$
     form a bad pair, then the distance from $\Delta_i$ to $E_i$ is less
-    than $r_i$.  Next, suppose that $r_{i_{j^*+t+C}} < 2r_{i_{j^*+t}}$.
+    than $r_i$.  Now, if $r_{i_{j^*+t+C}} < 2r_{i_{j^*+t}}$.
     Then $\Delta_{i_{j^*+t}},\ldots,\Delta_{i_{i_{j^*+t+C}}}$ is a set
-    of $C+1$ disks all having radii in $[r_{i_{j^*}},2r_{i_{j^*}})$ and
-    that are all contained in a ball of radius $6r_{i_{j^*}}$ centered
+    of $C+1$ disks all having radii in $[r_{i_{j^*+t}},2r_{i_{j^*+t}})$ and
+    that are all contained in a ball of radius $6r_{i_{j^*+t}}$ centered
     at $w^*$.  Therefore, some point, $p$, in this ball is contained in
     $\Omega(C)$ of these disks.  But then Property~4 of $k$-partitions
-    implies that $C\in O(1)$.
+    implies that $C\in O(1)$.  Thus, for a sufficiently large constant, $C$,
+    $r_{i_{j^*+t+C}} > 2r_{i_{j^*+t}}$ and $E'\subset E_{i_{j^*+t+C}}$.
 
     Since $E_{i'}$ and $E_{i_{j^*}}$ are disjoint and $E_{i'}\subset
     E_{i_{j^*+t+C}}$,
@@ -876,6 +974,7 @@ Without further ado, we now prove that $G$ has low average stretch factor.
 
 
 \section{Lower Bounds}
+\seclabel{lower-bound}
 
 \begin{thm}\thmlabel{lower-bound}
   For every positive integer, $n$, there exists a point set, $V$, of $n$
@@ -949,6 +1048,80 @@ spanning ratio.  In particular, if $G$ has $m\in o(n^2)$ edges, then
 \[
    \asf(G) \ge 1 + \Omega(1/\sqrt{m}) \enspace .
 \]
+
+\section{Discussion}
+\seclabel{discussion}
+
+Our results leave many areas open for further research.  We say that
+a graph, $G=(V,E)$, with $|V|=n$, has \emph{good average stretch} if
+$\asf(G)=1+o_n(1)$ and $|E|=O(n)$.
+
+We have proven that a good average stretch graph $G=(V,E)$ exists for
+any point set $V\subset\R^d$.  Without much effort, the proof can be
+made into an $O(n^2\log n)$ time algorithm to construct the graph, $G$
+from the point set $V$.
+
+\begin{op}
+  Given a point set, $V$, how quickly can one construct a good average
+  stretch graph $G=(V,E)$? \note{should we solve this ourselves? at
+  least in $\R^2$?}
+\end{op}
+
+The following open problems have to do with strengthenings of
+\thmref{upper-bound} in which $G$ has additional properties.
+
+\begin{op}
+  Given a point set, $V$, does there always exist a good average stretch
+  graph $G=(V,E)$ whose total edge length is close to that of the minimum
+  spanning tree?
+\end{op}
+
+\begin{op}
+  Given a point set, $V$, does there always exist a good average stretch
+  graph $G=(V,E)$ whose maximum degree is bounded by a constant?
+\end{op}
+
+\begin{op}
+  Given a point set, $V$, does there always exist a good average stretch
+  graph $G=(V,E)$ that is $k$-fault tolerant? That is, for any set
+  $F\subset V$, $|F|\le k$, $\asf(G\setminus K)=1+o_n(1)$.
+\end{op}
+
+\begin{op}
+  Bose \etal\ \cite{S} define $f(k)$-robust spanners in terms of the
+  (worst-case) spanning ratio and their definition extends naturally
+  to average spanning ratio.  Given a point set, $V$, does there always
+  exist a good average stretch graph $G=(V,E)$ that is $f(k)$-robust?
+\end{op}
+
+
+The following questions ask in how general of a setting
+\thmref{upper-bound} can be proved:
+
+\begin{op}
+  Given a weighted graph, $H=(V,E)$ with $|V|=n$ vertices, does $H$
+  always have a subgraph
+  $G=(V,E')$ with $|E'|\in O(n)$ and such that
+  \[
+     \asf_H(G) = \binom{n}{2}^{-1}\sum_{\{u,w\}\in V}\frac{\|uw\|_G}{\|uw\|_H}
+         = 1+o_n(1) \enspace ?
+  \]
+\end{op}
+
+\begin{op}\oplabel{metric-space}
+  Given a metric space $(V,d)$, does there always exist a graph $G=(V,E)$,
+  $|E|\in O(n)$ with $\asf(G)=1+o_n(1)$?  (Here shortest paths in $G$
+  are measured in terms of the cost of their edges in the metric space.)
+\end{op}
+
+The techniques used to prove \thmref{upper-bound} seem applicable to
+metric spaces of bounded doubling dimension \cite{x}.\note{reference?}
+Is this extra restriction on the metric spaces necessary?   The results of
+Abraham \etal\ \cite{abraham.bartal.ea:metric,abraham.bartal.ea:embedding}
+show that, for arbitrary metric spaces, there exist spanning trees with
+average stretch factor $O(1)$.  It seems conceivable that, even for
+arbitrary metric spaces, there may exist good average stretch graphs.
+
 
 
 \section*{Acknowledgement}

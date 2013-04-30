@@ -41,7 +41,7 @@
   points in $\R^d$, there exists a geometric graph with vertex set $V$,
   that has $O(n)$ edges, and that has average stretch factor $1+ o_n(1)$.
   More precisely, the average stretch factor of this graph is $1+O((\log
-  n/n)^{4d-1})$.  We complement this upper-bound with a lower bound
+  n/n)^{1/(4d-1)})$.  We complement this upper-bound with a lower bound
   which shows that, even in $\R^2$, there are point sets for which
   any graph with a linear number of edges has average stretch factor
   $1+\Omega(1/\sqrt{n})$.
@@ -73,14 +73,28 @@ stretch factor}
 \[
     \strf(G) = \max_{\{u,w\}\in\binom{V}{2}}\frac{\|uw\|_G}{\|uw\|} 
 \]
-has been studied extensively.  It is known that, for any $\eps >0$,
-it is possible to construct a graph with $O(n/\eps^{d-1})$ edges such
-that $\strf(G)\le 1+\eps$ \cite{x} and this dependence on $\epsilon$
-and $d$ is optimal \cite{Y}.\note{what are the correct references?}
-This upper-bound on (worst-case) stretch factor certainly implies the
-same upper-bound for average stretch factor.  Intuitively, though, one
-might think that it is possible to obtain improved results for average
-stretch factor that, say, reduce the dependence on $\epsilon$ and/or $d$.
+has been studied extensively and is the subject of a book
+\cite{narasimhan.smid:geometric} and handbook chapter
+\cite{eppstein:spanning}.
+
+It is known that, for any $\eps >0$, it is possible to construct a
+graph with $O(n/\eps^{d-1})$ edges such that $\strf(G)\le 1+\eps$
+\cite{ruppert.seidel:approximating} and such a graph can even
+be constructed in $O(n\log n)$ time \cite{carmi.smid:optimal}.
+This dependence on $\eps$ and $d$ is optimal: Elkin and Solomon
+\cite{elkin.solomon:steiner} show that, in the worst case, any
+graph $G=(V,E)$ having $\strf(G)\le 1+\eps$ has maximum degree
+$\Omega(1/\eps^{d-1})$.  A variant of their argument shows that a
+constant fraction of vertices must have degree $\Omega(1/\eps^{d-1})$
+and therefore, $\Omega(n/\epsilon^{d-1})$ edges \cite{solomon}.
+
+
+The upper-bound on (worst-case) stretch factor certainly implies the same
+upper-bound for average stretch factor: For any point set, $V$, there
+exists a graph with $\asf(G)=1+\epsilon$ having $O(n/\epsilon^{d-1})$
+edges.  Intuitively, though, one might think that it is possible to
+obtain improved results for average stretch factor that, say, reduce
+the dependence on $\epsilon$ and/or $d$.
 
 \subsection{New Results}
 
@@ -91,10 +105,14 @@ $V\subset \R^d$, with $|V|=n<\infty$, there exists a geometric graph
 $G=(V,E)$ having $|E|\in O(n)$ edges and such that $\asf(G)=1+o_n(1)$.
 More precisely,
 \[
-   \asf(G)=1+O((\log n/n)^{4d-1}) \enspace .
+   \asf(G)=1+O((\log n/n)^{1/(4d-1)}) \enspace .
 \]
 The proof of this result is in \secref{upper-bound} and constitutes the
-bulk of the paper.
+bulk of the paper.  In \secref{upper-bound}, we also show that these graphs
+can be constructed efficiently:  There exists an $O(n\log^d n)$ time
+Monte-Carlo algorithm that, with high probability, constructs a graph $G'$
+with $\asf(G')=1+O((\log n/n)^{1/(4d-1)})$.
+
 
 In \secref{lower-bound} we prove a simple lower-bound that shows our
 upper-bound is at least of the right flavour:  For every positive integer
@@ -110,38 +128,44 @@ $\asf(T)\in O(\log n)$.  More recently, this was improved by Abraham
 \etal\ \cite{abraham.bartal.ea:metric,abraham.bartal.ea:embedding}
 to show that there exists a spanning tree, $T$, with $\asf(T)\in O(1)$.
 
-Aldous and Kendall \cite{aldous.kendall:short} show that, for any
-set, $V\subset[0,\sqrt{n}]^2$, and any $\epsilon > 0$, there exists a
+Aldous and Kendall \cite{aldous.kendall:short-length} show that,
+for any any well-distributed\footnote{For example, any family
+of point sets that satisfies the quantitative equidistribution
+condition \cite[Definition~3]{aldous.kendall:short-length}.} point set
+$V\subset[0,\sqrt{n}]^2$, and any $\epsilon > 0$, there exists a
 Steiner network, $N=(V',E)$, with $V'\supseteq V$, of total edge length
-$\sum_{uw\in E}\|uw\| \le \msst(V) + \epsilon n$ and in which,
+$\sum_{uw\in E}\|uw\| \le (1+\epsilon)\msst(V)$ and in which,
 \[
     \sum_{\{u,w\}\in \binom{V}{2}}\frac{\|uw\|_N}{\|uw\|} = 1 + O(\log n/n) .
 \]
-Here $\msst(V)$ denotes the length of the minimum Steiner spanning
-tree of the points in $V$.  For most well distributed\footnote{For
-example, any family of point sets that satisfies the quantitative
-equidistribution condition \cite{aldous.kendall:short}.} point sets,
-$V$, $\msst(V)\in\Omega(n)$, so $N$ is a graph that is only slightly
-longer than the minimum Steiner spanning tree of $V$ and for which the
-average stretch factor (taken over pairs in $V$) tends to 1.
+Here $\msst(V)$ denotes the length of the minimum Steiner spanning tree
+of the points in $V$.  Thus $N$ is a graph that is only slightly longer
+than the minimum length connected graph that contains $V$ and the average
+stretch factor of $N$ (taken over pairs in $V$) tends to 1.
 
-We call the points in $V'\setminus V$ \emph{Steiner points}.  The work
-of Aldous and Kendall, which was the starting point for the current work,
-immediately raises two questions: (1)~Is there always a graph, $G=(V,E)$,
-that does not use Steiner points and has $\asf(G)=1+o_n(1)$? (2)~Does
-this result generalize to point sets in $\R^d$?  Our results answer both
-of these questions in the affirmative.
+We call the points in $V'\setminus V$ \emph{Steiner points}.  The work of
+Aldous and Kendall, which was the starting point for the current work,
+immediately raises three questions: (1)~Can a similar result be proven
+without making any form of ``well-distributed'' assumption on the points
+in $V$? (2)~Is there always a graph, $G=(V,E)$, that does not use Steiner
+points and has $\asf(G)=1+o_n(1)$? (3)~Does this result generalize to
+point sets in $\R^d$?  Our results answer all three of these questions
+in the affirmative.
 
-We note that it does not seem easy to answer either of the preceding two
-questions using a modification of Aldous and Kendall's construction, which
-consists of a minimum Steiner spanning tree of $V$, some additional random
-line segments, and some additional segments that form a grid.  Anywhere
-two segments cross, a vertex is added to $V'$, so this construction makes
-essential use of Steiner points.  Furthermore, the main technical tool
-used by Aldous and Kendall is a new result on the lengths of boundaries
-of certain cells in arrangements of random lines \cite[Theorems~3 and 4]{aldous.kendall:short}.  In dimensions greater
-than 2, arrangements of lines do not decompose space into cells, so it
-seems difficult to generalize this result to higher dimensions.
+We note that it does not seem easy to answer any of the preceding
+questions using a modification of Aldous and Kendall's construction.
+(1)~Their proof uses the well-distributed assumption to argue that
+most pairs of points are at distance at least $n^{\gamma}$, for any
+$y<1/2$ \cite[Section~5.3]{aldous.kendall:short-length}.  (2)~their
+construction consists of a minimum Steiner spanning tree of $V$,
+some additional random line segments, and some additional segments
+that form a grid.  Anywhere two segments cross, a vertex is added
+to $V'$, so this construction makes essential use of Steiner points.
+(3)~The main technical tool used in their proof is a new result on the
+lengths of boundaries of certain cells in arrangements of random lines
+\cite[Theorems~3 and 4]{aldous.kendall:short-length}.  In dimensions
+greater than 2, arrangements of lines do not decompose space into cells,
+so it seems difficult to generalize this result to higher dimensions.
 
 \section{The Construction}
 \seclabel{upper-bound}
@@ -151,6 +175,11 @@ makes use of a clustering of the points of $V$ into $O(n/k)$ clusters,
 each of size at most $k$, that we call a $k$-partition.  In the next
 subsection, we define $k$-partitions and show how to compute them.
 In the following subsection we show how to construct the graph $G$.
+The proof that shows the existence of $k$-partitions and especially the
+proof that upper-bounds $\asf(G)$ are quite complicated.  Therefore,
+we defer until the final subsection, a discussion of how to efficiently
+compute the graph $G$.
+
 
 \subsection{$k$-Partitions}
 
@@ -180,7 +209,7 @@ Note that, aside from Properties~4 and 5, there is very little structure
 to the balls in $D$. In particular, balls in $D$ may overlap and may
 even contain each other.
 
-\begin{lem}
+\begin{lem}\lemlabel{k-partition}
   For any set $V$ of $n$ points, a $k$-partition of $V$ exists and can
   be found in $O(n\log n)$ time.
 \end{lem}
@@ -972,6 +1001,110 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   \]
 \end{proof}
 
+\subsection{An Algorithm for Constructing a Good Average Stretch Graph}
+
+Next, we show that good average stretch factor graphs can be constructed
+efficiently.
+
+\begin{thm}\thmlabel{algorithm}
+  For every constant dimension, $d$, and every set, $V$, of $n<\infty$
+  points in $\R^d$, there exists a randomized $O(n\log^{d} n )$ time
+  algorithm that constructs a graph $G'=(V,E)$ that has $O(n)$ edges and,
+  with high probability, $\asf(G')=1+O((\log n/n)^{1/(4d-1)})$.
+\end{thm}
+
+
+\begin{proof}
+  The graph $G'$ is similar to the graph, $G$, described in the previous
+  section, except for three major differences:
+  \begin{enumerate}
+     \item Every element in $G$ that is defined in terms of a ball is
+     now defined in terms of a square box.  In particular,
+     \begin{enumerate}
+       \item $\Delta_1,\ldots,\Delta_{n'}$ are minimal square boxes that contain
+         the corresponding boxes defined by nodes of the fair split tree;
+       \item $D_1,\ldots,D_{n'}$ are boxes where each $\D_i$ is a box of
+         side-length $cL(\Delta_i)$ centered at the center of $\Delta_i$;
+         and
+       \item $E_1,\ldots,E_{n'}$ are boxes where each $E_i$ is a box of
+         side-length $L(\Delta_i)/c$ that intersects $D_i$.
+     \end{enumerate}
+     \item The box $E_i$ does not perfectly maximize the number of points
+       it contains. Instead, we guarantee that if there exists any
+       box of side-length $L(\Delta_i)/2c$ that intersects $D_i$ and
+       contains $\epsilon n$ points of $V$, then $E_i$ is chosen so that
+       it contains at least $\epsilon n$ points of $V$.
+     \item We change the value of $\epsilon$ to 
+      \[  \epsilon = \frac{1}{k} = \left(\frac{\log}{n}\right)^{(d-1)/(4d-1)} \enspace . \]
+  \end{enumerate} 
+  A straightforward, but tedious, walkthrough of the proof of
+  \thmref{upper-bound} using these new definitions of $\Delta_i$,
+  $D_i$, $E_i$, and $\epsilon$ shows that the graph $G'$ has $\asf(G')=
+  1+O((\log n/n)^{1/(4d-1)})$.  (A key step occurs in the analysis of
+  Type~4 pairs, where we must check that the new value of $\epsilon$
+  still satisfies $\epsilon \ge D\sqrt{k/n}$---which it does.)
+
+  As described in the proof of \lemref{k-partition}, computing the
+  fair split tree, and the resulting $\Delta_1,\ldots,\Delta_{n'}$,
+  $V_1,\ldots,V_{n'}$, $u_1,\ldots,u_{n'}$ and $D_1,\ldots,D_{n'}$ is
+  easily accomplished in $O(n\log n)$ time.  All that remains is to show
+  how to compute $E_1,\ldots,E_{n'}$ and $w_1,\ldots,w_{n'}$ efficiently.
+
+  The reason for moving from balls to boxes is that they allow for the
+  use of range trees \cite{a,b,c}.  Range trees allow us to preprocess,
+  using $O(n\log^{d-1} n)$ time and space, a set of $n$ points in $\R^d$
+  so that, for any query box, $B$, we can find, in $O(\log^{d-1} n)$ time:
+  (1)~the number of points in $B$, (2)~a randomly chosen point in $B$,
+  or (3)~the point with minimum index in $B$.\footnote{For this third type
+  of query, we use a constant-time range-minimum data structure \cite{x}
+  as the 1-dimensional structure.} Furthermore, using a box-point duality,
+  a set of square boxes in $\R^d$ can be preprocessed, using $O(n\log^d
+  n)$ time and space, so that, for any query point $p\in\R^d$, we can,
+  in $O(\log^d n)$ time, determine the index of the smallest box that
+  contains $p$.
+
+  To find each box, $E_i$, we use random sampling.  Let $D'_{i}$ be
+  the square box that is centered at the center of $\Delta_i$ and has
+  side-length $(c+1/2c)L(\Delta_i)$.  We repeatedly select a random point
+  $u\in V\cap D'_{i}$ and count the number of points in the box, $E(u)$,
+  that is centered at $u$ and has side length $L(\Delta_i)/c$.  The sample
+  box containing the maximum number of points is chosen as $E_i$.
+
+  Suppose that there exists some box, $E'_i$, of side length
+  $L(\Delta_i)/2c$ that intersects $D_i$ and that contains at least
+  $\epsilon n$ points of $V$.  Then, if we repeat the above sampling
+  procedure $c\ln n/\epsilon$ times, then, with probability at least
+  $1-n^{-c}$, one of our sample points, $u$, is in $E'_i$.  In this case,
+  $E(u)$ contains $E'_i$, so we obtain a box, $E_i$ that intersects $D_i$
+  and contains at least $\epsilon n$ points of $V$.
+
+  By storing the points of $V$ in a range tree, we can therefore identify
+  the boxes $E_1,\ldots,E_{n'}$ in time
+  \[
+     O(n'(\log n/\epsilon)\log^{d-1} n) 
+        = O\left(\frac{n\log^{d-1}n}{\epsilon k} \right) = O(n\log^d n) \enspace .
+  \]
+ 
+  Let $E\subseteq\{E_1,\ldots,E_{n'}\}$ be the subset of boxes that
+  contain at least $\epsilon n$ points of $V$. By using the point-box
+  duality, we can store $E$ in a range tree so that, for each point
+  $u\in V$, we can determine the index, $i(u)$, of the smallest box that
+  contains at least $\epsilon n$ points of $V$ and contains $u$. This step
+  takes time
+  \[
+     O(n\log^d n) \enspace .
+  \]
+
+  Finally, we can store the point/index pairs $(u,i(u))$, $u\in V$, in a
+  range tree so that, for each box $E_i$ we can find a point $w_i\in E_i$
+  that minimizes $i(u)$.  This step takes time
+  \[
+     O(n\log^{d-1} n) \enspace . \qedhere
+  \]
+  
+\end{proof}
+
+
 
 \section{Lower Bounds}
 \seclabel{lower-bound}
@@ -1056,17 +1189,6 @@ Our results leave many areas open for further research.  We say that
 a graph, $G=(V,E)$, with $|V|=n$, has \emph{good average stretch} if
 $\asf(G)=1+o_n(1)$ and $|E|=O(n)$.
 
-We have proven that a good average stretch graph $G=(V,E)$ exists for
-any point set $V\subset\R^d$.  Without much effort, the proof can be
-made into an $O(n^2\log n)$ time algorithm to construct the graph, $G$
-from the point set $V$.
-
-\begin{op}
-  Given a point set, $V$, how quickly can one construct a good average
-  stretch graph $G=(V,E)$? \note{should we solve this ourselves? at
-  least in $\R^2$?}
-\end{op}
-
 The following open problems have to do with strengthenings of
 \thmref{upper-bound} in which $G$ has additional properties.
 
@@ -1088,41 +1210,34 @@ The following open problems have to do with strengthenings of
 \end{op}
 
 \begin{op}
-  Bose \etal\ \cite{S} define $f(k)$-robust spanners in terms of the
+  Bose \etal\ \cite{bose.dujmovic.ea:robust} define $f(k)$-robust spanners in terms of the
   (worst-case) spanning ratio and their definition extends naturally
   to average spanning ratio.  Given a point set, $V$, does there always
   exist a good average stretch graph $G=(V,E)$ that is $f(k)$-robust?
 \end{op}
 
 
-The following questions ask in how general of a setting
-\thmref{upper-bound} can be proved:
-
-\begin{op}
-  Given a weighted graph, $H=(V,E)$ with $|V|=n$ vertices, does $H$
-  always have a subgraph
-  $G=(V,E')$ with $|E'|\in O(n)$ and such that
-  \[
-     \asf_H(G) = \binom{n}{2}^{-1}\sum_{\{u,w\}\in V}\frac{\|uw\|_G}{\|uw\|_H}
-         = 1+o_n(1) \enspace ?
-  \]
-\end{op}
+The following question asks if the upper-bound can be proven in a more
+general setting:
 
 \begin{op}\oplabel{metric-space}
-  Given a metric space $(V,d)$, does there always exist a graph $G=(V,E)$,
-  $|E|\in O(n)$ with $\asf(G)=1+o_n(1)$?  (Here shortest paths in $G$
-  are measured in terms of the cost of their edges in the metric space.)
+  What conditions on a metric space $(V,d)$ are necessary and sufficient
+  so that there always exist a graph $G=(V,E)$, $|E|\in O(n)$ with
+  $\asf(G)=1+o_n(1)$?  (Here shortest paths in $G$ are measured in terms
+  of the cost of their edges in the metric space.)
 \end{op}
 
-The techniques used to prove \thmref{upper-bound} seem applicable to
-metric spaces of bounded doubling dimension \cite{x}.\note{reference?}
-Is this extra restriction on the metric spaces necessary?   The results of
-Abraham \etal\ \cite{abraham.bartal.ea:metric,abraham.bartal.ea:embedding}
-show that, for arbitrary metric spaces, there exist spanning trees with
-average stretch factor $O(1)$.  It seems conceivable that, even for
-arbitrary metric spaces, there may exist good average stretch graphs.
-
-
+It seems likely that some of the techniques used to prove
+\thmref{upper-bound} are applicable to metric spaces of bounded doubling
+dimension \cite[Section~10.13]{heinonen:lectures}.  Is bounded doubling
+dimension the weakest possible restriction on the metric space?  It is
+clear that some restrictions on the metric space are required;
+in the metric space in which all points have unit distance, the spanning
+ratio of a graph, $G=(V,E)$, having $m$ edges is at least
+\[
+    \binom{n}{2}^{-1}\left(m + 2\left(\binom{n}{2}-m\right)\right) 
+\]
+since, if there is no edge between $u$ and $w$ in $G$, then $\|uw\|_G \ge 2$.
 
 \section*{Acknowledgement}
 

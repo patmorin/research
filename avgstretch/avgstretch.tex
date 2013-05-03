@@ -2,6 +2,13 @@
 \usepackage{amsthm,amsmath,graphicx}
 \usepackage{pat}
 %\usepackage{coffee4}
+\usepackage[letterpaper]{hyperref}
+\usepackage[dvipsnames]{color}
+\definecolor{linkblue}{named}{Blue}
+\hypersetup{colorlinks=true, linkcolor=linkblue,  anchorcolor=linkblue,
+citecolor=linkblue, filecolor=linkblue, menucolor=linkblue, pagecolor=linkblue,
+urlcolor=linkblue} 
+
 
 \usepackage{tikz,hyphenat}
 \let\oldmarginpar\marginpar
@@ -46,11 +53,15 @@
   sets for which any graph with a linear number of edges has average
   stretch factor $1+\Omega(1/\sqrt{n})$.  Bounds of this type are not
   possible for the more commonly studied worst-case stretch-factor.
-  In particular, there exists point sets, $V$, such that, for any graph $G=(V,E)$
-  with worst-case stretch factor $1+o_n(1)$, $|E|\in\omega(n)$.
+  In particular, there exists point sets, $V$, such that, for any graph
+  $G=(V,E)$ with worst-case stretch factor $1+o_n(1)$, $|E|\in\omega(n)$.
 \end{abstract}
 
 \end{titlepage}
+
+\tableofcontents
+
+\newpage
 
 \section{Introduction}
 
@@ -87,16 +98,16 @@ It is known that, for any $d\in O(1)$ and any $\eps >0$, where
 $\eps$ may even depend on $n$, it is possible to construct a
 graph with $O(n/\eps^{d-1})$ edges such that $\strf(G)\le 1+\eps$
 \cite{carmi.smid:optimal,ruppert.seidel:approximating}.\footnote{We
-note that not all of the classic spanner constructions have an optimal
-dependence on $\eps$ and $d$.  Spanners based on the well-separated pair
-decomposition \cite{callahan.kosaraju:faster} can have $\Omega(n/\eps^d)$
-edges.}  This dependence on $\eps$ and $d$ is optimal: Elkin and
-Solomon \cite{elkin.solomon:steiner} show that, in the worst case,
-any graph $G=(V,E)$ having $\strf(G)\le 1+\eps$ has maximum degree
-$\Omega(1/\eps^{d-1})$.  A variant of their argument shows that, for
-some point sets, a constant fraction of vertices must have degree
-$\Omega(1/\eps^{d-1})$ and therefore, $\Omega(n/\eps^{d-1})$ edges
-\cite{solomon}.
+note that not all of the classic spanner constructions have an
+optimal dependence on $\eps$ and $d$.  Spanners based on the
+well-separated pair decomposition \cite{callahan.kosaraju:faster}
+can have $\Omega(n/\eps^d)$ edges.}  This dependence on $\eps$ and $d$
+is optimal: Elkin and Solomon \cite{elkin.solomon:steiner} show that,
+in the worst case, any graph $G=(V,E)$ having $\strf(G)\le 1+\eps$
+has maximum degree $\Omega(1/\eps^{d-1})$.  A variant of their argument
+shows that, for some point sets, a constant fraction of vertices must
+have degree $\Omega(1/\eps^{d-1})$ and therefore the graph must have
+$\Omega(n/\eps^{d-1})$ edges \cite{solomon}.
 
 The upper-bound on (worst-case) stretch factor certainly implies the same
 upper-bound for average stretch factor: For any point set, $V$, there
@@ -117,10 +128,16 @@ More precisely,
    \asf(G)=1+O((\log n/n)^{1/(4d-1)}) \enspace .
 \]
 The proof of this result is in \secref{upper-bound} and constitutes the
-bulk of the paper.  In \secref{upper-bound}, we also show that these graphs
-can be constructed efficiently:  There exists an $O(n\log^d n)$ time
-Monte-Carlo algorithm that, with high probability, constructs a graph $G'$
-with $\asf(G')=1+O((\log n/n)^{1/(4d-1)})$.
+bulk of the paper.  
+
+In \secref{algorithms}, we also show that these graphs can be
+constructed efficiently:  There exists an $O(n\log^d n)$ time Monte-Carlo
+algorithm that, with high probability, constructs a graph $G'$ with
+$\asf(G')=1+O((\log n/n)^{1/(4d-1)})$.  If one is willing to accept a
+slight increase in the average stretch factor, a faster algorithm is
+possible: There exists an $O(n\log n)$ time Monte-Carlo algorithm that,
+with high probability, constructs a graph $G''$ with $\asf(G'')=1+O((\log
+n/n)^{1/(4d-1)}\log n)$.
 
 
 In \secref{lower-bound} we prove a simple lower-bound that shows our
@@ -136,6 +153,8 @@ set $V$ of $n$ points in $\R^d$, there exists a spanning tree, $T=(V,E)$,
 such that $\asf(T)\in O(\log n)$.  More recently, this was improved by
 Abraham \etal\ \cite{abraham.bartal.ea:metric,abraham.bartal.ea:embedding}
 to show that there exists a spanning tree, $T$, with $\asf(T)\in O(1)$.
+Thus, there exists very sparse graphs with constant average stretch
+factor.
 
 Aldous and Kendall \cite[Section~5.3]{aldous.kendall:short-length} show that,
 for any any well-distributed\footnote{For example, any family
@@ -902,13 +921,14 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   Equating the right hand sides of \eqref{ub-4} and \eqref{lb-4}, we
   obtain a contradiction when $t>2C$ and
   \[
-      \epsilon = D\sqrt{k/n}
+      \epsilon \ge D\sqrt{k/n}
   \] 
   for a sufficiently large constant $D$.
   Thus, the total number of bad Type~4 pairs is at most
   \[
-    \epsilon n^2 \in O(n^{3/2}k^{1/2}) \enspace .
+    \epsilon n^2 \enspace .
   \]
+  for any $\epsilon \in \Omega(\sqrt{k/n})$. 
 
   All that remains in handling Type~4 pairs is to prove \clmref{zuper}.
 
@@ -995,17 +1015,21 @@ Without further ado, we now prove that $G$ has low average stretch factor.
     \item For each good Type~4 pair, $(u,w)$, 
       $\|uw\|_G/\|uw\|\le 1+ O(1/c)$.
     \item The number of bad Type~4 pairs is at most 
-       $O(k^{1/2}n^{3/2})$.
+       $O(\epsilon n^2)$ provided that $\epsilon \in \Omega(\sqrt{k/n})$.
   \end{enumerate}
-  The contributions of Type~2 and Type~3 pairs dominate the others, and
-  we obtain
-  \[
+  The contribution of Type~1 pairs is dominated by that of Type~3 pairs,
+  so we obtain
+  \begin{equation}\eqlabel{master-asf}
      \asf(G) = 1 + O\left(1/k^{1/(d-1)} + 1/c 
-       + \binom{n}{2}^{-1}\left(k^{3/2}n^{3/2}c^{d/2}\log c\right)\right) \enspace .
-  \]
+       + \binom{n}{2}^{-1}\left(k^{3/2}n^{3/2}c^{d/2}\log c
+             +\epsilon n^2\right)\right) \enspace .
+  \end{equation}
   Taking 
   \[ 
-       c = (n/\log n)^{1/(4d-1)}
+       \epsilon = \sqrt{k/n} \enspace ,
+  \]
+  \[ 
+       c = (n/\log n)^{1/(4d-1)} \enspace ,
   \]
   and
   \[
@@ -1017,7 +1041,34 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   \]
 \end{proof}
 
+\begin{rem}\remlabel{epsilon-choice}
+   The following observations about the choice of $\epsilon$ will be
+   useful when designing algorithms in the next section.  The choice
+   of the value $\epsilon$ remains free up until the last step in the
+   proof of \thmref{upper-bound}, but is subject to the constraint
+   $\epsilon \in\Omega(k/n)$.  Observe that, if we fix $k=(n/\log
+   n)^{(d-1)/(4d-1)}$, and set $\epsilon = \log^\kappa n/k$, for
+   any constant $\kappa \ge 0$, then the requirement $\epsilon \in
+   \Omega(\sqrt{k/n})$ is satisified for any $d\ge 2$.  Furthermore,
+   for all $d \ge 3$,
+   \[
+      \epsilon n^2 = n^{2-(d-1)/(4d-1)}\log^{\kappa+(d-1)/(4d-1)} n 
+       \in O(n^{2-1/(4d-1)}) \subset O((\log n/n)^{1/(4d-1)}) \enspace .
+   \]
+   In other words, for $\epsilon = \log^\kappa n/k$, the contribution
+   of bad Type~4 pairs to the average stretch factor is dominated by the
+   other terms.
+
+   The case $d=2$ is special.  In this case, 
+   \[ \epsilon n^2 = n^{2-1/7}\log^{\kappa+1/7} n
+        \in O(n^{2-1/7}\log^{\kappa+1/7} n)  \enspace .
+   \]
+   In this case, the average stretch does increase to
+   $1+O((\log n/n)^{1/(4d-1)}\log^{\kappa} n)$.
+\end{rem}
+
 \section{Algorithms}
+\seclabel{algorithms}
 
 In this section, we discuss efficient algorithms for computing a graph
 $G=(V,E)$ that has low average stretch factor, given the point set
@@ -1026,12 +1077,11 @@ the construction given in the preceding section that yields an $O(n\log^d
 n)$ time algorithm.  We then show that some refinements of this algorithm
 lead to an $O(n\log n)$ time algorithm.
 
-Throughot this section, we say that an event within an algorithm happens
+Throughout this section, we say that an event within an algorithm happens
 \emph{with high probability} if the event occurs with probability at
 least $1-O(n^{\alpha})$ and $\alpha$ can be made into an arbitrarily
 large constant by increasing the running time of the algorithm by a
-constant factor.  When describing algorithms in this section, we will
-use the variable $\alpha$ to describe certain aspects of the algorithm.
+constant factor. 
 
 \subsection{A Simple Algorithm}
 
@@ -1071,13 +1121,13 @@ relatively faithful to the proof of \thmref{upper-bound}.
      \item We change the value of $\epsilon$ to 
       \[  \epsilon = \frac{1}{k} = \left(\frac{\log n}{n}\right)^{(d-1)/(4d-1)} \enspace . \]
   \end{enumerate} 
-  A straightforward, but tedious, walkthrough of the proof of
+  It is straightforward, but tedious, to check that the proof of
   \thmref{upper-bound} using these new definitions of $\Delta_i$, $D_i$,
   $E_i$, and $\epsilon$ shows that the graph $G'$ has $\asf(G')= 1+O((\log
-  n/n)^{1/(4d-1)})$.  (A key step occurs in the analysis of Type~4 pairs,
-  where we must check that the new value of $\epsilon$ still satisfies
-  $\epsilon \ge D\sqrt{k/n}$---which it does.) What remains is to show
-  how the graph $G'$ can be constructed in $O(n\log^d n)$ time.
+  n/n)^{1/(4d-1)})$.  (\remref{epsilon-choice}, with $\kappa=0$, gives
+  an explanation as to why the new value of $\epsilon$ does not increase
+  the average stretch factor of the resulting graph.)  What remains is
+  to show how the graph $G'$ can be constructed in $O(n\log^d n)$ time.
 
   As described in the proof of \lemref{k-partition}, computing the
   fair-split tree, and the resulting $\Delta_1,\ldots,\Delta_{n'}$,
@@ -1087,11 +1137,11 @@ relatively faithful to the proof of \thmref{upper-bound}.
   n)$ time using any of several different possible methods
   \cite{callahan.kosaraju:faster,salowe:constructing,vaidya:sparse}.
   An algorithm of Ruppert and Seidel \cite{ruppert.seidel:approximating}
-  can, for any $\gamma >0$, construct a $(1+\gamma)$-spanner of $n'$ points
-  in $\R^d$ that has $O((1/\gamma)^{d-1}n')$ edges in $O((1/\gamma)^{d-1}
-  n'\log n')$ time.  Using this algorithm with $\gamma=1/k^{1/(d-1)}$,
-  the $(1+1/k^{1/(d-1)})$-spanner of the $n'$ points in $N$ can be
-  constructed in time
+  can, for any $\gamma >0$, construct a $(1+\gamma)$-spanner of
+  $n'$ points in $\R^d$ that has $O((1/\gamma)^{d-1}n')$ edges in
+  $O((1/\gamma)^{d-1} n'\log n')$ time.  Using this algorithm with
+  $\gamma=1/k^{1/(d-1)}$, the $(1+1/k^{1/(d-1)})$-spanner of the $n'$
+  points in $N$ can be constructed in time
   \[
      O(kn'\log^{d-1} n') = O(n\log^{d-1} n) \enspace .
   \]
@@ -1103,22 +1153,25 @@ relatively faithful to the proof of \thmref{upper-bound}.
   Range trees allow us to preprocess, using $O(n\log^{d-1} n)$ time and
   space, a set of $n$ points in $\R^d$ so that, for any query box, $B$,
   we can find, in $O(\log^{d-1} n)$ time: (1)~the number of points in $B$,
-  (2)~a randomly chosen point in $B$, or (3)~the point with minimum index
-  in $B$.\footnote{For this third type of query, we use a constant-time
-  range-minimum data structure \cite{bender.farach-colton:lca} as the
-  1-dimensional structure.} Furthermore, using a box-point duality that
-  maps square boxes in $\R^d$ onto points in $\R^{d+1}$, a set of square
-  boxes in $\R^d$ can be preprocessed, using $O(n\log^d n)$ time and
-  space, so that, for any query point $p\in\R^d$, we can, in $O(\log^d
-  n)$ time, determine the index of the smallest box that contains $p$.
+  or (2)~the point with minimum index in $B$.\footnote{For this third
+  type of query, we use a constant-time range-minimum data structure
+  \cite{bender.farach-colton:lca} as the 1-dimensional substructure.}
+  Furthermore, by using a box-point duality that maps square boxes in
+  $\R^d$ onto points in $\R^{d+1}$, a set of square boxes in $\R^d$
+  can be preprocessed, using $O(n\log^d n)$ time and space, so that, for
+  any query point $p\in\R^d$, we can, in $O(\log^d n)$ time, determine
+  the index of the smallest box that contains $p$.
 
-  Our first task is to find the boxes $E_1,\ldots,E_{n'}$ and for this we
-  use random sampling.  Let $D'_{i}$ be the square box that is centered
-  at the center of $\Delta_i$ and has side-length $(c+1/2c)L(\Delta_i)$.
-  We repeatedly select a random point $u\in V\cap D'_{i}$ and count the
+  Our first task is to find the boxes $E_1,\ldots,E_{n'}$ and for
+  this we use random sampling.  Let $D'_{i}$ be the square box
+  that is centered at the center of $\Delta_i$ and has side-length
+  $(c+1/2c)L(\Delta_i)$.  We repeatedly select a random point $u\in V$.
+  If $u$ is not in $D'_i$, then we discard it.  Otherwise, we count the
   number of points in the box, $E(u)$, that is centered at $u$ and has
   side length $L(\Delta_i)/c$.  The sample box containing the maximum
-  number of points is chosen as $E_i$.
+  number of points is chosen as $E_i$.  (If all samples were discarded,
+  then we take $E_i$ to be any square box of side length $L(\Delta_i)/c$
+  that intersects $D_i$.)
 
   Let $E'_i$, be some square box of side length $L(\Delta_i)/2c$ that
   intersects $D_i$ and that contains the maximum number of points in $V$.
@@ -1163,17 +1216,25 @@ relatively faithful to the proof of \thmref{upper-bound}.
 
 \subsection{A Faster Algorithm}
 
-In the preceding section, we showed that a graph with average stretch factor
-$1+o_n(1)$ can be constructed in $O(n\log^d n)$ time. In
+In the preceding section we showed that a graph with average stretch factor
+$1+O((\log n/n)^{1/(4d-1)}$ can be constructed in $O(n\log^d n)$ time. In
 this section, we show that the running time can be reduced to $O(n\log n)$
-provided that we are willing to sacrifice a little inside the $o_n(1)$ term
-in the average stretch factor.
+with only a small increase in the average stretch factor.
 
 \begin{thm}\thmlabel{algorithm-faster}
   For every constant dimension, $d$, and every set, $V$, of $n<\infty$
   points in $\R^d$, there exists a randomized $O(n\log n )$ time
-  algorithm that constructs a graph $G''=(V,E)$ that has $O(n)$ edges and,
-  with high probability, $\asf(G'')=1+o_n(1)$.
+  algorithm that constructs a graph $G''=(V,E)$ that has $O(n)$ edges
+  and, with high probability, 
+  \[
+    \asf(G'')=
+       \begin{cases}
+             1+O\left((\log n/n)^{1/(4d-1)}\log n\right) 
+                & \text{for $d = 2$} \\
+             1+O\left((\log n/n)^{1/(4d-1)}(\log n)^{(d-2)/(d-1)}\right) 
+                & \text{for $d\ge 3$.}
+       \end{cases}
+  \]
 \end{thm}
 
 \begin{proof}
@@ -1186,19 +1247,17 @@ in the average stretch factor.
   that contain at least $\epsilon n$ points takes $\Theta(n\log^{d} n)$
   time; and (3)~determining the index, $i(u)$, of each point $u\in V$
   takes $\Theta(n\log^d n)$ time.  
-
-  We address each of the preceding three problems in turn. Doing so
-  requires making some changes to the algorithm for constructing $G'$
-  that improve the running time but also affect the stretch factor.
-  We will first establish that these changes do, indeed, reduce the
-  running time to $O(n\log n)$.  Afterwards we will discuss what affect
-  these changes have on the stretch factor.
-  
+  We address each of these issues in turn:  
   \begin{enumerate}
      \item We only construct a $(1+(\log^{d-2}
       n/k)^{1/(d-1)})$-spanner of $N$.  Using the algorithm of Ruppert
       and Seidel, the construction of this spanner takes only $O(n\log
-      n)$ time.
+      n)$ time.  This modification increases the spanning ratio of the 
+      resulting graph, so that 
+      \[
+         \asf(G'') \le 1 
+             + O\left((\log n/n)^{1/(4d-1)}(\log n)^{(d-2)/(d-1)}\right) \enspace .
+      \]
 
      \item The sampling process used to find $E_1,\ldots,E_{n'}$
      has two phases.  In Phase~1, a range tree is constructed
@@ -1224,39 +1283,32 @@ in the average stretch factor.
      \end{enumerate}
      Properties~(b) and (c) above ensure that the quantity $|B\cap V'|/p$,
      which can be computed in $O(\log^{d-1} n)$ time using $T_1$, is an
-     accurately enough estimate of $|B\cap V|$.
+     accurate enough estimate of $|B\cap V|$.
 
      Phase~2 requires sampling $\alpha n'\ln n/\epsilon$ points and,
      for each sample point, $u$, counting the number of points of $V$
      in some box centered at $u$.  By increasing the value of $\epsilon$
-     from $\epsilon=1/k$ to $\epsilon=\log^{d-1} n/k$, this sampling
-     and counting can be done in $O(n\log n)$ time using $T_1$.
-
-     We note that the sample obtained this way is a random sample of
-     $V'$, which is itself a Bernoulli sample of $V$. Despite this, the
-     sample will still, with high probability, sample a point in the
-     box $E'_i$ described in the proof of \thmref{algorithm}.  This can
-     be proven by first using Chernoff's Bounds to show that, with high
-     probability, the number of points in $E'_i\cap V$  that are in the
-     sample $V'$ is at least $p\epsilon n/2$ and then proceeding as in
-     the proof of \thmref{algorithm} to show that, with high probability,
-     at least one of these points is sampled.
+     from $\epsilon=1/k$ to $\epsilon=\log^{d-1} n/k$, this counting can
+     be done in $O(n\log n)$ time using $T_1$.  \remref{epsilon-choice}
+     explains why this new choice of $\epsilon$ does not increase the
+     average stretch factor for $d\ge 3$, and increases it to $1+O((\log
+     n/n)^{1/(4d-1)}\log n)$ for $d=2$.
 
     \item To determine the index, $i(u)$, of points $u\in V$, we
       first construct a range tree, $T_2$ for (the duals of) some boxes
       in  $\{E_1,\ldots,E_{n'}\}$.  In $T_2$, we include every box,
       $B\in\{E_1,\ldots,E_{n'}\}$ such that $|B\cap V'|/p\ge\epsilon n$.
-      From the discussion, $T_2$ then contains only boxes, $B$ such
-      that $|B\cap V|\ge \epsilon n/2$ and $T_2$ includes every box,
-      $B$ such that $|B\cap V|\ge 2\epsilon n$.
+      From the preceding discussion, with high probability, $T_2$ then
+      contains only boxes, $B$ such that $|B\cap V|\ge \epsilon n/2$ and
+      $T_2$ includes every box, $B$ such that $|B\cap V|\ge 2\epsilon n$.
 
       Determining which boxes to include in $T_2$ requires $n'$ queries
-      in $T_1$, so this takes $O(n'\log^{d-1} n)\subset O(n\log n)$
-      time.  Building the tree $T_2$ takes $O(n'\log^{d} n)\subset
-      O(n\log n)$ time.  At this point, we would like to use $T_2$
-      to compute $i(w)$ for every point $w\in V$, but this would take
-      $\Omega(n\log^d n)$ time.  Instead, we take a sample, $V''\subseteq
-      V$ of size $n/\log^{d-1} n$ and compute $i(w)$ for each $w\in V''$.
+      in $T_1$, so this takes $O(n'\log^{d-1} n)\subset O(n\log n)$ time.
+      Building the tree $T_2$ takes $O(n'\log^{d} n)\subset O(n\log n)$
+      time.  At this point, we would like to use $T_2$ to compute $i(w)$
+      for every point $w\in V$, but this would take $\Omega(n\log^d
+      n)$ time.  Instead, we take another sample, $V''\subseteq V$
+      of size $n/\log^{d-1} n$ and compute $i(w)$ for each $w\in V''$.
       This takes only $O(n\log n)$ time.
 
       Finally, we put each pair $(u,i(u))$ for each $u\in V''$ into
@@ -1270,10 +1322,12 @@ in the average stretch factor.
       over all $w_i\in E_{i}\cap V''$ is a good-enough replacement for
       the point, $w_i^*$, that minimizes $i(w_i^*)$ over all $w_i^*\in
       E_i\cap V$.  To establish this, it is necessary to revisit the
-      proof of \thmref{upper-bound}.
+      proof of \thmref{upper-bound}.  The only place in the proof of
+      \thmref{upper-bound} in which the choice of $w_i$ plays a role is
+      in counting the number of bad Type~4 pairs.
 
       Recall that this part of the proof of \thmref{upper-bound} assumes
-      that that number of bad Type~4 pairs is at least $\epsilon
+      that that number of bad Type~4 pairs is greater than $\epsilon
       n^2$ and uses this assumption to derive a contradiction.
       In particular, the proof shows the existence of a point $w^*$
       that satisfies Conditions~B1--B3.  Walking through the proof, we
@@ -1306,17 +1360,18 @@ in the average stretch factor.
       \]
       for any constant $\alpha >0$ and all sufficiently large values of $n$.
   \end{enumerate}
-  Finally, it remains to establish the effect of the preceding changes
-  on the stretch factor of the resulting graph.  As it turns out, the
-  only change that makes any difference to the spanning ratio is the
-  change to the spanner of $N$.
-
+  This completes the proof of \thmref{algorithm-faster}.
 \end{proof}
 
 
 
 \section{Lower Bounds}
 \seclabel{lower-bound}
+
+Next, we prove a simple lower-bound which shows that our bound on the
+average stretch factor is at least of the right flavour: Combined with
+the upper-bound of \thmref{upper-bound}, the following result shows that
+the optimal bound is $1+O(1/n^{\delta})$ for some $\delta\in(1/4d-1,1/2]$.
 
 \begin{thm}\thmlabel{lower-bound}
   For every positive integer, $n$, there exists a point set, $V$, of $n$
@@ -1447,7 +1502,9 @@ of a graph, $G=(V,E)$, having $m$ edges is at least
 \[
     \binom{n}{2}^{-1}\left(m + 2\left(\binom{n}{2}-m\right)\right) 
 \]
-since, if there is no edge between $u$ and $w$ in $G$, then $\|uw\|_G \ge 2$.
+since, if there is no edge between $u$ and $w$ in $G$, then $\|uw\|_G
+\ge 2$.  Therefore any graph with average stretch factor $1+o_n(1)$
+must have $\binom{n}{2}-o(n^2)$ edges.
 
 \section*{Acknowledgement}
 

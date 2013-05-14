@@ -798,14 +798,13 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   \[
       \|uw_i\|+2\|w_iw\| \ge (1+\beta/c)\|uw\| \enspace ,
   \]
-  and otherwise the pair is \emph{good}.
-  For any good pair $(u,w)$,
+  and otherwise it is a \emph{good pair}.  For any good pair $(u,w)$,
   \[
     \frac{\|uw\|_G}{\|uw\|} = 1+O(1/c) \enspace ,
   \]
-  so we can focus our effort on upper-bounding the number of bad pairs.
-  The remainder of this will assume, for the sake of contradiction,
-  that the number of bad Type~4 pairs is at least $\epsilon n^2$.
+  so we can focus our study on bad pairs.  To upper-bound the number
+  of bad pairs we will assume, for the sake of contradiction, that the
+  number of bad pairs is at least $\epsilon n^2$.
 
   Let $b_i$ denote the number of bad pairs $(u,w)$ with $u\in V_i$
   and $w\in E_i\cap D_i$.  Then, by assumption,
@@ -848,7 +847,8 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   \begin{equation}
      \sum_{j=j^*+1}^{j^*+t+C} n_{i_j}
         = |V\cap E'_{i_{j^*+t+C}}\setminus \E'_{i_{j^*}}| 
-          \in O((t+C)k/\epsilon) \enspace . \eqlabel{sparse}
+          \in O((t+C)k/\epsilon)
+          = O(tk/\epsilon) \enspace . \eqlabel{sparse}
   \end{equation}
 
   The careful choice of $w_i$'s implies the following claim, whose proof
@@ -895,32 +895,34 @@ Without further ado, we now prove that $G$ has low average stretch factor.
 %  point, $p$, in this ball is contained in $\Omega(\mu)$ of these balls.
 %  But then Property~4 of $k$-partitions implies that $\mu\in O(1)$.
 
-  Next, we will upper-bound $\sum_{j=j^*}^{j^*+t}b_{i_j}$, the number
+  Next, we will upper-bound $\sum_{j=j^*+1}^{j^*+t}b_{i_j}$, the number
   of bad pairs, $(u,w)$, with $u\in V_{i_j}$, $w\in E_{i_j}$, and
   $j\in\{j^*,\ldots,j^*+t\}$.  From the preceding discussion, each such
-  pair either has (a)~$u\in E$ or has (b)~$w\not\in E_{i_{j^*}}$.
+  pair falls into at least one of the two following categories:
+  \begin{enumerate}
+    \item Category A: $u\in E$. 
+      To bound the number of these pairs, consider the balls
+      $\Delta_{i_{j^*+1}},\ldots,\Delta_{i_{j^*+t}}$. Each of these
+      balls has radius at least $r_{i_{j^*}}=\radius(E)$.  Therefore,
+      Property~5 of $k$-partitions implies that
+      \[
+        \left|\bigcup_{j=j^*+1}^{j^*+t} V_{i_{j}}\cap E\right|
+          \in O(k)
+      \]
+      Each $u$ in $V_{i_j}\cap E$ takes part in at most $O(n)$ bad pairs,
+      so the number of bad pairs of this form is $O(kn)$.
 
-  To bound the number of pairs from class~(a), consider the balls
-  $\Delta_{i_{j^*+1}},\ldots,\Delta_{i_{j^*+t}}$. Each of these balls
-  has radius at least $r_{i_{j^*}}=\radius(E)$.  Therefore, Property~5
-  of $k$-partitions, implies that
-  \[
-    \left|\bigcup_{j=j^*+1}^{j^*+t} V_{i_{j}}\cap E\right|
-      \in O(k)
-  \]
-  Each $u$ in $V_{i_j}\cap E$ takes part in at most $O(n)$ bad pairs,
-  so the number of bad pairs from class~(a) is $O(kn)$.
-
-  Next we bound the number of bad pairs from class~(b).
-  By \eqref{sparse}, the number of $w$'s that are outside of
-  $E_{i_{j^*}}$ but still in some $E_{i_j}$ for $j\in\{1,\ldots,t\}$
-  is $O(tk/\epsilon)$.  Each such $w$ forms a bad pair with at most
-  $tk$ different values of $u$, so the number of bad pairs of class~(b)
-  is at most $(tk)^2/\epsilon$.
-
-  Thus, the total number of bad Type~3 pairs is at most
+    \item Category B: $w\not\in E_{i_{j^*}}$.
+      By \eqref{sparse}, the number of points that are not in
+      $E_{i_{j^*}}$ but still in some $E_{i_j}$ for $j\in\{1,\ldots,t\}$
+      is $O(tk/\epsilon)$.  Each such point, $w$, forms a bad pair
+      with at most $tk$ different values of $u$---namely the elements
+      of $V_{i_{j^*}+1},\ldots,V_{i_{j^*+t}}$. Therefore, the number of
+      bad pairs in this category is at most $O((tk)^2/\epsilon)$.
+  \end{enumerate}
+  Thus, we have 
   \begin{equation}
-    \sum_{j=j^*+1}^{j^*+t} b_{i_{j}}  \in O(kn + (tk)^2/\epsilon \enspace .
+    \sum_{j=j^*+1}^{j^*+t} b_{i_{j}}  \in O(kn + (tk)^2/\epsilon) \enspace .
     \eqlabel{ub-4}
   \end{equation}
   On the other hand, the indices $i_1,\ldots,i_\ell$ are chosen
@@ -933,7 +935,11 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   \end{equation}
  
   Equating the right hand sides of \eqref{ub-4} and \eqref{lb-4}, we
-  obtain a contradiction when 
+  obtain 
+  \[
+     C_1t\epsilon kn \le C_2(kn + (tk)^2/\epsilon) \enspace , 
+  \]
+  for some constants $C_1$ and $C_2$.  This yields a contradiction when 
   \[
       t > D/\epsilon
   \]
@@ -941,34 +947,36 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   \[
           \epsilon\ge D\sqrt{\frac{tk}{n}} \enspace ,
   \]
-  for some sufficiently large constant $D$.  Taking $t=D/\epsilon$ yields
-  the condition
+  for some sufficiently large constant $D$.  Setting $t=D/\epsilon$
+  leaves only the condition
   \[
-          \epsilon\ge \left(\frac{k}{n}\right)^{1/3} \enspace ,
+          \epsilon \ge D^{2/3}\left(\frac{k}{n}\right)^{1/3} \enspace .
   \]
-  Thus, the total number of bad Type~4 pairs is at most
+  Thus, there exists some constant $D_0$ such that the total number of
+  bad Type~4 pairs is at most
   \[
-    \epsilon n^2 \enspace .
+    \epsilon n^2 \enspace ,
   \]
-  for any $\epsilon \in \Omega((k/n)^{1/3})$. 
+  provided that $\epsilon \ge D_0(k/n)^{1/3}$. 
 
   All that remains in handling Type~4 pairs is to prove \clmref{zuper}.
 
   \begin{proof}[Proof of \clmref{zuper}]
-  Let $u$ by any point $V_{i_{j}}$, for any $j\in\{j^*+1,\ldots,j^*+t\}$.
-  It is sufficient to prove that $\|w^*w_{i_{j}}\|\in O(r_{i_{j^*}}/c)$.
-  If $w_{i_{j}}=w^*$, then we are done, so assume $w_{i_{j}}\neq
-  w^*$.  Since $w^*\in E_{i_{j}}$ but was not chosen to act as
-  $w_{i_{j}}$, there must exist some index $i'$ such that $E_{i'}\cap
-  E_{i_{j}}\neq\emptyset$, $|E_{i'}\cap V|\ge\epsilon n$, $r_{i'}\le
-  r_{i_{j^*}}$, and $w_{i_{j}}\in E_{i'}$.
+  Let $u$ by any point in $V_{i_{j}}$, for any
+  $j\in\{j^*+1,\ldots,j^*+t\}$.  Since there is an edge joining $u$
+  and $w_{i_{j}}$, it is sufficient to prove that $\|w^*w_{i_{j}}\|\in
+  O(r_{i_{j^*}}/c)$.  If $w_{i_{j}}=w^*$, then we are done, so assume
+  $w_{i_{j}}\neq w^*$.  Since $w^*\in E_{i_{j}}$ but was not chosen
+  to act as $w_{i_{j}}$, there must exist some index $i'$ such that
+  $E_{i'}\cap E_{i_{j}}\neq\emptyset$, $|E_{i'}\cap V|\ge\epsilon n$,
+  $r_{i'}\le r_{i_{j^*}}$, and $w_{i_{j}}\in E_{i'}$.
 
-  There are two cases to consider:
+  \noindent There are two cases to consider:
   \begin{enumerate}
     \item 
     If $E'_{i_{j^*}}$ intersects $E_{i'}$, then (see \figref{gummo-a})
     \[
-       \|w^*w_{i_j}\|\le 2r_{i_{j^*}}/c + 2r_{i'}/c \le 4r_{i_{j^*}}/c \in O(r_{i_{j^*}}) \enspace ,
+       \|w^*w_{i_j}\|\le 2r_{i_{j^*}}/c + 2r_{i'}/c \le 4r_{i_{j^*}}/c \in O(r_{i_{j^*}}/c) \enspace ,
     \]
     and we are done. 
     \begin{figure}
@@ -982,21 +990,31 @@ Without further ado, we now prove that $G$ has low average stretch factor.
     \item If $E_{i'}$ and $E'_{i_{j^*}}$ are disjoint, then we claim that
     $E_{i'}\subset E'_{i_{j^*+t+C}}$ (see \figref{gummo-b}).  To see why
     this is so, we argue that, when $C$ is a sufficiently large constant,
-    \[
+    \begin{equation}
       r_{i_{j^*+t+C}} > 2r_{i_{j^*+t}} 
-          \ge 2r_{i_j} \ge r_{i_j} + r_{i'} \enspace .
-    \]  
-    To see why this first inequality holds, we first observe
-    that, for any $i\in\{1,\ldots,n'\}$, if $u\in V_i$ and $w\in E_i$
-    form a bad pair, then the distance from $\Delta_i$ to $E_i$ is less
-    than $r_i$.  Now, if $r_{i_{j^*+t+C}} < 2r_{i_{j^*+t}}$,
-    then $\Delta_{i_{j^*+t}},\ldots,\Delta_{i_{i_{j^*+t+C}}}$ is a set
-    of $C+1$ balls all having radii in $[r_{i_{j^*+t}},2r_{i_{j^*+t}})$ and
-    that are all contained in a ball of radius $6r_{i_{j^*+t}}$ centered
-    at $w^*$.  Therefore, some point, $p$, in this ball is contained in
-    $\Omega(C)$ of these balls.  But then Property~4 of $k$-partitions
-    implies that $C\in O(1)$.  Thus, for a sufficiently large constant, $C$,
-    $r_{i_{j^*+t+C}} > 2r_{i_{j^*+t}}$ and $E'\subset E_{i_{j^*+t+C}}$.
+          \ge 2r_{i_j} \enspace . \eqlabel{xxxx}
+    \end{equation}
+    This implies that $E_{i'}\subset E'_{i_{j^*+t+C}}$ since every
+    point in $E_{i'}$ is at distance at most $4r_{i_j}$ from $w^*$
+    and $E'_{i_{j^*+t+C}}$ is centered at $w^*$ and has radius
+    $2r_{i_{j^*+t+C}} > 4r_{i_j}$.
+
+    To see why the first inequality in \eqref{xxxx} holds, we first
+    observe that, for any $i\in\{1,\ldots,n'\}$, if any $u\in V_i$
+    and $w\in E_i$ form a bad pair, then the distance from $\Delta_i$
+    to $E_i$ is less than $r_i$.  Since each $V_{i_j}$ and $E_{i_j}$
+    define at least one pair, this implies that $\Delta_{i_j}$ is
+    contained in a ball of radius $(3+2/c)r_{i_j}$ centered at $w^*$.
+
+    Now, if $r_{i_{j^*+t+C}} < 2r_{i_{j^*+t}}$, then
+    $\Delta_{i_{j^*+t}},\ldots,\Delta_{i_{i_{j^*+t+C}}}$ is a set of
+    $C+1$ balls all having radii in $[r_{i_{j^*+t}},2r_{i_{j^*+t}})$ and
+    that are all contained in a ball of radius $(6+4/c)r_{i_{j^*+t}}$
+    centered at $w^*$.  Therefore, some point, $p$, in this ball is
+    contained in $\Omega(C)$ of these balls.  But then Property~4 of
+    $k$-partitions implies that $C\in O(1)$.  Thus, for a sufficiently
+    large constant, $C$, $r_{i_{j^*+t+C}} > 2r_{i_{j^*+t}}$ and $E'\subset
+    E_{i_{j^*+t+C}}$.
 
     Since $E_{i'}$ and $E_{i_{j^*}}$ are disjoint and $E_{i'}\subset
     E_{i_{j^*+t+C}}$,
@@ -1018,8 +1036,15 @@ Without further ado, we now prove that $G$ has low average stretch factor.
       |V\cap E_{i_{j^*+t+2\mu}}\setminus E_i| 
          \in O(tk/\epsilon) \enspace .
     \]
-    This yields a contradiction when $t<D \epsilon^2 n/k$, for a
-    sufficiently small constant $D>0$.
+    This yields a contradiction when $t<D' \epsilon^2 n/k$, for a
+    sufficiently small constant $D'>0$.  Note that we have already set
+    $t=D/\epsilon$, so this requires that
+    \[
+       D/\epsilon < D'\epsilon ^2 n/k \Leftrightarrow \epsilon 
+           > \left(\frac{Dk}{D'n}\right)^{1/3} \enspace .
+    \]
+    Therefore, the condition on $t$ is already contained in the
+    requirement that $\epsilon \ge D_0(k/n)^{1/3}$.
   \end{enumerate}
   This completes the proof of \clmref{zuper}.
   \end{proof}
@@ -1068,11 +1093,13 @@ Without further ado, we now prove that $G$ has low average stretch factor.
    useful when designing algorithms in the next section.  The choice
    of the value $\epsilon$ remains free up until the last step in the
    proof of \thmref{upper-bound}, but is subject to the constraint
-   $\epsilon \in\Omega(\sqrt{k/n})$.  Observe that, if we fix $k=(n/\log
-   n)^{(d-1)/(4d-1)}$, and set $\epsilon = \log^\kappa n/k$, for
-   any constant $\kappa \ge 0$, then the requirement $\epsilon \in
-   \Omega(\sqrt{k/n})$ is satisified for any $d\ge 2$.  Furthermore,
-   for all $d \ge 3$,
+   $\epsilon \in\Omega((k/n)^{1/3})$. 
+
+   It will be particularly useful to fix $k=(n/\log n)^{(d-1)/(4d-1)}$,
+   and set $\epsilon = (\log^\kappa n)/k$, for some constant $\kappa
+   \ge 0$.  It is then straightforward to verify that the requirement
+   $\epsilon \in \Omega((k/n)^{1/3})$ is satisified for any constant
+   $d\ge 2$.  Furthermore, for all $d \ge 3$,
    \[
       \epsilon n^2 = n^{2-(d-1)/(4d-1)}\log^{\kappa+(d-1)/(4d-1)} n 
        \in O(n^{2-1/(4d-1)}) \subset O((\log n/n)^{1/(4d-1)}) \enspace .
@@ -1099,11 +1126,11 @@ the construction given in the preceding section that yields an $O(n\log^d
 n)$ time algorithm.  We then show that some refinements of this algorithm
 lead to an $O(n\log n)$ time algorithm.
 
-Throughout this section, we say that an event within an algorithm happens
-\emph{with high probability} if the event occurs with probability at
-least $1-O(n^{\alpha})$ and $\alpha$ can be made into an arbitrarily
-large constant by increasing the running time of the algorithm by a
-constant factor. 
+Our algorithms are randomized.  Throughout this section, we say that an
+event within an algorithm happens \emph{with high probability} if the
+event occurs with probability at least $1-O(n^{\alpha})$ and $\alpha$
+can be made into an arbitrarily large constant by increasing the running
+time of the algorithm by a constant factor.
 
 \subsection{A Simple Algorithm}
 
@@ -1120,8 +1147,9 @@ relatively faithful to the proof of \thmref{upper-bound}.
 \begin{proof}
   Throughout this proof, a \emph{box} is an axis-aligned box of the form
   $[a_1,b_1]\times\cdots\times[a_d,b_d]$ and we call this a \emph{square
-  box} if $b_i-a_i=b_j-a_j$ for all $i,j\in\{1,\ldots,d\}$.  The graph
-  $G'$ constructed by our algorithm is similar to the graph, $G$,
+  box} if $b_i-a_i=b_j-a_j$ for all $i,j\in\{1,\ldots,d\}$. As before,
+  $L(B)$ denotes the length of the longest side of the box, $B$.  The
+  graph $G'$ constructed by our algorithm is similar to the graph, $G$,
   described in the previous section, except for three major differences:
   \begin{enumerate}
      \item Every element in $G$ that is defined in terms of a ball is
@@ -1129,14 +1157,14 @@ relatively faithful to the proof of \thmref{upper-bound}.
      \begin{enumerate}
        \item $\Delta_1,\ldots,\Delta_{n'}$ are minimal square boxes that contain
          the corresponding boxes defined by nodes of the fair-split tree;
-       \item $D_1,\ldots,D_{n'}$ are square boxes where each $D_i$ is a box of
-         side-length $cL(\Delta_i)$ centered at the center of $\Delta_i$;
-         and
+       \item $D_1,\ldots,D_{n'}$ are square boxes where each $D_i$
+         is a square box of side-length $cL(\Delta_i)$ centered at the
+         center of $\Delta_i$; and
        \item $E_1,\ldots,E_{n'}$ are square boxes where each $E_i$ is a box of
          side-length $L(\Delta_i)/c$ that intersects $D_i$.
      \end{enumerate}
      \item The box $E_i$ does not perfectly maximize the number of points
-       it contains. Instead, we guarantee that if there exists any
+       it contains. Instead, we guarantee that, if there exists any
        box of side-length $L(\Delta_i)/2c$ that intersects $D_i$ and
        contains $m\ge \epsilon n$ points of $V$, then $E_i$ is chosen so that
        it contains at least $m$ points of $V$.
@@ -1170,7 +1198,7 @@ relatively faithful to the proof of \thmref{upper-bound}.
   All that remains is to show how to compute $E_1,\ldots,E_{n'}$ and
   $w_1,\ldots,w_{n'}$ efficiently.
 
-  The reason for moving from balls to square boxes is that they allow for
+  The reason for moving from balls to square boxes is that boxes allow for
   the use of range trees \cite{bentley:multidimensional,luecker:data}.
   Range trees allow us to preprocess, using $O(n\log^{d-1} n)$ time and
   space, a set of $n$ points in $\R^d$ so that, for any query box, $B$,
@@ -1197,18 +1225,18 @@ relatively faithful to the proof of \thmref{upper-bound}.
 
   Let $E'_i$, be some square box of side length $L(\Delta_i)/2c$ that
   intersects $D_i$ and that contains the maximum number of points in $V$.
-  Suppose, furthermore, that $|E'_i\cap V|\ge \epsilon n$.  If we repeat
-  the above sampling procedure $\alpha\ln n/\epsilon$ times, then the
-  probability that none of our samples is a point in $|E'_i\cap V|$ is
-  at most
+  Suppose, furthermore, that $|E'_i\cap V|\ge \epsilon n$ (since this
+  is the only case in which we make any guarantees about $E_i$).  If we
+  repeat the above sampling procedure $\alpha\ln n/\epsilon$ times, then
+  the probability that none of our samples is a point in $|E'_i\cap V|$
+  is at most
   \[
       (1-\epsilon)^{\alpha\ln n/\epsilon} 
          \le 1/e^{\alpha\ln n} = 1/n^{\alpha} \enspace .
   \]
   Therefore, with high probability, at least one of our sample points,
   $u$, is in $E'_i$.  In this case, $E(u)$ contains $E'_i$, so we obtain
-  a box, $E_i$ that intersects $D_i$ and contains at least $\epsilon n$
-  points of $V$.
+  a box, $E_i$ that intersects $D_i$ and contains $E'_i$.
 
   By storing the points of $V$ in a range tree, we can therefore identify
   the boxes $E_1,\ldots,E_{n'}$ in time
@@ -1223,7 +1251,7 @@ relatively faithful to the proof of \thmref{upper-bound}.
   $w\in V$, we can determine the index, $i(w)$, of the smallest box
   that contains at least $\epsilon n$ points of $V$ and contains $w$.
   Building the range tree for (the duals of) $E_1,\ldots,E_{n'}$ takes
-  $O(n'\log^d n)\subset O(n\log n)$ time and search this structure for
+  $O(n'\log^d n)\subset O(n\log n)$ time and searching this range tree for
   each point $w\in V$ takes time
   \[
      O(n\log^d n) \enspace .
@@ -1239,7 +1267,7 @@ relatively faithful to the proof of \thmref{upper-bound}.
 \subsection{A Faster Algorithm}
 
 In the preceding section we showed that a graph with average stretch factor
-$1+O((\log n/n)^{1/(4d-1)}$ can be constructed in $O(n\log^d n)$ time. In
+$1+O((\log n/n)^{1/(4d-1)})$ can be constructed in $O(n\log^d n)$ time. In
 this section, we show that the running time can be reduced to $O(n\log n)$
 with only a small increase in the average stretch factor.
 
@@ -1316,7 +1344,7 @@ with only a small increase in the average stretch factor.
      average stretch factor for $d\ge 3$, and increases it to $1+O((\log
      n/n)^{1/(4d-1)}\log n)$ for $d=2$.
 
-    \item To determine the index, $i(u)$, of points $u\in V$, we
+    \item To determine the index, $i(u)$, of each point $u\in V$, we
       first construct a range tree, $T_2$ for (the duals of) some boxes
       in  $\{E_1,\ldots,E_{n'}\}$.  In $T_2$, we include every box,
       $B\in\{E_1,\ldots,E_{n'}\}$ such that $|B\cap V'|/p\ge\epsilon n$.
@@ -1349,7 +1377,7 @@ with only a small increase in the average stretch factor.
       in counting the number of bad Type~4 pairs.
 
       Recall that this part of the proof of \thmref{upper-bound} assumes
-      that that number of bad Type~4 pairs is greater than $\epsilon
+      that the number of bad Type~4 pairs is greater than $\epsilon
       n^2$ and uses this assumption to derive a contradiction.
       In particular, the proof shows the existence of a point $w^*$
       that satisfies Conditions~B1--B3.  Walking through the proof, we
@@ -1393,10 +1421,10 @@ with only a small increase in the average stretch factor.
 Next, we prove a simple lower-bound which shows that our bound on the
 average stretch factor is at least of the right flavour: Combined with
 the upper-bound of \thmref{upper-bound}, the following result shows that
-the optimal bound is $1+O(1/n^{\delta})$ for some $\delta\in(1/4d-1,1/2]$.
+the optimal bound is $1+O(1/n^{\delta})$ for some $\delta\in(1/(4d-1),1/2]$.
 
 \begin{thm}\thmlabel{lower-bound}
-  For every positive integer, $n$, there exists a point set, $V$, of $n$
+  For every positive integer, $n$, there exists a set, $V$, of $n$
   points in $\R^2$, such that every geometric graph, $G$, with vertex
   set $V$ and having $O(n)$ edges has $\asf(G)\ge 1 + \Omega(1/\sqrt{n})$.
 \end{thm}
@@ -1430,7 +1458,7 @@ the optimal bound is $1+O(1/n^{\delta})$ for some $\delta\in(1/4d-1,1/2]$.
   Let $G$ be any graph with vertex set $V$.  We say that an edge $uw$
   with $u\in A$ and $w\in B$ \emph{covers} the set of pairs
   \[
-     \{ \left(u+(0,i), w+(n,j)\right) : 
+     \{ \left(u+(0,i), w+(0,j)\right) : 
           i,j\in\{-\sqrt{\alpha n},\ldots,\sqrt{\alpha n}\}\}
   \]
   for some constant $\alpha$ to be discussed later.  Thus, any edge of
@@ -1544,7 +1572,7 @@ The following open problems have to do with strengthenings of
   in terms of the (worst-case) stretch factor and their definition
   extends naturally to average stretch factor.  Given a point set, $V$,
   does there always exist a good average stretch graph $G=(V,E)$ that
-  is $f(k)$-robust, for some function $f(k)$?
+  is $f(k)$-robust, for some reasonable function $f(k)$?
 \end{op}
 
 

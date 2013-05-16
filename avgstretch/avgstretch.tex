@@ -48,7 +48,7 @@ urlcolor=linkblue}
   We show that for any set, $V$, of $n$ points in $\R^d$, there exists
   a geometric graph with vertex set $V$, that has $O(n)$ edges, and
   that has average stretch factor $1+ o_n(1)$.  More precisely, the
-  average stretch factor of this graph is $1+O((\log^2 n/n)^{1/(2d+1)})$.
+  average stretch factor of this graph is $1+O((\log n/n)^{1/(2d+1)})$.
   We complement this upper-bound with a lower bound: There exist $n$
   point sets in $\R^2$ for which any graph with $O(n)$ edges has average
   stretch factor $1+\Omega(1/\sqrt{n})$.  Bounds of this type are not
@@ -125,19 +125,19 @@ $V\subset \R^d$, with $|V|=n<\infty$, there exists a geometric graph
 $G=(V,E)$ having $|E|\in O(n)$ edges and such that $\asf(G)=1+o_n(1)$.
 More precisely,
 \[
-   \asf(G)=1+O((\log^2 n/n)^{1/(2d+1)}) \enspace .
+   \asf(G)=1+O((\log n/n)^{1/(2d+1)}) \enspace .
 \]
 The proof of this result is in \secref{upper-bound} and constitutes the
 bulk of the paper.  
 
-In \secref{algorithms}, we also show that graphs with small average
-stretch factor can be constructed efficiently.
-FIXXXXXXXXXXXXXXXMMMMMMMMMMMMMMMMEEEEEEEEEEEEEEEEEEEEEE
-
+In \secref{algorithms}, we show that graphs with small average stretch
+factor can be constructed efficiently.  In this section, we present an
+$O(n\log n)$ time Monte-Carlo algorithm that, with high probability,
+constructs a graph with average stretch factor $1+o_n(1)$.  The
 
 In \secref{lower-bound} we prove a simple lower-bound that shows our
 upper-bound is at least of the right flavour:  For every positive integer
-$n$, there exists an $n$ point set in $\R^2$ for which any graph with
+$n$, there exists an $n$ point set in $\R^2$ on which any graph with
 $O(n)$ edges has average stretch factor $1+\Omega(1/\sqrt{n})$.
 
 \subsection{Related Work}
@@ -625,7 +625,7 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   For every constant dimension, $d$, and every set, $V$, of
   $n<\infty$ points in $\R^d$, the graph $G=(V,E)$ described above
   has $O(n)$ edges and $\asf(G)=1+o_n(1)$.  More precisely,
-  $\asf(G)=1+O((\log^2 n)/n^{1/(2d+1)})$.
+  $\asf(G)=1+O((\log n)/n^{1/(2d+1)})$.
   % there exists a geometric graph $G$ with
   % $V(G)=V$, $|E(G)|\in O(n)$ and $\asf(G)=1+o_n(1)$. 
   % More precisely, $\asf(G)=1+O((\log n/n)^{1/2d})$.
@@ -784,7 +784,7 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   works.  So the total number of terms of the sum in \eqref{asf}
   contributed by Type~3 pairs is at most
   \[
-    \delta n^2 \in O(k^{1/2}n^{3/2}c^{d/2}\log c) \enspace .
+    \delta n^2 \in O\left(\sqrt{kn^3c^d\log c}\right) \enspace .
   \]
 
   \paragraph{Type~4 Pairs.}  
@@ -1054,7 +1054,7 @@ Without further ado, we now prove that $G$ has low average stretch factor.
     \item For each Type~2 pair, $(u,w)$, 
       $\|uw\|_G/\|uw\|\le 1+ O(1/k^{1/(d-1)}+1/c)$.
     \item The number of Type~3 pairs is at most
-      $O(k^{1/2}n^{3/2}c^{d/2}\log c)$.
+      $O(\sqrt{kn^{3}c^{d}\log c})$.
     \item For each good Type~4 pair, $(u,w)$, 
       $\|uw\|_G/\|uw\|\le 1+ O(1/c)$.
     \item The number of bad Type~4 pairs is at most 
@@ -1063,7 +1063,7 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   Putting all these together, we obtain
   \begin{equation}\eqlabel{master-asf}
      \asf(G) = 1 + O\left(1/k^{1/(d-1)} + 1/c 
-       + \binom{n}{2}^{-1}\left(kn+k^{1/2}n^{3/2}c^{d/2}\log c
+       + \binom{n}{2}^{-1}\left(kn+\sqrt{kn^{3}c^{d}\log c}
              +\epsilon n^2\right)\right) \enspace .
   \end{equation}
   Taking 
@@ -1071,43 +1071,39 @@ Without further ado, we now prove that $G$ has low average stretch factor.
        \epsilon = (k/n)^{1/3} \enspace ,
   \]
   \[ 
-       k = \left(\frac{n}{\log^2 n}\right)^{(d-1)/(2d+1)}
+       k = \left(\frac{n}{\log n}\right)^{(d-1)/(2d+1)}
   \]
   and
   \[
-       c = \left(\frac{n}{\log^2 n}\right)^{1/(2d+1)}
+       c = \left(\frac{n}{\log n}\right)^{1/(2d+1)}
   \]
   yields
   \[
-     \asf(G) = 1+ O\left((\log^2 n/n)^{1/(2d+1)}\right) \enspace .
+     \asf(G) = 1+ O\left(\left(\frac{\log n}{n}\right)^{1/(2d+1)}\right) \enspace .
   \]
+  (The $O(kn/\binom{n}{2})$ term and the $\epsilon n^2/\binom{n}{2}$ term are dominated by the three other terms, which are all in $O((\log n/n)^{1/(2d+1)})$.)
 \end{proof}
 
 \begin{rem}\remlabel{epsilon-choice}
+   In the next section, efficient algorithms will require that
+   $\epsilon = (\log^\kappa n)/k$ for some constant $\kappa \ge 0$.
+   Since the bound on the average stretch factor requires that
+   $\epsilon\in\Omega((k/n)^{1/3})$, this implies that the value of $k$
+   must be at most $n^{1/4}$.  The following table shows the optimal
+   choices of $k$ and $c$ for different dimensions, $d$:
 
-   The following observations about the choice of $\epsilon$ will be
-   useful when designing algorithms in the next section.  The choice of
-   the value $\epsilon$ remains free up until the last step in the proof
-   of \thmref{upper-bound}, but is subject to the constraint $\epsilon
-   \in\Omega((k/n)^{1/3})$.  Observe that, if we fix $k=n^{(d-1)/(4d-1)}$
-   and set $\epsilon = (\log^\kappa n)/k$, for
-   any constant $\kappa \ge 0$, then the requirement $\epsilon \in
-   \Omega(\sqrt{k/n})$ is satisfied for any $d\ge 2$.  Furthermore,
-   for all $d \ge 3$,
-   \[
-      \epsilon n^2 = n^{2-(d-1)/(4d-1)}\log^{\kappa+(d-1)/(4d-1)} n 
-       \in O(n^{2-1/(4d-1)}) \subset O((\log n/n)^{1/(4d-1)}) \enspace .
-   \]
-   In other words, for $\epsilon = \log^\kappa n/k$, the contribution
-   of bad Type~4 pairs to the average stretch factor is dominated by the
-   other terms.
-
-   The case $d=2$ is special.  In this case, 
-   \[ \epsilon n^2 = n^{2-1/7}\log^{\kappa+1/7} n
-        \in O(n^{2-1/7}\log^{\kappa+1/7} n)  \enspace .
-   \]
-   In this case, the average stretch does increase to
-   $1+O((\log n/n)^{1/(4d-1)}\log^{\kappa} n)$.
+   \begin{center}
+   \renewcommand\arraystretch{1.3} %\setlength\minrowclearance{2.4pt}
+     \begin{tabular}{|r|l|l|l|}
+        \hline
+        $d$ & $k$ & $c$ & $\asf(G)$ \\\hline\hline
+        $2$ & $(n/\log n)^{1/5}$ & $(n/\log n)^{1/5}$ 
+              & $1+ O((\log^{5\kappa+1} n/n)^{1/5})$ \\
+        $\ge 3$ & $n^{1/4}$ & $(\log n/n^{3/4})^{1/(d+2)}$ 
+              & $1+ O(1/n^{1/(4d-4)})$ \\
+     \hline
+     \end{tabular}
+   \end{center}
 \end{rem}
 
 \section{Algorithms}
@@ -1134,7 +1130,13 @@ relatively faithful to the proof of \thmref{upper-bound}.
   For every constant dimension, $d$, and every set, $V$, of $n<\infty$
   points in $\R^d$, there exists a randomized $O(n\log^{d} n )$ time
   algorithm that constructs a graph $G'=(V,E)$ that has $O(n)$ edges and,
-  with high probability, $\asf(G')=1+O((\log n/n)^{1/(4d-1)})$.
+  with high probability, 
+  \[
+      \asf(G')=\begin{cases}
+         1+ O((\log n/n)^{1/5}) & \text{for $d=2$} \\
+         1+ O(1/n^{1/(4d-4)}) & \text{for $d\ge 3$} \\
+      \end{cases}
+  \]
 \end{thm}
 
 
@@ -1162,16 +1164,14 @@ relatively faithful to the proof of \thmref{upper-bound}.
        box of side-length $L(\Delta_i)/2c$ that intersects $D_i$ and
        contains $m\ge \epsilon n$ points of $V$, then $E_i$ is chosen so that
        it contains at least $m$ points of $V$.
-     \item We change the value of $\epsilon$ to 
-      \[  \epsilon = \frac{1}{k} = \left(\frac{\log n}{n}\right)^{(d-1)/(4d-1)} \enspace . \]
+     \item We change the value of $\epsilon$ to $\epsilon = 1/k$
+      and use the values of $c$ and $k$ given in \remref{epsilon-choice}.
   \end{enumerate} 
   It is straightforward, but tedious, to check that the proof of
-  \thmref{upper-bound} using these new definitions of $\Delta_i$, $D_i$,
-  $E_i$, and $\epsilon$ shows that the graph $G'$ has $\asf(G')= 1+O((\log
-  n/n)^{1/(4d-1)})$.  (\remref{epsilon-choice}, with $\kappa=0$, gives
-  an explanation as to why the new value of $\epsilon$ does not increase
-  the average stretch factor of the resulting graph.)  What remains is
-  to show how the graph $G'$ can be constructed in $O(n\log^d n)$ time.
+  \thmref{upper-bound} using these new definitions of $\Delta_i$,
+  $D_i$, and $E_i$ shows that the graph $G'$ has $\asf(G')$ satisfies the
+  requirements of the theorem.  What remains is to show how the graph $G'$
+  can be constructed in $O(n\log^d n)$ time.
 
   As described in the proof of \lemref{k-partition}, computing the
   fair-split tree, and the resulting $\Delta_1,\ldots,\Delta_{n'}$,
@@ -1260,24 +1260,21 @@ relatively faithful to the proof of \thmref{upper-bound}.
 
 \subsection{A Faster Algorithm}
 
-In the preceding section we showed that a graph with average stretch factor
-$1+O((\log n/n)^{1/(4d-1)})$ can be constructed in $O(n\log^d n)$ time. In
-this section, we show that the running time can be reduced to $O(n\log n)$
-with only a small increase in the average stretch factor.
+In the preceding section we gave an $O(n\log^d n)$ time algorithm.
+In this section, we show that the running time can be reduced to $O(n\log
+n)$ with only a small increase in the average stretch factor.
 
 \begin{thm}\thmlabel{algorithm-faster}
   For every constant dimension, $d$, and every set, $V$, of $n<\infty$
-  points in $\R^d$, there exists a randomized $O(n\log n )$ time
+  points in $\R^d$, there exists a randomized $O(n\log n)$ time
   algorithm that constructs a graph $G''=(V,E)$ that has $O(n)$ edges
   and, with high probability, 
   \[
-    \asf(G'')=
-       \begin{cases}
-             1+O\left((\log n/n)^{1/(4d-1)}\log n\right) 
-                & \text{for $d = 2$} \\
-             1+O\left((\log n/n)^{1/(4d-1)}(\log n)^{(d-2)/(d-1)}\right) 
-                & \text{for $d\ge 3$.}
-       \end{cases}
+      \asf(G'')=\begin{cases}
+         1+ O((\log^{7} n/n)^{1/5}) & \text{for $d=2$} \\
+         1+ O((\log^{(d-2)/(d-1)/n^{1/(4d-4)}}) 
+                  & \text{for $d\ge 3$} 
+      \end{cases}
   \]
 \end{thm}
 
@@ -1296,12 +1293,9 @@ with only a small increase in the average stretch factor.
      \item We only construct a $(1+(\log^{d-2}
       n/k)^{1/(d-1)})$-spanner of $H$.  Using the algorithm of Ruppert
       and Seidel, the construction of this spanner takes only $O(n\log
-      n)$ time.  This modification increases the spanning ratio of the 
-      resulting graph, so that 
-      \[
-         \asf(G'') \le 1 
-             + O\left((\log n/n)^{1/(4d-1)}(\log n)^{(d-2)/(d-1)}\right) \enspace .
-      \]
+      n)$ time.  This modification increases the average stretch factor
+      of the resulting graph, so that the lower-order term increases by
+      a factor of $\log^{(d-2)/(d-1)} n$.
 
      \item The sampling process used to find $E_1,\ldots,E_{n'}$
      has two phases.  In Phase~1, a range tree is constructed
@@ -1333,10 +1327,10 @@ with only a small increase in the average stretch factor.
      for each sample point, $u$, counting the number of points of $V$
      in some box centered at $u$.  By increasing the value of $\epsilon$
      from $\epsilon=1/k$ to $\epsilon=\log^{d-1} n/k$, this counting can
-     be done in $O(n\log n)$ time using $T_1$.  \remref{epsilon-choice}
-     explains why this new choice of $\epsilon$ does not increase the
-     average stretch factor for $d\ge 3$, and increases it to $1+O((\log
-     n/n)^{1/(4d-1)}\log n)$ for $d=2$.
+     be done in $O(n\log n)$ time using $T_1$.  \remref{epsilon-choice},
+     with the value $\kappa = d-1$ explains why this new choice of
+     $\epsilon$ does not increase the average stretch factor for $d\ge
+     3$, and increases it by a factor of $\log n$ for $d=2$.
 
     \item To determine the index, $i(u)$, of each point $u\in V$, we
       first construct a range tree, $T_2$ for (the duals of) some boxes
@@ -1415,7 +1409,7 @@ with only a small increase in the average stretch factor.
 Next, we prove a simple lower-bound which shows that our bound on the
 average stretch factor is at least of the right flavour: Combined with
 the upper-bound of \thmref{upper-bound}, the following result shows that
-the optimal bound is $1+O(1/n^{\delta})$ for some $\delta\in(1/(4d-1),1/2]$.
+the optimal bound is $1+O(1/n^{\delta})$ for some $\delta\in(1/(2d+1),1/2]$.
 
 \begin{thm}\thmlabel{lower-bound}
   For every positive integer, $n$, there exists a set, $V$, of $n$
@@ -1528,7 +1522,9 @@ and other large cities (see \figref{us-map}).
     \includegraphics[width=\dimexpr.2\textwidth-8pt]{memphis} &
     \includegraphics[width=\dimexpr.2\textwidth-8pt]{newport}  \\
   \end{tabular}
-  \caption{Large cities have many direct routes to them. (Source: Map of the final U.S. Highway system as approved November 11, 1926.  This material is in the public domain.)}
+  \caption{Large cities have many direct routes to them. (Source:
+  Map of the final U.S. Highway system as approved November 11, 1926.
+  This map is in the public domain.)}
   \figlabel{us-map}
 \end{figure}
 

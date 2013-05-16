@@ -48,7 +48,7 @@ urlcolor=linkblue}
   We show that for any set, $V$, of $n$ points in $\R^d$, there exists
   a geometric graph with vertex set $V$, that has $O(n)$ edges, and
   that has average stretch factor $1+ o_n(1)$.  More precisely, the
-  average stretch factor of this graph is $1+O((\log n/n)^{1/(4d-1)})$.
+  average stretch factor of this graph is $1+O((\log^2 n/n)^{1/(2d+1)})$.
   We complement this upper-bound with a lower bound: There exist $n$
   point sets in $\R^2$ for which any graph with $O(n)$ edges has average
   stretch factor $1+\Omega(1/\sqrt{n})$.  Bounds of this type are not
@@ -125,19 +125,15 @@ $V\subset \R^d$, with $|V|=n<\infty$, there exists a geometric graph
 $G=(V,E)$ having $|E|\in O(n)$ edges and such that $\asf(G)=1+o_n(1)$.
 More precisely,
 \[
-   \asf(G)=1+O((\log n/n)^{1/(4d-1)}) \enspace .
+   \asf(G)=1+O((\log^2 n/n)^{1/(2d+1)}) \enspace .
 \]
 The proof of this result is in \secref{upper-bound} and constitutes the
 bulk of the paper.  
 
-In \secref{algorithms}, we also show that these graphs can be
-constructed efficiently:  There exists an $O(n\log^d n)$ time Monte-Carlo
-algorithm that, with high probability, constructs a graph $G'$ with
-$\asf(G')=1+O((\log n/n)^{1/(4d-1)})$.  If one is willing to accept a
-slight increase in the average stretch factor, a faster algorithm is
-possible: There exists an $O(n\log n)$ time Monte-Carlo algorithm that,
-with high probability, constructs a graph $G''$ with $\asf(G'')=1+O((\log
-n/n)^{1/(4d-1)}\log n)$.
+In \secref{algorithms}, we also show that graphs with small average
+stretch factor can be constructed efficiently.
+FIXXXXXXXXXXXXXXXMMMMMMMMMMMMMMMMEEEEEEEEEEEEEEEEEEEEEE
+
 
 In \secref{lower-bound} we prove a simple lower-bound that shows our
 upper-bound is at least of the right flavour:  For every positive integer
@@ -629,7 +625,7 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   For every constant dimension, $d$, and every set, $V$, of
   $n<\infty$ points in $\R^d$, the graph $G=(V,E)$ described above
   has $O(n)$ edges and $\asf(G)=1+o_n(1)$.  More precisely,
-  $\asf(G)=1+O((\log n)/n^{1/(4d-1)})$.
+  $\asf(G)=1+O((\log^2 n)/n^{1/(2d+1)})$.
   % there exists a geometric graph $G$ with
   % $V(G)=V$, $|E(G)|\in O(n)$ and $\asf(G)=1+o_n(1)$. 
   % More precisely, $\asf(G)=1+O((\log n/n)^{1/2d})$.
@@ -788,7 +784,7 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   works.  So the total number of terms of the sum in \eqref{asf}
   contributed by Type~3 pairs is at most
   \[
-    k\delta n^2 \in O(k^{3/2}n^{3/2}c^{d/2}\log c) \enspace .
+    \delta n^2 \in O(k^{1/2}n^{3/2}c^{d/2}\log c) \enspace .
   \]
 
   \paragraph{Type~4 Pairs.}  
@@ -918,7 +914,7 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   $tk$ different values of $u$, so the number of bad pairs of class~(b)
   is at most $(tk)^2/\epsilon$.
 
-  Thus, the total number of bad Type~3 pairs is at most
+  Thus, the total number of bad Type~4 pairs is at most
   \begin{equation}
     \sum_{j=j^*+1}^{j^*+t} b_{i_{j}}  \in O(kn + (tk)^2/\epsilon \enspace .
     \eqlabel{ub-4}
@@ -1033,17 +1029,16 @@ Without further ado, we now prove that $G$ has low average stretch factor.
     \item For each Type~2 pair, $(u,w)$, 
       $\|uw\|_G/\|uw\|\le 1+ O(1/k^{1/(d-1)}+1/c)$.
     \item The number of Type~3 pairs is at most
-      $O(k^{3/2}n^{3/2}c^{d/2}\log c)$.
+      $O(k^{1/2}n^{3/2}c^{d/2}\log c)$.
     \item For each good Type~4 pair, $(u,w)$, 
       $\|uw\|_G/\|uw\|\le 1+ O(1/c)$.
     \item The number of bad Type~4 pairs is at most 
        $O(\epsilon n^2)$ provided that $\epsilon \in \Omega((k/n)^{1/3})$.
   \end{enumerate}
-  The contribution of Type~1 pairs is dominated by that of Type~3 pairs,
-  so we obtain
+  Putting all these together, we obtain
   \begin{equation}\eqlabel{master-asf}
      \asf(G) = 1 + O\left(1/k^{1/(d-1)} + 1/c 
-       + \binom{n}{2}^{-1}\left(k^{3/2}n^{3/2}c^{d/2}\log c
+       + \binom{n}{2}^{-1}\left(kn+k^{1/2}n^{3/2}c^{d/2}\log c
              +\epsilon n^2\right)\right) \enspace .
   \end{equation}
   Taking 
@@ -1051,25 +1046,26 @@ Without further ado, we now prove that $G$ has low average stretch factor.
        \epsilon = (k/n)^{1/3} \enspace ,
   \]
   \[ 
-       c = (n/\log n)^{1/(4d-1)} \enspace ,
+       k = \left(\frac{n}{\log^2 n}\right)^{(d-1)/(2d+1)}
   \]
   and
   \[
-       k = (n/\log n)^{(d-1)/(4d-1)} 
+       c = \left(\frac{n}{\log^2 n}\right)^{1/(2d+1)}
   \]
   yields
   \[
-     \asf(G) = 1+ O\left((\log n/n)^{1/(4d-1)}\right) \enspace . \qedhere
+     \asf(G) = 1+ O\left((\log^2 n/n)^{1/(2d+1)}\right) \enspace .
   \]
 \end{proof}
 
 \begin{rem}\remlabel{epsilon-choice}
+
    The following observations about the choice of $\epsilon$ will be
-   useful when designing algorithms in the next section.  The choice
-   of the value $\epsilon$ remains free up until the last step in the
-   proof of \thmref{upper-bound}, but is subject to the constraint
-   $\epsilon \in\Omega(\sqrt{k/n})$.  Observe that, if we fix $k=(n/\log
-   n)^{(d-1)/(4d-1)}$, and set $\epsilon = \log^\kappa n/k$, for
+   useful when designing algorithms in the next section.  The choice of
+   the value $\epsilon$ remains free up until the last step in the proof
+   of \thmref{upper-bound}, but is subject to the constraint $\epsilon
+   \in\Omega((k/n)^{1/3})$.  Observe that, if we fix $k=n^{(d-1)/(4d-1)}$
+   and set $\epsilon = (\log^\kappa n)/k$, for
    any constant $\kappa \ge 0$, then the requirement $\epsilon \in
    \Omega(\sqrt{k/n})$ is satisified for any $d\ge 2$.  Furthermore,
    for all $d \ge 3$,

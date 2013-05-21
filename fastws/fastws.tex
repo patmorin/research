@@ -1,247 +1,302 @@
 \documentclass{patmorin}
-
+\listfiles
+\usepackage{amsthm,amsmath,graphicx,wrapfig}
 \usepackage{pat}
-\usepackage{amsopn}
-\usepackage[noend]{algorithmic}
-\usepackage{url}
+%\usepackage{coffee4}
+\usepackage[letterpaper]{hyperref}
+\usepackage[dvipsnames]{color}
+\definecolor{linkblue}{named}{Blue}
+\hypersetup{colorlinks=true, linkcolor=linkblue,  anchorcolor=linkblue,
+citecolor=linkblue, filecolor=linkblue, menucolor=linkblue, pagecolor=linkblue,
+urlcolor=linkblue} 
 
-\DeclareMathOperator{\pred}{pred}
+
+\usepackage{tikz,hyphenat}
+\let\oldmarginpar\marginpar
+% renew the \marginpar command to draw 
+% a node; it has a default setting which 
+% can be overwritten
+\renewcommand{\marginpar}[2][rectangle,draw,fill=yellow,rounded corners,text width=2.21cm]{%
+        \oldmarginpar{%
+        \tikz \node at (0,0) [#1]{#2};}%
+        }
+\newcommand{\note}[1]{\marginpar{\raggedright\footnotesize\nohyphens{#1}}}
+
+\newcommand{\eps}{\varepsilon}
+
+\title{\MakeUppercase{Dynamic Finger and Working Set: Approaching the Lower Bounds}}
+\author{Luis Barba and Pat Morin}
+
 
 \begin{document}
+\begin{titlepage}
+\maketitle
+%\cofeAm{0.7}{0.38}{0}{5.5cm}{3.5in}
 
-\section{Ideas for Introduction and Motivation}
+\begin{abstract}
+  This paper begins the process of making practical comparison-based
+  dictionaries that have the dynamic finger and working-set properties.
+  In particular, we initiate the study of the exact number of comparisons
+  needed in dynamic dictionaries that have these two properties.  We
+  present a data structure with the dynamic finger property that performs
+  at most $\log_2 d+o(\log d)$ comparisons per search and a data structure
+  that has the working-set property and, for any $\eps > 0$, that
+  performs at most $(1+\eps)\log_2 w+o(\log w)$ comparisons per search.
+  Here $d$ and $w$ are the ``finger number'' and ``working-set number'',
+  respectively, of the element being searched for.  All previously-known
+  structures with the dynamic-finger or working-set property properties
+  perform at least $2\log_2 d$ or $3\log_2 w$ comparison, respectively.
+\end{abstract}
 
-\begin{itemize}
-  \item Cite splay trees, Iacono, and Bose-Dou\"\i eb-Langerman SODA~2008.
-  \item Working set is important because real applications exhibit
-   significant locality of reference; it implies static optimality;
-   the best general-purpose compression algorithms (bzip2) is based on
-   an encoding with the working-set property [what's the running-time?].
-  \item Working-set with leading constant $C$ gives:
-   \begin{itemize}
-     \item Static optimality with leading constant $C$
-     \item Compression algorithm with cost $m(CH+o(H))$ that runs in time $O(mH)$.
-   \end{itemize}
-  \item Unfortunately, splay trees and Iacono's structure are impractical
-   because of the large constants.  For example, when $n=10^6$, binary
-   search takes 20 comparisons.  Splay trees have the leading constant 4,
-   so they only beat binary search when the working set number is less
-   than 32.  Out of the million elements, there are only 32 that can be
-   accessed faster using a splay tree than using binary search.  This only
-   counts the cost of comparisons, and doesn't even account for the rotations
-   done during a splay operation.
-  \item Iacono's trick of grouping into groups with working set numbers
-   that are increasing doubly-exponentially has been used repeatedly and
-   is the basis of X, Y, Z, ..... (Even Bose-Dou\"\i eb-Langerman splits
-   the skiplist into layers defined this way.)  A new idea is needed.
+\end{titlepage}
 
-   Our structure is a significant departure from this method.  It uses a 
-   sequence of interlinked structures $D_0,\ldots,D_k$ whose sizes increase
-   sub-exponentially.
-\end{itemize}
+\section{Introduction}
 
-\section{The Structure}
+Comparison-based dictionaries supporting the operations
+\emph{insert}, \emph{remove} and \emph{search} represent \emph{the}
+classic data-structuring problem in computer science.  AVL trees, a
+comparison-based asymptotically optimal solution to the dynamic dictionary
+problem, were discovered already in 1962 \cite{adelsson.vleski.ea:blah}.
+AVL trees implement all three operations in $O(\log n)$ time per operation
+while performing at most $1.4404\log(n+2)$ comparisons between the element
+being inserted/deleted/searched and the elements stored in the AVL tree.
+(Here, and throughout, all logarithms are binary unless specifically
+subscripted, so $\log x \equiv \log_2 x$.)
 
-We store a totally-ordered set, $S$, of size $n$ in a sequence of sorted
-lists $D_0,\ldots,D_k$.  For non-negative integers, $i$, let
-\[  n_i=\begin{cases}
-       1 & \text{if $i=0$} \\
-       2^{i}/f(i) & \text{otherwise}
-    \end{cases}
+Since the discovery of AVL trees, many other comparison-based
+dictionaries have been proposed: 2-3 trees \cite{X}, red-black trees
+\cite{X}, splay trees \cite{X}, scapegoat trees \cite{X, Y}, skiplists
+\cite{X}, treaps \cite{X,Y}, randomized binary search trees \cite{X},
+and jumplists \cite{X} are just a few of the colorful names for data
+structures that solve the dictionary problem in $O(\log n)$ time
+per operation.\footnote{Some of these structures use amortization,
+in which case the $O(\log n)$ running-time bound is only an amortized
+bound.  Some of these structures use randomization, in which case the
+running-time bound is an expected running time bound.}  All of these
+structures perform, in the worst case, $c\log n + o(\log n)$ comparisons
+per operation, for some constant $c>1$. Different structures guarantee
+different upper-bounds on $c$.
+
+\subsection{Constants}
+
+A handful of lesser-known structures perform even fewer comparisons.
+For these structures, the goal is to minimize the number of comparisons
+while still supporting all operations in $O(\log n)$ time.  In their
+theses \cite{X,Y} and in resulting papers, Lai and Andersson \cite{X,Y,Z}
+present a series of schemes for maintaining binary search trees with
+height at most $\lceil\log(n+1)\rceil+1$ in $O(\log n)$ time per insert,
+update, and remove operation.  Note that $\lceil\log(n+1)\rceil$ is
+a lower-bound on the height of any binary search tree containing $n$
+elements, so these trees are within 1 of the minimum possible height.
+
+Fagerberg \cite{fagerberg:complexity} tightens these results even
+further by showing that, for any $c>0$, it is possible to maintain
+a binary search tree with height at most $\lceil\log(n+1)+c/\log
+n\rceil$ while still performing all operations in $O((1/c)\log n)$
+amortized time.  This result is matched by a lower-bound: No binary
+search tree that performs insertions and deletions in $O((1/c)\log n)$
+time can guarantee a height smaller than $\lceil\log(n+1)+c/\log n\rceil$
+\cite{fagerberg:binary-how-low-can-you-go}.  Taken together, this upper
+bound and lower bound more or less close the book on the worst-case
+number of comparisons achievable by comparison-based dictionaries that
+support all operations in $O(\log n)$.
+
+\subsection{Properties}
+
+A more recent trend in the design of comparison-based dictionaries
+is the study of dictionaries with special running-time \emph{properties}.
+Examples include the dictionaries with 
+\begin{description}
+\item[the static-optimality property] in which the average access time is
+   proportional to the (empirical) entropy of the distribution of
+   searches;
+
+\item[the dynamic finger property] in which the time to perform the current
+   search for an element, $x$, is logarithmic in the difference in ranks between
+   $x$ and the element $y$ found in the previous search; and
+
+\item[the working-set property] in which the time to perform the current
+   search for an element, $x$, is logarithmic in the number of distinct
+   elements accessed since the most recent previous access to $x$.
+\end{description}
+There are additional properties, including the unified property
+\cite{IXX}, and the dynamic optimality property \cite{X}, but the three
+properties discussed above seem to be among the most fundamental.
+
+The study of \emph{biased dictionaries}, that satisfy the
+static-optimality property has a long and rich history.  A classic
+result in this area is that of Mehlhorn \cite{mehlhorn:best}.
+Mehlhorn's algorithm takes as input a probability distribution
+$q_0,p_1,q_1,p_2,q_2,\ldots,p_n,q_n$ and a sequence of keys
+$x_0=-\infty<x_1<x_2<\cdots<x_n<x_{n+1}=\infty$.  Each $p_i$
+represents the probability of searching for the key $x_i$ and $q_i$
+represents the probability of searching for a key in the open interval
+$(x_{i},x_{i+1})$. Mehlhorn's algorithm then builds, in linear time,
+a binary search tree containing $x_1,\ldots,x_n$ where the depth of
+$x_i$ is at most $\log (1/p_i)+1$ and the length of the search path
+for any element in the interval $(x_i,x_{i+1})$ is at most $\log
+(1/q_i)+2$. With the exception of the additive constants, 1 and 2,
+these bounds are essentially the best-possible.  
+
+Several data structures are known that can provide the dynamic
+finger property, including finger search trees \cite{tarjan:xxx},
+splay trees \cite{S} treaps \cite{sksk}, skiplists \cite{sksk}.
+See Brodal \cite{brodal:finger} for a recent survey on finger search.
+In all of these structures, a finger search takes $O(\log d)$ time and
+performs at most $cd$ comparisons, for some constant $c>0$.  Here $d$
+is the rank difference between the element being searched for and the
+previous element searched for.  The constant, $c$, varies from structure
+to structure, but is at least $4$.\note{is this true?}
+
+Similarly, several data structures are known that provide the working-set
+property, including splay trees \cite{X} and several variants of Iacono's
+doubly-exponential structure \cite{X}.  These structures can perform a
+search for the element $x$ in $O(\log w)$ time and $cw$ comparisons,
+for some constant $c>0$. Here $w$ is the number of distinct elements
+accessed since the most recent previous access to $x$ (or $w=n$ if this
+is the first access to $x$).  Again, the constant, $c$, varies, but is
+always at least 4.
+
+\subsection{Constants for Dynamic-Finger and Working-Set}
+
+In order to illustrate how important leading constants are for dynamic
+dictionaries, consider a binary search tree, $T$, that contains $n=10^6$
+elements, and is implemented using Andersson, Lai, or Fagerberg's binary
+search trees.  Such a structure can perform any search using at most
+\[
+   \lceil\log(10^6+1)\rceil+1= 21
 \]
-for some function $f(i)$ to be defined later.  These lists have the
-following properties:
+comparisons.  In contrast, consider storing the same elements in
+a dictionary, $S$ implemented using splay trees.  The (amortized)
+number of comparisons performed during a search in $S$ is $4\log w$
+(see \secref{working-set}).  Thus, in order for $S$ (a splay tree)
+to perform faster than $T$ (a balanced binary search tree), we must have
+\[
+   4\log w < 21 
+       \Leftrightarrow \log w < 5.25 
+       \Leftrightarrow w \le 38 \enspace .
+\]
+That is, of the one million elements stored in $D$ and $T$, there are
+only 38 that can be accessed faster in $S$ than in $T$.  On the other
+hand, the remaining $10^6 - 38$ elements require more comparison to
+access in $S$ than in $T$, most by a factor of 2--4.  Furthermore, $S$
+performs $3\log w$ rotations after every search, while searches do not
+affect the structure of $T$ at all.  Taking all this into consideration,
+it seems difficult to imagine \emph{any} realistic application where
+the working-set property of splay trees would give better performance
+than (Andersson, Lai, or Fagerberg's) balanced binary search trees.
+(This back-of-the- envelope analysis is born out by several experimental
+evaluations of splay trees \cite{X,X,X}.)
 
+Considering the preceding, it seems that a necessary condition for a
+dynamic-finger structure or a working-set structure to be practical is
+that the leading constant on the number of comparisons performed during a
+search should be very small, ideally this constant should be 1.  In this
+paper we present two data structures that attempt to achieve this ideal.
+Our first data structure supports dynamic-finger operations in $O(\log
+d)$ time and performs at most $\log d+o(\log d)$ comparisons during any
+operation. Our second data structure is parameterized by a parameter $\eps
+>0$ and supports all operations in $O(\eps^{-1}\log w)$ time and performs
+at most $(1+\eps)\log w+o(\log w)$ comparisons during any operation.
+(Note that $\eps$ may even depend on $n$.)
+
+We do not claim that this immediately implies our data structures
+are practical, only that they satisfy a necessary condition
+that prevents existing structures, such as splay trees, from being
+practical. Nevertheless there are programming environments that tilt the
+table heavily towards minimizing comparisons.  Consider, for example, the
+Java Collections Framework \cite{jcf}.  In the JCF, a single comparison
+between two \texttt{Integer} objects stored in a \texttt{SortedMap}
+(which is implemented as a red-black tree) involves
 \begin{enumerate}
-  \item If $w(x)\le n_i$, then $x\in D_i$, for all $x\in S$ and all
-    $i\in\{0,\ldots,k\}$.
-  \item $D_i\subseteq D_{i+1}$, for all $i\in\{0,\ldots,k-1\}$.
-  \item A list node that contains a value $x$ in $D_i$ contains a pointer
-    to the list node that contains $x$ in $D_{i+1}$.
-  \item For each $i\in\{0,\ldots,k\}$, if $x$ and $y$ are two consecutive
-    values in $D_i$, then at least one of $x$ and $y$ appears in
-    $D_{i-1}$.
-  \item $|D_0| \in O(1)$.
+\item dereferencing the data structure's \texttt{Comparator} object, \texttt{c};
+\item calling \texttt{c}'s \text{compare(a,b)} method, which requires both a function call and a dereferencing operation in \texttt{c}'s dispatch table; and
+\item the \texttt{compare(a,b)} method must then dereference \texttt{a} and \texttt{b}'s native variables and compare them using the \text{icmp} instruction.
 \end{enumerate}
+In this way, a single comparison performed within the data structure
+involves a function call and four dereferencing operations, each of which
+is an order of magnitude slower than the \texttt{icmp} instruction that
+actually performs the comparison.  One could argue that this is a(nother)
+reason not to develop software in Java, but given that there are already
+3 billion devices running Java \cite{www.java.com/en/about}, it is still
+a worthwhile goal to optimize algorithms for it.
 
-In addition, the data structure stores a sequence of queues,
-$Q_0,\ldots,Q_k$, where $Q_i$ stores exactly the elements $x\in S$
-such that $w(x)\le n_i$.  Within $Q_i$, elements are ordered by
-working-set number so that the $j$th element in $Q_i$ has working set
-number $j$.  Cross pointers are used to link the elements in $Q_i$
-with the corresponding elements in $D_i$. (Or, more efficiently, each
-\emph{node} contains four pointers: two for the doubly-linked list $D_i$,
-one to link the node to the corresponding node in $D_{i+1}$, and one to
-allow the node to take part in the queue, $Q_i$.)
+\section{Background}
 
-\begin{lem}
-  For any one-to-one assignment of working set numbers $w:S\to\{1,\ldots,n\}$,
-  a data structure satisfying Properties~1--5 exists.
-\end{lem}
+\subsection{Bentley and Yao's unbounded Search.}
 
-\begin{proof}
-  Properties~1 and 2 are satisfied by including, in each $D_i$, the $n_i$
-  elements with working-set number at most $n_i$.  Properties~3 and
-  4 can be satisfied by adding at most half the elements from $D_k$
-  into $D_{k-1}$, then adding at most half the element from $D_{k-1}$
-  into $D_{k-2}$, and so on.  We call this last step in the construction,
-  the \emph{cascading step}.
+\subsection{Unbounded Search}
 
-  All that remains is to show that Property~5 is satisfied.
-  In particular, we need to show that the cascading step does not
-  increase the size of $D_0$ by more than a constant.  From the definition
-  of the cascading phase, we have:
-  \begin{align*}
-    |D_0| 
-      & \le n_0 + \sum_{i=1}^{k} n_{i}/2^i  \\
-      & = 1 + \sum_{i=1}^{k} 1/f(i) \\
-      & < 1 + \sum_{i=1}^{\infty} 1/f(i) \\
-      & = 1 + O(1)  \enspace . \qedhere
-  \end{align*}
-  provided that $f(i)\in\Omega(i(log i)^{1+\epsilon})$ for some constant
-  $\epsilon >0$ (for example $f(i)=i^2$, works well.
-\end{proof}
+\begin{thm}\thmlabel{unbounded-search}
+After this, one can use a straightforward modification of Bentley
+and Yao's unbounded search algorithm \cite{byXX,kXX,xxx} to find $x$
+at some position $a_j$ in $\log w + O(\log\log w)$ comparisons, where
+$w=|i-j|$.\footnote{Bentley and Yao actually prove the somewhat stronger
+result that the number of comparisons required is at most $\log w +
+\log\log w + \log\log\log w +\cdots + O(\log^* w)$.  See also, Knuth
+\cite{kXX} and Beigel \cite{bXX}.}
+\end{thm}
 
-%\begin{lem}
-%  The size of the data structure is $O(n)$.
-%\end{lem}
-%
-%\begin{proof}
-%  By Property~5, the number of nodes in the structure is at most
-%  \[
-%    \sum_{i=0}^k 3(k-i)2^i = 3\cdot2^{k}\sum_{i=0}^k 3i/2^i \le 3\cdot 2^{k+1} \le 12n \enspace .
-%  \]
-%  Each node has constant size so the total size is $O(n)$.
-%\end{proof}
-%
-%
-%
-%
-%Given an input list, $D_k$, containing the $n$ values of $S$ in sorted
-%order, the lists $D_{k-1},\ldots,D_{0}$ can be easily created in $O(n)$
-%time, creating the list $D_i$ by taking every second element from
-%$D_{i+1}$, for each $i\in\left\langle k-1,\ldots,0\right\rangle$.
-%
-%More generally, the lists $D_0,\ldots,D_i$ that satisfy properties 
+\subsection{Fagerberg's 1-2 Trees}
 
-A search for a value, $x$, in this structure proceeds as follows:\\
-\begin{minipage}{\textwidth}
-\begin{algorithmic}[1]
-\STATE{$i\gets 0$}
-\STATE{locate the successor, $x'$, of $x$ in $D_0$}
-\WHILE{$x'\neq x$}
-  \STATE{$i\gets i+1$}
-  \STATE{locate $x'$ in $D_{i}$}
-  \IF{$x \le \mbox{predecessor of $x'$ in $D_i$}$}
-    \STATE{$x' \gets \mbox{predecessor of $x'$ in $D_i$}$}
-  \ENDIF
-  \STATE{\COMMENT{now $x'$ is the successor of $x$ in $D_i$}}
-  \STATE{add $x$ to $D_j$ for each $j\in\{0,\ldots,i-1\}$}
-  \STATE{if $|D_0| > 10$, then rebalance}
-  %\STATE{if $|D_j|\ge 3\cdot 2^j$ the rebuild $D_0,\ldots,D_j$}
-\ENDWHILE
-\end{algorithmic}
-\end{minipage}
+Fagerberg's 1-2 trees \cite{fagerberg:complexity}, maintain a 1-2 tree
+of height at most $\log n +O(1)$, support insertion and deletion, and
+have an amortized rebalancing cost of $O(1)$ per update.  We modify this
+data structure slightly so that all keys are stored in the leaves. Each
+internal node, $u$, stores a value that upper-bounds the largest value
+stored at any leaf in $u$'s subtree. However, this value never exceeds the
+smallest value stored in any leaf to the right of $u$'s subtree\ldots
 
-%Let $s(N)$ denote the maximum number of nodes in a structure that is
-%created, from scratch, from a set of $N$ elements.  From \lemref{blah},
-%we know that $s(N)\le cN$ for some universal constant $c$.
-%To rebuild the structure, we find the minimum value of $i$ such that
-%\[
-%   s(|D_i|) \le \alpha \sum_{j=0}^{i} |D_i|
-%\]
-%for some constant $\alpha > 1$ to be defined later.  Rebuilding then
-%involves deleting all nodes from $D_{0},\ldots,D_{i-1}$ and rebuilding
-%these levels, from scratch, using the values in $D_i$.  This amortizes
-%efficiently because it takes time $O(|D_i|)$ but also removes
-%$(\alpha-1)|D_i|$ nodes from the data structures.  [In an amortized
-%analysis, the potential function can be the number of nodes.]
-%
-%The only thing that remains is to show that there does indeed exist a
-%level where this happens.  In the sloppy case, where we set $n_i=(3/2)^i$,
-%Since $k=\log_{3/2} n$, there will be some minimal level $i$ such that
-%$|D_i| \le \alpha(5/3)^i$.
-%On the other hand,
-%\[
-%   \sum_{j=0}^{i-1}|D_{j}| \ge \sum_{j=0}^{i-1}|D_{j}| \alpha(5/3)^{j} \ge 
-%     \alpha (3/2)((5/3)^i -1)
-%\]
-%By rebuilding $D_0,\ldots,D_{i}$ the number of nodes in these levels becomes at most
-%\[
-%   6|D_i|  \le 6(5/3)^i
-%\]
-%so the number of nodes decreases by at least 
-%\[   10(5/3)^{i-1} + |D_i| - 6|D_i| = 
-%10(5/3)^{i-1} - 5|D_i| \ge 
-%
-%
-%\paragraph{How did that work?}  We took a function $f(i)=(5/3)^i$ such
-%that $f(i)=\omega(n_i)$ and $f(i)=o(2^i)$.   We then found the smallest value
-%of $i$ such that
-%\[
-%   |D_i| \le f(i) 
-%\]
 
-\paragraph{Notes:}
-\begin{enumerate}
-  \item The choice of $n_i$ ensures that $x$ is found by the time the
-  algorithm reaches level
-  \[
-     i(x) = (1+o(1))\log w(x) = \log w(x) + o(\log w(x))
-  \]
-  \item In the ternary comparison model, the whole algorithm does $\log
-     w(x)+o(\log w(x))$ comparisons
-  \item In the binary comparison model, we can skip the equality
-    comparison in the condition of the while loop except when $i$ is
-    a perfect square.  This only increases the number of comparison by
-    $O(\sqrt{\log w(x)})$.
-  \item The search operation eventually leads to a violation of
-    Property~5.  We still have to show that Property~5 can be maintained
-    through judicious use of partial rebuilding.
 
-   We can get this to work if we take $f(i)=1/(2-\epsilon/2)^i$, so that
-   $n_i=(2-\epsilon)^i$.  When we rebuild we start the rebuild at the
-   first level in which $|D_i|\le (2-\epsilon/2)^i$.  Unfortunately,
-   this choice of $n_i$ only yields a query algorithm that does
-   \[
-     \log_{2-\epsilon} w(x) \le (1+\epsilon/e)\log w(x) + O(\log\log w(x))
-   \]
-   comparisons.
 
-   A potential way around this is to take $f(i)=i^2$, rebuild at the
-   first level $i$ where $|D_i|\le 2^{i}$, but have special levels
-   that only contain 1/3 of the elements below them.  When we rebuild
-   at level $i$, level $i-1$ becomes a special level.  The trick then
-   is to ensure that among the first $i$ levels, the number of special
-   levels is $o(i)$.  This approach works provided that we can answer
-   the following combinatorial question in the affirmative:
+\section{The Dynamic-Finger Property}
 
-   \noindent\textbf{Question:} For an increasing function $g(i)$,
-   let $B(k,g)$ denote the set of all bitstrings, $b_0,\ldots,b_k$,
-   such that the $i$-prefix $b_0,\ldots,b_i$ contains at most $i/g(i)$
-   one bits, for all $i\in\{1,\ldots,k\}$.  Does there exists a function
-   $g(i)\in o(i)\cap\omega(1)$ such that $|B(k,g)|\ge 2^{i-o(i)}$?
+We begin this section by observing that, in the absence of insert or
+remove operations, the dynamic-finger property is easy to achieve simply
+by storing the data in a sorted array, $A=a_1,\ldots,a_n$, and maintaining
+the index, $i$, of the most recently accessed element.  When searching
+an element $x$, a single comparison suffices to determine if the search
+should proceed in $a_i,\ldots, a_n$ or in $a_{i-1},\ldots,a_1$ after which
+one can apply \thmref{unbounded-search} to find $x$ in $O(\log x)$ time.
 
-   \noindent\textbf{Update:} The answer is no, even if the requirement
-   is weakened to $b_0,\ldots,b_k$ contains at most $k/g(k)$ one bits.  To see this, recall that, for $x \le k/2$, the number of bitstrings of length $k$ that have at most $x$ one bits is
-   \[  \sum_{i=0}^x \binom{k}{i} \le \binom{k}{x}\left(\frac{k-x+1}{k-2x+1}\right)
-   \]
-   [\url{http://goo.gl/G0Xlp}]. Also
-   \[
-     \binom{k}{x} \le \left(\frac{ke}{x}\right)^x \enspace .
-   \]
-   Substituting $x=k/g(k)$, we get
-   \begin{align*}
-      \sum_{i=0}^{k/g(k)} \binom{k}{i} 
-          & \le \binom{k}{k/g(k)}(1+o(1)) \\
-          & \le\left(\frac{ke}{k/g(k)}\right)^{k/g(k)}(1+o(1)) \\
-          & = (e\cdot g(k))^{k/g(k)}(1+o(1)) \\
-          & = e^{k/g(k)+k\ln g(k)/g(k)}(1+o(1)) \\
-          & = e^{o(k)}(1+o(1)) \\
-          & \not\in 2^{k-o(k)} \enspace .
-   \end{align*}
-   \item \noindent\textbf{Next idea:} micro-trees so that rebuilding a
-   level of size $2^{i}$ can be done in $O(2^{i}/f(n))$ time for some
-   slow-growing function $f(n)$ like $f(n)=c\log n$.
-\end{enumerate}
+To obtain an efficient dynamic-finger data structure that supports insert
+and delete operations, we make use of Fagerberg's 1-2 trees.
+
+
+
+
+\section{The Working-Set Property}
+
+\section{Discussion}
+
+\subsection{Two-Way Comparisons}
+
+\subsection{Handling Searches for Missing Values}
+
+\section*{Acknowledgement}
+
+The authors of this paper are partly funded by NSERC and CFI.
+
+\bibliographystyle{abbrvurl}
+\bibliography{avgstretch}
+
+\newpage
+
+\section*{Authors}
+
+\noindent
+\includegraphics[width=.475\textwidth]{luis-b}% 
+\hspace{.1\textwidth}%
+\includegraphics[width=.475\textwidth]{pat-b}%
+
+\noindent\emph{Luis Barba.}
+School of Computer Science, Carleton University, and D\'epartement
+D'Informatique, Universit\'e Libre de Bruxelles
+
+\noindent\emph{Pat Morin.}
+School of Computer Scence, Carleton University
+
 \end{document}
+
+

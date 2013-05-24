@@ -25,6 +25,7 @@
 \DeclareMathOperator{\prnt}{parent}
 \DeclareMathOperator{\lca}{LCA}
 \DeclareMathOperator{\logsum}{logsum}
+\DeclareMathOperator{\hgt}{height}
 
 
 
@@ -424,9 +425,9 @@ The following result, due to Fagerberg \cite{X}, is used in the
 maintenance of binary trees of very low height:
 
 \begin{thm}[Fagerberg]
-  It is possible to maintain a unary-binary tree, $T$, under the operations
-  of adding or removing a leaf (at a specified location) in constant
-  amortized time per operation so that, after every operation
+  It is possible to maintain a unary-binary search tree, $T$, under the
+  operations of insertion and removal in constant amortized time per
+  operation so that, after every operation
   \begin{enumerate}
     \item(low height) $T$ has height $\log n + O(1)$, where $n$ is the
       number of leaves currently in the tree;
@@ -437,254 +438,324 @@ maintenance of binary trees of very low height:
    \end{enumerate}
 \end{thm}
 
-In our application, the keys in our dictionary will be stored in the
-leaves of a 1-2 tree, $T$, left-to-right, in sorted order.  Each node,
-$u$, will store an interval, $R(u)=(a,b)$ where $a$ and $b$ are the
-minimum and maximum values stored at any leaf in $u$'s subtree.  All the
-nodes within a level of the 1-2 tree will be linked into a doubly-linked
-list.  For a node, $u$, $\scc(u)$ and $\pred(u)$ denote the successor
-and predecessor, respectively, of $u$ in this list.
+To obtain fast finger search trees, we will store our data in a 1-2 tree,
+$T$.  To implement our ``finger'' we modify a technique of Blelloch \etal\
+\cite{S} that is, in turn, a refinement and combination of techniques
+of Brown and Tarjan \cite{S} and Tarjan and Van Wyk \cite{S}. In doing
+so, we extend and simplify Blelloch \etal's method by replacing
+doubly-linked lists with arrays.  The use of arrays allows for exponential search, which speeds up the upward phase of a two phase search so that it runs in $O(\log\log d)$ time.
 
-\subsection{Fast Finger Search Trees}
+\subsection{A Review of Hands}
 
-%\subsection{Why We Need Arrays (or Duplication)}
+Blelloch \etal's data structure, which they call ``hands'' consists
+of four lists.  The first two of these lists are called $L$ and $R$.
+Suppose the most recently accessed value was $x_0$. To understand the
+contents of $L$ and $R$, consider the standard drawing of a binary search
+tree, where the $x$ coordinate of each node is given by its key and the
+$y$-coordinate is given by its height.  If we draw a vertical line through
+$x_0$, then $L$ contains those nodes immediately to the left of (and on)
+this line and $R$ contains those nodes immediately to the right of (and
+on) this line.  The nodes are ordered from bottom-to-top, so that $L[i]$
+and $A[i]$ are nodes of height $i$.
+
+In addition to the two lists $L$ and $R$, two stacks, $L^+$ and $R^+$,
+also implemented as lists, are maintained. $L^+$ contains those nodes
+on the search path for $x_0$ that are less than or equal to $x_0$ and
+$R^+$ contains those nodes that are greater than or equal to $x_0$.
+These stacks are ordered so that the nodes closer to $x_0$ are closer
+to the top of the stack and $x_0$ itself is the top element on each the
+stack. Note that the elements of $L^+$ and $R^+$ are a subset of those
+in $L$ and $R$, respectively.
+
+Suppose, without loss of generality, that we want to perform a search for
+some value $x>x_0$.  To do this, we repeatedly examine the top element
+of $R^+$ and pop it off if it is less than $x$.  This process pops off
+at least one element, since $x_0<x$.  Consider the last element $\hat x$
+popped off the stack.  It must be the case that $x=\hat x$ or $x$ is in
+the right subtree of $\hat x$.  Unfortunately, searching in $\hat x$'s
+subtree may be too slow.  This height of this subtree has no relation
+to $d$.
+
+Consider the second-last element of $\hat{\hat x}$ that was popped off
+the stack (if no such element exists, imagine $\hat{\hat x}$ is the
+external node that is just to the right of $x_0$).  Now, $\hat{\hat
+x}$ has some height, $h$, and therefore $\hat{\hat x}$'s right subtree
+has size at least $c2^h$.  All the elements in $\hat{\hat x}$'s right
+subtree are in the interval $(x_0,x)$, so $d\ge c2^h$.  In other words,
+we can afford to spend $O(h)$ time to find $x$.
+
+The list $R$ contains $\hat{\hat x}$ as well as an element $x^*$ that is
+one level above $\hat{\hat x}$.  The vertex $x^*$ is either equal to $\hat
+x$ or is in $\hat x$'s right subtree.  By starting at $x^*$ and walking
+upwards until reaching a node whose value is greater than $x$, we find
+a node, $u$, of height $h+r$ that is an ancestor of the node $x$ we are
+searching for.  Since $u$ is the first such node, we also know that $d >
+c2^{h+r-1}$, so we can afford to search for $x$ starting from node $u$.
+
+In this way, we find $x$ in $O(h+r)$ time using at most $2(h+r)$
+comparisons.  What remains is to update $L$, $R$, $L^+$, and $R^+$.
+One can observe that $L$ and $R$ only change at indices $0,\ldots,h+r$
+and updating $L[0],\ldots,L[h+r]$ and $R[0],\ldots,R[h+r]$ is easy to
+do in $O(h+r)$ time while searching for $x$.
+
+The tricky part is updating $L^+$ and $R^+$.  Updating $L^+$ is the
+easier of the two.  It is first truncated so that it doesn't contain
+any nodes at height lower than the height of $\hat x$ (Blelloch \etal\
+manage this by maintaining cross pointers between elements of $L$ and
+$R$ at the same level as well as cross pointers between elements of $L$
+and $L^+$ and $R$ and $R^+$). The stack $L^+$ is then extended by adding
+the appropriate nodes on the search path from $u$ to $x$.
+
+To update $R^+$ Blelloch \etal\ make use of the fact that lists
+are concatenable. The sequence of nodes that need to be added to
+$R^+$ come from the search path from $u$ to $x$ and from the sublist
+$R[h+r],\ldots,R[\hgt(\hat{\hat{x}})]$.  The former nodes can be added
+while searching for $x$ and the latter nodes are added by splicing the
+appropriate piece from $R$ and appending it to $R^+$.
+
 %
-%Next we argue, informally, that some fundamentally different type of
-%structure is needed to reduce the constant below 2.  In particular,
-%it seems that one must either duplicate keys or use some form of random
-%access structure like an array.
 %
-%Suppose that one makes a pointer-based data structure that stores each key
-%in exactly one node.  One can think of this structure as a graph, $G$, whose
-%vertices contain keys.  It is natural for this graph to have maximum
-%degree 3 since one can think of a search as entering a node through one
-%of its edges and then performing a single comparison to determine that
-%the search should stop at this node (in the case of equality), or leave
-%through one of the other two edges based on the result of the comparison.
 %
-%Now, consider the key, $x$, whose rank is $n/2$.  If this structure supports 
+%\subsection{Fast Finger Search Trees}
 %
-
-Given a 1-2 tree, it is easy to perform finger search using $2\log d +
-O(1)$ comparisons.  Refer to \figref{finger-a}. To perform a finger search
-from $x_0$ to $x>x_0$, we start at the leaf containing $x_0$ and walk
-up to the root until reaching a node, $w$, such that $x\in R(\scc(w))$
-(if no such node, $w$, exists, then $x$ is larger than every value stored
-in $T$).  We then continue with a standard search downwards from $w$
-down to the node containing $x$.
-
-\begin{figure}
-  \begin{center}
-    \includegraphics{finger-a}
-  \end{center}
-  \caption{Performing a slow finger search in Fagerberg's 1-2 trees (2 cases).}
-  \figlabel{finger-a}
-\end{figure}
-
-If the difference in height between $w$ and $u$ is $h$ then the walk
-from $u$ up to $w$ performs $h$ comparisons and so does the walk from
-$w$ down to the node containing $y$, for a total of $2h$ comparisons.
-The exponential-size property of 1-2 trees ensures that, $d$, the rank
-difference between $x$ and $y$ is at least $c2^{h-1}$ for some constant,
-$c>0$.  Thus we have $d > (c/2)2^h$. Taking the logarithm of this equation
-and multiplying by two yields the desired result
-\[
-  2h < 2\log d + O(1) \enspace .
-\]
-
-To speed up this solution, we need to speed up the first phase, in which
-we search for the node $w$.  Note that, if we had the path, $P$, from
-the root of $T$ to $x$ stored in an array, $A$, then we could easily
-find $w$ using $O(\log h)=O(\log\log d)$ comparisons.  This is because,
-for every ancestor, $w_>\in P$ of $w$, $x\in R(w_>)\cup R(\scc(w_>))$
-and, for every descendant, $w_<\in P$ of $w$, $x\not\in R(w_<)\bigcup
-R(\scc(w_<))$.  Therefore, $w$, which is the lowest node in $P$ such that
-$x\in R(w_>)\cup R(\scc(w_>))$, can be found using \thmref{bentley-yao}
-in $O(\log h)$ time using $\log h+O(\log\log h)$ comparisons. 
-
-Unfortunately, it seems difficult to update $A$ during this operation
-so that, after the search is complete, $A$ contains the root to leaf
-path for $x$.  This is because our search for $x$ uses the edge from
-$w$ to $\scc(w)$ and therefore potentially bypasses many nodes on the
-root to leaf path for $x$.  In particular, it misses all the nodes
-between the lowest-common-ancestor of $x_0$ and $x$ and $\scc(w)$.
-See \figref{finger-b}.
-
-\begin{figure}
-  \begin{center}
-    \includegraphics{finger-b}
-  \end{center}
-  \caption{Updating $A$ (in orange) so that it becomes a root-to-leaf path
-      for $x$ is not possible.}
-  \figlabel{finger-b}
-\end{figure}
-
-Instead of trying to maintain a root-to-leaf path in $T$, we store
-\emph{some} simple path, $P$, from the root of $T$ to the most recently
-accessed leaf, $x_0$.  The path $P$ may use edges of that join each node
-$u$ to any of $\lft(u)$, $\rght(u)$, $\scc(u)$, or $\pred(u)$. We call
-the latter two types of edges \emph{horizontal edges}.  In words, every
-step in $P$ goes left or right within a level or down to the next level.
-We place the following restrictions on any horizontal edge $uw$ in $P$:
-(1)~$u$ and $w$ must be binary nodes in $T$ and (2)~if the depth of $u$
-is $i$, then the lowest-common-ancestor of $u$ and $w$ must have depth
-at most $i-C$.  We call a path, $P$ that satisfies these conditions an
-\emph{$x_0$-path}.
-
-The second restriction has several consequences: $P$ never uses two or
-more horizontal edges at the same level (since two of the three endpoints
-of those edges have a common parent).  If $P$ uses the horizontal edge
-$uw$ with $u=\pred(w)$, then $u$ is the right child of its parent, which
-is the right child of $u$'s grandparent, and so on for $C-1$ levels.
-Similarly, $w$ is the left child of its parent, which is the left child
-of $w$'s grandparent, and so on, for $C-1$ levels. (See \figref{uw}.)
-
-\begin{figure}
-  \begin{center}
-    \includegraphics{uw}
-  \end{center}
-  \caption{Restrictions on horizontal edges of $x_0$-paths provide a
-  lot of information about the vertices $u$ and $w$ of the horizontal
-  edge $uw$.} 
-  \figlabel{uw}
-\end{figure}
-
-The following lemma helps us control the relationship between $P$ and
-root-to-leaf paths in $T$.
-
-\begin{lem}\lemlabel{control}
-  For a node $v\in T$, let $\hat v\neq v$ denote the first binary node on
-  the path from $v$ to the root of $T$.  If an $x_0$ path, $P$,
-  uses a horizontal edge $uw$, then $x_0$ is a descendant of $\hat u$
-  or of $\hat w$
-\end{lem}
-
-\begin{proof}
-  The proof is by induction on the height of $u$.  When this height is
-  zero, the result is immediate ($w$ is the last node in $P$).  Refer to
-  \figref{control} for the remainder of the proof.
-
-  \begin{figure}
-    \begin{center}
-      \begin{tabular}{c@{\hspace{1cm}}c}
-         \includegraphics{control-a} &
-         \includegraphics{control-b}
-      \end{tabular}
-    \end{center}
-    \caption{Two cases in the proof of \lemref{control}.}
-    \figlabel{control}
-  \end{figure}
-
-  If $P$ ever returns to the subtree rooted at $u$, then it does so by
-  traversing a horizontal edge from $w'$ in the subtree of $w$ to $u'$
-  in the subtree of $u$.  By induction, $x_0$ is either in the subtree of
-  $\hat w'$, which is a subtree of $\hat w$ or in the subtree of  $\hat
-  u'$ which is a subtree of $\hat u$, as required.
-
-  If $P$ never returns to the subtree of $u$, then the only concern
-  is that it exits the subtree of $w$.  In order to do this without
-  returning to the subtree of $u$, $P$ must traverse a horizontal edge
-  $w'w''$ that exits the subtree of $w$ ($w'$ is on the rightmost path
-  in the subtree of $w$).  In this case we can apply induction again
-  to determine that $x_0$ is in the subtree of $\hat w'$ (which is
-  contained in the subtree of $\hat w$) or in the subtree of $\hat w''$.
-
-  In the case where $x_0$ is in the subtree of $\hat w''$ we need to
-  show that $\hat w''$ is in the subtree of $\hat w$.  To show this,
-  it is sufficient to show that there is at least one binary node in
-  the interior of the path from $w$ to $\lca(uw)$.  But this follows
-  from the fact that this path has length at least $C\ge 3$ and $T$
-  does not have two adjacent unary nodes.\note{check this}
-\end{proof}
-
-The next lemma says that an $x_0$-path, $P$, is almost as useful as the
-actual path, $Q$, from the root of $T$ to $x_0$. Given any node $v'\in P$
-we can quickly find the node $v\in Q$ at the same level as $v'$.
-
-\begin{lem}\lemlabel{ancestor-find}
-  If $P$ is an $x_0$-path then, given $x_0$, $T$, and any $v'$ in $P$
-  at level $i$, we can find the ancestor, $v$, of $x_0$ at level $i$
-  in $O(1)$ time using $O(1)$ comparisons.
-\end{lem}
-
-\begin{proof}
-  If $v=v'$ then we are done, and we can identify this situation by
-  checking if $x_0\in R(v')$.  Suppose this is not the case so that
-  (without loss of generality) $x_0$ is greater than all values in
-  $R(v')$.  Refer to \figref{ancestor-find}.  Then $P$ must contain
-  some horizontal edge $uw$ where $u$ is in the subtree of $v'$ and
-  $w=\scc(u)$.  By \lemref{control}, $x$ must be in the subtree rooted at
-  $\hat u$ or at $\hat w$. Since $T$ does not contain two adjacent unary
-  nodes \note{check this} $x$ is in the subtree rooted the grandparent
-  of $v'$ or at the grandparent of $\scc(v')$.  Which of these cases
-  applies can be determined using a constant number of comparisons and
-  from there at most two comparison suffice to find the required ancestor,
-  $v$, of $x_0$.
-\end{proof}
-
-\begin{figure}
-  \begin{center}
-    \includegraphics{ancestor-find}
-  \end{center}
-  \caption{The ancestor, $v$, of $x_0$ at the same level as $v'\in P$
-    can be found quickly; $v$ is a descendant of the grandparent of $v'$
-    and/or the grandparent of $\scc(v')$.}
-  \figlabel{ancestor-find}
-\end{figure}
-
-Our next lemma shows that we can perform restructuring operations on $P$.
-
-\begin{lem}\lemlabel{push-up}
-   If $P$ contains an edge $(u,\scc(u))$ then, in constant amortized
-   time we can either (1)~replace subpath $\prnt(u),u,\scc(u)$ with
-   $\prnt(u),\scc(\prnt(u)),\scc(u)$ or (2)~shorten $P$ by one edge.
-\end{lem}
-
-\begin{proof}
-  If we are unable to perform (1), then that is because the
-  lowest-common-ancestor, $u'$, of $u$ and $\scc(u)$ is at distance
-  exactly $C$ from $u$ and $\scc(u)$.  If $u'$ is in $P$ then we can
-  simply replace that part of $P$ from $u'$ to $\scc(u)$ with the path
-  in $T$ from $u'$ to $\scc(u)$.  If $u'$ is not in $P$, then this is
-  because $P$ visits the left child of $u'$ through its predecessor edge.
-  In this case, we recursively apply the lemma to $u'$'s predecessor
-  edge so that $P$ leads to $u'$ and then add back the path, in $T$,
-  from $u'$ to $\scc(p)$ to $u$.
-\end{proof}
-
-\begin{lem}
-  Given a 1-2 tree, $T$, an $x_0$-path, $P$ stored in an array, $A$, and
-  a key $x\in T$, can find the leaf of $T$ containing $x$ and update $A$
-  so that it contains an $x$-path in $O(\log d)$ time using $\log d +
-  O(\log\log d)$ comparisons.
-\end{lem}
-
-\begin{proof}
-  Without loss of generality, assume $x>x_0$.  Using
-  \lemref{ancestor-find} we can run Bentley and Yao's search
-  algorithm\footnote{Simple exponential search is also sufficient for
-  this result.} on $A$ to find the lowest node $w$ such $y\in R(\scc(w))$.
-  This search takes $O(\log\log d)$ time and comparisons.
-
-  Next, we need to update the path $P$, stored in $A$, so that it
-  leads from the root of $T$ to $w$.  At this point, since we have
-  found $w$, we have found a node $w'\in P$ such that (1)~$w'=w$,
-  (2)~$w'=\pred(w)$ or (3)~$w'=\scc(w)$ (this follows from the proof
-  of \lemref{ancestor-find}).  In Case~(1) we have nothing to so and
-  Cases~(2) and (3) are symmetric, so without loss of generality, we
-  may assume that Case~(2) applies.
-
-  We truncate $P$ so that it is now a path that leads from the root of $T$
-  to $\pred(w)$.
-
-  Finally, we would like to append $\scc(w)$ to $P$ and add the path from
-  $\scc(w)$ to the node containing $y$.  The only thing that prevents
-  us from doing this is if the lowest-common-ancestor, $u'$, of $w$
-  and $\scc(w)$ is too close.  In this case, if $u'$ is already in $P$
-  then we can go directly from $u'$ to $\scc(u)$ using the path in $T$.
-  Otherwise, we can treat this case in the same way that the proof of
-  of \lemref{push-up} is treated.
-\end{proof}
+%%\subsection{Why We Need Arrays (or Duplication)}
+%%
+%%Next we argue, informally, that some fundamentally different type of
+%%structure is needed to reduce the constant below 2.  In particular,
+%%it seems that one must either duplicate keys or use some form of random
+%%access structure like an array.
+%%
+%%Suppose that one makes a pointer-based data structure that stores each key
+%%in exactly one node.  One can think of this structure as a graph, $G$, whose
+%%vertices contain keys.  It is natural for this graph to have maximum
+%%degree 3 since one can think of a search as entering a node through one
+%%of its edges and then performing a single comparison to determine that
+%%the search should stop at this node (in the case of equality), or leave
+%%through one of the other two edges based on the result of the comparison.
+%%
+%%Now, consider the key, $x$, whose rank is $n/2$.  If this structure supports 
+%%
+%
+%Given a 1-2 tree, it is easy to perform finger search using $2\log d +
+%O(1)$ comparisons.  Refer to \figref{finger-a}. To perform a finger search
+%from $x_0$ to $x>x_0$, we start at the leaf containing $x_0$ and walk
+%up to the root until reaching a node, $w$, such that $x\in R(\scc(w))$
+%(if no such node, $w$, exists, then $x$ is larger than every value stored
+%in $T$).  We then continue with a standard search downwards from $w$
+%down to the node containing $x$.
+%
+%\begin{figure}
+%  \begin{center}
+%    \includegraphics{finger-a}
+%  \end{center}
+%  \caption{Performing a slow finger search in Fagerberg's 1-2 trees (2 cases).}
+%  \figlabel{finger-a}
+%\end{figure}
+%
+%If the difference in height between $w$ and $u$ is $h$ then the walk
+%from $u$ up to $w$ performs $h$ comparisons and so does the walk from
+%$w$ down to the node containing $y$, for a total of $2h$ comparisons.
+%The exponential-size property of 1-2 trees ensures that, $d$, the rank
+%difference between $x$ and $y$ is at least $c2^{h-1}$ for some constant,
+%$c>0$.  Thus we have $d > (c/2)2^h$. Taking the logarithm of this equation
+%and multiplying by two yields the desired result
+%\[
+%  2h < 2\log d + O(1) \enspace .
+%\]
+%
+%To speed up this solution, we need to speed up the first phase, in which
+%we search for the node $w$.  Note that, if we had the path, $P$, from
+%the root of $T$ to $x$ stored in an array, $A$, then we could easily
+%find $w$ using $O(\log h)=O(\log\log d)$ comparisons.  This is because,
+%for every ancestor, $w_>\in P$ of $w$, $x\in R(w_>)\cup R(\scc(w_>))$
+%and, for every descendant, $w_<\in P$ of $w$, $x\not\in R(w_<)\bigcup
+%R(\scc(w_<))$.  Therefore, $w$, which is the lowest node in $P$ such that
+%$x\in R(w_>)\cup R(\scc(w_>))$, can be found using \thmref{bentley-yao}
+%in $O(\log h)$ time using $\log h+O(\log\log h)$ comparisons. 
+%
+%Unfortunately, it seems difficult to update $A$ during this operation
+%so that, after the search is complete, $A$ contains the root to leaf
+%path for $x$.  This is because our search for $x$ uses the edge from
+%$w$ to $\scc(w)$ and therefore potentially bypasses many nodes on the
+%root to leaf path for $x$.  In particular, it misses all the nodes
+%between the lowest-common-ancestor of $x_0$ and $x$ and $\scc(w)$.
+%See \figref{finger-b}.
+%
+%\begin{figure}
+%  \begin{center}
+%    \includegraphics{finger-b}
+%  \end{center}
+%  \caption{Updating $A$ (in orange) so that it becomes a root-to-leaf path
+%      for $x$ is not possible.}
+%  \figlabel{finger-b}
+%\end{figure}
+%
+%Instead of trying to maintain a root-to-leaf path in $T$, we store
+%\emph{some} simple path, $P$, from the root of $T$ to the most recently
+%accessed leaf, $x_0$.  The path $P$ may use edges of that join each node
+%$u$ to any of $\lft(u)$, $\rght(u)$, $\scc(u)$, or $\pred(u)$. We call
+%the latter two types of edges \emph{horizontal edges}.  In words, every
+%step in $P$ goes left or right within a level or down to the next level.
+%We place the following restrictions on any horizontal edge $uw$ in $P$:
+%(1)~$u$ and $w$ must be binary nodes in $T$ and (2)~if the depth of $u$
+%is $i$, then the lowest-common-ancestor of $u$ and $w$ must have depth
+%at most $i-C$.  We call a path, $P$ that satisfies these conditions an
+%\emph{$x_0$-path}.
+%
+%The second restriction has several consequences: $P$ never uses two or
+%more horizontal edges at the same level (since two of the three endpoints
+%of those edges have a common parent).  If $P$ uses the horizontal edge
+%$uw$ with $u=\pred(w)$, then $u$ is the right child of its parent, which
+%is the right child of $u$'s grandparent, and so on for $C-1$ levels.
+%Similarly, $w$ is the left child of its parent, which is the left child
+%of $w$'s grandparent, and so on, for $C-1$ levels. (See \figref{uw}.)
+%
+%\begin{figure}
+%  \begin{center}
+%    \includegraphics{uw}
+%  \end{center}
+%  \caption{Restrictions on horizontal edges of $x_0$-paths provide a
+%  lot of information about the vertices $u$ and $w$ of the horizontal
+%  edge $uw$.} 
+%  \figlabel{uw}
+%\end{figure}
+%
+%The following lemma helps us control the relationship between $P$ and
+%root-to-leaf paths in $T$.
+%
+%\begin{lem}\lemlabel{control}
+%  For a node $v\in T$, let $\hat v\neq v$ denote the first binary node on
+%  the path from $v$ to the root of $T$.  If an $x_0$ path, $P$,
+%  uses a horizontal edge $uw$, then $x_0$ is a descendant of $\hat u$
+%  or of $\hat w$
+%\end{lem}
+%
+%\begin{proof}
+%  The proof is by induction on the height of $u$.  When this height is
+%  zero, the result is immediate ($w$ is the last node in $P$).  Refer to
+%  \figref{control} for the remainder of the proof.
+%
+%  \begin{figure}
+%    \begin{center}
+%      \begin{tabular}{c@{\hspace{1cm}}c}
+%         \includegraphics{control-a} &
+%         \includegraphics{control-b}
+%      \end{tabular}
+%    \end{center}
+%    \caption{Two cases in the proof of \lemref{control}.}
+%    \figlabel{control}
+%  \end{figure}
+%
+%  If $P$ ever returns to the subtree rooted at $u$, then it does so by
+%  traversing a horizontal edge from $w'$ in the subtree of $w$ to $u'$
+%  in the subtree of $u$.  By induction, $x_0$ is either in the subtree of
+%  $\hat w'$, which is a subtree of $\hat w$ or in the subtree of  $\hat
+%  u'$ which is a subtree of $\hat u$, as required.
+%
+%  If $P$ never returns to the subtree of $u$, then the only concern
+%  is that it exits the subtree of $w$.  In order to do this without
+%  returning to the subtree of $u$, $P$ must traverse a horizontal edge
+%  $w'w''$ that exits the subtree of $w$ ($w'$ is on the rightmost path
+%  in the subtree of $w$).  In this case we can apply induction again
+%  to determine that $x_0$ is in the subtree of $\hat w'$ (which is
+%  contained in the subtree of $\hat w$) or in the subtree of $\hat w''$.
+%
+%  In the case where $x_0$ is in the subtree of $\hat w''$ we need to
+%  show that $\hat w''$ is in the subtree of $\hat w$.  To show this,
+%  it is sufficient to show that there is at least one binary node in
+%  the interior of the path from $w$ to $\lca(uw)$.  But this follows
+%  from the fact that this path has length at least $C\ge 3$ and $T$
+%  does not have two adjacent unary nodes.\note{check this}
+%\end{proof}
+%
+%The next lemma says that an $x_0$-path, $P$, is almost as useful as the
+%actual path, $Q$, from the root of $T$ to $x_0$. Given any node $v'\in P$
+%we can quickly find the node $v\in Q$ at the same level as $v'$.
+%
+%\begin{lem}\lemlabel{ancestor-find}
+%  If $P$ is an $x_0$-path then, given $x_0$, $T$, and any $v'$ in $P$
+%  at level $i$, we can find the ancestor, $v$, of $x_0$ at level $i$
+%  in $O(1)$ time using $O(1)$ comparisons.
+%\end{lem}
+%
+%\begin{proof}
+%  If $v=v'$ then we are done, and we can identify this situation by
+%  checking if $x_0\in R(v')$.  Suppose this is not the case so that
+%  (without loss of generality) $x_0$ is greater than all values in
+%  $R(v')$.  Refer to \figref{ancestor-find}.  Then $P$ must contain
+%  some horizontal edge $uw$ where $u$ is in the subtree of $v'$ and
+%  $w=\scc(u)$.  By \lemref{control}, $x$ must be in the subtree rooted at
+%  $\hat u$ or at $\hat w$. Since $T$ does not contain two adjacent unary
+%  nodes \note{check this} $x$ is in the subtree rooted the grandparent
+%  of $v'$ or at the grandparent of $\scc(v')$.  Which of these cases
+%  applies can be determined using a constant number of comparisons and
+%  from there at most two comparison suffice to find the required ancestor,
+%  $v$, of $x_0$.
+%\end{proof}
+%
+%\begin{figure}
+%  \begin{center}
+%    \includegraphics{ancestor-find}
+%  \end{center}
+%  \caption{The ancestor, $v$, of $x_0$ at the same level as $v'\in P$
+%    can be found quickly; $v$ is a descendant of the grandparent of $v'$
+%    and/or the grandparent of $\scc(v')$.}
+%  \figlabel{ancestor-find}
+%\end{figure}
+%
+%Our next lemma shows that we can perform restructuring operations on $P$.
+%
+%\begin{lem}\lemlabel{push-up}
+%   If $P$ contains an edge $(u,\scc(u))$ then, in constant amortized
+%   time we can either (1)~replace subpath $\prnt(u),u,\scc(u)$ with
+%   $\prnt(u),\scc(\prnt(u)),\scc(u)$ or (2)~shorten $P$ by one edge.
+%\end{lem}
+%
+%\begin{proof}
+%  If we are unable to perform (1), then that is because the
+%  lowest-common-ancestor, $u'$, of $u$ and $\scc(u)$ is at distance
+%  exactly $C$ from $u$ and $\scc(u)$.  If $u'$ is in $P$ then we can
+%  simply replace that part of $P$ from $u'$ to $\scc(u)$ with the path
+%  in $T$ from $u'$ to $\scc(u)$.  If $u'$ is not in $P$, then this is
+%  because $P$ visits the left child of $u'$ through its predecessor edge.
+%  In this case, we recursively apply the lemma to $u'$'s predecessor
+%  edge so that $P$ leads to $u'$ and then add back the path, in $T$,
+%  from $u'$ to $\scc(p)$ to $u$.
+%\end{proof}
+%
+%\begin{lem}
+%  Given a 1-2 tree, $T$, an $x_0$-path, $P$ stored in an array, $A$, and
+%  a key $x\in T$, can find the leaf of $T$ containing $x$ and update $A$
+%  so that it contains an $x$-path in $O(\log d)$ time using $\log d +
+%  O(\log\log d)$ comparisons.
+%\end{lem}
+%
+%\begin{proof}
+%  Without loss of generality, assume $x>x_0$.  Using
+%  \lemref{ancestor-find} we can run Bentley and Yao's search
+%  algorithm\footnote{Simple exponential search is also sufficient for
+%  this result.} on $A$ to find the lowest node $w$ such $y\in R(\scc(w))$.
+%  This search takes $O(\log\log d)$ time and comparisons.
+%
+%  Next, we need to update the path $P$, stored in $A$, so that it
+%  leads from the root of $T$ to $w$.  At this point, since we have
+%  found $w$, we have found a node $w'\in P$ such that (1)~$w'=w$,
+%  (2)~$w'=\pred(w)$ or (3)~$w'=\scc(w)$ (this follows from the proof
+%  of \lemref{ancestor-find}).  In Case~(1) we have nothing to so and
+%  Cases~(2) and (3) are symmetric, so without loss of generality, we
+%  may assume that Case~(2) applies.
+%
+%  We truncate $P$ so that it is now a path that leads from the root of $T$
+%  to $\pred(w)$.
+%
+%  Finally, we would like to append $\scc(w)$ to $P$ and add the path from
+%  $\scc(w)$ to the node containing $y$.  The only thing that prevents
+%  us from doing this is if the lowest-common-ancestor, $u'$, of $w$
+%  and $\scc(w)$ is too close.  In this case, if $u'$ is already in $P$
+%  then we can go directly from $u'$ to $\scc(u)$ using the path in $T$.
+%  Otherwise, we can treat this case in the same way that the proof of
+%  of \lemref{push-up} is treated.
+%\end{proof}
 
 \subsection{Discussion}
 
@@ -692,6 +763,9 @@ At this point it is worth comparing our structure with some existing
 approaches to finger searches.  Mention:
 \begin{itemize}
   \item Level-linked search trees (Tarjan?)
+
+  \item Mention stupid solution, that uses level-linked leaf-oriented
+    search trees.
 
   \item Our array, $A$, serves the same purpose as Blelloch \etal's
     \emph{hands} data structure, in the sense that it is used for fast

@@ -2,13 +2,21 @@
 \listfiles
 \usepackage{amsthm,amsmath,graphicx,wrapfig}
 \usepackage{pat}
-%\usepackage{coffee4}
-\usepackage[letterpaper]{hyperref}
-\usepackage[dvipsnames]{color}
+
+\usepackage{color}
 \definecolor{linkblue}{named}{Blue}
-\hypersetup{colorlinks=true, linkcolor=linkblue,  anchorcolor=linkblue,
-citecolor=linkblue, filecolor=linkblue, menucolor=linkblue, pagecolor=linkblue,
-urlcolor=linkblue} 
+
+\usepackage[letterpaper]{hyperref}
+\hypersetup{
+  colorlinks=true, 
+  linkcolor=linkblue,  
+  anchorcolor=linkblue,
+  citecolor=linkblue, 
+  filecolor=linkblue, 
+  menucolor=linkblue, 
+  pagecolor=linkblue,
+  urlcolor=linkblue
+} 
 
 \DeclareMathOperator{\scc}{succ}
 \DeclareMathOperator{\pred}{pred}
@@ -16,6 +24,7 @@ urlcolor=linkblue}
 \DeclareMathOperator{\rght}{right}
 \DeclareMathOperator{\prnt}{parent}
 \DeclareMathOperator{\lca}{LCA}
+\DeclareMathOperator{\logsum}{logsum}
 
 
 
@@ -45,15 +54,15 @@ urlcolor=linkblue}
   This paper begins the process of making practical comparison-based
   dictionaries that have the dynamic finger and working-set properties.
   In particular, we initiate the study of the exact number of comparisons
-  needed in dynamic dictionaries that have these two properties.  We
-  present a data structure with the dynamic finger property that performs
-  at most $\log_2 d+o(\log d)$ comparisons per search and a data structure
-  that has the working-set property and, for any $\eps > 0$, that
+  needed in dynamic dictionaries that have these two properties.
+  We present a data structure with the dynamic finger property that
+  performs at most $\log_2 d+o(\log d)$ comparisons per search and a data
+  structure that, for any $\eps > 0$, has the working-set property and
   performs at most $(1+\eps)\log_2 w+o(\log w)$ comparisons per search.
   Here $d$ and $w$ are the ``finger number'' and ``working-set number'',
   respectively, of the element being searched for.  All previously-known
-  structures with the dynamic-finger or working-set property
-  perform at least $2\log_2 d$ or $3\log_2 w$ comparison, respectively.
+  structures with the dynamic-finger or working-set property perform at
+  least $2\log_2 d$ or $4\log_2 w$ comparison, respectively.
 \end{abstract}
 
 \end{titlepage}
@@ -331,37 +340,110 @@ node, $w$, from which the usual search procedure can be applied.  In the
 \emph{downward phase} a search for $x$ that starts at $w$ is performed.
 
 This two phase approach is expensive: If the structure has worst-case
-search time $c\log n+o(\log n)$ the two phase approach always leads to
+search time $c\log n+o(\log n)$ the two phase approach usually leads to
 a search time of $2c\log d+o(\log d)$; using a simple two-phase finger
-search on a normal structure doubles the leading constant.  This is the
-reason no existing structure has a constant smaller than 2.
+search on a normal structure doubles the leading constant.  Informally,
+this is because the logarithm is such a slow-growing function: If $w$
+is a node containing a value equidistant from $x_0$ and $x$, then the
+the number of comparison used to go from $x_0$ to $w$ and then to $x$
+is $c\log(d/2) + c\log(d/2) = 2c\log d - 2c$.  This is the reason no
+existing structure has a constant smaller than 2.
 
-At a high level, our new structure works as follows: We use an
-extremely well-balanced leaf-oriented search tree, $T$, that has the
-nodes at each level linked together in a list.  Using this structure,
-the two phase approach gives an algorithm that performs $2\log d+o(\log
-d)$ comparison.  To speed this up we store a path from the root node
-to the current node, $x_0$, in an array, $A$. Using $A$, we speed up
-the upward phase of our search so that it runs in $O(\log\log d)$ time.
+\subsection{Overview}
+
+At a high level, our new structure works as follows: We use an extremely
+well-balanced leaf-oriented search tree, $T$, that has the nodes at
+each level linked together in a list.  Using this structure, the two
+phase approach gives an algorithm that performs $2\log d+o(\log d)$
+comparisons.  To speed this up we store a path, $P$, from the root node
+to the current node, $x_0$, in an array, $A$. Using $A$, we can perform
+an exponential search during the upward phase of the search so that
+it runs in $O(\log\log d)$ time and uses $O(\log\log d)$ comparisons.
 The downward phase still takes $O(\log d)$ time and performs $\log d$
 comparisons, so the total number of comparison is $\log d+O(\log\log d)$.
 
 Of course, there are issues with this approach that need to be resolved.
 The most troublesome of these is the fact that the path stored in $A$
 does not only use edges of $T$; it also uses edges between adjacent
-nodes within a level.  Some care is then required to ensure that not too
-many such edges are used in $A$ since, otherwise, $A$ may have little
-resemblance to the root to leaf path for $x_0$ in which case it is not
-useful for a finger search starting at $x_0$.  (Consider, for example, if
-$A$ contains the path in $T$ from the root to the left-most leaf followed
-the nodes of the bottom level in left-to-right order, leading to $x_0$.
-This path is useless if $x_0$ has rank $n/2$ and the next search is for
-some element $x>x_0$.)
+nodes within a level.  Care is required to ensure that not too many such
+\emph{horizontal} edges are used in $A$. Otherwise, the path stored in $A$
+may have little resemblance to the root to leaf path for $x_0$ making
+it useless for speeding up a finger search from $x_0$. (Consider, for
+example, if $A$ contains the path in $T$ from the root to the left-most
+leaf followed the nodes of the bottom level in left-to-right order,
+leading to $x_0$.  This path is useless if $x_0$ has rank $n/2$ and the
+next search is for some element $x>x_0$.)
 
 \subsection{Unbounded Search and Unary-Binary Trees}
 
 We begin with a short discussion of the two fundamental tools used by
 our algorithm.
+
+\subsubsection{Unbounded Search in a Sorted Array}
+
+Define the \emph{iterated logarithm function}
+\[
+    \log^{(j)} x = \begin{cases}
+       x & \text{if $j=0$} \\
+       \log(\log^{(j-1)} x) & \text{if $j>0$}
+    \end{cases}
+\]
+and define $\log^* x=\min\{j: \log^{(j)} x \le 1\}$.  The following result,
+due to Bentley and Yao \cite{bentley.yao.XX} is a generalization of
+exponential search \cite{X}:
+
+\begin{thm}[Bentley and Yao]\thmlabel{bentley-yao}
+There exists an algorithm that takes as input a sorted array,
+$A=a_1,\ldots,a_n$, and a value, $x$, and finds the smallest index, $i$,
+such that $a_i\ge x$ or returns $n+1$ if $x>a_n$.  This algorithm runs
+in $O(\log i)$ time and performs
+\[
+    \logsum(i) = \sum_{j=1}^{\log^* i} \log^{(j)} i + O(\log^* i)
+\]
+comparisons.
+\end{thm}
+
+We observing that \thmref{bentley-yao} makes it easy to obtain a
+static dictionary---one that does not support the insert or delete
+operations---that has very fast finger search.  Simply store the data in
+a sorted array, $A=a_1,\ldots,a_n$, and maintain the index, $i$, of the
+most recently accessed element, $x_0$.  When it comes time to search
+for the next element, $x$, a single comparison between $x$ and $x_0$
+suffices to determine if the search should proceed in $a_i,\ldots, a_n$
+or in $a_{i-1},\ldots,a_1$ after which one can apply \thmref{bentley-yao}
+to find $x$ in $O(\log d)$ time using $\logsum(d)=\log d + O(\log\log d)$ comparison.
+
+
+\subsubsection{1-2 Trees}
+
+To obtain a dynamic dictionary, we will use a special kind of very well
+balanced binary search trees.  A \emph{unary-binary tree} or \emph{1-2
+tree} is a tree in which all the leaves have the same depth and every
+internal node has one (a unary node) or two (a binary node) children.
+The following result, due to Fagerberg \cite{X}, is used in the
+maintenance of binary trees of very low height:
+
+\begin{thm}[Fagerberg]
+  It is possible to maintain a unary-binary tree, $T$, under the operations
+  of adding or removing a leaf (at a specified location) in constant
+  amortized time per operation so that, after every operation
+  \begin{enumerate}
+    \item(low height) $T$ has height $\log n + O(1)$, where $n$ is the
+      number of leaves currently in the tree;
+    \item(exponential size) every node of height $h$ is the root of a
+      subtree having at least $c2^h$ leaves, for some constant $c>0$; and
+    \item(no adjacent unary) the child of each unary node is either 
+      a leaf or a binary node.
+   \end{enumerate}
+\end{thm}
+
+In our application, the keys in our dictionary will be stored in the
+leaves of a 1-2 tree, $T$, left-to-right, in sorted order.  Each node,
+$u$, will store an interval, $R(u)=(a,b)$ where $a$ and $b$ are the
+minimum and maximum values stored at any leaf in $u$'s subtree.  All the
+nodes within a level of the 1-2 tree will be linked into a doubly-linked
+list.  For a node, $u$, $\scc(u)$ and $\pred(u)$ denote the successor
+and predecessor, respectively, of $u$ in this list.
 
 \subsection{Fast Finger Search Trees}
 
@@ -383,25 +465,13 @@ our algorithm.
 %Now, consider the key, $x$, whose rank is $n/2$.  If this structure supports 
 %
 
-We begin by observing that it is easy to obtain a static dictionary---one
-that does not support the insert or delete operations---that has
-very fast finger search.  Simply store the data in a sorted array,
-$A=a_1,\ldots,a_n$, and maintain the index, $i$, of the most recently
-accessed element, $x_0$.  When it comes time to search for the next
-element, $x$, a single comparison between $x$ and $x_0$ suffices
-to determine if the search should proceed in $a_i,\ldots, a_n$ or in
-$a_{i-1},\ldots,a_1$ after which one can apply \thmref{unbounded-search}
-to find $x$ in $O(\log d)$ time using $\log d + O(\log\log d)$ comparison.
-
-To obtain an efficient dynamic-finger data structure that supports insert
-and delete operations, we make use of 1-2 trees.  Given a 1-2 tree, it
-is easy to perform finger search using $2\log d + O(1)$ comparisons.
-Refer to \figref{finger-a}. To perform a finger search from $x_0$ to
-$x>x_0$, we start at the leaf containing $x_0$ and walk up to the root
-until reaching a node, $w$, such that $x\in R(\scc(w))$ (if no such
-node, $w$, exists, then $x$ is larger than every value stored in $T$).
-We then continue with a standard search downwards from $w$ down to the
-node containing $x$.
+Given a 1-2 tree, it is easy to perform finger search using $2\log d +
+O(1)$ comparisons.  Refer to \figref{finger-a}. To perform a finger search
+from $x_0$ to $x>x_0$, we start at the leaf containing $x_0$ and walk
+up to the root until reaching a node, $w$, such that $x\in R(\scc(w))$
+(if no such node, $w$, exists, then $x$ is larger than every value stored
+in $T$).  We then continue with a standard search downwards from $w$
+down to the node containing $x$.
 
 \begin{figure}
   \begin{center}
@@ -414,23 +484,23 @@ node containing $x$.
 If the difference in height between $w$ and $u$ is $h$ then the walk
 from $u$ up to $w$ performs $h$ comparisons and so does the walk from
 $w$ down to the node containing $y$, for a total of $2h$ comparisons.
-The exponential-size property of 1-2 trees ensures that,
-$d$, the rank difference between $x$ and $y$ is at least $c2^h$ for some
-constant, $c>0$.  Thus we have $d > c2^h$. Taking the logarithm of this
-equation and multiplying by two yields the desired result
+The exponential-size property of 1-2 trees ensures that, $d$, the rank
+difference between $x$ and $y$ is at least $c2^{h-1}$ for some constant,
+$c>0$.  Thus we have $d > (c/2)2^h$. Taking the logarithm of this equation
+and multiplying by two yields the desired result
 \[
   2h < 2\log d + O(1) \enspace .
 \]
 
 To speed up this solution, we need to speed up the first phase, in which
-we search for the node $w$.  Note that, if we had the path, $P$, from the
-root of $T$ to $x$ stored in an array, $A$, then we could easily find
-$w$ using $O(\log h)=O(\log\log d)$ comparisons.  This is because, for
-every ancestor, $w_>\in P$ of $w$, $x\in R(w_>)\cup R(\scc(w_>))$ and,
-for every descendant, $w_<\in P$ of $w$, $y\not\in R(w_<)\bigcup
+we search for the node $w$.  Note that, if we had the path, $P$, from
+the root of $T$ to $x$ stored in an array, $A$, then we could easily
+find $w$ using $O(\log h)=O(\log\log d)$ comparisons.  This is because,
+for every ancestor, $w_>\in P$ of $w$, $x\in R(w_>)\cup R(\scc(w_>))$
+and, for every descendant, $w_<\in P$ of $w$, $x\not\in R(w_<)\bigcup
 R(\scc(w_<))$.  Therefore, $w$, which is the lowest node in $P$ such that
-$x\in R(w_>)\cup R(\scc(w_>))$, can be found using the unbounded search
-algorithm in $O(\log h)$ time using $\log h+O(\log\log h)$ comparisons.
+$x\in R(w_>)\cup R(\scc(w_>))$, can be found using \thmref{bentley-yao}
+in $O(\log h)$ time using $\log h+O(\log\log h)$ comparisons. 
 
 Unfortunately, it seems difficult to update $A$ during this operation
 so that, after the search is complete, $A$ contains the root to leaf
@@ -591,9 +661,10 @@ Our next lemma shows that we can perform restructuring operations on $P$.
 
 \begin{proof}
   Without loss of generality, assume $x>x_0$.  Using
-  \lemref{ancestor-find} we can run Bentley and Yao's search algorithm
-  on $A$ to find the lowest node $w$ such $y\in R(\scc(w))$.  This search
-  takes $O(\log\log d)$ time and comparisons.
+  \lemref{ancestor-find} we can run Bentley and Yao's search
+  algorithm\footnote{Simple exponential search is also sufficient for
+  this result.} on $A$ to find the lowest node $w$ such $y\in R(\scc(w))$.
+  This search takes $O(\log\log d)$ time and comparisons.
 
   Next, we need to update the path $P$, stored in $A$, so that it
   leads from the root of $T$ to $w$.  At this point, since we have
@@ -614,6 +685,44 @@ Our next lemma shows that we can perform restructuring operations on $P$.
   Otherwise, we can treat this case in the same way that the proof of
   of \lemref{push-up} is treated.
 \end{proof}
+
+\subsection{Discussion}
+
+At this point it is worth comparing our structure with some existing
+approaches to finger searches.  Mention:
+\begin{itemize}
+  \item Level-linked search trees (Tarjan?)
+
+  \item Our array, $A$, serves the same purpose as Blelloch \etal's
+    \emph{hands} data structure, in the sense that it is used for fast
+    finger searching.  A (pair of) hands consists of 4 concatenable
+    deques.  If applied to 1-2 trees, hands would allow for finger search
+    using $2\log d+O(1)$ comparisons without requiring that the nodes
+    of the 1-2 tree have $\scc$ and $\pred$ pointers.  (The purpose of
+    hands is to implement the two phase finger search strategy without
+    requiring level linking.)
+
+    Blelloch \etal\ implement the 4 concatenable deques using
+    doubly-linked lists.  One could speed up the hands approach
+    by implementing these deques using a different data structure.
+    In particular, one needs a deque data structure that also supports
+    concatenation of two deques in $O(1)$ time, that supports searching
+    from the end of the deque using $f(\Delta)$ comparisons, and that
+    supports splitting the deque in $g(\Delta)$ time.  Here $\Delta$
+    represents the distance of the operation (search or split) from the
+    end of the deque.  Such a structure would allow hands to perform
+    finger search in a 1-2 tree using $\log d + f(\log d)$ comparisons
+    in $O(\log d + g(\log d))$ time.
+
+
+  \item Right parent stack (Brown and Tarjan, Ref. [6] in Hands paper)
+  \item Brodal finger search with constant insertion time
+  \item 
+\end{itemize}
+
+Finally, it is worth noting that our structure supports multiple
+simultaneous fingers.  Several processes can share the same search tree,
+$T$, with each process maintaining its own array, $A$.
 
 
 \section{The Working-Set Property}

@@ -68,16 +68,18 @@ connectivity with another desirable property of geometric graphs:
 low spanning ratio (a.k.a., low stretch factor or low dilation),  the
 property of approximately preserving Euclidean distances between vertices.
 In particular, given a set of $n$ points in $\R^d$, we study the problem
-of constructing a graph on these points such that
+of constructing a graph on these points where the weights of the edges
+are given by the Euclidean distance between their endpoints. We wish
+to construct a graph such that
 \begin{enumerate}
   \item The graph is sparse: the graph has $o(n^2)$ edges
-  \item The graph is a spanner: shortest paths in the graph do not exceed
-  Euclidean distances between their endpoints by more than a constant
-  factor; and
+  \item The graph is a spanner: (weighted) shortest paths in the graph
+    do not exceed the Euclidean distance between their endpoints by more
+    than a constant factor; and
   \item The graph has high global connectivity: removing a small number
-  of vertices leaves a graph in which a set of vertices of size $n-o(n)$
-  are all in the same component and all vertices in this set have
-  spanning paths between them.
+    of vertices leaves a graph in which a set of vertices of size $n-o(n)$
+    are all in the same component and all vertices in this set have
+    spanning paths between them.
 \end{enumerate}
 
 This is the first paper to consider combining low spanning ratio
@@ -98,7 +100,11 @@ every $r$-fault-tolerant spanner has $\Omega(rn)$ edges.
 
 In the next few subsections, we formally define robust spanners
 and discuss, at a more rigorous level, the relationship between
-robust-spanners, fault-tolerant spanners, and expanders.
+robust-spanners, fault-tolerant spanners, and expanders.  From this point
+onwards, all graphs we discuss have vertices that are points in $\R^d$;
+$n$ refers to the number points/vertices;  all distances between pairs of
+points are Euclidean distances; and any shortest path in a graph refers
+to the shortest (Euclidean) path that uses only edges of the graph.
 
 \subsection{Robustness}
 
@@ -113,7 +119,8 @@ $\|xy\|_G$ denotes the length of the Euclidean shortest path from $x$
 to $y$ that uses only edges in $G$.  Here we use the convention that
 $\|xy\|_G=\infty$ if there is no path, in $G$, from $x$ to $y$.  We say
 simply that $G$ is a \emph{$t$-spanner} if it is a $t$-spanner of $V$
-(i.e., $V^-=V$).
+(i.e., $V^-=V$).  We point out that, although $t$ is always at least 1,
+it need not be an integer.
 
 Geometric $t$-spanners have been studied extensively and have applications
 in robotics, graph theory, data structures, wireless networks, and network
@@ -130,8 +137,11 @@ An example is shown in \figref{grid} which suggests that the
 $\sqrt{n}\times\sqrt{n}$ grid graph is an $O(k^2)$-robust 3-spanner.
 The set $S^+$ in this example is obtained by choosing ``disjoint''
 squares that cover the vertices of $S$ and adding to $S^+$ any vertices
-contained in these squares.  (A proof that the grid graph is indeed an
-$O(k^2)$-robust 3-spanner is sketched in \secref{summary}.)
+contained in these squares.  A short path between any two vertices in
+$V\setminus S^+$ is obtained by starting with some shortest path in $G$
+between these two vertices and then routing around any of the square
+holes encountered by this path. (A proof that the grid graph is indeed
+an $O(k^2)$-robust 3-spanner is sketched in \secref{summary}.)
 
 \begin{figure}
   \begin{center}
@@ -149,6 +159,19 @@ reliability.  If a network is an $f(k)$-robust $t$-spanner, and $k$ nodes
 of the network fail, then the network remains a $t$-spanner of $n-f(k)$
 of its nodes.  Intuitively, most of the network survives the removal of
 $k$ nodes, provided that $k$ is small enough that $f(k)\ll n$.
+
+%%%%%%%%% FIXME: Remove this piece of shit definition requested by the referee
+A slightly stronger version of robustness, which is achieved by some
+of our constructions, requires that $G\setminus S^+$ induces a spanner.
+Under this definition, the graph $G\setminus S^+$ must be a $t$-spanner of
+$V\setminus S^+$. For example, the grid graph in \figref{grid} satisfies
+this stronger definition since the vertices inside the squares are not
+used in the short paths between vertices outside the squares.  In some
+applications, this stronger definition may be preferable since the nodes
+in $S^+$, which no longer gain the full benefits of the network $G$,
+are not required to help with the routing of messages between nodes of
+$V\setminus S^+$.  (An open problem related to this stronger definition
+of robustness is discussed in \secref{summary}.)
 
 \subsection{Robustness versus Fault-Tolerance}
 
@@ -214,22 +237,22 @@ $S\subseteq V$,
 \[
     |N(S)| \ge h(|S|) \enspace ,
 \]
-where $N(S)$ denotes the set of vertices in $V\setminus S$ that are
-adjacent to vertices in $S$.  Of particular interest are graphs
-that have a magnification function $h(x)=cx$, for $c>1$, and
-all $x\in\{0,\ldots,|V|/2\}$.  Such graphs are called \emph{vertex
+where $N(S)$ denotes the set of vertices in $V\setminus S$ that
+are adjacent to vertices in $S$.  Of particular interest are graphs
+that have a magnification function $h(x)=cx$, for fixed $c>1$, and
+all $x\in\{1,\ldots,|V|/2\}$.  Such graphs are called \emph{vertex
 expanders}, and have a long history and an enormous number of applications
 \cite{hlw06}.
 
 If $G$ is $f(k)$-robust, then there exists a magnification function,
-$h$, for $G$ that satisfies $h(x) \ge k$, for all $x> f(k)-k$ and
-every $k\in\{1,\ldots,|V|\}$; see \figref{magnification}.  This can
-be proven by contradiction: If $h(x) < k$ for some $x> f(k)-k$, then
-there exists a set $S''$ of size $x>f(k)-k$ such that $|N(S'')|< k$.
-Taking $S=N(S'')\cup\{x_1,\ldots,x_{k-|N(S'')|}\}$, where each $x_i$ is
-chosen arbitrarily from $V\setminus N(S'')$ yields a set, $S$, of size
-$k$ such that $G\setminus S$, has no component of size greater than $n-x
-< n-f(k)$.
+$h$, for $G$ that satisfies $h(x) \ge k$, for all $x> f(k)-k$
+and every $k\in\{1,\ldots,\lfloor\max\{k':f(k')\le n/2\}\rfloor\}$;
+see \figref{magnification}.  This can be proven by contradiction:
+If $h(x)$ must be less than $k$ for some $x> f(k)-k$, then there
+exists a set $S''$ of size $x>f(k)-k$ such that $|N(S'')|< k$.  Taking
+$S=N(S'')\cup\{x_1,\ldots,x_{k-|N(S'')|}\}$, where each $x_i$ is chosen
+arbitrarily from $V\setminus N(S'')$ yields a set, $S$, of size $k$, such
+that $G\setminus S$, has no component of size greater than $n-x < n-f(k)$.
 
 \begin{figure}
   \begin{center}
@@ -247,13 +270,13 @@ $h(x)\in\Omega(\min\{n-x,f^{-1}(x)\})$.  This implies, for example, that the
 smallest separator in an $f(k)$-robust spanner with $n$ vertices has
 size $\Omega(f^{-1}(n/2))$.
 
-Unfortunately, achieving $f(k)$-robustness is considerably more
-difficult than just obtaining a magnification function of the
-preceding form; there exist vertex expanders with a linear number of
-edges \cite{hlw06}, so they have magnification functions of the form
-$h(x)=cx$, with $c>1$.  However, these graphs can not be $f(k)$-robust
-since, in \thmref{general-lower-bound-1d}, we show that $f(k)$-robust
-spanners have a superlinear number of edges, for any function $f(k)$.
+Unfortunately, achieving $f(k)$-robustness is considerably more difficult
+than just obtaining a magnification function of the preceding form;
+there exist vertex expanders with a linear number of edges \cite{hlw06},
+so they have magnification functions of the form $h(x)=cx$, with
+fixed $c>1$.  However, these graphs can not be $f(k)$-robust since,
+in \thmref{general-lower-bound-1d}, we show that $f(k)$-robust spanners
+have a superlinear number of edges, for any function $f(k)$.
 
 
 \subsection{Overview of Results}
@@ -272,11 +295,12 @@ sets of size $n$ for which any $f(k)$-robust $t$-spanner has size
 $\Omega(nf^*(n))$.  For one-dimensional point sets, we can almost match
 this lower-bound: \thmref{general-1d} states that any one-dimensional
 point set of size $n$ has an $O(f(k)f^*(k))$-robust 1-spanner of size
-$O(nf^*(n))$.  Furthermore, if $f(k)$ is sufficiently fast-growing,
-this construction is $O(f(k))$-robust, and hence has optimal size.
-For point sets in dimension $d>1$, our upper and lower bounds diverge
-by a factor of $k$.  \thmref{dd} shows that, for any set of $n$ points
-in $\R^d$, there exists an $O(kf(k))$-robust spanner of size $O(nf^*(n))$.
+$O(nf^*(n))$.  Furthermore, if $f(k)$ is sufficiently fast-growing, this
+construction is $O(f(k))$-robust, and hence has optimal size.  For point
+sets in dimension $d>1$, our upper and lower bounds diverge by a factor
+of $k$.  \thmref{dd} shows that, for any set of $n$ points in $\R^d$
+and any fixed $t>1$, there exists an $O(kf(k))$-robust $t$-spanner of
+size $O(nf^*(n))$.
 
 As a concrete example, we can consider a function $f(k)\in O(k^2)$.
 Removing any set $S$ of vertices from a $n$ vertex $O(k^2)$-robust
@@ -643,7 +667,7 @@ class of lower-bounds.
   \[  \Omega(n) \times (f^*(n/t)-i_0) = \Omega(n f^*(n)) \enspace . \qedhere \]
 \end{proof}
 
-\begin{cor}
+\begin{cor}\corlabel{lower-bound}
   Let $V=\{1,\ldots,n\}$ and let $c>1$ and $t>1$ be constants.  Then any
   $f(k)$-robust $t$-spanner with
   \begin{enumerate}
@@ -657,6 +681,28 @@ class of lower-bounds.
 Note that the lower bounds in Parts~2 and 3 of this corollary match the
 corresponding upper-bounds while the lower-bound in Part~1 is off by a
 factor of $\log\log n$.
+
+\begin{rem}
+  The dependence of our lower bounds on the value of $t$ is not
+  given in the statements of Theorems~\ref{thm:simple-lower-bound-1d}
+  and \ref{thm:general-lower-bound-1d} or in \corref{lower-bound}.
+  However, it is readily extracted from their proofs.  In
+  \thmref{simple-lower-bound-1d}, each value of $k$ shows the existence
+  of $\Omega(n/t)$ edges and there are $\Omega(\log_t n)$ values of $k$,
+  so the lower-bound is $\Omega((n\log n)/(t\log t))$.
+
+  In \thmref{general-lower-bound-1d}, each value of $k$ shows the
+  existence of $\Omega(n/t)$ edges, but now the number of values of $k$
+  is $f^*(n/t) - f^*(x_0)$ where $x_0$ is the minimum value such that
+  $f(x_0)\ge 4tx_0$. (Informally, $x_0$ is where the slope of $f$ exceeds
+  $4t$.)  Thus, in \thmref{general-lower-bound-1d}, the lower-bound is
+  $\Omega((n/t)(f^*(n)-f^*(x_0))))$.  It is fairly straightforward to
+  apply this bound to the choices of $f$ used in \corref{lower-bound}
+  or to other choices of $f$.  For example, applying it to Case~3 of
+  \corref{lower-bound} we get $x_0=\Theta(t^{1/(c-1)})$ and the result
+  that any $O(k^c)$-robust $t$-spanner has $\Omega((n/t)(\log\log n -
+  \log\log t - \log (1/(c-1))))$ edges.
+\end{rem}
 
 
 \section{Higher Dimensions}
@@ -687,8 +733,10 @@ $G_\dumbbell=(V,E_\dumbbell)$ obtained by taking
 \]
 is a $t'$-spanner of $V$.  
 
-The size (number of edges) in a dumbbell tree spanner is clearly
-$O(pn)=O(n)$.  As a function of $t$ and $d$, the number of trees, $p\in O(\log(1/(t-1))/(t-1)^d)$.  In particular, for $t=1+\eps$, $p\in O(\log(1/\eps)/\eps^d)$.
+The size (number of edges) of a dumbbell tree spanner is clearly
+$O(pn)=O(n)$.  For a fixed dimension, $d$, as a function of $t$ and as $t$
+approaches 1, the number of trees, $p$, is $O(\log(1/(t-1))/(t-1)^d)$.
+In particular, for $t=1+\eps$, $p\in O(\log(1/\eps)/\eps^d)$.
 
 %\begin{figure}
 %  \begin{center}\includegraphics{dumbbell}\end{center}
@@ -804,7 +852,7 @@ associated with $u$.  Hopefully the reader can tolerate this informality.
 
 Applying \thmref{dd} with different functions $f(k)$ yields the
 following results.
-\begin{cor}
+\begin{cor}\corlabel{dd}
   For any constants $d >1$, $t>1$, $\eps>0$, and any set $V$ of $n$ points
   in $\R^d$, there exist $f(k)$-robust $t$-spanners $G=(V,E)$ with
   \begin{enumerate}
@@ -815,6 +863,17 @@ following results.
   \end{enumerate}
 \end{cor}
 
+\begin{rem}
+  Note that, like our lower bounds, \thmref{dd} and \corref{dd} do
+  not express the relationship between the number of edges and the
+  spanning ratio, $t$.  As before, this relationship is not hard
+  to work out. The number, $p$, of spanning trees in the dumbbell
+  tree spanner is $O(\log(1/\eps)/\eps^d)$, where $\eps=1-\sqrt{t}$.
+  Each $k'$-fault-tolerant spanner has $O(n\eps^{d-1})$ edges \cite{l99}
+  and we construct one of these for $f^*(n)$ different values of $k'$.
+  Thus, the total number of edges in our constructions is
+  $O(n(f^*(n)/\eps^{d-1} + \log(1/\eps)/\eps^d))$.
+\end{rem}
 
 
 \subsection{Linear-Size (Kind of) Robust Spanners}

@@ -16,6 +16,9 @@ $(basename).pdf : $(basename).tex $(figs) $(basename).bib
 %.pdf : %.xml
 	ipetoipe -pdf $<
 
+avgstretch-soda-submit.pdf : avgstretch-soda.pdf avgstretch.pdf 
+	pdftk A=$< B=avgstretch.pdf cat A B2-end output $@
+
 arxiv : 
 	~/git/bin/arxbundle $(basename)
 

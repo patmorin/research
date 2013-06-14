@@ -1,16 +1,25 @@
-\documentclass{patmorin}
+\documentclass[1p]{elsarticle}
 \listfiles
-\usepackage{amsthm,amsmath}
+%\usepackage{amsthm,amsmath,amsfonts}
+\usepackage{amsmath}
 \usepackage{pat}
+\usepackage{url}
+%\newcommand{\R}{\mathbb{R}}
+%\newcommand{\secref}[1]{Section~\ref{sec:#1}}
+%\newcommand{\seclabel}[1]{\label{sec:#1}}
+%\newcommand{\lemref}[1]{Lemma~\ref{sec:#1}}
+%\newcommand{\thmlabel}[1]{\label{sec:#1}}
 
+\newproof{proof}{Proof}
 
 \newcommand{\eps}{\varepsilon}
 
-\title{\MakeUppercase{Approximating Majority Depth}}
-\author{Dan Chen and Pat Morin}
-
 \begin{document}
-\maketitle
+\title{Approximating Majority Depth\tnoteref{t1}}
+\tnotetext[t1]{This research was supported by NSERC.}
+\author[carleton]{Dan Chen and Pat Morin}
+
+\address[carleton]{School of Computer Science, Carleton University, 1125 Colonel By Drive, Ottawa, CANADA, K1S~5B6}
 
 \begin{abstract}
 We consider the problem of approximating the majority depth (Liu and
@@ -20,9 +29,12 @@ question: How can we preprocess a set of $n$ lines so that we can quickly
 test whether a randomly selected vertex in the arrangement of these
 lines is above or below the median level.  We describe a Monte-Carlo data
 structure for this problem that can be constructed in $O(n\log n)$ time,
-can answer queries $O((\log n)^{4/3})$ expected time, and answers correctly
+can answer queries in $O((\log n)^{4/3})$ expected time, and answers correctly
 with high probability.
 \end{abstract}
+
+\maketitle
+
 
 \section{Introduction}
 
@@ -36,13 +48,14 @@ statistician's point of view, refer to the survey by Small \cite{s90}.
 For a computational geometer's point of view refer to Aloupis' survey
 \cite{a06}.
 
-In this paper, we focus on the bivariate majority depth measure.
-Let $S$ be a set of $n$ points in $\R^2$.  For a pair $x,y\in S$,
-the \emph{major side} of $x,y$ is the union of the (at most 2) closed
-halfplanes having both $x$ and $y$ on their boundary that contain at
-least $n/2$ points of $S$.  The \emph{majority depth} \cite{ls93,s91}
-of a point, $q$, with respect to $S$, is defined as the number of pairs
-$x,y\in S$ that have $q$ in their major side.
+In this paper, we focus on the bivariate majority depth measure.  Let $S$
+be a set of $n$ points in $\R^2$.  For a pair $x,y\in S$, a \emph{major
+side} of $x,y$ is a closed halfplane having both $x$ and $y$ on its
+boundary and that contain at least $n/2$ points of $S$.  Note that,
+in the degenerate case where the line through $x$ and $y$ is a halving
+line, the pair $x,y$ has two major sides.  The \emph{majority depth}
+\cite{ls93,s91} of a point, $q$, with respect to $S$, is defined as the
+number of pairs $x,y\in S$ that have $q$ in a major side.
 
 Under the usual projective duality \cite{e97}, the set $S$ becomes
 a set, $S^*$, of lines; pairs of points in $S$ becomes vertices
@@ -68,7 +81,8 @@ the complexity of the median level.
 The maximum complexity of the median level of $n$ lines has been the
 subject of intense study since it was first posed.  The current best
 upper bound is $O(n^{4/3})$, due to Dey \cite{d98} and the current best
-lower bound is $2^{\Omega(\sqrt{\log n})}$, due to T\'oth \cite{t00}.
+lower bound is $n2^{\Omega(\sqrt{\log n})}$, due to T\'oth \cite{t00}
+and tightened by Nivasch \cite{n08}.
 The median level can be computed in time $O(\min\{m\log n,n^{4/3}\})$
 \cite{bj02,c99}.  Thus, the worst-case running time of Chen and Morin's
 majority depth algorithm is $\omega(n(\log n)^c)$ for any constant $c$,
@@ -81,10 +95,10 @@ It seems difficult for any algorithm that computes the exact majority
 depth of a point to avoid (at least implicitly) computing the median
 level of $A(S^*)$.  This motivates approximation by random sampling.
 In particular, one can use the simple technique of sampling vertices of
-$A(S^*)$ and checking whether
+$A(S^*)$ and checking, for each sampled vertex, whether
 \begin{enumerate}
-  \item each sample lies above or below $q^*$; and
-  \item each sample lies above or below the median level of $S^*$.
+  \item it lies above or below $q^*$; and
+  \item it lies above or below the median level of $S^*$.
 \end{enumerate}
 In the primal, this is equivalent to taking random pairs of points in
 $S$ and checking, for each such pair, $(x,y)$, if, (1)~the closed
@@ -176,7 +190,7 @@ crossed by any halfplane.
 
 For a geometric graph $G=(S,E)$, the \emph{crossing number} of $G$ is the
 maximum, over all halfplanes, $h$, of the number of edges $uw\in E$ such
-that $h$ crosses $\{u,w\}$.  From \thmref{optimal-partition-tree} it is
+that $h$ crosses the set $\{u,w\}$.  From \thmref{optimal-partition-tree} it is
 easy to derive a spanning tree of $S$ with crossing number $O(n^{1/2})$
 using a bottom-up algorithm:  Perform a post-order traversal of the
 partition tree.  When processing a node $u$ with children $v$ and $w$,
@@ -209,7 +223,7 @@ Next, we take every second edge of $P$ to obtain a matching:
 The following argument is due to Matou\v{s}ek, Welzl and Wernsich
 \cite[Lemma~2.5]{mww93}.  Assume, for simplicity, that $n$ is even and let
 $S'\subset S$ be obtained by taking exactly one endpoint from each edge in
-the matching $M$ obtained by \corref{matching}.  Consider some halfplane
+the matching $M$ obtained from \Corref{matching}.  Consider some halfplane
 $h$,  and let $M^{I}_h$ be the subset of the edges of $M$ contained in
 $h$ and let $M^{C}_h$ be the subset of edges crossed by $h$. Then
 \[
@@ -224,7 +238,7 @@ range counting;  the set $S'$ is half the size of $S$, but $2|h\cap
 S'|$ gives estimate of $|h\cap S|$ that is off by only $O(n^{1/2})$.
 Next we show that this can be improved considerably with almost no effort.
 
-Rather than choose an arbitrary endpoint of each edge in $M$ to
+Rather than choosing an arbitrary endpoint of each edge in $M$ to
 take part in $S'$, we choose each one of the two endpoints at random
 (and independently of the other $n/2-1$ choices).  Then, each edge in
 $M^{C}_h$ has probability $1/2$ of contributing a point to $h\cap S'$
@@ -295,12 +309,12 @@ gives the result we need on approximate range counting:
       C2^{3j/4} n^{1/4}(\log N)^{1/2} \le i \enspace ,
   \]
   where the constant $C$ depends on the constant in the big-Oh notation
-  in \eqref{crap}.  This means $|S_j| = O((n/i)^{4/3}(\log N)^{2/3}))$
+  in \eqref{crap}.  This means that $|S_j| = O((n/i)^{4/3}(\log N)^{2/3}))$
   and the query takes expected time
   \[
       O(|S_j|^{1/2}) = O((n/i)^{2/3}(\log N)^{1/3}) \enspace ,
   \]
-   as required.
+   as required. \qed
 \end{proof}
 
 Our main application of \lemref{approx-range-counting} is a test that
@@ -310,8 +324,8 @@ checks whether a halfspace, $h$, contains $n/2$ or more points of $S$.
   Given any set $S$ of $n$ points in $\R^2$ and any $N\ge n$, there
   exists a data structure that can be constructed in $O(n\log N)$
   expected time and, with probability at least $1-1/N$, can, for any
-  halfspace $h$ determine if $|h\cap S|\ge n/2$.  Such a query takes
-  expected time 
+  halfspace $h$, determine whether $|h\cap S|\ge n/2$ or not.  Such a
+  query takes expected time
   \[  Q(i) = \begin{cases}
         O(n^{1/2}) & \text{for $0\le i\le n^{1/4}$} \\
         O((n/i)^{2/3}(\log N)^{1/3}) & \text{otherwise, }
@@ -328,7 +342,7 @@ checks whether a halfspace, $h$, contains $n/2$ or more points of $S$.
   question, ``is $|h\cap S|\ge n/2$?'' is resolved once $n/2^j < i/2$.
   Since the cost of successive queries is exponentially increasing, this
   final query takes time $O(\min\{n^{1/2},(n/i)^{2/3}(\log N)^{1/3}\})$
-  and dominates the total query time.
+  and dominates the total query time. \qed
 \end{proof}
 
 %
@@ -476,7 +490,7 @@ of levels.
 
 \begin{lem}\lemlabel{dey}
  Let $L$ be any set of $n$ lines and let $s$ be the number of vertices
- of $A(L)$ that are on levels $k,k+1,\ldots,k+j$.  Then, $s \in
+ of $A(L)$ that are on levels $k$, $k+1$,\ldots, or $k+j$.  Then, $s \in
  O(nk^{1/3}j^{2/3})$.
 \end{lem}
 
@@ -489,8 +503,16 @@ and $j=2i$:
   $\{n/2-i,\ldots,n/2+i\}$ is $O(n^{4/3}i^{2/3})$.
 \end{cor}
 
-\corref{dey} is useful because it gives bounds on the distribution of
+\Corref{dey} is useful because it gives bounds on the distribution of
 the level of a randomly chosen vertex of $A(S^*)$.
+
+%The analysis in the proof of Theorem 3 can be shortened down to a
+%paragraph or so. Rather than writing the exact sum in (2), level by
+%level, group the levels into bunches of sizes 1,2,4,...,2^k.  Then,
+%for i in the k-th bunch, upper bound Q(i) by Q(2^k), and upper bound n_i
+%by Dey's bound, by something like n^{4/3}2^{2k/3}. The factor 2^{2k/3}
+%then cancels out, the powers of n also cancel out, and you are left with
+%log n iterations times (log n)^{1/3}, and that's it.
 
 \begin{thm}\thmlabel{exp-side-test}
   Given any set, $L$, of $n$ lines and any $c>0$, there exists a data
@@ -510,90 +532,34 @@ the level of a randomly chosen vertex of $A(S^*)$.
 
 \begin{proof}
   The data structure is, of course, the data structure of
-  \lemref{side-test} with $N=n^c$.  Let $n_i$ be the number of vertices
-  of $A(L)$ on levels $n/2-i$ and $n/2+i$.  Then the expected query time
-  of this data structure is at most
-  \begin{equation}
-    F(n_0,\ldots,n_{n/2}) 
-      = \frac{1}{\binom{n}{2}}\sum_{i=0}^{n/2} n_i Q(i) \enspace ,
-     \eqlabel{expected}
-  \end{equation}
-  where, for sufficiently large $n$, $Q(i)$ is upper-bounded by
+  \lemref{side-test} with $N=n^c$.    If the query vertex is chosen from
+  level $n/2-i$ or $n/2-i$, the query time is upper-bounded by
   \[
         Q(i) \le \begin{cases}
-          \beta n^{1/2} & \text{if $0\le i \le n^{1/4}$} \\
-          \beta (n/i)^{2/3}(\log N)^{1/3}  & \text{otherwise} .
+          O(n^{1/2}) & \text{if $0\le i \le n^{1/4}$} \\
+          O((n/i)^{2/3}(\log N)^{1/3})  & \text{otherwise} .
         \end{cases}
   \]
-  for some constant $\beta>0$.   Our goal, therefore, is to upper-bound
-  $F(n_0,\ldots,n_{n/2})$ subject to Dey's constraints (\lemref{dey}):
-  \[
-     \sum_{i=0}^{j}n_i \le \gamma n^{4/3}j^{2/3} 
-  \]
-  for some constant $\gamma>0$ and all $j\in\{0,\ldots,n/2\}$.
-
-  Working in our favour is that $Q(i) \ge Q(i')$ for all $i \le i'$.
-  This implies that, to obtain an upper bound on $F(n_0,\ldots,n_{n/2})$,
-  we can set
-  \begin{equation}
-      \sum_{i=0}^{j}n_i = 
-        \begin{cases}
-           \gamma n^{4/3} & \text{if $j=0$} \\
-           \gamma n^{4/3}j^{2/3} & \text{otherwise}
-        \end{cases}  \eqlabel{deys-equality}
-  \end{equation}
-  for all $j\in\{0,\ldots,n/2\}$.  To see why this is so, suppose we have
-  a sequence $S=n_0,\ldots,n_{n/2}$ that satisfies Dey's constraints
-  but for which $\sum_{i=0}^{j}n_i < \gamma n^{4/3}j^{2/3}$ for some index
-  $j$. If $j=n/2$ then we can obviously increase the value of $n_j$, still
-  satisfy Dey's constraints and increase the value of $F(n_0,\ldots,n_j)$.
-  Otherwise ($j\in\{0,\ldots,n/2-1\}$), the sequence
-  \[
-     S'=n_0,\ldots,n_{j}+\delta,n_{j+1}-\delta,\ldots,n_{n/2} \enspace ,
-  \]
-  where $\Delta=\gamma n^{4/3}j^{2/3}-\sum_{i=0}^{j}n_i$, also satisfies
-  Dey's constraints.  Furthermore, 
-  \[  F(S')-F(S) = \Delta Q(j) - \Delta Q(j+1) \ge 0 \enspace , \]
-  so $F(S')\ge F(S)$.  Repeatedly applying this type of modification (or
-  using induction) shows that the sequence $S=n_0,\ldots,n_{n/2}$ that
-  satisifies \eqref{deys-equality} is a sequence that maximizes $F(S)$.
-
-  Finally, we can bound the sequence that satisfies \eqref{deys-equality}
-  by differentiating $\gamma n^{4/3}j^{2/3}$ with respect to $j$.
-  This yields $n_i \in O(n^{4/3}/i^{1/3})$ for all $i\in\{1,\ldots,n/2\}$.
-  Plugging this back into \eqref{expected} yields
-  \begin{align}
-     F(n_0,\ldots,n_{n/2}) 
-      & \le \frac{1}{\binom{n}{2}}\left(O(n^{4/3}Q(0))+\sum_{i=1}^{n/2} O(n^{4/3}Q(i)/i^{1/3})\right) \notag \\
-      & \le o(1) \notag \\
-      & \qquad {} + \frac{1}{\binom{n}{2}}\sum_{i=1}^{n^{1/4}} O(n^{4/3}n^{1/2}/i^{1/3})  \eqlabel{header}\\
-      & \qquad {} + \frac{1}{\binom{n}{2}}\sum_{i=n^{1/4}+1}^{n/2}O(n^{4/3}(n/i)^{2/3}(\log N)^{1/3}/i^{1/3}) \eqlabel{middle} 
-  \end{align}
-  Recall that $\int_1^n i^{-1/3}\,\mathrm{d}i = \frac{3}{2}(n^{2/3}-1)$.
-  Using this integral to bound the sum in \eqref{header}
-  allows us to just squeak by:
-  \begin{align*}
-    \eqref{header} & = \frac{1}{\binom{n}{2}}\sum_{i=1}^{n^{1/4}} O(n^{4/3}n^{1/2}/i^{1/3}) \\
-        & = \frac{1}{\binom{n}{2}}O(n^{4/3}n^{1/2}(n^{1/4})^{2/3})
-           & \text{(bounding by integral)}  \\
-        & = O(1) \\
-  \end{align*}
-  We are not so lucky with the sum in \eqref{middle}, which ends up
-  being harmonic:
-  \begin{align*}
-    \eqref{middle} 
-      & = \frac{1}{\binom{n}{2}}\sum_{i=n^{1/4}+1}^{n/2}O(n^{4/3}(n/i)^{2/3}(\log N)^{1/3}/i^{1/3}) \\
-      & = 
-       \sum_{i=n^{1/4}+1}^{n/2}O((\log N)^{1/3}/i) \\
-      & = O((\log n)(\log N)^{1/3})  & \mbox{(since $\sum_{i=1}^n 1/i=O(\log n)$)} \\
-      & = O((\log n)^{4/3}) \enspace ,
-  \end{align*}
-  since $N=n^c$ and $c$ is constant.
-  To summarize, the expected running time of the query algorithm is at most
-  \[ 
-     F(n_0,\ldots,n_{n/2}) \le o(1)+\eqref{header} + \eqref{middle} 
-     = O((\log n)^{4/3}) \enspace . \qedhere
-  \]
+  For simplicity, assume that $n$
+  is even.
+  Let $n_i$ be the total number of vertices of $A(L)$ on levels $n/2-i+1$
+  and $n/2+i-1$, with the convention that $n_i=0$ for all $i>n/2$.
+  Then the expected query time of this data structure is at most
+  \begin{eqnarray*}
+    T
+      & \le & \frac{1}{\binom{n}{2}}\sum_{i=1}^{n/2} n_i Q(i) \\
+      & = & \frac{1}{\binom{n}{2}}\sum_{k=0}^{\lceil\log n\rceil}\left(\sum_{i=2^k}^{2^{k+1}-1} n_i Q(i)\right) \\
+      & \le & \frac{1}{\binom{n}{2}}\sum_{k=0}^{\lceil\log n\rceil}O(n^{4/3}2^{2k/3})\cdot Q(2^{k}) \\
+      & = & \frac{1}{\binom{n}{2}}\left(
+              \sum_{k=0}^{\lfloor\log n^{1/4}\rfloor}O(n^{4/3}2^{2k/3})\cdot Q(2^{k}) 
+              + \sum_{k=\lfloor\log n^{1/4}\rfloor+1}^{\lceil\log n\rceil}O(n^{4/3}2^{2k/3})\cdot Q(2^{k})\right) \\
+      & = & \frac{1}{\binom{n}{2}}\left(O(n^{4/3+(1/4)2/3})  
+              + \sum_{k=\lfloor\log n^{1/4}\rfloor+1}^{\lceil\log n\rceil}O(n^{4/3}2^{2k/3})\cdot O((n/2^k)^{2/3}(\log N)^{1/3}) \right) \\
+      & = & \frac{1}{\binom{n}{2}}\left(O(n^{4/3+(1/4)2/3})  
+              + \sum_{k=\log n^{1/4}+1}^{\log n}O(n^2(\log N)^{1/3}) \right) \\
+      & = & O((\log N)^{4/3}) = O((\log n)^{4/3}) \enspace ,
+  \end{eqnarray*}
+  as required. \qed
 \end{proof}
 
 
@@ -671,27 +637,43 @@ the level of a randomly chosen vertex of $A(S^*)$.
 \section{Estimating Majority Depth}
 \seclabel{majority-depth}
 
-Finally, we return to our application, namely estimating majority depth. 
+Finally, we return to our application, namely estimating majority depth.
+For a set $S$ of $n$ points in $\subset\R^2$ and a point $q\in\R^2$,
+let $d(q,S)$ denote the majority depth of $q$ with respect to $S$ and
+let $p=d(q,S)/\binom{n}{2}$ denote the normalized majority depth of $q$.
+
+%% FIXME: Referee suggestion
+%% Also, the phrasing of the Theorem is a maybe a bit harder to follow
+%% than it aught to be because of the use of parameter r.  As stated
+%% now, the query time is stated in terms of this parameter r which
+%% fits into the probability of correctness in a complicated way.
+%% It would be a bit more intuitive (and perhaps standard) to use the
+%% PAC notation of having at most eps error with probability 1-delta,
+%% and then phrasing the runtime in terms of n, eps, and delta.
+%% So this would require setting delta = n^-c + exp(-Omega(eps^2 r p)
+%% and solving for r (instead of forcing the reader to do the same).
+
 
 \begin{thm}
-  Given a set $S$ of $n$ points in $\R^2$ and any constant $c>0$,
-  there exists a data structure that can preprocess $S$ in $O(n\log n)$
-  expected time such that, for any point $q$, the data structure can
-  compute, in $O(r(\log n)^{4/3})$ expected time, a value $d'(q,S)$
-  such that 
+  Given a set $S$ of $n$ points in $\R^2$ and any constant $c>0$, there
+  exists a data structure that can preprocess $S$ using $O(n\log n)$
+  expected time and $O(n)$ space, such that, for any point $q$ and any
+  parameter $r\ge 1$, the data structure can compute, in $O(r(\log n)^{4/3})$
+  expected time, a value $d'(q,S)$ such that
   \[
      \Pr\left\{\frac{|d'(q,S)-d(q,S)|}{d(q,S)} \ge \eps \right\} 
-        \le \exp\left(-\Omega\left(\eps^2rp\right)\right) + n^{-c} \enspace ,
+        \le \exp\left(-\Omega\left(\eps^2rp\right)\right) + n^{-c} \enspace .
   \]
-  where $d(q,S)$ is the majority depth of $p$ with respect to $S$ and
-  $p=d(q,S)/\binom{n}{2}$ is the normalized majority depth of $q$.
+  In particular, choosing $r=(c\log n)/(\eps^2p)$ yields a linear-sized
+  data structure that, with probability at least $1-n^{-c}$, provides an
+  $\eps$-approximation to $d(q,S)$ in $O(c(\log n)^{7/3}/(\eps^2p))$ time.
 \end{thm}
 
 \begin{proof}
   The data structure is the one described in \thmref{exp-side-test}.
-  Let $p=d(q,S)/\binom{n}{2}$.  Select $r$ random vertices of $A(S^*)$
-  (by taking random pairs of lines in $S^*$) and, for each sample, test
-  if it contributes to $d(q,S)$.  This yields a count $r' \le r$ where
+  Select $r$ random vertices of $A(S^*)$ (by taking random pairs of lines
+  in $S^*$) and, for each sample, test if it contributes to $d(q,S)$.
+  This yields a count $r' \le r$ where
   \[ 
      \E[r'] = rp \enspace .
   \]
@@ -706,7 +688,7 @@ Finally, we return to our application, namely estimating majority depth.
   Finally, the algorithm may fail not because of badly chosen samples,
   but rather, because the data structure of \thmref{exp-side-test} fails.
   The probability that this happens is at most $n^{-c}$. Therefore,
-  the overall result follows from the union bound.
+  the overall result follows from the union bound. \qed
 \end{proof}
 
 \section{Conclusions}
@@ -715,7 +697,8 @@ Finally, we return to our application, namely estimating majority depth.
 Although the estimation of majority depth is the original motivation for
 studying this problem, the underlying question of the tradeoffs involved
 in preprocessing for testing whether a point is above or below the median
-level seems a fundamental question that is still far from answered.  In particular, we have no good answer to the following question:
+level seems to be a fundamental question that is still far from being answered.
+In particular, we have no good answer to the following question:
 
 \begin{op}
 What is the fastest linear-space data structure for testing if an
@@ -726,7 +709,15 @@ $n$ lines?
 To the best of our knowledge, the current state of the art is partition
 trees, which can only answer these queries in $O(n^{1/2})$ time.
 
-\bibliographystyle{plain}
+\section*{Acknowledgement}
+
+In the preliminary version of this paper \cite{cm12}, the proof of
+\thmref{exp-side-test} involved a much longer calculation.  The authors
+are grateful to an anonymous referee who pointed out the trick of grouping
+into powers of two, which simplifies the proof into its current form.
+
+\section*{References}
+\bibliographystyle{elsarticle-num-names}
 \bibliography{majapx}
 
 \end{document}

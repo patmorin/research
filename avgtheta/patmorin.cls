@@ -36,6 +36,9 @@
 \RequirePackage{kpfonts}
 \RequirePackage[sf,bf,small,raggedright,compact]{titlesec}
 
+\RequirePackage[font=small]{caption}
+
+
 % Page setup
 \setlength{\textheight}{8.5in}
 \setlength{\textwidth}{6in}
@@ -45,9 +48,9 @@
 \setlength{\headheight}{0.200in}
 \setlength{\headsep}{0.4in}
 \setlength{\footskip}{0.500in}
-\setlength{\parskip}{1ex}
+%\setlength{\parskip}{1ex}
 \setlength{\parindent}{1.25cm}
-\flushbottom
+%\flushbottom
 
 
 % Commands for typesetting affiliations and email addresses
@@ -106,7 +109,7 @@
 
 % Abstract
 \renewenvironment{abstract}
-{\hrule \noindent\textsc{Abstract.}}{\vskip 1ex \hrule}
+{\hrule\vskip 1ex \noindent\textsc{Abstract.}}{\vskip 1ex \hrule}
 
 
 %------------- Use this so pdflatex outputs US letter pages -------------

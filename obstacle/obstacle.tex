@@ -3,6 +3,8 @@
 \usepackage{amsopn}
 
 \DeclareMathOperator{\obs}{obs}
+\newcommand{\x}{\mathsf{x}}
+\newcommand{\y}{\mathsf{y}}
 
 \title{On Obstacle Numbers}
 \author{Bellairs Geometry and Graphs 2013}
@@ -11,7 +13,7 @@
 \maketitle
 
 \begin{abstract}
-The obstacle number of a graph is an interesting new graph parameter
+The obstacle number of a graph is a new graph parameter
 introduced by Alpert, Koch, and Laison (2010).  Pach \etal\ (2012)
 show that there exist graphs with $n$ vertices having obstacle
 number in $\Omega(n/\log n)$. In this paper we up this lower bound to
@@ -23,23 +25,24 @@ $\Omega(n/(\log\log n)^2)$
 \section{Introduction}
 
 The obstacle number of a graph is a new graph parameter introduced by
-Alpert, Koch, and Laison \cite{alpert.koch.ea:obstacle}.
+Alpert, Koch, and Laison \cite{alpert.koch.ea:obstacle}.  Let $G=(V,E)$ be
+a graph, let $\varphi:V\to \R^2$ be a one-to-one mapping of the vertices
+of $G$ onto $\R^2$, and let $S$ be a set of connected subsets of $\R^2$.
+The pair $(\varphi,S)$ is an \emph{obstacle representation} of $G$ if and
+only if, for every pair of vertices $u,w\in V$, the edge $uw\in E$ if and
+only if the open line segment with endpoints $\varphi(u)$ and $\varphi(w)$
+does not intersect any \emph{obstacle} in $S$.  When $uw\not\in E$
+we call $uw$ a \emph{non-edge} of $G$. The \emph{obstacle number} of a
+graph $G$, denoted by $\obs(G)$, is the minimum number of obstacles in
+any obstacle representation of $G$.
 
-Let $G=(V,E)$ be a graph, let $\varphi:V\to \R^2$ be a one-to-one mapping
-of the vertices of $G$ onto $\R^2$, and let $S$ be a set of connected
-subsets of $\R^2$.  The pair $(\varphi,S)$ is an \emph{obstacle
-representation} of $G$ if and only if, for every pair of vertices
-$u,w\in V$, the edge $\{u,w\}\in E$ if and only if the open line segment
-with endpoints $\varphi(u)$ and $\varphi(w)$ does not intersect any
-\emph{obstacle} in $S$.  The \emph{obstacle number} of a graph $G$,
-denoted by $\obs(G)$, is the minimum number of obstacles in any obstacle
-representation of $G$.
-
-\figref{fivebyfive} shows a surprising example of an obstacle
-representation of the $5\times 5$ grid graph that uses only one obstacle.
-Since at least one obstacle is necessary to represent any graph other
-than a complete graph, this proves that the $5\times 5$ grid graph has
-obstacle number 1.
+An $h$-obstacle representation of $G$ is an obstacle representation with
+at most $h$ obstacles.  The (point set which is the) image of $\varphi$
+in an obstacle representation is said to \emph{support} the obstacle
+representation.  \figref{fivebyfive} shows a surprising example of a
+1-obstacle representation of the $5\times 5$ grid graph.  Since at least
+one obstacle is necessary to represent any graph other than a complete
+graph, this proves that the $5\times 5$ grid graph has obstacle number 1.
 
 \begin{figure}
   \begin{center}
@@ -69,14 +72,11 @@ is that of determining the \emph{worst-case obstacle number},
 of a graph with $n$ vertices.
 
 The worst-case obstacle number is obviously upper-bounded by
-$\binom{n}{2}\in O(n^2)$ since, by drawing the vertices of a graph
- on a point set in sufficiently general position, one can place
-a small obstacle---even a single point---on the mid-point of each
-line segment $uw$ for every pair of vertices $u$ and $w$ such that
-$uw\not\in E$.  If the vertices are in sufficiently general position,
-then, for each pair of vertices $u$ and $w$, the line segment $uw$ will
-intersect an obstacle if and only if $uw\not\in E$. No upper-bound on
-$w(n)$ that is asymptotically better than $O(n^2)$ is known.
+$\binom{n}{2}\in O(n^2)$ since, by mapping the vertices of $G$
+ onto a point set in sufficiently general position, one can place
+a small obstacle---even a single point---on the mid-point of each non-edge
+of $G$.  No upper-bound on $w(n)$ that is asymptotically better than
+$O(n^2)$ is known.
 
 More is known about lower-bounds on $w(n)$.  Alpert \etal\
 initially show that the worst-case obstacle number is
@@ -86,17 +86,30 @@ $\Omega(\sqrt{\log n/\log\log n}$.}
 %\footnote{Alpert \etal's lower-bound uses the Erd\"os-Szekeres convex
 %$n$-gon theorem and shows the existence of an $n$-vertex graph $G$
 %with $\obs(G)\ge \sqrt{\log n/\log\log n}$.}
-Pach \etal\ \cite{mukkamala.pach.ea:graphs} showed that there exist
-graphs on $n$ vertices with obstacle number $\Omega(n/\log^2 n)$.
-Mukkamala \etal\ \cite{mukkamala.pach.ea:lower} later upped this bound
-to $\Omega(n/\log n)$.  In the current paper, we up the lower-bound
+Pach \etal\ \cite{mukkamala.pach.ea:graphs} showed that
+$w(n)\in \Omega(n/\log^2 n)$.
+Mukkamala \etal\ \cite{mukkamala.pach.ea:lower} later increased this
+to $w(n)\in\Omega(n/\log n)$.  In the current paper, we up the lower-bound
 again by proving the following theorem:
 \begin{thm}\thmlabel{main}
-  For every integer $n>0$, there exists a graph $G$ with $n$ vertices
-  and $\obs(G)\in\Omega(n/(\log\log n)^2)$.
+  For every integer $n>0$, $w(n)\in\Omega(n/(\log\log n)^2)$, i.e., there
+  exists a graph $G$ with $n$ vertices and $\obs(G)\in\Omega(n/(\log\log
+  n)^2)$.
 \end{thm}
 
 \section{The Proof}
+
+Our proof strategy is an application of the probabilistic method
+\cite{alon.spencer:probabilistic}.  We will show that, for a random graph,
+$G$, with a fixed embedding, the probability, $p$, that this embedding
+allows for an obstacle representation with few obstacles is extremely
+small.  We will then show that the number, $N$, of combinatorially
+distinct embeddings is not too big.  Small and big in this case are
+defined so that $pN < 1$.  Therefore, by the union bound, there exists at
+least one graph, $G'$, that has no embedding that allows for an obstacle
+representation with few obstacles.  In other words, $\obs(G')$ is large.
+
+\subsection{A Random Graph with a Fixed Embedding}
 
 We make use of the following theorem, due to Mukkamala, Pach, and
 P\'alv\"olgyi \cite{mukkamala.pach.ea:lower} about the number of $n$
@@ -111,8 +124,8 @@ set and fixed embedding is \emph{very} unlikely to yield an obstacle
 representation with few obstacles.
 
 \begin{lem}\lemlabel{fixed}
-  Let $G=(V,E)$ be an Erd\"os-Renyi random graph $G_{n,\frac{1}{2}}$,
-  let $P\subset\R^2$ be a set of $n$ points in general position, let
+  Let $G=(V,E)$ be an Erd\"os-R\'enyi random graph $G_{n,\frac{1}{2}}$,
+  let $P\subset\R^2$ be a set of $n$ points, let
   $\varphi:V\rightarrow P$ be a bijection between $V$ and $P$ that is
   independent of the choices of edges in $G$, and let $(\varphi, S)$ be
   an obstacle representation of $G$ using the minimum number of obstacles
@@ -131,10 +144,10 @@ P'\}$ of vertices that are mapped by $\varphi$ to $P'$.  Applying
 \begin{equation}
      \Pr\{\obs(G') \le \alpha k/\log^2 k\} 
        \le \frac{2^{O(\alpha n^2)}}{2^{\binom{k}{2}}}
-       = 2^{-\Omega(k^2)} \enspace , \eqlabel{g1}
+       = e^{-\Omega(k^2)} \enspace , \eqlabel{g1}
 \end{equation}
 for a sufficiently small constant $\alpha > 0$.  Note that, if
-$\obs(G')\ge h$, then, in the obstacle representation of $(\varphi,S)$,
+$\obs(G')\ge h$, then, in the obstacle representation $(\varphi,S)$,
 there must be at least $h-1$ obstacles of $S$ that are contained in the
 convex hull of $P'$.
 
@@ -143,22 +156,22 @@ same x-coordinate and denote the points in $P$ by $x_0,\ldots,x_{n-1}$
 by increasing order of x-coordinate.  Let $m=\lfloor n/k\rfloor$ and
 consider the point sets $P'_0,\ldots,P'_{m-1}$, where
 \[ 
-  P_i'=\{x_{ik},x_{ik+1},\ldots,x_{(ik+k-1}\} \enspace .
+  P_i'=\{x_{ik},x_{ik+1},\ldots,x_{ik+k-1}\} \enspace .
 \]  
 That is, $P_0',\ldots,P_{m-1}'$ are determined by vertical slabs,
 $s_0,\ldots,s_{m-1}$ that each contain $k$ points.  \Eqref{g1} shows
-that, with probability at least $1-2^{-\Omega(k^2)}$, the obstacle
-number of the subgraph that maps to $P'_i$ is $\Omega(k/\log^2 k)$.
-If this occurs, then $S$ has $\Omega(k/\log^2 k)$ obstacles that are
-completely contained in $s_i$.  These obstacles are therefore disjoint
-from any other obstacles contained in any other $s_j$, $j\neq i$.
+that, with probability at least $1-2^{-\Omega(k^2)}$, the obstacle number
+of the subgraph that maps to $P'_i$ is $\Omega(k/\log^2 k)$.  If this
+occurs, then $S$ has $\Omega(k/\log^2 k)$ obstacles that are completely
+contained in the slab $s_i$.  These obstacles are therefore disjoint
+from any other obstacles contained in any other slab $s_j$, $j\neq i$.
 
-We are proving a lower bound on the number of obstacles, so we are worried
-about the case where the number of slabs that do \emph{not} completely
-contain $\alpha k/\log^2 k$ obstacles exceeds $m/2$.  The number of
-slabs, $M$, not containing $\alpha k/\log^2 k$ obstacles is dominated
-by a binomial$(m,2^{-\Omega(k^2)})$ random variable.  Using Chernoff's
-bound on the tail of a binomial random
+We are proving a lower bound on the number of obstacles, so we are
+worried about the case where the number of slabs that do \emph{not}
+completely contain at least $\alpha k/\log^2 k$ obstacles exceeds $m/2$.
+The number of slabs, $M$, not containing at least $\alpha k/\log^2 k$
+obstacles is dominated by a binomial$(m,2^{-\Omega(k^2)})$ random
+variable.  Using Chernoff's bound on the tail of a binomial random
 variable,\footnote{%
   Chernoff's Bound: For any binomial$(m,p)$ random variable, $B$,
   any $\delta>0$ and $\mu=mp$, 
@@ -174,7 +187,7 @@ we have that
     & = \left(\frac{e^{e^{ck^2}}}{(e^{ck^2-1})^{e^{ck^2-1}}}\right)^{me^{-ck^2}}\\
     & = \left(\frac{e^{e^{ck^2}}}{e^{(ck^2-1)e^{ck^2-1}}}\right)^{me^{-ck^2}}\\
     & = \frac{e^{m}}{e^{m(ck^2-1)e^{ck^2-1}e^{-ck^2}}} \\
-    & = \frac{e^{m}}{e^{m(ck^2-1)/2}} \\
+    & = \frac{e^{m}}{e^{m(ck^2-1)/e}} \\
     & = e^{-\Omega(mk^2)} \enspace .
 \end{align*}
 Taking $k=\sqrt{c}\log n$ and recalling that $m=\lfloor n/k\rfloor$, we obtain
@@ -189,18 +202,10 @@ with probability at least
 \]
 \end{proof}
 
-The remainder of the proof of \thmref{main} is just an application of
-the probabilistic method.  \lemref{fixed} shows that the probabilitly,
-$p$, that a particular embedding of the random graph $G$ is able to
-yield an obstacle representation with $o(n/(\log\log n)^2)$ obstacles
-is extremely small.  Let $N$ be the total number of possible embeddings
-of $G$.  Then the union bound shows that $p N$ is an upper-bound on the
-probability that there exists \emph{any} embedding of $G$ that yields
-an obstacle representation using $o(n/(\log\log n)^2)$ obstacles.
-If $pN <1$, this implies that, with positive probability $\obs(G)\in
-\Omega(n/(\log\log n)^2)$ and, in particular, there exists some graph $G$
-with $\obs(G)\in \Omega(n/(\log\log n)^2)$.
-
+We have completed the first step in our application of the probabilistic
+method.  \lemref{fixed} shows that the probability, $p$, that a
+particular embedding of the random graph $G$ is able to yield an obstacle
+representation with $o(n/(\log\log n)^2)$ obstacles is extremely small.
 The remaining difficulty is establishing a sufficiently strong upper-bound
 on $N$, the number of embeddings of $G$. In actuality, the number of
 embeddings is uncountable.  However, we are interested in the number of
@@ -209,18 +214,16 @@ to partition the set of embeddings into equivalence classes such that,
 within each equivalence class, the minimum number of obstacles in an
 obstacle representation remains the same.
 
-% the following reference numbers come from Goodman and Pollacks DCG(1) paper
-Classifying embeddings, which are really just labelled sets of $n$ points,
-into combinatorially distinct equivalence classes has been considered
-previously. Several definitions of equivalence exist, include oriented
-matroid (a.k.a., chirotope) equivalence
-\cite{%
-  bland.vergnas:orientability,%
-%  dreiding.dress.ea:chirotopes,%
-  folkman.lawrence:oriented%
-} semispace equivalence \cite{goodman.pollack:semispaces}, order equivalence \cite{goodman.pollack:multidimensional}, and combinatorial equivalence
-\cite{goodman:on,goodman.pollack:semispaces}.  For the latter two definitions of equivalence, the number
-of distinct (equivalence classes of) point sets is $e^{O(n\log n)}$ \cite{goodman.pollack:upper}.
+Classifying embeddings (labelled sets of $n$ points) into combinatorially
+distinct equivalence classes has been considered previously. Several
+definitions of equivalence exist, including oriented matroid (a.k.a.,
+chirotope) equivalence
+\cite{bland.vergnas:orientability,folkman.lawrence:oriented},
+semispace equivalence \cite{goodman.pollack:semispaces}, order equivalence
+\cite{goodman.pollack:multidimensional}, and combinatorial equivalence
+\cite{goodman:on,goodman.pollack:semispaces}.  For the latter two
+definitions of equivalence, the number of distinct (equivalence classes
+of) point sets is $e^{O(n\log n)}$ \cite{goodman.pollack:upper}.
 
 %Definitions include equivalence classes of point
 %sets with the same \emph{order type} \cite{goodman.pollack:upper}, in which the orientation
@@ -250,39 +253,61 @@ on the left needs an additional obstacle inside one of the inner faces.
   \figlabel{order-type-problem}
 \end{figure}
 
+\subsection{Super-Order Types}
+
 We now define an equivalence relation on point sets that works for our
-purposes.
-For a sex-tuple $S=\langle a_1,a_2,b_1,b_2,c_1,c_2\rangle$ of points
-with $a_1\neq a_2$, $b_1\neq b_2$ and $c_1\neq c_2$,
-we define the \emph{type}, $\sigma(S)$, of $S$ as
+purposes.  Consider a sextuple $S=\langle a_1,a_2,b_1,b_2,c_1,c_2\rangle$
+of points with $a_1\neq a_2$, $b_1\neq b_2$, $c_1\neq c_2$, and 
+$\{a_1,a_2\}\cap\{b_1,b_2\}\cap\{c_1,c_2\}=\emptyset$.  Let $A$
+denote the directed line through $a_1$ and $a_2$ that is directed from
+$a_1$ towards $a_2$. Define $B$ and $C$ similarly, but with respect to
+$b_1,b_2$ and $c_1,c_2$, respectively.  We say that the sextuple, $S$,
+is \emph{degenerate} if
+\begin{enumerate}
+  \item any of $A$, $B$, or $C$ is vertical;
+  \item $A$ is parallel to $B$ or to $C$; or
+  \item $A$, $B$, and $C$ contain a common point.
+\end{enumerate}
+We define the \emph{type}, $\sigma(S)$, of $S$ as
 \[
-    \sigma(a_1,a_2,b_1,b_2,c_1,c_2) = \left\{\begin{array}{rl}
-      -1 & \text{if $a_1a_2\cap b_1b_2$ comes before $a_1a_2\cap c_1c_2$ on $a_1a_2$.} \\
-      0 & \text{if $a_1a_2\cap b_1b_2=a_1a_2\cap c_1c_2$}  \\
-      +1 & \text{otherwise} 
+    \sigma(S) = \left\{\begin{array}{rl}
+      -1 & \text{if $A\cap B$ comes before $A\cap C$ on $A$.} \\
+      0 & \text{if $S$ is degenerate} \\
+      +1 & \text{otherwise ($A\cap B$ comes after $A\cap C$ on $A$).} 
     \end{array}\right.
 \]
 (See \figref{super-order}.)  Let $\langle\langle
 i_{1,\ell},i_{2,\ell},j_{1,\ell},j_{2,\ell},k_{1,\ell},k_{2,\ell}\rangle:
-\ell in \{1,\ldots,\binom{n}{2}^3\}\rangle$ be any sequence that lists the
+\ell \in \{1,\ldots,r\}\rangle$ be any sequence that lists the
 6-tuples whose elements are the indices $\{1,\ldots,n\}$ with the property
-that $i_{1,\ell}\neq i_{2,\ell}$, $j_{1,\ell}\neq j_{2,\ell}$, and
-$k_{1,\ell}\neq k_{2,\ell}$, for each $\ell\in\{1,\ldots,\binom{n}{2}^2\}$.
+that $i_{1,\ell}\neq i_{2,\ell}$, $j_{1,\ell}\neq j_{2,\ell}$,
+$k_{1,\ell}\neq k_{2,\ell}$, and $\{i_1,i_2\}\cap\{j_1,j_2\}\cap\{k_1,k_2\}=\emptyset$ for each $\ell\in\{1,\ldots,r\}$.  Note that $r< \binom{n}{2}^3$.
 Then the \emph{super-order type} of a sequence 
 $P=\langle x_1,\ldots,x_n\rangle$ of $n$ distinct points is the sequence
 \[
-   \sigma(P) = \left\langle \sigma\left(i_{1,\ell},i_{2,\ell},
-       j_{1,\ell},j_{2,\ell},
-       k_{1,\ell},k_{2,\ell}\right) : \ell\in\left\{1,\ldots,\binom{n}{2}^3\right\} \right\rangle \enspace .
+   \sigma(P) = \left\langle \sigma\left(x_{i_{1,\ell}},x_{i_{2,\ell}},
+       x_{j_{1,\ell}},x_{j_{2,\ell}},
+       x_{k_{1,\ell}},x_{k_{2,\ell}}\right) : \ell\in\left\{1,\ldots,r\right\} \right\rangle \enspace .
 \]
+Finally, we say that super-order type is \emph{simple} if it contains
+no zeros and a sequence of points is \emph{simple} if its super-order
+type is simple.
+The following lemma shows that super-order types are sufficient for answering
+questions about obstacle representations.
+
 
 \begin{figure}
   \begin{center}
-    \begin{tabular}{ccc}
+    \begin{tabular}{cc}
        \includegraphics{super-order-1} &
+       \includegraphics{super-order-2} \\ 
+       -1 & 1 \\
+    \end{tabular}\\[4ex]
+    \begin{tabular}{ccc}
        \includegraphics{super-order-3} &
-       \includegraphics{super-order-2} \\
-        -1 & 0 & 1
+       \includegraphics{super-order-4} &
+       \includegraphics{super-order-5} \\
+       0 & 0 & 0
     \end{tabular}
   \end{center}
   \caption{The three cases of three lines defined by 6 points that can
@@ -290,56 +315,120 @@ $P=\langle x_1,\ldots,x_n\rangle$ of $n$ distinct points is the sequence
   \figlabel{super-order}
 \end{figure}
 
-The following lemma shows that super-order types are sufficient for answering
-questions about obstacle representations.
-
 \begin{lem}\lemlabel{order-type}
   Let $G$ be a graph with $n$ vertices and let $P_1$ and $P_2$ be two
-  sequences of $n$ points that have the same super-order type.
-  Then, if $G$ has an $h$-obstacle representation $(\varphi_1,S_1)$
+  sequences of $n$ points that are simple and have the same super-order
+  type.  Then, if $G$ has an $h$-obstacle representation $(\varphi_1,S_1)$
   such that $P_1$ is the image of $\varphi_1$, then $G$ also has an
   $h$-obstacle representation $(\varphi_2,S_2)$ such that $P_2$ is the
   image of $\varphi_2$.
 \end{lem}
 
 \begin{proof}
-  Coming soon.
+  Let $(\varphi_1,S_1)$ be some $h$-obstacle representation of $G$
+  where the image of $\varphi_1$ is $P_1$.
+  We use the obvious mapping $\varphi_2$ that maps each vertex,
+  $u$, of $G$ onto the point in $P_2$ that corresponds to the point
+  $\varphi_1(u)\in P_1$.
+
+  We now have two embeddings of $G$, one onto $P_1$ and one onto $P_2$.
+  Consider the two plane graphs $G_1$ and $G_2$ obtained by adding a
+  vertex where any two edges cross.  The fact that $P_1$
+  and $P_2$ have the same super-order type implies that $G_1$ and $G_2$
+  are two combinatorially equivalent drawings of the same planar graph.
+  Without loss of generality, we can assume that each obstacle $X_1\in
+  S_1$ is an open polygon whose boundary is the face, $f_1$, of $G_1$ that
+  contains $X_1$.  For each such obstacle, we create an obstacle, $X_2$,
+  whose boundary is the face $f_2$ of $G_2$ that corresponds to $f_1$.
+
+  By construction, no edge of the embedding $\varphi_2$ of $G$
+  intersects any obstacle in $S_2$.  Because $P_1$ and $P_2$ have the
+  same super-order type it is easy to verify that, for every non-edge
+  $uw$ of $G$, the segment $\varphi_2(u)\varphi_2(w)$ intersects some
+  obstacle in $S_2$. (Indeed, $\varphi_2(u)\varphi_2(w)$ intersects
+  the obstacles of $S_2$ corresponding to those in $S_1$ intersected
+  by $\varphi_1(u)\varphi_1(w)$.)  That is, $(\varphi_2,S_2)$ is an
+  obstacle representation of $G$ using $|S_1|$ obstacles, as required.
 \end{proof}
 
-What remains is to show that $N$, the number of super-order corresponding
-to point sets of size $n$ is not too big.  Luckily, the methods used
-by Goodman and Pollack to bound order types and combinatorial types
-generalize readily to super-order types.
+The next lemma shows that we can restrict our attention to embeddings
+onto simple point sets.
 
-\begin{lem}\lemlabel{order-type-count}
-  The number of sequences in $\{-1,0,+1\}^{\binom{n}{2}^3}$ that are the
-  super-order type of some point sequence of length $n$ is $e^{O(n\log
-  n)}$.
+\begin{lem}\lemlabel{simple}
+  If a graph $G$ has an $h$-obstacle representation $(\varphi, S)$,
+  then $G$ has an $h$-obstacle representation $(\varphi',S')$ in which
+  the image of $\varphi'$ is a simple point set.
 \end{lem}
 
 \begin{proof}
-   Coming soon.
+  By growing the obstacles in $S$ into maximum open sets and then
+  shrinking them slightly, we may assume that each obstacle in $S$ is
+  an open set that is at some positive distance $\epsilon >0$ from each
+  line segment $\varphi(u)\varphi(w)$ joining the two endpoints of each
+  edge $uw$ in $G$.  Call this new set of obstacles $S'$.
+
+  Suppose some point $a=\varphi(u)$ is involved in a degenerate sextuple.
+  A sufficiently small perturbation of $a$ that moves it to a new location
+  $a'$ will simultaneously
+  \begin{enumerate}
+    \item eliminate all the degenerate sextuples that include $a$;
+    \item not change the type of any sextuple whose type is not 0; 
+    \item not result in any point $b=\varphi(w)$ that is visible to $a$
+      being invisible to $a'$; and
+    \item not result in any point $b=\varphi(w)$ that is invisible to $a$
+      being visible to $a'$.
+  \end{enumerate}
+  We can easily verify that such a perturbation of $a$ is possible because
+  \begin{enumerate}
+    \item For each degenerate sextuple that includes $a$ there are only a
+    constant number of directions $a-a'$ that preserve the degeneracy of
+    that sextuple.
+    \item Changing the type of a non-denerate sextuple involving $a$
+    requires moving $a$ by some distance $\delta >0$;  we can ensure
+    that our perturbation moves $a$ by less than $\delta$.
+    \item All obstacles are at distance $\epsilon >0$ from the
+    edges of the embedding.
+    \item All obstacles are open sets.
+  \end{enumerate}
+  The preceding perturbation step can be repeated until no
+  degeneracy remain to obtain the desired $h$-obstacle representation
+  $(\varphi',S')$.
 \end{proof}
+
+What remains is to show that $N$, the number of super-order types corresponding
+to point sets of size $n$ is not too big.  Luckily, the methods used
+by Goodman and Pollack to bound order types and combinatorial types
+generalize readily to super-order types.  The proof of the following
+result is given in \appref{order-type}.
+
+\begin{lem}\lemlabel{order-type-count}
+  The number of sequences in $\{-1,+1\}^{r}$ that are the super-order
+  type of some simple point sequence of length $n$ is $e^{O(n\log n)}$.
+\end{lem}
+
+\subsection{Proof of \thmref{main}}
 
 For completeness, we now spell out the proof of \thmref{main}.
 
 \begin{proof}[Proof of \thmref{main}]
-  Let $G$ be an Erd\"os-Renyi random graph with $n$ vertices.  Fix some
-  super-order type on $n$ points.  By \lemref{order-type}, all point
+  Let $G$ be an Erd\"os-R\'enyi random graph with $n$ vertices.  Fix some
+  simple super-order type on $n$ points.  By \lemref{order-type}, all point
   sets with this super-order type support an obstacle representation
   of $G$ with $o(n/(\log\log n)^2)$ obstacles or none of them do.
   By \lemref{fixed}, the probability that all of them do is
-  at most $p=e^{-cn\log n}$ for any constant $c>0$.  By the union bound
+  at most $p=e^{-cn\log n}$ for every constant $c>0$.  By the union bound
   and \lemref{order-type-count} the probability that there is any
-  super-order type---and therefore any point set---that supports an
+  simple super-order type---and therefore any simple point set---that supports an
   obstacle representation of $G$ with $o(n/(\log\log n)^2)$ obstacles is
   \[
      \hat p = p\cdot e^{O(n\log n)} = e^{-cn\log n}\cdot e^{O(n\log n)} < 1
   \]
-  for a sufficiently large constant $c$. Therefore, with probability
-  $1-\hat p > 0$, the obstacle number of $G$ is in $\Omega(n/(\log\log n)^2)$ and therefore, there
-  exist graphs having $n$ vertices and obstacle number
-  $\Omega(n/(\log\log n)^2)$.
+  for a sufficiently large constant $c$.  Therefore, with probability
+  $1-\hat p > 0$, there is no simple point set that supports an obstacle
+  representation of $G$ using $o(n/(\log\log n)^2)$ obstacles. We deduce
+  that there exists some some graph, $G'$, with this property.  Finally,
+  \lemref{simple} implies that we can ignore the restriction to simple
+  point sets and deduced that $\obs(G')\in \Omega(n/(\log\log n)^2)$.
 \end{proof}
 
 %A \emph{quad} $(a,b,c,d)\in(\R^2)^4$ is a sequence of points such that
@@ -532,8 +621,84 @@ $h$ and let $\hat h = \max\{h:f(h,c\log n) \le 2^{(c\log n)^2/4}\}$.
 Then our proof technique shows that there exist graphs with obstacle
 number at least $n\hat h/(c\log n)$.
 
+\section*{Acknowledgement}
+
+This work was initiated at the \emph{Workshop on Geometry and Graphs},
+held at the Bellairs Research Institute, March 10-15, 2013.  We are
+grateful to the workshop organizers and participants for providing
+a stimulating research environment.
+
 \bibliographystyle{abbrv}
 \bibliography{obstacle}
+
+\appendix
+
+\section{Proof of \lemref{order-type-count}}
+\applabel{order-type}
+
+\begin{proof}[Proof of \lemref{order-type-count}]
+   First, consider what it means for a sextuple
+   $S=(a_1,a_2,b_1,b_2,c_1,c_2)$, which defines three lines $A$, $B$,
+   and $C$, to be degenerate.  This can occur, for example, if $A$
+   and $B$ are parallel.  $A$ and $B$ are parallel if and only if
+   \[
+      \x(a_1-a_2)\cdot \y(b_1-b_2) - 
+       \x(b_1-b_2)\cdot \y(a_1-a_2) = 0 \enspace .
+   \]
+   (This formula is a formalization of the less precise statement
+   ``the slopes of $A$ and $B$ are the same.'')
+   Observe that the preceding equation is a polynomial in
+   $a_1,a_2,b_1,b_2$ of degree 2.
+
+   Next, consider the case where $S$ is degenerate because $A$, $B$, and
+   $C$ intersect in a common point or because one of $A$, $B$, or $C$
+   is vertical.  This occurs if and only if the following determinant
+   is undefined or equal to zero:
+   \begin{equation}
+   \left|\begin{array}{lll}
+   \y(a_1)-\x(a_1)\left(\frac{\y(a_1-a2)}{\x(a_1-a_2)}\right) & \frac{\y(a_1)-\y(a_2)}{\x(a_1)-\x(a_2)} & 1 \\
+   \y(b_1)-\x(b_1)\left(\frac{\y(b_1-b2)}{\x(b_1-b_2)}\right) & \frac{\y(b_1)-\y(b_2)}{\x(b_1)-\x(b_2)}  & 1 \\
+   \y(c_1)-\x(c_1)\left(\frac{\y(c_1-c2)}{\x(c_1-c_2)}\right) & \frac{\y(c_1)-\y(c_2)}{\x(c_1)-\x(c_2)}  & 1 \\
+   \end{array}\right| \enspace .
+   \eqlabel{determinant}
+   \end{equation}
+   (The values in this matrix are the $\y$-intercepts and slopes of the
+   lines $A$, $B$, and $C$.)
+   Multiplying the matrix in \eqref{determinant} by 
+   \[
+      \x(a_1-a_2)\cdot
+      \x(b_1-b_2)\cdot
+      \x(c_1-c_2)
+   \]
+   yields a polynomial of degree $6$ in the six variables
+   $a_1,a_2,b_1,b_2,c_1,c_2$ that is equal to zero if and only if $A$,
+   $B$, and $C$ contain a common point or one of $A$, $B$, or $C$
+   is vertical.
+
+   For the remainder of the proof, we proceed exactly as in
+   \cite{goodman.pollack:upper}.  We can treat any sequence of $n$ points
+   in $\R^2$ as a single point in $\R^{2n}$.  Applying the preceding
+   conditions for determining the degeneracy to each of the $O(n^6)$
+   sextuples of points leads to a set of $O(n^6)$ polynomials in $2n$
+   variables, each of constant degree.  By multiplying these polynomial
+   together, we obtain a single polynomial, $P^*$, with $2n$ variables
+   and degree $d=O(n^6)$.  If $X\subset\R^{2n}$ is the zero set of $P^*$,
+   then $\R^{2n}\setminus X$ has at most $(2+d)^{2n}=e^{O(n\log n)}$
+   connected components \cite[Lemma~2]{goodman.pollack:upper}.
+
+   Observe that $X$ corresponds exactly to the set of non-simple
+   point sets and observe that a sextuple of points can not be moved
+   continuously so that its type goes from $-1$ to $+1$, or vice versa,
+   without its type becoming $0$ at some point during the movement.
+   In particular, it is not possible to change the super-order type of
+   a point set without going through a non-simple super-order type.
+   Thus, within each component, $C$, of $\R^{2n}\setminus X$, the
+   super-order type corresponding to every point in $C$ is the same.
+   We conclude that the number of super-order types of simple point
+   sets is at most the number of components of $\R^{2n}\setminus X$,
+   which is $e^{O(n\log n)}$, as required.
+\end{proof}
+
 
 \end{document}
 

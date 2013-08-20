@@ -31,7 +31,7 @@
 \ProcessOptions
 
 % Read the article class
-\LoadClass[11pt,letterpaper]{article}
+\LoadClass[12pt,letterpaper]{article}
 
 \RequirePackage{kpfonts}
 \RequirePackage[sf,bf,small,raggedright,compact]{titlesec}
@@ -128,3 +128,4 @@
 \renewcommand{\headrulewidth}{1pt}
 \renewcommand{\footrulewidth}{1pt}
 \pagestyle{fancy}
+

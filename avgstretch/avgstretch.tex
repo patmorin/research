@@ -47,16 +47,17 @@ urlcolor=linkblue}
   the shortest path from $u$ to $w$ in $G$ and the Euclidean distance
   between $u$ and $w$.  The \emph{average stretch factor} of $G$ is
   the average stretch factor taken over all pairs of vertices in $G$.
-  We show that for any set, $V$, of $n$ points in $\R^d$, there exists
-  a geometric graph with vertex set $V$, that has $O(n)$ edges, and
-  that has average stretch factor $1+ o_n(1)$.  More precisely, the
-  average stretch factor of this graph is $1+O((\log n/n)^{1/(2d+1)})$.
-  We complement this upper-bound with a lower bound: There exist $n$
-  point sets in $\R^2$ for which any graph with $O(n)$ edges has average
-  stretch factor $1+\Omega(1/\sqrt{n})$.  Bounds of this type are not
-  possible for the more commonly studied worst-case stretch factor.
-  In particular, there exists point sets, $V$, such that any graph with
-  worst-case stretch factor $1+o_n(1)$ has a superlinear number of edges.
+  We show that, for any constant dimension, $d$, and any set, $V$, of
+  $n$ points in $\R^d$, there exists a geometric graph with vertex set
+  $V$, that has $O(n)$ edges, and that has average stretch factor $1+
+  o_n(1)$.  More precisely, the average stretch factor of this graph is
+  $1+O((\log n/n)^{1/(2d+1)})$.  We complement this upper-bound with a
+  lower bound: There exist $n$-point sets in $\R^2$ for which any graph
+  with $O(n)$ edges has average stretch factor $1+\Omega(1/\sqrt{n})$.
+  Bounds of this type are not possible for the more commonly studied
+  worst-case stretch factor.  In particular, there exists point sets,
+  $V$, such that any graph with worst-case stretch factor $1+o_n(1)$
+  has a superlinear number of edges.
 \end{abstract}
 
 \end{titlepage}
@@ -200,7 +201,7 @@ We note that it does not seem easy to answer any of the preceding
 questions using a modification of Aldous and Kendall's construction.
 (1)~Their proof uses the well-distributed assumption to argue that
 most pairs of points are at distance at least $n^{\gamma}$, for any
-$y<1/2$ \cite[Section~5.3]{aldous.kendall:short-length}.  (2)~their
+$\gamma<1/2$ \cite[Section~5.3]{aldous.kendall:short-length}.  (2)~their
 construction consists of a minimum Steiner spanning tree of $V$,
 some additional random line segments, and some additional segments
 that form a grid.  Anywhere two segments cross, a vertex is added
@@ -489,7 +490,7 @@ even contain each other.
 \subsection{The Graph $G$}
 
 With the availability of $k$-partitions, we are now ready to construct
-a graph $G$ with low average stretch.  In the following construction,
+a graph $G$ with low average stretch factor.  In the following construction,
 positive valued variables $c,k\in\omega_n(1)$ and $\epsilon\in o_n(1)$
 are used without being specified.  Values of these variables that
 optimize the average stretch factor of $G$ will be given in the proof
@@ -500,12 +501,14 @@ prove that $\asf(G)=1+o_n(1)$.
 \paragraph{Hubs.}
 
 We begin with a $k$-partition $(\{\Delta_1,\ldots,\Delta_{n'}\},f)$
-of $V$, and we use the convention that $\Delta_1,\ldots,\Delta_{n'}$
-are ordered by decreasing size.  For each $i\in \{1,\ldots,n'\}$,
-let $V_i=\{u\in V : f(u)=\Delta_i\}$; that is, $V_i$ is the set of
-points assigned to the ball $\Delta_i$.  For each set $V_i$, we choose
-a \emph{hub}, $u_i\in V_i$, arbitrarily. Let $H=\{u_1,\ldots,u_{n'}\}$ denote
-the set of hubs and recall that $|H|=n'\in O(n/k)$.
+of $V$.  For each $i\in\{1,\ldots,n'\}$, let $r_i$ denote the radius of
+$\Delta_i$.  We will use the convention that $\Delta_1,\ldots,\Delta_{n'}$
+are ordered by increasing radii, so that $r_i \le r_j$ for each $1\le
+i < j\le n'$.  For each $i\in \{1,\ldots,n'\}$, let $V_i=\{u\in V :
+f(u)=\Delta_i\}$; that is, $V_i$ is the set of points assigned to the
+ball $\Delta_i$.  For each set $V_i$, we choose a \emph{hub}, $u_i\in
+V_i$, arbitrarily. Let $H=\{u_1,\ldots,u_{n'}\}$ denote the set of hubs
+and recall that $|H|=n'\in O(n/k)$.
 
 \begin{figure}
   \begin{center} 
@@ -520,10 +523,10 @@ the set of hubs and recall that $|H|=n'\in O(n/k)$.
 \paragraph{Roads and Highways.}
 
 Our graph $G$ starts with two spanner constructions.
-The first spanner (the roads) is denoted by
+The first spanner (the roads), denoted by
 $G_2=(V,E_2)$, is a 2-spanner of $V$, and has $O(n)$ edges
 \cite{callahan.kosaraju:faster,salowe:constructing,vaidya:sparse}.
-The next spanner (the highways) is denoted by $G_1=(H,E_1)$, is a
+The next spanner (the highways), denoted by $G_1=(H,E_1)$, is a
 $(1+1/k^{1/(d-1)})$-spanner of $H$, and has $O(k|H|)=O(n)$ edges
 \cite{carmi.smid:optimal,ruppert.seidel:approximating}.
 
@@ -546,11 +549,10 @@ this only works if $u$ and $w$ are far apart.  The final step of
 our construction attempts to deal with the majority of cases where $u$
 and $w$ are not far apart.
 
-To make the preceding ideas precise, Let $r_i$ denote the radius
-of $\Delta_i$ and let $D_i$ be the ball centered at the center of
-$\Delta_i$ and having radius $cr_i$.  Points of $V$ that are in $D_i$
-can be problematic for $V_i$; there is no guarantee that such points
-have paths with $1+o_n(1)$ stretch factor to the points in $V_i$.
+To make the preceding ideas precise, let $D_i$ be the ball centered at
+the center of $\Delta_i$ and having radius $cr_i$.  Points of $V$ that
+are in $D_i$ can be problematic for $V_i$; there is no guarantee that such
+points have paths with $1+o_n(1)$ stretch factor to the points in $V_i$.
 
 For each $i\in\{1,\ldots,n'\}$, we find a ball, $E_i$, of radius $r_i/c$,
 that intersects $D_i$, and that contains the maximum number of points
@@ -625,10 +627,11 @@ is a dense cluster of $n/2$ points that is contained in some ball $E_j$
 much greater than $r_j$.  It is easy to make a configuration of points so
 that, for some cluster $V_i$, the corresponding ball $E_i$ contains $E_j$
 as well as a few other points that are far from $E_j$. If one of these
-points is used as the representative vertex, $w_i$, then all $kn/2$ paths
-from $u$ in $V_i$ to $w\in E_j$ will have to make a detour through $w_i$.
-By repeating this for many different values of $i$, this is enough to
-produce an average stretch factor significantly larger than 1.
+points is used as the representative vertex, $w_i$, then all $kn/2$
+paths from some $u$ in $V_i$ to some $w\in E_j$ will have to make a
+detour through $w_i$.  By repeating this for many different values of
+$i$, this is enough to produce an average stretch factor significantly
+larger than 1.
 
 \begin{figure}
   \begin{center}
@@ -668,8 +671,8 @@ Without further ado, we now prove that $G$ has low average stretch factor.
   That $G$ has $O(n)$ edges follows immediately from its definition.
 
   To upper-bound the average stretch factor of $G$, there are four types
-  of pairs of points, $u\in V_i$, $w\in V_j$, $j\ge i$, to consider
-  (recall that $\Delta_1,\ldots,\Delta_{n'}$ are ordered so that $r_i \ge r_j)$:
+  of pairs of points, $u\in V_i$, $w\in V_j$, $j\le i$, to consider
+  (recall that $\Delta_1,\ldots,\Delta_{n'}$ are ordered so that $r_j \le r_i$):
   \begin{enumerate}
     \item pairs that are both from the same set, i.e., where $i=j$;
     \item pairs for which $w$ is outside of $D_i$;
@@ -1204,8 +1207,8 @@ relatively faithful to the proof of \thmref{upper-bound}.
        \item $D_1,\ldots,D_{n'}$ are square boxes where each $D_i$
          is a square box of side-length $cL(\Delta_i)$ centered at the
          center of $\Delta_i$; and
-       \item $E_1,\ldots,E_{n'}$ are square boxes where each $E_i$ is a box of
-         side-length $L(\Delta_i)/c$ that intersects $D_i$.
+       \item $E_1,\ldots,E_{n'}$ are square boxes where each $E_i$
+         is a square box of side-length $L(\Delta_i)/c$ that intersects $D_i$.
      \end{enumerate}
      \item The box $E_i$ does not perfectly maximize the number of points
        it contains. Instead, we guarantee that, if there exists any
@@ -1655,8 +1658,8 @@ It seems likely that some of the techniques used to prove
 dimension \cite[Section~10.13]{heinonen:lectures}.  Is bounded doubling
 dimension the weakest possible restriction on the metric space?  It is
 clear that some restrictions on the metric space are required: In the
-metric space in which all points have unit distance, the stretch factor
-of a graph, $G=(V,E)$, having $m$ edges is at least
+metric space in which all points have unit distance, the average stretch
+factor of a graph, $G=(V,E)$, having $m$ edges is at least
 \[
     \binom{n}{2}^{-1}\left(m + 2\left(\binom{n}{2}-m\right)\right) 
 \]

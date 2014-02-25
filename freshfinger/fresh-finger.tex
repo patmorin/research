@@ -43,7 +43,7 @@ Any comparison-based search data structure is, at its core, a method of choosing
 
 But, worst-case analysis is not the end of the story, as one can design data structures that execute operations in $\LittleOh{\log n}$ time if the operations have some kind of order to them. Thus, we can create data structures with access times that are functions of the access sequences themselves (or some distributional statistic of the access sequence)---these runtimes will still have $\BigOh{\log n}$ worst-case behavior, but will be faster over sequences that have certain desirable characteristics. We now review some runtime bounds that have been introduced, and the data structures whose runtimes have bounds (we will say a data structure has a bound to mean that its runtime can be bounded by the bound):
 
-\paragraph{Static optimality bound.} If the number of searches in $A$ to $x$ is $f(x)$, then the runtime to search for $a_i$ is $\BigOh{\log \frac{m}{f(a_i)}}$.\footnote{In this paper,  $\log 0=\log 1=1$.} Knuth showed how to achieve this bound if the $f(\cdot)$-values are given in advance \cite{DBLP:journals/acta/Knuth71}.
+\paragraph{Static optimality bound.} If the number of searches in $A$ to $x$ is $f(x)$, then the runtime to search for $a_i$ is $\BigOh{\log \frac{m}{f(a_i)}}$.\footnote{In this paper,  $\log 0=\log 1=1$.} Knuth showed how to achieve this bound if the $f(\cdot)$-values are given in advance \cite{DBLP:journals/acta/Knuth71}. A linear time construction is given by Mehlhorn \cite{mXX}.  Several structures can achieve static optimality for sufficiently long sequences even if the $f(\cdot)$ values are not given in advance.
 
 \paragraph{Working-set bound.} Let $w_i(x)$ be the number of distinct items accessed since the last access to $x$ in $a_1, \ldots a_{i-1}$ (or $n$ if $x \notin \{a_1, \ldots a_{i-1}\}$). A data structure has the working-set bound if an access to $a_i$ takes time $\BigOh{\log w_i(a_i)}$. The idea behind this is that if the accesses are restricted to a subset of $k$ items, then the accesses will take time $\BigOh{\log k}$ rather than $\BigOh{\log n}$. It has been shown that the working-set bound implies the static optimality bound in the amortized sense. Splay trees \cite{DBLP:journals/jacm/SleatorT85} have the working-set bound in the amortized sense, while the working-set structure \cite{DBLP:conf/soda/Iacono01a} was designed to have this bound in the worst-case.
 
@@ -66,7 +66,7 @@ There are several issues that are important when considering a bound:
 
 \paragraph{Binary Search Tree model.} Wilber \cite{DBLP:journals/siamcomp/Wilber89} formalized the binary search tree model; in this model the data structure is a binary search tree which can be restructured through the use of rotations. The set of sequences which binary search trees can execute quickly seems to be a reasonable classifier of those sequences that we consider to be natural. Without a restriction to the BST model, given any single access sequence, it is possible to create a data structure that will execute the searches in that sequence quickly, and others slowly. This is not possible in the BST model as there are deterministic sequences such as the bit reversal permutation that can not be executed faster than $\BigOh{\log n}$ amortized time.
 
-The class of BST data structures also have the possibility that there may exist an online BST data structure that can execute every access sequence asymptotically as fast as the best BST data structure \emph{for that sequence}. Such a structure would be called \emph{dynamically optimal}; no BSTs are known to be dynamically optimal although spay trees and Lucas' trees \cite{lucas} are conjectured to be. Blum et.~al. \cite{blum} gave a non-tree data structure that runs within a constant factor of the number of comparisons of any BST data structure, but requires superpoloynomial time to decide which comparisons to perform. Tango trees \cite{DBLP:journals/siamcomp/DemaineHIP07} are a BST that execute every sequence within a $\BigOh{\log \log n}$ factor of the best possible binary search tree. Of the bounds described above, no BST can have the queueish property, it is conjectured that there is a BST with the unified property, and the rest of the bounds described above are achievable by BST data structures.
+The class of BST data structures also have the possibility that there may exist an online BST data structure that can execute every access sequence asymptotically as fast as the best BST data structure \emph{for that sequence}. Such a structure would be called \emph{dynamically optimal}; no BSTs are known to be dynamically optimal although spay trees and Lucas' trees \cite{lucas} are conjectured to be. Blum et.~al. \cite{blum} gave a non-tree data structure that runs within a constant factor of the number of comparisons of any BST data structure, but requires super-polynomial time to decide which comparisons to perform. Tango trees \cite{DBLP:journals/siamcomp/DemaineHIP07} are a BST that execute every sequence within a $\BigOh{\log \log n}$ factor of the best possible binary search tree. Of the bounds described above, no BST can have the queueish property, it is conjectured that there is a BST with the unified property, and the rest of the bounds described above are achievable by BST data structures.
 
 \section{Problems with the unified bound}
 
@@ -98,22 +98,22 @@ On the other hand, the sequence $A'$ is not very different from $A$.  Indeed $A'
 The sequence $A'$ demonstrates the problem with the unified property: The distance function $d(x,y)$ simply measures the number of keys between $x$ and $y$. But, suppose some key values have not been accessed in a long time relative to $x$ and $y$, or in the extreme case, have never been accessed. Why should the number of such keys between $x$ and $y$ influence the runtime of accessing keys such as $x$ and $y$?
 Put simply, they should not. Data structures such as splay trees will have items that are never accessed ``percolate'' to to bottom of the structure, and the runtime of a splay tree with a subtree of never-accessed keys is identical to the runtime if the keys are not there. Thus we need a more nuanced $d(\cdot,\cdot)$ function that ``forgets'' keys that have not been accessed in a while when computing key distance.
 
-In this paper, we will expand on the idea of counting only recently accessed elements towards the distance between elements stored by the dictionary. The remainder of the paper is organized in the following way. In Section~\ref{section:definitions}, we define a new, stronger version of the unified property. In Section~\ref{section:main}, we show how to construct a dictionary that has this new property. We conclude with possible directions for future research in Section~\ref{section:conclusion}.
+In this paper, we will expand on the idea of counting only recently accessed elements towards the distance between elements stored by the dictionary. The remainder of the paper is organized in the following way. In Section~\ref{section:definitions}, we define a new, stronger, version of the unified property. In Section~\ref{section:main}, we show how to construct a dictionary that has this new property. We conclude with possible directions for future research in Section~\ref{section:conclusion}.
 
 \section{Defining the fresh-finger property}
 \label{section:definitions}
 
 In this section, we define a new, stronger version of the unified property that we term the \emph{fresh-finger property}. Recall that $A = \langle a_1, a_2, \ldots, a_m \rangle$ is our access sequence. Define
 \begin{displaymath}
-	l_i(x) = \min \left( \{ \infty \} \cup \{ j > 0 \;|\; a_{i-j} = x \} \right)
+	\ell_i(x) = \min \left( \{ \infty \} \cup \{ j > 0 \;|\; a_{i-j} = x \} \right)
 \end{displaymath}
 
-One can think of $l_i(x)$ as the most recent time $x$ has been queried in $A$ before time $i$. We then define
+One can think of $\ell_i(x)$ as the most recent time $x$ has been queried in $A$ before time $i$. We then define
 \begin{displaymath}
 	w_i(x) =
 		\begin{cases}
-			n 																	& \text{if } l_i(x) = \infty \\
-			|\{ a_{i-l_i(x)+1}, \ldots, a_i \}|	& \text{otherwise}
+			n 																	& \text{if } \ell_i(x) = \infty \\
+			|\{ a_{i-\ell_i(x)+1}, \ldots, a_i \}|	& \text{otherwise}
 		\end{cases} 
 \end{displaymath}
 %
@@ -170,12 +170,12 @@ and
 	\SU{x} = \log (w_i(y_i(x)) + d_{W_i(w_i(x)^2)}(x,y_i(x)))
 \end{displaymath}
 
-As an example, consider the following access sequence, where $15$ is the element currently being accessed at the end of the sequence.
+As an example, consider the following access sequence, where $14$ is the element currently being accessed at the end of the sequence.
 \begin{displaymath}
-2, 3, 4, 5, 6, 7, 8, \overbrace{9, 10, 11, 12, 13, \underbrace{14, 15, 16, 1}_{W_i(w_i(15))}}^{W_i(w_i(15)^2)}, 15
+2, 3, 4, 5, 6, 7, 8, \overbrace{9, 10, 11, 12, 13, 14, \underbrace{15, 16, 1}_{W_i(w_i(14))}}^{W_i(w_i(15)^2)}, 14
 \end{displaymath}
 
-The original definition of the fresh-finger property uses $W_i(w_i(15))$, while the modified definition uses $W_i(w_i(15)^2)$. This modified definition allows for $9,10,11,12,13$ to contribute to the rank distance. This results in a query time that does not violate information-theoretic lower bounds, since it does not result in a situation where all $n$ queries must be executed in constant time. 
+The original definition of the fresh-finger property uses $W_i(w_i(14))$, while the modified definition uses $W_i(w_i(14)^2)$. This modified definition allows for $9,10,11,12,13$ to contribute to the rank distance. This results in a query time that does not violate information-theoretic lower bounds, since it does not result in a situation where all $n$ queries must be executed in constant time. 
 Before presenting a data structure that (nearly) achieves the fresh-finger property, it is worth doing a sanity-check of this definition.  In particular, we confirm that there exists (distributions over) sequences $A=\langle a_1,\ldots,a_m \rangle$ such that
 \[
    \su{a_1,\ldots,a_m} = \sum_{i=1}^m \SU{a_i}
@@ -191,11 +191,11 @@ is a lower-bound for accessing $a_1,\ldots,a_m$.
 \end{theorem}
 
 \begin{proof}
-  The sequence $A$ is defined as $a_i=i$ for $i\le r$ or $a_i$ is selected
-  uniformly at random from the set $\{1,\ldots,r\}$ for $r< i\le m$.  This
+  The sequence $A$ is defined as $a_i=r-i+1$ for $i\le r$ or $a_i$ is selected
+  uniformly at random from the set $\{1,\ldots,\lfloor\sqrt{r}\rfloor\}$ for $r< i\le m$.  This
   choice of $A$ immediately implies that 
   \[
-     (m-r)\log_2 r\ge (m/2)\log_2 r = \BigOmega{m\log r}
+     (m-r)\log_2 \lfloor\sqrt{r}\rfloor\ge (m/2)\log \lfloor\sqrt{r}\rfloor = \BigOmega{m\log r}
   \]
   is a lower-bound on the expected number of comparisons performed by $D$
   while accessing the (randomly chosen values) $a_{r+1},\ldots,a_m$.
@@ -211,9 +211,9 @@ is a lower-bound for accessing $a_1,\ldots,a_m$.
   \]
   Thus,
   \[
-     \su{a_1,\ldots,a_m} \le r\log n + (m-r)\log(2r) = \BigOh{m\log r}
+     \su{a_1,\ldots,a_m} \le r\log n + (m-r)\log r = \BigOh{m\log r}
   \]
-  since $m\ge 2r\log n$.
+  since $m\ge 2r\log n$.  \qed
 \end{proof}
 
 
@@ -221,16 +221,39 @@ is a lower-bound for accessing $a_1,\ldots,a_m$.
 \section{Towards the fresh-finger property}
 \label{section:main}
 
-In this section, we describe a data structure that comes to within a small additive term of achieving the fresh-finger property.
+In this section, we describe a three data structures, the fastest of which
+comes very close to having the fresh-finger property.  The three data structures share the same basic representation and differ only in how searches are performed.
 
-\subsection{The data structure}
+\subsection{The basic structure}
 \label{section:main:datastructure}
 
-The data structure consists of $k$ finger search trees $T_1,T_2,\ldots,T_k$ as well as $k$ accompanying queues $Q_1,Q_2,\ldots,Q_k$. Recall that finger search trees can support insertions and deletions in $\BigOh{1}$ worst-case time (when provided with a pointer to the element to be deleted) and finger searches in $\BigOh{\log d}$ worst-case time, where $d$ is the distance between the element being searched for and the supplied pointer into the data structure \cite{DBLP:journals/jcss/BrodalLMTT03}. % One property of finger search trees that we make use of is that, given a pointer to a node in a finger search tree, we can find its successor or predecessor in constant time.
+Our basic data structure consists of $k$ finger search trees $T_1,T_2,\ldots,T_k$ as well as $k$ accompanying queues $Q_1,Q_2,\ldots,Q_k$. Recall that finger search trees can support insertions and deletions in $\BigOh{1}$ worst-case time (when provided with a pointer to the element to be deleted) and finger searches in $\BigOh{\log d}$ worst-case time, where $d$ is the distance between the element being searched for and the supplied pointer into the data structure \cite{DBLP:journals/jcss/BrodalLMTT03}. % One property of finger search trees that we make use of is that, given a pointer to a node in a finger search tree, we can find its successor or predecessor in constant time.
 
-The size of $T_j$ is $2^{2^j}$, except for $T_k$ which has size $n$. It follows that $k$ is $\BigOh{\log \log n}$. We will maintain the invariant that $T_j \subset T_{j+1}$ for all $1 \le j < n$. The queue $Q_j$ contains exactly the same elements as $T_j$ in the order they were inserted into $T_j$. Pointers are maintained between elements in the queue and corresponding elements in the finger search tree.
+The size of $T_j$ is $2^{\alpha^j}$, except for $T_k$ which has size $n$. The constant $\alpha>1$ will be specified later. It follows that $k=\lceil \log_\alpha\log_2 n\rceil$. The structure maintains the invariant that $T_j$
+contains exactly the elements with working set number less than
+or equal to $2^{\alpha^j}$.  The queue $Q_j$ contains the elements of $T_j$
+that are not contained in $T_0,\ldots,T_{j-1}$ and these elements are ordered by their working set number, with larger values at the head of the queue.
 
-To perform a search, we will perform finger searches for $x$ in $T_1,T_2,\ldots$ until we find $x$ for the first time (say, $x \in T_j$). In $T_1$, we use an arbitrary element as the starting finger for the search. In all other trees, we run two finger searches for $x$ in parallel: one from the successor of the element found in the previous finger search tree, and one from the predecessor of the element found in the previous finger search tree. As soon as the first of these two searches terminates, we stop the other. 
+For navigation, a number of cross links (bidirectional pointers) are maintained within this structure.  Each element in $Q_j$ is cross-linked with the corresponding element in $T_j$.  Each value, $x$, stored in the structure maintains pointers to all the nodes of each tree that contain $x$.  These pointers are maintained in, say, an array so that if we find $x$ in some tree $T_j$, then we can, in constant time, locate $x$ in any tree $T_{j'}$ with $j'\in\{\lfloor\log_\alpha\log_2(w_i(x)+1)\rfloor,\ldots,k\}$. 
+
+\subsection{Updating the structure}
+
+Before describing how to search for an element in this structure, we first describe how to update the structure after searching for (and finding) an element.  A search for the value $x$ in this data structure will find $x$ in some tree $T_j$.  For simplicity, assume that $j$ is the minimum index such that $T_j$ contains $x$.
+
+Once $x$ is found, the structures $T_0,\ldots,T_{j-1}$ and $Q_0,\ldots,Q_{j-i}$ need to be updated.  For each $j\in\{0,\ldots,j-1\}$, the oldest element, $z_j$, in $Q_j$ is dequeued and $z_j$ is removed from $T_j$ and enqueued onto $Q_{j+1}$. The dequeuing and enqueuing operations takes constant time and, thanks to cross-links and the fact that $T_j$ is a finger-search tree, removing $z_j$ from $T_j$ also takes constant time. 
+
+Next, $x$ is removed from its current location in $Q_j$ and enqueued
+into $Q_0$. Finally, $x$ is inserted into each of $T_0,\ldots,T_{j-1}$.
+HMMMM: The enqueuing is easy, but how can we do these insertions quickly?
+Our faster searching strategies don't actually locate $x$ in each of
+$T_0,\ldots,T_{j-1}$.
+
+    First, $x$ is inserted into each of 
+
+\subsection{A basic search strategy}
+
+A first search
+To perform a search, we perform finger searches for $x$ in $T_1,T_2,\ldots$ until we find $x$ for the first time (say, $x \in T_j$). In $T_1$, we use an arbitrary element as the starting finger for the search. In all other trees, we run two finger searches for $x$ in parallel: one from the successor of the element found in the previous finger search tree, and one from the predecessor of the element found in the previous finger search tree. As soon as the first of these two searches terminates, we stop the other. 
 
 To restructure the data structure after we have found $x \in T_j$, we must insert $x$ into $T_1,T_2,\ldots,T_{j-1}$ (note that $x$ is not present in any of these trees, since if it were, it would have already been found) and enqueue $x$ in $Q_1,Q_2,\ldots,Q_{j-1}$. At this point, we note that each of $T_1,T_2,\ldots,T_{j-1}$ and $Q_1,Q_2,\ldots,Q_{j-1}$ are too big. We therefore dequeue the oldest element in each of $Q_1,Q_2,\ldots,Q_{j-1}$ and delete the corresponding elements in $T_1,T_2,\ldots,T_{j-1}$.
 

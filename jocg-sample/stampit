@@ -1,8 +1,8 @@
 #!/bin/bash -e
 
-usage="Usage: $0 <infile.pdf> <vol> <num> <firstpage> <npages>"
+usage="Usage: $0 <infile.pdf> <vol> <num> <firstpage>"
 
-if [[ $# -ne 5 ]] ; then
+if [[ $# -ne 4 ]] ; then
   echo "$usage"
   exit -1
 fi
@@ -16,12 +16,15 @@ if [[ ! -e "$f" ]] ; then
 fi
 r="${f%.pdf}"
 
+
+
 # other parameters
 v="$2"
 y="$((v+2009))"
 n="$3"
 fp="$4"
-np="$5"
+np=`pdfinfo "$f" | grep -i pages | awk '{print $2'}`
+#np="$5"
 lp="$((fp + np - 1))"
 
 # print parameters for user to check

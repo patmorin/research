@@ -5,7 +5,7 @@
 %
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{jocg} 
-		[2010/02/02 v0.1d
+		[2010/02/02 v0.1e
  JoCG article class]
 
 \RequirePackage{fancyhdr}
@@ -135,13 +135,15 @@
 \renewenvironment{abstract}
 {\hrule \noindent\textsc{Abstract.}}{\vskip 1em \hrule}
 
+%------------- This eliminates the warning: Font shape `OMS/cmtt/m/n' undefined
+\usepackage[T1]{fontenc}
 
 %------------- Use this so pdflatex outputs US letter pages -------------
-\usepackage[letterpaper]{hyperref}
-\usepackage[dvipsnames]{color}
+\usepackage{hyperref}
+\usepackage[dvipsnames]{xcolor}
 \definecolor{linkblue}{named}{MidnightBlue}
 \hypersetup{colorlinks=true, linkcolor=linkblue,  anchorcolor=linkblue,
-citecolor=linkblue, filecolor=linkblue, menucolor=linkblue, pagecolor=linkblue,
+citecolor=linkblue, filecolor=linkblue, menucolor=linkblue, 
 urlcolor=linkblue} 
 
 %--------------------------- Headers and Footers ------------------------

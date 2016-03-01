@@ -47,12 +47,12 @@ The game proceeds in $n$
 rounds. During the $i$th round, the player selects a monotonically
 increasing set, $P_i$, of live points in $G$.\footnote{Here monotonically
 increasing means that each point in $P_i$ has a unique $x$-coordinate
-and $y$-coordinate and, for every $(i_1,j_1),(i_2,j_2)\in P_i$, $i_1 <
-i_2\Leftrightarrow j_1<j_2$.}  Each point $(i,j)$ selected in $P_i$
-\emph{kills} the L-shape $\{(i,j'): j'\ge j\}\cup\{(i',j):i'\ge i\}$ so 
+and $y$-coordinate and, for every $(x_1,y_1),(x_2,y_2)\in P_i$, $x_1 <
+x_2\Leftrightarrow y_1<y_2$.}  Each point $(x,y)$ selected in $P_i$
+\emph{kills} the L-shape $\{(x,y'): y'\ge y\}\cup\{(x',y):x'\ge x\}$ so 
 that these points are no longer live in subsequent rounds. 
 
-The game ends after $n$ rounds and the player's score is $\sum_{j=1}^n |P_i|$.
+The game ends after $n$ rounds and the player's score is $\sum_{i=1}^n |P_i|$.
 
 \begin{op}
    What is the maximum score a player can earn in this game?
@@ -67,11 +67,14 @@ in the top-right corner, a player can earn a score of $\Omega(n^{3/2})$:
 
 This seems optimal, but I've been unable to prove it.
 
+\newcommand{\taco}{\raisebox{-.1ex}{\includegraphics[height=1.6ex]{figs/triangles-edge-1}}}
+\newcommand{\nested}{\raisebox{-.1ex}{\includegraphics[height=1.6ex]{figs/triangles-vertex-2}}}
+
 \noindent History: this game models a combinatorial geometry problem
 posed by Bra\ss\ (2004) of determining the maximum number of triangles
 one can draw on a convex point set before creating a pair of triangles
-that (a)~share an edge and cross or (b)~share a vertex but whose edges
-oppposite the shared vertex do not cross.
+that (a)~share an edge and cross (\taco) or (b)~share a vertex but whose edges
+oppposite the shared vertex are ``nested'' (\nested).
 
 \section{Facial Nonrepetitive Colouring of Trees}
 
@@ -96,10 +99,16 @@ that every tree has a nonrepetitive 4-colouring and that this is optimal
 for some trees. Here is a warm-up question, that would only need a slight
 generalization of Thue's result:
 
-\begin{op}
+\begin{op}\oplabel{thue-easy}
   Let $T^3_n$ be the tree having one vertex of degree 3 attached to three
   paths of length $n$.  Does $T^3_n$ have a nonrepetitive 3-colouring?
 \end{op}
+
+\noindent\textbf{Update:} We managed to prove that $T^3_n$
+does indeed have a nonrepetitive 3-colouring, though the proof
+does not look like it has much chance of generalizing.  (If you're
+not worried about poisoning your own thoughts on this problem, see
+\url{http://cglab.ca/~morin/misc/bb2016/drafts/starcolour.pdf}.)
 
 A \emph{facial path} in an embedded graph, $G$, is a path that appears
 as a block in the facial walk of some face of $G$.  A \emph{facial
@@ -117,7 +126,7 @@ uses nonrepetitive colouring of trees as a building block (twice), so
 solving \opref{facial-tree-colouring} would give a facial nonrepetitive
 20-colouring of plane graphs.
 
-\section{Optimal isotopic embedding}
+\section{Optimal Isotopic Embedding}
 
 \noindent\emph{G\"unter Rote}
 
@@ -146,7 +155,7 @@ When $|V_0|=2$ and $G$ consists just of parallel edges,
 I can model the problem as a dual network flow problem and solve it
 in polynomial time.
 
-\section{Straightening monotone drawings}
+\section{Straightening Monotone Drawings}
 
 \noindent\emph{G\"unter Rote}
 
@@ -159,7 +168,7 @@ in the same sense as before?
 \end{op}
 It is know than it can be done with at most one bend per edge.
 
-\section{Free edge in planar UDGs}
+\section{Free Edge in Planar UDGs}
 
 \noindent\emph{Ahmad Biniaz}
 
@@ -188,7 +197,7 @@ We have a set $R$ of red points and a set $B$ of blue points in the plane such t
 \noindent
 Adrian Dumitrescu, Rick Kaye: Matching colored points in the plane: Some new results. Comput. Geom. 19(1): 69-85 (2001)
 
-\section{Grid point sets with no convex $n$-gons}
+\section{Grid Point Sets With No Convex $n$-gons}
 
 \noindent\emph{Ruy Fabila}
 
@@ -205,7 +214,7 @@ Adrian Dumitrescu, Rick Kaye: Matching colored points in the plane: Some new res
  $n^{\gamma}$ contains an empty convex $7$-gon.
 \end{op}
 
-\section{Packing and covering $K_4$'s in a graph}
+\section{Packing and Covering $K_4$'s in a Graph}
 
 \noindent\emph{Abdul Basit}
 
@@ -267,6 +276,181 @@ graph has a planar drawing with slope number two.
   for which we can approximate this number accurately? Alternatively,
   can we prove any inapproximability results for slope number?
 \end{op}
+
+\section{Plane spanners of points in convex position} 
+
+\newcommand{\CH}{\mathord{\it CH}}
+
+\emph{Michiel Smid} 
+
+Let $S$ be a finite and non-empty set of points in the plane that is in 
+convex position, and let $\CH(S)$ denote the convex hull of $S$. 
+For two points $p$ and $q$ of $S$, 
+\begin{itemize}
+\item let $|pq|$ denote their Euclidean distance and 
+\item let $|pq|_{\partial \CH(S)}$ denote their shortest-path distance 
+      along the boundary of $\CH(S)$. 
+\end{itemize} 
+We say that a point $p$ of $S$ is $t$-\emph{good in} $S$, if for each 
+point $q$ of $S$, 
+\[ |pq|_{\partial \CH(S)} \leq t |pq| . 
+\]
+Define 
+\[ \begin{array}{ll} 
+       t^* = \inf \{ t : & \mbox{each finite and non-empty set of 
+                                 points in convex position} \\ 
+         & \mbox{has at least one $t$-good point} \} .
+   \end{array} 
+\]   
+
+For any $t>t^*$, the following algorithm constructs a plane $t$-spanner 
+for any finite and non-empty set $S$ of points in convex position:  
+\begin{itemize} 
+\item Initialize $E = \emptyset$.  
+\item While $|S| \geq 4$: 
+      \begin{itemize} 
+      \item Let $p$ be any $t$-good point in $S$. 
+      \item Let $q$ and $r$ be $p$'s neighbors along $\CH(S)$. 
+      \item Add the edges $pq$, $pr$, and $qr$ to $E$. 
+      \item Let $S = S \setminus \{p\}$. 
+      \end{itemize} 
+\item Add the edges of $\CH(S)$ to $E$. 
+\item Return the graph with edge set $E$. 
+\end{itemize} 
+
+\begin{op} 
+What is the value of $t^*$? 
+\end{op} 
+
+Let $pq$ be a diametral pair in the point set $S$. We have recently 
+shown that both $p$ and $q$ are $1.88$-good. In fact, this remains 
+true if we take for $pq$ a sufficiently good approximation to the 
+diameter of $S$. 
+
+Consider the set $S$ consisting of the three vertices of an equilateral  
+triangle, together with the three points at the midpoints of the 
+edges. It is easy to verify that none of the points in $S$ is 
+$(\sqrt{3} - \epsilon)$-good for any $\epsilon>0$. 
+
+Thus, the currently best known bounds for $t^*$ are 
+\[ \sqrt{3} \leq t^* \leq 1.88 . 
+\] 
+As a result, we obtain, for any set of points in convex position, a 
+plane spanner with stretch factor $1.88$. The previously best known 
+stretch factor for plane spanners was $1.998$, which is attained by the 
+Delaunay triangulation and, in fact, also holds for point sets that 
+are not in convex position. 
+
+\section{Flipping Edge-Labelled Pseudotriangulations}
+
+\noindent\emph{Sander Verdonschot}
+
+A pseudo-triangle is a simple polygon with three convex interior
+angles, called \emph{corners}, connected by reflex chains.
+Given a simple polygon $P$, a \emph{pseudo-triangulation} of $P$ is a
+subdivision of its interior into pseudo-triangles, using only the
+vertices of $P$.
+Pseudo-triangulations support a flip operation analogous to the one
+for triangulations.
+It is known that any pseudo-triangulation of $P$ can be transformed
+into any other by flips.
+An \emph{edge-labeled} pseudo-triangulation of $P$ is one in which
+every interior edge has a unique label.
+Flipping an edge transfers the label from the removed edge to the new
+edge.
+
+\begin{center}
+  \includegraphics{figs/edge-flip.pdf}
+\end{center}
+ 
+\begin{op}
+  Can every edge-labeled pseudo-triangulation be transformed into every
+other via flips? If not, can we decide which pairs can be transformed
+into each other and which cannot?
+\end{op}
+
+\section{Spinning Trident Spanners}
+
+\noindent\emph{Joe O'Rourke}
+
+Given $n$ points $P$ in the plane,
+the Yao graph $Y_k$ partitions the plane around each point $p \in P$ by a \emph{$k$-fan}
+into $k$ sectors of equal
+angular measure, and connects $p$ to the closest point in each sector.
+The sectors are all oriented equally with respect to a global coordinate system.
+Here I imagine the natural situation where each $k$-fan can be oriented differently,
+allowing for the possibility of improving various aspects of the resulting graph
+without requiring more ``hardware."
+
+Although one could ask many question (e.g.: What is the best spanning ratio of
+spinning $Y_k$'s for $k \ge 4$?), I propose to focus on
+$Y_3$, because it is known that $Y_3$ is not a spanner, % [Nawar],
+but $Y_4$ is a spanner. 
+Nawar's $Y_3$ counterexample relies crucially on all the tridents being ``parallel"
+in the sense that all are oriented identically.
+
+\begin{op}
+If each trident is permitted to reorient 
+independently about its fixed center,
+does this guarantee a spanner?
+\end{op}
+
+
+It is not difficult to show that allowing the $2$-fans of $Y_2$ to reorient does not
+guarantee a spanner.  So $Y_3$ lies at a critical juncture in this spectrum of problems.
+\begin{center}
+   \includegraphics{figs/trident}
+\end{center}
+
+\section{Constant-Degree Spanners}
+
+\noindent\emph{Mirela Damian}
+
+A graph is a spanner if a shortest path between any pair of points in the
+graph is no longer than a constant times the Euclidean distance between
+the two points.  The Yao graph $Y_k$ and the Theta graph $\Theta_k$
+are defined for a given point set and a fixed integer $k > 0$. The space
+around each point is divided into $k$ cones of equal angle, and each point
+is connected to a nearest neighbor in each cone. The difference between
+Yao and Theta graphs is in the way the nearest neighbor is defined: Yao
+graphs minimize the Euclidean distance, whereas Theta graphs minimize
+the \emph{projective} distance, measured from the cone origin to the
+orthogonal projection of the neighbor on the cone bisector.
+
+The graph \emph{half}-$\Theta_6$ is composed of the edges of $\Theta_6$
+that lie in non-consecutive cones. Thus $\Theta_6$ is the union of two
+edge-disjoint half-$\Theta_6$ graphs.  Each half-$\Theta_6$ graph is a
+triangular distance Delaunay graph and is a $2$-spanner of the complete
+Euclidean graph (Bonichon et al 2010).
+
+Each of $\Theta_k$ and $Y_k$ has out-degree $k$, but in-degree $n-1$. To
+reduce the in-degrees, the Yao-Yao graph $YY_k \subseteq Y_k$ is obtained
+from $Y_k$ by discarding from each cone all incoming edges, with the
+exception of a shortest one; ties are broken arbitrarily. The graphs
+$\Theta\Theta_k \subseteq \Theta_k$ and half-$\Theta\Theta_6 \subseteq$
+half-$\Theta_6$ are similarly defined.
+
+\begin{op}
+At last year's workshop we showed that $\Theta\Theta_6$ is not a spanner (writeup available online at \url{http://csc.villanova.edu/~mdamian/tt6.pdf}). Is $\Theta\Theta_6$ a spanner for points in convex position? What about half-$\Theta\Theta_6$ (this would have the advantage of being planar)? These problems might not be too difficult to tackle. 
+\end{op}
+
+\begin{op}
+The smallest known $k$ for which $\Theta\Theta_k$ and $YY_k$ are spanners is $k = 30$. Is there a value $k < 30$ for which $\Theta\Theta_k$ and/or $YY_k$ is a spanner? The case $k = 12$ appears to be the simplest (just split the $\Theta_6$ cones in half), because we might be able to use the planarity (and low spanning ratio) of half-$\Theta_6$.
+\end{op}
+
+
+%%SeeiFig.~\figref{Trident}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Figure Begin
+%\begin{figure}[htbp]
+%\centering
+%\includegraphics[width=0.3\linewidth]{Figures/Trident.pdf}
+%\caption{Trident at angle $\th_i$.}
+%%The three sectors cover angular ranges $[ \th_i, \th_i + k \frac{2}{3}\pi )$,
+%%for $k=1,2,3$, closed at one boundary ray and open at the other, and so
+%%partition the plane.}
+%\figlab{Trident}
+%\end{figure}
+%
 
 \end{document}
 

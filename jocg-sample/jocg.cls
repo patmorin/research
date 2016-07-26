@@ -24,11 +24,6 @@
 \DeclareOption{10pt}{\OptionNotUsed}
 \DeclareOption{12pt}{\OptionNotUsed}
 
-% Use option draft to get page numbers
-\newif\if@draft
-\@draftfalse
-\DeclareOption{draft}{\@drafttrue}
-
 % The default action is to pass options to article class
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
 

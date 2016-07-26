@@ -147,11 +147,5 @@ urlcolor=linkblue}
 \fancyfoot{}
 \fancyhead[L]{\sf Journal of Computational Geometry}
 \fancyhead[R]{\texttt{\href{http://jocg.org/}{jocg.org}}}
-\if@draft
-  \fancyfoot[L]{\sf DRAFT \today}
-  \fancyfoot[C]{\thepage}
-  \fancyfoot[R]{}
-  \renewcommand{\footrulewidth}{1pt}
-\fi
 \renewcommand{\headrulewidth}{1pt}
 \pagestyle{fancy}

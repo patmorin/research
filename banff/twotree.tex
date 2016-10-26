@@ -1,0 +1,113 @@
+\documentclass[lotsofwhite]{patmorin}
+\usepackage{html}
+\usepackage{pat}
+\definecolor{linkblue}{named}{Blue}
+\hypersetup{colorlinks=true, linkcolor=linkblue,  anchorcolor=linkblue,
+citecolor=linkblue, filecolor=linkblue, menucolor=linkblue, pagecolor=linkblue,
+urlcolor=linkblue, pdfcreator=Me, pdfproducer=Me} \setlength{\parskip}{1ex}
+
+\DeclareMathOperator{\spn}{span}
+
+
+\begin{document}
+\section{2-Trees as Subgraphs of Rectangle Intersection Graphs}
+
+We prove a Ramsey-Type Theorem about representing 2-trees as subgraphs
+of rectangle intersection graphs.
+
+\subsection{Definitions}
+
+A \emph{rectangle intersection} graph is a graph whose vertices are
+(open) rectangles and the edge between two rectangles $u$ and $w$ is
+present if and only $u\cap w\neq \emptyset$.
+
+For two rectangles $v$ and $w$ that intersect and such that $w$ does not
+contain any corner\footnote{We use the word \emph{corner} here rather
+than vertex to reduce confusion between vertices of rectangles
+and vertices of graphs.} of $v$, we define $\spn(v,w)$
+as the length of one of the connected components of $\partial v\cap w$.
+If $\partial v\cap w$ is empty (because $w\subseteq w$) then $\spn(v,w)=0$.
+
+The \emph{height-$h$ $d$-branching universal 2-tree}, $T_{h,d}$ is
+defined recursively as follows:
+\begin{itemize}
+  \item $T_{0,d}$ is the empty graph;
+  \item $T_{1,d}$ is a two-vertex graph with a single edge;
+  \item For $h\ge 1$, $T_{h,d}$ is obtained from $T_{h-1,d}$ by adding,
+     for each edge $vw \in E(T_{i-1,d})\setminus E(T_{i-2,d})$,
+     a new vertex $x_{vw}$ adjacent to both $v$ and $w$.
+\end{itemize}
+The \emph{root edge} of $T_{k,d}$ is the single edge of $T_{1,d}$.
+The $i$-vertices of $T_{k,d}$ are \[ V_i(T_{k,d}) = V(T_{i,d}\setminus
+V(T_{i-1,d}) \] and the $i$ edges of $T_{k,d}$ are \[ E_i(T_{k,d})
+= E(T_{i,d}\setminus E(T_{i-1,d}) \enspace . \] For a vertex $v$ of
+$T_{k,d}$, we use the notation $N_i(v)$ to denote the set of vertices
+joined to $v$ by an $i$-edge.
+
+\subsection{The Result}
+
+\begin{thm}
+  For each $k\in \N$, any rectangle intersection graph that contains
+  $T_{4k-7,k}$ as a subgraph contains a clique of size $k$.
+\end{thm}
+
+\begin{proof}
+  The cases $k=1$ and $k=2$ are trivial so, for the remainder of the proof
+  we assume that $k\ge 2$.
+
+  Let $G$ be a rectangle intersection graph that contains $T=T_{4k+1,k}$
+  as a subgraph, so that vertices of $T$ are rectangles in $V(G)$ and
+  if vertices $v$ and $w$ are adjacent in $T$, then the rectangles $v$
+  and $w$ intersect (but not necessarily \emph{vice versa}).
+
+  We will define a path $v_1,\ldots,v_k$ in $T$ such that $v_1,\ldots,v_k$
+  form a clique in $G$. This path is built so that each $v_i\in V_i(T)$.
+
+  The first vertex $v_1$ in our path is an arbitrary endpoint of the root
+  edge of $T$.  To extend the path from $v_{i-1}$ to $v_{i}$ we define
+  the set
+  \[
+     S_i = \left\{v\in N_{i}(v_{i-1}) : \text{$v$ contains no corner of
+           $\bigcap_{j=1}^{i-1} v_j$}\right\}
+  \]
+  We may assume that $S_i$ is non-empty because, otherwise, one of the
+  corners of $v_{i-1}$ is contained in
+  \[  \left\lceil |N_{i+1}(v_i)|/4]\right\rceil 
+      = \left\lceil(4k-7)/4]\right\rceil = k-1
+  \]
+  rectangles. Since these rectangles are open, there is a point $x$
+  contained in these $k-1$ rectangles and in $v_{i-1}$.  These $k$
+  rectangles therefore form a $k$-clique in $G$.   
+
+  The vertex $v_{i+1}$ is chosen to be some vertex in $S_i$ that
+  minimizes $\spn(v_{i},v_{i+1})$.
+
+  For each $i\in\{1,\ldots,k\}$, let $P_i= v_1,\ldots,v_i$.  We claim that
+  $P_i$ has the following properties:
+  \begin{enumerate}
+    \item $v_{i}$ contains no corners of $v_{i-1}$:
+    By choice, $v_i$ intersects, but contains no corner of
+    $\bigcup_{j=1}^{i-1} v_j$. This immediately implies that $v_i$
+    contains no corner of $v_{i-1}$ (or, even any $v_j$ for $j<i$).
+
+    \item $\spn(v_{i-1},v_i)$ is minimum over all $v_i \in S_i$:  This
+    is the definition of $v_i$.
+  
+    \item $v_{i-1}\cap v_i = \bigcap_{j=1}^i v_j$:
+    By the definitions of $S_i$ and $T$, the edges $v_{i-1}v_i$ and
+    $v_{i-2}v_i$ are both in $T$, so that $v_i\cap v_{i-1}\cap v_{i-2}\neq \emptyset$
+    By Property~3 $v_{i-1}\cap v_{i-2}=\bigcap_{j=1}^{i-1}
+  v_j$, so
+  \[
+       \bigcap_{j=1}^i v_j = v_i\cap v_{i-1}\cap v_{i-2} \neq \emptyset \enspace .
+  \]
+  \end{enumerate}
+  This completes the proofo the theorem, since the final property implies
+  that $v_1,\ldots,v_k$ form a $k$-clique in $G$.
+\end{proof}
+
+
+
+\bibliography{op}
+\bibliographystyle{plainurl}
+\end{document}

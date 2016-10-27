@@ -7,26 +7,80 @@ citecolor=linkblue, filecolor=linkblue, menucolor=linkblue, pagecolor=linkblue,
 urlcolor=linkblue, pdfcreator=Me, pdfproducer=Me} \setlength{\parskip}{1ex}
 
 \DeclareMathOperator{\spn}{span}
+\DeclareMathOperator{\tp}{top}
+\DeclareMathOperator{\bttom}{bottom}
 
+\title{2-Trees as Subgraphs of Rectangle Intersection Graphs}
+\author{Banff 2016}
 
 \begin{document}
-\section{2-Trees as Subgraphs of Rectangle Intersection Graphs}
+\maketitle
+
+\section{Introduction}
 
 We prove a Ramsey-Type Theorem about representing 2-trees as subgraphs
-of rectangle intersection graphs.
+of rectangle intersection graphs.  A consequence of this result is
+that 2-trees do not have a representation as the product of two path
+decompsitions whose bags have bounded intersection.
 
 \subsection{Definitions}
 
-A \emph{rectangle intersection} graph is a graph whose vertices are
-(open) rectangles and the edge between two rectangles $u$ and $w$ is
-present if and only $u\cap w\neq \emptyset$.
+We define some geometric terminology and a particular graph.
 
-For two rectangles $v$ and $w$ that intersect and such that $w$ does not
-contain any corner\footnote{We use the word \emph{corner} here rather
-than vertex to reduce confusion between vertices of rectangles
-and vertices of graphs.} of $v$, we define $\spn(v,w)$
-as the length of one of the connected components of $\partial v\cap w$.
-If $\partial v\cap w$ is empty (because $w\subseteq w$) then $\spn(v,w)=0$.
+\subsubsection{Rectangles}
+
+Throughout this paper, the word \emph{rectangle} means open axis-aligned
+rectangle: a subset of $\R^2$ of the form $(\ell,r)\times (b,t)$,
+where $\ell< r$ and $b<t$.  The rectangle $R=(\ell,r)\times (b,t)$
+has four \emph{corners} $c_1=(\ell,b)$, $c_2=(\ell,t)$, $c_3=(r,b)$,
+$c_4=(r,t)$.\footnote{We use the word corner rather than vertex to reduce
+confusion between vertices of rectangles and vertices of graphs.}  $R$
+also has four \emph{sides} that are open line segments: the top side
+has endpoints $c_2$ and $c_4$; the bottom side has endpoints $c_1$ and
+$c_3$; the left side has endpoints $c_1$ and $c_2$; and the right side
+has endpoints $c_3$ and $c_4$.
+
+Let $v$ and $w$ be two rectangles that intersect and such that $w$ does
+not contain a corner of $v$.  The intersection $R=v\cap w$ is a rectangle.
+We say that $(v,w)$ is an h-pair if the left or right side of $R$ is
+contained in $\partial v$.  We say that $(v,w)$ a v-pair if the top or
+bottom side of $R$ is contained in $\partial(v)$.  If $(v,w)$ is not an
+h-pair or a v-pair, then we call it an o-pair.  Note that, since $w$
+does not contain a corner of $v$, $(v,w)$ is exactly one of a v-pair,
+an h-pair or an o-pair.
+
+We say that a sequence of rectangles $v_1,\ldots,v_k$ is a \emph{good
+sequence} if
+\begin{enumerate}
+  \item for each $i\in\{2,\ldots,k\}$, $v_i\cap v_{i-1}\neq \emptyset$
+        and $v_i$ does not contain any corner of $v_{i-1}$; and
+  \item for each $i\in\{3,\ldots,k-1\}$, $(v_{i-1},v_i)$ and
+        $(v_i,v_{i+1})$ are not both h-pairs and not both v-pairs.
+\end{enumerate}
+We will make use of the following simple geometric lemma:
+\begin{lem}\lemlabel{hv-triples}
+  If $v_1,v_2,v_3$ is a good sequence of rectangles then
+  $v_1\cap v_2\cap v_3=v_2\cap v_3 \neq \emptyset$.
+\end{lem}
+
+\begin{proof}
+  Easy.
+\end{proof}
+
+Using the transitivity of set inclusion, \lemref{hv-triples} has the
+following corollary:
+
+\begin{cor}\corlabel{hv-sequence}
+  If $v_1,\ldots,v_k$ is a good sequence of rectangles then 
+  $\bigcap_{i=1}^{k} v_i = v_{k-1}\cap v_k \neq \emptyset$.
+\end{cor}
+
+A \emph{rectangle intersection graph} is a graph whose vertices are
+rectangles and the edge between two rectangles $u$ and $w$ is present
+if and only $u\cap w\neq \emptyset$.
+
+\subsubsection{2-Trees}
+
 
 The \emph{height-$h$ $d$-branching universal 2-tree}, $T_{h,d}$ is
 defined recursively as follows:
@@ -44,66 +98,184 @@ V(T_{i-1,d}) \] and the $i$ edges of $T_{k,d}$ are \[ E_i(T_{k,d})
 $T_{k,d}$, we use the notation $N_i(v)$ to denote the set of vertices
 joined to $v$ by an $i$-edge.
 
-\subsection{The Result}
+
+\section{The Result}
 
 \begin{thm}
   For each $k\in \N$, any rectangle intersection graph that contains
-  $T_{4k-7,k}$ as a subgraph contains a clique of size $k$.
+  $T_{4k-7,k^2}$ as a subgraph contains a clique of size $k$.
 \end{thm}
 
 \begin{proof}
   The cases $k=1$ and $k=2$ are trivial so, for the remainder of the proof
   we assume that $k\ge 2$.
 
-  Let $G$ be a rectangle intersection graph that contains $T=T_{4k+1,k}$
-  as a subgraph, so that vertices of $T$ are rectangles in $V(G)$ and
-  if vertices $v$ and $w$ are adjacent in $T$, then the rectangles $v$
-  and $w$ intersect (but not necessarily \emph{vice versa}).
+  Let $G$ be a rectangle intersection graph that contains
+  $T=T_{4k-7,BLAH}$ as a subgraph.  We can assume that $V(G)=V(T)$
+  so that vertices of $T$ are rectangles in $V(G)$ and if vertices $v$
+  and $w$ are adjacent in $T$, then the rectangles $v$ and $w$ intersect
+  (but not necessarily \emph{vice versa}).  
 
-  We will define a path $v_1,\ldots,v_k$ in $T$ such that $v_1,\ldots,v_k$
-  form a clique in $G$. This path is built so that each $v_i\in V_i(T)$.
+  We will attempt to define a path $v_1,\ldots,v_k$ in $T$ such that
+  $v_1,\ldots,v_k$ is a good sequence of rectangles and therefore,
+  by \corref{hv-sequence}, $v_1,\ldots,v_k$ form a clique in $G$.
+  Each vertex, $v_i$, in this path will be a level-$t_i$ vertex of $T$
+  for $t_i \le ik$.  The only cases in which we are unable to complete
+  this path occur because some point $x\in\R^2$ is contained in a set
+  $X$ of $k$ rectangles of $T$.  In these cases, the set $X$ forms a
+  $k$-clique in $G$.
 
-  The first vertex $v_1$ in our path is an arbitrary endpoint of the root
-  edge of $T$.  To extend the path from $v_{i-1}$ to $v_{i}$ we define
-  the set
-  \[
-     S_i = \left\{v\in N_{i}(v_{i-1}) : \text{$v$ contains no corner of
-           $\bigcap_{j=1}^{i-1} v_j$}\right\}
-  \]
-  We may assume that $S_i$ is non-empty because, otherwise, one of the
-  corners of $v_{i-1}$ is contained in
+  Let $vw$ be the root edge of $T$, set $v_1=v$ and use the convention
+  that $v_0=w$.  Suppose now that we have already constructed a partial
+  sequence $v_1,\ldots,v_i$ and we want to extend it to $v_{i+1}$.
+  Define $R=\bigcap_{j=1}^i v_i$.  By \corref{hv-sequence}, $R$ is
+  non-empty and $R=v_{i-1}\cap v_i$.
+
+  If $v_i$ is a $t$-level vertex of $T$ with $t<k^2$, 
+  then $v_{i-1}$ and $v_i$ are both adjacent to a set $S$ of $4k-7$
+  level-$(t+1)$ vertices of $T$.  All the rectangles in $S$ intersect
+  $R$.  
+  If all the rectangles in $S$ contain a corner of $R$, then some corner
+  of $R$ is contained in at least
   \[  \left\lceil |N_{i+1}(v_i)|/4]\right\rceil 
-      = \left\lceil(4k-7)/4]\right\rceil = k-1
+         = \left\lceil(4k-7)/4]\right\rceil = k-1
   \]
-  rectangles. Since these rectangles are open, there is a point $x$
-  contained in these $k-1$ rectangles and in $v_{i-1}$.  These $k$
-  rectangles therefore form a $k$-clique in $G$.   
+  rectangles.  Since these rectangles are open, there is a point $x$
+  contained in these $k-1$ rectangles and in $v_{i}$.  These $k$
+  rectangles therefore form a $k$-clique in $G$ and we are done.
 
-  The vertex $v_{i+1}$ is chosen to be some vertex in $S_i$ that
-  minimizes $\spn(v_{i},v_{i+1})$.
-
-  For each $i\in\{1,\ldots,k\}$, let $P_i= v_1,\ldots,v_i$.  We claim that
-  $P_i$ has the following properties:
+  Otherwise, some rectangle $v\in S$ does not contain a corner of $R$.
+  Notice that the sequence $v_1,\ldots,v_i,v$ satisifies all the
+  properties of a good sequence except, possibly, the pairs $(v_{i-1},v_i)$
+  and $(v_i,v)$ are both h-pairs or both v-pairs.  There are two cases
+  to consider:
   \begin{enumerate}
-    \item $v_{i}$ contains no corners of $v_{i-1}$:
-    By choice, $v_i$ intersects, but contains no corner of
-    $\bigcup_{j=1}^{i-1} v_j$. This immediately implies that $v_i$
-    contains no corner of $v_{i-1}$ (or, even any $v_j$ for $j<i$).
+     \item $v_1,\ldots,v_i,v$ is a good sequence of rectangles. In this
+        case we say that the procedure \emph{succeeds} in this iteration
+        and we set $v_{i+1}=v$.
+     
+     \item  $v_1,\ldots,v_i,v$ is not a good sequence.  In this case,
+       we say that the procedure \emph{stalls} in this iteration.
+       Without loss of generality, suppose $v_1,\ldots,v_i,v$ is not a
+       good sequence because $(v_{i-1},v)$ and $(v_i,v)$ are both h-pairs.
 
-    \item $\spn(v_{i-1},v_i)$ is minimum over all $v_i \in S_i$:  This
-    is the definition of $v_i$.
-  
-    \item $v_{i-1}\cap v_i = \bigcap_{j=1}^i v_j$:
-    By the definitions of $S_i$ and $T$, the edges $v_{i-1}v_i$ and
-    $v_{i-2}v_i$ are both in $T$, so that $v_i\cap v_{i-1}\cap v_{i-2}\neq \emptyset$
-    By Property~3 $v_{i-1}\cap v_{i-2}=\bigcap_{j=1}^{i-1}
-  v_j$, so
-  \[
-       \bigcap_{j=1}^i v_j = v_i\cap v_{i-1}\cap v_{i-2} \neq \emptyset \enspace .
-  \]
+       In this case, we change $v_i$ by setting $v_i=v$. We claim
+       that the resulting sequence $v_1,\ldots,v_{i-1},v$ is a good
+       sequence of rectangles.  To see why this is so, recall that
+       $v_1,\ldots,v_{i-1}$ is a good sequence, so $(v_{i-2},v_{i-1})$
+       is not an h-pair.  This means that $v_{i-2}\cap v_{i-1}
+       \supseteq v_{i-1}\cap s$ where $s=(\bttom(v_i),\tp(v_i))\times
+       (-\infty,\infty)$ is the horizontal strip bounded above and
+       below by the top and bottom sides of $v_i$.  Since $(v_{i},v)$
+       is an h-pair, $v\subseteq s$.  Therefore, $(v_{i-1},v)$ is also
+       an h-pair or an o-pair and $v_1,\ldots,v_{i-1},v$ is a good sequence.
+
+       Note that in this case we have failed to make our path any
+       longer. Instead, we have only replaced the last element.
+       Regardless, we continue again trying to extend the path with the
+       new value of $v_i$.
   \end{enumerate}
-  This completes the proofo the theorem, since the final property implies
-  that $v_1,\ldots,v_k$ form a $k$-clique in $G$.
+  Notice that each iteration of the preceding two steps considers a new
+  vertex, $v$, that is one level deeper in $T$ than the vertex considered
+  during the previous iteration.  If we repeat these steps $k(k-1)$
+  times, then one of two things occurs.
+  \begin{enumerate}
+     \item During these $k(k-1)$ iterations, the algorithm succeeds
+     (Case~1, above) at least $k-1$ times, in which case we have
+     successfully found the path $v_1,\ldots,v_k$ and whose vertices
+     form a $k$-clique in $G$.
+
+     \item During these $k(k-1)$ iterations, the algorithm stalls during
+     $k$ consecutive iterations say while trying to select $v_{i+1}$.
+     During this process the vertex $v_i$ takes on $k+1$ different
+     values $v_{i,0},\ldots,v_{i,k}$.  Assume, again, without loss
+     of generality that $(v_{i-1},v_i)$ is an h-pair.  Then, for each
+     $j\in\{0,\ldots,k-1\}$, the pair $(v_{i,j}, v_{i,j+1})$ is an h-pair,
+     otherwise the procedure would have selected $v_{i,j+1}$ as $v_{i+1}$.
+
+     Furthermore, for each $j\in\{0,\ldots,k-1\}$, the pair $v_{i-1},v_{i,j}$ is an h-pair, otherwise the procedure would have selected 
+
+
+
+, $k$ iterations, the algorithm
+     considers a sequence of candidates, $v_{i,1},\ldots,v_{i,k}$ for $v_{i+1}$
+
+
+
+  at least $k-1$ times, in which case we have
+     successfully found the path $v_1,\ldots,v_k$ and whose vertices
+     form a $k$-clique in $G$.
+  \end{enumerate}
+
+
+  If $(v_i,v_{i+1}')$ are an o-pair, then we set $v_2=v_2'$ and continue
+  as described below
+
+
+
+   To extend the path from $v_{i-1}$ to $v_{i}$ we define
+%  the set
+%  \[
+%     S_i = \left\{v\in N_{i}(v_{i-1})\cup N_{i+1}(v_{i-1}) : \text{$v$ contains no corner of
+%           $\bigcap_{j=1}^{i-1} v_j$}\right\}
+%  \]
+%  We may assume that $S_i$ is non-empty because, otherwise, one of the
+%  corners of $v_{i-1}$ is contained in
+%  \[  \left\lceil |N_{i+1}(v_i)|/4]\right\rceil 
+%      = \left\lceil(4k-7)/4]\right\rceil = k-1
+%  \]
+%  rectangles. Since these rectangles are open, there is a point $x$
+%  contained in these $k-1$ rectangles and in $v_{i-1}$.  These $k$
+%  rectangles therefore form a $k$-clique in $G$.   
+%  The vertex $v_{i}$ is chosen to be some vertex in $S_i$ that
+%  minimizes $\spn(v_{i-1},v_{i})$.
+%
+%  We claim that, for each $i\in\{2,\ldots,k\}$, $v_1,\ldots,v_i$
+%  has the following properties:
+% \begin{enumerate}
+%    \item $v_{i}$ contains no corners of $v_{i-1}$:
+%    By choice, $v_i$ intersects, but contains no corner of
+%    $\bigcup_{j=1}^{i-1} v_j$. This immediately implies that $v_i$
+%    contains no corner of $v_{i-1}$ (or, even any $v_j$ for $j<i$).
+%
+%    \item $\spn(v_{i-1},v_i)$ is minimum over all $v_i \in S_i$:  This
+%    is the definition of $v_i$.
+%
+%    \item $\bigcap_{j=1}^i v_j = v_{i-1}\cap v_i$: For $i=2$, this is
+%       immediately, so we may assume $i\ge 3$.  By induction, we may 
+%       assume that $\bigcap_{j=1}^{i-1} v_j= v_{i-1}\cap v_{i-2}$.
+%       We make the following two observations about $v_{i-2}$ and $v_{i-1}$:
+%       \begin{enumerate}
+%         \item By Property~1, above, $v_{i-2}$ contains no corner of $v_{i-1}$.
+%         \item Since $v_{i-2}$ and $v_{i-1}$ are joined by an edge in $T$,
+%       $v_{j-1}\cap v_{j-2}\neq\emptyset$.  
+%       \end{enumerate}
+%       These two observations imply that
+%       the rectangle $R=\v_{j-1}\cap v_{j-2}$ has two edges that are
+%       contained in $\partial v_{j-1}$ and at most two edges that are
+%       contained in $\partial v_{j-2}$.  We claim that $v_j
+%
+% (Property~1, above)
+%       and $v_{
+%
+%
+%=v_{j}$
+%
+%    \item FIXME: Unnecessary.  $\bigcap_{j=1}^i v_j \neq\emptyset$: For $i=2$, this follows
+%    immediately from the fact that $v_1$ and $v_2$ are joined by an edge
+%    in $T$, so we may assume that $i\ge 3$.
+%
+%    By the definitions of $S_i$ and $T$, the edges $v_{i-1}v_i$
+%    and $v_{i-2}v_i$ are both in $T$, so that $v_i\cap v_{i-1}\cap
+%    v_{i-2}\neq \emptyset$.  Since $v_1,\ldots,v_{i-1}$ has Property~3,
+%    $v_{i-1}\cap v_{i-2}=\bigcap_{j=1}^{i-1} v_j$, so
+%    \[
+%       \bigcap_{j=1}^i v_j = v_i\cap v_{i-1}\cap v_{i-2} \neq \emptyset 
+%         \enspace .
+%    \]
+%  \end{enumerate}
+%  This completes the proof of the theorem, since the final property implies
+%  that $v_1,\ldots,v_k$ form a $k$-clique in $G$.
 \end{proof}
 
 

@@ -1,27 +1,36 @@
 \documentclass[lotsofwhite]{patmorin}
 \usepackage{html}
 \usepackage{pat}
+\usepackage{graphicx}
 \definecolor{linkblue}{named}{Blue}
 \hypersetup{colorlinks=true, linkcolor=linkblue,  anchorcolor=linkblue,
 citecolor=linkblue, filecolor=linkblue, menucolor=linkblue, pagecolor=linkblue,
 urlcolor=linkblue, pdfcreator=Me, pdfproducer=Me} \setlength{\parskip}{1ex}
 
+\usepackage{titlesec}
+
+
 \DeclareMathOperator{\spn}{span}
 \DeclareMathOperator{\tp}{top}
 \DeclareMathOperator{\bttom}{bottom}
+\DeclareMathOperator{\tl}{t}
+\DeclareMathOperator{\bl}{b}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\br}{br}
 
-\title{2-Trees as Subgraphs of Rectangle Intersection Graphs}
-\author{Banff 2016}
+
+\title{\MakeUppercase{2-Trees as Subgraphs of Rectangle Intersection Graphs}}
+\author{Banff Workshop on Orthogonal Graph Decompositions}
 
 \begin{document}
 \maketitle
 
 \section{Introduction}
 
-We prove a Ramsey-Type Theorem about representing 2-trees as subgraphs
-of rectangle intersection graphs.  A consequence of this result is
-that 2-trees do not have a representation as the product of two path
-decompsitions whose bags have bounded intersection.
+We prove a theorem about representing 2-trees as subgraphs of rectangle
+intersection graphs.  A consequence of this result is that 2-trees do
+not have a representation as the product of two path decompsitions whose
+bags have bounded intersection.
 
 \subsection{Definitions}
 
@@ -30,15 +39,17 @@ We define some geometric terminology and a particular graph.
 \subsubsection{Rectangles}
 
 Throughout this paper, the word \emph{rectangle} means open axis-aligned
-rectangle: a subset of $\R^2$ of the form $(\ell,r)\times (b,t)$,
-where $\ell< r$ and $b<t$.  The rectangle $R=(\ell,r)\times (b,t)$
-has four \emph{corners} $c_1=(\ell,b)$, $c_2=(\ell,t)$, $c_3=(r,b)$,
-$c_4=(r,t)$.\footnote{We use the word corner rather than vertex to reduce
-confusion between vertices of rectangles and vertices of graphs.}  $R$
-also has four \emph{sides} that are open line segments: the top side
-has endpoints $c_2$ and $c_4$; the bottom side has endpoints $c_1$ and
-$c_3$; the left side has endpoints $c_1$ and $c_2$; and the right side
-has endpoints $c_3$ and $c_4$.
+rectangle: a subset of $\R^2$ of the form $(\ell(R),r(R))\times
+(b(R),t(R))$, where $\ell(R)< r(R)$ and $b(R)<t(R)$.  The rectangle $R$
+has four \emph{corners} $\bl(R)(\ell(R),b(R))$, $\tl(R)=(\ell(R),t(R))$,
+$\br(R)=(r(R),b(R))$, $\tr(R)=(r(R),t(R))$.\footnote{We use the word
+corner rather than vertex to reduce confusion between vertices of
+rectangles and vertices of graphs.}  $R$ also has four \emph{sides}
+that are closed line segments: the \emph{top side} has endpoints
+$\tl(R)$ and $\tr(R)$; the \emph{bottom side} has endpoints $\bl(R)$
+and $\br(R)$; the \emph{left side} has endpoints $\bl(R)$ and $\tl(R)$;
+and the \emph{right side} has endpoints $\br(R)$ and $\tr(R)$. The
+boundary of $R$ (the union of its four sides) is denoted by $\partial R$.
 
 Let $v$ and $w$ be two rectangles that intersect and such that $w$ does
 not contain a corner of $v$.  The intersection $R=v\cap w$ is a rectangle.
@@ -47,25 +58,69 @@ contained in $\partial v$.  We say that $(v,w)$ a v-pair if the top or
 bottom side of $R$ is contained in $\partial(v)$.  If $(v,w)$ is not an
 h-pair or a v-pair, then we call it an o-pair.  Note that, since $w$
 does not contain a corner of $v$, $(v,w)$ is exactly one of a v-pair,
-an h-pair or an o-pair.
+an h-pair or an o-pair. See \figref{hvo}.
 
-We say that a sequence of rectangles $v_1,\ldots,v_k$ is a \emph{good
+\begin{figure}
+   \begin{tabular}{ccc}
+   \includegraphics{figs/hvo-1} & 
+   \includegraphics{figs/hvo-2} & 
+   \includegraphics{figs/hvo-3} \\
+   v-pair & h-pair & o-pair
+   \end{tabular}
+   \caption{Example of a v-pair, an h-pair, and an o-pair.}
+   \figlabel{hvo}
+\end{figure}
+
+Let $v_1,\ldots,v_k$ be a sequence of rectangles and let
+$R_i=\bigcap_{j=1}^i v_j$.  We say that $v_1,\ldots,v_k$ is a \emph{good
 sequence} if
 \begin{enumerate}
-  \item for each $i\in\{2,\ldots,k\}$, $v_i\cap v_{i-1}\neq \emptyset$
-        and $v_i$ does not contain any corner of $v_{i-1}$; and
-  \item for each $i\in\{3,\ldots,k-1\}$, $(v_{i-1},v_i)$ and
-        $(v_i,v_{i+1})$ are not both h-pairs and not both v-pairs.
+  \item for each $i\in\{2,\ldots,k\}$, $v_i\cap R_{i-1}\neq \emptyset$
+        and $v_i$ does not contain any corner of $R_{i-1}$; and
+  \item for each $i\in\{3,\ldots,k-1\}$, $(R_{i-1},v_i)$ and
+        $(R_i,v_{i+1})$ are not both h-pairs and not both v-pairs.
 \end{enumerate}
+See \figref{good-sequence}.
+
+\begin{figure}
+  \begin{center}
+    \includegraphics{figs/good-sequence}
+  \end{center}
+  \caption{A good sequence of rectangles.}
+  \figlabel{good-sequence}
+\end{figure}
+
 We will make use of the following simple geometric lemma:
 \begin{lem}\lemlabel{hv-triples}
   If $v_1,v_2,v_3$ is a good sequence of rectangles then
-  $v_1\cap v_2\cap v_3=v_2\cap v_3 \neq \emptyset$.
+  $v_1\cap v_2\cap v_3=v_2\cap v_3$.
 \end{lem}
 
+
 \begin{proof}
-  Easy.
+  If $(v_1,v_2)$ is an o-pair, then $v_1\supseteq v_2$, so $v_1\cap v_2 =
+  v_2$ and therefore $v_1\cap v_2\cap v_3=v_2\cap v_3$, as required.
+
+  Otherwise, assume without loss of generality that $(R_1,v_2)=(v_1,v_2)$
+  is an h-pair, so that $(R_2,v_3)$ is not an h-pair. Refer to
+  \figref{geometric}.  In this case, $v_2\cap v_3$ is contained in the
+  rectangle $R^*=(\ell(v_1),r(v_1))\times (b(v_2),t(v_2)$ whose top and
+  bottom sides coincide with those of $v_2$ and whose left and right
+  sides coincide with those of $v_1$. Observe that $R^*\subseteq v_1$, so
+  \[
+   v_2\cap v_3 = R^* \cap v_2\cap v_3 \subset v_1 \enspace .
+  \]
+  Therefore $v_1\cap v_2\cap v_3=v_2\cap v_3$, as required.
 \end{proof}
+
+\begin{figure}
+  \begin{center}
+    \includegraphics{figs/geometric}
+  \end{center}
+  \caption{The proof of \lemref{hv-triples}.}
+  \figlabel{geometric}
+\end{figure}
+
 
 Using the transitivity of set inclusion, \lemref{hv-triples} has the
 following corollary:
@@ -117,26 +172,26 @@ joined to $v$ by an $i$-edge.
   (but not necessarily \emph{vice versa}).  
 
   We will attempt to define a path $v_1,\ldots,v_k$ in $T$ such that
-  $v_1,\ldots,v_k$ is a good sequence of rectangles and therefore,
-  by \corref{hv-sequence}, $v_1,\ldots,v_k$ form a clique in $G$.
-  Each vertex, $v_i$, in this path will be a level-$t_i$ vertex of $T$
-  for $t_i \le ik$.  The only cases in which we are unable to complete
-  this path occur because some point $x\in\R^2$ is contained in a set
-  $X$ of $k$ rectangles of $T$.  In these cases, the set $X$ forms a
-  $k$-clique in $G$.
+  $v_1,\ldots,v_k$ is a good sequence of rectangles. Since every good
+  sequence has  non-empty intersection, this implies that $v_1,\ldots,v_k$
+  form a clique in $G$.  The only cases in which we are unable to
+  complete this path occur because some point $x\in\R^2$ is contained
+  in a set $X$ of $k$ vertices of $T$.  In these cases, the set $X$
+  forms a $k$-clique in $G$.
 
-  Let $vw$ be the root edge of $T$, set $v_1=v$ and use the convention
-  that $v_0=w$.  Suppose now that we have already constructed a partial
-  sequence $v_1,\ldots,v_i$ and we want to extend it to $v_{i+1}$.
-  Define $R=\bigcap_{j=1}^i v_i$.  By \corref{hv-sequence}, $R$ is
-  non-empty and $R=v_{i-1}\cap v_i$.
+  Let $vw$ be the root edge of $T$. We set $v_1=v$ and use the convention
+  that $v_0=w$.  We will perform $k(k-1)$ iterations, each of which
+  tries to add another vertex, $v_{i+1}$, to a partially constructed
+  path $v_1,\ldots,v_i$ that forms a good sequence.  During iteration
+  $t$, for each $t\in\{1,\ldots,k(k-1)\}$, the procedure will consider a
+  level-$t$ vertex of $T$.  At the end of iteration $t$, the last vertex
+  in the partially constructed sequence is a level-$t$ vertex.
 
-  If $v_i$ is a $t$-level vertex of $T$ with $t<k^2$, 
-  then $v_{i-1}$ and $v_i$ are both adjacent to a set $S$ of $4k-7$
-  level-$(t+1)$ vertices of $T$.  All the rectangles in $S$ intersect
-  $R$.  
-  If all the rectangles in $S$ contain a corner of $R$, then some corner
-  of $R$ is contained in at least
+  At the beginning of iteration $t$, $v_i$ is a level-$t$ vertex,
+  so $v_{i-1}$ and $v_i$ are both adjacent to a set $S$ of $4k-7$
+  level-$(t+1)$ vertices.  All the rectangles in $S$ intersect
+  $R_i=\bigcup_{j=1}^i v_j$.  If all the rectangles in $S$ contain a
+  corner of $R_i$, then some corner of $R_i$ is contained in at least
   \[  \left\lceil |N_{i+1}(v_i)|/4]\right\rceil 
          = \left\lceil(4k-7)/4]\right\rceil = k-1
   \]
@@ -144,25 +199,25 @@ joined to $v$ by an $i$-edge.
   contained in these $k-1$ rectangles and in $v_{i}$.  These $k$
   rectangles therefore form a $k$-clique in $G$ and we are done.
 
-  Otherwise, some rectangle $v\in S$ does not contain a corner of $R$.
+  Otherwise, some rectangle $v\in S$ does not contain a corner of $R_i$.
   Notice that the sequence $v_1,\ldots,v_i,v$ satisifies all the
-  properties of a good sequence except, possibly, the pairs $(v_{i-1},v_i)$
-  and $(v_i,v)$ are both h-pairs or both v-pairs.  There are two cases
+  properties of a good sequence except, possibly, the pairs $(R_{i-1},v_i)$
+  and $(R_i,v)$ are both h-pairs or both v-pairs.  There are two cases
   to consider:
   \begin{enumerate}
      \item $v_1,\ldots,v_i,v$ is a good sequence of rectangles. In this
-        case we say that the procedure \emph{succeeds} in this iteration
-        and we set $v_{i+1}=v$.
-     
+       case we say that the procedure \emph{succeeds} in this iteration
+       and we set $v_{i+1}=v$.
+
      \item  $v_1,\ldots,v_i,v$ is not a good sequence.  In this case,
-       we say that the procedure \emph{stalls} in this iteration.
-       Without loss of generality, suppose $v_1,\ldots,v_i,v$ is not a
-       good sequence because $(v_{i-1},v)$ and $(v_i,v)$ are both h-pairs.
+       we say that the procedure \emph{stalls} in iteration $t$.  Without
+       loss of generality, suppose $v_1,\ldots,v_i,v$ is not a good
+       sequence because $(R_{i-1},v_i)$ and $(R_i,v)$ are both h-pairs.
 
        In this case, we change $v_i$ by setting $v_i=v$. We claim
        that the resulting sequence $v_1,\ldots,v_{i-1},v$ is a good
        sequence of rectangles.  To see why this is so, recall that
-       $v_1,\ldots,v_{i-1}$ is a good sequence, so $(v_{i-2},v_{i-1})$
+       $v_1,\ldots,v_{i-1}$ is a good sequence, so $(R_{i-2},v_{i-1})$
        is not an h-pair.  This means that $v_{i-2}\cap v_{i-1}
        \supseteq v_{i-1}\cap s$ where $s=(\bttom(v_i),\tp(v_i))\times
        (-\infty,\infty)$ is the horizontal strip bounded above and
@@ -186,25 +241,21 @@ joined to $v$ by an $i$-edge.
      form a $k$-clique in $G$.
 
      \item During these $k(k-1)$ iterations, the algorithm stalls during
-     $k$ consecutive iterations say while trying to select $v_{i+1}$.
+     $k$ consecutive iterations, say while trying to select $v_{i+1}$.
      During this process the vertex $v_i$ takes on $k+1$ different
      values $v_{i,0},\ldots,v_{i,k}$.  Assume, again, without loss
      of generality that $(v_{i-1},v_i)$ is an h-pair.  Then, for each
      $j\in\{0,\ldots,k-1\}$, the pair $(v_{i,j}, v_{i,j+1})$ is an h-pair,
      otherwise the procedure would have selected $v_{i,j+1}$ as $v_{i+1}$.
+     This implies that the projections of $v_{i,0},\ldots,v_{i,k}$
+     onto the $y$-axis are nested. (EXPLAIN BETTER)
 
-     Furthermore, for each $j\in\{0,\ldots,k-1\}$, the pair $v_{i-1},v_{i,j}$ is an h-pair, otherwise the procedure would have selected 
+     Furthermore, for each $j\in\{0,\ldots,k-1\}$, the pair
+     $v_{i-1},v_{i,j}$ is an h-pair (and not an o-pair), otherwise the
+     procedure would have succeeded in finding $v_{i+1}$ in the iteration
+     immediately after $v_i$ was set to $v_{i,j}$.  This means that each
+     $v_{i,0},\ldots,v_{i,k-1}$ intersects (say) the left or right side
 
-
-
-, $k$ iterations, the algorithm
-     considers a sequence of candidates, $v_{i,1},\ldots,v_{i,k}$ for $v_{i+1}$
-
-
-
-  at least $k-1$ times, in which case we have
-     successfully found the path $v_1,\ldots,v_k$ and whose vertices
-     form a $k$-clique in $G$.
   \end{enumerate}
 
 

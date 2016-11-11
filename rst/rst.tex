@@ -1,0 +1,158 @@
+\documentclass[lotsofwhite]{patmorin}
+\usepackage{html}
+\usepackage{pat}
+\usepackage{graphicx}
+\usepackage{paralist}
+\definecolor{linkblue}{named}{Blue}
+\hypersetup{colorlinks=true, linkcolor=linkblue,  anchorcolor=linkblue,
+citecolor=linkblue, filecolor=linkblue, menucolor=linkblue, pagecolor=linkblue,
+urlcolor=linkblue, pdfcreator=Me, pdfproducer=Me} \setlength{\parskip}{1ex}
+\usepackage{algorithmic}
+
+\usepackage{titlesec}
+
+
+\DeclareMathOperator{\spn}{span}
+\DeclareMathOperator{\tp}{top}
+\DeclareMathOperator{\bttom}{bottom}
+\DeclareMathOperator{\tl}{t}
+\DeclareMathOperator{\bl}{b}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\br}{br}
+
+\newcommand{\iters}{2k^2}
+
+
+\title{\MakeUppercase{Notes on Growing a Spanning Tree}}
+\author{Banff Workshop on Random Geometric Graphs}
+
+\begin{document}
+\maketitle
+
+\section{Notes}
+
+
+\subsection{A Ball in Urns Lemma}
+\seclabel{balls-in-bins}
+
+For some integer $w\in\N$, consider the following balls in urns process.
+We have some number $k$ of urns labelled $1,\ldots,k$, and each urn
+$i$ has a weight $w_i\in\{0,\ldots,w\}$.  Define $W=\sum_{i=1}^n w_i$.
+We place $\lceil W/w\rceil$ balls into these urns using the following
+process:
+
+\noindent
+\begin{algorithmic}
+  \FOR{$j\in\{1,\ldots,\lceil W/w\rceil\}$}
+    \STATE{Select a random urn $i$ using the distribution $\Pr\{i\}=w_i/W$}
+    \STATE{Add a ball to urn $i$}
+    \STATE{Increase $w_i$ by some value $x_j\in\{-1,0,1,\ldots,w\}$}
+   \ENDFOR
+\end{algorithmic}
+
+Let $b_i$ be the number of balls in urn $i$ at the end of this process.
+
+\begin{lem}\lemlabel{balls-in-bins}
+   For any $w_1,\ldots,w_n$ and any $x_1,\ldots,x_{\lceil W/w\rceil}$,
+   $\E[\sum_{i=1}^n \binom{b_i+1}{2}] \in O(W/w)$
+\end{lem}
+
+\begin{proof}
+Easy enough (for Luc).
+\end{proof}
+
+\subsection{Random Spanning Trees}
+
+Consider the following process for building an $n$-vertex spanning tree
+of an undirected graph $G$ with a special vertex $v_0$.
+
+\noindent
+\begin{algorithmic}
+  \STATE{$T_1=(\{v_0\},\emptyset)$}
+  \FOR{$k\in\{1,\ldots,|V(G)|-1$}
+    \STATE{Select a uniformly random edge from $\{uv\in E(G):u\in V(T)\wedge v\not\in V(T)\}$} 
+    \STATE{$T_{k+1}\gets (V(T_j)\cup\{v\}, E(T_j)\cup\{uv\})$}
+  \ENDFOR
+\end{algorithmic}
+
+We aim to study the (average) depth of a node in the tree $T_n$ that
+results from this process.  The following theorem shows how this can
+be done when the graph $G$ has an isoperimetric inequality.
+
+
+\begin{thm}
+   If $G$ is the $\sqrt{n}\times\sqrt{n}$ toroidal grid, then the 
+   expected average height of a node in $T_n$ is $O(\sqrt{n})$.
+\end{thm}
+
+\begin{proof}
+   We use the isoperimetic inequality for the toroidal grid, which states
+   that for any $A\subseteq V(G)$,
+  \begin{equation}
+        |N(A)| \ge \begin{cases}
+          1 & \text{if $|A|=n-1$} \\
+          \min\{4\sqrt{|A|}, 4(\sqrt{n-|A|}-1)\} & \text{otherwise}
+        \end{cases} 
+     \eqlabel{isogrid}
+  \end{equation}
+  for some $\alpha >0$ that I can't find right now.  For convenience,
+  define $p(k) = \lceil \alpha\sqrt{\min\{|A|, n-|A|\}}\rceil$.  
+
+%  Rather than track the height of $T_k$, we will track the average depth,
+%  $D_k$, of the $p(k)$ deepest nodes in $T_k$.  Note that $p(n-1)=1$,
+%  so $D_{n-1}$ is the maximum depth of a node in $T_{n-1}$.  The height
+%  of $T_n$ is therefore at most $D_{n-1}+1$.
+
+  We break the process of creating $T_n$ into \emph{phases} defined
+  as follows: Phase 1 contains $T_1$.  In the general case, if phase
+  $j-1$ finishes with the tree $T_k$, then phase $j$ contains trees
+  $T_{k+1},\ldots,T_{k+p(k)}$.
+
+  Now, consider what happens during phase $j$: We have a tree $T_k$
+  with $k$ vertices. Each of the vertices $i\in V(T_k)$ is incident
+  to $w_i\in\{0,1,2,3\}$ edges of $G$ with one endpoint not in $V(T)$.
+  The isoperimetric inequality \eqref{isogrid} implies that $W=\sum_{i\in
+  V(T)} w_i \ge f(k)$.  We now draw a parallel between the process of
+  growing $T_{k+1},\ldots,T_{k+f(k)}$ and the balls and urns process
+  described in \secref{balls-in-bins}.
+
+  Each vertex $i$ of $T_k$ represents an urn.  The weight $w_i$ of vertex
+  $i$ is the weight of urn $i$.  Let $v_t$ denote the unique vertex of
+  $T_{k+t}$ that is not in $T_{k+t-1}$.  Then the $t$th ball is assigned
+  to bin $i$ if there is a path in $T_{k+t}$ to $i$ that does not use
+  any vertex of $T_{k}$ except $i$.  Now note that, under these rules,
+  this process obeys exactly the rules of the balls in urns process
+  described in \secref{balls-in-bins} with $w=3$.
+
+  Now, consider the average depth of a node in $T_{k}$, which is
+  \[
+     D_k = \left(\frac{1}{k}\right)\sum_{i\in T(k)} d(i)
+  \]
+  Letting $B_i$ denote the set of vertices assigned to bin $i$,
+  we can write the average depth of a node in $T_{k+p(k)}$ as
+  \begin{align*}
+      D_{k+p(k)} 
+         & = \left(\frac{1}{k+p(k)}\right)\sum_{i\in T_k}\left(d(i) + \sum_{v\in B_i} d(v) \right) \\
+         & = \left(\frac{1}{k+p(k)}\right)\sum_{i\in T_k}\left(d(i) + b_id(i) + \sum_{v\in B_i} (d(v)-d(i)) \right) \\
+         & \le \left(\frac{1}{k+p(k)}\right)\sum_{i\in T_k}\left(d(i) + b_id(i) + \binom{d_i+1}{2}\right)  \\
+         & < D_k + \left(\frac{1}{k+p(k)}\right)\sum_{i\in T_k}\left(b_id(i) + \binom{d_i+1}{2}\right)  \\
+         & \le D_k + \left(\frac{1}{k+p(k)}\right)\left(p(k)\max\{d(i):i\in T_k\} + \sum_{i\in T_k}\binom{d_i+1}{2}\right)  \\
+  \end{align*} 
+  where the last inequality is only tight if the vertices in each $B_i$
+  form a path.
+
+
+  Next, consider the difference in average height between $T_{k}$
+  and $T_{k+f(k)}$.  The total height increases because of the addition
+  of nodes $v_1,\ldots,v_{f(k)}$.  If $b_i$ of these nodes are assigned to vertex $i$ of depth $d(i)$, then these $b_i$ nodes contribute at most
+  \[  \sum_{r=1}^{b_i} \left(h+r\right) =  b_i h + \binom{b_{i}+1}{2} \]
+  to the total height of $T_{k+f(k)}$.  Thus, the total depth of $T_{k+f(k)}$
+  is at most
+  \[
+      \sum_{i\in V(T_k)} d(i) + f(k)
+  \]
+
+\end{proof}
+
+
+\end{document}

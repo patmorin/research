@@ -2,4 +2,4 @@
 
 all:
 	# cd figs; make
-	latexmk -pdf -e '$$pdflatex=q/pdflatex %O -shell-escape %S/' twotree.tex
+	latexmk -pdf twotree.tex

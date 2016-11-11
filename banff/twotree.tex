@@ -3,6 +3,7 @@
 \usepackage{pat}
 \usepackage{graphicx}
 \usepackage{paralist}
+\usepackage[utf8]{inputenc}
 \definecolor{linkblue}{named}{Blue}
 \hypersetup{colorlinks=true, linkcolor=linkblue,  anchorcolor=linkblue,
 citecolor=linkblue, filecolor=linkblue, menucolor=linkblue, pagecolor=linkblue,
@@ -19,7 +20,7 @@ urlcolor=linkblue, pdfcreator=Me, pdfproducer=Me} \setlength{\parskip}{1ex}
 \DeclareMathOperator{\tr}{tr}
 \DeclareMathOperator{\br}{br}
 
-\newcommand{\iters}{2k^2}
+\newcommand{\iters}{(k-1)^2}
 
 
 \title{\MakeUppercase{2-Trees as Subgraphs of Rectangle Intersection Graphs}}
@@ -49,7 +50,8 @@ vertical or horizontal line segments whose endpoints are corners.  We call
 these the left, top, right, and bottom sides of $R$ in the obvious way.
 A \emph{rectangle intersection graph} is a graph whose vertices are
 rectangles and the edge between two rectangles $u$ and $w$ is present
-if and only $u\cap w\neq \emptyset$.
+if and only $u\cap w\neq \emptyset$.  The boundary of $R$---the union
+of its four sides---is denoted by $\partial R$.
 
 We will make use of the fact that the set of rectangles in the plane is
 a Helly family (of order 2) \cite[Chapter~11]{bollobas:combinatorics}:
@@ -66,7 +68,7 @@ Let $v$ and $w$ be two rectangles with $R=v\cap w\neq \emptyset$ and
 such that $w$ does not contain any corner of $v$.  We say that $(v,w)$
 is an \emph{h-pair} if the left or right side of $R$ is contained in
 $\partial v$.  We say that $(v,w)$ is a \emph{v-pair} if the top or bottom
-side of $R$ is contained in $\partial(v)$.  If $(v,w)$ is not an h-pair
+side of $R$ is contained in $\partial v$.  If $(v,w)$ is not an h-pair
 or a v-pair, then we call it an \emph{o-pair}.  Note that, since $w$
 does not contain a corner of $v$, $(v,w)$ is exactly one of a v-pair,
 an h-pair or an o-pair. See \figref{hvo}.
@@ -171,13 +173,13 @@ replace the last element in the sequence.
 
 \begin{proof}
   Notice that $v_1,\ldots,v_k,v$ satisfies all the conditions to be
-  hvo-alternating except that both $(R_{k-1},v_k)$ and $(R_k,v)$
+  hvo-alternating except that $(R_{k-1},v_k)$ and $(R_k,v)$
   are both h-pairs or both v-pairs.  Without loss of generality assume
   that they are both h-pairs.
 
   It is sufficient to show that $(R_{k-1},v)$ is not a v-pair so that,
   by replacing $v_k$ with $v$ we are replacing the h-pair $(R_{k-1},v_k)$
-  with a new with an h-pair or an o-pair.  But this is immediate, since
+  with an h-pair or an o-pair.  But this is immediate, since
   $v$ intersects $R_k$ but does not intersect the top or bottom side
   of $R_k$.  Therefore $v$ cannot intersect the top or bottom side of
   $R_{k-1}\supseteq R_k$, so $(R_{k-1},v)$ is not a v-pair.
@@ -205,8 +207,8 @@ defined similarly by replacing h-pair with v-pair.
 
 \begin{lem}\lemlabel{nesting}
    If $v_1,\ldots,v_k$ is an h-nesting sequence or a v-nesting sequence
-   with respect to $R$, then there exists a point $x\in R$ such that $|\{
-   i: x\in v_i \}|\ge \lceil k/2\rceil$.
+   with respect to $R$, then there exists a point $x\in R$ such that 
+   $|\{ i: x\in v_i \}|\ge \lceil k/2\rceil$.
 \end{lem}
 
 \begin{proof}
@@ -222,7 +224,10 @@ defined similarly by replacing h-pair with v-pair.
    Since $(R,v_i)$ is an h-pair, $v_i$ contains at least one of $\ell$
    or $r$, for each $i\in\{1,\ldots,k\}$.  Therefore, at least one of
    $\ell$ or $r$ is contained in at least $\lceil k/2\rceil$ rectangles
-   in $v_1,\ldots,v_k$.
+   in $v_1,\ldots,v_k$.  Since rectangles are open, there is a point
+   $x$, in the neighbourhood of $\ell$ or $r$ (as appropriate) that
+   is contained in $R$ and is also contained in $\lceil k/2\rceil$
+   rectangles in $v_1,\ldots,v_k$.
 \end{proof}
 
 \subsubsection{The Universal 2-Tree}
@@ -230,17 +235,18 @@ defined similarly by replacing h-pair with v-pair.
 The \emph{height-$h$ $d$-branching universal 2-tree}, $T_{h,d}$ is
 defined recursively as follows:
 \begin{itemize}
+  \item $T_{-1,d}$ is the empty graph;
   \item $T_{0,d}$ is a two-vertex graph with a single edge;
   \item For $h\ge 1$, $T_{h,d}$ is obtained from $T_{h-1,d}$ by adding,
      for each edge $vw \in E(T_{h-1,d})\setminus E(T_{h-2,d})$, $d$
-     new vertices $x_{1,vw},\ldots,v_{d,vw}$ each adjacent to both $v$
+     new vertices $v_{1,vw},\ldots,v_{d,vw}$ each adjacent to both $v$
      and $w$.
 \end{itemize}
 The \emph{root edge} of $T_{h,d}$ is the single edge of $T_{0,d}$.
-For each $i\in\{1,\ldots,h\}$, the level-$i$ vertices of $T_{h,d}$
+For each $i\in\{0,\ldots,h\}$, the level-$i$ vertices of $T_{h,d}$
 are the vertices in $V(T_{i,d})\setminus V(T_{i-1,d})$.  The level-$i$
-edges of $T$ are the edges that join a level $i$ vertex to a level-$j$
-for some $j<i$.
+edges of $T$ are the edges that join a level-$i$ vertex to a level-$j$
+vertex for some $j<i$.
 
 Note that the number of level-$i$ edges in $T_{h,d}$ is given by the recurrence
 \[
@@ -261,24 +267,16 @@ $T_{h,d}$ is less than $(2d)^{h+1}$.
 
 \begin{proof}
   The cases $k=1$ and $k=2$ are trivial so, for the remainder of the proof
-  we assume that $k\ge 2$.
+  we assume that $k\ge 3$.
 
   Let $G$ be a rectangle intersection graph that contains
-  $T=T_{4k-7,\iters}$ as a subgraph.  We use the convention that
+  $T=T_{4k-7,\iters}$ as a spanning subgraph.  We use the convention that
   $V(G)=V(T)$ so that vertices of $T$ are rectangles in $V(G)$.  
-%  If
-%  vertices $v$ and $w$ are adjacent in $T$, then $v\cap w \neq\emptyset$.
   We will attempt to define a path $v_1,\ldots,v_k$ in $T$ such that
   $v_1,\ldots,v_k$ is hvo-alternating. 
-%  Since every hvo-alternating
-%  sequence has  non-empty intersection, this implies that $v_1,\ldots,v_k$
-%  form a clique in $G$.  The only cases in which we are unable to complete
-%  this path occur because some point $x\in\R^2$ is contained in a set $X$
-%  of $k$ vertices of $T$.  In these cases, the set $X$ forms a $k$-clique
-%  in $G$.
 
-  Let $vw$ be the root edge of $T$. We set $v_1=v$ and use the convention
-  that $v_0=w$.  We will perform $\iters$ iterations, each of which
+  Let $r_0r_1$ be the root edge of $T$. We set $v_1=r_0$ and use the convention
+  that $v_0=r_1$.  We will perform $\iters$ iterations, each of which
   tries to add another vertex, $v_{i+1}$, to a partially constructed
   hvo-alternating path $v_1,\ldots,v_i$. During iteration $t$, for
   each $t\in\{1,\ldots,\iters\}$, the procedure will consider a
@@ -290,12 +288,11 @@ $T_{h,d}$ is less than $(2d)^{h+1}$.
   $v_{i-1}$ and $v_i$ are both adjacent to a set $S$ of $4k-7$ level-$t$
   vertices.  Each of the rectangles in $S$ intersects $v_{i-1}$ and
   $v_i$ so, by \obsref{helly}, each rectangle in $S$ intersects
-  $v_{i-1}\cap v_i$.  Therefore, by by \lemref{hvo-alternating}, each of
+  $v_{i-1}\cap v_i$.  Therefore, by \lemref{hvo-alternating}, each of
   the rectangles in $S$ intersects $R_i=\bigcap_{j=1}^i v_j$.
 
-  If each rectangle in $S$ contains a
-  at least one corner of $R_i$, then some corner of $R_i$ is contained 
-  in at least
+  If each rectangle in $S$ contains at least one corner of $R_i$, then
+  some corner of $R_i$ is contained in at least
   \[
          \left\lceil(4k-7)/4\right\rceil = k-1
   \]
@@ -325,28 +322,28 @@ $T_{h,d}$ is less than $(2d)^{h+1}$.
   If we allow this procedure to run sufficiently long, then one of two
   cases occurs:
   \begin{enumerate}
-     \item At least $k-1$ iterations are successes.
-     In this case, we find $v_2,\ldots,v_k$, so that $v_1,\ldots,v_k$
-     is an hvo-sequence whose vertices form a $k$-clique in $G$.
+     \item At least $k-1$ iterations are successes.  In this case, we
+     find $v_2,\ldots,v_k$, so that $v_1,\ldots,v_k$ is an hvo-sequence
+     whose vertices form a $k$-clique in $G$.
 
-     \item Some element of our sequence,
-     $v_i$ takes on a sequence $S_i=v_{i,0},\ldots,v_{i,2(k-i)}$
-     of $2(k-i)+1$ different values because the procedure stalls
-     $2(k-i)$ times while trying to select $v_{i+1}$.  In this
-     case, $S_i$ is either h-nesting or v-nesting with respect
-     to $R_{i-1}$ so, by \lemref{nesting}, all the rectangles in
-     $S_i$ have a point in common with $R_{i-1}$.  But $R_{i-1}$
-     is the common intersection of $v_1,\ldots,v_{i-1}$.  Therefore
-     $v_1,\ldots,v_{i-1},v_{i,0},\ldots,v_{i,k-i}$ all have a point in
-     common and form a $k$-clique in $G$.
+     \item Some element of our sequence, $v_i$ takes on a sequence
+     $S_i=v_{i,0},\ldots,v_{i,2(k-i)}$ of $2(k-i)+1$ different values
+     because the procedure stalls $2(k-i)$ times while trying to
+     select $v_{i+1}$.  In this case, $S_i$ is either h-nesting or
+     v-nesting with respect to $R_{i-1}$ so, by \lemref{nesting}, some
+     subset $\{w_0,\ldots,w_{k-i}\}\subset S_i$ of rectangles in $S_i$
+     all have a common intersection that includes a point of $R_{i-1}$.
+     But $R_{i-1}$ is the common intersection of $v_1,\ldots,v_{i-1}$.
+     Therefore $v_1,\ldots,v_{i-1},w_{0},\ldots,w_{k-i}$ all have a
+     point in common and form a $k$-clique in $G$.
   \end{enumerate}
   The number of iterations required before this procedure finds
   a $k$-clique in $G$ is at most
   \[
-      h = \sum_{i=2}^k (2(k-i)+1) = k + (k-2)(k+1) = k^2-2 \enspace .
+      h = \sum_{i=2}^k (2(k-i)+1) = k + (k-2)(k+1) = (k-1)^2 \enspace .
   \]
   During these $h$ iterations, the procedure selects a level-$j$ vertex
-  of $T$ for $j=1,2,\ldots,h$.  Since $T$ has height $k^2-2 = h$, the 
+  of $T$ for $j=1,2,\ldots,h$.  Since $T$ has height $(k-1)^2 = h$, the
   procedure succeeds in finding a $k$-clique before running out of levels.
 \end{proof}
 
@@ -361,23 +358,22 @@ other ways we could generalize these problems.
 
 The graph $T_{4k-7,2k^2}$ in \thmref{path-times-path} is a 2-tree.
 On the other hand, any tree can be represented in an obvious way as a
-rectangle intersection graph.  Between trees and 2-trees is the class
-of outerplanar graphs:
+rectangle intersection graph, and a result of Dujmovi\'c, Eppstein, and
+Wood \cite[Theorem~X]{X} shows that every outerplanar graph is a subgraph
+of some rectangle intersection graph that contains no 4-clique.  Thus,
+\thmref{path-times-path} is quite sharp in that it separates outerplanar
+graphs from general 2-trees.
+
+Does adding extra dimensions help?  A $d$-D box intersection graph is a
+graph whose vertices are $d$-dimensional axis-aligned boxes and for which
+two vertices are adjacent if and only if they intersect.  For a graph,
+$G$, the smallest $d$ such that $G$ is a $d$-D box intersection graph
+is known as the \emph{boxicity} of $G$.
 
 \begin{op}
-  Is there an integer $k$ such that, for every outerplanar graph $T$, there
-  exists a rectangle intersection graph $G$ that contains $T$ as a subgraph
-  but does not contain any $k$-clique?
-\end{op}
-
-Does adding extra dimensions help?  A $d$-D box intersection graph is
-a graph whose vertices are $d$-dimensional axis-aligned boxes and for
-which two vertices are adjacent if and only if they intersect.
-
-\begin{op}
-   For each $d\in\N$, what is the smallest value of $r=r_d$ for which this
-   statement is true: For every $k\in\N$ there exists an $r$-tree $T$
-   such that every $d$-D box intersection graph $G$ that contains $T$
+   For each $d\in\N$, what is the smallest value of $r=r_d$ for which
+   this statement is true: For every $k\in\N$ there exists an $r$-tree
+   $T$ such that every graph $G$ of boxicity $d$ that contains $T$
    as a subgraph contains a $k$-clique?
 \end{op}
 
@@ -388,34 +384,45 @@ that $r_2> 1$, so $r_2=2$.
 For $d>2$, we can show that $r_d \le 2d$ using a universal $2d$-tree along
 with the fact that, for any set $B$ of axis-aligned boxes, there exists
 $B'\subset B$, $|B'|\le 2d$ such that $\bigcap_{b\in B}b=\bigcap_{b\in
-B'}b$.  The only lower-bound we know is $r_d> 1$ that comes from drawing
-trees as rectangle intersection graphs.  We conjecture the lower-bound
-is tight:
+B'}b$.  
 
-\begin{conj}
-   For every $d,k\in\N$, there exists a 2-tree $T=T(k,d)$ such that
-   every $d$-D box intersection graph that contains $T$ as a subgraph
-   contains a $k$-clique.
-\end{conj}
+On the lower-bound side, a result of Thomassen \cite{thomassen:interval}
+states that every planar graph has a boxicity at most 3. Since every
+2-tree is planar, this implies $r_d \ge 3$, for $d\ge 3$.  More generally,
+Chandran and Sivadasan \cite{chandran.sivadasan:boxicity} show that
+the boxicity of any graph is at most 2 more than it's treewidth, so
+every $d-2$-tree has boxicity at most $d$. This implies that $r_d\ge d-1$.
 
-Coming back to two dimension, if we let $C$ be a set of lines, we
-can consider intersection graphs of \emph{$C$-oriented convex shapes}:
-convex bodies whose boundaries consist of linear pieces, each of which is
-parallel to some line in $C$.  (Axis-aligned rectangles are $C$-oriented
-where $C$ is the set consisting of the x-axis and y-axis.)  For a set $C$
-of lines, let $\mathcal{G}_C$ denote the class of intersection graphs
-of $C$-oriented convex shapes.  For an integer $c$, let $\mathcal{G}_c=\bigcup_{C:|C|=c}\mathcal{G}_C$.
+Coming back to two dimensions, recall that the Koebe–Andreev–Thurston
+theorem states that every planar graph is a subgraph of some intersection
+graph of disks for which no point in the plane is contained in more
+than 2 disks.  2-trees are a very special subclass of planar graphs,
+so \thmref{path-times-path} shows that axis-aligned rectangles are very
+different than disks in this respect. Thus, we might ask how expressive
+other classes of plane shapes are.
+
+QUESTION: Do Schneider embeddings tell us anything about triangle
+intersection graphs?
+
+If we let $C$ be a set of lines, we can consider intersection graphs
+of \emph{$C$-oriented convex shapes}: convex bodies whose boundaries
+consist of linear pieces, each of which is parallel to some line in $C$.
+(Axis-aligned rectangles are $C$-oriented where $C$ is the set consisting
+of the x-axis and y-axis.)  For a set $C$ of lines, let $\mathcal{G}_C$
+denote the class of intersection graphs of $C$-oriented convex shapes.
+For an integer $c$, let $\mathcal{G}_c=\bigcup_{C:|C|=c}\mathcal{G}_C$.
 
 \begin{op}
-   For each $c\in N$, what is the smallest value of $r=r_c$ such that the
+   For each $c\in\N$, what is the smallest value of $r=r_c$ such that the
    following statement is true: For every $k\in\N$, there exists an
    $r$-tree $T$ such that every graph $G\in\mathcal{G}_c$ that contains
    $T$ as a subgraph contains a $k$-clique?
 \end{op}
 
 Again, we can use the fact that, for any set $B$ of $C$-oriented convex
-shapes, we can find a subset $B'\subset B$, $|B'|\le 2|C|$ to establish
-that $r_c \le 2c$.  We do not know a lower bound better than $r_c > 1$.
+shapes, we can find a subset $B'\subset B$, $|B'|\le 2|C|$, such that
+$\bigcap_{b\in B}b=\bigcap_{b\in B'} b$ to establish that $r_c \le 2c$.
+We do not know a lower bound better than $r_c > 1$.
 
 \bibliography{twotree}
 \bibliographystyle{plainurl}

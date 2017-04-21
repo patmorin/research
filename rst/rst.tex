@@ -36,7 +36,7 @@ urlcolor=linkblue, pdfcreator=Me, pdfproducer=Me} \setlength{\parskip}{1ex}
 \seclabel{balls-in-bins}
 
 For some integer $w\in\N$, consider the following balls in urns process.
-We have some number $k$ of urns labelled $1,\ldots,k$, and each urn
+We have some number $k$ of urns labelled $1,\ldots,n$, and each urn
 $i$ has a weight $w_i\in\{0,\ldots,w\}$.  Define $W=\sum_{i=1}^n w_i$.
 We place $\lceil W/w\rceil$ balls into these urns using the following
 process:
@@ -49,7 +49,7 @@ process:
     \STATE{Increase $w_i$ by some value $x_j\in\{-1,0,1,\ldots,w\}$}
    \ENDFOR
 \end{algorithmic}
-
+\noindent
 Let $b_i$ be the number of balls in urn $i$ at the end of this process.
 
 \begin{lem}\lemlabel{balls-in-bins}
@@ -68,10 +68,10 @@ of an undirected graph $G$ with a special vertex $v_0$.
 
 \noindent
 \begin{algorithmic}
-  \STATE{$T_1=(\{v_0\},\emptyset)$}
+  \STATE{$T_1\gets (\{v_0\},\emptyset)$ \COMMENT{$T_1$ has one vertex and no edges}}
   \FOR{$k\in\{1,\ldots,|V(G)|-1$}
-    \STATE{Select a uniformly random edge from $\{uv\in E(G):u\in V(T)\wedge v\not\in V(T)\}$} 
-    \STATE{$T_{k+1}\gets (V(T_j)\cup\{v\}, E(T_j)\cup\{uv\})$}
+    \STATE{Select a uniformly random edge from $\{uv\in E(G):u\in V(T_k)\wedge v\not\in V(T_k)\}$} 
+    \STATE{$T_{k+1}\gets (V(T_k)\cup\{v\}, E(T_k)\cup\{uv\})$}
   \ENDFOR
 \end{algorithmic}
 
@@ -89,14 +89,12 @@ be done when the graph $G$ has an isoperimetric inequality.
    We use the isoperimetic inequality for the toroidal grid, which states
    that for any $A\subseteq V(G)$,
   \begin{equation}
-        |N(A)| \ge \begin{cases}
+        |N_G(A)| \ge f(|A|,n)=\begin{cases}
           1 & \text{if $|A|=n-1$} \\
           \min\{4\sqrt{|A|}, 4(\sqrt{n-|A|}-1)\} & \text{otherwise}
         \end{cases} 
      \eqlabel{isogrid}
   \end{equation}
-  for some $\alpha >0$ that I can't find right now.  For convenience,
-  define $p(k) = \lceil \alpha\sqrt{\min\{|A|, n-|A|\}}\rceil$.  
 
 %  Rather than track the height of $T_k$, we will track the average depth,
 %  $D_k$, of the $p(k)$ deepest nodes in $T_k$.  Note that $p(n-1)=1$,
@@ -105,14 +103,14 @@ be done when the graph $G$ has an isoperimetric inequality.
 
   We break the process of creating $T_n$ into \emph{phases} defined
   as follows: Phase 1 contains $T_1$.  In the general case, if phase
-  $j-1$ finishes with the tree $T_k$, then phase $j$ contains trees
-  $T_{k+1},\ldots,T_{k+p(k)}$.
+  $j-1$ finishes with the tree $T_k$ which has $|N_G(V(T_k))|=\tau$, then phase $j$ contains trees
+  $T_{k+1},\ldots,T_{k+\lceil\tau/3\rceil}$.
 
   Now, consider what happens during phase $j$: We have a tree $T_k$
   with $k$ vertices. Each of the vertices $i\in V(T_k)$ is incident
   to $w_i\in\{0,1,2,3\}$ edges of $G$ with one endpoint not in $V(T)$.
   The isoperimetric inequality \eqref{isogrid} implies that $W=\sum_{i\in
-  V(T)} w_i \ge f(k)$.  We now draw a parallel between the process of
+  V(T)} w_i \ge 3p(k)-1$.  We now draw a parallel between the process of
   growing $T_{k+1},\ldots,T_{k+f(k)}$ and the balls and urns process
   described in \secref{balls-in-bins}.
 

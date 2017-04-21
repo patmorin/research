@@ -12,7 +12,8 @@
 \newcommand{\mst}{\mathit{MST}}
 
 \title{\MakeTextUppercase{A Note on Interference in Random Networks}%
-   \thanks{This work was partly funded by NSERC.}}
+   \thanks{This work was partly funded by NSERC. A preliminary version
+    of this paper appears in the \emph{Proceedings of the 24th Canadian Conference on Computational Geometry (CCCG~2012)} \cite{devroye.morin:note}.}}
 \author{Luc Devroye\thanks{School of Computer Science, McGill University}
         \ and
         Pat Morin\thanks{School of Computer Science, Carleton University}}
@@ -136,7 +137,7 @@ as $n\rightarrow\infty$):
 
 This section surveys previous work on the problem of bounding the
 interference of worst-case and random point sets.  A summary of the
-results described in this section is given in \figref{related}.  In the
+results described in this section is given in \tabref{related}.  In the
 statements of all results in this section, $|V|=n$.
 
 \begin{table*}
@@ -146,7 +147,7 @@ statements of all results in this section, $|V|=n$.
     \cite{vR05} & $d\ge 1$ & there exists $V$ s.t.\ & $I(V)\in \Omega(n^{1/2})$ \\
     \cite{vR05} & $d=1$ & for all $V$, & $I(V)\in O(n^{1/2})$ \\
     \cite{ht08} & $d=2$ & for all $V$, & $I(V)\in O(n^{1/2})$ \\
-    \cite{ht08} & $d\ge 3$ & for all $V$, & $I(V)\in O((n\log n)^{1/2})$ \\
+    \cite{ht08} & $d\ge 3$ & for all $V$, & $I(V)\in O((n\log n)^{1/2})$ \\ \hline
     \cite{kkmns10} & $d= 1$ & for $V$ i.u.d. in $[0,1]$, & $I(\mst(V))\in \Theta((\log n)^{1/2})$ w.h.p. \\
     \cite{kdhk15} & $d\ge 2$ & for $V$ i.u.d. in $[0,1]^d$, & $I(\mst(V))\in O(\log n)$ w.h.p.  \\
     Here & $d\ge 1$ & for $V$ i.u.d. in $[0,1]^d$, & $I(\mst(V))\in \Theta((\log n)^{1/2})$ w.h.p.  \\ 
@@ -158,7 +159,7 @@ statements of all results in this section, $|V|=n$.
   \end{tabular}
 \end{center}
 \caption{Previous and new results on interference in geometric networks.}
-\figlabel{related}
+\tablabel{related}
 \end{table*}
 
 The definition of interference used in this paper was introduced by
@@ -171,13 +172,13 @@ that $I(V)\in\Omega(n^{1/2})$.
 The point set, $V$, in this lower-bound consists of any sequence of
 points $x_1,\ldots,x_n$, all on a line, such that $\|x_{i+1}x_i\| \le (1/2)\|x_{i}x_{i-1}\|$,
 for all $i\in\{2,\ldots,n-1\}$.  That is, the gaps between consecutive
-points decrease exponentially.
-
+points decrease exponentially. This type of configuration is called an \emph{exponential chain} and is also used in our lower bound construction.
 This lower bound is matched by an upper-bound:
 \begin{thm}[von Rickenbach \etal\ 2005]\thmlabel{twod-upper}
 For all $V\subset\R$, $I(V)\in O(n^{1/2})$.
 \end{thm}
-The upper bound in \thmref{twod-upper} is obtained by selecting $n^{1/2}$
+The upper bound in \thmref{twod-upper} is obtained by selecting one out
+of every $n^{1/2}$
 vertices to act as \emph{hubs}, connecting the hubs into any connected
 network and then having each of the remaining nodes connect to its
 nearest hub.  This idea was extended to two and higher dimensions
@@ -313,7 +314,14 @@ Note that \lemref{log} implies \thmref{log}, since it implies that we
 can partition the edges of $\mst(V)$ into $\lceil\log_2 D\rceil$ classes,
 based on length, and each class contributes at most a constant to $I(\mst(V))$.
 
-We are ready to prove Parts~2 and 3 of \thmref{main}.  The sketch of the
+We are ready to prove Parts~2 and 3 of \thmref{main}, i.e., that for a set $V$
+ of $n$ points i.u.d. in $[0,1]^d$,
+\begin{enumerate}
+  \setcounter{enumi}{1}
+  \item  $I(V)\in O((\log n)^{1/3})$, for $d\in\{1,2\}$; and 
+  \item $I(V)\in O((\log n)^{1/3}(\log\log n)^{1/2})$, for $d\ge 3$.
+\end{enumerate}
+The sketch of the
 proof is as follows:  We partition $[0,1]^d$ into equal cubes of volume
 $1/nt$, for some parameter $t$ to be chosen later.  Using Chernoff's
 bounds, we show that each cube contains $O((\log n)^{2/3})$ points so
@@ -406,8 +414,9 @@ $pnt\le 1/n^{c'}$.  Since we can choose $r\in O(\log t+\log\log n) = O((\log
 n)^{1/3})$, this completes the proof.
 \end{proof}
 
-The proof of Part~1 of \thmref{main} is just a matter of reusing the ideas
-from the previous proof of Parts~2 and 3.
+The proof of Part~1 of \thmref{main}, that $I(\mst(V))\in O((\log
+n)^{1/2})$, is just a matter of reusing the ideas from the previous
+proof of Parts~2 and 3.
 
 \begin{proof}[Proof of \thmref{main}, Part 1]
 Let $x$ be any point in $\R^2$.  We partition the balls in $B(\mst(V))$
@@ -449,15 +458,20 @@ $O(n^{-c})$.  Therefore, with high probability,
 \section{Proof of The Lower Bounds (\thmref{lower-bound})}
 
 In this section, we prove the lower bounds in \thmref{lower-bound}.
-We define a \emph{Zeno configuration} as follows (see \figref{zeno}):
-A Zeno configuration of size $k$, centered at a point, $x$, is defined
-by a set of $k+1$ balls.  The construction starts with disjoint balls
-$D_0,\ldots,D_{k-1}$, each having radius $u$.  The ball $D_0$ is centered
-at $x$.  The center of $D_i$, $i\in\{1,\ldots,k-1\}$ is at $x+(u3^i, 0)$.
-A final large ball, $D$, of radius $r=u3^k$ is centered at $x$ and
-contains all other balls.  A Zeno configuration occurs at location $x$
-in a point set $V$ when $D$ contains exactly $k$ points of $V$ and these
-occur with exactly one point in each ball $D_i$.
+We define a variant of the exponential chain called a \emph{Zeno
+configuration}\footnote{This is named after Zeno of Elea who used
+exponential chains in his arguments against motion as exemplified
+by his ``paradoxes'' of Achilles and the Tortoise and the Dichotomy Paradox
+\cite{aristotle:physics}.}
+as follows (see \figref{zeno}): A Zeno configuration of
+size $k$, centered at a point, $x$, is defined by a set of $k+1$ balls.
+The construction starts with disjoint balls $D_0,\ldots,D_{k-1}$, each
+having radius $u$.  The ball $D_0$ is centered at $x$.  The center of
+$D_i$, $i\in\{1,\ldots,k-1\}$ is at $x+(u3^i, 0)$.  A final large ball,
+$D$, of radius $r=u3^k$ is centered at $x$ and contains all other balls.
+A Zeno configuration occurs at location $x$ in a point set $V$ when $D$
+contains exactly $k$ points of $V$ and these occur with exactly one
+point in each ball $D_i$.
 
 \begin{figure*}
   \begin{center}
@@ -467,7 +481,8 @@ occur with exactly one point in each ball $D_i$.
   \figlabel{zeno}
 \end{figure*}
 
-
+Zeno configurations are a natural $d$-dimensional extension of the
+(1-dimensional) $k$-frames defined by Kranakis \etal \cite{kkmns10}.
 The following lemma shows that a Zeno configuration in $V$ causes high
 interference in $\mst(V)$.
 
@@ -535,7 +550,11 @@ We analyze the probability that a Zeno configuration of length $k=c(\log
 n)^{1/2}$ centered at $x_i$ occurs in a set, $V$, of $n$ i.u.d. points
 $\{x_1,\ldots,x_n\}$ in
 $[0,1]^2$.  Let $\mathcal{Z}_i$ denote the event ``$V$
-contains a Zeno configuration centered at $x_i$.''  Then we have
+contains a Zeno configuration centered at $x_i$.''  
+After fixing the location of $x_i$, each of the disks $D_1,\ldots,D_{k-1}$
+should contain exactly one point of $V$ and the remaining $n-k$ points
+must should be outside the ball of radius $1/n$ centered at $x_i$.
+There are $(n-1)!(n-k)!$ ways of choosing the $k-1$ points and assigning them to $D_1,\ldots,D_{k-1}$.  Therefore,
 \begin{align*}
  &\!\!\!\! \Pr\{\mathcal{Z}_i\mid x_i\in[r,1-r]^2\} \\
   & = \left(\frac{(n-1)!}{(n-k)!}\right) % ways of choosing remaining points (order matters)

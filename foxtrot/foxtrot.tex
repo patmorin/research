@@ -1,0 +1,346 @@
+\documentclass[a4paper,UKenglish]{lipics-v2016}
+%This is a template for producing LIPIcs articles. 
+%See lipics-manual.pdf for further information.
+%for A4 paper format use option "a4paper", for US-letter use option "letterpaper"
+%for british hyphenation rules use option "UKenglish", for american hyphenation rules use option "USenglish"
+% for section-numbered lemmas etc., use "numberwithinsect"
+ 
+\usepackage{microtype}%if unwanted, comment out or use option "draft"
+
+%\graphicspath{{./graphics/}}%helpful if your graphic files are in another directory
+
+\bibliographystyle{plainurl}% the recommended bibstyle
+
+% Author macros::begin %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{First-Passage Percolation Time \newline on Hypercubes and Grids}
+
+\titlerunning{First-Passage Percolation Time}
+
+\author[1]{Pat Morin}
+\affil[1]{Carleton University School of Computer Science, Ottawa, Canada \\
+   \texttt{morin@scs.carleton.ca}a}
+\authorrunning{P. Morin} %mandatory. First: Use abbreviated first/middle names. Second (only in severe cases): Use first author plus 'et. al.'
+
+\Copyright{P. Morin}%mandatory, please use full first names. LIPIcs license is "CC-BY";  http://creativecommons.org/licenses/by/3.0/
+
+\subjclass{Dummy classification -- please refer to \url{http://www.acm.org/about/class/ccs98-html}}% mandatory: Please choose ACM 1998 classifications from http://www.acm.org/about/class/ccs98-html . E.g., cite as "F.1.1 Models of Computation". 
+\keywords{Dummy keyword -- please provide 1--5 keywords}% mandatory: Please provide 1-5 keywords
+% Author macros::end %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%Editor-only macros:: begin (do not touch as author)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\EventEditors{John Q. Open and Joan R. Acces}
+\EventNoEds{2}
+\EventLongTitle{42nd Conference on Very Important Topics (CVIT 2016)}
+\EventShortTitle{CVIT 2016}
+\EventAcronym{CVIT}
+\EventYear{2016}
+\EventDate{December 24--27, 2016}
+\EventLocation{Little Whinging, United Kingdom}
+\EventLogo{}
+\SeriesVolume{42}
+\ArticleNo{23}
+% Editor-only macros::end %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\DeclareMathOperator{\E}{E}
+\DeclareMathOperator{\exponential}{exponential}
+\DeclareMathOperator{\binomial}{binomial}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We give a simple proof of the following statement: If one puts independent
+uniform $[0,1]$ edge weights on the edges of a $d$-cube, then the expected
+length of the lightest path from $(0,\ldots,0)$ to $(1,\ldots,1)$ is
+$O(1)$. This proof generalizes to the $d$-dimensional $k\times\cdots\times
+k$ grid for any any $k$ and $d$ and to any edge-weight distribution that
+has positive density at zero.
+\end{abstract}
+
+\section{Introduction}
+
+The $d$-cube $Q_d$ is the graph with vertex set $V(Q_d)=\{0,1\}^d$
+and whose edge set $E(Q_d)$ contains the edge $uv$ if and only if the
+Hamming distance between $u$ and $v$ is exactly 1.
+Assign an independent $\exponential(1)$ \emph{edge weight} to each
+edge of $Q_d$.  These weights define a lightest path metric between the
+vertices of $Q_d$, where $w(u,v)$ denotes the weight of the lightest
+path from vertex $u$ to vertex $w$.  What is the expected weight
+$\E[w(\mathbf{0},\mathbf{1})]$? of the lightest path from
+$\mathbf{0}=(0,\ldots,0)$ to $\mathbf{1}=(1,\ldots,1)$?
+
+In this note, we offer a simple proof that $\E[w(\mathbf{0},\mathbf{1})]
+\in O(1)$;  although the number of edges in any path from $\mathbf{0}$
+to $\mathbf{1}$ is $d$, the expected weight of the lightest path does not
+increase with $d$.  This result is not new.  Indeed, this type of question
+is central in the study of first-passage percolation \cite{X}. Fill and
+Pemantle \cite{fill.pemantle:percolation}, first proved this result in
+1993 (as well as stronger, more general results).  The last word on this
+problem is due to Martinsson \cite{martinsson:unoriented}, who shows 
+that $w(\mathbf{0},\mathbf{1})$
+converges in probability to $\ln(1+\sqrt{2})\approx 0.881$ as
+$d\rightarrow\infty$.  
+
+The proof we present here is (arguably) simpler and more accessible to
+a computer science audience than either of the proofs discussed above.
+Our proof employs a natural greedy strategy that results in an algorithm for
+finding such a short path that runs in $O(d^4)$ time.  In distributed
+computing terms, this algorithm is 3-local, it can be implemented by an
+agent that only has information about edge weights in a neighbourhood
+of radius 3 about the current vertex.
+
+
+\section{Preliminaries and A Simple Lemma}
+
+Recall that an $\exponential(1)$ random variable $X$ is obeys the distribution:
+\[
+   \Pr\{X > x\} = e^{-x} \enspace,\enspace x \ge 0 \enspace .
+\]
+If $X_1,\ldots,X_k$ are independent $\exponential(1)$ random variables, then their minimum behaves like:
+\[
+   \Pr\{\min\{X_1,\ldots X_k\} > x\} = \Pr\{\text{$X_1>x$, $X_2>x$,\ldots, and $X_k>x$}\} = \left(e^{-x}\right)^k = e^{-kx} \enspace .
+\]
+We will sometimes make use of the inequality
+\[
+     1-x \le e^{-x} \le 1-3x/4 \enspace ,
+\]
+valid for $0\le x\le 1/2$.
+
+
+
+\begin{lemma}\label{lem:abc}
+Let $a>b\ge c\ge 1$ be integers and let $T$ be a rooted tree of height
+three of whose root has $a$ children, each of which has $b$ children,
+each of which has $c$ children.  Assign an $\exponential(1)$ edge weight
+to each edge of $T$.  Then there exists a constants $\alpha,\beta>0$ such that, for any $t>0$, with probability at least $1-e^{-\alpha t}$, $T$
+contains a root to leaf path of weight at most $\beta(t+2)/(abc)^{1/3}$
+\end{lemma}
+
+\begin{proof}
+  First, consider the (easy) case in which $t/(abc)^{1/3}>\epsilon$
+  for some constant $\epsilon >0$. The tree $T$ contains $a$ independent
+  root-to-leaf paths, each of whose weight is the sum of three independent
+  $\exponential(1)$ random variables.  If one of paths has weight greater than
+  $\beta(t+2)/(abc)^{1/3}$, then one of its three edges has weight greater than 
+  $(\beta/3)(t+2)/(abc)^{1/3}$.  The probability that happens for one particular path is at most
+  \[
+      3e^{-(\beta/3)(t+2)/(abc)^{1/3}   
+  \]
+  and the probabliity that it happens for all paths is at most
+  \[
+      (3e^{-(\beta/3)(t+2)/(abc)^{1/3})^a
+      \le 3^a e^{-(\beta/3)(t+2)}
+  \]
+
+
+
+  Fix some (small) positive values $w_1$, $w_2$, and $w_3$ to be specified
+  shortly.  We say that a node $v$ in $T$ is \emph{good} if $v$ is the
+  root of $T$, or if the path from the root of $T$ to $v$ consists of an
+  edge of weight at most $w_1$, possibly followed by an edge of weight
+  at most $w_2$, possibly followed by an edge of weight at most $w_3$.
+
+  In what follows, it helps to think of good nodes as branching
+  out from the root: Each of the root's $a$ children has probability
+  $1-e^{-w_1}\approx w_1$ of being good.  Each of the root's good children
+  has $b$ children which each have probability $1-e^{-w_2}\approx w_2$
+  of being good. Each of the root's good grandchildren have $c$ children,
+  each of which has probability $1-e^{-w_3}\approx w_3$ of being good.
+  We take $w_1=\Theta(t/(abc)^{1/3})$ and $w_2,w_3=\Theta(1/(abc)^{1/3})$. In this way, the number, $N_1$, of good children is concentrated around
+  \[  \mu_1 = \Theta(aw_1) = \Theta(at/(abc)^{1/3}) \enspace , \]
+  the number, $N_2$ of good grandchildren is concentrated around 
+  \[  \mu_2 = \Theta(w_2b\mu_1) = \Theta(bat/(abc)^{2/3}) \enspace , \]
+  and the number $N_3$ of good grandchildren is concentrated around
+  \[  \mu_3 = \Theta(w_2c\mu_2=\Theta(cbat/(abc)^{3/3}) = \Theta(t) \enspace . \]
+
+  We now make this precise using the machinery of Chernoff's bounds.
+  Observe that, for $i\in\{1,2,3\}$ and conditioned on
+  $N_{i-1}$, $N_i$ is a binomial random variable. Specifically
+  \[
+     N_1 \sim \binomial(a,1-e^{-w_1}) \enspace 
+     N_2 \sim \binomial(bN_1,1-e^{-w_2}) \enspace
+     N_3 \sim \binomial(cN_2,1-e^{-w_3})
+  \]
+
+  Set 
+  \[  
+        w_1=\frac{8t}{3(abc)^{1/3}} \enspace .
+  \]
+  Then $N_1$ is a $\binomial(a,1-e^{-w_1})$ random variable with expected value
+  \[
+     \mu_1 = a(1-e^{-w_1}) \ge 3aw_1/4 = 2at/(abc)^{1/3} \enspace ,
+  \]
+  provided that $w_1 \le 1/2$.
+  By Chernoff's bounds, we have
+  \[
+      \Pr\{N_1 < \mu_1/2\} \le e^{-\mu_1/8}\le e^{-\frac{at}{4(abc)^{1/3}}} \le e^{-t/4} \enspace .
+  \]
+  Now set
+   \[  
+        w_2=\frac{8}{3(abc)^{1/3}} \enspace .
+  \]
+  Then, conditioned on $N_1$, $N_2$ is $\binomial(bN_1, p_2)$ random
+  variable with $p_2=1-e^{-w_2}\ge 3w_2/4$, provided that $w_2<1/2$.
+  Conditioning on $N_1>\mu_1/2$, the (conditional) expectation of $\mu_2$
+  of $N_2$ is
+  \[
+     \mu_2 = \E[N_2\mid N_1\ge \mu_1/2] 
+      \ge (3w_2/4)b\mu_1/2 
+      \ge \frac{3w_2}{4}\cdot\frac{abt}{(abc)^{1/3}}
+       = 2abt/(abc)^{2/3} \enspace .
+  \]   
+  Again, by Chernoff's bounds, we have
+  \[
+     \Pr\{N_2 < \mu_2/2\mid N_1 \ge \mu_1/2\} 
+       \le e^{-\mu_2/8} \le e^{-\frac{abt}{4(abc)^{1/3}}} \le e^{-t/4} \enspace .
+  \]
+  For the last step, we get to take a small shortcut.  Set
+  \[
+     w_3=\frac{1}{4(abc)^{1/3}}
+  \]
+  Then
+  \[
+    \Pr\{N_3 = 0\mid N_2\ge \mu_2/2\} 
+        \le (e^{-w_3})^{c\mu_2/2}
+        \le e^{\frac{1}{4(abc)^{1/3}}\cdot\frac{abt}{(abc)^{2/3}}} = e^{-t/4} \enspace .
+  \]
+  To summarize, we have
+  \begin{align*}
+    \Pr\{N_3 = 0\}
+      & \le \Pr\{N_3=0\mid N_2 \ge \mu_2/2\} \\
+      & \quad {}+\Pr\{N_2<\mu_2/2\mid N_1 \ge \mu_1/2\} \\
+       & \quad {}+\Pr\{N_1<\mu_1/2\} \\
+       & \le 3e^{-t/4}
+  \end{align*}
+  On the other hand, if $N_3\ge 1$, then there is a root-to-leaf path in $T$ of weight at most 
+  \[
+     w_1+w_2+w_3 = \frac{8t+8+3/4}{3(abc)^{1/3}} \le \frac{8}{3}(t+2)/(abc)^{1/3}\enspace . \qedhere
+  \]
+\end{proof}
+
+
+From Lemma~\ref{lem:abc} we can easily obtain an upper bound on the expected length of the shortest root-to-leaf path in $T$.
+
+\begin{corollary}
+  Let $T$ be defined as in Lemma~\ref{lem:abc}. Then the expected length of the lightest root-to-leaf path in $T$ is $O(1/(abc)^{1/3})$.
+\end{corollary}
+
+\begin{proof}
+  Let $X$ denote the length of the lightest root-to-leaf path in $T$ and recall that for any continuous non-negative random variable $X$, $\E[X]=\int_0^\infty \Pr\{X>x\}$.  Therefore,
+ \begin{align*}
+  \E[X] & = \int_0^\infty \Pr\{X>x\}\,dx \\
+      & \le \int_0^\infty e^{-\frac{\alpha x(abc)^{1/3}}{\beta}+2} & \text{(setting $x=\beta(t+2)/(abc)^{1/3}$ and using Lemma~\ref{lem:abc})} \\
+      & = \frac{\beta e^2}{\alpha(abc)^{1/3}} \\
+      & = O(1/(abc)^{1/3}) \enspace .&  \qedhere
+ \end{align*}
+\end{proof}
+
+
+\section{The Hypercube}
+
+\section{The $(d,k)$-Grid}
+
+
+\bibliography{foxtrot}
+\end{document}
+
+\newpage
+
+
+Let 
+Please comply with the following instructions when preparing your article for a LIPIcs proceedings volume. 
+\begin{itemize}
+\item Use pdflatex and an up-to-date LaTeX system.
+\item Use further LaTeX packages only if required. Avoid usage of packages like \verb+enumitem+, \verb+enumerate+, \verb+cleverref+. Keep it simple, i.e. use as few additional packages as possible.
+\item Add custom made macros carefully and only those which are needed in the article (i.e., do not simply add your convolute of macros collected over the years).
+\item Do not use a different main font. For example, the usage of the \verb+times+-package is forbidden.
+\item Provide full author names (especially with regard to the first name) in the \verb+\author+ macro and in the \verb+\Copyright+ macro.
+\item Fill out the \verb+\subjclass+ and \verb+\keywords+ macros. For the \verb+\subjclass+, please refer to the ACM classification at \url{http://www.acm.org/about/class/ccs98-html}.
+\item Take care of suitable linebreaks and pagebreaks. No overfull \verb+\hboxes+ should occur in the warnings log.
+\item Provide suitable graphics of at least 300dpi (preferrably in pdf format).
+\item Use the provided sectioning macros: \verb+\section+, \verb+\subsection+, \verb+\subsection*+, \verb+\paragraph+, \verb+\subparagraph*+, ... ``Self-made'' sectioning commands (for example, \verb+\noindent{\bf My+ \verb+subparagraph.}+ will be removed and replaced by standard LIPIcs style sectioning commands.
+\item Do not alter the spacing of the  \verb+lipics-v2016.cls+ style file. Such modifications will be removed.
+\item Do not use conditional structures to include/exclude content. Instead, please provide only the content that should be published -- in one file -- and nothing else.
+\item Remove all comments, especially avoid commenting large text blocks and using \verb+\iffalse+ $\ldots$ \verb+\fi+ constructions.
+\item Keep the standard style (\verb+plainurl+) for the bibliography as provided by the\linebreak \verb+lipics-v2016.cls+ style file.
+\item Use BibTex and provide exactly one BibTex file for your article. The BibTex file should contain only entries that are referenced in the article. Please make sure that there are no errors and warnings with the referenced BibTex entries.
+\item Use a spellchecker to get rid of typos.
+\item A manual for the LIPIcs style is available at \url{http://drops.dagstuhl.de/styles/lipics-v2016/lipics-v2016-authors/lipics-v2016-manual.pdf}.
+\end{itemize}
+
+
+\section{Lorem ipsum dolor sit amet}
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit \cite{DBLP:journals/cacm/Knuth74}. Praesent convallis orci arcu, eu mollis dolor. Aliquam eleifend suscipit lacinia. Maecenas quam mi, porta ut lacinia sed, convallis ac dui. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse potenti. Donec eget odio et magna ullamcorper vehicula ut vitae libero. Maecenas lectus nulla, auctor nec varius ac, ultricies et turpis. Pellentesque id ante erat. In hac habitasse platea dictumst. Curabitur a scelerisque odio. Pellentesque elit risus, posuere quis elementum at, pellentesque ut diam. Quisque aliquam libero id mi imperdiet quis convallis turpis eleifend. 
+
+\begin{lemma}[Lorem ipsum]
+\label{lemma:lorem}
+Vestibulum sodales dolor et dui cursus iaculis. Nullam ullamcorper purus vel turpis lobortis eu tempus lorem semper. Proin facilisis gravida rutrum. Etiam sed sollicitudin lorem. Proin pellentesque risus at elit hendrerit pharetra. Integer at turpis varius libero rhoncus fermentum vitae vitae metus.
+\end{lemma}
+
+\begin{proof}
+Cras purus lorem, pulvinar et fermentum sagittis, suscipit quis magna.
+\end{proof}
+
+\begin{theorem}[Curabitur pulvinar, \cite{DBLP:books/mk/GrayR93}]
+\label{theorem:curabitur}
+Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet doming id quod mazim placerat facer possim assum. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
+\end{theorem}
+
+\subsection{Curabitur dictum felis id sapien}
+
+Curabitur dictum felis id sapien mollis ut venenatis tortor feugiat. Curabitur sed velit diam. Integer aliquam, nunc ac egestas lacinia, nibh est vehicula nibh, ac auctor velit tellus non arcu. Vestibulum lacinia ipsum vitae nisi ultrices eget gravida turpis laoreet. Duis rutrum dapibus ornare. Nulla vehicula vulputate iaculis. Proin a consequat neque. Donec ut rutrum urna. Morbi scelerisque turpis sed elit sagittis eu scelerisque quam condimentum. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean nec faucibus leo. Cras ut nisl odio, non tincidunt lorem. Integer purus ligula, venenatis et convallis lacinia, scelerisque at erat. Fusce risus libero, convallis at fermentum in, dignissim sed sem. Ut dapibus orci vitae nisl viverra nec adipiscing tortor condimentum \cite{DBLP:journals/cacm/Dijkstra68a}. Donec non suscipit lorem. Nam sit amet enim vitae nisl accumsan pretium. 
+
+\begin{lstlisting}[caption={Useless code},label=list:8-6,captionpos=t,float,abovecaptionskip=-\medskipamount]
+for i:=maxint to 0 do 
+begin 
+    j:=square(root(i));
+end;
+\end{lstlisting}
+
+\subsection{Proin ac fermentum augue}
+
+Proin ac fermentum augue. Nullam bibendum enim sollicitudin tellus egestas lacinia euismod orci mollis. Nulla facilisi. Vivamus volutpat venenatis sapien, vitae feugiat arcu fringilla ac. Mauris sapien tortor, sagittis eget auctor at, vulputate pharetra magna. Sed congue, dui nec vulputate convallis, sem nunc adipiscing dui, vel venenatis mauris sem in dui. Praesent a pretium quam. Mauris non mauris sit amet eros rutrum aliquam id ut sapien. Nulla aliquet fringilla sagittis. Pellentesque eu metus posuere nunc tincidunt dignissim in tempor dolor. Nulla cursus aliquet enim. Cras sapien risus, accumsan eu cursus ut, commodo vel velit. Praesent aliquet consectetur ligula, vitae iaculis ligula interdum vel. Integer faucibus faucibus felis. 
+
+\begin{itemize}
+\item Ut vitae diam augue. 
+\item Integer lacus ante, pellentesque sed sollicitudin et, pulvinar adipiscing sem. 
+\item Maecenas facilisis, leo quis tincidunt egestas, magna ipsum condimentum orci, vitae facilisis nibh turpis et elit. 
+\end{itemize}
+
+\section{Pellentesque quis tortor}
+
+Nec urna malesuada sollicitudin. Nulla facilisi. Vivamus aliquam tempus ligula eget ornare. Praesent eget magna ut turpis mattis cursus. Aliquam vel condimentum orci. Nunc congue, libero in gravida convallis \cite{DBLP:conf/focs/HopcroftPV75}, orci nibh sodales quam, id egestas felis mi nec nisi. Suspendisse tincidunt, est ac vestibulum posuere, justo odio bibendum urna, rutrum bibendum dolor sem nec tellus. 
+
+\begin{lemma} [Quisque blandit tempus nunc]
+Sed interdum nisl pretium non. Mauris sodales consequat risus vel consectetur. Aliquam erat volutpat. Nunc sed sapien ligula. Proin faucibus sapien luctus nisl feugiat convallis faucibus elit cursus. Nunc vestibulum nunc ac massa pretium pharetra. Nulla facilisis turpis id augue venenatis blandit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.
+\end{lemma}
+
+Fusce eu leo nisi. Cras eget orci neque, eleifend dapibus felis. Duis et leo dui. Nam vulputate, velit et laoreet porttitor, quam arcu facilisis dui, sed malesuada risus massa sit amet neque.
+
+
+\subparagraph*{Acknowledgements.}
+
+I want to thank \dots
+
+\appendix
+\section{Morbi eros magna}
+
+Morbi eros magna, vestibulum non posuere non, porta eu quam. Maecenas vitae orci risus, eget imperdiet mauris. Donec massa mauris, pellentesque vel lobortis eu, molestie ac turpis. Sed condimentum convallis dolor, a dignissim est ultrices eu. Donec consectetur volutpat eros, et ornare dui ultricies id. Vivamus eu augue eget dolor euismod ultrices et sit amet nisi. Vivamus malesuada leo ac leo ullamcorper tempor. Donec justo mi, tempor vitae aliquet non, faucibus eu lacus. Donec dictum gravida neque, non porta turpis imperdiet eget. Curabitur quis euismod ligula. 
+
+
+%%
+%% Bibliography
+%%
+
+%% Either use bibtex (recommended), 
+
+\bibliography{lipics-v2016-sample-article}
+
+%% .. or use the thebibliography environment explicitely
+
+
+
+\end{document}

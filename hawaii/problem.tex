@@ -1,0 +1,71 @@
+\documentclass{article}
+\usepackage{url}
+\usepackage{amsthm}
+
+\theoremstyle{remark}
+\newtheorem{op}{Open Problem}
+
+
+\begin{document}
+
+\section{Optimal Log Placement for Disambiguating Execution Paths}
+
+The following problems are motivated by the problem of automatically
+placing log statements in order to differentiate execution paths, as in
+this paper:  
+\url{http://log20.dsrg.utoronto.ca/log20_sosp17_paper.pdf}.
+(This paper talks about it in a compiler context, but it's equally applicable in a distributed systems context, making it appropriate for this workshop.)
+
+We are given a directed graph $G$, with a single source $s$ and at least one sink and a probability distribution over all (directed) source to sink paths in $G$. This input is given to us as a list of pairs $(P_i,p_i)$ where $P_i$ is a source to sink path and $p_i>0$. Any source to sink path not in this list is assumed to have probability 0.
+
+The input distribution has an entropy $H=\sum_{i}p_i\log(1/p_i)$.  It also induces weights on the vertices of $G$, where $w(v)=\sum_{i:v\in P_i} p_i$ is the probability that the chosen path includes $v$.  
+
+For a set $V'\subset V(G)$ and a path $P$ in $G$, we use $P\cap V'$ to denote the subsequence of vertices in $P$ that are contained in $X$.  For a set $V'\subset V(G)$, define
+\[
+   H(V') = \sum_{X\subseteq V'}\sum_{i:P_i\cap V'=X} p_i\log(1/p_i) \enspace ,
+\]
+which measures the expected entropy after seeing $P_i\cap V'$.
+
+\begin{op}
+  Find a set $V'\subset V(G)$ such that $H(V')=0$ and $\sum_{v\in V'} w(v)$ minimized.
+\end{op}
+
+\begin{op}
+  Given a $W>0$, find a set $V'\subset V(G)$ such that $\sum_{v\in V'} w(v)\le W$ and $H(V')$ is minimized.
+\end{op}
+
+To start, we can consider each of these problems when $G$ is acyclic.
+
+\section{Applications of Parallel Memory}
+
+Modern memory subsystems can server several memory requests in parallel and this can be used in surprising ways to speed up some basic algorithms.  See, for example, this reference, in which binary search is sped up using this technique: \url{https://arxiv.org/abs/1509.05053}.
+
+This motivates a model of a processor with cache where the cache line
+width, measured in data items, is $B$, the latency, measured in time
+units, for reading a cache line is $L$, and the bandwidth, measured as
+the number of cache lines that can be read per time unit, is $W$.  For example, in this model, the cost of searching in $B$-tree is
+\[
+   (L+c)\log_B n
+\]
+where $c=O(\log B)$ is the cost of searching an (in-memory) block of size $B$.This is because a B-tree search consists of $\log_B n$
+rounds where each round requires loading a cache line (at a cost of $L$)
+and searching that cache line (at a cost of $c$).
+
+On the other hand, if $WL > \log B$, then the memory subsystem can
+handle $\log B$ cache line requests in parallel without any additional
+overhead. In this case, it would be better to use a BFS-layout of a binary tree
+and prefetch $\log B$ levels ahead.  The cost of this search is roughly 
+\[
+    \max\{L,c\}\log_B n \enspace .
+\]
+Indeed, the paper cited above shows that the second approach is indeed faster.
+
+\begin{op}
+  What other problems can be solved faster by making use of memory parallelism?
+\end{op}
+
+Theoretical answers for this problem are probably easy.  For example, this model can simulate the I/O model with block size $WB$ and latency $L+O(W)$, so any algorithm for the I/O model can be used here.  More interesting, I think, is to find problems for which this approach yields faster implementations.
+
+
+
+\end{document}
